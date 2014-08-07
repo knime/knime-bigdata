@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+     <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            factory-class="com.knime.database.hive.connector.HiveConnectorNodeFactory"
+            category-path="/database/database-connector"
+            id="com.knime.database.hive.connector.HiveConnectorNodeFactory"/>
+      <node
+            category-path="/database/database-io"
+            expert-flag="false"
+            factory-class="com.knime.database.hive.loader.HiveLoaderNodeFactory"
+            id="com.knime.database.hive.loader.HiveLoaderNodeFactory">
+      </node>
+    </extension>
+     <extension
+           point="org.knime.core.DatabaseUtility">
+        <databaseUtility
+              class="com.knime.database.hive.connector.HiveUtility"
+              database="hive2">
+        </databaseUtility>
+     </extension>
+</plugin>
