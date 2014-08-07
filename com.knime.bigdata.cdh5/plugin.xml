@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+     <extension
+           point="org.knime.core.JDBCDriver">
+        <jdbcDriver
+              jarFile="lib/hive-jdbc-0.12.0-cdh5.1.0.jar">
+        </jdbcDriver>
+     </extension>
+</plugin>
