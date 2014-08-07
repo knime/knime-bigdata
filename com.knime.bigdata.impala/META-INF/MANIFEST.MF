@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Cloudera Impala Connector
+Bundle-SymbolicName: com.knime.bigdata.impala;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: knime-impala.jar
+Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
+ org.knime.core;bundle-version="[2.10.0,3.0.0)",
+ org.knime.base;bundle-version="[2.10.0,3.0.0)",
+ com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
+ com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
+ com.knime.bigdata.filehandling;bundle-version="1.0.0",
+ org.knime.base.filehandling;bundle-version="2.11.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
