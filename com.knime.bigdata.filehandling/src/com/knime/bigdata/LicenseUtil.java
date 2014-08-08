@@ -39,7 +39,7 @@ public final class LicenseUtil implements LicenseStoreListener {
     public static final LicenseUtil instance = new LicenseUtil();
 
     private String m_licenseError = LicenseStore.getDefaultStore().checkLicense(
-        LicenseFeatures.ImpalaConnector);
+        LicenseFeatures.HDFSFileHandling);
 
     private LicenseUtil() {
         LicenseStore.getDefaultStore().addListener(this);
@@ -63,6 +63,6 @@ public final class LicenseUtil implements LicenseStoreListener {
      */
     @Override
     public void licensesChanged(final LicenseStore store) {
-        m_licenseError = store.checkLicense(LicenseFeatures.ImpalaConnector);
+        m_licenseError = store.checkLicense(LicenseFeatures.HDFSFileHandling);
     }
 }

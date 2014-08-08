@@ -70,7 +70,7 @@ public class HDFSConnectionInformationNodeFactory extends NodeFactory<Connection
      */
     @Override
     public ConnectionInformationNodeModel createNodeModel() {
-        return new ConnectionInformationNodeModel(HDFSRemoteFileHandler.PROTOCOL);
+        return new HDFSConnectionInformationNodeModel();
     }
 
     /**

@@ -46,6 +46,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.LicenseUtil;
 import com.knime.bigdata.hdfs.filehandler.HDFSConnection;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
@@ -87,6 +88,7 @@ public class SetFilePermissionNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        LicenseUtil.instance.checkLicense();
         final ConnectionInformationPortObjectSpec object = (ConnectionInformationPortObjectSpec)inSpecs[0];
         final ConnectionInformation connInfo = object.getConnectionInformation();
         // Check if the port object has connection information
