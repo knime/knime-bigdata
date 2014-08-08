@@ -18,7 +18,7 @@
  * History
  *   06.05.2014 (thor): created
  */
-package com.knime.database.impala;
+package com.knime.database.impala.testing;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
