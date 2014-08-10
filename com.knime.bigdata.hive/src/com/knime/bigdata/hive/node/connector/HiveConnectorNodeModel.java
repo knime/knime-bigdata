@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.database.hive.connector;
+package com.knime.bigdata.hive.node.connector;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
-import com.knime.database.hive.LicenseUtil;
+import com.knime.bigdata.hive.LicenseUtil;
 
 /**
  * Model for the Hive connector node.

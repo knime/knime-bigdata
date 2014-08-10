@@ -18,10 +18,20 @@
  * History
  *   Created on 08.05.2014 by thor
  */
-package com.knime.database.hive.connector;
+package com.knime.bigdata.hive.utility;
 
 import org.knime.core.node.port.database.DatabaseUtility;
-import org.knime.core.node.port.database.StatementManipulator;
+import org.knime.core.node.port.database.aggregation.AverageDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.CountDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.MaxDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.MinDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.SumDBAggregationFunction;
+
+import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.StdDevPopDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.StdDevSampDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.VarPopDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.VarSampDBAggregationFunction;
 
 /**
  * Database utility for Hive.
@@ -29,53 +39,19 @@ import org.knime.core.node.port.database.StatementManipulator;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 public class HiveUtility extends DatabaseUtility {
-    private static class HiveStatementManipulator extends StatementManipulator {
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String unquoteColumn(final String colName) {
-            // Hive's JDBC drivers always adds the table name to the column names
-            return colName.replaceFirst("^[^\\.]*\\.", "");
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String quoteColumn(final String colName) {
-            // Hive does not all other characters
-            return colName.replaceAll("[^0-9a-zA-Z_]", "_");
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String forMetadataOnly(final String sql) {
-            return limitRows(sql, 0);
-        }
-    }
-
     /**The unique database identifier.*/
     static final String DATABASE_IDENTIFIER = "hive2";
 
     /**
-     * {@inheritDoc}
+     * Constructor.
      */
-    @Override
-    public String getDatabaseIdentifier() {
-        return DATABASE_IDENTIFIER;
-    }
-
-    private static final StatementManipulator MANIPULATOR = new HiveStatementManipulator();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StatementManipulator getStatementManipulator() {
-        return MANIPULATOR;
+    public HiveUtility() {
+        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), CountDBAggregationFunction.getInstance(),
+            SumDBAggregationFunction.getInstance(), AverageDBAggregationFunction.getInstance(),
+            MinDBAggregationFunction.getInstance(), MaxDBAggregationFunction.getInstance(),
+            VarPopDBAggregationFunction.getInstance(), VarSampDBAggregationFunction.getInstance(),
+            StdDevPopDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
+            CollectSetDBAggregationFunction.getInstance());
     }
 
     /**

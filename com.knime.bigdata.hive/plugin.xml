@@ -4,20 +4,20 @@
      <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            factory-class="com.knime.database.hive.connector.HiveConnectorNodeFactory"
+            factory-class="com.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"
             category-path="/database/database-connector"
-            id="com.knime.database.hive.connector.HiveConnectorNodeFactory"/>
+            id="com.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"/>
       <node
             category-path="/database/database-io"
             expert-flag="false"
-            factory-class="com.knime.database.hive.loader.HiveLoaderNodeFactory"
-            id="com.knime.database.hive.loader.HiveLoaderNodeFactory">
+            factory-class="com.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory"
+            id="com.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory">
       </node>
     </extension>
      <extension
            point="org.knime.core.DatabaseUtility">
         <databaseUtility
-              class="com.knime.database.hive.connector.HiveUtility"
+              class="com.knime.bigdata.hive.utility.HiveUtility"
               database="hive2">
         </databaseUtility>
      </extension>

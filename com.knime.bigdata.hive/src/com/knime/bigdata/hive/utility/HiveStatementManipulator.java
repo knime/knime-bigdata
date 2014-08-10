@@ -16,57 +16,41 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 09.05.2014 by thor
+ *   Created on 08.08.2014 by koetter
  */
-package com.knime.database.hive.loader;
+package com.knime.bigdata.hive.utility;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.knime.core.node.port.database.StatementManipulator;
 
 /**
- * Factory for the Hive Loader node.
+ * Statement manipulator for Hive.
  *
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
-public class HiveLoaderNodeFactory extends NodeFactory<HiveLoaderNodeModel> {
+public class HiveStatementManipulator extends StatementManipulator {
     /**
      * {@inheritDoc}
      */
     @Override
-    public HiveLoaderNodeModel createNodeModel() {
-        return new HiveLoaderNodeModel();
+    public String unquoteColumn(final String colName) {
+        // Hive's JDBC drivers always adds the table name to the column names
+        return colName.replaceFirst("^[^\\.]*\\.", "");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected int getNrNodeViews() {
-        return 0;
+    public String quoteColumn(final String colName) {
+        // Hive does not all other characters
+        return colName.replaceAll("[^0-9a-zA-Z_]", "_");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<HiveLoaderNodeModel> createNodeView(final int viewIndex, final HiveLoaderNodeModel nodeModel) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new HiveLoaderNodeDialog();
+    public String forMetadataOnly(final String sql) {
+        return limitRows(sql, 0);
     }
 }

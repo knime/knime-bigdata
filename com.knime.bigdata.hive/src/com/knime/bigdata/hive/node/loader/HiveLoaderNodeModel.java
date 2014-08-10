@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.database.hive.loader;
+package com.knime.bigdata.hive.node.loader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,8 +68,8 @@ import org.knime.core.node.port.database.DatabaseReaderConnection;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.util.FileUtil;
 
-import com.knime.database.hive.LicenseUtil;
-import com.knime.database.hive.connector.HiveUtility;
+import com.knime.bigdata.hive.LicenseUtil;
+import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Model for the Hive Loader node.
@@ -155,6 +155,7 @@ class HiveLoaderNodeModel extends NodeModel {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         exec.setProgress(null);
