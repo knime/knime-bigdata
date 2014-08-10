@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.database.hive.connector;
+package com.knime.bigdata.hive.node.connector;
 
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
 import org.knime.core.node.InvalidSettingsException;

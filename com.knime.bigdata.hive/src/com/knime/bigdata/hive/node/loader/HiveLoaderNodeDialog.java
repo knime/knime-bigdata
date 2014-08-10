@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.database.hive.loader;
+package com.knime.bigdata.hive.node.loader;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
