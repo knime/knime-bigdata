@@ -56,7 +56,7 @@ public final class VarianceSampDBAggregationFunction implements DBAggregationFun
      */
     @Override
     public String getName() {
-        return "STDDEV_SAMP";
+        return "VARIANCE_SAMP";
     }
 
     /**
