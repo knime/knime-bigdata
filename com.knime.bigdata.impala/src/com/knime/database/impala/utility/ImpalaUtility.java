@@ -47,7 +47,7 @@ public class ImpalaUtility extends DatabaseUtility {
     private static final StatementManipulator MANIPULATOR = new ImpalaStatementManipulator();
 
     /**
-     *
+     * Constructor.
      */
     public ImpalaUtility() {
         super(DATABASE_IDENTIFIER, MANIPULATOR,
