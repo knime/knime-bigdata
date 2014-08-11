@@ -5,10 +5,10 @@
     <shortDescription>Loads data from KNIME into Impala</shortDescription>
     <fullDescription>
         <intro>
-            This node loads a KNIME data table into Impala. Impala requires imported data to be present on the Impala server,
-            therefore this node first copies the data onto the Impala server. You can use any of the protocols supported
-            by the file handling nodes, e.g. SSH/SCP or FTP. The data is then loaded into a Impala table and the uploaded
-            file is deleted.
+            This node loads a KNIME data table into Impala. Impala requires imported data to be present in the 
+            HDFS file system on the Impala server, therefore this node first copies the data onto the Impala server. 
+            You can use the HDFS Connection node to establish a connection to the HDFS file system. 
+            The data is then loaded into a Impala table and the uploaded file is deleted.
             <br />
             Additionally the data can be partitioned by selecting one or more compatible columns (e.g. integer or
             string). The node relies on Impala's dynamic partitioning.
@@ -16,30 +16,25 @@
 
         <option name="Target folder">
             A folder on the server where the temporary copy of the data is copied. The Impala server user
-            needs
-            read access to this folder.
+            needs read and write access to this folder.
         </option>
         <option name="Table name">
             The name of the new table in the database.
         </option>
         <option name="Drop existing table">
             If this option is selected, an existing table will be dropped and re-created. Otherwise the
-            table
-            is loaded into the existing table. Note that the import may fail in this case if the table structure
-            and
-            partitioning information do not match.
+            table is loaded into the existing table. Note that the import may fail in this case if the table structure
+            and partitioning information do not match.
         </option>
         <option name="Partition columns">
             Here you can select one or more columns that should be used for partitioning the data in the
-            table. A
-            partitioned table requires a two-step import via a temporary table and therefore is much slower than
-            import
-            into an unpartitioned table.
+            table. A partitioned table requires a two-step import via a temporary table and therefore is much slower 
+            than import into an unpartitioned table.
         </option>
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Remote connection">A connection to the remote Impala server</inPort>
+        <inPort index="0" name="HDFS connection">A HDFS connection to the remote Impala server</inPort>
         <inPort index="1" name="Data">The data table that should be loaded into Impala</inPort>
         <inPort index="2" name="Impala database connection">A connection to a Impala database</inPort>
         <outPort index="0" name="Database Connection">A database connection with the imported table</outPort>
