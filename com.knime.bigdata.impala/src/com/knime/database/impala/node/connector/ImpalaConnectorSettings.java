@@ -70,8 +70,8 @@ class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
     @Override
     public void saveConnection(final ConfigWO settings) {
         super.saveConnection(settings);
-        Config hiveConfig = settings.addConfig(CFG_IMPALA);
-        hiveConfig.addBoolean("http-mode", m_httpMode);
+        Config config = settings.addConfig(CFG_IMPALA);
+        config.addBoolean("http-mode", m_httpMode);
     }
 
     /**
@@ -81,8 +81,8 @@ class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
     public void validateConnection(final ConfigRO settings, final CredentialsProvider cp)
         throws InvalidSettingsException {
         super.validateConnection(settings, cp);
-        Config hiveConfig = settings.getConfig(CFG_IMPALA);
-        hiveConfig.getBoolean("http-mode");
+        Config config = settings.getConfig(CFG_IMPALA);
+        config.getBoolean("http-mode");
     }
 
     /**
@@ -92,8 +92,8 @@ class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
     public boolean loadValidatedConnection(final ConfigRO settings, final CredentialsProvider cp)
         throws InvalidSettingsException {
         boolean b = super.loadValidatedConnection(settings, cp);
-        Config hiveConfig = settings.getConfig(CFG_IMPALA);
-        m_httpMode = hiveConfig.getBoolean("http-mode");
+        Config config = settings.getConfig(CFG_IMPALA);
+        m_httpMode = config.getBoolean("http-mode");
         setRowIdsStartWithZero(true);
         return b;
     }
