@@ -49,7 +49,6 @@ import com.knime.database.impala.utility.ImpalaUtility;
 /**
  * Model for the Impala connector node.
  *
- * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 class ImpalaConnectorNodeModel extends NodeModel {
@@ -80,13 +79,22 @@ class ImpalaConnectorNodeModel extends NodeModel {
     }
 
     private DatabaseConnectionPortObjectSpec createSpec() {
-        String jdbcUrl = "jdbc:hive2://" + m_settings.getHost() + ":" + m_settings.getPort() + "/"
-                            + m_settings.getDatabaseName() + ";auth=noSasl";
-        DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
+        final String jdbcUrl = getJDBCURL(m_settings.getHost(), m_settings.getPort(), m_settings.getDatabaseName());
+        final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
         s.setJDBCUrl(jdbcUrl);
         s.setDatabaseIdentifier(ImpalaUtility.DATABASE_IDENTIFIER);
         DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
+    }
+
+    /**
+     * @param host the host
+     * @param port the port
+     * @param dbName the db name
+     * @return the jdbc url
+     */
+    static String getJDBCURL(final String host, final int port, final String dbName) {
+        return "jdbc:hive2://" + host + ":" + port + "/" + dbName + ";auth=noSasl";
     }
 
     /**
@@ -95,13 +103,6 @@ class ImpalaConnectorNodeModel extends NodeModel {
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         DatabaseConnectionPortObjectSpec spec = createSpec();
-
-        if (DatabaseConnectionSettings.getDatabaseTimeout() < 30) {
-            setWarningMessage("Your database timeout (" + DatabaseConnectionSettings.getDatabaseTimeout()
-                + " s) is set to a rather low value for Impala. If you experience timeouts increase the value in the"
-                + " preference page.");
-        }
-
         try {
             spec.getConnectionSettings(getCredentialsProvider()).createConnection(getCredentialsProvider());
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidSettingsException
@@ -146,7 +147,7 @@ class ImpalaConnectorNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        ImpalaConnectorSettings s = new ImpalaConnectorSettings();
+        final ImpalaConnectorSettings s = new ImpalaConnectorSettings();
         s.validateConnection(settings, getCredentialsProvider());
     }
 

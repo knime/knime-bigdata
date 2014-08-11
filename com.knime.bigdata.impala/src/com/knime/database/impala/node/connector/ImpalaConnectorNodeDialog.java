@@ -24,7 +24,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import org.knime.base.node.io.database.connection.util.DBAuthenticationPanel;
@@ -48,32 +47,9 @@ import org.knime.core.node.port.database.DatabaseConnectionSettings;
 class ImpalaConnectorNodeDialog extends NodeDialogPane {
     private static class ImpalaConnectionPanel extends DBConnectionPanel<ImpalaConnectorSettings> {
         private static final long serialVersionUID = 8294604980299992419L;
-        private final JCheckBox m_httpMode = new JCheckBox("Enable http mode");
 
         ImpalaConnectionPanel(final ImpalaConnectorSettings settings) {
             super(settings, ImpalaConnectorNodeDialog.class.getName());
-
-            m_c.gridx = 0;
-            m_c.gridy++;
-            add(m_httpMode, m_c);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void loadSettings(final PortObjectSpec[] specs) throws NotConfigurableException {
-            super.loadSettings(specs);
-            m_httpMode.setSelected(m_settings.isHttpMode());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void saveSettings() throws InvalidSettingsException {
-            super.saveSettings();
-            m_settings.setHttpMode(m_httpMode.isSelected());
         }
 
         /**
@@ -81,7 +57,7 @@ class ImpalaConnectorNodeDialog extends NodeDialogPane {
          */
         @Override
         protected String getJDBCURL(final String host, final int port, final String dbName) {
-            return "jdbc:hive2://" + host + ":" + port + "/" + dbName;
+            return ImpalaConnectorNodeModel.getJDBCURL(host, port, dbName);
         }
     }
 
@@ -96,7 +72,7 @@ class ImpalaConnectorNodeDialog extends NodeDialogPane {
         new DBTimezonePanel<DatabaseConnectionSettings>(m_settings);
 
     private final DBMiscPanel<DatabaseConnectionSettings> m_miscPanel = new DBMiscPanel<DatabaseConnectionSettings>(
-        m_settings, true);
+        m_settings, false);
 
     ImpalaConnectorNodeDialog() {
         JPanel p = new JPanel(new GridBagLayout());
