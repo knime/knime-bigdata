@@ -35,5 +35,6 @@ class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
         setPort(21050);
         setRowIdsStartWithZero(true);
         setRetrieveMetadataInConfigure(false);
+        setDatabaseName("default");
     }
 }
