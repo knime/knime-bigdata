@@ -34,7 +34,7 @@ public class ImpalaStatementManipulator extends StatementManipulator {
     public String unquoteColumn(final String colName) {
         // Impala's JDBC drivers always adds the table name to the column names
         final String unquotedString = colName.replace("`", "");
-        return unquotedString.replaceFirst("^[^\\.]*\\.", "");
+        return unquotedString.replaceFirst("^[^\\.]*\\.", "").toLowerCase();
     }
 
     /**
