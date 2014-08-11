@@ -78,13 +78,22 @@ class HiveConnectorNodeModel extends NodeModel {
     }
 
     private DatabaseConnectionPortObjectSpec createSpec() {
-        String jdbcUrl =
-            "jdbc:hive2://" + m_settings.getHost() + ":" + m_settings.getPort() + "/" + m_settings.getDatabaseName();
+        String jdbcUrl = getJDBCURL(m_settings.getHost(), m_settings.getPort(), m_settings.getDatabaseName());
 
         DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
         s.setJDBCUrl(jdbcUrl);
         DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
+    }
+
+    /**
+     * @param dbName the db name
+     * @param port the port
+     * @param host the host
+     * @return the jdbc url
+     */
+    static String getJDBCURL(final String host, final int port, final String dbName) {
+        return "jdbc:hive2://" + host + ":" + port + "/" + dbName;
     }
 
     /**
