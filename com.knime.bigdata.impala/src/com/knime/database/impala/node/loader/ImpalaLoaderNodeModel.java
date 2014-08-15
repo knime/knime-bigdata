@@ -237,7 +237,8 @@ class ImpalaLoaderNodeModel extends NodeModel {
         final ExecutionMonitor execMon) throws Exception {
         final double max = table.getRowCount();
         long count = 0;
-        try (final BufferedWriter out = new BufferedWriter(new OutputStreamWriter(remoteFile.openOutputStream()))) {
+        try (final BufferedWriter out =
+                new BufferedWriter(new OutputStreamWriter(remoteFile.openOutputStream(), "UTF-8"))) {
             for (final DataRow row : table) {
                 execMon.setProgress(count++ / max, "Writing table to temporary file (" + count + " rows)");
                 execMon.checkCanceled();
@@ -348,8 +349,8 @@ class ImpalaLoaderNodeModel extends NodeModel {
             }
 
             exec.setProgress(0.6, "Copying data to partitioned table");
-            st.execute("SET hive.exec.dynamic.partition = true");
-            st.execute("SET hive.exec.dynamic.partition.mode = nonstrict");
+//            st.execute("SET hive.exec.dynamic.partition = true");
+//            st.execute("SET hive.exec.dynamic.partition.mode = nonstrict");
             final String insertCmd =
                 buildInsertCommand(remoteFile, tempTableName, m_settings.tableName(), normalColumns,
                     m_settings.partitionColumns(), manip);
