@@ -18,7 +18,7 @@
  * History
  *   Created on 01.08.2014 by koetter
  */
-package com.knime.database.impala.aggregation;
+package com.knime.bigdata.impala.aggregation;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
@@ -28,11 +28,11 @@ import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class StdDevPopDBAggregationFunction implements DBAggregationFunction {
+public final class VariancePopDBAggregationFunction implements DBAggregationFunction {
 
-    private static volatile StdDevPopDBAggregationFunction instance;
+    private static volatile VariancePopDBAggregationFunction instance;
 
-    private StdDevPopDBAggregationFunction() {
+    private VariancePopDBAggregationFunction() {
         //avoid object creation
     }
 
@@ -40,11 +40,11 @@ public final class StdDevPopDBAggregationFunction implements DBAggregationFuncti
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static StdDevPopDBAggregationFunction getInstance() {
+    public static VariancePopDBAggregationFunction getInstance() {
         if (instance == null) {
-            synchronized (StdDevPopDBAggregationFunction.class) {
+            synchronized (VariancePopDBAggregationFunction.class) {
                 if (instance == null) {
-                    instance = new StdDevPopDBAggregationFunction();
+                    instance = new VariancePopDBAggregationFunction();
                 }
             }
         }
@@ -56,7 +56,7 @@ public final class StdDevPopDBAggregationFunction implements DBAggregationFuncti
      */
     @Override
     public String getName() {
-        return "STDDEV_POP";
+        return "VARIANCE_POP";
     }
 
     /**
@@ -72,7 +72,7 @@ public final class StdDevPopDBAggregationFunction implements DBAggregationFuncti
      */
     @Override
     public String getDescription() {
-        return "The function computes the population standard deviation, respectively, of the input values."
+        return "The function computes the population variance, respectively, of the input values."
                 + "The function evaluates all input rows matched by the query and is scaled by 1/N";
     }
 

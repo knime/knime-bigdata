@@ -4,20 +4,20 @@
      <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            factory-class="com.knime.database.impala.node.connector.ImpalaConnectorNodeFactory"
+            factory-class="com.knime.bigdata.impala.node.connector.ImpalaConnectorNodeFactory"
             category-path="/database/database-connector"
-            id="com.knime.database.impala.connector.ImpalaConnectorNodeFactory"/>
+            id="com.knime.bigdata.impala.node.connector.ImpalaConnectorNodeFactory"/>
       <node
             category-path="/database/database-io"
             expert-flag="false"
-            factory-class="com.knime.database.impala.node.loader.ImpalaLoaderNodeFactory"
-            id="com.knime.database.impala.loader.ImpalaLoaderNodeFactory">
+            factory-class="com.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory"
+            id="com.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory">
       </node>
     </extension>
      <extension
            point="org.knime.core.DatabaseUtility">
         <databaseUtility
-              class="com.knime.database.impala.utility.ImpalaUtility"
+              class="com.knime.bigdata.impala.utility.ImpalaUtility"
               database="impala">
         </databaseUtility>
      </extension>

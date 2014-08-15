@@ -18,7 +18,7 @@
  * History
  *   Created on 08.05.2014 by thor
  */
-package com.knime.database.impala.utility;
+package com.knime.bigdata.impala.utility;
 
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
@@ -28,12 +28,12 @@ import org.knime.core.node.port.database.aggregation.MaxDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.MinDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.SumDBAggregationFunction;
 
-import com.knime.database.impala.aggregation.GroupConcatDBAggregationFunction;
-import com.knime.database.impala.aggregation.NDVDBAggregationFunction;
-import com.knime.database.impala.aggregation.StdDevPopDBAggregationFunction;
-import com.knime.database.impala.aggregation.StdDevSampDBAggregationFunction;
-import com.knime.database.impala.aggregation.VariancePopDBAggregationFunction;
-import com.knime.database.impala.aggregation.VarianceSampDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.GroupConcatDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.StdDevPopDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.StdDevSampDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.VariancePopDBAggregationFunction;
+import com.knime.bigdata.impala.aggregation.VarianceSampDBAggregationFunction;
 
 /**
  * Database utility for Impala.

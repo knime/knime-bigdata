@@ -18,7 +18,7 @@
  * History
  *   Created on 14.05.2014 by thor
  */
-package com.knime.database.impala;
+package com.knime.bigdata.impala;
 
 import org.knime.core.node.InvalidSettingsException;
 
