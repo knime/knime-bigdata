@@ -18,7 +18,7 @@
  * History
  *   Created on 01.08.2014 by koetter
  */
-package com.knime.database.impala.aggregation;
+package com.knime.bigdata.impala.aggregation;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
@@ -28,11 +28,11 @@ import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class VariancePopDBAggregationFunction implements DBAggregationFunction {
+public final class GroupConcatDBAggregationFunction implements DBAggregationFunction {
 
-    private static volatile VariancePopDBAggregationFunction instance;
+    private static volatile GroupConcatDBAggregationFunction instance;
 
-    private VariancePopDBAggregationFunction() {
+    private GroupConcatDBAggregationFunction() {
         //avoid object creation
     }
 
@@ -40,11 +40,11 @@ public final class VariancePopDBAggregationFunction implements DBAggregationFunc
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static VariancePopDBAggregationFunction getInstance() {
+    public static GroupConcatDBAggregationFunction getInstance() {
         if (instance == null) {
-            synchronized (VariancePopDBAggregationFunction.class) {
+            synchronized (GroupConcatDBAggregationFunction.class) {
                 if (instance == null) {
-                    instance = new VariancePopDBAggregationFunction();
+                    instance = new GroupConcatDBAggregationFunction();
                 }
             }
         }
@@ -56,7 +56,7 @@ public final class VariancePopDBAggregationFunction implements DBAggregationFunc
      */
     @Override
     public String getName() {
-        return "VARIANCE_POP";
+        return "GROUP_CONCAT";
     }
 
     /**
@@ -72,8 +72,7 @@ public final class VariancePopDBAggregationFunction implements DBAggregationFunc
      */
     @Override
     public String getDescription() {
-        return "The function computes the population variance, respectively, of the input values."
-                + "The function evaluates all input rows matched by the query and is scaled by 1/N";
+        return "An aggregate function that returns a single string representing the argument value concatenated "
+                + "together for each row of the result set. Supports only string columns.";
     }
-
 }

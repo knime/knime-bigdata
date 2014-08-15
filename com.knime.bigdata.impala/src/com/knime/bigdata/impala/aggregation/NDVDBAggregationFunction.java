@@ -18,7 +18,7 @@
  * History
  *   Created on 01.08.2014 by koetter
  */
-package com.knime.database.impala.aggregation;
+package com.knime.bigdata.impala.aggregation;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.LongCell;

@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.database.impala.node.loader;
+package com.knime.bigdata.impala.node.loader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -71,8 +71,8 @@ import org.knime.core.node.port.database.StatementManipulator;
 import com.knime.bigdata.hdfs.filehandler.HDFSConnection;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import com.knime.database.impala.LicenseUtil;
-import com.knime.database.impala.utility.ImpalaUtility;
+import com.knime.bigdata.impala.LicenseUtil;
+import com.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
  * Model for the Impala Loader node.

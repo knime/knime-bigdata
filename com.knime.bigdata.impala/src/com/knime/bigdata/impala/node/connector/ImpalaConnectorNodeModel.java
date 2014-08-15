@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.database.impala.node.connector;
+package com.knime.bigdata.impala.node.connector;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +43,8 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
-import com.knime.database.impala.LicenseUtil;
-import com.knime.database.impala.utility.ImpalaUtility;
+import com.knime.bigdata.impala.LicenseUtil;
+import com.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
  * Model for the Impala connector node.

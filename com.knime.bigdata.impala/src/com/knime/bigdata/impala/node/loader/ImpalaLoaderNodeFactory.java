@@ -16,28 +16,27 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 06.05.2014 by thor
+ *   Created on 09.05.2014 by thor
  */
-package com.knime.database.impala.node.connector;
+package com.knime.bigdata.impala.node.loader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * Factory for the Impala connector node.
+ * Factory for the Impala Loader node.
  *
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public class ImpalaConnectorNodeFactory extends NodeFactory<ImpalaConnectorNodeModel> {
-
+public class ImpalaLoaderNodeFactory extends NodeFactory<ImpalaLoaderNodeModel> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImpalaConnectorNodeModel createNodeModel() {
-        return new ImpalaConnectorNodeModel();
+    public ImpalaLoaderNodeModel createNodeModel() {
+        return new ImpalaLoaderNodeModel();
     }
 
     /**
@@ -52,7 +51,7 @@ public class ImpalaConnectorNodeFactory extends NodeFactory<ImpalaConnectorNodeM
      * {@inheritDoc}
      */
     @Override
-    public NodeView<ImpalaConnectorNodeModel> createNodeView(final int viewIndex, final ImpalaConnectorNodeModel nodeModel) {
+    public NodeView<ImpalaLoaderNodeModel> createNodeView(final int viewIndex, final ImpalaLoaderNodeModel nodeModel) {
         return null;
     }
 
@@ -69,6 +68,6 @@ public class ImpalaConnectorNodeFactory extends NodeFactory<ImpalaConnectorNodeM
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new ImpalaConnectorNodeDialog();
+        return new ImpalaLoaderNodeDialog();
     }
 }

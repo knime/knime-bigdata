@@ -18,7 +18,7 @@
  * History
  *   Created on 01.08.2014 by koetter
  */
-package com.knime.database.impala.aggregation;
+package com.knime.bigdata.impala.aggregation;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
@@ -28,11 +28,11 @@ import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class GroupConcatDBAggregationFunction implements DBAggregationFunction {
+public final class StdDevSampDBAggregationFunction implements DBAggregationFunction {
 
-    private static volatile GroupConcatDBAggregationFunction instance;
+    private static volatile StdDevSampDBAggregationFunction instance;
 
-    private GroupConcatDBAggregationFunction() {
+    private StdDevSampDBAggregationFunction() {
         //avoid object creation
     }
 
@@ -40,11 +40,11 @@ public final class GroupConcatDBAggregationFunction implements DBAggregationFunc
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static GroupConcatDBAggregationFunction getInstance() {
+    public static StdDevSampDBAggregationFunction getInstance() {
         if (instance == null) {
-            synchronized (GroupConcatDBAggregationFunction.class) {
+            synchronized (StdDevSampDBAggregationFunction.class) {
                 if (instance == null) {
-                    instance = new GroupConcatDBAggregationFunction();
+                    instance = new StdDevSampDBAggregationFunction();
                 }
             }
         }
@@ -56,7 +56,7 @@ public final class GroupConcatDBAggregationFunction implements DBAggregationFunc
      */
     @Override
     public String getName() {
-        return "GROUP_CONCAT";
+        return "STDDEV_SAMP";
     }
 
     /**
@@ -72,7 +72,8 @@ public final class GroupConcatDBAggregationFunction implements DBAggregationFunc
      */
     @Override
     public String getDescription() {
-        return "An aggregate function that returns a single string representing the argument value concatenated "
-                + "together for each row of the result set. Supports only string columns.";
+        return "The function computes the sample standard deviation, respectively, of the input values."
+                + "The function evaluates all input rows matched by the query and is scaled by 1/(N-1)";
     }
+
 }

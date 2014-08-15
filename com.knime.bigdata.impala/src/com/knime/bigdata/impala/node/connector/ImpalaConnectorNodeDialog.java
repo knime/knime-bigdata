@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.database.impala.node.connector;
+package com.knime.bigdata.impala.node.connector;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
