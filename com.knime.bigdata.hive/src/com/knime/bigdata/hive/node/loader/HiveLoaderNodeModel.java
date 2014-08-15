@@ -22,8 +22,9 @@ package com.knime.bigdata.hive.node.loader;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.file.Files;
 import java.sql.Connection;
@@ -206,7 +207,7 @@ class HiveLoaderNodeModel extends NodeModel {
 
         double max = table.getRowCount();
         long count = 0;
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(tempFile))) {
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile),"UTF-8"))) {
             for (DataRow row : table) {
                 execMon.setProgress(count++ / max, "Writing table to temporary file (" + count + " rows)");
                 execMon.checkCanceled();
