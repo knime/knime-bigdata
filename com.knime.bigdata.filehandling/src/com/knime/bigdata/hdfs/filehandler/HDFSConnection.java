@@ -25,8 +25,11 @@ package com.knime.bigdata.hdfs.filehandler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -37,6 +40,7 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.core.util.MutableInteger;
 
 /**
  *
@@ -46,6 +50,11 @@ public class HDFSConnection extends Connection {
     private FileSystem m_fs = null;
     private final Configuration m_conf;
     private final ConnectionInformation m_connectionInformation;
+    //We have to count the open connections per user since connections are cached within the FileSystem class.
+    //If two different nodes work with the same hdfs user they work with the same FileSystem instance which
+    //they get from the FileSystem.CACHE. Counting the number of open connections helps to prevent that one node
+    //closes the connection prior the other has finished!!!
+    private static final Map<String, MutableInteger> CONNECTION_COUNT = new HashMap<>();
 
     /**
      * @param connectionInformation the {@link ConnectionInformation}to use
@@ -53,7 +62,8 @@ public class HDFSConnection extends Connection {
     public HDFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
         m_conf = new Configuration();
-        m_conf.set("fs.defaultFS", createDefaultName(connectionInformation));
+        m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, createDefaultName(connectionInformation));
+        m_conf.setBoolean(CommonConfigurationKeysPublic.FS_AUTOMATIC_CLOSE_KEY, true);
     }
 
     private static String createDefaultName(final ConnectionInformation conInfo) {
@@ -134,7 +144,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link FileSystem}
      * @throws IOException if the {@link FileSystem} can not accessed
      */
-    public FileSystem getFileSystem() throws IOException {
+    public synchronized FileSystem getFileSystem() throws IOException {
         if (!isOpen()) {
             open();
         }
@@ -150,8 +160,8 @@ public class HDFSConnection extends Connection {
      * @param dst path
      * @throws IOException if an exception occurs
      */
-    public void copyFromLocalFile(final boolean delSrc, final boolean overwrite, final URI src, final URI dst)
-            throws IOException {
+    public synchronized void copyFromLocalFile(final boolean delSrc, final boolean overwrite, final URI src,
+        final URI dst) throws IOException {
         final FileSystem fs = getFileSystem();
         fs.copyFromLocalFile(delSrc, overwrite, new Path(src), getHDFSPath4URI(dst));
     }
@@ -169,8 +179,8 @@ public class HDFSConnection extends Connection {
      *
      * @throws IOException - if any IO error
      */
-    public void copyToLocalFile(final boolean delSrc, final URI src, final URI dst, final boolean useRawLocalFileSystem)
-            throws IOException {
+    public synchronized void copyToLocalFile(final boolean delSrc, final URI src, final URI dst,
+        final boolean useRawLocalFileSystem) throws IOException {
         final FileSystem fs = getFileSystem();
         fs.copyToLocalFile(delSrc, getHDFSPath4URI(src), new Path(dst), useRawLocalFileSystem);
     }
@@ -184,7 +194,7 @@ public class HDFSConnection extends Connection {
     * @return  true if delete is successful else false.
     * @throws IOException
     */
-    public boolean delete(final URI f, final boolean recursive) throws IOException {
+    public synchronized boolean delete(final URI f, final boolean recursive) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.delete(getHDFSPath4URI(f), recursive);
     }
@@ -193,15 +203,26 @@ public class HDFSConnection extends Connection {
      * {@inheritDoc}
      */
     @Override
-    public void open() throws IOException {
+    public synchronized void open() throws IOException {
         if (m_fs == null) {
-            //ensure that the current login user is the right
-            final String userName = m_connectionInformation.getUser();
-            final UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
-            if (loginUser == null || !loginUser.getUserName().equals(userName)) {
-                UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser(userName));
+            synchronized (CONNECTION_COUNT) {
+                //ensure that the current login user is the right
+                final String userName = m_connectionInformation.getUser();
+                final UserGroupInformation user = UserGroupInformation.getLoginUser();
+                if (user == null || !user.getUserName().equals(userName)) {
+                    UserGroupInformation newUser = UserGroupInformation.createRemoteUser(userName);
+                    UserGroupInformation.setLoginUser(newUser);
+                }
+                //the hdfs connections are cached in the FileSystem class based on the uri (which is always the default
+                //one in our case) and the user name which we therefore use as the key for the MAP
+                final MutableInteger count = CONNECTION_COUNT.get(userName);
+                if (count == null) {
+                    CONNECTION_COUNT.put(userName, new MutableInteger(1));
+                } else {
+                    count.inc();
+                }
+                m_fs = FileSystem.get(m_conf);
             }
-            m_fs = FileSystem.get(m_conf);
         }
     }
 
@@ -217,10 +238,20 @@ public class HDFSConnection extends Connection {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (m_fs != null) {
-            m_fs.close();
-            m_fs = null;
+            synchronized (CONNECTION_COUNT) {
+                final String userName = m_connectionInformation.getUser();
+                final MutableInteger counter = CONNECTION_COUNT.get(userName);
+                if (counter == null || counter.intValue() <= 1) {
+                    //this is the last one that held the connection open => close it
+                    m_fs.close();
+                    CONNECTION_COUNT.remove(userName);
+                } else {
+                    counter.dec();
+                }
+                m_fs = null;
+            }
         }
     }
 
@@ -229,7 +260,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the directory was successfully created
      * @throws IOException if an exception occurs
      */
-    public boolean mkDir(final URI dir) throws IOException {
+    public synchronized boolean mkDir(final URI dir) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.mkdirs(getHDFSPath4URI(dir));
     }
@@ -239,7 +270,7 @@ public class HDFSConnection extends Connection {
      * @return {@link FSDataInputStream} to read from
      * @throws IOException if an exception occurs
      */
-    public FSDataInputStream open(final URI uri) throws IOException {
+    public synchronized FSDataInputStream open(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.open(getHDFSPath4URI(uri));
     }
@@ -252,7 +283,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link FSDataOutputStream} to write to
      * @throws IOException if an exception occurs
      */
-    public FSDataOutputStream create(final URI f, final boolean overwrite)
+    public synchronized FSDataOutputStream create(final URI f, final boolean overwrite)
         throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.create(getHDFSPath4URI(f), overwrite);
@@ -263,7 +294,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the path exists
      * @throws IOException if an exception occurs
      */
-    public boolean exists(final URI uri) throws IOException {
+    public synchronized boolean exists(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.exists(getHDFSPath4URI(uri));
     }
@@ -273,7 +304,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the {@link URI} belongs to a directory
      * @throws IOException if an exception occurs
      */
-    public boolean isDirectory(final URI uri) throws IOException {
+    public synchronized boolean isDirectory(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.isDirectory(getHDFSPath4URI(uri));
     }
@@ -283,7 +314,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link FileStatus} for the given {@link URI}
      * @throws IOException if an exception occurs
      */
-    public FileStatus getFileStatus(final URI uri) throws IOException {
+    public synchronized FileStatus getFileStatus(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         final FileStatus fileStatus = fs.getFileStatus(getHDFSPath4URI(uri));
         return fileStatus;
@@ -297,7 +328,7 @@ public class HDFSConnection extends Connection {
      * @throws IOException if an exception occurred
      * @throws FileNotFoundException
      */
-    public FileStatus[] listFiles(final URI uri) throws FileNotFoundException, IOException {
+    public synchronized FileStatus[] listFiles(final URI uri) throws FileNotFoundException, IOException {
         final FileSystem fs = getFileSystem();
         return fs.listStatus(getHDFSPath4URI(uri));
     }
@@ -307,7 +338,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link ContentSummary} of the given URI
      * @throws IOException if an exception occurs
      */
-    public ContentSummary getContentSummary(final URI uri) throws IOException {
+    public synchronized ContentSummary getContentSummary(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         //returns the size of the file or the length of all files within the directory
         final ContentSummary contentSummary = fs.getContentSummary(getHDFSPath4URI(uri));
@@ -319,7 +350,7 @@ public class HDFSConnection extends Connection {
      * @param unixSymbolicPermission  a Unix symbolic permission string e.g. "-rw-rw-rw-"
      * @throws IOException if an exception occurs
      */
-    public void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
+    public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
         final FileSystem fs = getFileSystem();
         fs.setPermission(getHDFSPath4URI(uri), FsPermission.valueOf(unixSymbolicPermission));
     }
