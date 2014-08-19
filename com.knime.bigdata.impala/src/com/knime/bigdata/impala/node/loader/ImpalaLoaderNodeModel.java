@@ -223,9 +223,6 @@ class ImpalaLoaderNodeModel extends NodeModel {
             targetFolder += "/";
         }
         final URI folderUri = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(targetFolder));
-        final HDFSRemoteFile folder =
-                RemoteFileFactory.<HDFSConnection, HDFSRemoteFile>createRemoteFile(folderUri, connInfo, connMonitor);
-        folder.mkDirs(true);
         final String tempFileName = "knime2impala" + Math.abs(RND.nextLong());
         final URI targetUri = new URI(folderUri + tempFileName);
         remoteFile =
