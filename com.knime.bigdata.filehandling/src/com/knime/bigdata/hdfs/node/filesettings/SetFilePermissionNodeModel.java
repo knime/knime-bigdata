@@ -120,7 +120,7 @@ public class SetFilePermissionNodeModel extends NodeModel {
         if (!columnSpec.getType().isCompatible(URIDataValue.class)) {
             throw new InvalidSettingsException("Selected column with name: " + colName + " is not a URI");
         }
-        return inSpecs;
+        return new PortObjectSpec[] {tableSpec};
     }
 
     /**
