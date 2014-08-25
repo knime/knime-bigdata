@@ -42,7 +42,15 @@ public class HiveStatementManipulator extends StatementManipulator {
      */
     @Override
     public String quoteColumn(final String colName) {
-        // Hive does not all other characters
+        return getValidColumnName(colName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getValidColumnName(final String colName) {
+        // Hive does not support all characters
         return colName.replaceAll("[^0-9a-zA-Z_]", "_");
     }
 

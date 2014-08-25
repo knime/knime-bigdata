@@ -20,13 +20,16 @@
  */
 package com.knime.bigdata.hive.utility;
 
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.database.DatabaseUtility;
+import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.AverageDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.CountDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.MaxDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.MinDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.SumDBAggregationFunction;
 
+import com.knime.bigdata.hive.LicenseUtil;
 import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
 import com.knime.bigdata.hive.aggregation.StdDevPopDBAggregationFunction;
 import com.knime.bigdata.hive.aggregation.StdDevSampDBAggregationFunction;
@@ -76,5 +79,16 @@ public class HiveUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public StatementManipulator getStatementManipulator() {
+        try {
+            LicenseUtil.instance.checkLicense();
+        } catch (InvalidSettingsException ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+        return super.getStatementManipulator();
     }
 }
