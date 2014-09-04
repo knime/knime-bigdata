@@ -59,7 +59,7 @@ public class HiveDatabaseJanitor implements TestrunJanitor {
             stmt.execute(sql);
             m_dbName = dbName;
             NodeLogger.getLogger(getClass()).info("Created temporary Hive testing database " + m_dbName);
-            config.addFlowVariable(new FlowVariable("hive-db-name", m_dbName));
+            config.addFlowVariable(new FlowVariable("test.hive-db-name", m_dbName));
         }
     }
 
