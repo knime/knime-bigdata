@@ -69,7 +69,6 @@ import org.knime.core.node.port.database.DatabaseReaderConnection;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.util.FileUtil;
 
-import com.knime.bigdata.hive.LicenseUtil;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -90,7 +89,7 @@ class HiveLoaderNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        LicenseUtil.instance.checkLicense();
+        HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
 
         checkDatabaseSettings(inSpecs);
         checkUploadSettings(inSpecs);

@@ -43,7 +43,7 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
-import com.knime.bigdata.hive.LicenseUtil;
+import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Model for the Hive connector node.
@@ -62,7 +62,7 @@ class HiveConnectorNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        LicenseUtil.instance.checkLicense();
+        HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
         m_settings.setDriver("org.apache.hive.jdbc.HiveDriver");
 
         if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {

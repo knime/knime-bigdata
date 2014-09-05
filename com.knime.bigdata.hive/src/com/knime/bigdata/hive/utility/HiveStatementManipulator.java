@@ -41,6 +41,16 @@ public class HiveStatementManipulator extends StatementManipulator {
      * {@inheritDoc}
      */
     @Override
+    public String quoteIdentifier(final String identifier) {
+        return getValidColumnName(identifier);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated
+     */
+    @Deprecated
+    @Override
     public String quoteColumn(final String colName) {
         return getValidColumnName(colName);
     }

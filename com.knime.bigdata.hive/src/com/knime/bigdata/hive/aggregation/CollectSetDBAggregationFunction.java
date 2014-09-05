@@ -21,14 +21,15 @@
 package com.knime.bigdata.hive.aggregation;
 
 import org.knime.core.data.DataType;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.NoSettingsDBAggregationFunction;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class CollectSetDBAggregationFunction implements DBAggregationFunction {
+public final class CollectSetDBAggregationFunction extends NoSettingsDBAggregationFunction {
 
     private static volatile CollectSetDBAggregationFunction instance;
 
@@ -73,5 +74,13 @@ public final class CollectSetDBAggregationFunction implements DBAggregationFunct
     @Override
     public String getDescription() {
         return "Returns a set of objects with duplicate elements eliminated.";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(final DataType type) {
+        return type.isCompatible(DataValue.class);
     }
 }
