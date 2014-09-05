@@ -20,20 +20,27 @@
  */
 package com.knime.bigdata.impala.utility;
 
+import java.util.Collection;
+
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
-import org.knime.core.node.port.database.aggregation.AverageDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.CountDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.MaxDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.MinDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.SumDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.AverageDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CountDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.GroupConcatDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.MaxDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.MinDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.StdDevPopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.SumDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.VariancePopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.VarianceSampDBAggregationFunction;
 
-import com.knime.bigdata.impala.aggregation.GroupConcatDBAggregationFunction;
 import com.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
-import com.knime.bigdata.impala.aggregation.StdDevPopDBAggregationFunction;
-import com.knime.bigdata.impala.aggregation.StdDevSampDBAggregationFunction;
-import com.knime.bigdata.impala.aggregation.VariancePopDBAggregationFunction;
-import com.knime.bigdata.impala.aggregation.VarianceSampDBAggregationFunction;
+import com.knime.licenses.LicenseChecker;
+import com.knime.licenses.LicenseException;
+import com.knime.licenses.LicenseFeatures;
+import com.knime.licenses.LicenseUtil;
 
 /**
  * Database utility for Impala.
@@ -43,6 +50,11 @@ import com.knime.bigdata.impala.aggregation.VarianceSampDBAggregationFunction;
 public class ImpalaUtility extends DatabaseUtility {
     /**The unique database identifier.*/
     public static final String DATABASE_IDENTIFIER = "impala";
+
+    /**
+     * {@link LicenseChecker} to use.
+     */
+    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.ImpalaConnector);
 
     private static final StatementManipulator MANIPULATOR = new ImpalaStatementManipulator();
 
@@ -56,9 +68,48 @@ public class ImpalaUtility extends DatabaseUtility {
             NDVDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
             StdDevPopDBAggregationFunction.getInstance(), SumDBAggregationFunction.getInstance(),
             VarianceSampDBAggregationFunction.getInstance(), VariancePopDBAggregationFunction.getInstance(),
-            GroupConcatDBAggregationFunction.getInstance());
+            new GroupConcatDBAggregationFunction());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StatementManipulator getStatementManipulator() {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getStatementManipulator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<DBAggregationFunction> getAggregationFunctions() {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getAggregationFunctions();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBAggregationFunction getAggregationFunction(String id) {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getAggregationFunction(id);
+    }
+    
     /**
      * {@inheritDoc}
      */

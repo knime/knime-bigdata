@@ -71,7 +71,6 @@ import org.knime.core.node.port.database.StatementManipulator;
 import com.knime.bigdata.hdfs.filehandler.HDFSConnection;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import com.knime.bigdata.impala.LicenseUtil;
 import com.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
@@ -95,7 +94,7 @@ class ImpalaLoaderNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        LicenseUtil.instance.checkLicense();
+        ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
 
         checkDatabaseSettings(inSpecs);
         checkUploadSettings(inSpecs);
