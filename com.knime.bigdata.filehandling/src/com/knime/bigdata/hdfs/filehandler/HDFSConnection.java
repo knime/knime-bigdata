@@ -42,6 +42,8 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.core.util.MutableInteger;
 
+import com.knime.licenses.LicenseException;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
@@ -60,6 +62,11 @@ public class HDFSConnection extends Connection {
      * @param connectionInformation the {@link ConnectionInformation}to use
      */
     public HDFSConnection(final ConnectionInformation connectionInformation) {
+        try {
+            HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
         m_connectionInformation = connectionInformation;
         m_conf = new Configuration();
         m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, createDefaultName(connectionInformation));
