@@ -41,8 +41,26 @@ public class ImpalaStatementManipulator extends StatementManipulator {
      * {@inheritDoc}
      */
     @Override
+    public String quoteIdentifier(final String identifier) {
+        return getValidColumnName(identifier);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @deprecated
+     */
+    @Deprecated
+    @Override
     public String quoteColumn(final String colName) {
-        // Impala does not all other characters
+        return getValidColumnName(colName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getValidColumnName(final String colName) {
+     // Impala does not support all other characters
         final String cleanedString = colName.replaceAll("[^0-9a-zA-Z_]", "_");
         return "`" + cleanedString + "`".toLowerCase();
     }
