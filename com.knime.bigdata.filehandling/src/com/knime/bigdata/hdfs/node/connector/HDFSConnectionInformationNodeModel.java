@@ -24,7 +24,6 @@ import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionI
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.LicenseUtil;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
@@ -45,7 +44,7 @@ public class HDFSConnectionInformationNodeModel extends ConnectionInformationNod
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        LicenseUtil.instance.checkLicense();
+        HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicenseInNode();
         return super.configure(inSpecs);
     }
 }
