@@ -20,21 +20,27 @@
  */
 package com.knime.bigdata.hive.utility;
 
-import org.knime.core.node.InvalidSettingsException;
+import java.util.Collection;
+
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
-import org.knime.core.node.port.database.aggregation.AverageDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.CountDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.MaxDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.MinDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.SumDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.AverageDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CovariancePopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.MaxDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.MinDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.StdDevPopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
 
-import com.knime.bigdata.hive.LicenseUtil;
 import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.StdDevPopDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.StdDevSampDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.VarPopDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.VarSampDBAggregationFunction;
+import com.knime.licenses.LicenseChecker;
+import com.knime.licenses.LicenseException;
+import com.knime.licenses.LicenseFeatures;
+import com.knime.licenses.LicenseUtil;
 
 /**
  * Database utility for Hive.
@@ -46,15 +52,59 @@ public class HiveUtility extends DatabaseUtility {
     static final String DATABASE_IDENTIFIER = "hive2";
 
     /**
+     * {@link LicenseChecker} to use.
+     */
+    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.HiveConnector);
+
+    /**
      * Constructor.
      */
     public HiveUtility() {
-        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), CountDBAggregationFunction.getInstance(),
-            SumDBAggregationFunction.getInstance(), AverageDBAggregationFunction.getInstance(),
+        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction(),
+            new SumDistinctDBAggregationFunction(), new AverageDistinctDBAggregationFunction(),
             MinDBAggregationFunction.getInstance(), MaxDBAggregationFunction.getInstance(),
             VarPopDBAggregationFunction.getInstance(), VarSampDBAggregationFunction.getInstance(),
             StdDevPopDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
-            CollectSetDBAggregationFunction.getInstance());
+            new CovariancePopDBAggregationFunction(), CollectSetDBAggregationFunction.getInstance());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StatementManipulator getStatementManipulator() {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getStatementManipulator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBAggregationFunction getAggregationFunction(final String id) {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getAggregationFunction(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<DBAggregationFunction> getAggregationFunctions() {
+        try {
+            LICENSE_CHECKER.checkLicense();
+        } catch (LicenseException e) {
+            new RuntimeException(e.getMessage(), e);
+        }
+        return super.getAggregationFunctions();
     }
 
     /**
@@ -79,16 +129,5 @@ public class HiveUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public StatementManipulator getStatementManipulator() {
-        try {
-            LicenseUtil.instance.checkLicense();
-        } catch (InvalidSettingsException ex) {
-            throw new RuntimeException(ex.getMessage(), ex);
-        }
-        return super.getStatementManipulator();
     }
 }
