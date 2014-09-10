@@ -20,21 +20,21 @@
  */
 package com.knime.bigdata.hive.aggregation;
 
-import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.node.port.database.aggregation.NoSettingsDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class CollectSetDBAggregationFunction extends NoSettingsDBAggregationFunction {
+public final class CollectSetDBAggregationFunction extends SimpleDBAggregationFunction {
 
     private static volatile CollectSetDBAggregationFunction instance;
 
     private CollectSetDBAggregationFunction() {
-        //avoid object creation
+        super("COLLECT_SET", "Returns a set of objects with duplicate elements eliminated.", StringCell.TYPE,
+            DataValue.class);
     }
 
     /**
@@ -50,37 +50,5 @@ public final class CollectSetDBAggregationFunction extends NoSettingsDBAggregati
             }
         }
         return instance;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return "COLLECT_SET";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DataType getType(final DataType originalType) {
-        return StringCell.TYPE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        return "Returns a set of objects with duplicate elements eliminated.";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(final DataType type) {
-        return type.isCompatible(DataValue.class);
     }
 }
