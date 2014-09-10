@@ -20,21 +20,23 @@
  */
 package com.knime.bigdata.impala.aggregation;
 
-import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.def.LongCell;
-import org.knime.core.node.port.database.aggregation.NoSettingsDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public final class NDVDBAggregationFunction extends NoSettingsDBAggregationFunction {
+public final class NDVDBAggregationFunction extends SimpleDBAggregationFunction {
 
     private static volatile NDVDBAggregationFunction instance;
 
     private NDVDBAggregationFunction() {
-        //avoid object creation
+        super("NDV", "An aggregate function that returns an approximate value similar to the result of COUNT(DISTINCT col), "
+                + "the 'number of distinct values'. It is much faster than the combination of COUNT and DISTINCT, "
+                + "and uses a constant amount of memory and thus is less memory-intensive for columns with high "
+                + "cardinality.", LongCell.TYPE, DataValue.class);
     }
 
     /**
@@ -50,40 +52,5 @@ public final class NDVDBAggregationFunction extends NoSettingsDBAggregationFunct
             }
         }
         return instance;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return "NDV";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DataType getType(final DataType originalType) {
-        return LongCell.TYPE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        return "An aggregate function that returns an approximate value similar to the result of COUNT(DISTINCT col), "
-                + "the 'number of distinct values'. It is much faster than the combination of COUNT and DISTINCT, "
-                + "and uses a constant amount of memory and thus is less memory-intensive for columns with high "
-                + "cardinality.";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(final DataType type) {
-        return type.isCompatible(DataValue.class);
     }
 }
