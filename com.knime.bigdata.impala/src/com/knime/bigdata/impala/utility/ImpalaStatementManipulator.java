@@ -32,9 +32,22 @@ public class ImpalaStatementManipulator extends StatementManipulator {
      */
     @Override
     public String unquoteColumn(final String colName) {
-        // Impala's JDBC drivers always adds the table name to the column names
-        final String unquotedString = colName.replace("`", "");
-        return unquotedString.replaceFirst("^[^\\.]*\\.", "").toLowerCase();
+        final String unquotedString;
+        if (isQuoted(colName)) {
+            //if the column name is quoted take it as it is
+            unquotedString = colName.substring(1, colName.length());
+        } else {
+            unquotedString = colName;
+        }
+        return unquotedString;
+    }
+
+    /**
+     * @param colName
+     * @return
+     */
+    private boolean isQuoted(final String colName) {
+        return colName.startsWith("`") && colName.endsWith("`");
     }
 
     /**
@@ -42,7 +55,8 @@ public class ImpalaStatementManipulator extends StatementManipulator {
      */
     @Override
     public String quoteIdentifier(final String identifier) {
-        return getValidColumnName(identifier);
+        final String validName = getValidColumnName(identifier);
+        return "`" + validName + "`";
     }
 
     /**
@@ -52,7 +66,7 @@ public class ImpalaStatementManipulator extends StatementManipulator {
     @Deprecated
     @Override
     public String quoteColumn(final String colName) {
-        return getValidColumnName(colName);
+        return quoteIdentifier(colName);
     }
 
     /**
@@ -62,7 +76,7 @@ public class ImpalaStatementManipulator extends StatementManipulator {
     public String getValidColumnName(final String colName) {
      // Impala does not support all other characters
         final String cleanedString = colName.replaceAll("[^0-9a-zA-Z_]", "_");
-        return "`" + cleanedString + "`".toLowerCase();
+        return cleanedString.toLowerCase();
     }
 
     /**
