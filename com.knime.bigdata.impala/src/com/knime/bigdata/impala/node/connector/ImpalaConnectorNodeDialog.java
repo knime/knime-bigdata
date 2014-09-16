@@ -46,7 +46,7 @@ import org.knime.core.node.port.database.DatabaseConnectionSettings;
  */
 class ImpalaConnectorNodeDialog extends NodeDialogPane {
     private static class ImpalaConnectionPanel extends DBConnectionPanel<ImpalaConnectorSettings> {
-        private static final long serialVersionUID = 8294604980299992419L;
+        private static final long serialVersionUID = 1L;
 
         ImpalaConnectionPanel(final ImpalaConnectorSettings settings) {
             super(settings, ImpalaConnectorNodeDialog.class.getName());
@@ -57,7 +57,7 @@ class ImpalaConnectorNodeDialog extends NodeDialogPane {
          */
         @Override
         protected String getJDBCURL(final String host, final int port, final String dbName) {
-            return ImpalaConnectorNodeModel.getJDBCURL(host, port, dbName);
+            return ImpalaConnectorNodeModel.getJDBCURL(m_settings);
         }
     }
 

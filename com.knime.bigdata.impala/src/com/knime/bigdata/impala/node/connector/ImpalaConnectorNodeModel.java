@@ -68,9 +68,9 @@ class ImpalaConnectorNodeModel extends NodeModel {
         if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
             throw new InvalidSettingsException("No hostname for database server given");
         }
+        final String userName = m_settings.getUserName(getCredentialsProvider());
         if ((m_settings.getCredentialName() == null)
-            && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
-                getCredentialsProvider()).isEmpty())) {
+            && ((userName == null) || userName.isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
         }
 
@@ -78,22 +78,23 @@ class ImpalaConnectorNodeModel extends NodeModel {
     }
 
     private DatabaseConnectionPortObjectSpec createSpec() {
-        final String jdbcUrl = getJDBCURL(m_settings.getHost(), m_settings.getPort(), m_settings.getDatabaseName());
         final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
-        s.setJDBCUrl(jdbcUrl);
-        s.setDatabaseIdentifier(ImpalaUtility.DATABASE_IDENTIFIER);
-        DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
+        final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
     }
 
     /**
-     * @param host the host
-     * @param port the port
-     * @param dbName the db name
+     * @param settings the {@link ImpalaConnectorSettings} to use
      * @return the jdbc url
      */
-    static String getJDBCURL(final String host, final int port, final String dbName) {
-        return "jdbc:hive2://" + host + ":" + port + "/" + dbName + ";auth=noSasl";
+    static String getJDBCURL(final ImpalaConnectorSettings settings) {
+        final String url = "jdbc:hive2://" + settings.getHost() + ":" + settings.getPort() + "/"
+                + settings.getDatabaseName();
+        String pwd = settings.getPassword(null);
+        if (pwd == null || pwd.trim().length() == 0) {
+            return url + ";auth=noSasl";
+        }
+        return url;
     }
 
     /**
@@ -110,8 +111,11 @@ class ImpalaConnectorNodeModel extends NodeModel {
             if (cause == null) {
                 cause = ex;
             }
-
-            throw new SQLException("Could not create connection to database: " + cause.getMessage(), ex);
+            String errorMessage = cause.getMessage();
+            if (errorMessage == null) {
+                errorMessage = "Maybe invalid user name and/or password";
+            }
+            throw new SQLException("Could not create connection to database: " + errorMessage, ex);
         }
 
         return new PortObject[]{new DatabaseConnectionPortObject(spec)};
