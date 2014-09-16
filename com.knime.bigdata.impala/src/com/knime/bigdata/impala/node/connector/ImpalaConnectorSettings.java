@@ -22,6 +22,8 @@ package com.knime.bigdata.impala.node.connector;
 
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
 
+import com.knime.bigdata.impala.utility.ImpalaUtility;
+
 /**
  * Settings for the Impala connector node.
  *
@@ -36,5 +38,6 @@ class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
         setRowIdsStartWithZero(true);
         setRetrieveMetadataInConfigure(false);
         setDatabaseName("default");
+        setDatabaseIdentifier(ImpalaUtility.DATABASE_IDENTIFIER);
     }
 }
