@@ -49,7 +49,7 @@ import com.knime.licenses.LicenseUtil;
  */
 public class HiveUtility extends DatabaseUtility {
     /**The unique database identifier.*/
-    static final String DATABASE_IDENTIFIER = "hive2";
+    public static final String DATABASE_IDENTIFIER = "hive2";
 
     /**
      * {@link LicenseChecker} to use.

@@ -22,6 +22,8 @@ package com.knime.bigdata.hive.node.connector;
 
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
 
+import com.knime.bigdata.hive.utility.HiveUtility;
+
 /**
  * Settings for the Hive connector node.
  *
@@ -33,5 +35,6 @@ class HiveConnectorSettings extends DefaultDatabaseConnectionSettings {
         setPort(10000);
         setRowIdsStartWithZero(true);
         setRetrieveMetadataInConfigure(false);
+        setDatabaseIdentifier(HiveUtility.DATABASE_IDENTIFIER);
     }
 }
