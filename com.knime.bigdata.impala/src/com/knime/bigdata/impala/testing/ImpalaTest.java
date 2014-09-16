@@ -42,15 +42,15 @@ public class ImpalaTest {
     public static void main(final String[] args) {
         Connection con = null;
         try {
-            Class.forName(driverName);
 
             //replace "hive" here with the name of the user the queries should run as
 //            String jdbcUrl = "jdbc:hive2://192.168.56.101:21050/;auth=noSasl";
 //            String userName = "cloudera";
 //            String pwd = "";
-            String jdbcUrl = "jdbc:hive2://ec2-54-165-140-183.compute-1.amazonaws.com:21050";
+            String jdbcUrl = "jdbc:hive2://ec2-54-165-140-183.compute-1.amazonaws.com:21050/default";
             String userName = "knime@cloudera.com";
             String pwd = "Cloudera!!";
+            Class.forName(driverName);
             con = DriverManager.getConnection(jdbcUrl, userName, pwd);
             System.out.println("DIRECT CONNECTION");
             testConnection(con);
