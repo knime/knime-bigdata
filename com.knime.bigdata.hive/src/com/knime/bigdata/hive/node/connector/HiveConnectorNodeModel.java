@@ -79,6 +79,8 @@ class HiveConnectorNodeModel extends NodeModel {
 
     private DatabaseConnectionPortObjectSpec createSpec() {
         final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
+        //set the jdbc url again in the case that the settings have been changed by variables
+        s.setJDBCUrl(getJDBCURL(m_settings.getHost(), m_settings.getPort(), m_settings.getDatabaseName()));
         final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
     }

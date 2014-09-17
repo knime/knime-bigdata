@@ -79,6 +79,8 @@ class ImpalaConnectorNodeModel extends NodeModel {
 
     private DatabaseConnectionPortObjectSpec createSpec() {
         final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
+        //set the jdbc url again in the case that the settings have been changed by variables
+        s.setJDBCUrl(getJDBCURL(m_settings));
         final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
     }
