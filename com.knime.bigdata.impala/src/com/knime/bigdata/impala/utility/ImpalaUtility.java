@@ -22,17 +22,18 @@ package com.knime.bigdata.impala.utility;
 
 import java.util.Collection;
 
+import org.knime.core.data.StringValue;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.function.AverageDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.function.CountDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.GroupConcatDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.MaxDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.MinDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.StdDevPopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.function.SumDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VariancePopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarianceSampDBAggregationFunction;
 
@@ -63,12 +64,12 @@ public class ImpalaUtility extends DatabaseUtility {
      */
     public ImpalaUtility() {
         super(DATABASE_IDENTIFIER, MANIPULATOR,
-            AverageDBAggregationFunction.getInstance(), CountDBAggregationFunction.getInstance(),
-            MaxDBAggregationFunction.getInstance(), MinDBAggregationFunction.getInstance(),
-            NDVDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
-            StdDevPopDBAggregationFunction.getInstance(), SumDBAggregationFunction.getInstance(),
-            VarianceSampDBAggregationFunction.getInstance(), VariancePopDBAggregationFunction.getInstance(),
-            new GroupConcatDBAggregationFunction());
+            new AvgDistinctDBAggregationFunction(), new CountDistinctDBAggregationFunction(),
+            new GroupConcatDBAggregationFunction(StringValue.class), MaxDBAggregationFunction.getInstance(),
+            MinDBAggregationFunction.getInstance(), NDVDBAggregationFunction.getInstance(),
+            StdDevSampDBAggregationFunction.getInstance(), StdDevPopDBAggregationFunction.getInstance(),
+            new SumDistinctDBAggregationFunction(), VarianceSampDBAggregationFunction.getInstance(),
+            VariancePopDBAggregationFunction.getInstance());
     }
 
     /**
@@ -96,12 +97,12 @@ public class ImpalaUtility extends DatabaseUtility {
         }
         return super.getAggregationFunctions();
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public DBAggregationFunction getAggregationFunction(String id) {
+    public DBAggregationFunction getAggregationFunction(final String id) {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
@@ -109,7 +110,7 @@ public class ImpalaUtility extends DatabaseUtility {
         }
         return super.getAggregationFunction(id);
     }
-    
+
     /**
      * {@inheritDoc}
      */
