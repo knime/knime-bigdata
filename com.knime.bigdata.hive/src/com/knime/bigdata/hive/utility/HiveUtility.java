@@ -25,9 +25,11 @@ import java.util.Collection;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.function.AverageDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CorrDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
-import org.knime.core.node.port.database.aggregation.function.CovariancePopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CovarPopDBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.function.CovarSampDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.MaxDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.MinDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.StdDevPopDBAggregationFunction;
@@ -37,6 +39,8 @@ import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregatio
 import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
 
 import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
+import com.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
 import com.knime.licenses.LicenseFeatures;
@@ -46,6 +50,7 @@ import com.knime.licenses.LicenseUtil;
  * Database utility for Hive.
  *
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public class HiveUtility extends DatabaseUtility {
     /**The unique database identifier.*/
@@ -61,11 +66,14 @@ public class HiveUtility extends DatabaseUtility {
      */
     public HiveUtility() {
         super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction(),
-            new SumDistinctDBAggregationFunction(), new AverageDistinctDBAggregationFunction(),
+            new SumDistinctDBAggregationFunction(), new AvgDistinctDBAggregationFunction(),
             MinDBAggregationFunction.getInstance(), MaxDBAggregationFunction.getInstance(),
             VarPopDBAggregationFunction.getInstance(), VarSampDBAggregationFunction.getInstance(),
             StdDevPopDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
-            new CovariancePopDBAggregationFunction(), CollectSetDBAggregationFunction.getInstance());
+            new CovarPopDBAggregationFunction(), new CovarSampDBAggregationFunction(),
+            new CorrDBAggregationFunction(), new PercentileDBAggregationFunction(),
+            new PercentileApproxDBAggregationFunction(),  CollectSetDBAggregationFunction.getInstance());
+            //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
     }
 
     /**
