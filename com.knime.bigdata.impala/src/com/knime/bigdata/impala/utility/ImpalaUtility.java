@@ -57,13 +57,11 @@ public class ImpalaUtility extends DatabaseUtility {
      */
     public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.ImpalaConnector);
 
-    private static final StatementManipulator MANIPULATOR = new ImpalaStatementManipulator();
-
     /**
      * Constructor.
      */
     public ImpalaUtility() {
-        super(DATABASE_IDENTIFIER, MANIPULATOR,
+        super(DATABASE_IDENTIFIER, new ImpalaStatementManipulator(),
             new AvgDistinctDBAggregationFunction(), new CountDistinctDBAggregationFunction(),
             new GroupConcatDBAggregationFunction(StringValue.class), MaxDBAggregationFunction.getInstance(),
             MinDBAggregationFunction.getInstance(), NDVDBAggregationFunction.getInstance(),
