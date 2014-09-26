@@ -86,4 +86,12 @@ public class ImpalaStatementManipulator extends StatementManipulator {
     public String forMetadataOnly(final String sql) {
         return limitRows(sql, 0);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String[] createTableAsSelect(final String tableName, final String query) {
+        return new String[] {"CREATE TABLE " + quoteIdentifier(tableName) + " AS " + query};
+    }
 }
