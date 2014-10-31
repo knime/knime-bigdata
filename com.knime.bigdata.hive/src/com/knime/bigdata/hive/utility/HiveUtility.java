@@ -20,6 +20,9 @@
  */
 package com.knime.bigdata.hive.utility;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 import org.knime.core.node.port.database.DatabaseUtility;
@@ -137,5 +140,16 @@ public class HiveUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return false;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean tableExists(final Connection conn, final String tableName) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null)) {
+            return rs.next();
+        }
     }
 }
