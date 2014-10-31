@@ -28,7 +28,6 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.file.Files;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -267,8 +266,8 @@ class HiveLoaderNodeModel extends NodeModel {
 
         // check if table already exists and whether we should drop it
         boolean tableAlreadyExists = false;
-        try (ResultSet rs = conn.getMetaData().getTables(null, null, m_settings.tableName(), null)) {
-            if (rs.next()) {
+        synchronized (conn) {
+            if (connSettings.getUtility().tableExists(conn, m_settings.tableName())) {
                 if (m_settings.dropTableIfExists()) {
                     try (Statement st = conn.createStatement()) {
                         getLogger().debug("Dropping existing table '" + m_settings.tableName() + "'");
@@ -288,23 +287,24 @@ class HiveLoaderNodeModel extends NodeModel {
         }
         StatementManipulator manip = connSettings.getUtility().getStatementManipulator();
 
-        try (Statement st = conn.createStatement()) {
-            if (!m_settings.partitionColumns().isEmpty()) {
-                importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
-            } else {
-                if (!tableAlreadyExists) {
-                    exec.setProgress(0, "Creating table");
-                    String createTableCmd =
-                        buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
-                            new ArrayList<String>(), manip);
-                    getLogger().debug("Executing '" + createTableCmd + "'");
-                    st.execute(createTableCmd);
+        synchronized (conn) {
+            try (Statement st = conn.createStatement()) {
+                if (!m_settings.partitionColumns().isEmpty()) {
+                    importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
+                } else {
+                    if (!tableAlreadyExists) {
+                        exec.setProgress(0, "Creating table");
+                        String createTableCmd =
+                            buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
+                                new ArrayList<String>(), manip);
+                        getLogger().info("Executing '" + createTableCmd + "'");
+                        st.execute(createTableCmd);
+                    }
+                    exec.setProgress(0.5, "Loading data into table");
+                    String buildTableCmd = buildLoadCommand(remoteFile, m_settings.tableName());
+                    getLogger().info("Executing '" + buildTableCmd + "'");
+                    st.execute(buildTableCmd);
                 }
-
-                exec.setProgress(0.5, "Loading data into table");
-                String buildTableCmd = buildLoadCommand(remoteFile, m_settings.tableName());
-                getLogger().debug("Executing '" + buildTableCmd + "'");
-                st.execute(buildTableCmd);
             }
         }
         exec.setProgress(1);
