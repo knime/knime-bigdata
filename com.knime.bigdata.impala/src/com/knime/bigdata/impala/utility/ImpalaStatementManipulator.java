@@ -94,4 +94,13 @@ public class ImpalaStatementManipulator extends StatementManipulator {
     public String[] createTableAsSelect(final String tableName, final String query) {
         return new String[] {"CREATE TABLE " + quoteIdentifier(tableName) + " AS " + query};
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String dropTable(final String tableName, final boolean cascade) {
+        //Impala does not support the cascade option
+        return super.dropTable(tableName, false);
+    }
 }
