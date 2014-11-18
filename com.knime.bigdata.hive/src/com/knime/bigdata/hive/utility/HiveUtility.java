@@ -68,14 +68,14 @@ public class HiveUtility extends DatabaseUtility {
      * Constructor.
      */
     public HiveUtility() {
-        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction(),
-            new SumDistinctDBAggregationFunction(), new AvgDistinctDBAggregationFunction(),
-            MinDBAggregationFunction.getInstance(), MaxDBAggregationFunction.getInstance(),
-            VarPopDBAggregationFunction.getInstance(), VarSampDBAggregationFunction.getInstance(),
-            StdDevPopDBAggregationFunction.getInstance(), StdDevSampDBAggregationFunction.getInstance(),
-            new CovarPopDBAggregationFunction(), new CovarSampDBAggregationFunction(),
-            new CorrDBAggregationFunction(), new PercentileDBAggregationFunction(),
-            new PercentileApproxDBAggregationFunction(),  CollectSetDBAggregationFunction.getInstance());
+        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction.Factory(),
+            new SumDistinctDBAggregationFunction.Factory(), new AvgDistinctDBAggregationFunction.Factory(),
+            new MinDBAggregationFunction.Factory(), new MaxDBAggregationFunction.Factory(),
+            new VarPopDBAggregationFunction.Factory(), new VarSampDBAggregationFunction.Factory(),
+            new StdDevPopDBAggregationFunction.Factory(), new StdDevSampDBAggregationFunction.Factory(),
+            new CovarPopDBAggregationFunction.Factory(), new CovarSampDBAggregationFunction.Factory(),
+            new CorrDBAggregationFunction.Factory(), new PercentileDBAggregationFunction.Factory(),
+            new PercentileApproxDBAggregationFunction.Factory(),  new CollectSetDBAggregationFunction.Factory());
             //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
     }
 

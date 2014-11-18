@@ -62,12 +62,12 @@ public class ImpalaUtility extends DatabaseUtility {
      */
     public ImpalaUtility() {
         super(DATABASE_IDENTIFIER, new ImpalaStatementManipulator(),
-            new AvgDistinctDBAggregationFunction(), new CountDistinctDBAggregationFunction(),
-            new GroupConcatDBAggregationFunction(StringValue.class), MaxDBAggregationFunction.getInstance(),
-            MinDBAggregationFunction.getInstance(), NDVDBAggregationFunction.getInstance(),
-            StdDevSampDBAggregationFunction.getInstance(), StdDevPopDBAggregationFunction.getInstance(),
-            new SumDistinctDBAggregationFunction(), VarianceSampDBAggregationFunction.getInstance(),
-            VariancePopDBAggregationFunction.getInstance());
+            new AvgDistinctDBAggregationFunction.Factory(), new CountDistinctDBAggregationFunction.Factory(),
+            new GroupConcatDBAggregationFunction.Factory(StringValue.class), new MaxDBAggregationFunction.Factory(),
+            new MinDBAggregationFunction.Factory(), new NDVDBAggregationFunction.Factory(),
+            new StdDevSampDBAggregationFunction.Factory(), new StdDevPopDBAggregationFunction.Factory(),
+            new SumDistinctDBAggregationFunction.Factory(), new VarianceSampDBAggregationFunction.Factory(),
+            new VariancePopDBAggregationFunction.Factory());
     }
 
     /**

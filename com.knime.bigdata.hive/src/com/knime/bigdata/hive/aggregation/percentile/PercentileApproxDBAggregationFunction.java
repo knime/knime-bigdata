@@ -32,12 +32,33 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public class PercentileApproxDBAggregationFunction implements DBAggregationFunction {
+
+    private static final String ID = "PERCENTILE_APPROX";
+    /**Factory for {@link PercentileApproxDBAggregationFunction}.*/
+    public static final class Factory implements DBAggregationFunctionFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getId() {
+            return ID;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DBAggregationFunction createInstance() {
+            return new PercentileApproxDBAggregationFunction();
+        }
+    }
 
     private PercentileApproxFuntionSettingsPanel m_settingsPanel;
     private final PercentileApproxFuntionSettings m_settings = new PercentileApproxFuntionSettings(0.1, 10000);
@@ -47,7 +68,7 @@ public class PercentileApproxDBAggregationFunction implements DBAggregationFunct
      */
     @Override
     public String getId() {
-        return getLabel();
+        return ID;
     }
 
     /**
@@ -55,7 +76,7 @@ public class PercentileApproxDBAggregationFunction implements DBAggregationFunct
      */
     @Override
     public String getLabel() {
-        return "PERCENTILE_APPROX";
+        return getId();
     }
 
     /**
@@ -167,14 +188,6 @@ public class PercentileApproxDBAggregationFunction implements DBAggregationFunct
         return getLabel() + "("
                 + manipulator.quoteIdentifier(tableName) + "." + manipulator.quoteIdentifier(columnName)
                 + ", " + m_settings.getPercentile() + ", " + m_settings.getApprox() + ")";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBAggregationFunction createInstance() {
-        return new PercentileApproxDBAggregationFunction();
     }
 
     /**

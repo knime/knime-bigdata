@@ -22,6 +22,8 @@ package com.knime.bigdata.hive.aggregation;
 
 import org.knime.core.data.DataValue;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction;
 
 /**
@@ -32,23 +34,35 @@ public final class CollectListDBAggregationFunction extends SimpleDBAggregationF
 
     private static volatile CollectListDBAggregationFunction instance;
 
-    private CollectListDBAggregationFunction() {
-        super("COLLECT_LIST", "Returns a list of objects with duplicates.", StringCell.TYPE,
-            DataValue.class);
-    }
+    private static final String ID = "COLLECT_LIST";
+    /**Factory for the parent class.*/
+    public static final class Factory implements DBAggregationFunctionFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getId() {
+            return ID;
+        }
 
-    /**
-     * Returns the only instance of this class.
-     * @return the only instance
-     */
-    public static CollectListDBAggregationFunction getInstance() {
-        if (instance == null) {
-            synchronized (CollectListDBAggregationFunction.class) {
-                if (instance == null) {
-                    instance = new CollectListDBAggregationFunction();
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DBAggregationFunction createInstance() {
+            if (instance == null) {
+                synchronized (CollectListDBAggregationFunction.class) {
+                    if (instance == null) {
+                        instance = new CollectListDBAggregationFunction();
+                    }
                 }
             }
+            return instance;
         }
-        return instance;
+    }
+
+    private CollectListDBAggregationFunction() {
+        super(ID, "Returns a list of objects with duplicates.", StringCell.TYPE,
+            DataValue.class);
     }
 }

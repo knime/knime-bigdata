@@ -32,12 +32,33 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public class PercentileDBAggregationFunction implements DBAggregationFunction {
+
+    private static final String ID = "PERCENTILE";
+    /**Factory for {@link PercentileDBAggregationFunction}.*/
+    public static final class Factory implements DBAggregationFunctionFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getId() {
+            return ID;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DBAggregationFunction createInstance() {
+            return new PercentileDBAggregationFunction();
+        }
+    }
 
     private PercentileFuntionSettingsPanel m_settingsPanel;
     private final PercentileFuntionSettings m_settings = new PercentileFuntionSettings(0.1);
@@ -47,7 +68,7 @@ public class PercentileDBAggregationFunction implements DBAggregationFunction {
      */
     @Override
     public String getId() {
-        return getLabel();
+        return ID;
     }
 
     /**
@@ -55,7 +76,7 @@ public class PercentileDBAggregationFunction implements DBAggregationFunction {
      */
     @Override
     public String getLabel() {
-        return "PERCENTILE";
+        return getId();
     }
 
     /**
@@ -166,14 +187,6 @@ public class PercentileDBAggregationFunction implements DBAggregationFunction {
         return getLabel() + "("
                 + manipulator.quoteIdentifier(tableName) + "." + manipulator.quoteIdentifier(columnName)
                 + ", " + m_settings.getPercentile() + ")";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBAggregationFunction createInstance() {
-        return new PercentileDBAggregationFunction();
     }
 
     /**
