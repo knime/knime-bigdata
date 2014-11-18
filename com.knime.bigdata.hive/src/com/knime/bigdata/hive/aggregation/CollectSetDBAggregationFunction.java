@@ -22,6 +22,8 @@ package com.knime.bigdata.hive.aggregation;
 
 import org.knime.core.data.DataValue;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction;
 
 /**
@@ -32,23 +34,35 @@ public final class CollectSetDBAggregationFunction extends SimpleDBAggregationFu
 
     private static volatile CollectSetDBAggregationFunction instance;
 
-    private CollectSetDBAggregationFunction() {
-        super("COLLECT_SET", "Returns a set of objects with duplicate elements eliminated.", StringCell.TYPE,
-            DataValue.class);
-    }
+    private static final String ID = "COLLECT_SET";
+    /**Factory for the parent class.*/
+    public static final class Factory implements DBAggregationFunctionFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getId() {
+            return ID;
+        }
 
-    /**
-     * Returns the only instance of this class.
-     * @return the only instance
-     */
-    public static CollectSetDBAggregationFunction getInstance() {
-        if (instance == null) {
-            synchronized (CollectSetDBAggregationFunction.class) {
-                if (instance == null) {
-                    instance = new CollectSetDBAggregationFunction();
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DBAggregationFunction createInstance() {
+            if (instance == null) {
+                synchronized (CollectSetDBAggregationFunction.class) {
+                    if (instance == null) {
+                        instance = new CollectSetDBAggregationFunction();
+                    }
                 }
             }
+            return instance;
         }
-        return instance;
+    }
+
+    private CollectSetDBAggregationFunction() {
+        super(ID, "Returns a set of objects with duplicate elements eliminated.", StringCell.TYPE,
+            DataValue.class);
     }
 }

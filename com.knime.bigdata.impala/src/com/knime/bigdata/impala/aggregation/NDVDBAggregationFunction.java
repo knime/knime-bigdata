@@ -22,6 +22,8 @@ package com.knime.bigdata.impala.aggregation;
 
 import org.knime.core.data.DataValue;
 import org.knime.core.data.def.LongCell;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
+import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction;
 
 /**
@@ -32,25 +34,37 @@ public final class NDVDBAggregationFunction extends SimpleDBAggregationFunction 
 
     private static volatile NDVDBAggregationFunction instance;
 
+    private static final String ID = "NDV";
+    /**Factory for the parent class.*/
+    public static final class Factory implements DBAggregationFunctionFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getId() {
+            return ID;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DBAggregationFunction createInstance() {
+            if (instance == null) {
+                synchronized (NDVDBAggregationFunction.class) {
+                    if (instance == null) {
+                        instance = new NDVDBAggregationFunction();
+                    }
+                }
+            }
+            return instance;
+        }
+    }
+
     private NDVDBAggregationFunction() {
-        super("NDV", "An aggregate function that returns an approximate value similar to the result of COUNT(DISTINCT col), "
+        super(ID, "An aggregate function that returns an approximate value similar to the result of COUNT(DISTINCT col), "
                 + "the 'number of distinct values'. It is much faster than the combination of COUNT and DISTINCT, "
                 + "and uses a constant amount of memory and thus is less memory-intensive for columns with high "
                 + "cardinality.", LongCell.TYPE, DataValue.class);
-    }
-
-    /**
-     * Returns the only instance of this class.
-     * @return the only instance
-     */
-    public static NDVDBAggregationFunction getInstance() {
-        if (instance == null) {
-            synchronized (NDVDBAggregationFunction.class) {
-                if (instance == null) {
-                    instance = new NDVDBAggregationFunction();
-                }
-            }
-        }
-        return instance;
     }
 }
