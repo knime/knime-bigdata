@@ -31,12 +31,12 @@ import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public final class NDVDBAggregationFunction extends SimpleDBAggregationFunction {
-
-    private static volatile NDVDBAggregationFunction instance;
-
     private static final String ID = "NDV";
+
     /**Factory for the parent class.*/
     public static final class Factory implements DBAggregationFunctionFactory {
+        private static final NDVDBAggregationFunction INSTANCE = new NDVDBAggregationFunction();
+
         /**
          * {@inheritDoc}
          */
@@ -50,14 +50,7 @@ public final class NDVDBAggregationFunction extends SimpleDBAggregationFunction 
          */
         @Override
         public DBAggregationFunction createInstance() {
-            if (instance == null) {
-                synchronized (NDVDBAggregationFunction.class) {
-                    if (instance == null) {
-                        instance = new NDVDBAggregationFunction();
-                    }
-                }
-            }
-            return instance;
+            return INSTANCE;
         }
     }
 
