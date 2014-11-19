@@ -31,12 +31,12 @@ import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public final class CollectListDBAggregationFunction extends SimpleDBAggregationFunction {
-
-    private static volatile CollectListDBAggregationFunction instance;
-
     private static final String ID = "COLLECT_LIST";
+
     /**Factory for the parent class.*/
     public static final class Factory implements DBAggregationFunctionFactory {
+        private static final CollectListDBAggregationFunction INSTANCE = new CollectListDBAggregationFunction();
+
         /**
          * {@inheritDoc}
          */
@@ -50,14 +50,7 @@ public final class CollectListDBAggregationFunction extends SimpleDBAggregationF
          */
         @Override
         public DBAggregationFunction createInstance() {
-            if (instance == null) {
-                synchronized (CollectListDBAggregationFunction.class) {
-                    if (instance == null) {
-                        instance = new CollectListDBAggregationFunction();
-                    }
-                }
-            }
-            return instance;
+            return INSTANCE;
         }
     }
 
