@@ -20,71 +20,39 @@
  */
 package com.knime.database.hive.testing;
 
-import java.lang.reflect.Field;
-import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
-import java.util.Map;
-
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
-import org.knime.core.node.port.database.DatabaseDriverLoader;
-import org.knime.core.node.workflow.FlowVariable;
-import org.knime.testing.core.TestrunConfiguration;
-import org.knime.testing.core.TestrunJanitor;
+import org.knime.testing.core.AbstractDatabaseJanitor;
 
 /**
  * Creates temporary databases for testing and sets workflow variables accordingly.
  *
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
-public class HiveDatabaseJanitor implements TestrunJanitor {
-    private static final String JDBC_URL = "jdbc:hive2://testing.knime.org:10000/";
+public class HiveDatabaseJanitor extends AbstractDatabaseJanitor {
+    private static final String DB_HOST = "hive.testing.knime.org:10000";
 
-    private String m_dbName;
+    private static final String JDBC_URL = "jdbc:hive2://" + DB_HOST + "/";
+
+    /**
+     * Creates a new janitor for PostgreSQL.
+     */
+    public HiveDatabaseJanitor() {
+        super("org.apache.hive.jdbc.HiveDriver", JDBC_URL, DB_HOST, "hive", "");
+    }
+
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void before(final TestrunConfiguration config) throws Exception {
-        DatabaseDriverLoader.registerDriver("org.apache.hive.jdbc.HiveDriver");
-        SecureRandom rand = new SecureRandom();
-
-        try (Connection conn = DriverManager.getConnection(JDBC_URL, "hduser", "")) {
-            String dbName = "knime_testing_" + Long.toHexString(rand.nextLong()) + Long.toHexString(rand.nextLong());
-            Statement stmt = conn.createStatement();
-            String sql = "CREATE DATABASE " + dbName;
-            stmt.execute(sql);
-            m_dbName = dbName;
-            NodeLogger.getLogger(getClass()).info("Created temporary Hive testing database " + m_dbName);
-            config.addFlowVariable(new FlowVariable("test.hive-db-name", m_dbName));
-        }
+    public String getName() {
+        return "Hive test databases";
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void after(final TestrunConfiguration config) throws Exception {
-        if (m_dbName != null) {
-            Class<DatabaseConnectionSettings> clazz = DatabaseConnectionSettings.class;
-            Field mapField = clazz.getDeclaredField("CONNECTION_MAP");
-            mapField.setAccessible(true);
-            Map<?, Connection> connectionMap = (Map<?, Connection>)mapField.get(null);
-            for (Connection conn : connectionMap.values()) {
-                if (!conn.isClosed() && conn.getMetaData().getURL().startsWith("jdbc:hive2:")) {
-                    conn.close();
-                }
-            }
-
-            try (Connection conn = DriverManager.getConnection(JDBC_URL, "hduser", "")) {
-                Statement stmt = conn.createStatement();
-                String sql = "DROP DATABASE " + m_dbName;
-                stmt.execute(sql);
-                NodeLogger.getLogger(getClass()).info("Deleted temporary Hive testing database " + m_dbName);
-            }
-        }
+    public String getID() {
+        return "com.knime.database.hive.testing.HiveDatabaseJanitor";
     }
 }
