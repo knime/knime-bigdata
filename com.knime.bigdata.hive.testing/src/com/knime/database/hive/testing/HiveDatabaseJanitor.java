@@ -28,15 +28,15 @@ import org.knime.testing.core.AbstractDatabaseJanitor;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 public class HiveDatabaseJanitor extends AbstractDatabaseJanitor {
-    private static final String DB_HOST = "hive.testing.knime.org:10000";
+    private static final String DB_HOST = "hive.testing.knime.org";
 
-    private static final String JDBC_URL = "jdbc:hive2://" + DB_HOST + "/";
+    private static final int DB_PORT = 10000;
 
     /**
      * Creates a new janitor for PostgreSQL.
      */
     public HiveDatabaseJanitor() {
-        super("org.apache.hive.jdbc.HiveDriver", JDBC_URL, DB_HOST, "hive", "");
+        super("org.apache.hive.jdbc.HiveDriver", "", DB_HOST, DB_PORT, "hive", "");
     }
 
 
@@ -54,5 +54,14 @@ public class HiveDatabaseJanitor extends AbstractDatabaseJanitor {
     @Override
     public String getID() {
         return "com.knime.database.hive.testing.HiveDatabaseJanitor";
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getJDBCUrl(final String dbName) {
+        return "jdbc:hive2://" + DB_HOST + ":" + DB_PORT + "/" + dbName;
     }
 }
