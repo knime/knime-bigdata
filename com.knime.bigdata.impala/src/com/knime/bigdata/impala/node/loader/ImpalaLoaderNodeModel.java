@@ -270,16 +270,18 @@ class ImpalaLoaderNodeModel extends NodeModel {
 
         // check if table already exists and whether we should drop it
         boolean tableAlreadyExists = false;
-        try (ResultSet rs = conn.getMetaData().getTables(null, null, m_settings.tableName().toLowerCase(), null)) {
-            if (rs.next()) {
-                if (m_settings.dropTableIfExists()) {
-                    try (Statement st = conn.createStatement()) {
-                        getLogger().debug("Dropping existing table '" + m_settings.tableName() + "'");
-                        exec.setMessage("Dropping existing table '" + m_settings.tableName() + "'");
-                        st.execute("DROP TABLE " + m_settings.tableName());
+        synchronized (conn) {
+            try (ResultSet rs = conn.getMetaData().getTables(null, null, m_settings.tableName().toLowerCase(), null)) {
+                if (rs.next()) {
+                    if (m_settings.dropTableIfExists()) {
+                        try (Statement st = conn.createStatement()) {
+                            getLogger().debug("Dropping existing table '" + m_settings.tableName() + "'");
+                            exec.setMessage("Dropping existing table '" + m_settings.tableName() + "'");
+                            st.execute("DROP TABLE " + m_settings.tableName());
+                        }
+                    } else {
+                        tableAlreadyExists = true;
                     }
-                } else {
-                    tableAlreadyExists = true;
                 }
             }
         }
@@ -290,24 +292,25 @@ class ImpalaLoaderNodeModel extends NodeModel {
             normalColumns.add(cs.getName());
         }
         final StatementManipulator manip = connSettings.getUtility().getStatementManipulator();
+        synchronized (conn) {
+            try (Statement st = conn.createStatement()) {
+                if (!m_settings.partitionColumns().isEmpty()) {
+                    importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
+                } else {
+                    if (!tableAlreadyExists) {
+                        exec.setProgress(0, "Creating table");
+                        final String createTableCmd =
+                            buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
+                                new ArrayList<String>(), manip);
+                        getLogger().debug("Executing '" + createTableCmd + "'");
+                        st.execute(createTableCmd);
+                    }
 
-        try (Statement st = conn.createStatement()) {
-            if (!m_settings.partitionColumns().isEmpty()) {
-                importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
-            } else {
-                if (!tableAlreadyExists) {
-                    exec.setProgress(0, "Creating table");
-                    final String createTableCmd =
-                        buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
-                            new ArrayList<String>(), manip);
-                    getLogger().debug("Executing '" + createTableCmd + "'");
-                    st.execute(createTableCmd);
+                    exec.setProgress(0.5, "Loading data into table");
+                    final String buildTableCmd = buildLoadCommand(remoteFile, m_settings.tableName());
+                    getLogger().debug("Executing '" + buildTableCmd + "'");
+                    st.execute(buildTableCmd);
                 }
-
-                exec.setProgress(0.5, "Loading data into table");
-                final String buildTableCmd = buildLoadCommand(remoteFile, m_settings.tableName());
-                getLogger().debug("Executing '" + buildTableCmd + "'");
-                st.execute(buildTableCmd);
             }
         }
         exec.setProgress(1);
