@@ -47,7 +47,8 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
     public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.HDFSFileHandling);
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
-    public static final Protocol PROTOCOL = new Protocol("hdfs", 8020, true, false, false, true, true, true);
+    public static final Protocol PROTOCOL =
+            new Protocol("hdfs", 8020, false, false, false, true, true, true, false, false);
 
     /**
      * {@inheritDoc}
