@@ -22,6 +22,7 @@ package com.knime.bigdata.hdfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
@@ -46,5 +47,15 @@ public class HDFSConnectionInformationNodeModel extends ConnectionInformationNod
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicenseInNode();
         return super.configure(inSpecs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+        super.saveSettingsTo(settings);
+        //set a default password otherwise a missing password warning appears
+        settings.addString("password", "default");
     }
 }
