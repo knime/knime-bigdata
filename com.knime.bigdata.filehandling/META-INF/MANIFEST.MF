@@ -4,6 +4,7 @@ Bundle-Name: KNIME Big Data File Handling
 Bundle-SymbolicName: com.knime.bigdata.filehandling;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Export-Package: com.knime.bigdata.hdfs.filehandler
 Require-Bundle: com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
  com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
  org.knime.core;bundle-version="[2.11.0,3.0.0)",
@@ -14,4 +15,3 @@ Require-Bundle: com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
  org.junit;bundle-version="[4.0.0,5.0.0)";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.knime.bigdata.hdfs.filehandler
