@@ -1,0 +1,8 @@
+<configuration>
+<property>
+  <name>hive.metastore.uris</name>
+  <!-- Ensure that the following statement points to the Hive Metastore URI in your cluster -->
+  <value>thrift://sandbox.hortonworks.com:9083</value>
+  <description>URI for client to contact metastore server</description>
+</property>
+</configuration>
