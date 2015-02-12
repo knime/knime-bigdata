@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Apache Spark integration
+Bundle-SymbolicName: org.knime.bigdata.spark;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: knime-spark.jar,
+ lib/spark-assembly-1.2.0-hadoop2.4.0.jar,
+ conf/hortonworks/hive/
+Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.knime.base;bundle-version="2.12.0",
+ org.knime.workbench.repository;bundle-version="2.12.0",
+ com.knime.bigdata.hive;bundle-version="1.0.0"
