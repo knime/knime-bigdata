@@ -18,9 +18,12 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering;
+package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
+
+import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 
 /**
  * 
@@ -28,4 +31,13 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
  */
 public class MLlibClusterAssignerNodeDialog extends DefaultNodeSettingsPane {
 
+    /**
+     * 
+     */
+    public MLlibClusterAssignerNodeDialog() {
+        addDialogComponent(
+            new DialogComponentString(MLlibClusterAssignerNodeModel.createTableNameModel(), "Table name: "));
+        addDialogComponent(
+            new DialogComponentString(MLlibClusterAssignerNodeModel.createColumnNameModel(), "Column name: "));
+    }
 }

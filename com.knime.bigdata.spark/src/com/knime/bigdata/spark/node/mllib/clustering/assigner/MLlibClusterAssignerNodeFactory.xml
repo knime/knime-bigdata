@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Learner" icon="icon.png">
+    <name>MLlib Cluster Assigner</name>
+    <shortDescription>k-Means</shortDescription>
+    <fullDescription>
+        <intro>
+            Bla
+        </intro>
+
+        <option name="Target folder">
+            A folder on the server where the temporary copy of the data is copied. The Impala server user
+            needs read and write access to this folder.
+        </option>
+        <option name="Table name">
+            The name of the new table in the database.
+        </option>
+        <option name="Drop existing table">
+            If this option is selected, an existing table will be dropped and re-created. Otherwise the
+            table is loaded into the existing table. Note that the import may fail in this case if the table structure
+            and partitioning information do not match.
+        </option>
+        <option name="Partition columns">
+            Here you can select one or more columns that should be used for partitioning the data in the
+            table. A partitioned table requires a two-step import via a temporary table and therefore is much slower 
+            than import into an unpartitioned table.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="MLlib Cluster Model">MLlib Cluster Model</inPort>
+        <inPort index="1" name="Hive query">Hive query</inPort>
+        <outPort index="0" name="Result">Result</outPort>
+    </ports>
+</knimeNode>
