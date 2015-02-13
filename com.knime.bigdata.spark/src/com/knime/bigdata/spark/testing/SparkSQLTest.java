@@ -18,7 +18,7 @@
  * History
  *   Created on 11.08.2014 by koetter
  */
-package org.knime.bigdata.spark.testing;
+package com.knime.bigdata.spark.testing;
 
 import java.util.List;
 
