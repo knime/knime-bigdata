@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering;
+package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -68,7 +68,7 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new MLlibClusterAssignerNodeDialog();
     }
 
 }

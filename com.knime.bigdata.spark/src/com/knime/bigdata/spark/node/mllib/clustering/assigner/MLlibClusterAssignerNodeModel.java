@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Feb 12, 2015 by knime
+ *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
+package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,27 +66,25 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.port.MLlibModel;
 import com.knime.bigdata.spark.port.MLlibPortObject;
-import com.knime.bigdata.spark.port.MLlibPortObjectSpec;
-
 
 /**
  *
- * @author knime
+ * @author koetter
  */
-public class MLlibKMeansNodeModel extends NodeModel {
+public class MLlibClusterAssignerNodeModel extends NodeModel {
 
     private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
-    private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
-    private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
+//    private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
+//    private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
     private final SettingsModelString m_tableName = createTableNameModel();
     private final SettingsModelString m_colName = createColumnNameModel();
 
     /**
      *
      */
-    public MLlibKMeansNodeModel() {
-        super(new PortType[]{DatabasePortObject.TYPE},
-            new PortType[]{DatabasePortObject.TYPE, MLlibPortObject.TYPE});
+    public MLlibClusterAssignerNodeModel() {
+        super(new PortType[]{MLlibPortObject.TYPE, DatabasePortObject.TYPE},
+            new PortType[]{DatabasePortObject.TYPE});
     }
 
     /**
@@ -122,11 +120,11 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
+        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[1];
         if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Only Hive connections are supported");
         }
-        return new PortObjectSpec[] {createSQLSpec(spec), createMLSpec()};
+        return new PortObjectSpec[] {createSQLSpec(spec)};
     }
 
     private DatabasePortObjectSpec createSQLSpec(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
@@ -160,11 +158,14 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final DatabasePortObject db = (DatabasePortObject)inObjects[0];
+        @SuppressWarnings("unchecked")
+        final MLlibModel<KMeansModel> model = ((MLlibPortObject<KMeansModel>)inObjects[0]).getModel();
+        final DatabasePortObject db = (DatabasePortObject)inObjects[1];
         final DataTableSpec tableSpec = db.getSpec().getDataTableSpec();
         final String resultTableName = m_tableName.getStringValue();
         final CredentialsProvider cp = getCredentialsProvider();
         final DatabaseQueryConnectionSettings connSettings = db.getConnectionSettings(cp);
+        exec.setMessage("Drop result tabe if exists");
         connSettings.execute("DROP TABLE IF EXISTS " + resultTableName , cp);
         final String jdbcUrl = connSettings.getJDBCUrl();
         System.out.println(jdbcUrl);
@@ -186,12 +187,10 @@ public class MLlibKMeansNodeModel extends NodeModel {
         }
         final String sql = connSettings.getQuery();
         final StructType resultSchema = createSchema(tableSpec, numericColIdx);
-        final KMeansTask task = new KMeansTask(sql, numericColIdx, resultTableName, m_noOfCluster.getIntValue(),
-            m_noOfIteration.getIntValue());
-        final KMeansModel clusters = task.execute(sqlsc, resultSchema);
+        final AssignTask task = new AssignTask(sql, numericColIdx, resultTableName);
+        task.execute(sqlsc, resultSchema, model.getModel());
 //        KMeansModel clusters = new KMeansModel(new Vector[] {new DenseVector(new double[] {1,0,1})});
-        return new PortObject[] {new DatabasePortObject(createSQLSpec(db.getSpec())),
-            new MLlibPortObject<>(new MLlibModel<>("KMeans", clusters))};
+        return new PortObject[] {new DatabasePortObject(createSQLSpec(db.getSpec()))};
         }
     }
 
@@ -223,19 +222,12 @@ public class MLlibKMeansNodeModel extends NodeModel {
     }
 
     /**
-     * @return
-     */
-    private MLlibPortObjectSpec createMLSpec() {
-        return new MLlibPortObjectSpec("kmeans");
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_noOfCluster.saveSettingsTo(settings);
-        m_noOfIteration.saveSettingsTo(settings);
+//        m_noOfCluster.saveSettingsTo(settings);
+//        m_noOfIteration.saveSettingsTo(settings);
         m_tableName.saveSettingsTo(settings);
         m_colName.saveSettingsTo(settings);
     }
@@ -245,8 +237,8 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noOfCluster.validateSettings(settings);
-        m_noOfIteration.validateSettings(settings);
+//        m_noOfCluster.validateSettings(settings);
+//        m_noOfIteration.validateSettings(settings);
         m_tableName.validateSettings(settings);
         m_colName.validateSettings(settings);
     }
@@ -256,8 +248,8 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noOfCluster.loadSettingsFrom(settings);
-        m_noOfIteration.loadSettingsFrom(settings);
+//        m_noOfCluster.loadSettingsFrom(settings);
+//        m_noOfIteration.loadSettingsFrom(settings);
         m_tableName.loadSettingsFrom(settings);
         m_colName.loadSettingsFrom(settings);
     }
@@ -287,5 +279,4 @@ public class MLlibKMeansNodeModel extends NodeModel {
     protected void reset() {
         // nothing to do
     }
-
 }

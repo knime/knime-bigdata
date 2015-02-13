@@ -19,5 +19,11 @@
             factory-class="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory">
+      </node>
    </extension>
 </plugin>
