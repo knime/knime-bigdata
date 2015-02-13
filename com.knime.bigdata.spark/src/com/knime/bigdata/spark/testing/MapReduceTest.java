@@ -18,7 +18,7 @@
  * History
  *   Created on 27.01.2015 by koetter
  */
-package org.knime.bigdata.spark.testing;
+package com.knime.bigdata.spark.testing;
 
 import java.io.IOException;
 import java.util.Iterator;

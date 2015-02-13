@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package org.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -32,11 +32,11 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @param <M>
  */
 public class MLlibPortObject<M extends Serializable> implements PortObject {
 
@@ -48,12 +48,12 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
     /**
      * Database port type.
      */
-    public static final PortType TYPE = new PortType(DatabaseConnectionPortObject.class);
+    public static final PortType TYPE = new PortType(MLlibPortObject.class);
 
     /**
      * Database type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(DatabaseConnectionPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL = new PortType(MLlibPortObject.class, true);
 
     private MLlibModel<M> m_model;
 
@@ -93,7 +93,7 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
     }
 
     /**
-     * Serializer used to save {@link DatabaseConnectionPortObject}s.
+     * Serializer used to save {@link MLlibPortObject}s.
      *
      * @return a new serializer
      */

@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            icon="resources/category.png"
+            level-id="spark"
+            locked="true"
+            name="Spark"
+            path="/labs">
+      </category>
+   </extension>
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory">
+      </node>
+   </extension>
 </plugin>

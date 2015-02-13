@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package org.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,6 +33,7 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 /**
  *
  * @author knime
+ * @param <M> the model
  */
 public class MLlibModel<M extends Serializable> {
 
@@ -40,7 +41,8 @@ public class MLlibModel<M extends Serializable> {
     private String m_type;
 
     /**
-     *
+     * @param type model type
+     * @param model the model
      */
     public MLlibModel(final String type, final M model) {
         m_type = type;
@@ -55,9 +57,9 @@ public class MLlibModel<M extends Serializable> {
     @SuppressWarnings("unchecked")
     public MLlibModel(final ExecutionMonitor exec, final PortObjectZipInputStream in)
             throws IOException {
-        ZipEntry type = in.getNextEntry();
+        final ZipEntry type = in.getNextEntry();
         if (!type.getName().equals("Model")) {
-            throw new IOException("Invalid zip");
+            throw new IOException("Invalid zip entry");
         }
         try (final ObjectInputStream os = new ObjectInputStream(in);){
             m_type = (String)os.readObject();
@@ -77,7 +79,6 @@ public class MLlibModel<M extends Serializable> {
         try (final ObjectOutputStream os = new ObjectOutputStream(out)){
             os.writeObject(getType());
             os.writeObject(getModel());
-            os.close();
         }
     }
 
