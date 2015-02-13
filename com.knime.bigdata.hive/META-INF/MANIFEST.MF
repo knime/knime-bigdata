@@ -12,3 +12,4 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: com.knime.bigdata.hive.utility
