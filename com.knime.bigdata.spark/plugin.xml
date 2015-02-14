@@ -25,5 +25,23 @@
             factory-class="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.pmml.converter.MLlib2PMMLNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.pmml.converter.MLlib2PMMLNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory">
+      </node>
    </extension>
 </plugin>
