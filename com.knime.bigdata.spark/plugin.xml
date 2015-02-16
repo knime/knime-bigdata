@@ -28,6 +28,11 @@
       <node
             category-path="/labs/spark"
             expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory">
+      </node>      <node
+            category-path="/labs/spark"
+            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory">
       </node>

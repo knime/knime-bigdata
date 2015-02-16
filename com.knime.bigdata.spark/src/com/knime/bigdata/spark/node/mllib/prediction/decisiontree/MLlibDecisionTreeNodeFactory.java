@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
+package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author koetter
  */
-public class MLlibKMeansNodeFactory extends NodeFactory<MLlibKMeansNodeModel> {
+public class MLlibDecisionTreeNodeFactory extends NodeFactory<MLlibDecisionTreeNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibKMeansNodeModel createNodeModel() {
-        return new MLlibKMeansNodeModel();
+    public MLlibDecisionTreeNodeModel createNodeModel() {
+        return new MLlibDecisionTreeNodeModel();
     }
 
     /**
@@ -50,7 +50,7 @@ public class MLlibKMeansNodeFactory extends NodeFactory<MLlibKMeansNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public NodeView<MLlibKMeansNodeModel> createNodeView(final int viewIndex, final MLlibKMeansNodeModel nodeModel) {
+    public NodeView<MLlibDecisionTreeNodeModel> createNodeView(final int viewIndex, final MLlibDecisionTreeNodeModel nodeModel) {
         return null;
     }
 
@@ -67,7 +67,7 @@ public class MLlibKMeansNodeFactory extends NodeFactory<MLlibKMeansNodeModel> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new MLlibKMeansNodeDialog();
+        return new MLlibDecisionTreeNodeDialog();
     }
 
 }

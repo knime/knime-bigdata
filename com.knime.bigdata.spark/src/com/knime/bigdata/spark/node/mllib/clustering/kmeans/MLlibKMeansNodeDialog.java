@@ -28,12 +28,12 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
  *
  * @author koetter
  */
-public class MLLibKMeansNodeDialog extends DefaultNodeSettingsPane {
+public class MLlibKMeansNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      *
      */
-    public MLLibKMeansNodeDialog() {
+    public MLlibKMeansNodeDialog() {
         addDialogComponent(
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfClusterModel(), "Number of clusters: ", 1));
         addDialogComponent(
