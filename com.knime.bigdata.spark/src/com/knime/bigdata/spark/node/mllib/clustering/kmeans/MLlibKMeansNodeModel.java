@@ -22,28 +22,19 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
+
+import javax.swing.JOptionPane;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.data.RowKey;
-import org.knime.core.data.container.CellFactory;
-import org.knime.core.data.container.ColumnRearranger;
-import org.knime.core.data.def.IntCell;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -59,11 +50,10 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
-import org.knime.core.node.port.database.DatabaseUtility;
-import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
+import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.MLlibModel;
 import com.knime.bigdata.spark.port.MLlibPortObject;
 import com.knime.bigdata.spark.port.MLlibPortObjectSpec;
@@ -122,37 +112,12 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
+        final DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
         if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Only Hive connections are supported");
         }
-        return new PortObjectSpec[] {createSQLSpec(spec), createMLSpec()};
-    }
-
-    private DatabasePortObjectSpec createSQLSpec(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
-        final DataTableSpec tableSpec = spec.getDataTableSpec();
-        final ColumnRearranger rearranger = new ColumnRearranger(tableSpec);
-        rearranger.append(new CellFactory() {
-            @Override
-            public void setProgress(final int curRowNr, final int rowCount, final RowKey lastKey,
-                final ExecutionMonitor exec) {
-            }
-            @Override
-            public DataColumnSpec[] getColumnSpecs() {
-                final DataColumnSpecCreator creator =
-                        new DataColumnSpecCreator(m_colName.getStringValue(), IntCell.TYPE);
-                return new DataColumnSpec[] {creator.createSpec()};
-            }
-            @Override
-            public DataCell[] getCells(final DataRow row) {
-                return null;
-            }
-        });
-        final DatabaseQueryConnectionSettings conn = spec.getConnectionSettings(getCredentialsProvider());
-        final DatabaseUtility utility = DatabaseUtility.getUtility(DATABASE_IDENTIFIER);
-        final StatementManipulator sm = utility.getStatementManipulator();
-        conn.setQuery("select * from " + sm.quoteIdentifier(m_tableName.getStringValue()));
-        return new DatabasePortObjectSpec(rearranger.createSpec(), conn);
+        return new PortObjectSpec[] {MLlibClusterAssignerNodeModel.createSQLSpec(spec, getCredentialsProvider(),
+            m_tableName.getStringValue(), m_colName.getStringValue()), createMLSpec()};
     }
 
     /**
@@ -185,41 +150,17 @@ public class MLlibKMeansNodeModel extends NodeModel {
             counter++;
         }
         final String sql = connSettings.getQuery();
-        final StructType resultSchema = createSchema(tableSpec, numericColIdx);
+        final StructType resultSchema = MLlibClusterAssignerNodeModel.createSchema(tableSpec, numericColIdx,
+            m_colName.getStringValue());
         final KMeansTask task = new KMeansTask(sql, numericColIdx, resultTableName, m_noOfCluster.getIntValue(),
             m_noOfIteration.getIntValue());
         final KMeansModel clusters = task.execute(sqlsc, resultSchema);
+        JOptionPane.showMessageDialog(null, "End execution.");
 //        KMeansModel clusters = new KMeansModel(new Vector[] {new DenseVector(new double[] {1,0,1})});
-        return new PortObject[] {new DatabasePortObject(createSQLSpec(db.getSpec())),
+        return new PortObject[] {new DatabasePortObject(MLlibClusterAssignerNodeModel.createSQLSpec(db.getSpec(),
+            getCredentialsProvider(), m_tableName.getStringValue(), m_colName.getStringValue())),
             new MLlibPortObject<>(new MLlibModel<>("KMeans", clusters))};
         }
-    }
-
-    /**
-     * @param numericColIdx
-     * @param tableSpec
-     * @return
-     */
-    private StructType createSchema(final DataTableSpec tableSpec, final Collection<Integer> numericColIdx) {
-        final List<StructField> fields = new ArrayList<>(numericColIdx.size() + 1);
-        for (final Integer id : numericColIdx) {
-            final DataColumnSpec colSpec = tableSpec.getColumnSpec(id.intValue());
-            fields.add(DataType.createStructField(colSpec.getName(), getSparkType(colSpec.getType()), true));
-        }
-        fields.add(DataType.createStructField(m_colName.getStringValue(), DataType.IntegerType, false));
-        StructType schema = DataType.createStructType(fields);
-        return schema;
-    }
-
-    /**
-     * @param type
-     * @return
-     */
-    private DataType getSparkType(final org.knime.core.data.DataType type) {
-        if (type.isCompatible(DoubleValue.class)) {
-            return DataType.DoubleType;
-        }
-        return DataType.StringType;
     }
 
     /**

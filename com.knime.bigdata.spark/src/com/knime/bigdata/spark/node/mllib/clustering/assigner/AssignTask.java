@@ -26,7 +26,6 @@ import java.util.Collection;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.sql.api.java.JavaSchemaRDD;
 import org.apache.spark.sql.api.java.Row;
@@ -63,32 +62,25 @@ public class AssignTask implements Serializable {
     public void execute(final JavaHiveContext sqlsc, final StructType resultSchema,
         final KMeansModel kMeansModel) {
         final JavaSchemaRDD inputData = sqlsc.sql(m_query);
-        final Function<Row, Vector> rowFunction = new Function<Row, Vector>() {
+        final JavaRDD<Row> predictedData = inputData.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
             @Override
-            public Vector call(final Row r) {
-                final double[] vals = new double[m_numericColIdx.size()];
-                int colCount = 0;
-                for (Integer id : m_numericColIdx) {
-                    vals[colCount++] = r.getDouble(id.intValue());
-                }
-                return Vectors.dense(vals);
-            }
-        };
-        final JavaRDD<Vector> parsedData = inputData.map(rowFunction);
-        parsedData.cache();
-     // Cluster the data into two classes using KMeans
-        final JavaRDD<Row> predictedData = parsedData.map(new Function<Vector, Row>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public Row call(final Vector v) {
-                final int cluster = kMeansModel.predict(v);
-                final Object[] vals = new Object[v.size() + 1];
-                int valCount = 0;
-                for (double d : v.toArray()) {
-                    vals[valCount++] = Double.valueOf(d);
-                }
-                vals[valCount++] = Integer.valueOf(cluster);
+            public Row call(final Row v) {
+                final double[] doubleVals = new double[m_numericColIdx.size()];
+                  final Object[] vals = new Object[v.length() + 1];
+                  int valCount = 0;
+                  int doubleColCount = 0;
+                  for (int idx = 0; idx < v.length(); idx++) {
+                      if (m_numericColIdx.contains(Integer.valueOf(idx))) {
+                          final double dVal = v.getDouble(idx);
+                          doubleVals[doubleColCount++] = dVal;
+                          vals[valCount++] = Double.valueOf(dVal);
+                      } else {
+                          vals[valCount++] = v.getString(idx);
+                      }
+                  }
+                final int cluster = kMeansModel.predict(Vectors.dense(doubleVals));
+                vals[valCount++] = "cluster_" + cluster;
                 return Row.create(vals);
             }
         });
