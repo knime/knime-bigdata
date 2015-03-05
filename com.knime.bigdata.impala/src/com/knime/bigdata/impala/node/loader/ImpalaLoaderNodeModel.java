@@ -186,7 +186,7 @@ class ImpalaLoaderNodeModel extends NodeModel {
             if (remoteFile != null) {
                 try {
                     //if the import is successful the hdfs file is moved into the cloudera directory so we
-                    //no longer need to delete the file remote file manually
+                    //no longer need to delete the remote file manually
                     if (!importSuccessful && !remoteFile.delete()) {
                         setWarningMessage("Could not delete temporary import file on server. Path: "
                                 + remoteFile.getFullName());
