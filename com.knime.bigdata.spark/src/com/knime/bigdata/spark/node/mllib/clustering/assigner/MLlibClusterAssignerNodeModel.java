@@ -66,8 +66,8 @@ import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
-import com.knime.bigdata.spark.port.MLlibModel;
-import com.knime.bigdata.spark.port.MLlibPortObject;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 
 /**
  *
@@ -85,7 +85,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      *
      */
     public MLlibClusterAssignerNodeModel() {
-        super(new PortType[]{MLlibPortObject.TYPE, DatabasePortObject.TYPE},
+        super(new PortType[]{SparkModelPortObject.TYPE, DatabasePortObject.TYPE},
             new PortType[]{DatabasePortObject.TYPE});
     }
 
@@ -136,7 +136,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
         @Override
         protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
             @SuppressWarnings("unchecked")
-            final MLlibModel<KMeansModel> model = ((MLlibPortObject<KMeansModel>)inObjects[0]).getModel();
+            final SparkModel<KMeansModel> model = ((SparkModelPortObject<KMeansModel>)inObjects[0]).getModel();
             final DatabasePortObject db = (DatabasePortObject)inObjects[1];
             final DataTableSpec tableSpec = db.getSpec().getDataTableSpec();
             final String resultTableName = m_tableName.getStringValue();
