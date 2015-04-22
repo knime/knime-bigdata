@@ -19,9 +19,14 @@
           The nodes uses the <a href="https://pypi.python.org/pypi/JayDeBeApi/">JayDeBeApi</a> library 
           to establish a connection to the database via a JDBC connection. That is why 
           <a href="http://jpype.sourceforge.net/">JPype</a> needs to be installed. For Windows precompiled
-          libraries can be download from the <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#jpype">Unofficial Windows Binaries for Python Extension Packages</a>.
+          libraries can be download from the 
+          <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#jpype">Unofficial Windows Binaries for Python Extension Packages</a>.
 		</intro>
 		<tab name="Script">
+		    <option name="Target folder">
+		      A folder on the server where the temporary copy of the data is copied. The Hive server user
+              needs read access to this folder.
+		    </option>
 			<option name="Editor">
 				The script that will be executed to generate this nodes output.
 				Execute
