@@ -47,7 +47,18 @@
  */
 package com.knime.bigdata.scripting.nodes.python.hive;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.io.IOException;
+import java.util.Collection;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
+import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.code.generic.templates.SourceCodeTemplatesPanel;
 import org.knime.code.python.PythonSourceCodePanel;
 import org.knime.core.node.InvalidSettingsException;
@@ -57,6 +68,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
+import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.python.kernel.SQLEditorObjectWriter;
@@ -65,12 +77,12 @@ import org.knime.python.kernel.SQLEditorObjectWriter;
  * <code>NodeDialog</code> for the node.
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
- * @author Patrick Winter, KNIME.com, Zurich, Switzerland
  */
 class PythonScriptHiveNodeDialog extends NodeDialogPane {
 
-	PythonSourceCodePanel m_sourceCodePanel;
-	SourceCodeTemplatesPanel m_templatesPanel;
+	private final PythonSourceCodePanel m_sourceCodePanel;
+	private final SourceCodeTemplatesPanel m_templatesPanel;
+    private final RemoteFileChooserPanel m_target;
 
 	/**
 	 * Create the dialog for this node.
@@ -78,7 +90,25 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 	protected PythonScriptHiveNodeDialog() {
 		m_sourceCodePanel = new PythonSourceCodePanel(PythonScriptHiveNodeConfig.getVariableNames());
 		m_templatesPanel = new SourceCodeTemplatesPanel(m_sourceCodePanel, "python-script");
-		addTab("Script", m_sourceCodePanel, false);
+		m_target = new RemoteFileChooserPanel(getPanel(), "", false, "targetHistory", RemoteFileChooser.SELECT_DIR,
+	                createFlowVariableModel("target", FlowVariable.Type.STRING), null);
+		JPanel sourcePanel = new JPanel(new GridBagLayout());
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.fill = GridBagConstraints.BOTH;
+		gc.gridx = 0;
+		gc.gridy = 0;
+		sourcePanel.add(new JLabel("Target folder"));
+		gc.gridx++;
+		gc.weightx = 1;
+		gc.weighty = 0;
+		sourcePanel.add(m_target.getPanel(), gc);
+		gc.gridx = 0;
+		gc.gridy++;
+		gc.gridwidth = 2;
+		gc.weightx = 1;
+        gc.weighty = 1;
+		sourcePanel.add(m_sourceCodePanel, gc);
+		addTab("Script", sourcePanel, false);
 		addTab("Templates", m_templatesPanel, true);
 	}
 
@@ -89,6 +119,7 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 	protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
 		final PythonScriptHiveNodeConfig config = new PythonScriptHiveNodeConfig();
 		m_sourceCodePanel.saveSettingsTo(config);
+		config.setTargetFolder(m_target.getSelection());
 		config.saveTo(settings);
 	}
 
@@ -106,15 +137,19 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 		m_sourceCodePanel.loadSettingsFrom(config, specs);
 		m_sourceCodePanel.updateFlowVariables(getAvailableFlowVariables().values().toArray(
 				new FlowVariable[getAvailableFlowVariables().size()]));
-		final ConnectionInformationPortObjectSpec fileSpec = (ConnectionInformationPortObjectSpec) specs[0];
+		ConnectionInformation remoteFileInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
+        m_target.setConnectionInformation(remoteFileInfo);
+        m_target.setSelection(config.getTargetFolder());
 		final DatabasePortObjectSpec dbSpec = (DatabasePortObjectSpec) specs[1];
 		try {
 			final CredentialsProvider cp = getCredentialsProvider();
-			final SQLEditorObjectWriter sqlObject = new SQLEditorObjectWriter(
+			final DatabaseQueryConnectionSettings connInfo = dbSpec.getConnectionSettings(cp);
+			final Collection<String> jars = PythonScriptHiveNodeModel.getJars(connInfo.getDriver());
+            final SQLEditorObjectWriter sqlObject = new SQLEditorObjectWriter(
 					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0],
-					dbSpec.getConnectionSettings(cp), cp);
+					connInfo, cp, jars);
 			m_sourceCodePanel.updateData(sqlObject);
-		} catch (final InvalidSettingsException e) {
+		} catch (final InvalidSettingsException|IOException e) {
 			throw new NotConfigurableException(e.getMessage(), e);
 		}
 	}

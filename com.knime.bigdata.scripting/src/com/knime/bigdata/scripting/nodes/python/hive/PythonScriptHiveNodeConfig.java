@@ -49,11 +49,19 @@ package com.knime.bigdata.scripting.nodes.python.hive;
 
 import org.knime.code.generic.SourceCodeConfig;
 import org.knime.code.generic.VariableNames;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 
 class PythonScriptHiveNodeConfig extends SourceCodeConfig {
 
 	private static final VariableNames VARIABLE_NAMES = new VariableNames("flow_variables",
 			null, null, null, null, null, new String[] {"db_util"}, null);
+
+    /**Config key for the target folder.*/
+    public static final String CFG_TARGET_FOLDER = "targetFolder";
+
+	private String m_targetFolder = "";
 
 	/**
 	 * {@inheritDoc}
@@ -65,8 +73,21 @@ class PythonScriptHiveNodeConfig extends SourceCodeConfig {
 				"# call " + var + ".print_description()\n\n" +
 				"df = " + var + ".get_dataframe()\n" +
 				var + ".write_dataframe('resultTableName', df)";
-
 	}
+
+	/**
+     * @return the targetFolder
+     */
+    public String getTargetFolder() {
+        return m_targetFolder;
+    }
+
+    /**
+     * @param targetFolder the targetFolder to set
+     */
+    public void setTargetFolder(final String targetFolder) {
+        m_targetFolder = targetFolder;
+    }
 
 	/**
 	 * Get the variable names for this node
@@ -76,5 +97,45 @@ class PythonScriptHiveNodeConfig extends SourceCodeConfig {
 	static VariableNames getVariableNames() {
 		return VARIABLE_NAMES;
 	}
+
+	/**
+     * Save configuration to the given node settings.
+     *
+     * @param settings
+     *            The settings to save to
+     */
+    @Override
+    public void saveTo(final NodeSettingsWO settings) {
+        super.saveTo(settings);
+        settings.addString(CFG_TARGET_FOLDER, m_targetFolder);
+    }
+
+    /**
+     * Load configuration from the given node settings.
+     *
+     * @param settings
+     *            The settings to load from
+     * @throws InvalidSettingsException
+     *             If the settings are invalid
+     */
+    @Override
+    public void loadFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        super.loadFrom(settings);
+        m_targetFolder = settings.getString(CFG_TARGET_FOLDER);
+    }
+
+    /**
+     * Load configuration from the given node settings (using defaults if
+     * necessary).
+     *
+     * @param settings
+     *            The settings to load from
+     */
+    @Override
+    public void loadFromInDialog(final NodeSettingsRO settings) {
+        super.loadFromInDialog(settings);
+        m_targetFolder = settings.getString(CFG_TARGET_FOLDER, "");
+    }
+
 
 }

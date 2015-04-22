@@ -47,12 +47,21 @@
  */
 package com.knime.bigdata.scripting.nodes.python.hive;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.files.ConnectionMonitor;
+import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.node.util.exttool.ExtToolOutputNodeModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -62,15 +71,19 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.database.DatabaseDriverLoader;
 import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
-import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.python.kernel.PythonKernel;
 import org.knime.python.kernel.SQLEditorObjectReader;
 import org.knime.python.kernel.SQLEditorObjectWriter;
+
+import com.knime.bigdata.hive.utility.HiveLoader;
+import com.knime.bigdata.hive.utility.HiveLoaderSettings;
+import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * This is the model implementation.
@@ -81,6 +94,8 @@ import org.knime.python.kernel.SQLEditorObjectWriter;
 class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 
 	private PythonScriptHiveNodeConfig m_config = new PythonScriptHiveNodeConfig();
+
+	static final String CFG_TARGET_FOLDER = "targetFolder";
 
 	/**
 	 * Constructor for the node model.
@@ -96,6 +111,9 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	protected PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
 		final PythonKernel kernel = new PythonKernel();
 		final ConnectionInformation fileInfo = ((ConnectionInformationPortObject)inData[0]).getConnectionInformation();
+		if (fileInfo == null) {
+            throw new InvalidSettingsException("No remote file port available");
+        }
 		final DatabasePortObject dbObj = (DatabasePortObject) inData[1];
 		checkDBConnection(dbObj.getSpec());
 		try {
@@ -103,16 +121,20 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 					getAvailableFlowVariables().values());
 			final CredentialsProvider cp = getCredentialsProvider();
 			final DatabaseQueryConnectionSettings connIn = dbObj.getConnectionSettings(cp);
+			final Collection<String> jars = getJars(connIn.getDriver());
 			final SQLEditorObjectWriter sqlObject = new SQLEditorObjectWriter(
-					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0], connIn, cp);
+					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0], connIn, cp, jars);
 			kernel.putGeneralObject(sqlObject);
 			final String[] output = kernel.execute(m_config.getSourceCode(), exec);
 			setExternalOutput(new LinkedList<>(Arrays.asList(output[0].split("\n"))));
 			setExternalErrorOutput(new LinkedList<>(Arrays.asList(output[1].split("\n"))));
-			exec.createSubProgress(0.4).setProgress(1);
+			exec.createSubProgress(0.2).setProgress(1);
 			final SQLEditorObjectReader sqlReader = new SQLEditorObjectReader(
 					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0]);
 			kernel.getGeneralObject(sqlReader);
+			final String targetFolder= m_config.getTargetFolder();
+			uploadToHive(exec.createSubExecutionContext(0.8), fileInfo, connIn, cp, sqlReader, targetFolder);
+			exec.setProgress("Determining table structure");
 			final DatabaseQueryConnectionSettings connOut = new DatabaseQueryConnectionSettings(connIn, sqlReader.getQuery());
 			final DatabaseReaderConnection dbCon = new DatabaseReaderConnection(connOut);
 			final DataTableSpec resultSpec = dbCon.getDataTableSpec(cp);
@@ -122,12 +144,99 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 		}
 	}
 
+    static Collection<String> getJars(final String driver) throws IOException {
+        //locate the jdbc jar files
+                try {
+                    final File driverFile = DatabaseDriverLoader.getDriverFileForDriverClass(driver);
+                    if (driverFile != null) {
+                        final String absolutePath = driverFile.getAbsolutePath();
+                        final File jarFile = new File(absolutePath);
+                        final File folder = jarFile.getParentFile();
+                        final File[] files = folder.listFiles(new FilenameFilter() {
+                            @Override
+                            public boolean accept(final File dir, final String name) {
+                                return name.endsWith(".jar");
+                            }
+                        });
+                        final Collection<String> jars = new ArrayList<>(files.length);
+                        for (File file : files) {
+                            jars.add(file.getAbsolutePath());
+                        }
+                        return jars;
+                    }
+                } catch (final Exception e) {
+                    throw new IOException(e);
+                }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void uploadToHive(final ExecutionContext exec, final ConnectionInformation connInfo,
+        final DatabaseQueryConnectionSettings connIn, final CredentialsProvider cp,
+        final SQLEditorObjectReader sqlReader, final String targetFolder) throws Exception {
+        File dataFile = null;
+        RemoteFile<? extends Connection> remoteFile = null;
+        ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
+        try {
+            dataFile = new File(sqlReader.getFileName());
+            final HiveLoaderSettings settings = createHiveLoaderSettings(sqlReader, targetFolder);
+            remoteFile = HiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor, exec, settings);
+            final List<String> columnNames = sqlReader.getColumnNamesList();
+            HiveLoader.importData(remoteFile, columnNames, connIn, exec, settings, cp);
+        } finally {
+            Exception er = null;
+            if (dataFile != null) {
+                try {
+                    if (!dataFile.delete()) {
+                        setWarningMessage("Could not delete temporary import file on client");
+                    }
+                } catch (Exception e) {
+                    er = e;
+                }
+            }
+            if (remoteFile != null) {
+                try {
+                    if (!remoteFile.delete()) {
+                        setWarningMessage("Could not delete temporary import file on server");
+                    }
+                } catch (Exception e) {
+                    er = e;
+                }
+                connMonitor.closeAll();
+                if (er != null) {
+                    throw er;
+                }
+            }
+        }
+    }
+
+    private HiveLoaderSettings createHiveLoaderSettings(final SQLEditorObjectReader reader, final String targetFolder) {
+        HiveLoaderSettings settings = new HiveLoaderSettings();
+        settings.dropTableIfExists(reader.isDropTable());
+        settings.partitionColumn(reader.getPartitionColumnNamesList());
+        settings.tableName(reader.getTableName());
+        settings.clearTypeMapping();
+        List<String> columnNamesList = reader.getColumnNamesList();
+        List<String> columnTypeList = reader.getColumnTypeList();
+        if (columnNamesList.size() != columnTypeList.size()) {
+            throw new IllegalArgumentException("Column names and types should have the same length");
+        }
+        for (int i = 0, length = columnNamesList.size(); i < length; i++) {
+            settings.typeMapping(columnNamesList.get(i), columnTypeList.get(i));
+        }
+        settings.targetFolder(targetFolder);
+        return settings;
+    }
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
 		final ConnectionInformationPortObjectSpec fileSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+		if (fileSpec == null) {
+		    throw new InvalidSettingsException("No remote file port available");
+		}
 		final DatabasePortObjectSpec dbSpec = (DatabasePortObjectSpec) inSpecs[1];
 		checkDBConnection(dbSpec);
 		return new PortObjectSpec[] { null };
@@ -140,10 +249,8 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	private void checkDBConnection(final DatabasePortObjectSpec spec)
 			throws InvalidSettingsException {
 		final String dbIdentifier = spec.getDatabaseIdentifier();
-
-		final DatabaseUtility utility = DatabaseUtility.getUtility(dbIdentifier);
-		if (!utility.supportsInsert() && !utility.supportsUpdate()) {
-			throw new InvalidSettingsException("Database does not support insert or update");
+		if (!HiveUtility.DATABASE_IDENTIFIER.equals(dbIdentifier)) {
+		    throw new InvalidSettingsException("Only Hive connections are supported");
 		}
 	}
 
@@ -162,6 +269,10 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
 		final PythonScriptHiveNodeConfig config = new PythonScriptHiveNodeConfig();
 		config.loadFrom(settings);
+		String targetFolder = config.getTargetFolder();
+        if (targetFolder == null || targetFolder.trim().isEmpty()) {
+            throw new InvalidSettingsException("Please specify the target folder");
+        }
 	}
 
 	/**
