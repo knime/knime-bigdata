@@ -25,22 +25,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URI;
 import java.nio.file.Files;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
-import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
@@ -65,9 +59,11 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
-import org.knime.core.node.port.database.StatementManipulator;
+import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.FileUtil;
 
+import com.knime.bigdata.hive.utility.HiveLoader;
+import com.knime.bigdata.hive.utility.HiveLoaderSettings;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -165,11 +161,18 @@ class HiveLoaderNodeModel extends NodeModel {
         ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
         RemoteFile<? extends Connection> remoteFile = null;
         try {
-            remoteFile = uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor,
-                exec.createSubExecutionContext(0.2));
+            final HiveLoader hiveLoader = HiveLoader.getInstance();
+            remoteFile = hiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor,
+                exec.createSubExecutionContext(0.2), m_settings);
             exec.checkCanceled();
-            importData(remoteFile, table.getDataTableSpec(), dbObj.getConnectionSettings(getCredentialsProvider()),
-                exec.createSubExecutionContext(0.5));
+            final CredentialsProvider cp = getCredentialsProvider();
+            final DataTableSpec tableSpec = table.getDataTableSpec();
+            final List<String> normalColumns = new ArrayList<>();
+            for (final DataColumnSpec cs : tableSpec) {
+                normalColumns.add(cs.getName());
+            }
+            hiveLoader.importData(remoteFile, normalColumns, dbObj.getConnectionSettings(cp),
+                exec.createSubExecutionContext(0.5), m_settings, cp);
         } finally {
             Exception er = null;
             if (remoteFile != null) {
@@ -237,187 +240,6 @@ class HiveLoaderNodeModel extends NodeModel {
         }
 
         return tempFile;
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private RemoteFile<? extends Connection> uploadFile(final File dataFile, final ConnectionInformation connInfo,
-        final ConnectionMonitor<? extends Connection> connMonitor, final ExecutionContext exec) throws Exception {
-        exec.setMessage("Uploading import file to server");
-        String targetFolder = m_settings.targetFolder();
-        if (!targetFolder.endsWith("/")) {
-            targetFolder += "/";
-        }
-        URI folderUri = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(targetFolder));
-        RemoteFile folder = RemoteFileFactory.createRemoteFile(folderUri, connInfo, connMonitor);
-        folder.mkDirs(true);
-
-        RemoteFile sourceFile = RemoteFileFactory.createRemoteFile(dataFile.toURI(), null, null);
-
-        URI targetUri = new URI(folder.getURI() + NodeUtils.encodePath(dataFile.getName()));
-        RemoteFile target = RemoteFileFactory.createRemoteFile(targetUri, connInfo, connMonitor);
-        target.write(sourceFile, exec);
-        exec.setProgress(1);
-        return target;
-    }
-
-    private void importData(final RemoteFile<? extends Connection> remoteFile, final DataTableSpec tableSpec,
-        final DatabaseConnectionSettings connSettings, final ExecutionContext exec) throws Exception {
-        Connection conn = connSettings.createConnection(getCredentialsProvider());
-
-        // check if table already exists and whether we should drop it
-        boolean tableAlreadyExists = false;
-        synchronized (conn) {
-            if (connSettings.getUtility().tableExists(conn, m_settings.tableName())) {
-                if (m_settings.dropTableIfExists()) {
-                    try (Statement st = conn.createStatement()) {
-                        getLogger().debug("Dropping existing table '" + m_settings.tableName() + "'");
-                        exec.setMessage("Dropping existing table '" + m_settings.tableName() + "'");
-                        st.execute("DROP TABLE " + m_settings.tableName());
-                    }
-                } else {
-                    tableAlreadyExists = true;
-                }
-            }
-        }
-
-        exec.setMessage("Importing data");
-        List<String> normalColumns = new ArrayList<>();
-        for (DataColumnSpec cs : tableSpec) {
-            normalColumns.add(cs.getName());
-        }
-        StatementManipulator manip = connSettings.getUtility().getStatementManipulator();
-
-        synchronized (conn) {
-            try (Statement st = conn.createStatement()) {
-                if (!m_settings.partitionColumns().isEmpty()) {
-                    importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
-                } else {
-                    if (!tableAlreadyExists) {
-                        exec.setProgress(0, "Creating table");
-                        String createTableCmd =
-                            buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
-                                new ArrayList<String>(), manip);
-                        getLogger().info("Executing '" + createTableCmd + "'");
-                        st.execute(createTableCmd);
-                    }
-                    exec.setProgress(0.5, "Loading data into table");
-                    String buildTableCmd = buildLoadCommand(remoteFile, m_settings.tableName());
-                    getLogger().info("Executing '" + buildTableCmd + "'");
-                    st.execute(buildTableCmd);
-                }
-            }
-        }
-        exec.setProgress(1);
-    }
-
-    private void importPartitionedData(final RemoteFile<? extends Connection> remoteFile, final DataTableSpec tableSpec,
-        final List<String> normalColumns, final StatementManipulator manip, final boolean tableAlreadyExists,
-        final Statement st, final ExecutionContext exec) throws Exception {
-        String tempTableName = m_settings.tableName() + "_" + Long.toHexString(Math.abs(new Random().nextLong()));
-
-        // first create an unpartitioned table
-        exec.setProgress(0, "Creating temporary table");
-        String createTableCmd =
-            buildCreateTableCommand(tempTableName, tableSpec, normalColumns, new ArrayList<String>(), manip);
-        getLogger().debug("Executing '" + createTableCmd + "'");
-        st.execute(createTableCmd);
-
-        for (String partCol : m_settings.partitionColumns()) {
-            normalColumns.remove(partCol);
-        }
-        try {
-            exec.setProgress(0.2, "Importing data from uploaded file");
-            String loadTableCmd = buildLoadCommand(remoteFile, tempTableName);
-            getLogger().debug("Executing '" + loadTableCmd + "'");
-            st.execute(loadTableCmd);
-
-            if (!tableAlreadyExists) {
-                // now create a partitioned table and copy data from
-                exec.setProgress(0.4, "Creating final table");
-                createTableCmd =
-                    buildCreateTableCommand(m_settings.tableName(), tableSpec, normalColumns,
-                        m_settings.partitionColumns(), manip);
-                getLogger().debug("Executing '" + createTableCmd + "'");
-                st.execute(createTableCmd);
-            }
-
-            exec.setProgress(0.6, "Copying data to partitioned table");
-            st.execute("SET hive.exec.dynamic.partition = true");
-            st.execute("SET hive.exec.dynamic.partition.mode = nonstrict");
-            String insertCmd =
-                buildInsertCommand(remoteFile, tempTableName, m_settings.tableName(), normalColumns,
-                    m_settings.partitionColumns(), manip);
-            getLogger().debug("Executing '" + insertCmd + "'");
-            st.execute(insertCmd);
-        } finally {
-            exec.setProgress(0.9, "Deleting temporary table");
-            st.execute("DROP TABLE " + tempTableName);
-        }
-        exec.setProgress(1);
-    }
-
-    private String buildCreateTableCommand(final String tableName, final DataTableSpec tableSpec,
-        final Collection<String> normalColumns, final Collection<String> partitionColumns,
-        final StatementManipulator manip) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("CREATE TABLE " + tableName + " (\n");
-
-        for (String col : normalColumns) {
-            buf.append("   ");
-            buf.append(manip.quoteColumn(col));
-            buf.append(" ");
-            buf.append(m_settings.typeMapping(col));
-            buf.append(",\n");
-        }
-        assert tableSpec.getNumColumns() > 0 : "No columns in input table";
-        buf.deleteCharAt(buf.length() - 2); // delete the comma
-        buf.append(")\n");
-
-        if (!partitionColumns.isEmpty()) {
-            buf.append("PARTITIONED BY (");
-            for (String partCol : m_settings.partitionColumns()) {
-                buf.append(manip.quoteColumn(partCol));
-                buf.append(" ");
-                buf.append(m_settings.typeMapping(partCol));
-                buf.append(",");
-            }
-            buf.deleteCharAt(buf.length() - 1);
-            buf.append(")\n");
-        }
-        buf.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ESCAPED BY '\\\\'\n");
-        buf.append("STORED AS TEXTFILE");
-        return buf.toString();
-    }
-
-    private String buildLoadCommand(final RemoteFile<? extends Connection> remoteFile, final String tableName)
-            throws Exception {
-        return "LOAD DATA LOCAL INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
-    }
-
-    private String buildInsertCommand(final RemoteFile<? extends Connection> remoteFile, final String sourceTableName,
-        final String destTableName, final Collection<String> normalColumns, final Collection<String> partitionColumns,
-        final StatementManipulator manip) {
-
-        StringBuilder buf = new StringBuilder();
-        buf.append("INSERT INTO TABLE ").append(destTableName);
-        buf.append(" PARTITION (");
-        for (String partCol : partitionColumns) {
-            buf.append(manip.quoteColumn(partCol)).append(",");
-        }
-        buf.deleteCharAt(buf.length() - 1);
-        buf.append(")\n");
-
-        buf.append("SELECT ");
-        for (String col : normalColumns) {
-            buf.append(manip.quoteColumn(col)).append(",");
-        }
-        for (String col : partitionColumns) {
-            buf.append(manip.quoteColumn(col)).append(",");
-        }
-        buf.deleteCharAt(buf.length() - 1);
-        buf.append("\nFROM ").append(sourceTableName);
-
-        return buf.toString();
     }
 
     /**

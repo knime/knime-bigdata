@@ -48,6 +48,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
 
+import com.knime.bigdata.hive.utility.HiveLoaderSettings;
+
 /**
  * Dialog for the Hive Loader node.
  *

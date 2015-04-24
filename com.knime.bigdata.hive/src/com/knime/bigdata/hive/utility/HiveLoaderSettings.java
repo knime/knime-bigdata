@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.loader;
+package com.knime.bigdata.hive.utility;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +44,7 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
-class HiveLoaderSettings {
+public class HiveLoaderSettings {
     private String m_tableName;
 
     private String m_targetFolder;
@@ -52,6 +52,8 @@ class HiveLoaderSettings {
     private NodeSettings m_typeMap = new NodeSettings("typeMap");
 
     private boolean m_dropTableIfExists;
+
+    private String m_valueDelimiter = "\\t";
 
     private final List<String> m_partitionColumns = new ArrayList<>();
 
@@ -194,6 +196,7 @@ class HiveLoaderSettings {
         m_tableName = settings.getString("tableName", "");
         m_targetFolder = settings.getString("targetFolder", "");
         m_dropTableIfExists = settings.getBoolean("dropTableIfExists", false);
+        m_valueDelimiter = settings.getString("valueDelimiter", "\\t");
         clearTypeMapping();
         try {
             settings.getNodeSettings("typeMap").copyTo(m_typeMap);
@@ -217,6 +220,7 @@ class HiveLoaderSettings {
         settings.addString("tableName", m_tableName);
         settings.addString("targetFolder", m_targetFolder);
         settings.addBoolean("dropTableIfExists", m_dropTableIfExists);
+        settings.addString("valueDelimiter", m_valueDelimiter);
         settings.addStringArray("partitionColumns", m_partitionColumns.toArray(new String[m_partitionColumns.size()]));
         settings.addNodeSettings(m_typeMap);
     }
@@ -257,5 +261,19 @@ class HiveLoaderSettings {
         for (Map.Entry<String, String> e : typeMap.entrySet()) {
             typeMapping(e.getKey(), e.getValue());
         }
+    }
+
+    /**
+     * @param valueDelimiter the delimiter that should be used to indicates the end of a column value in the text file
+     */
+    public void valueDelimiter(final String valueDelimiter) {
+        m_valueDelimiter = valueDelimiter;
+    }
+
+    /**
+     * @return the delimiter that should be used to indicates the end of a column value in the text file
+     */
+    public String valueDelimiter() {
+        return m_valueDelimiter;
     }
 }
