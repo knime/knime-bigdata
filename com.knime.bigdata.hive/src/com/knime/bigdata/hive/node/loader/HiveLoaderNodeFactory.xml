@@ -16,8 +16,7 @@
 
         <option name="Target folder">
             A folder on the server where the temporary copy of the data is copied. The Hive server user
-            needs
-            read access to this folder.
+            needs read access to this folder.
         </option>
         <option name="Table name">
             The name of the new table in the database.
