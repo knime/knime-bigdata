@@ -109,6 +109,7 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	 */
 	@Override
 	protected PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+	    HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
 		final PythonKernel kernel = new PythonKernel();
 		final ConnectionInformation fileInfo = ((ConnectionInformationPortObject)inData[0]).getConnectionInformation();
 		if (fileInfo == null) {
@@ -180,9 +181,10 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
         try {
             dataFile = new File(sqlReader.getFileName());
             final HiveLoaderSettings settings = createHiveLoaderSettings(sqlReader, targetFolder);
-            remoteFile = HiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor, exec, settings);
+            final HiveLoader hiveLoader = HiveLoader.getInstance();
+            remoteFile = hiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor, exec, settings);
             final List<String> columnNames = sqlReader.getColumnNamesList();
-            HiveLoader.importData(remoteFile, columnNames, connIn, exec, settings, cp);
+            hiveLoader.importData(remoteFile, columnNames, connIn, exec, settings, cp);
         } finally {
             Exception er = null;
             if (dataFile != null) {
@@ -215,6 +217,7 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
         settings.dropTableIfExists(reader.isDropTable());
         settings.partitionColumn(reader.getPartitionColumnNamesList());
         settings.tableName(reader.getTableName());
+        settings.valueDelimiter(reader.getDelimiter());
         settings.clearTypeMapping();
         List<String> columnNamesList = reader.getColumnNamesList();
         List<String> columnTypeList = reader.getColumnTypeList();
@@ -233,6 +236,7 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	 */
 	@Override
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+	    HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
 		final ConnectionInformationPortObjectSpec fileSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
 		if (fileSpec == null) {
 		    throw new InvalidSettingsException("No remote file port available");
