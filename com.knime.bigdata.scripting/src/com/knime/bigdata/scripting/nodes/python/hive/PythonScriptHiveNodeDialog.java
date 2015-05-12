@@ -54,6 +54,8 @@ import java.util.Collection;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -92,11 +94,12 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 		m_templatesPanel = new SourceCodeTemplatesPanel(m_sourceCodePanel, "python-script");
 		m_target = new RemoteFileChooserPanel(getPanel(), "", false, "targetHistory", RemoteFileChooser.SELECT_DIR,
 	                createFlowVariableModel("target", FlowVariable.Type.STRING), null);
-		JPanel sourcePanel = new JPanel(new GridBagLayout());
+		final JPanel sourcePanel = new JPanel(new GridBagLayout());
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.fill = GridBagConstraints.BOTH;
 		gc.gridx = 0;
 		gc.gridy = 0;
+		gc.ipady = 5;
 		sourcePanel.add(new JLabel("Target folder"));
 		gc.gridx++;
 		gc.weightx = 1;
@@ -105,6 +108,9 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 		gc.gridx = 0;
 		gc.gridy++;
 		gc.gridwidth = 2;
+		sourcePanel.add(new JSeparator(SwingConstants.HORIZONTAL), gc);
+		gc.ipady = 0;
+		gc.gridy++;
 		gc.weightx = 1;
         gc.weighty = 1;
 		sourcePanel.add(m_sourceCodePanel, gc);
