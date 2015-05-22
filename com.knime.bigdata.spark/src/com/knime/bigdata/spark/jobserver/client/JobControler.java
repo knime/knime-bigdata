@@ -1,0 +1,241 @@
+package com.knime.bigdata.spark.jobserver.client;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+
+/**
+ * handles the client side of the job-server in all requests related to jobs
+ *
+ * @author dwk
+ *
+ */
+public class JobControler {
+    private final static Logger LOGGER = Logger.getLogger(JobControler.class.getName());
+
+    // TODO - this should probably be configurable and user-specific
+    final static String appName = "app";
+
+    /**
+     * upload a jar file to the server TODO - need to dynamically create jar file
+     *
+     * @param aJarPath
+     *
+     * @throws GenericKnimeSparkException
+     */
+    public static void uploadJobJar(final String aJarPath) throws GenericKnimeSparkException {
+        // upload jar
+        // curl command:
+        // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
+        // localhost:8090/jars/test
+        Invocation.Builder builder = RestClient.getInvocationBuilder("/jars/" + appName, null);
+
+        final File jarFile = new File(aJarPath);
+        if (!jarFile.exists()) {
+            final String msg =
+                "ERROR: job jar file '" + jarFile.getAbsolutePath()
+                    + "' does not exist. Make sure to set the proper (relative) path in the application.conf file.";
+            LOGGER.severe(msg);
+            throw new GenericKnimeSparkException(msg);
+        }
+        //
+        Response response = builder.post(Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
+
+        RestClient.checkStatus(response, "Error: failed to upload jar to server", Status.OK);
+
+    }
+
+    /**
+     * start a new job within the given context
+     *
+     * @param aContextName name of the Spark context to run the job in
+     * @param aClassPath full class path of the job to run (class must be in a jar that was previously uploaded to the
+     *            server)
+     * @return job id
+     * @throws GenericKnimeSparkException
+     */
+    public static String startJob(final String aContextName, final String aClassPath) throws GenericKnimeSparkException {
+        return startJob(aContextName, aClassPath, "");
+    }
+
+    /**
+     * start a new job within the given context
+     *
+     * @param aContextName name of the Spark context to run the job in
+     * @param aClassPath full class path of the job to run (class must be in a jar that was previously uploaded to the
+     *            server)
+     * @param aJsonParams json formated string with job parameters
+     * @return job id
+     * @throws GenericKnimeSparkException
+     */
+    public static String startJob(final String aContextName, final String aClassPath, final String aJsonParams)
+        throws GenericKnimeSparkException {
+
+        // start actual job
+        // curl command would be:
+        // curl --data-binary @classification-config.json
+        // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
+        Invocation.Builder builder =
+            RestClient.getInvocationBuilder("/jobs/", new String[]{"appName", appName, "context", aContextName,
+                "classPath", aClassPath});
+
+        Response response = builder.post(Entity.text(aJsonParams));
+
+        RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
+            + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
+            + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
+            Status.ACCEPTED, Status.OK});
+        return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
+    }
+
+    /**
+     * start a new job within the given context
+     *
+     * @param aContextName name of the Spark context to run the job in
+     * @param aClassPath full class path of the job to run (class must be in a jar that was previously uploaded to the
+     *            server)
+     * @param aJsonParams json formated string with job parameters
+     * @param aDataFile reference to a file that is to be uploaded
+     * @return job id
+     * @throws GenericKnimeSparkException
+     */
+    public static String startJob(final String aContextName, final String aClassPath, final String aJsonParams,
+        final File aDataFile) throws GenericKnimeSparkException {
+
+        // start actual job
+        // curl command would be:
+        // curl --data-binary @classification-config.json
+        // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
+        Invocation.Builder builder =
+            RestClient.getInvocationBuilder("/jobs/", new String[]{"appName", appName, "context", aContextName,
+                "classPath", aClassPath});
+
+        try (final MultiPart multiPart = new MultiPart()) {
+            multiPart.bodyPart(aJsonParams, MediaType.APPLICATION_JSON_TYPE).bodyPart(
+                new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_DATA_PATH,
+                    aDataFile));
+
+            final Response response = builder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+            multiPart.close();
+
+            //			Response response = builder.post(Entity.text(aJsonParams));
+
+            RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
+                + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
+                + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
+                Status.ACCEPTED, Status.OK});
+            return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
+        } catch (final IOException e) {
+            throw new GenericKnimeSparkException("Error closing multi part entity", e);
+        }
+    }
+
+    /**
+     * query the job-server for the status of the job with the given id
+     *
+     * @param aJobId job id as returned by startJob
+     * @return the status
+     * @throws GenericKnimeSparkException
+     */
+    public static JobStatus getJobStatus(final String aJobId) throws GenericKnimeSparkException {
+
+        JsonArray jobs = RestClient.toJSONArray("/jobs");
+
+        for (int i = 0; i < jobs.size(); i++) {
+            JsonObject jobInfo = jobs.getJsonObject(i);
+            LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
+            if (aJobId.equals(jobInfo.getString("jobId"))) {
+                return JobStatus.valueOf(jobInfo.getString("status"));
+            }
+        }
+
+        return JobStatus.GONE;
+    }
+
+    /**
+     * kill the given job
+     *
+     * @param aJobId job id as returned by startJob
+     * @throws GenericKnimeSparkException
+     */
+    public static void killJob(final String aJobId) throws GenericKnimeSparkException {
+        Invocation.Builder builder = RestClient.getInvocationBuilder("/jobs/" + aJobId, null);
+
+        Response response = builder.buildDelete().invoke();
+        // we don't care about the response as long as it is "OK"
+        RestClient.checkStatus(response, "Error: failed to kill job " + aJobId + "!", Status.OK);
+
+    }
+
+    /**
+     * waits for the completion of a job with the given id for at most 1000 seconds
+     *
+     * @param aJobId job id as returned by startJob
+     * @return JobStatus status as returned by the server
+     */
+    public static JobStatus waitForJob(final String aJobId) {
+        return waitForJob(aJobId, 1000, 1);
+    }
+
+    /**
+     * waits for the completion of a job with the given id for at most the given number of seconds, pings the server for
+     * the status approximately every aCheckFrequencyInSeconds seconds
+     *
+     * @param aJobId job id as returned by startJob
+     * @param aTimeoutInSeconds the maximal duration to wait for the job (in seconds)
+     * @param aCheckFrequencyInSeconds (the wait interval between server requests, in seconds)
+     * @return JobStatus status as returned by the server
+     */
+    public static JobStatus waitForJob(final String aJobId, final int aTimeoutInSeconds,
+        final int aCheckFrequencyInSeconds) {
+        int maxNumChecks = aTimeoutInSeconds / aCheckFrequencyInSeconds;
+        for (int i = 0; i < maxNumChecks; i++) {
+            try {
+                Thread.sleep(1000 * aCheckFrequencyInSeconds);
+                JobStatus status;
+                try {
+                    status = getJobStatus(aJobId);
+                    if (JobStatus.RUNNING != status) {
+                        return status;
+                    }
+                } catch (GenericKnimeSparkException e) {
+                    // Log and continue to wait... we might want to exist if
+                    // this persists...
+                    LOGGER.log(Level.SEVERE, e.getMessage());
+                }
+            } catch (InterruptedException e) {
+                // ignore and continue...
+            }
+        }
+        return JobStatus.UNKNOWN;
+    }
+
+    /**
+     * query the job-server for the result of the given job (it is typically a good idea to ask first whether the job
+     * finished successfully)
+     *
+     * @param aJobId job id as returned by startJob
+     * @return JSONObject with job status and result
+     * @throws GenericKnimeSparkException
+     */
+    public static JsonObject fetchJobResult(final String aJobId) throws GenericKnimeSparkException {
+        // GET /jobs/<jobId> - Gets the result or status of a specific job
+        return RestClient.toJSONObject("/jobs/" + aJobId);
+    }
+
+}

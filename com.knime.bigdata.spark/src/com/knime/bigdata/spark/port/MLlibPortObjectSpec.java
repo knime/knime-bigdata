@@ -163,7 +163,7 @@ public class MLlibPortObjectSpec implements PortObjectSpec {
     }
 
     /**
-     * @return
+     * @return port type as a string
      */
     public String getType() {
         return m_conn.getString("type", "none");

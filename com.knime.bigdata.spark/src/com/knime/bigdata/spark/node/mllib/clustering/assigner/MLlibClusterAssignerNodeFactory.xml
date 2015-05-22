@@ -29,7 +29,7 @@
 
     <ports>
         <inPort index="0" name="MLlib Cluster Model">MLlib Cluster Model</inPort>
-        <inPort index="1" name="Hive query">Hive query</inPort>
+        <!-- >inPort index="1" name="Hive query">Hive query</inPort -->
         <outPort index="0" name="Result">Result</outPort>
     </ports>
 </knimeNode>

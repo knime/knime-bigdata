@@ -22,19 +22,10 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.sql.api.java.StructType;
-import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -47,17 +38,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
-import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
-import org.knime.core.node.workflow.CredentialsProvider;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
+import com.knime.bigdata.spark.port.JavaRDDPortObject;
 import com.knime.bigdata.spark.port.MLlibModel;
 import com.knime.bigdata.spark.port.MLlibPortObject;
 import com.knime.bigdata.spark.port.MLlibPortObjectSpec;
-
 
 /**
  *
@@ -65,25 +52,28 @@ import com.knime.bigdata.spark.port.MLlibPortObjectSpec;
  */
 public class MLlibKMeansNodeModel extends NodeModel {
 
-    private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
     private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
+
     private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
+
     private final SettingsModelString m_tableName = createTableNameModel();
+
     private final SettingsModelString m_colName = createColumnNameModel();
 
     /**
      *
      */
     public MLlibKMeansNodeModel() {
-        super(new PortType[]{DatabasePortObject.TYPE},
-            new PortType[]{DatabasePortObject.TYPE, MLlibPortObject.TYPE});
+        //        super(new PortType[]{DatabasePortObject.TYPE},
+        //            new PortType[]{DatabasePortObject.TYPE, MLlibPortObject.TYPE});
+        super(new PortType[]{}, new PortType[]{JavaRDDPortObject.TYPE, MLlibPortObject.TYPE});
     }
 
     /**
      * @return
      */
     static SettingsModelString createTableNameModel() {
-        return new SettingsModelString("tableName", "result");
+        return new SettingsModelString("tableName", "input");
     }
 
     /**
@@ -112,12 +102,11 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
-        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
-            throw new InvalidSettingsException("Only Hive connections are supported");
-        }
-        return new PortObjectSpec[] {MLlibClusterAssignerNodeModel.createSQLSpec(spec, getCredentialsProvider(),
-            m_tableName.getStringValue(), m_colName.getStringValue()), createMLSpec()};
+        //        final DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
+        //        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
+        //            throw new InvalidSettingsException("Only Hive connections are supported");
+        //        }
+        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(m_tableName.getStringValue()),createMLSpec()};
     }
 
     /**
@@ -125,43 +114,19 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final DatabasePortObject db = (DatabasePortObject)inObjects[0];
-        final DataTableSpec tableSpec = db.getSpec().getDataTableSpec();
-        final String resultTableName = m_tableName.getStringValue();
-        final CredentialsProvider cp = getCredentialsProvider();
-        final DatabaseQueryConnectionSettings connSettings = db.getConnectionSettings(cp);
-        connSettings.execute("DROP TABLE IF EXISTS " + resultTableName , cp);
-        final String jdbcUrl = connSettings.getJDBCUrl();
-        System.out.println(jdbcUrl);
-        exec.setMessage("Connecting to Spark...");
-        final SparkConf conf = new SparkConf().setMaster("local[1]").setAppName("knimeTest");
-//        conf.set("hive.metastore.uris", "thrift://sandbox.hortonworks.com:9083");
-        try (final JavaSparkContext sc = new JavaSparkContext(conf);) {
-        exec.checkCanceled();
-        exec.setMessage("Connecting to Hive...");
-        final JavaHiveContext sqlsc = new JavaHiveContext(sc);
-        exec.setMessage("Execute Hive Query...");
-        final Collection<Integer> numericColIdx = new LinkedList<>();
-        int counter = 0;
-        for (DataColumnSpec colSpec : tableSpec) {
-            if (colSpec.getType().isCompatible(DoubleValue.class)) {
-                numericColIdx.add(Integer.valueOf(counter));
-            }
-            counter++;
-        }
-        final String sql = connSettings.getQuery();
-        final StructType resultSchema = MLlibClusterAssignerNodeModel.createSchema(tableSpec, numericColIdx,
-            m_colName.getStringValue());
-        final KMeansTask task = new KMeansTask(sql, numericColIdx, resultTableName, m_noOfCluster.getIntValue(),
-            m_noOfIteration.getIntValue());
-        final KMeansModel clusters = task.execute(sqlsc, resultSchema);
-        JOptionPane.showMessageDialog(null, "End execution.");
-//        KMeansModel clusters = new KMeansModel(new Vector[] {new DenseVector(new double[] {1,0,1})});
-        return new PortObject[] {new DatabasePortObject(MLlibClusterAssignerNodeModel.createSQLSpec(db.getSpec(),
-            getCredentialsProvider(), m_tableName.getStringValue(), m_colName.getStringValue())),
+        final String aOutputTableName = "kmeansTrainPrediction" + System.currentTimeMillis();
+        final KMeansTask task =
+            new KMeansTask(m_tableName.getStringValue(), m_noOfCluster.getIntValue(),
+                m_noOfIteration.getIntValue(), aOutputTableName);
+        final KMeansModel clusters = task.execute();
+        JOptionPane.showMessageDialog(null, "KMeans (SPARK) Learner done.");
+
+        DatabasePortObjectSpec dbSpec = MLlibClusterAssignerNodeModel.createSpec(aOutputTableName);
+        return new PortObject[]{
+            new JavaRDDPortObject(dbSpec),
             new MLlibPortObject<>(new MLlibModel<>("KMeans", clusters))};
-        }
     }
+
 
     /**
      * @return
@@ -208,7 +173,7 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
+        CanceledExecutionException {
         // nothing to do
     }
 
@@ -217,7 +182,7 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     @Override
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
+        CanceledExecutionException {
         // nothing to do
     }
 
