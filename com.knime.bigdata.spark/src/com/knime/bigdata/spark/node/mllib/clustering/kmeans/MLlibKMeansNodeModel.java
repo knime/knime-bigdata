@@ -23,8 +23,6 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -115,11 +113,13 @@ public class MLlibKMeansNodeModel extends NodeModel {
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final String aOutputTableName = "kmeansTrainPrediction" + System.currentTimeMillis();
+        exec.setMessage("Starting KMeans (SPARK) Learner");
+        exec.checkCanceled();
         final KMeansTask task =
             new KMeansTask(m_tableName.getStringValue(), m_noOfCluster.getIntValue(),
                 m_noOfIteration.getIntValue(), aOutputTableName);
-        final KMeansModel clusters = task.execute();
-        JOptionPane.showMessageDialog(null, "KMeans (SPARK) Learner done.");
+        final KMeansModel clusters = task.execute(exec);
+        exec.setMessage("KMeans (SPARK) Learner done.");
 
         DatabasePortObjectSpec dbSpec = MLlibClusterAssignerNodeModel.createSpec(aOutputTableName);
         return new PortObject[]{

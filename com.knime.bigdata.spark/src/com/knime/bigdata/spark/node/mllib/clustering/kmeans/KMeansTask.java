@@ -25,6 +25,7 @@ import java.io.Serializable;
 import javax.json.JsonObject;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
@@ -68,21 +69,22 @@ public class KMeansTask implements Serializable {
 
     /**
      * run the job on the server
+     * @param exec
      *
      * @return KMeansModel
      * @throws Exception
      */
-    public KMeansModel execute() throws Exception {
+    public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String contextName = KnimeContext.getSparkContext();
         try {
             final FileToRDDTask tableTask = new FileToRDDTask(m_inputTableName);
-            final String rddTableKey = tableTask.execute();
+            final String rddTableKey = tableTask.execute(exec);
             final String learnerKMeansParams = kmeansLearnerDef(rddTableKey, m_outputTableName);
 
             final String jobId =
                 JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
-            assert (JobControler.waitForJob(jobId) != JobStatus.UNKNOWN); //, "job should have finished properly");
+            assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
 
             assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
 

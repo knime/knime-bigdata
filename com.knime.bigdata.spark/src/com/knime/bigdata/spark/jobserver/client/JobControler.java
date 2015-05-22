@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.Nullable;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
@@ -15,6 +16,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -186,10 +189,13 @@ public class JobControler {
      * waits for the completion of a job with the given id for at most 1000 seconds
      *
      * @param aJobId job id as returned by startJob
+     * @param aExecutionContext execution context to watch out for cancel
      * @return JobStatus status as returned by the server
+     * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final String aJobId) {
-        return waitForJob(aJobId, 1000, 1);
+    public static JobStatus waitForJob(final String aJobId, @Nullable final ExecutionContext aExecutionContext)
+        throws CanceledExecutionException {
+        return waitForJob(aJobId, aExecutionContext, 1000, 1);
     }
 
     /**
@@ -197,12 +203,14 @@ public class JobControler {
      * the status approximately every aCheckFrequencyInSeconds seconds
      *
      * @param aJobId job id as returned by startJob
+     * @param aExecutionContext execution context to watch out for cancel
      * @param aTimeoutInSeconds the maximal duration to wait for the job (in seconds)
      * @param aCheckFrequencyInSeconds (the wait interval between server requests, in seconds)
      * @return JobStatus status as returned by the server
+     * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final String aJobId, final int aTimeoutInSeconds,
-        final int aCheckFrequencyInSeconds) {
+    public static JobStatus waitForJob(final String aJobId, @Nullable final ExecutionContext aExecutionContext,
+        final int aTimeoutInSeconds, final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
         int maxNumChecks = aTimeoutInSeconds / aCheckFrequencyInSeconds;
         for (int i = 0; i < maxNumChecks; i++) {
             try {
@@ -213,10 +221,21 @@ public class JobControler {
                     if (JobStatus.RUNNING != status) {
                         return status;
                     }
+                    if (aExecutionContext != null) {
+                        aExecutionContext.checkCanceled();
+                    }
                 } catch (GenericKnimeSparkException e) {
-                    // Log and continue to wait... we might want to exist if
+                    // Log and continue to wait... we might want to exit if
                     // this persists...
                     LOGGER.log(Level.SEVERE, e.getMessage());
+                } catch (CanceledExecutionException c) {
+                    try {
+                        LOGGER.log(Level.WARNING, "Cancelling job on server side: " + aJobId);
+                        killJob(aJobId);
+                    } catch (GenericKnimeSparkException e) {
+                        LOGGER.log(Level.SEVERE, "Failed to cancel job " + aJobId + "\nMessage: " + e.getMessage());
+                    }
+                    throw c;
                 }
             } catch (InterruptedException e) {
                 // ignore and continue...
