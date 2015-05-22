@@ -24,6 +24,8 @@ import java.io.Serializable;
 
 import javax.json.JsonObject;
 
+import org.knime.core.node.ExecutionContext;
+
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -53,17 +55,18 @@ public class FileToRDDTask implements Serializable {
 
     /**
      * run the job on the server
+     * @param exec execution context
      *
      * @return name of RDD
      * @throws Exception if anything goes wrong
      */
-    public String execute() throws Exception {
+    public String execute(final ExecutionContext exec) throws Exception {
         final String contextName = KnimeContext.getSparkContext();
         final String params = text2RDDDef(m_inputTableName);
 
         String jobId = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(), params);
 
-        assert(JobControler.waitForJob(jobId) != JobStatus.UNKNOWN); //job should have finished properly
+        assert(JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //job should have finished properly
 
         assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //job should not be running anymore
 

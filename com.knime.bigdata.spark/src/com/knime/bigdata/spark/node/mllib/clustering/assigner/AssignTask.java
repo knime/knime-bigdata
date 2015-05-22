@@ -23,6 +23,8 @@ package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 import java.io.Serializable;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
@@ -43,11 +45,6 @@ public class AssignTask implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    /**
-     */
-    public AssignTask() {
-    }
-
     private String kmeansPredictorDef(final KMeansModel aModel, final String aInputTableName,
         final String aOutputTableName) {
         return JsonUtils.asJson(new Object[]{
@@ -57,14 +54,14 @@ public class AssignTask implements Serializable {
             new String[]{ParameterConstants.PARAM_DATA_PATH, aOutputTableName}});
     }
 
-    void execute(final String contextName, final String aTableName, final KMeansModel aModel,
-        final String aOutputTableName) throws GenericKnimeSparkException {
+    void execute(final String contextName, final ExecutionContext exec, final String aTableName,
+        final KMeansModel aModel, final String aOutputTableName) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(aModel, aTableName, aOutputTableName);
 
         String jobId =
             JobControler.startJob(contextName, KMeansPredictor.class.getCanonicalName(), predictorKMeansParams);
 
-        assert (JobControler.waitForJob(jobId) != JobStatus.UNKNOWN); //, "job should have finished properly");
+        assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
 
         assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
 

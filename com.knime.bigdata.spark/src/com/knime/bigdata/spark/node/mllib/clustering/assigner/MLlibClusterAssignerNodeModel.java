@@ -23,8 +23,6 @@ package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
@@ -94,16 +92,17 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
         @SuppressWarnings("unchecked")
         final MLlibModel<KMeansModel> model = ((MLlibPortObject<KMeansModel>)inObjects[0]).getModel();
         exec.checkCanceled();
+        exec.setMessage("Starting KMeans (SPARK) Predictor");
 
         final String contextName = KnimeContext.getSparkContext();
         try {
             final AssignTask task = new AssignTask();
-            task.execute(contextName, m_tableName.getStringValue(), model.getModel(), aOutputTableName);
+            task.execute(contextName, exec, m_tableName.getStringValue(), model.getModel(), aOutputTableName);
         } finally {
             //TODO - context must be terminated when KNIME is terminated KnimeContext.destroySparkContext(contextName);
         }
 
-        JOptionPane.showMessageDialog(null, "KMeans (SPARK) Prediction done.");
+        exec.setMessage("KMeans (SPARK) Prediction done.");
         return new PortObject[]{new JavaRDDPortObject(createSpec(aOutputTableName))};
     }
 

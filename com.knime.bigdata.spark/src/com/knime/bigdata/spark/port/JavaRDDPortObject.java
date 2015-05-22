@@ -149,9 +149,9 @@ public class JavaRDDPortObject extends DatabaseConnectionPortObject {
 
             String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), fetchParams);
 
-            assert (JobControler.waitForJob(jobId) != JobStatus.UNKNOWN); //, "job should have finished properly");
+            JobControler.waitForJob(jobId, null);
 
-            assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
+            assert (JobStatus.OK != JobControler.getJobStatus(jobId));
 
             return convertResultToDataTable(jobId);
         } catch (Throwable t) {
