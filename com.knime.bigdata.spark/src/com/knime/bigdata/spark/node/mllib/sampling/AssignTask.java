@@ -39,6 +39,10 @@ import org.apache.spark.sql.hive.api.java.JavaHiveContext;
  */
 public class AssignTask implements Serializable {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private String m_resultTableName;
     private String m_query;
     private Collection<Integer> m_numericColIdx;
@@ -58,7 +62,6 @@ public class AssignTask implements Serializable {
      * @param sqlsc
      * @param resultSchema
      * @param kMeansModel
-     * @return
      */
     public void execute(final JavaHiveContext sqlsc, final StructType resultSchema,
         final KMeansModel kMeansModel) {

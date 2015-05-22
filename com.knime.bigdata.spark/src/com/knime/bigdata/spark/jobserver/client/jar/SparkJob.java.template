@@ -1,0 +1,26 @@
+package $packageName;
+
+import org.apache.spark.SparkContext;
+import spark.jobserver.SparkJobValidation;
+
+import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+$additionalImports
+
+public class $className
+	   extends com.knime.bigdata.spark.jobserver.server.KnimeSparkJob {
+	   
+	@Override
+	protected SparkJobValidation validateWithContext(final SparkContext aSparkContext, final Config aConfig) {
+		$validationCode
+		return ValidationResultConverter.valid();
+	}
+
+	@Override
+	protected Object runJobWithContext(final SparkContext aSparkContext, final Config aConfig) { 
+		$executionCode
+	}
+
+   $helperMethods
+}

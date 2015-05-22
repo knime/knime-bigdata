@@ -23,16 +23,14 @@ package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
-
 /**
- * 
+ *
  * @author koetter
  */
 public class MLlibClusterAssignerNodeDialog extends DefaultNodeSettingsPane {
 
     /**
-     * 
+     *
      */
     public MLlibClusterAssignerNodeDialog() {
         addDialogComponent(
