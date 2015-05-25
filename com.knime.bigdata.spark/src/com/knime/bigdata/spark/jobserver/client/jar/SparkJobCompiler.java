@@ -24,6 +24,7 @@ import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.typesafe.config.Config;
 
@@ -68,10 +69,11 @@ final public class SparkJobCompiler {
      * @param aExecutionCode
      * @param aHelperMethodsCode
      * @return canonical name of compiled class
+     * @throws GenericKnimeSparkException in case of some error
      */
     public String addKnimeSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
         @Nonnull final String aAdditionalImports, @Nonnull final String validationCode,
-        @Nonnull final String aExecutionCode, @Nonnull final String aHelperMethodsCode) {
+        @Nonnull final String aExecutionCode, @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
         final String className = "kj" + (classNameSuffix++) + digits();
         final String qName = PACKAGE_NAME + '.' + className;
         try {
@@ -81,13 +83,15 @@ final public class SparkJobCompiler {
             byte[] bytes = compiler.getClassByteCode(qName);
             JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, bytes);
         } catch (CharSequenceCompilerException e) {
-            e.printStackTrace();
+            log(e.getDiagnostics());
             LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
         } catch (IOException e) {
             LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
             LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
         }
         return qName;
     }
@@ -111,6 +115,7 @@ final public class SparkJobCompiler {
                 compileKnimeSparkJob(className, aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
             return compiledCode.newInstance();
         } catch (CharSequenceCompilerException e) {
+            log(e.getDiagnostics());
             e.printStackTrace();
             LOGGER.severe(e.getMessage());
         } catch (IOException e) {

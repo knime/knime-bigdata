@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.jobserver.client.jar;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,21 +10,24 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 /**
- * add the byte code of the given class to a copy of an existing jar file
- * (put together from a number of different sources)
- * TODO - add original authors
+ * add the byte code of the given class to a copy of an existing jar file (put together from a number of different
+ * sources) TODO - add original authors
  */
 public class JarPacker {
 
     static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath,
         final byte[] aByteCode) throws IOException {
 
+        final File f = new File(aSourceJarPath);
+        if (!f.exists()) {
+            throw new IOException("Error: input jar file "+f.getAbsolutePath()+" does not exist!");
+        }
         final JarFile source = new JarFile(aSourceJarPath);
 
-        final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath));
-        copyJarFile(source, target);
-        addClass(aClassPath, aByteCode, target);
-        target.close();
+        try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
+            copyJarFile(source, target);
+            addClass(aClassPath, aByteCode, target);
+        }
     }
 
     private static void addClass(final String aClassPath, final byte[] aByteCode, final JarOutputStream target)
@@ -35,7 +39,8 @@ public class JarPacker {
         target.closeEntry();
     }
 
-    private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream) throws IOException {
+    private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream)
+        throws IOException {
         Enumeration<JarEntry> entries = aSourceJarFile.entries();
 
         while (entries.hasMoreElements()) {

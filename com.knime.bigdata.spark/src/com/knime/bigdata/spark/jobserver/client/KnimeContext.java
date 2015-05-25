@@ -22,7 +22,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 public class KnimeContext {
 
     /**
-     *
+     * path prefix for contexts
      */
     public static final String CONTEXTS_PATH = "/contexts";
 

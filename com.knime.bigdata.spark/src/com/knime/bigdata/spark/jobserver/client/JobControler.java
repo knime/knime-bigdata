@@ -28,6 +28,12 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
  *
  */
 public class JobControler {
+
+    /**
+     * path prefix for jobs
+     */
+    public static final String JOBS_PATH = "/jobs/";
+
     private final static Logger LOGGER = Logger.getLogger(JobControler.class.getName());
 
     // TODO - this should probably be configurable and user-specific
@@ -91,7 +97,7 @@ public class JobControler {
         // curl command would be:
         // curl --data-binary @classification-config.json
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
-        Response response = RestClient.post("/jobs/", new String[]{"appName", appName, "context", aContextName,
+        Response response = RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName,
             "classPath", aClassPath}, Entity.text(aJsonParams));
 
         RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
@@ -125,7 +131,7 @@ public class JobControler {
                 new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_DATA_PATH,
                     aDataFile));
 
-            final Response response = RestClient.post("/jobs/", new String[]{"appName", appName, "context", aContextName,
+            final Response response = RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName,
                 "classPath", aClassPath}, Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
             multiPart.close();
 
@@ -170,7 +176,7 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      */
     public static void killJob(final String aJobId) throws GenericKnimeSparkException {
-        Response response = RestClient.delete("/jobs/" + aJobId);
+        Response response = RestClient.delete(JOBS_PATH + aJobId);
         // we don't care about the response as long as it is "OK"
         RestClient.checkStatus(response, "Error: failed to kill job " + aJobId + "!", Status.OK);
 
@@ -245,7 +251,7 @@ public class JobControler {
      */
     public static JsonObject fetchJobResult(final String aJobId) throws GenericKnimeSparkException {
         // GET /jobs/<jobId> - Gets the result or status of a specific job
-        return RestClient.toJSONObject("/jobs/" + aJobId);
+        return RestClient.toJSONObject(JOBS_PATH + aJobId);
     }
 
 }
