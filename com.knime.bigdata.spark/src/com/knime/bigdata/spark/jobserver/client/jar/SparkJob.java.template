@@ -4,7 +4,7 @@ import org.apache.spark.SparkContext;
 import spark.jobserver.SparkJobValidation;
 
 import com.typesafe.config.Config;
-import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 $additionalImports
 

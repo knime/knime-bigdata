@@ -1,9 +1,5 @@
 package com.knime.bigdata.spark.jobserver.client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.logging.Logger;
 
@@ -62,6 +58,13 @@ class DummyRestClient implements IRestClient {
                     ConfigValueFactory.fromAnyRef("[\"" + aPath.substring(KnimeContext.CONTEXTS_PATH.length() + 1)
                         + "\"]"));
         }
+        if (aPath.startsWith(JobControler.JOBS_PATH)) {
+            KnimeConfigContainer.m_config =
+                KnimeConfigContainer.m_config.withValue(
+                    JobControler.JOBS_PATH,
+                    ConfigValueFactory.fromAnyRef("{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf"+System.currentTimeMillis()+"\"}}"));
+        }
+
         return Response.ok().build();
     }
 
@@ -84,29 +87,13 @@ class DummyRestClient implements IRestClient {
 
     @Override
     public JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException {
-        String val = "";
+        String val = "{\"result\":\"OK\"}";
         if (KnimeConfigContainer.m_config.hasPath(aType)) {
             val = KnimeConfigContainer.m_config.getString(aType);
         }
         return Json.createReader(new StringReader(val)).readObject();
     }
 
-    private static String responseToString(final Response response) throws GenericKnimeSparkException {
-        InputStream data = (InputStream)response.getEntity();
-        try {
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(data, "UTF-8"));
-
-            StringBuilder responseStrBuilder = new StringBuilder();
-            String inputStr;
-            while ((inputStr = streamReader.readLine()) != null) {
-                responseStrBuilder.append(inputStr);
-            }
-            return responseStrBuilder.toString();
-        } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
-            throw new GenericKnimeSparkException(e);
-        }
-    }
 
     /**
      * return the string value of the given field / sub-field combination from the given response
@@ -120,8 +107,12 @@ class DummyRestClient implements IRestClient {
     @Override
     public String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
         throws GenericKnimeSparkException {
+        String val = "";
+        if (aSubField.equals("jobId")) {
+            val = KnimeConfigContainer.m_config.getString(JobControler.JOBS_PATH);
+        }
 
-        JsonObject jsonObject = Json.createReader(new StringReader(responseToString(response))).readObject();
+        JsonObject jsonObject = Json.createReader(new StringReader(val)).readObject();
         JsonObject myResponse = jsonObject.getJsonObject(aField);
 
         return myResponse.getString(aSubField);

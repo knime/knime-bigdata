@@ -12,18 +12,21 @@ import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
+import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.testing.UnitSpec;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  *
  * @author dwk
  *
  */
-public class SparkJobCompilerTest {
+public class SparkJobCompilerTest extends UnitSpec {
 
 	@Test
 	public void compilePrimitiveJobThatDoesNothing() throws Throwable {
@@ -84,7 +87,7 @@ public class SparkJobCompilerTest {
 		Config config = ConfigFactory.parseString(configText);
 		assertEquals("config should be valid", ValidationResultConverter.valid(), job.validate(null, config));
 
-		final String className = testObj.addKnimeSparkJob2Jar("knimeJobUtils.jar", aJarPath, additionalImports,
+		final String className = testObj.addKnimeSparkJob2Jar("resources/knimeJobs.jar", aJarPath, additionalImports,
 				validationCode, "System.out.println(\"Hello World\"); return aConfig.getString(\"input.message\");",
 				"");
 
@@ -95,6 +98,10 @@ public class SparkJobCompilerTest {
 			//start job
 			String jobId = JobControler.startJob(contextName,
 					className, configText);
+
+			String val = "{\"result\":\"OK\"}";
+	        KnimeConfigContainer.m_config = KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH+jobId,
+	            ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
 
 			assertNotSame("job should have finished properly",
 					JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
