@@ -11,7 +11,7 @@ import org.apache.spark.sql.api.java.Row;
 
 
 /**
- * Interfaced for transformations of {@link Row}-valued {@link JavaRDD RDDs}.
+ * Interface for transformations of {@link Row}-valued {@link JavaRDD RDDs}.
  */
 public interface AbstractTransformation extends Serializable {
   @Nonnull

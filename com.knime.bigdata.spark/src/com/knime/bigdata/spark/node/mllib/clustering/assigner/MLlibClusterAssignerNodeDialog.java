@@ -34,7 +34,7 @@ public class MLlibClusterAssignerNodeDialog extends DefaultNodeSettingsPane {
      */
     public MLlibClusterAssignerNodeDialog() {
         addDialogComponent(
-            new DialogComponentString(MLlibClusterAssignerNodeModel.createTableNameModel(), "Table name: "));
+            new DialogComponentString(MLlibClusterAssignerNodeModel.createHiveStatementModel(), "Hive query: "));
         addDialogComponent(
             new DialogComponentString(MLlibClusterAssignerNodeModel.createColumnNameModel(), "Column name: "));
     }

@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Base64;
+//with parseBase64Binary() and printBase64Binary().
 import java.util.logging.Logger;
+
+//Java 8:
+//import java.util.Base64;
+//Java 7:
+import javax.xml.bind.DatatypeConverter;
 
 /**
  *
@@ -24,7 +29,8 @@ public class ModelUtils {
      * @return string representation of given object
 	 */
 	public static <T> T fromString(final String aString) {
-		byte[] data = Base64.getDecoder().decode(aString);
+		//JAva 1.8: byte[] data = Base64.getDecoder().decode(aString);
+        byte[] data =  DatatypeConverter.parseBase64Binary(aString);
 		try (final ObjectInputStream ois = new ObjectInputStream(
 				new ByteArrayInputStream(data))) {
 			return (T) ois.readObject();
@@ -44,7 +50,8 @@ public class ModelUtils {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try(final ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 			oos.writeObject(aObject);
-			return Base64.getEncoder().encodeToString(baos.toByteArray());
+			//Java 1.8: return Base64.getEncoder().encodeToString(baos.toByteArray());
+            return DatatypeConverter.printBase64Binary(baos.toByteArray());
 		} catch (IOException e) {
 			LOGGER.severe(e.getMessage());
 			return "ERROR - serialization failed!"+e.getMessage();
