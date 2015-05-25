@@ -32,6 +32,7 @@ import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 
@@ -77,7 +78,8 @@ public class KMeansTask implements Serializable {
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String contextName = KnimeContext.getSparkContext();
         try {
-            final FileToRDDTask tableTask = new FileToRDDTask(m_inputTableName);
+            //final FileToRDDTask tableTask = new FileToRDDTask(m_inputTableName);
+            final HiveToRDDTask tableTask = new HiveToRDDTask(m_inputTableName);
             final String rddTableKey = tableTask.execute(exec);
             final String learnerKMeansParams = kmeansLearnerDef(rddTableKey, m_outputTableName);
 
@@ -90,7 +92,10 @@ public class KMeansTask implements Serializable {
 
             final JsonObject statusWithResult = JobControler.fetchJobResult(jobId);
             assert (statusWithResult != null); //learner must return a model as its result
-            assert ("OK".equals(statusWithResult.getString("status"))); //should return OK as result status
+            if (!"OK".equals(statusWithResult.getString("status"))) {
+                exec.setMessage("Job failure: "+statusWithResult.toString());
+                throw new GenericKnimeSparkException("Job failure: "+statusWithResult.toString());
+            }
             final String kMeansModelAsString = statusWithResult.getString("result");
 
             return (KMeansModel)ModelUtils.fromString(kMeansModelAsString);

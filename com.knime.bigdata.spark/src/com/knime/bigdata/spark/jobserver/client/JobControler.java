@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -42,11 +41,6 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      */
     public static void uploadJobJar(final String aJarPath) throws GenericKnimeSparkException {
-        // upload jar
-        // curl command:
-        // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
-        // localhost:8090/jars/test
-        Invocation.Builder builder = RestClient.getInvocationBuilder("/jars/" + appName, null);
 
         final File jarFile = new File(aJarPath);
         if (!jarFile.exists()) {
@@ -56,8 +50,12 @@ public class JobControler {
             LOGGER.severe(msg);
             throw new GenericKnimeSparkException(msg);
         }
-        //
-        Response response = builder.post(Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
+
+        // upload jar
+        // curl command:
+        // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
+        // localhost:8090/jars/test
+        Response response = RestClient.post("/jars/" + appName, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
 
         RestClient.checkStatus(response, "Error: failed to upload jar to server", Status.OK);
 
@@ -93,11 +91,8 @@ public class JobControler {
         // curl command would be:
         // curl --data-binary @classification-config.json
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
-        Invocation.Builder builder =
-            RestClient.getInvocationBuilder("/jobs/", new String[]{"appName", appName, "context", aContextName,
-                "classPath", aClassPath});
-
-        Response response = builder.post(Entity.text(aJsonParams));
+        Response response = RestClient.post("/jobs/", new String[]{"appName", appName, "context", aContextName,
+            "classPath", aClassPath}, Entity.text(aJsonParams));
 
         RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
             + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
@@ -124,16 +119,14 @@ public class JobControler {
         // curl command would be:
         // curl --data-binary @classification-config.json
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
-        Invocation.Builder builder =
-            RestClient.getInvocationBuilder("/jobs/", new String[]{"appName", appName, "context", aContextName,
-                "classPath", aClassPath});
 
         try (final MultiPart multiPart = new MultiPart()) {
             multiPart.bodyPart(aJsonParams, MediaType.APPLICATION_JSON_TYPE).bodyPart(
                 new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_DATA_PATH,
                     aDataFile));
 
-            final Response response = builder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+            final Response response = RestClient.post("/jobs/", new String[]{"appName", appName, "context", aContextName,
+                "classPath", aClassPath}, Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
             multiPart.close();
 
             //			Response response = builder.post(Entity.text(aJsonParams));
@@ -177,9 +170,7 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      */
     public static void killJob(final String aJobId) throws GenericKnimeSparkException {
-        Invocation.Builder builder = RestClient.getInvocationBuilder("/jobs/" + aJobId, null);
-
-        Response response = builder.buildDelete().invoke();
+        Response response = RestClient.delete("/jobs/" + aJobId);
         // we don't care about the response as long as it is "OK"
         RestClient.checkStatus(response, "Error: failed to kill job " + aJobId + "!", Status.OK);
 

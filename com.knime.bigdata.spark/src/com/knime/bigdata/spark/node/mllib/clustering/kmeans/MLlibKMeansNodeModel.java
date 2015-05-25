@@ -54,9 +54,11 @@ public class MLlibKMeansNodeModel extends NodeModel {
 
     private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
 
-    private final SettingsModelString m_tableName = createTableNameModel();
+    private final SettingsModelString m_hiveQuery = createHiveQueryModel();
 
-    private final SettingsModelString m_colName = createColumnNameModel();
+//    private final SettingsModelString m_tableName = createTableNameModel();
+//
+//    private final SettingsModelString m_colName = createColumnNameModel();
 
     /**
      *
@@ -72,6 +74,13 @@ public class MLlibKMeansNodeModel extends NodeModel {
      */
     static SettingsModelString createTableNameModel() {
         return new SettingsModelString("tableName", "input");
+    }
+
+    /**
+     * @return
+     */
+    static SettingsModelString createHiveQueryModel() {
+        return new SettingsModelString("hiveQuery", "select * from iris");
     }
 
     /**
@@ -104,7 +113,7 @@ public class MLlibKMeansNodeModel extends NodeModel {
         //        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
         //            throw new InvalidSettingsException("Only Hive connections are supported");
         //        }
-        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(m_tableName.getStringValue()),createMLSpec()};
+        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(m_hiveQuery.getStringValue()),createMLSpec()};
     }
 
     /**
@@ -116,7 +125,7 @@ public class MLlibKMeansNodeModel extends NodeModel {
         exec.setMessage("Starting KMeans (SPARK) Learner");
         exec.checkCanceled();
         final KMeansTask task =
-            new KMeansTask(m_tableName.getStringValue(), m_noOfCluster.getIntValue(),
+            new KMeansTask(m_hiveQuery.getStringValue(), m_noOfCluster.getIntValue(),
                 m_noOfIteration.getIntValue(), aOutputTableName);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
@@ -142,8 +151,9 @@ public class MLlibKMeansNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIteration.saveSettingsTo(settings);
-        m_tableName.saveSettingsTo(settings);
-        m_colName.saveSettingsTo(settings);
+        //m_tableName.saveSettingsTo(settings);
+        m_hiveQuery.saveSettingsTo(settings);
+        //m_colName.saveSettingsTo(settings);
     }
 
     /**
@@ -153,8 +163,9 @@ public class MLlibKMeansNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfCluster.validateSettings(settings);
         m_noOfIteration.validateSettings(settings);
-        m_tableName.validateSettings(settings);
-        m_colName.validateSettings(settings);
+        //m_tableName.validateSettings(settings);
+        m_hiveQuery.validateSettings(settings);
+        //m_colName.validateSettings(settings);
     }
 
     /**
@@ -164,8 +175,9 @@ public class MLlibKMeansNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);
-        m_tableName.loadSettingsFrom(settings);
-        m_colName.loadSettingsFrom(settings);
+        //m_tableName.loadSettingsFrom(settings);
+        m_hiveQuery.loadSettingsFrom(settings);
+        //m_colName.loadSettingsFrom(settings);
     }
 
     /**

@@ -44,4 +44,9 @@ public class ParameterConstants {
 	 */
 	public static final String PARAM_NUMBER_ROWS = "numRows";
 
+	/**
+	 * hql statement parameter
+	 */
+    public static final String PARAM_HQL_STATEMENT = "hql";
+
 }

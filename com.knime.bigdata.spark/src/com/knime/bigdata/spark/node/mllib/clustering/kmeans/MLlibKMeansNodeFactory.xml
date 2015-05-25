@@ -27,6 +27,9 @@
 			The number of iterations after which the algorithm terminates,
 			independent of the accuracy improvement of the cluster centers.
 		</option>
+		<option name="hive query">
+			Hive query - TODO - this should be an input port.
+		</option>
 	</fullDescription>
 
 	<ports>

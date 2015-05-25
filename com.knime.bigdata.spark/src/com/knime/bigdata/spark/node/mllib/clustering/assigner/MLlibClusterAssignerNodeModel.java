@@ -50,7 +50,7 @@ import com.knime.bigdata.spark.port.MLlibPortObject;
  */
 public class MLlibClusterAssignerNodeModel extends NodeModel {
 
-    private final SettingsModelString m_tableName = createTableNameModel();
+    private final SettingsModelString m_hiveQuery = createHiveStatementModel();
 
     private final SettingsModelString m_colName = createColumnNameModel();
 
@@ -64,8 +64,8 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
     /**
      * @return
      */
-    static SettingsModelString createTableNameModel() {
-        return new SettingsModelString("tableName", "result");
+    static SettingsModelString createHiveStatementModel() {
+        return new SettingsModelString("hiveQuery", "select * from ");
     }
 
     /**
@@ -80,7 +80,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        return new PortObjectSpec[]{createSpec(m_tableName.getStringValue())};
+        return new PortObjectSpec[]{createSpec(m_hiveQuery.getStringValue())};
     }
 
     /**
@@ -97,7 +97,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
         final String contextName = KnimeContext.getSparkContext();
         try {
             final AssignTask task = new AssignTask();
-            task.execute(contextName, exec, m_tableName.getStringValue(), model.getModel(), aOutputTableName);
+            task.execute(contextName, exec, m_hiveQuery.getStringValue(), model.getModel(), aOutputTableName);
         } finally {
             //TODO - context must be terminated when KNIME is terminated KnimeContext.destroySparkContext(contextName);
         }
@@ -124,7 +124,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_tableName.saveSettingsTo(settings);
+        m_hiveQuery.saveSettingsTo(settings);
         m_colName.saveSettingsTo(settings);
     }
 
@@ -133,7 +133,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_tableName.validateSettings(settings);
+        m_hiveQuery.validateSettings(settings);
         m_colName.validateSettings(settings);
     }
 
@@ -142,7 +142,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_tableName.loadSettingsFrom(settings);
+        m_hiveQuery.loadSettingsFrom(settings);
         m_colName.loadSettingsFrom(settings);
     }
 

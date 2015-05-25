@@ -14,7 +14,7 @@ import org.apache.spark.sql.api.java.Row;
  * Builder for Spark {@link Row} objects.
  *
  * <p>
- * Rows can be build either starting {@link #fromRow(Row) from} a given row or with an {@link #emptyRow()} empty
+ * Rows can be built either starting {@link #fromRow(Row) from} a given row or with an {@link #emptyRow()} empty
  * {@code RowBuilder}. Values can be appended to the end of the row either {@link #add(Object) individually} or in
  * {@link #addAll(Iterable) batch}. The resulting {@code Row} is built with a call to {@link #build()}.
  */

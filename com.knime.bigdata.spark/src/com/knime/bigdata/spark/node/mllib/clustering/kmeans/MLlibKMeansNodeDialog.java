@@ -35,11 +35,13 @@ public class MLlibKMeansNodeDialog extends DefaultNodeSettingsPane {
      */
     public MLlibKMeansNodeDialog() {
         addDialogComponent(
+            new DialogComponentString(MLlibKMeansNodeModel.createHiveQueryModel(), "Hive query: "));
+        addDialogComponent(
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfClusterModel(), "Number of clusters: ", 1));
         addDialogComponent(
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10));
-        createNewGroup(" Result Settings ");
-        addDialogComponent(new DialogComponentString(MLlibKMeansNodeModel.createTableNameModel(), "Table name: "));
-        addDialogComponent(new DialogComponentString(MLlibKMeansNodeModel.createColumnNameModel(), "Column name: "));
+//        createNewGroup(" Result Settings ");
+//        addDialogComponent(new DialogComponentString(MLlibKMeansNodeModel.createTableNameModel(), "Table name: "));
+//        addDialogComponent(new DialogComponentString(MLlibKMeansNodeModel.createColumnNameModel(), "Column name: "));
     }
 }
