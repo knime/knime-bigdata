@@ -124,7 +124,7 @@ public class StructTypeBuilder {
     }
   };
 
-  private static final Map<Class<?>, DataType> DATA_TYPES_BY_CLASS = new HashMap<>();
+  public static final Map<Class<?>, DataType> DATA_TYPES_BY_CLASS = new HashMap<>();
   static {
     DATA_TYPES_BY_CLASS.put(Boolean.class, DataType.BooleanType);
     DATA_TYPES_BY_CLASS.put(Byte.class, DataType.ByteType);

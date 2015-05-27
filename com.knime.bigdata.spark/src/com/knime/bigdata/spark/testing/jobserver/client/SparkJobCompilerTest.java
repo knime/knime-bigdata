@@ -106,12 +106,11 @@ public class SparkJobCompilerTest extends UnitSpec {
 			assertNotSame("job should have finished properly",
 					JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
 
-			String res = JobControler.fetchJobResult(jobId).getString(
-					"result");
 
 			assertNotSame("job should not be running anymore", JobStatus.OK,
 					JobControler.getJobStatus(jobId));
 
+            String res = JobControler.fetchJobResult(jobId).getMessage();
 			assertEquals("job result", RES_STR, res);
 		} finally {
 			KnimeContext.destroySparkContext(contextName);

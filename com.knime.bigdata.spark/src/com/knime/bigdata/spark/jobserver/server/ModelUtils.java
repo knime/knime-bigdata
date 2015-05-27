@@ -36,7 +36,7 @@ public class ModelUtils {
 			return (T) ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			LOGGER.severe(e.getMessage());
-			LOGGER.severe( "ERROR - de-serialization failed!"+e.getMessage());
+			LOGGER.severe( "ERROR - de-serialization failed: "+e.getMessage());
 			return null;
 		}
 	}

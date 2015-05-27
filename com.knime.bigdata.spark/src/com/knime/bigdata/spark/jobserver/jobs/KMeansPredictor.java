@@ -29,15 +29,19 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.api.java.StructType;
 import org.knime.sparkClient.jobs.ValidationResultConverter;
 import org.knime.utils.RDDUtils;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
+import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 
 /**
@@ -108,10 +112,10 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 	 *         be retrieved by a separate job or used later on
 	 */
 	@Override
-	public Object runJobWithContext(final SparkContext sc, final Config aConfig) {
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
 		SparkJobValidation validation = validateInput(aConfig);
 		if (!ValidationResultConverter.isValid(validation)) {
-			return validation;
+            return JobResult.emptyJobResult().withMessage(validation.toString());
 		}
 
 		LOGGER.log(Level.INFO, "starting kMeans prediction job...");
@@ -126,8 +130,12 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 
 		LOGGER.log(Level.INFO, "kMeans prediction done");
 		addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictions);
-
-		return "OK";
+        try {
+            final StructType schema = StructTypeBuilder.fromRows(predictions.take(10)).build();
+            return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schema);
+        } catch (InvalidSchemaException e) {
+            return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+        }
 	}
 
 	static JavaRDD<Row> predict(final SparkContext aContext,

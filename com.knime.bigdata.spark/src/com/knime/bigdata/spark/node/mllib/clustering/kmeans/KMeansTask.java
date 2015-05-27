@@ -22,18 +22,14 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.Serializable;
 
-import javax.json.JsonObject;
-
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
-import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 
 /**
@@ -86,21 +82,13 @@ public class KMeansTask implements Serializable {
             final String jobId =
                 JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
-            assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
+            JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 
-            assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
+            //TODO - we might want to use the schema of the predicted data as well
+            return (KMeansModel)result.getObjectResult();
+        } catch (Exception e) {
 
-            final JsonObject statusWithResult = JobControler.fetchJobResult(jobId);
-            assert (statusWithResult != null); //learner must return a model as its result
-            if (!"OK".equals(statusWithResult.getString("status"))) {
-                exec.setMessage("Job failure: "+statusWithResult.toString());
-                throw new GenericKnimeSparkException("Job failure: "+statusWithResult.toString());
-            }
-            final String kMeansModelAsString = statusWithResult.getString("result");
-
-            return (KMeansModel)ModelUtils.fromString(kMeansModelAsString);
-        } finally {
-            //TODO - context must be terminated when KNIME is terminated KnimeContext.destroySparkContext(contextName);
+            throw e;
         }
     }
 

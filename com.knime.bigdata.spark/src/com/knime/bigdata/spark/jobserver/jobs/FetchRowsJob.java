@@ -11,6 +11,7 @@ import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.Config;
@@ -68,14 +69,15 @@ public class FetchRowsJob extends KnimeSparkJob {
 	}
 
 	@Override
-	public Object runJobWithContext(final SparkContext sc, final Config aConfig) {
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
 		final int numRows = aConfig.getInt(PARAM_NUM_ROWS);
 		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows
 				+ " rows from input RDD");
 		final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getString(PARAM_TABLE_NAME));
 
 		final List<Row> res = inputRDD.take(numRows);
-		return mapTo2DimArray(res);
+
+		return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mapTo2DimArray(res));
 	}
 
 	private Object[][] mapTo2DimArray(final List<Row> aRows) {
