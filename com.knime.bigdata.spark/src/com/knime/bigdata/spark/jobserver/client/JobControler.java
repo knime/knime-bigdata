@@ -19,6 +19,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 
 /**
@@ -160,7 +161,7 @@ public class JobControler {
 
         for (int i = 0; i < jobs.size(); i++) {
             JsonObject jobInfo = jobs.getJsonObject(i);
-            LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
+            //LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
             if (aJobId.equals(jobInfo.getString("jobId"))) {
                 return JobStatus.valueOf(jobInfo.getString("status"));
             }
@@ -249,9 +250,32 @@ public class JobControler {
      * @return JSONObject with job status and result
      * @throws GenericKnimeSparkException
      */
-    public static JsonObject fetchJobResult(final String aJobId) throws GenericKnimeSparkException {
+    public static JobResult fetchJobResult(final String aJobId) throws GenericKnimeSparkException {
         // GET /jobs/<jobId> - Gets the result or status of a specific job
-        return RestClient.toJSONObject(JOBS_PATH + aJobId);
+        JsonObject json = RestClient.toJSONObject(JOBS_PATH + aJobId);
+        if (json.containsKey("result"))
+        {
+            return JobResult.fromBase64String(json.getString("result"));
+        } else {
+            return JobResult.emptyJobResult().withMessage("ERROR: no job result in: "+json.toString());
+        }
+    }
+
+    /**
+     * @param jobId
+     * @param exec
+     * @return JobResult if job did not finish with an error
+     * @throws CanceledExecutionException
+     * @throws GenericKnimeSparkException
+     * @throws AssertionError if job failed
+     */
+    public static JobResult waitForJobAndFetchResult(final String jobId, final ExecutionContext exec) throws CanceledExecutionException, GenericKnimeSparkException {
+        JobStatus status = waitForJob(jobId, exec);
+        JobResult result = fetchJobResult(jobId);
+        if (JobStatus.isErrorStatus(status)) {
+            assert(false) : "Job failure: "+ result.toString();
+        }
+        return result;
     }
 
 }

@@ -36,6 +36,7 @@ import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.Config;
@@ -78,7 +79,7 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
      * @return rdd key
      */
     @Override
-    public Object runJobWithContext(final SparkContext sc, final Config aConfig) {
+    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
         LOGGER.log(Level.INFO, "reading hive table...");
 
         final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
@@ -94,8 +95,9 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        LOGGER.log(Level.INFO, "Storing predicted data under key: " + aConfig.getString(PARAM_HQL));
+        LOGGER.log(Level.INFO, "Storing (hive) data under key: " + aConfig.getString(PARAM_HQL));
         addToNamedRdds(aConfig.getString(PARAM_HQL), new JavaRDD<Row>(rdd, rdd.elementClassTag()));
-        return aConfig.getString(PARAM_HQL);
+        return JobResult.emptyJobResult().withMessage("OK")
+            .withTable(aConfig.getString(PARAM_HQL), schemaInputRDD.schema());
     }
 }

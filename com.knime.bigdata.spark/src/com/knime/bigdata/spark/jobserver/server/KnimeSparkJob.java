@@ -37,7 +37,7 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
 	 * run the actual job
 	 * @param aSparkContext
 	 * @param aConfig
-	 * @return whatever the job returns
+	 * @return JobResult - a container for results as they are supported by KNIME
 	 */
-	protected abstract Object runJobWithContext(SparkContext aSparkContext, Config aConfig);
+	protected abstract JobResult runJobWithContext(SparkContext aSparkContext, Config aConfig);
 }

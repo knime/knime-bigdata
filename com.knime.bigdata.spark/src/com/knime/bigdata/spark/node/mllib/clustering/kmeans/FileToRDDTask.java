@@ -22,15 +22,13 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.Serializable;
 
-import javax.json.JsonObject;
-
 import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.JavaRDDFromFile;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 
 
@@ -66,15 +64,10 @@ public class FileToRDDTask implements Serializable {
 
         String jobId = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(), params);
 
-        assert(JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //job should have finished properly
+        JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 
-        assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //job should not be running anymore
-
-        JsonObject statusWithResult = JobControler.fetchJobResult(jobId);
-        assert (statusWithResult != null);
-        assert ("OK".equals(statusWithResult.getString("status"))); //should return OK as result status
-
-        return statusWithResult.getString("result");
+        //TODO - we ignore everything but the actual key, do something with the result
+        return result.getFirstTableKey();
     }
 
     private final String text2RDDDef(final String aFileName) {

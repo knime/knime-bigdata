@@ -25,6 +25,7 @@ import org.knime.sparkClient.jobs.ValidationResultConverter;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.typesafe.config.Config;
 
@@ -219,8 +220,8 @@ final public class SparkJobCompiler {
         }
 
         @Override
-        protected Object runJobWithContext(final SparkContext aContext, final Config aConfig) {
-            return "ERROR";
+        protected JobResult runJobWithContext(final SparkContext aContext, final Config aConfig) {
+            return JobResult.emptyJobResult().withMessage("ERROR");
         }
 
     };

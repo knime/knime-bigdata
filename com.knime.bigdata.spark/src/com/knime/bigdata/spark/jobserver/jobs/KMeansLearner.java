@@ -30,15 +30,18 @@ import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.api.java.StructType;
 import org.knime.sparkClient.jobs.ValidationResultConverter;
 import org.knime.utils.RDDUtils;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
+import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 
@@ -121,10 +124,10 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 	 * run the actual job, the result is serialized back to the client
 	 */
 	@Override
-	public Object runJobWithContext(final SparkContext sc, final Config aConfig) {
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
 		SparkJobValidation validation = validateInput(aConfig);
 		if (!ValidationResultConverter.isValid(validation)) {
-			return validation;
+			return JobResult.emptyJobResult().withMessage(validation.toString());
 		}
 		LOGGER.log(Level.INFO, "starting kMeans job...");
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
@@ -132,6 +135,8 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDD(rowRDD);
 
 		final KMeansModel model = execute(sc, aConfig, inputRDD);
+
+		JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
 		if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
 			LOGGER.log(Level.INFO, "Storing predicted data unter key: "
@@ -141,6 +146,13 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 			try {
 				addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH),
 						predictedData);
+		        try {
+		            final StructType schema = StructTypeBuilder.fromRows(predictedData.take(10)).build();
+		            res = res
+		                    .withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schema);
+		        } catch (InvalidSchemaException e) {
+		            return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+		        }
 			} catch (Exception e) {
 				LOGGER.severe("ERROR: failed to predict and store results for training data.");
 				LOGGER.severe(e.getMessage());
@@ -148,7 +160,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		}
 		LOGGER.log(Level.INFO, "kMeans done");
 		// note that with Spark 1.4 we can use PMML instead
-		return ModelUtils.toString(model);
+		return res;
 	}
 
 	private KMeansModel execute(final SparkContext aContext,
