@@ -21,7 +21,9 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
 /**
  *
@@ -37,5 +39,11 @@ public class MLlibKMeansNodeDialog extends DefaultNodeSettingsPane {
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfClusterModel(), "Number of clusters: ", 1));
         addDialogComponent(
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10));
+
+        addDialogComponent(new DialogComponentColumnFilter2(MLlibKMeansNodeModel.createColumnsModel(), 0));
+
+        createNewGroup(" Result Settings ");
+        addDialogComponent(new DialogComponentString(MLlibKMeansNodeModel.createColumnNameModel(), "Column name: "));
+
     }
 }

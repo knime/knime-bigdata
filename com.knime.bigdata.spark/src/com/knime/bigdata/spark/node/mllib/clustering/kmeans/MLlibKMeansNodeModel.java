@@ -60,8 +60,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
      *
      */
     public MLlibKMeansNodeModel() {
-        //        super(new PortType[]{DatabasePortObject.TYPE},
-        //            new PortType[]{DatabasePortObject.TYPE, MLlibPortObject.TYPE});
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
     }

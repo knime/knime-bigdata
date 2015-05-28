@@ -52,4 +52,26 @@ public class ParameterConstants {
      * column indices starting with 0
      */
     public static final String PARAM_COL_IDXS = "colIndices";
+    /**
+     * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
+     */
+    public static final String PARAM_INFORMATION_GAIN = "impurity";
+    /**
+     * supported information gain criterion
+     */
+    public static final String VALUE_GINI = "gini";
+    /**
+     * supported information gain criterion
+     */
+    public static final String VALUE_ENTROPY = "entropy";
+
+    /**
+     * parameter for maximal (search, tree, ...) depth
+     */
+    public static final String PARAM_MAX_DEPTH = "maxDepth";
+
+    /**
+     * param for maximal number of bins
+     */
+    public static final String PARAM_MAX_BINS = "maxBins";
 }

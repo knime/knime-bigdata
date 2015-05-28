@@ -123,7 +123,7 @@ class WsRsRestClient implements IRestClient {
     public JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException {
         Invocation.Builder builder = getInvocationBuilder(aType, null);
         Response response = builder.get();
-        return Json.createReader(new StringReader(responseToString(response))).readArray();
+        return JsonUtils.toJsonArray(responseToString(response));
     }
 
 
