@@ -24,7 +24,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -36,13 +39,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
-import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.JavaRDDPortObject;
-import com.knime.bigdata.spark.port.MLlibModel;
-import com.knime.bigdata.spark.port.MLlibPortObject;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 
 /**
  *
@@ -58,7 +59,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      *
      */
     public MLlibClusterAssignerNodeModel() {
-        super(new PortType[]{MLlibPortObject.TYPE}, new PortType[]{JavaRDDPortObject.TYPE});
+        super(new PortType[]{SparkModelPortObject.TYPE}, new PortType[]{JavaRDDPortObject.TYPE});
     }
 
     /**
@@ -80,7 +81,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        return new PortObjectSpec[]{createSpec(m_hiveQuery.getStringValue())};
+        return new PortObjectSpec[]{createSpec(null)};
     }
 
     /**
@@ -90,7 +91,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final String aOutputTableName = "kmeansPrediction" + System.currentTimeMillis();
         @SuppressWarnings("unchecked")
-        final MLlibModel<KMeansModel> model = ((MLlibPortObject<KMeansModel>)inObjects[0]).getModel();
+        final SparkModel<KMeansModel> model = ((SparkModelPortObject<KMeansModel>)inObjects[0]).getModel();
         exec.checkCanceled();
         exec.setMessage("Starting KMeans (SPARK) Predictor");
 
@@ -103,20 +104,16 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
         }
 
         exec.setMessage("KMeans (SPARK) Prediction done.");
-        return new PortObject[]{new JavaRDDPortObject(createSpec(aOutputTableName))};
+        return new PortObject[]{};
     }
 
     /**
-     * TODO - fix me
-     * @param tableName
-     * @return DatabasePortObjectSpec
-     * @throws InvalidSettingsException
      */
-    public static DatabasePortObjectSpec createSpec(final String tableName) throws InvalidSettingsException {
-        final  DataTableSpec tableSpec = new DataTableSpec(tableName);
-        final DatabaseQueryConnectionSettings conn = new DatabaseQueryConnectionSettings();
-        conn.setQuery("select * from TODO"); // + sm.quoteIdentifier(tableName));
-        return new DatabasePortObjectSpec(tableSpec, conn);
+    public static DataTableSpec createSpec(final DataTableSpec originalSpec) throws InvalidSettingsException {
+        final String clusterColName = DataTableSpec.getUniqueColumnName(null, "Cluster");
+        DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
+        DataColumnSpec labelColSpec = creator.createSpec();
+        return new DataTableSpec(originalSpec, new DataTableSpec(labelColSpec));
     }
 
     /**

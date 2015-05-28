@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.node.ExecutionContext;
@@ -48,17 +49,21 @@ public class KMeansTask implements Serializable {
 
     private final int m_noOfCluster;
 
+    private int[] m_includeColIdxs;
+
     /**
      * constructor - simply stores parameters
      *
      * @param aInputTableName - table identifier (input data)
+     * @param includeColIdxs - index of the columns to include starting with 0
      * @param noOfCluster - number of clusters (aka "k")
      * @param noOfIteration - maximal number of iterations
      * @param aOutputTableName - table identifier (classified output data)
      */
-    public KMeansTask(final String aInputTableName, final int noOfCluster, final int noOfIteration,
-        final String aOutputTableName) {
+    public KMeansTask(final String aInputTableName, final int[] includeColIdxs, final int noOfCluster,
+        final int noOfIteration, final String aOutputTableName) {
         m_inputTableName = aInputTableName;
+        m_includeColIdxs = includeColIdxs;
         m_outputTableName = aOutputTableName;
         m_noOfCluster = noOfCluster;
         m_noOfIteration = noOfIteration;
@@ -74,11 +79,7 @@ public class KMeansTask implements Serializable {
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String contextName = KnimeContext.getSparkContext();
         try {
-            //final FileToRDDTask tableTask = new FileToRDDTask(m_inputTableName);
-            final HiveToRDDTask tableTask = new HiveToRDDTask(m_inputTableName);
-            final String rddTableKey = tableTask.execute(exec);
-            final String learnerKMeansParams = kmeansLearnerDef(rddTableKey, m_outputTableName);
-
+            final String learnerKMeansParams = kmeansLearnerDef();
             final String jobId =
                 JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
@@ -92,13 +93,15 @@ public class KMeansTask implements Serializable {
         }
     }
 
-    private String kmeansLearnerDef(final String aInputFileName, final String aOutputFileName) {
+    private String kmeansLearnerDef() {
+        //TODO: Add int array to config
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster,
+            new String[]{ParameterConstants.PARAM_COL_IDXS, Arrays.toString(m_includeColIdxs),
+                ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster,
                 ParameterConstants.PARAM_NUM_ITERATIONS, "" + m_noOfIteration, ParameterConstants.PARAM_DATA_PATH,
-                aInputFileName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, aOutputFileName}});
+                m_inputTableName}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_DATA_PATH, m_outputTableName}});
     }
 
 }

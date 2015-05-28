@@ -48,5 +48,11 @@
             factory-class="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory"
+            id="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory">
+      </node>
    </extension>
 </plugin>

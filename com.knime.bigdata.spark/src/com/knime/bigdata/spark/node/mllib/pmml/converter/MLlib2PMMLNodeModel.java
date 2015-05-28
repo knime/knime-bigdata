@@ -36,8 +36,8 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
-import com.knime.bigdata.spark.port.MLlibModel;
-import com.knime.bigdata.spark.port.MLlibPortObject;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 
 /**
  *
@@ -51,7 +51,7 @@ public class MLlib2PMMLNodeModel extends NodeModel {
      *
      */
     public MLlib2PMMLNodeModel() {
-        super(new PortType[]{MLlibPortObject.TYPE}, new PortType[]{PMMLPortObject.TYPE});
+        super(new PortType[]{SparkModelPortObject.TYPE}, new PortType[]{PMMLPortObject.TYPE});
     }
 
     /**
@@ -72,7 +72,7 @@ public class MLlib2PMMLNodeModel extends NodeModel {
      */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final MLlibModel<?> model = ((MLlibPortObject<?>)inObjects[0]).getModel();
+        final SparkModel<?> model = ((SparkModelPortObject<?>)inObjects[0]).getModel();
         return new PortObject[] {new PMMLPortObject(null)};
     }
 

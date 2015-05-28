@@ -16,26 +16,19 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 12.02.2015 by koetter
+ *   Created on 27.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
+package com.knime.bigdata.spark.port.data;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import java.util.UUID;
 
 /**
  *
  * @author koetter
  */
-public class MLlibKMeansNodeDialog extends DefaultNodeSettingsPane {
+public final class SparkIDGenerator {
 
-    /**
-     *
-     */
-    public MLlibKMeansNodeDialog() {
-        addDialogComponent(
-            new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfClusterModel(), "Number of clusters: ", 1));
-        addDialogComponent(
-            new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10));
+    public static String createID() {
+        return UUID.randomUUID().toString();
     }
 }

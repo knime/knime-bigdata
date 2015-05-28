@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port.model;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -35,34 +35,34 @@ import org.knime.core.node.port.PortType;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME.com
  * @param <M>
  */
-public class MLlibPortObject<M extends Serializable> implements PortObject {
-
-    /**
-     * The spec for this port object.
-     */
-    protected final MLlibPortObjectSpec m_spec;
+public class SparkModelPortObject<M extends Serializable> implements PortObject {
 
     /**
      * Database port type.
      */
-    public static final PortType TYPE = new PortType(MLlibPortObject.class);
+    public static final PortType TYPE = new PortType(SparkModelPortObject.class);
 
     /**
      * Database type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(MLlibPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL = new PortType(SparkModelPortObject.class, true);
 
-    private MLlibModel<M> m_model;
+    /**
+     * The spec for this port object.
+     */
+    private final SparkModelPortObjectSpec m_spec;
+
+    private SparkModel<M> m_model;
 
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibPortObjectSpec getSpec() {
+    public SparkModelPortObjectSpec getSpec() {
         return m_spec;
     }
 
@@ -80,7 +80,7 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
      * Creates a new database port object.
      * @param model
      */
-    public MLlibPortObject(final MLlibModel<M> model) {
+    public SparkModelPortObject(final SparkModel<M> model) {
         m_model = model;
         m_spec = model.getSpec();
     }
@@ -88,26 +88,26 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
     /**
      * @return the model
      */
-    public MLlibModel<M> getModel() {
+    public SparkModel<M> getModel() {
         return m_model;
     }
 
     /**
-     * Serializer used to save {@link MLlibPortObject}s.
+     * Serializer used to save {@link SparkModelPortObject}s.
      *
      * @return a new serializer
      */
     @SuppressWarnings("rawtypes")
-    public static PortObjectSerializer<MLlibPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<MLlibPortObject>() {
+    public static PortObjectSerializer<SparkModelPortObject> getPortObjectSerializer() {
+        return new PortObjectSerializer<SparkModelPortObject>() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void savePortObject(final MLlibPortObject portObject,
+            public void savePortObject(final SparkModelPortObject portObject,
                 final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
                 CanceledExecutionException {
-                MLlibModel model = portObject.getModel();
+                SparkModel model = portObject.getModel();
                 model.write(exec, out);
             }
 
@@ -115,10 +115,10 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
              * {@inheritDoc}
              */
             @Override
-            public MLlibPortObject loadPortObject(final PortObjectZipInputStream in,
+            public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in,
                 final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                MLlibModel<Serializable> model = new MLlibModel<>(exec, in);
-                return new MLlibPortObject<>(model);
+                SparkModel<Serializable> model = new SparkModel<>(exec, in);
+                return new SparkModelPortObject<>(model);
             }
         };
     }
@@ -139,10 +139,10 @@ public class MLlibPortObject<M extends Serializable> implements PortObject {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof MLlibPortObject)) {
+        if (!(obj instanceof SparkModelPortObject)) {
             return false;
         }
-        MLlibPortObject<?> dbPort = (MLlibPortObject<?>) obj;
+        SparkModelPortObject<?> dbPort = (SparkModelPortObject<?>) obj;
         return m_spec.equals(dbPort.m_spec);
     }
 

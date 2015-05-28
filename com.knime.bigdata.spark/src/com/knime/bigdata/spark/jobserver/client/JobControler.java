@@ -209,6 +209,9 @@ public class JobControler {
      */
     public static JobStatus waitForJob(final String aJobId, @Nullable final ExecutionContext aExecutionContext,
         final int aTimeoutInSeconds, final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
+        if (aExecutionContext != null) {
+            aExecutionContext.setMessage("Waiting for Spark job to finish...");
+        }
         int maxNumChecks = aTimeoutInSeconds / aCheckFrequencyInSeconds;
         for (int i = 0; i < maxNumChecks; i++) {
             try {
