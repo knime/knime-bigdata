@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.node.ExecutionContext;
@@ -49,13 +48,13 @@ public class KMeansTask implements Serializable {
 
     private final int m_noOfCluster;
 
-    private int[] m_includeColIdxs;
+    private final Integer[] m_includeColIdxs;
 
     /**
      * constructor - simply stores parameters
      *
      * @param aInputTableName - table identifier (input data)
-     * @param includeColIdxs - index of the columns to include starting with 0
+     * @param includeColIdxs - indices of the columns to include starting with 0
      * @param noOfCluster - number of clusters (aka "k")
      * @param noOfIteration - maximal number of iterations
      * @param aOutputTableName - table identifier (classified output data)
@@ -63,7 +62,11 @@ public class KMeansTask implements Serializable {
     public KMeansTask(final String aInputTableName, final int[] includeColIdxs, final int noOfCluster,
         final int noOfIteration, final String aOutputTableName) {
         m_inputTableName = aInputTableName;
-        m_includeColIdxs = includeColIdxs;
+        m_includeColIdxs = new Integer[includeColIdxs.length];
+        int i = 0;
+        for (int value : includeColIdxs) {
+            m_includeColIdxs[i++] = Integer.valueOf(value);
+        }
         m_outputTableName = aOutputTableName;
         m_noOfCluster = noOfCluster;
         m_noOfIteration = noOfIteration;
@@ -71,6 +74,7 @@ public class KMeansTask implements Serializable {
 
     /**
      * run the job on the server
+     *
      * @param exec
      *
      * @return KMeansModel
@@ -78,30 +82,22 @@ public class KMeansTask implements Serializable {
      */
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String contextName = KnimeContext.getSparkContext();
-        try {
-            final String learnerKMeansParams = kmeansLearnerDef();
-            final String jobId =
-                JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+        final String learnerKMeansParams = kmeansLearnerDef();
+        final String jobId =
+            JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
-            JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 
-            //TODO - we might want to use the schema of the predicted data as well
-            return (KMeansModel)result.getObjectResult();
-        } catch (Exception e) {
-
-            throw e;
-        }
+        return (KMeansModel)result.getObjectResult();
     }
 
     private String kmeansLearnerDef() {
-        //TODO: Add int array to config
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_COL_IDXS, Arrays.toString(m_includeColIdxs),
-                ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster,
-                ParameterConstants.PARAM_NUM_ITERATIONS, "" + m_noOfIteration, ParameterConstants.PARAM_DATA_PATH,
-                m_inputTableName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, m_outputTableName}});
+            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_includeColIdxs),
+                ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
+                "" + m_noOfIteration, ParameterConstants.PARAM_DATA_PATH, m_inputTableName},
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, m_outputTableName}});
     }
 
 }

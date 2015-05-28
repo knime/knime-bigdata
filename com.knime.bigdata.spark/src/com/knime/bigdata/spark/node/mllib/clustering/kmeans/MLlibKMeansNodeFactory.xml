@@ -15,25 +15,26 @@
 			The clustering algorithm uses the Euclidean distance on the selected
 			attributes. The data is not normalized by the node (if required, you
 			should consider to use the "Normalizer" as a preprocessing step).
+			
+			TODO: 
 			If the optional PMML inport is connected and contains preprocessing
 			operations in the TransformationDictionary those are added to the
 			learned model. The node can be configured as follows:
 		</intro>
 
-		<option name="number of clusters">
+		<option name="Number of clusters">
 			The number of clusters (cluster centers) to be created.
 		</option>
-		<option name="max number of iterations">
-			The number of iterations after which the algorithm terminates,
+		<option name="Number of iterations">
+			The maximal number of iterations after which the algorithm terminates,
 			independent of the accuracy improvement of the cluster centers.
 		</option>
-		<option name="hive query">
-			Hive query - TODO - this should be an input port.
+		<option name="Result Settings: Column name">
+			Name of column with cluster assignments (result preview only).
 		</option>
 	</fullDescription>
 
 	<ports>
-		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
 		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
 		<outPort index="0" name="Result">The input data labeled with the cluster they are contained in.</outPort>
 		<outPort index="1" name="MLlib Cluster Model">MLlib Cluster Model</outPort>

@@ -96,12 +96,8 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
         exec.setMessage("Starting KMeans (SPARK) Predictor");
 
         final String contextName = KnimeContext.getSparkContext();
-        try {
-            final AssignTask task = new AssignTask();
-            task.execute(contextName, exec, m_hiveQuery.getStringValue(), model.getModel(), aOutputTableName);
-        } finally {
-            //TODO - context must be terminated when KNIME is terminated KnimeContext.destroySparkContext(contextName);
-        }
+        final AssignTask task = new AssignTask();
+        task.execute(contextName, exec, m_hiveQuery.getStringValue(), model.getModel(), aOutputTableName);
 
         exec.setMessage("KMeans (SPARK) Prediction done.");
         return new PortObject[]{};
@@ -110,7 +106,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
     /**
      */
     public static DataTableSpec createSpec(final DataTableSpec originalSpec) throws InvalidSettingsException {
-        final String clusterColName = DataTableSpec.getUniqueColumnName(null, "Cluster");
+        final String clusterColName = DataTableSpec.getUniqueColumnName(originalSpec, "Cluster");
         DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
         DataColumnSpec labelColSpec = creator.createSpec();
         return new DataTableSpec(originalSpec, new DataTableSpec(labelColSpec));

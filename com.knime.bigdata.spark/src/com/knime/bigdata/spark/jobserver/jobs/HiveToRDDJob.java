@@ -42,7 +42,7 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.Config;
 
 /**
- * executes given HIVE hql statement and puts result into a (named) JavaRDD
+ * executes given sql statement and puts result into a (named) JavaRDD
  *
  * @author dwk, jfr
  */
@@ -50,10 +50,11 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_SQL = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SQL_STATEMENT;
+    private static final String PARAM_SQL = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_SQL_STATEMENT;
 
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_DATA_PATH;
+    private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
+        + ParameterConstants.PARAM_DATA_PATH;
 
     private final static Logger LOGGER = Logger.getLogger(HiveToRDDJob.class.getName());
 
@@ -67,6 +68,10 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         if (!config.hasPath(PARAM_SQL)) {
             msg = "Input parameter '" + PARAM_SQL + "' missing.";
+        }
+
+        if (!config.hasPath(PARAM_RESULT_TABLE_KEY)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE_KEY + "' missing.";
         }
 
         if (msg != null) {
@@ -98,10 +103,9 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        //TK_TODO: Shouldn't we use the given id for the named RDD?
-        LOGGER.log(Level.INFO, "Storing Hive query result under key: " + aConfig.getString(PARAM_SQL));
-        addToNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME), new JavaRDD<>(rdd, rdd.elementClassTag()));
-        return JobResult.emptyJobResult().withMessage("OK")
-            .withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schemaInputRDD.schema());
+        final String key = aConfig.getString(PARAM_RESULT_TABLE_KEY);
+        LOGGER.log(Level.INFO, "Storing Hive query result under key: " + key);
+        addToNamedRdds(key, new JavaRDD<>(rdd, rdd.elementClassTag()));
+        return JobResult.emptyJobResult().withMessage("OK").withTable(key, schemaInputRDD.schema());
     }
 }
