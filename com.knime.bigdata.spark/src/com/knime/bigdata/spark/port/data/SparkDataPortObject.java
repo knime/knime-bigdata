@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.json.JsonArray;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -297,10 +296,12 @@ public class SparkDataPortObject implements PortObject {
 
         // now check result:
         JobResult statusWithResult = JobControler.fetchJobResult(aJobId);
-        assert (statusWithResult != null); //row fetcher must return something
-        assert ("OK".equals(statusWithResult.getString("status"))); //fetcher should return OK as result status
-        final JsonArray arrayRes = statusWithResult.getJsonArray("result");
-        assert (arrayRes != null); //row fetcher must return a result
+         if (!"OK".equals(statusWithResult.getMessage())) {
+             //fetcher should return OK as result status
+             throw new GenericKnimeSparkException(statusWithResult.getMessage());
+         }
+        final Object[][] arrayRes = (Object[][])statusWithResult.getObjectResult();
+        assert (arrayRes != null) : "Row fetcher failed to return a result";
 
         return new DataTable() {
 
@@ -312,7 +313,7 @@ public class SparkDataPortObject implements PortObject {
 
                     @Override
                     public DataRow next() {
-                        final JsonArray o = arrayRes.getJsonArray(currentRow);
+                        final Object[] o = arrayRes[currentRow];
                         currentRow++;
                         return new DataRow() {
 
@@ -323,7 +324,7 @@ public class SparkDataPortObject implements PortObject {
 
                                     @Override
                                     public boolean hasNext() {
-                                        return current < o.size();
+                                        return current < o.length;
                                     }
 
                                     @Override
@@ -342,7 +343,7 @@ public class SparkDataPortObject implements PortObject {
 
                             @Override
                             public int getNumCells() {
-                                return o.size();
+                                return o.length;
                             }
 
                             @Override
@@ -360,17 +361,17 @@ public class SparkDataPortObject implements PortObject {
 
                     @Override
                     public boolean hasNext() {
-                        return currentRow < arrayRes.size();
+                        return currentRow < arrayRes.length;
                     }
                 };
             }
 
             @Override
             public DataTableSpec getDataTableSpec() {
-                final JsonArray o = arrayRes.getJsonArray(0);
-                final String[] names = new String[o.size()];
-                final DataType[] types = new DataType[o.size()];
-                for (int i=0; i<o.size(); i++) {
+                final Object[] o = arrayRes[0];
+                final String[] names = new String[o.length];
+                final DataType[] types = new DataType[o.length];
+                for (int i=0; i<o.length; i++) {
                     names[i] = "RDD-col"+i;
                     types[i] = DataType.getType(MyRDDDataCell.class);
                 }
@@ -381,9 +382,9 @@ public class SparkDataPortObject implements PortObject {
 
     private static class MyRDDDataCell extends DataCell {
         private final int m_index;
-        private final JsonArray m_row;
+        private final Object[] m_row;
 
-        MyRDDDataCell(final JsonArray aRow, final int aIndex) {
+        MyRDDDataCell(final Object[] aRow, final int aIndex) {
             m_index = aIndex;
             m_row = aRow;
         }
@@ -394,7 +395,7 @@ public class SparkDataPortObject implements PortObject {
 
         @Override
         public String toString() {
-            return m_row.get(m_index).toString();
+            return m_row[m_index].toString();
         }
 
         @Override
