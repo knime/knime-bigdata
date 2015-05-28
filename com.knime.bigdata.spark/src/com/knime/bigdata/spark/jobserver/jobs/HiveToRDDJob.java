@@ -50,7 +50,10 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_HQL = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_HQL_STATEMENT;
+    private static final String PARAM_SQL = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SQL_STATEMENT;
+
+    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
+            + "." + ParameterConstants.PARAM_DATA_PATH;
 
     private final static Logger LOGGER = Logger.getLogger(HiveToRDDJob.class.getName());
 
@@ -62,8 +65,8 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
     public SparkJobValidation validateWithContext(final SparkContext sc, final Config config) {
         String msg = null;
 
-        if (!config.hasPath(PARAM_HQL)) {
-            msg = "Input parameter '" + PARAM_HQL + "' missing.";
+        if (!config.hasPath(PARAM_SQL)) {
+            msg = "Input parameter '" + PARAM_SQL + "' missing.";
         }
 
         if (msg != null) {
@@ -83,9 +86,9 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "reading hive table...");
 
         final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
-        final String hqlStatement = aConfig.getString(PARAM_HQL);
+        final String sqlStatement = aConfig.getString(PARAM_SQL);
 
-        final JavaSchemaRDD schemaInputRDD = hiveContext.hql(hqlStatement);
+        final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
 
         for (final StructField field : schemaInputRDD.schema().getFields()) {
             LOGGER.log(Level.INFO, "Field '" + field.getName() + "' of type '" + field.getDataType() + "'");
@@ -95,9 +98,10 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        LOGGER.log(Level.INFO, "Storing (hive) data under key: " + aConfig.getString(PARAM_HQL));
-        addToNamedRdds(aConfig.getString(PARAM_HQL), new JavaRDD<Row>(rdd, rdd.elementClassTag()));
+        //TK_TODO: Shouldn't we use the given id for the named RDD?
+        LOGGER.log(Level.INFO, "Storing Hive query result under key: " + aConfig.getString(PARAM_SQL));
+        addToNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME), new JavaRDD<>(rdd, rdd.elementClassTag()));
         return JobResult.emptyJobResult().withMessage("OK")
-            .withTable(aConfig.getString(PARAM_HQL), schemaInputRDD.schema());
+            .withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schemaInputRDD.schema());
     }
 }

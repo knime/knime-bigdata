@@ -51,9 +51,9 @@ import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
-import com.knime.bigdata.spark.port.MLlibModel;
-import com.knime.bigdata.spark.port.MLlibPortObject;
-import com.knime.bigdata.spark.port.MLlibPortObjectSpec;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelPortObject;
+import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 
 
 /**
@@ -74,7 +74,7 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
      */
     public MLlibDecisionTreeNodeModel() {
         super(new PortType[]{DatabasePortObject.TYPE},
-            new PortType[]{MLlibPortObject.TYPE});
+            new PortType[]{SparkModelPortObject.TYPE});
     }
 
     /**
@@ -159,7 +159,7 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
         final DecisionTreeTask task = new DecisionTreeTask(sql, numericColIdx, classColName, classColIdx);
         final DecisionTreeModel model = task.execute(sqlsc);
 //        KMeansModel clusters = new KMeansModel(new Vector[] {new DenseVector(new double[] {1,0,1})});
-        return new PortObject[] {new MLlibPortObject<>(new MLlibModel<>("DecisionTree", model))};
+        return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model))};
         }
     }
 
@@ -177,8 +177,8 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
     /**
      * @return
      */
-    private MLlibPortObjectSpec createMLSpec() {
-        return new MLlibPortObjectSpec("DecisionTree");
+    private SparkModelPortObjectSpec createMLSpec() {
+        return new SparkModelPortObjectSpec("DecisionTree");
     }
 
     /**

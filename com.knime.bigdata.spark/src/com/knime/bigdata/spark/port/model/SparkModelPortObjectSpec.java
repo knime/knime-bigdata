@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port.model;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -32,29 +32,28 @@ import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
-import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
 /**
+ * Spark model port object specification implementation. A Spark model could be a learned Spark MLlib model.
  *
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME.com
  */
-public class MLlibPortObjectSpec implements PortObjectSpec {
+public class SparkModelPortObjectSpec implements PortObjectSpec {
     /**
-     * A serializer for {@link MLlibPortObjectSpec}s.
+     * A serializer for {@link SparkModelPortObjectSpec}s.
      *
      * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
      */
-    protected static class ConnectionSpecSerializer extends PortObjectSpecSerializer<MLlibPortObjectSpec> {
+    protected static class ConnectionSpecSerializer extends PortObjectSpecSerializer<SparkModelPortObjectSpec> {
         @Override
-        public MLlibPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in)
+        public SparkModelPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in)
             throws IOException {
             ModelContentRO modelContent = loadModelContent(in);
-            return new MLlibPortObjectSpec(modelContent);
+            return new SparkModelPortObjectSpec(modelContent);
         }
 
         @Override
-        public void savePortObjectSpec(final MLlibPortObjectSpec portObjectSpec,
+        public void savePortObjectSpec(final SparkModelPortObjectSpec portObjectSpec,
             final PortObjectSpecZipOutputStream out) throws IOException {
             saveModelContent(out, portObjectSpec);
         }
@@ -67,9 +66,9 @@ public class MLlibPortObjectSpec implements PortObjectSpec {
          */
         protected ModelContentRO loadModelContent(final PortObjectSpecZipInputStream in) throws IOException {
             ZipEntry ze = in.getNextEntry();
-            if (!ze.getName().equals(KEY_DATABASE_CONNECTION)) {
+            if (!ze.getName().equals(SPARK_MODEL)) {
                 throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
-                    + KEY_DATABASE_CONNECTION + "\".");
+                    + SPARK_MODEL + "\".");
             }
             return ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
         }
@@ -81,62 +80,60 @@ public class MLlibPortObjectSpec implements PortObjectSpec {
          * @throws IOException if an I/O error occurs
          */
         protected void saveModelContent(final PortObjectSpecZipOutputStream os,
-            final MLlibPortObjectSpec portObjectSpec) throws IOException {
-            os.putNextEntry(new ZipEntry(KEY_DATABASE_CONNECTION));
-            portObjectSpec.m_conn.saveToXML(new NonClosableOutputStream.Zip(os));
+            final SparkModelPortObjectSpec portObjectSpec) throws IOException {
+            os.putNextEntry(new ZipEntry(SPARK_MODEL));
+            portObjectSpec.m_model.saveToXML(new NonClosableOutputStream.Zip(os));
         }
     }
 
-    private final ModelContentRO m_conn;
+    private static final String SPARK_MODEL = "spark_model";
+    private final ModelContentRO m_model;
 
     /**
-     * Creates a new spec for a database connection port.
+     * Creates a new spec for a Spark model port.
      *
      * @param type connection model
      */
-    public MLlibPortObjectSpec(final String type) {
+    public SparkModelPortObjectSpec(final String type) {
         if (type == null) {
-            throw new IllegalArgumentException("Database connection model must not be null.");
+            throw new IllegalArgumentException("Spark model must not be null.");
         }
-        final ModelContent content = new ModelContent("MLlib");
+        final ModelContent content = new ModelContent("SparkModel");
         content.addString("type", type);
-        m_conn = content;
+        m_model = content;
     }
 
     /**
-     * @param conn
+     * @param model
      */
-    public MLlibPortObjectSpec(final ModelContentRO conn) {
-        m_conn = conn;
+    public SparkModelPortObjectSpec(final ModelContentRO model) {
+        m_model = model;
     }
 
     /**
-     * returns the actual model content. The actual content is defined by the {@link DatabaseConnectionSettings}
-     * class (and its potential subclasses).
+     * returns the actual model content
      *
      * @return a model content
      */
     protected ModelContentRO getConnectionModel() {
-        return m_conn;
+        return m_model;
     }
 
     /**
-     * Serializer used to save {@link DatabaseConnectionPortObjectSpec}s.
+     * Serializer used to save {@link SparkModelPortObjectSpec}s.
      *
      * @return a new serializer
      */
-    public static PortObjectSpecSerializer<MLlibPortObjectSpec> getPortObjectSpecSerializer() {
+    public static PortObjectSpecSerializer<SparkModelPortObjectSpec> getPortObjectSpecSerializer() {
         return new ConnectionSpecSerializer();
     }
-
-    private static final String KEY_DATABASE_CONNECTION = "database_connection.zip";
 
     /**
      * {@inheritDoc}
      */
     @Override
     public JComponent[] getViews() {
-        return new JComponent[]{new MLlibConnectionView(m_conn)};
+        return new JComponent[]{new SparkModelConnectionView(m_model)};
     }
 
     /**
@@ -147,11 +144,11 @@ public class MLlibPortObjectSpec implements PortObjectSpec {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof MLlibPortObject)) {
+        if (!(obj instanceof SparkModelPortObject)) {
             return false;
         }
-        MLlibPortObjectSpec dbSpec = (MLlibPortObjectSpec)obj;
-        return m_conn.equals(dbSpec.m_conn);
+        SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec)obj;
+        return m_model.equals(spec.m_model);
     }
 
     /**
@@ -159,13 +156,13 @@ public class MLlibPortObjectSpec implements PortObjectSpec {
      */
     @Override
     public int hashCode() {
-        return m_conn.hashCode();
+        return m_model.hashCode();
     }
 
     /**
-     * @return port type as a string
+     * @return the type of the model
      */
     public String getType() {
-        return m_conn.getString("type", "none");
+        return m_model.getString("type", "none");
     }
 }

@@ -204,6 +204,11 @@ public class JavaRDDPortObject extends DatabaseConnectionPortObject {
                                         current++;
                                         return cell;
                                     }
+
+                                    @Override
+                                    public void remove() {
+                                        throw new UnsupportedOperationException();
+                                    }
                                 };
                             }
 

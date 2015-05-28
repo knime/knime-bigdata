@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port.model;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,12 +31,14 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
 /**
+ * Spark model that encapsulates a learned Spark MLlib model.
  *
- * @author knime
+ * @author Tobias Koetter, KNIME.com
  * @param <M> the model
  */
-public class MLlibModel<M extends Serializable> {
+public class SparkModel<M extends Serializable> {
 
+    private static final String MODEL_ENTRY = "Model";
     private M m_model;
     private String m_type;
 
@@ -44,7 +46,7 @@ public class MLlibModel<M extends Serializable> {
      * @param type model type
      * @param model the model
      */
-    public MLlibModel(final String type, final M model) {
+    public SparkModel(final String type, final M model) {
         m_type = type;
         m_model = model;
     }
@@ -55,10 +57,10 @@ public class MLlibModel<M extends Serializable> {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public MLlibModel(final ExecutionMonitor exec, final PortObjectZipInputStream in)
+    public SparkModel(final ExecutionMonitor exec, final PortObjectZipInputStream in)
             throws IOException {
         final ZipEntry type = in.getNextEntry();
-        if (!type.getName().equals("Model")) {
+        if (!type.getName().equals(MODEL_ENTRY)) {
             throw new IOException("Invalid zip entry");
         }
         try (final ObjectInputStream os = new ObjectInputStream(in);){
@@ -75,7 +77,7 @@ public class MLlibModel<M extends Serializable> {
      * @throws IOException
      */
     public void write(final ExecutionMonitor exec, final PortObjectZipOutputStream out) throws IOException {
-        out.putNextEntry(new ZipEntry("Model"));
+        out.putNextEntry(new ZipEntry(MODEL_ENTRY));
         try (final ObjectOutputStream os = new ObjectOutputStream(out)){
             os.writeObject(getType());
             os.writeObject(getModel());
@@ -85,8 +87,8 @@ public class MLlibModel<M extends Serializable> {
     /**
      * @return the spec
      */
-    public MLlibPortObjectSpec getSpec() {
-        return new MLlibPortObjectSpec(getType());
+    public SparkModelPortObjectSpec getSpec() {
+        return new SparkModelPortObjectSpec(getType());
     }
 
     /**

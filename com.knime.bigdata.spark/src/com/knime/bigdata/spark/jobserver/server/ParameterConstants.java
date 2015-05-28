@@ -45,8 +45,11 @@ public class ParameterConstants {
 	public static final String PARAM_NUMBER_ROWS = "numRows";
 
 	/**
-	 * hql statement parameter
+	 * sql statement parameter
 	 */
-    public static final String PARAM_HQL_STATEMENT = "hql";
-
+    public static final String PARAM_SQL_STATEMENT = "sql";
+    /**
+     * column indices starting with 0
+     */
+    public static final String PARAM_COL_IDXS = "colIndices";
 }

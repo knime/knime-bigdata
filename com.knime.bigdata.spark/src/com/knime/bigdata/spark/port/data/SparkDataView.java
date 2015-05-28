@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port;
+package com.knime.bigdata.spark.port.data;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -28,27 +28,25 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.ModelContentRO;
-
 /**
  *
- * @author knime
+ * @author Tobias Koetter, KNIME.com
  */
-public class MLlibConnectionView extends JPanel {
+class SparkDataView extends JPanel {
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * @param conn
-     * @throws InvalidSettingsException
-     *
+     * @param sparkData the {@link SparkData} to visualize
      */
-    public MLlibConnectionView(final ModelContentRO conn) {
+    SparkDataView(final SparkData sparkData) {
         super(new GridBagLayout());
-        final MLlibPortObjectSpec spec = new MLlibPortObjectSpec(conn);
-        super.setName("MLlib");
+        super.setName("Spark Data");
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<strong>Type:</strong>&nbsp;&nbsp;");
-        buf.append("<tt>" + spec.getType() + "</tt>");
+        buf.append("<tt>");
+        buf.append(sparkData.getTableName());
+        buf.append("</tt>");
         buf.append("<br/><br/>");
         buf.append("</body></html>");
         final JTextPane textArea = new JTextPane();

@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +63,8 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 			+ "." + ParameterConstants.PARAM_DATA_PATH;
 	private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT
 			+ "." + ParameterConstants.PARAM_DATA_PATH;
+	private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
+            + "." + ParameterConstants.PARAM_COL_IDXS;
 
 	private final static Logger LOGGER = Logger.getLogger(KMeansLearner.class
 			.getName());
@@ -94,6 +97,16 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 						+ "' is not of expected type 'integer'.";
 			}
 		}
+		if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
+            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+        } else {
+            try {
+                aConfig.getIntList(PARAM_COL_IDXS);
+            } catch (ConfigException e) {
+                msg = "Input parameter '" + PARAM_NUM_ITERATIONS
+                        + "' is not of expected type 'integer list'.";
+            }
+        }
 
 		if (msg == null && !aConfig.hasPath(PARAM_DATA_FILE_NAME)) {
 			msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
@@ -132,7 +145,14 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		LOGGER.log(Level.INFO, "starting kMeans job...");
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
 				.getString(PARAM_DATA_FILE_NAME));
-		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDD(rowRDD);
+		final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
+		int[] idxs = new int[colIdxs.size()];
+		int idx = 0;
+		for (Integer colIdx : colIdxs) {
+		    idxs[idx++] = colIdx;
+        }
+		//TODO: Use only the column indices when convert to vector
+		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDD(rowRDD, idxs);
 
 		final KMeansModel model = execute(sc, aConfig, inputRDD);
 

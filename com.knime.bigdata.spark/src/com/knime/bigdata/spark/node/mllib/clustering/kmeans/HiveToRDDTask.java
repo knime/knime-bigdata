@@ -40,15 +40,18 @@ public class HiveToRDDTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String m_inputTableName;
+    private final String m_tableName;
+
+    private final String m_hiveQuery;
 
     /**
      * constructor - simply stores parameters
-     *
-     * @param aInputTableName - table identifier (input data and key for output)
+     * @param tableName - table identifier the key for the output table
+     * @param hiveQuery - the hive query to execute
      */
-    public HiveToRDDTask(final String aInputTableName) {
-        m_inputTableName = aInputTableName;
+    public HiveToRDDTask(final String tableName, final String hiveQuery) {
+        m_tableName = tableName;
+        m_hiveQuery = hiveQuery;
     }
 
     /**
@@ -61,20 +64,17 @@ public class HiveToRDDTask implements Serializable {
     public String execute(final ExecutionContext exec) throws Exception {
 
         final String contextName = KnimeContext.getSparkContext();
-        final String jsonArgs = params2Json(m_inputTableName);
+        final String jsonArgs = params2Json();
 
         String jobId = JobControler.startJob(contextName, HiveToRDDJob.class.getCanonicalName(), jsonArgs);
         JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
-
-        //TODO - we ignore everything but the actual key, do something with the result
         return result.getFirstTableKey();
     }
 
-    private final String params2Json(final String aHqlStatement) {
+    private final String params2Json() {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_HQL_STATEMENT, aHqlStatement},
-            //yes, same fileName - for the output this is just a key TODO - real KEY
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, aHqlStatement}});
+            new String[]{ParameterConstants.PARAM_SQL_STATEMENT, m_hiveQuery},
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, m_tableName}});
     }
 
 }
