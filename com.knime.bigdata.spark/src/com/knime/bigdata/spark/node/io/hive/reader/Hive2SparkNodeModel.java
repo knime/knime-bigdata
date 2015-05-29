@@ -33,11 +33,12 @@ import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
+import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.HiveToRDDTask;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkIDGenerator;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
@@ -64,8 +65,16 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
         if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(spec.getDataTableSpec());
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(), spec.getDataTableSpec());
         return new PortObjectSpec[] {resultSpec};
+    }
+
+    private String getContext() throws InvalidSettingsException {
+        try {
+            return KnimeContext.getSparkContext();
+        } catch (GenericKnimeSparkException e) {
+            throw new InvalidSettingsException(e.getMessage());
+        }
     }
 
     /**
@@ -78,10 +87,10 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
         final String hiveQuery = settings.getQuery();
-        final String tableName = SparkIDGenerator.createID();
-        final HiveToRDDTask hiveToRDDTask = new HiveToRDDTask(tableName, hiveQuery);
-        String resultTableName = hiveToRDDTask.execute(exec);
-        final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTableName, resultTableSpec);
+        SparkDataTable resultTable = new SparkDataTable(getContext(), resultTableSpec);
+        final HiveToRDDTask hiveToRDDTask = new HiveToRDDTask(resultTable, hiveQuery);
+        hiveToRDDTask.execute(exec);
+        final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
         return new PortObject[] {sparkObject};
     }
 

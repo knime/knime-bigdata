@@ -16,19 +16,31 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.05.2015 by koetter
+ *   Created on 29.05.2015 by koetter
  */
 package com.knime.bigdata.spark.port.data;
 
-import java.util.UUID;
-
 /**
- *
- * @author koetter
+ * This class represents a data object within Spark. The object is identified by the Spark context
+ * ({@link #getContext()}) it lives in and its unique id ({@link #getID()})
+ * @author Tobias Koetter, KNIME.com
  */
-public final class SparkIDGenerator {
+public interface SparkRDD {
 
-    public static String createID() {
-        return UUID.randomUUID().toString();
-    }
+    /**
+     * @return the unique id of the Spark object
+     */
+    public abstract String getID();
+
+    /**
+     * @return the Spark context the object lives in
+     */
+    public abstract String getContext();
+
+    /**
+     * @param other the other {@link SparkRDD} to check for compatibility
+     * @return <code>true</code> if both are compatible e.g. live in the same context
+     */
+    public boolean compatible(final SparkRDD other);
+
 }

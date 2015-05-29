@@ -25,56 +25,60 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.swing.JComponent;
-
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.util.NonClosableInputStream;
 import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
-import org.knime.core.node.workflow.DataTableSpecView;
+
+import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 /**
- *
+ * This class represents a Spark SchemaRDD or data frame which represents a data table with columns and rows.
+ * The table definition can be inspected with the {@link #getTableSpec()} method.
  * @author Tobias Koetter, KNIME.com
  */
-class SparkData {
+public class SparkDataTable extends AbstractSparkRDD {
 
-    private static final String SPARK_DATA = "data";
     private static final String TABLE_SPEC = "spec";
-    private static final String KEY_TABLE_NAME = "tableName";
 
-    private static final String DATA_ENTRY = "Data";
     private DataTableSpec m_spec;
-    private String m_tableName;
+    /**
+     * @param context the context the Spark data table lives in
+     * @param spec the {@link DataTableSpec} of the Spark data table
+     */
+    public SparkDataTable(final String context, final DataTableSpec spec) {
+        this(context, SparkIDGenerator.createID(), spec);
+    }
 
     /**
+     * @param context the context the Spark data table lives in
+     * @param tableName the unique name of the Spark data table
+     * @param spec the {@link DataTableSpec} of the Spark data table
      */
-    public SparkData(final String tableName, final DataTableSpec spec) {
-        m_tableName = tableName;
+    public SparkDataTable(final String context, final String tableName, final DataTableSpec spec) {
+        super(context, tableName);
+        if (spec == null) {
+            throw new NullPointerException("spec must not be null");
+        }
         m_spec = spec;
     }
 
     /**
      * @param in
      */
-    SparkData(final ZipInputStream in) throws IOException {
-        ZipEntry ze = in.getNextEntry();
-        if (!ze.getName().equals(SPARK_DATA)) {
-            throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
-                + SPARK_DATA + "\".");
-        }
+    @SuppressWarnings("resource")
+    SparkDataTable(final ZipInputStream in) throws IOException {
+        super(in);
         try {
-        final ModelContentRO sparkModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-        m_tableName = sparkModel.getString(KEY_TABLE_NAME);
-        ze = in.getNextEntry();
-        if (!ze.getName().equals(TABLE_SPEC)) {
-            throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
-                + TABLE_SPEC + "\".");
-        }
-        final ModelContentRO specModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-            m_spec = DataTableSpec.load(specModel);
+            ZipEntry ze = in.getNextEntry();
+            if (!ze.getName().equals(TABLE_SPEC)) {
+                throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
+                    + TABLE_SPEC + "\".");
+            }
+            final ModelContentRO specModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
+                m_spec = DataTableSpec.load(specModel);
         } catch (InvalidSettingsException ise) {
             throw new IOException(ise);
         }
@@ -84,36 +88,20 @@ class SparkData {
      * @param out
      * @throws IOException
      */
-    void save(final ZipOutputStream out) throws IOException {
-        final ModelContent sparkModel = new ModelContent(SPARK_DATA);
-        sparkModel.addString(KEY_TABLE_NAME, m_tableName);
-        out.putNextEntry(new ZipEntry(SPARK_DATA));
-        sparkModel.saveToXML(new NonClosableOutputStream.Zip(out));
+    @Override
+    @SuppressWarnings("resource")
+    protected void save(final ZipOutputStream out) throws IOException {
+        super.save(out);
         final ModelContent specModel = new ModelContent(TABLE_SPEC);
         m_spec.save(specModel);
         out.putNextEntry(new ZipEntry(TABLE_SPEC));
         specModel.saveToXML(new NonClosableOutputStream.Zip(out));
     }
 
-
     /**
      * @return the tableSpec
      */
     public DataTableSpec getTableSpec() {
         return m_spec;
-    }
-
-    /**
-     * @return the tableName
-     */
-    public String getTableName() {
-        return m_tableName;
-    }
-
-    /**
-     * @return
-     */
-    public JComponent[] getViews() {
-        return new JComponent[]{new DataTableSpecView(getTableSpec()), new SparkDataView(this)};
     }
 }

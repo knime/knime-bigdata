@@ -20,25 +20,21 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
-import java.io.Serializable;
-
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class KMeansTask implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class KMeansTask {
 
     private final String m_inputTableName;
 
@@ -50,24 +46,29 @@ public class KMeansTask implements Serializable {
 
     private final Integer[] m_includeColIdxs;
 
+    private final String m_context;
+
     /**
      * constructor - simply stores parameters
-     *
-     * @param aInputTableName - table identifier (input data)
+     * @param inputRDD input RDD
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param noOfCluster - number of clusters (aka "k")
      * @param noOfIteration - maximal number of iterations
-     * @param aOutputTableName - table identifier (classified output data)
+     * @param outputRDD - table identifier (classified output data)
      */
-    public KMeansTask(final String aInputTableName, final int[] includeColIdxs, final int noOfCluster,
-        final int noOfIteration, final String aOutputTableName) {
-        m_inputTableName = aInputTableName;
+    public KMeansTask(final SparkRDD inputRDD, final int[] includeColIdxs, final int noOfCluster,
+        final int noOfIteration, final SparkRDD outputRDD) {
+        if (!inputRDD.compatible(outputRDD)) {
+            throw new IllegalArgumentException("Incompatible rdds");
+        }
+        m_context = inputRDD.getContext();
+        m_inputTableName = inputRDD.getID();
         m_includeColIdxs = new Integer[includeColIdxs.length];
         int i = 0;
         for (int value : includeColIdxs) {
             m_includeColIdxs[i++] = Integer.valueOf(value);
         }
-        m_outputTableName = aOutputTableName;
+        m_outputTableName = outputRDD.getID();
         m_noOfCluster = noOfCluster;
         m_noOfIteration = noOfIteration;
     }
@@ -81,10 +82,9 @@ public class KMeansTask implements Serializable {
      * @throws Exception
      */
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
-        final String contextName = KnimeContext.getSparkContext();
         final String learnerKMeansParams = kmeansLearnerDef();
         final String jobId =
-            JobControler.startJob(contextName, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+                JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 

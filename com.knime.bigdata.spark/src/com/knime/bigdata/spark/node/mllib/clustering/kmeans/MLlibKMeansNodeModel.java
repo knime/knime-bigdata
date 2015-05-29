@@ -39,10 +39,11 @@ import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkIDGenerator;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 /**
  *
@@ -127,13 +128,14 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = tableSpec.findColumnIndex(includedCols[i]);
         }
-        final KMeansTask task = new KMeansTask(data.getTableName(), includeColIdxs, m_noOfCluster.getIntValue(),
-            m_noOfIteration.getIntValue(), aOutputTableName);
+        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
+        SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+        final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
+            m_noOfIteration.getIntValue(), resultRDD);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
 
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
-        return new PortObject[]{new SparkDataPortObject(aOutputTableName, resultSpec),
+        return new PortObject[]{new SparkDataPortObject(resultRDD),
             new SparkModelPortObject<>(new SparkModel<>("KMeans", clusters))};
     }
 

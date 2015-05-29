@@ -28,6 +28,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
+import org.knime.core.node.workflow.DataTableSpecView;
 
 /**
  * Spark data port object specification.
@@ -43,7 +44,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
         @Override
         public SparkDataPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in)
             throws IOException {
-            return new SparkDataPortObjectSpec(new SparkData(in));
+            return new SparkDataPortObjectSpec(new SparkDataTable(in));
         }
 
         @Override
@@ -54,21 +55,21 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
     }
 
 
-    private final SparkData m_data;
+    private final SparkDataTable m_data;
 
     /**
      * @param sparkData
      */
-    SparkDataPortObjectSpec(final SparkData sparkData) {
+    SparkDataPortObjectSpec(final SparkDataTable sparkData) {
         m_data = sparkData;
     }
 
     /**
-     * @param tableName
+     * @param context
      * @param spec
      */
-    public SparkDataPortObjectSpec(final DataTableSpec spec) {
-        this(new SparkData(null, spec));
+    public SparkDataPortObjectSpec(final String context, final DataTableSpec spec) {
+        this(new SparkDataTable(context, "dummy", spec));
     }
 
     /**
@@ -85,7 +86,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
      */
     @Override
     public JComponent[] getViews() {
-        return m_data.getViews();
+        return new JComponent[]{new DataTableSpecView(getTableSpec())};
     }
 
     /**
@@ -93,13 +94,6 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
      */
     public DataTableSpec getTableSpec() {
         return m_data.getTableSpec();
-    }
-
-    /**
-     * @return the unique result table name
-     */
-    public String getTableName() {
-        return m_data.getTableName();
     }
 
     /**

@@ -33,11 +33,11 @@ import org.knime.core.node.NodeLogger;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
@@ -50,34 +50,30 @@ public final class SparkDataTableCreator {
 
     /**
      * Retrieves all rows of the given rdd and converts them into a KNIME data table
-     * @param sparkTableName the unique name of the rdd
-     * @param spec the {@link DataTableSpec} of the rdd
+     * @param data the Spark data object
      * @return the named RDD as a DataTable
      */
-    public static DataTable getDataTable(final String sparkTableName, final DataTableSpec spec) {
-        return getDataTable(sparkTableName, spec, -1);
+    public static DataTable getDataTable(final SparkDataTable data) {
+        return getDataTable(data, -1);
     }
 
     /**
      * Retrieves the given number of rows from the given rdd and converts them into a KNIME data table
-     * @param sparkTableName the unique name of the rdd
-     * @param spec the {@link DataTableSpec} of the rdd
+     * @param data the Spark data object
      * @param cacheNoRows the number of rows to retrieve
      * @return the named RDD as a DataTable
      */
-    public static DataTable getDataTable(final String sparkTableName, final DataTableSpec spec, final int cacheNoRows) {
+    public static DataTable getDataTable(final SparkDataTable data, final int cacheNoRows) {
         try {
-            String contextName = KnimeContext.getSparkContext();
+            final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
-            final String fetchParams = rowFetcherDef(cacheNoRows, sparkTableName);
-
-            String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), fetchParams);
+            String jobId = JobControler.startJob(data.getContext(), FetchRowsJob.class.getCanonicalName(), fetchParams);
 
             JobControler.waitForJob(jobId, null);
 
             assert (JobStatus.OK != JobControler.getJobStatus(jobId));
 
-            return convertResultToDataTable(jobId, spec);
+            return convertResultToDataTable(jobId, data.getTableSpec());
         } catch (Throwable t) {
             LOGGER.error("Could not fetch data from Spark RDD, reason: " + t.getMessage(), t);
             return null;
@@ -95,9 +91,11 @@ public final class SparkDataTableCreator {
             throws GenericKnimeSparkException {
         // now check result:
         JobResult statusWithResult = JobControler.fetchJobResult(aJobId);
-         if (!"OK".equals(statusWithResult.getMessage())) {
+        final String message = statusWithResult.getMessage();
+        //TODO:  Returned message is "OK" and not OK
+        if (!"\"OK\"".equals(message)) {
              //fetcher should return OK as result status
-             throw new GenericKnimeSparkException(statusWithResult.getMessage());
+             throw new GenericKnimeSparkException(message);
          }
         final Object[][] arrayRes = (Object[][])statusWithResult.getObjectResult();
         assert (arrayRes != null) : "Row fetcher failed to return a result";
