@@ -1,7 +1,6 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 import org.apache.spark.SparkContext;
-import org.knime.sparkClient.jobs.KnimeSparkJobWithNamedRDD;
 
 import spark.jobserver.SparkJobValidation;
 

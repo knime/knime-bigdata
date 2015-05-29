@@ -62,7 +62,8 @@ class DummyRestClient implements IRestClient {
             KnimeConfigContainer.m_config =
                 KnimeConfigContainer.m_config.withValue(
                     JobControler.JOBS_PATH,
-                    ConfigValueFactory.fromAnyRef("{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf"+System.currentTimeMillis()+"\"}}"));
+                    ConfigValueFactory.fromAnyRef("{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf"
+                        + System.currentTimeMillis() + "\"}}"));
         }
 
         return Response.ok().build();
@@ -93,7 +94,6 @@ class DummyRestClient implements IRestClient {
         }
         return Json.createReader(new StringReader(val)).readObject();
     }
-
 
     /**
      * return the string value of the given field / sub-field combination from the given response

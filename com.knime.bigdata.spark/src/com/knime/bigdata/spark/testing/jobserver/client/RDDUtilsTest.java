@@ -14,8 +14,8 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
-import org.knime.utils.RDDUtils;
 
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.testing.jobserver.server.transformations.TestMultipleTransformations;
 
 /**
@@ -68,7 +68,7 @@ public class RDDUtilsTest  {
 			// JavaRDD input1 = sparkContext.makeRDD();
 			JavaDoubleRDD o = normalJavaRDD(sparkContext, 100L, 2);
 			JavaRDD<Vector> v = new MyMapper().apply(o);
-			JavaRDD<Row> rowRDD = RDDUtils.toJavaRDD(v.zip(o));
+			JavaRDD<Row> rowRDD = RDDUtils.toJavaRDDOfRows(v.zip(o));
 
 			assertEquals("conversion should keep number rows constant ",
 					rowRDD.count(), 100);
@@ -84,7 +84,7 @@ public class RDDUtilsTest  {
 			// JavaRDD input1 = sparkContext.makeRDD();
 			JavaDoubleRDD o = normalJavaRDD(sparkContext, 100L, 2);
 			JavaRDD<Row> v = new MyMapper().toRowRdd(o);
-			JavaRDD<Vector> rowRDD = RDDUtils.toJavaRDD(v);
+			JavaRDD<Vector> rowRDD = RDDUtils.toJavaRDDOfVectors(v);
 
 			assertEquals("conversion should keep number rows constant ",
 					rowRDD.count(), 100);

@@ -30,8 +30,6 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
-import org.knime.utils.RDDUtils;
 
 import spark.jobserver.SparkJobValidation;
 
@@ -40,6 +38,8 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
@@ -121,7 +121,7 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 		LOGGER.log(Level.INFO, "starting kMeans prediction job...");
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
 				.getString(PARAM_DATA_FILE_NAME));
-		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDD(rowRDD);
+		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectors(rowRDD);
 
 		final KMeansModel kMeansModel = ModelUtils.fromString(aConfig
 				.getString(PARAM_MODEL));
@@ -144,7 +144,7 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 
 		final JavaRDD<Integer> predictions = aModel.predict(aInputData);
 
-		final JavaRDD<Row> predictedData = RDDUtils.toJavaRDD(aInputData
+		final JavaRDD<Row> predictedData = RDDUtils.toJavaRDDOfRows(aInputData
 				.zip(predictions));
 
 		return predictedData;

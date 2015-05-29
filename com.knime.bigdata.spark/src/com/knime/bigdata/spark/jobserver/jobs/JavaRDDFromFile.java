@@ -32,13 +32,13 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;

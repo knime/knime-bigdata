@@ -32,13 +32,13 @@ import org.apache.spark.sql.api.java.JavaSchemaRDD;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
 
 /**

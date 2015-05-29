@@ -46,8 +46,8 @@ import com.typesafe.config.ConfigValueFactory;
 /**
  * immutable container for job results
  *
- * a job result may contain a message, any number of table keys and corresponding schemas and at most one mllib model
- * or some other result object (some object in fact)
+ * a job result may contain a message, any number of table keys and corresponding schemas and at most one mllib model or
+ * some other result object (some object in fact)
  *
  * @author dwk
  */
@@ -84,8 +84,7 @@ public class JobResult implements Serializable {
     private final Map<String, StructType> m_tables;
 
     /**
-     * machine learning model learned by this job (if any), or some other job
-     * result
+     * machine learning model learned by this job (if any), or some other job result
      */
     private final Serializable m_object;
 
@@ -188,7 +187,8 @@ public class JobResult implements Serializable {
     @Override
     public String toString() {
 
-        Config config = ConfigFactory.empty().withValue(MSG_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_msg));
+        Config config =
+            ConfigFactory.empty().withValue(MSG_IDENTIFIER, ConfigValueFactory.fromAnyRef(ensureQuotes(m_msg)));
 
         Map<String, ArrayList<ArrayList<String>>> m = new HashMap<>();
         for (Map.Entry<String, StructType> entry : m_tables.entrySet()) {
@@ -200,18 +200,28 @@ public class JobResult implements Serializable {
                 f.add("" + field.isNullable());
                 fields.add(f);
             }
-            String key = entry.getKey();
-            if (!key.startsWith("\"") || !key.endsWith("\"")) {
-                key = "\"" + key + "\"";
-            }
+            String key = ensureQuotes(entry.getKey());
             m.put(key, fields);
         }
         config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
         if (m_object != null) {
-            config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
+            config =  config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
         }
         return config.root().render(ConfigRenderOptions.concise());
 
+    }
+
+    /**
+     * ensure that the given string starts and ends with quotes
+     *
+     * @param aString
+     * @return original string if it is already in quotes, quoted string otherwise
+     */
+    private String ensureQuotes(final String aString) {
+        if (!aString.startsWith("\"") || !aString.endsWith("\"")) {
+            return "\"" + aString + "\"";
+        }
+        return aString;
     }
 
     /**
