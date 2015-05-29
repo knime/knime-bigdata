@@ -73,6 +73,7 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        exec.setMessage("Starting spark job");
         final DatabasePortObject db = (DatabasePortObject)inData[0];
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
