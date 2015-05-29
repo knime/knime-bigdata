@@ -18,9 +18,15 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
+import spark.jobserver.SparkJobValidation;
+
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * handles the client side of the job-server in all requests related to jobs
@@ -62,7 +68,8 @@ public class JobControler {
         // curl command:
         // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
         // localhost:8090/jars/test
-        Response response = RestClient.post("/jars/" + appName, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
+        Response response =
+            RestClient.post("/jars/" + appName, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
 
         RestClient.checkStatus(response, "Error: failed to upload jar to server", Status.OK);
 
@@ -93,15 +100,42 @@ public class JobControler {
      */
     public static String startJob(final String aContextName, final String aClassPath, final String aJsonParams)
         throws GenericKnimeSparkException {
+        try {
+            KnimeSparkJob job = (KnimeSparkJob)Class.forName(aClassPath).newInstance();
+            return startJob(aContextName, job, aJsonParams);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new GenericKnimeSparkException(e);
+        }
+    }
 
+    /**
+     * start a new job within the given context
+     *
+     * @param aContextName name of the Spark context to run the job in
+     * @param aJobInstance instance of the job (class must be in a jar that was previously uploaded to the
+     *            server), used to validate the inputs
+     * @param aJsonParams json formated string with job parameters
+     * @return job id
+     * @throws GenericKnimeSparkException
+     */
+    public static String
+        startJob(final String aContextName, final KnimeSparkJob aJobInstance, final String aJsonParams)
+            throws GenericKnimeSparkException {
+
+        Config config = ConfigFactory.parseString(aJsonParams);
+        SparkJobValidation validation = aJobInstance.validate(config);
+        if (!ValidationResultConverter.isValid(validation)) {
+            throw new GenericKnimeSparkException(validation.toString());
+        }
         // start actual job
         // curl command would be:
         // curl --data-binary @classification-config.json
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
-        Response response = RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName,
-            "classPath", aClassPath}, Entity.text(aJsonParams));
+        Response response =
+            RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName, "classPath",
+                aJobInstance.getClass().getCanonicalName()}, Entity.text(aJsonParams));
 
-        RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
+        RestClient.checkStatus(response, "Error: failed to start job: " + aJobInstance.getClass().getCanonicalName()
             + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
             + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
             Status.ACCEPTED, Status.OK});
@@ -132,8 +166,9 @@ public class JobControler {
                 new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_DATA_PATH,
                     aDataFile));
 
-            final Response response = RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName,
-                "classPath", aClassPath}, Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+            final Response response =
+                RestClient.post(JOBS_PATH, new String[]{"appName", appName, "context", aContextName, "classPath",
+                    aClassPath}, Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
             multiPart.close();
 
             //			Response response = builder.post(Entity.text(aJsonParams));
@@ -256,11 +291,10 @@ public class JobControler {
     public static JobResult fetchJobResult(final String aJobId) throws GenericKnimeSparkException {
         // GET /jobs/<jobId> - Gets the result or status of a specific job
         JsonObject json = RestClient.toJSONObject(JOBS_PATH + aJobId);
-        if (json.containsKey("result"))
-        {
+        if (json.containsKey("result")) {
             return JobResult.fromBase64String(json.getString("result"));
         } else {
-            return JobResult.emptyJobResult().withMessage("ERROR: no job result in: "+json.toString());
+            return JobResult.emptyJobResult().withMessage("ERROR: no job result in: " + json.toString());
         }
     }
 
@@ -272,11 +306,12 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      * @throws AssertionError if job failed
      */
-    public static JobResult waitForJobAndFetchResult(final String jobId, final ExecutionContext exec) throws CanceledExecutionException, GenericKnimeSparkException {
+    public static JobResult waitForJobAndFetchResult(final String jobId, final ExecutionContext exec)
+        throws CanceledExecutionException, GenericKnimeSparkException {
         JobStatus status = waitForJob(jobId, exec);
         JobResult result = fetchJobResult(jobId);
         if (JobStatus.isErrorStatus(status)) {
-            assert(false) : "Job failure: "+ result.toString();
+            assert (false) : "Job failure: " + result.toString();
         }
         return result;
     }

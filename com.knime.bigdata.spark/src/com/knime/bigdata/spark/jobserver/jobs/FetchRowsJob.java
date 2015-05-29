@@ -10,6 +10,7 @@ import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -41,8 +42,7 @@ public class FetchRowsJob extends KnimeSparkJob {
 	 * parse command line parameters
 	 */
 	@Override
-	public SparkJobValidation validateWithContext(final SparkContext sc,
-			final Config aConfig) {
+	public SparkJobValidation validate(final Config aConfig) {
 		String msg = null;
 		if (!aConfig.hasPath(PARAM_NUM_ROWS)) {
 			msg = "Input parameter '" + PARAM_NUM_ROWS + "' missing.";
@@ -57,8 +57,6 @@ public class FetchRowsJob extends KnimeSparkJob {
 
 		if (msg == null && !aConfig.hasPath(PARAM_TABLE_NAME)) {
 			msg = "Input parameter '" + PARAM_TABLE_NAME + "' missing.";
-		} else if (!validateNamedRdd(aConfig.getString(PARAM_TABLE_NAME))) {
-			msg = "Input data table missing for key: "+aConfig.getString(PARAM_TABLE_NAME);
 		}
 
 		if (msg != null) {
@@ -69,7 +67,11 @@ public class FetchRowsJob extends KnimeSparkJob {
 	}
 
 	@Override
-	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+
+	    if (!validateNamedRdd(aConfig.getString(PARAM_TABLE_NAME))) {
+            throw new GenericKnimeSparkException("Input data table missing for key: "+aConfig.getString(PARAM_TABLE_NAME));
+        }
 		final int numRows = aConfig.getInt(PARAM_NUM_ROWS);
 		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows
 				+ " rows from input RDD");

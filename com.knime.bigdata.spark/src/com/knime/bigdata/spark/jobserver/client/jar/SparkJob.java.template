@@ -15,7 +15,7 @@ public class $className
 	   extends com.knime.bigdata.spark.jobserver.server.KnimeSparkJob {
 	   
 	@Override
-	protected SparkJobValidation validateWithContext(final SparkContext aSparkContext, final Config aConfig) {
+	public SparkJobValidation validate(final Config aConfig) {
 		$validationCode
 		return ValidationResultConverter.valid();
 	}

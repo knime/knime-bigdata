@@ -15,7 +15,6 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -102,7 +101,7 @@ public class SparkJobCompilerTest extends UnitSpec {
         Config config = ConfigFactory.parseString(configText);
         assertEquals("config should be valid", ValidationResultConverter.valid(), job.validate(null, config));
 
-        final String className =
+        final KnimeSparkJob jobInstance =
             testObj
                 .addKnimeSparkJob2Jar(
                     "resources/knimeJobs.jar",
@@ -112,12 +111,10 @@ public class SparkJobCompilerTest extends UnitSpec {
                     "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
                     "");
 
-        String contextName = KnimeContext.getSparkContext();
-        try {
             //upload jar to job-server
             JobControler.uploadJobJar(aJarPath);
             //start job
-            String jobId = JobControler.startJob(contextName, className, configText);
+            String jobId = JobControler.startJob(contextName, jobInstance, configText);
 
             KnimeConfigContainer.m_config =
                 KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
@@ -130,10 +127,66 @@ public class SparkJobCompilerTest extends UnitSpec {
             JsonObject res = RestClient.toJSONObject(JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
             assertTrue("job result", res.getString("result").contains(RES_STR));
 
-        } finally {
-            KnimeContext.destroySparkContext(contextName);
-        }
-
     }
+
+    /**
+    *
+    * @throws Throwable
+    */
+   @Test
+   public void addTransformationJob2JarAndExecuteOnServer() throws Throwable {
+
+       final String RES_STR = "HELLO WORLD!!!";
+       final String configText = "{\"input\":{\"message\":\"" + RES_STR + "\"}}";
+
+       final String validationCode =
+           "try {\n" + "String s = aConfig.getString(\"input.message\");\n" + "} catch (Exception e) {\n"
+               + " // OK, ignore\n" + "}";
+
+       final String additionalImports = "import java.util.concurrent.TimeUnit;";
+
+       final String aJarPath = Files.createTempFile("knimeJobUtils", "jar").toString();
+
+       final SparkJobCompiler testObj = new SparkJobCompiler();
+
+       KnimeSparkJob job =
+           testObj
+               .newKnimeSparkJob(
+                   additionalImports,
+                   validationCode,
+                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                   "");
+
+       Config config = ConfigFactory.parseString(configText);
+       assertEquals("config should be valid", ValidationResultConverter.valid(), job.validate(null, config));
+
+       final KnimeSparkJob jobInstance =
+           testObj
+               .addKnimeSparkJob2Jar(
+                   "resources/knimeJobs.jar",
+                   aJarPath,
+                   additionalImports,
+                   validationCode,
+                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                   "");
+
+           //upload jar to job-server
+           JobControler.uploadJobJar(aJarPath);
+           //start job
+           String jobId = JobControler.startJob(contextName, jobInstance, configText);
+
+           KnimeConfigContainer.m_config =
+               KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
+                   ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
+
+           assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
+
+           assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(jobId));
+
+           JsonObject res = RestClient.toJSONObject(JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+           assertTrue("job result", res.getString("result").contains(RES_STR));
+
+
+   }
 
 }

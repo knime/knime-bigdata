@@ -8,10 +8,31 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaRDDLike;
 import org.apache.spark.sql.api.java.Row;
 
+import org.apache.spark.SparkContext;
+import spark.jobserver.SparkJobValidation;
+
+import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+
 $additionalImports
 
-public class $className
-	   implements com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation {
+public class $className extends KnimeSparkJob implements UserDefinedTransformation {
+	   
+	@Override
+	protected SparkJobValidation validateWithContext(final SparkContext aSparkContext, final Config aConfig) {
+		$validationCode
+		return ValidationResultConverter.valid();
+	}
+
+	@Override
+	protected JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig) { 
+	
+	}
 	   
 	@Override
 	@Nonnull

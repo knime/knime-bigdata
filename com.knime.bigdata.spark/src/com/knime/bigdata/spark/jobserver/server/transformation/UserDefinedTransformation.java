@@ -5,7 +5,6 @@ import java.io.Serializable;
 import javax.annotation.Nonnull;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaRDDLike;
 import org.apache.spark.sql.api.java.Row;
 
 /**
@@ -16,5 +15,5 @@ import org.apache.spark.sql.api.java.Row;
 public interface UserDefinedTransformation extends Serializable {
 
 	@Nonnull
-	<T extends JavaRDDLike<Row, ?>> JavaRDD<Row> apply(@Nonnull T input);
+	<T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull T input);
 }
