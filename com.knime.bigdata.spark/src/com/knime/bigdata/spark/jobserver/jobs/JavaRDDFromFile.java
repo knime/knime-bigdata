@@ -64,8 +64,7 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 	 *
 	 */
 	@Override
-	public SparkJobValidation validateWithContext(final SparkContext sc,
-			final Config config) {
+	public SparkJobValidation validate(final Config config) {
 		String msg = null;
 
 		if (!config.hasPath(PARAM_DATA_FILE_NAME)) {

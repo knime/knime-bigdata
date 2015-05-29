@@ -6,9 +6,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.testing.UnitSpec;
 
 /**
@@ -36,17 +37,18 @@ public class JobControlerTest extends UnitSpec {
         JobControler.uploadJobJar("resources/knimeJobs.jar");
     }
 
+    /**
+     *
+     * @throws Throwable
+     */
     @Test
     public void jobControlerShouldCreateJobWithProperName() throws Throwable {
-        String contextName = KnimeContext.getSparkContext();
-        try {
-            String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName());
-            assertNotNull("JobId should not be null", jobId);
-            assertTrue("JobId should be some lengthy string", jobId.length() > 25);
+        final String params = JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
+            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "9", ParameterConstants.PARAM_DATA_PATH, "someRDD"}});
 
-        } finally {
-            KnimeContext.destroySparkContext(contextName);
-        }
+        String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), params);
+        assertNotNull("JobId should not be null", jobId);
+        assertTrue("JobId should be some lengthy string", jobId.length() > 25);
     }
 
 }

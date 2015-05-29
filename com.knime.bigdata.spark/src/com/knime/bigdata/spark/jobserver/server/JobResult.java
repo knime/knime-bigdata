@@ -89,9 +89,18 @@ public class JobResult implements Serializable {
     private final Serializable m_object;
 
     private JobResult(final String aMsg, final Map<String, StructType> aTables, final Serializable aObjectResult) {
+        this(aMsg, aTables, aObjectResult, null);
+    }
+
+    private JobResult(final String aMsg, final Map<String, StructType> aTables, final Serializable aObjectResult,
+        final Throwable aThrowable) {
         m_msg = aMsg;
         m_tables = aTables;
-        m_object = aObjectResult;
+        if (aThrowable != null) {
+            m_object = aThrowable.getStackTrace();
+        } else {
+            m_object = aObjectResult;
+        }
     }
 
     /**
@@ -124,6 +133,16 @@ public class JobResult implements Serializable {
         final Map<String, StructType> tables = new HashMap<>(m_tables);
         tables.put(aKey, aTableSchema);
         return new JobResult(m_msg, Collections.unmodifiableMap(tables), m_object);
+    }
+
+    /**
+     * add a throwable to this result
+     *
+     * @param aThrowable the error
+     * @return copy of this with error set
+     */
+    public JobResult withException(final Throwable aThrowable) {
+        return new JobResult(m_msg, m_tables, m_object, aThrowable);
     }
 
     /**
@@ -205,7 +224,7 @@ public class JobResult implements Serializable {
         }
         config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
         if (m_object != null) {
-            config =  config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
+            config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
         }
         return config.root().render(ConfigRenderOptions.concise());
 
@@ -262,4 +281,5 @@ public class JobResult implements Serializable {
         }
         return null;
     }
+
 }

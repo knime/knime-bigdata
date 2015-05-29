@@ -8,7 +8,6 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
-import com.knime.bigdata.spark.testing.UnitSpec;
 
 
 /**
@@ -16,7 +15,7 @@ import com.knime.bigdata.spark.testing.UnitSpec;
  * @author dwk
  *
  */
-public class ModelUtilsTest extends UnitSpec {
+public class ModelUtilsTest {
 
     /**
      *

@@ -10,6 +10,8 @@ package com.knime.bigdata.spark.jobserver.client.jar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,8 +59,9 @@ final public class SparkJobCompiler {
     // for secure package name
     private static final Random random = new Random();
 
-    // the Java source template
-    private String template;
+    // the Java source templates
+    private String sparkJobTemplate;
+    private String transformationTemplate;
 
     /**
      * fill a template with source code, compile the code and add it to a jar file
@@ -72,7 +75,7 @@ final public class SparkJobCompiler {
      * @return canonical name of compiled class
      * @throws GenericKnimeSparkException in case of some error
      */
-    public String addKnimeSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
+    public KnimeSparkJob addKnimeSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
         @Nonnull final String aAdditionalImports, @Nonnull final String validationCode,
         @Nonnull final String aExecutionCode, @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
         final String className = "kj" + (classNameSuffix++) + digits();
@@ -80,6 +83,60 @@ final public class SparkJobCompiler {
         try {
             // generate semi-secure unique package and class names
             // compile the generated Java source
+            Class<KnimeSparkJob> c = compileKnimeSparkJob(className, aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
+            byte[] bytes = compiler.getClassByteCode(qName);
+            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, bytes);
+            return c.newInstance();
+        } catch (CharSequenceCompilerException e) {
+            log(e.getDiagnostics());
+            LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
+        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
+        }
+    }
+
+    /**
+     * add pre-compiled job to a jar file
+     *
+     * @param aSourceJarPath
+     * @param aTargetJarPath
+     * @param aCanonicalClassPath
+     * @throws GenericKnimeSparkException in case of some error
+     */
+    public void addKnimeSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
+        @Nonnull final String aCanonicalClassPath) throws GenericKnimeSparkException {
+        try {
+            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, aCanonicalClassPath);
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+            throw new GenericKnimeSparkException(e);
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+        }
+    }
+
+    /**
+     * fill a template with source code, compile the code and add it to a jar file
+     *
+     * @param aSourceJarPath
+     * @param aTargetJarPath
+     * @param aAdditionalImports
+     * @param aTransformationCode
+     * @param aHelperMethodsCode
+     * @return canonical name of compiled class
+     * @throws GenericKnimeSparkException in case of some error
+     * /
+    public String addTransformationSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
+        @Nonnull final String aAdditionalImports, @Nonnull final String aTransformationCode,
+        @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
+        final String className = "kt" + (classNameSuffix++) + digits();
+        final String qName = PACKAGE_NAME + '.' + className;
+        try {
+            // generate semi-secure unique package and class names
+            // compile the generated Java source
+            final String helperMethodsCode = fillTransformationTemplate(packageName, className, aAdditionalImports, aTransformationCode, aHelperMethods)
             compileKnimeSparkJob(className, aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
             byte[] bytes = compiler.getClassByteCode(qName);
             JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, bytes);
@@ -96,6 +153,7 @@ final public class SparkJobCompiler {
         }
         return qName;
     }
+*/
 
     /**
      * fill a template with source code, compile the code and return an instance of the compiled class
@@ -138,7 +196,7 @@ final public class SparkJobCompiler {
         // generate semi-secure unique package and class names
         // generate the source class as String
         final String source =
-            fillTemplate(PACKAGE_NAME, aClassName, aAdditionalImports, validationCode, aExecutionCode,
+                fillJobTemplate(PACKAGE_NAME, aClassName, aAdditionalImports, validationCode, aExecutionCode,
                 aHelperMethodsCode);
         // compile the generated Java source
         final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<JavaFileObject>();
@@ -164,27 +222,53 @@ final public class SparkJobCompiler {
      * @return source for the new class extending the KnimeSparkJob abstract class
      * @throws IOException
      */
-    private String fillTemplate(final String packageName, final String className, final String aAdditionalImports,
+    private String fillJobTemplate(final String packageName, final String className, final String aAdditionalImports,
         final String validationCode, final String executionCode, final String helperMethods) throws IOException {
-        if (template == null) {
-            template = readTemplate();
+        if (sparkJobTemplate == null) {
+            sparkJobTemplate = readTemplate("SparkJob.java.template");
         }
-        // simplest "template processor":
-        String source =
-            template.replace("$packageName", packageName).replace("$className", className)
-                .replace("$additionalImports", aAdditionalImports).replace("$validationCode", validationCode)
-                .replace("$executionCode", executionCode).replace("$helperMethods", helperMethods);
+        Map<String, String> snippets = new HashMap<String, String>();
+        snippets.put("$packageName", packageName);
+        snippets.put("$className", className);
+        snippets.put("$additionalImports", aAdditionalImports);
+        snippets.put("$validationCode", validationCode);
+        snippets.put("$executionCode", executionCode);
+        snippets.put("$helperMethods", helperMethods);
+
+        return fillTemplate(sparkJobTemplate, snippets);
+    }
+
+    private String fillTransformationTemplate(final String packageName, final String className, final String aAdditionalImports,
+        final String aTransformationCode, final String aHelperMethods) throws IOException {
+        if (transformationTemplate == null) {
+            transformationTemplate = readTemplate("UserDefinedTransformation.java.template");
+        }
+        Map<String, String> snippets = new HashMap<String, String>();
+        snippets.put("$packageName", packageName);
+        snippets.put("$className", className);
+        snippets.put("$additionalImports", aAdditionalImports);
+        snippets.put("$transformationCode", aTransformationCode);
+        snippets.put("$helperMethods", aHelperMethods);
+
+        return fillTemplate(transformationTemplate, snippets);
+    }
+
+    private static String fillTemplate(final String aTemplate, final Map<String, String> aSnippets) throws IOException {
+        String source =  aTemplate;
+        for (Map.Entry<String, String> entry : aSnippets.entrySet()) {
+            source = source.replace(entry.getKey(), entry.getValue());
+        }
         return source;
     }
 
     /**
-     * Read the KnimeSparkJob source template
-     *
+     * Read the KnimeSparkJob or Transformation source template
+     * @param name template name
      * @return a source template
      * @throws IOException
      */
-    private String readTemplate() throws IOException {
-        InputStream is = SparkJobCompiler.class.getResourceAsStream("SparkJob.java.template");
+    private String readTemplate(final String aName) throws IOException {
+        InputStream is = SparkJobCompiler.class.getResourceAsStream(aName);
         int size = is.available();
         byte bytes[] = new byte[size];
         if (size != is.read(bytes, 0, size)) {
@@ -215,7 +299,7 @@ final public class SparkJobCompiler {
     private static final KnimeSparkJob NULL_JOB = new KnimeSparkJob() {
 
         @Override
-        protected SparkJobValidation validateWithContext(final SparkContext aContext, final Config aConfig) {
+        public SparkJobValidation validate(final Config aConfig) {
             return ValidationResultConverter.invalid("job compilation failure!");
         }
 

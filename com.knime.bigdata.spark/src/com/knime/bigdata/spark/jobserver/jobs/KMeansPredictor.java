@@ -72,8 +72,7 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 	 * - the kmeans model - the input JavaRDD
 	 */
 	@Override
-	public SparkJobValidation validateWithContext(final SparkContext sc,
-			final Config aConfig) {
+	public SparkJobValidation validate(final Config aConfig) {
 		String msg = null;
 		if (!aConfig.hasPath(PARAM_DATA_FILE_NAME)) {
 			msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
