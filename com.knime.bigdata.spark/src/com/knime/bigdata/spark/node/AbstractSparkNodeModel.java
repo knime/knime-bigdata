@@ -81,7 +81,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
  */
 public abstract class AbstractSparkNodeModel extends NodeModel {
 
-    private static final String NET_DIR_PREFIX = "net_";
+//    private static final String NET_DIR_PREFIX = "net_";
 
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(AbstractSparkNodeModel.class);
@@ -90,11 +90,11 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
 
     private static final String CFG_SETTING = "saveInternalsSettings";
 
-    private static final String CFG_NETWORK_UUIDS = "networkUUIDs";
+    private static final String CFG_NAMED_RDD_UUIDS = "namedRDDs";
 
-    private final LinkedList<String> m_netCacheIDs = new LinkedList<>();
+    private final LinkedList<String> m_namedRDDs = new LinkedList<>();
 
-    private boolean m_destroyNetworks = true;
+    private boolean m_destroyRDDs = true;
 
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
@@ -110,8 +110,8 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      * on node reset. <code>false</code> if they should be removed from cache
      * but not destroyed in the persistence layer.
      */
-    protected void destroyGraphs(final boolean destroy) {
-        m_destroyNetworks = destroy;
+    protected void destroyRDDs(final boolean destroy) {
+        m_destroyRDDs = destroy;
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                    final  SparkDataPortObject netPortObject =
                        (SparkDataPortObject)portObject;
                    final String uuid = netPortObject.getTableName();
-                   m_netCacheIDs.add(uuid);
+                   m_namedRDDs.add(uuid);
                 }
             }
         }
@@ -142,7 +142,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
         }
-        for (final String id : m_netCacheIDs) {
+        for (final String id : m_namedRDDs) {
 //            if (m_destroyNetworks) {
 //                //destroy all networks that were created by this node
 //                GraphRepository.getInstance().destroy(id);
@@ -152,7 +152,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
 //                GraphRepository.getInstance().detach(id);
 //            }
         }
-        m_netCacheIDs.clear();
+        m_namedRDDs.clear();
         resetInternal();
     }
 
@@ -195,13 +195,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         final FileInputStream inData = new FileInputStream(settingFile);
         final ConfigRO config = NodeSettings.loadFromXML(inData);
         try {
-            final String[] networkUUIDs =
-                config.getStringArray(CFG_NETWORK_UUIDS);
-            if (networkUUIDs.length > 0) {
-                final double progress = 1.0 / networkUUIDs.length;
-                for (int i = 0, length = networkUUIDs.length; i < length; i++) {
-                    final String uuid = networkUUIDs[i];
-                    m_netCacheIDs.add(uuid);
+            final String[] namedRDDUUIDs =
+                config.getStringArray(CFG_NAMED_RDD_UUIDS);
+            if (namedRDDUUIDs.length > 0) {
+                final double progress = 1.0 / namedRDDUUIDs.length;
+                for (int i = 0, length = namedRDDUUIDs.length; i < length; i++) {
+                    final String uuid = namedRDDUUIDs[i];
+                    m_namedRDDs.add(uuid);
                     //check if the network is already in the cache
 //                    if (GraphRepository.getInstance().isPresent(uuid)) {
 //                        if (LOGGER.isDebugEnabled()) {
@@ -229,8 +229,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                 }
             }
         } catch (final InvalidSettingsException e) {
-            throw new IOException("Invalid loadInternals settings file",
-                    e.getCause());
+            throw new IOException("Invalid loadInternals settings file", e.getCause());
         }
         loadAdditionalInternals(nodeInternDir, exec);
     }
@@ -250,23 +249,19 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     @Override
     protected final void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
     throws IOException, CanceledExecutionException {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Entering saveInternals(nodeInternDir, exec) "
-                    + "of class AbstractGraphNodeModel.");
-        }
         try {
             final File settingFile = new File(nodeInternDir, CFG_FILE);
             final FileOutputStream dataOS = new FileOutputStream(settingFile);
             final Config config = new NodeSettings(CFG_SETTING);
             exec.checkCanceled();
             final Collection<String> uuids = new LinkedList<>();
-            if (!m_netCacheIDs.isEmpty()) {
+            if (!m_namedRDDs.isEmpty()) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Spark ids to save: " + m_netCacheIDs.toString());
+                    LOGGER.debug("Spark ids to save: " + m_namedRDDs.toString());
                 }
-                final double subProgress = 1.0 / m_netCacheIDs.size();
+                final double subProgress = 1.0 / m_namedRDDs.size();
                 int i = 0;
-                for (final String id : m_netCacheIDs) {
+                for (final String id : m_namedRDDs) {
 //                    final File networkDir =
 //                        new File(nodeInternDir, NET_DIR_PREFIX + i++);
 //                    if (!networkDir.mkdir()) {
@@ -280,12 +275,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                     exec.checkCanceled();
                 }
             }
-            config.addStringArray(CFG_NETWORK_UUIDS,
-                    uuids.toArray(new String[0]));
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Exiting saveInternals(nodeInternDir, exec) "
-                        + "of class AbstractGraphNodeModel.");
-            }
+            config.addStringArray(CFG_NAMED_RDD_UUIDS, uuids.toArray(new String[0]));
             config.saveToXML(dataOS);
         } catch (final Exception e) {
             throw new IOException(e.getMessage(), e.getCause());
@@ -311,15 +301,14 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
             //detach all networks from the repository
             //when the workflow is closed or the node is removed from the
             //workflow
-            if (!m_netCacheIDs.isEmpty()) {
-                for (final String id : m_netCacheIDs) {
+            if (!m_namedRDDs.isEmpty()) {
+                for (final String id : m_namedRDDs) {
 //                    GraphRepository.getInstance().detach(id);
                 }
-                m_netCacheIDs.clear();
+                m_namedRDDs.clear();
             }
         } catch (final Throwable e) {
-            LOGGER.debug("Exception while finalizing network node: "
-                    + e.getMessage());
+            LOGGER.debug("Exception while finalizing Spark node: " + e.getMessage());
         }
     }
 }

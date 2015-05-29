@@ -74,9 +74,12 @@ public class FetchRowsJob extends KnimeSparkJob {
 		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows
 				+ " rows from input RDD");
 		final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getString(PARAM_TABLE_NAME));
-
-		final List<Row> res = inputRDD.take(numRows);
-
+		final List<Row> res;
+		if (numRows > 0) {
+		    res = inputRDD.take(numRows);
+		} else {
+		    res = inputRDD.collect();
+		}
 		return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mapTo2DimArray(res));
 	}
 

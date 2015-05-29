@@ -27,7 +27,6 @@ import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,13 +36,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
-import org.knime.core.data.RowIterator;
-import org.knime.core.data.RowKey;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
@@ -56,14 +50,7 @@ import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.SwingWorkerWithContext;
 
-import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
-import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
  * Spark data {@link PortObject} implementation which holds a reference to a {@link SparkData} object.
@@ -223,7 +210,7 @@ public class SparkDataPortObject implements PortObject {
                     /** {@inheritDoc} */
                     @Override
                     protected DataTable doInBackgroundWithContext() throws Exception {
-                        return getDataTable(value.get());
+                        return SparkDataTableCreator.getDataTable(getTableName(), getTableSpec(), value.get());
                     }
                     /** {@inheritDoc} */
                     @Override
@@ -263,151 +250,6 @@ public class SparkDataPortObject implements PortObject {
         return panels;
     }
 
-    /**
-     * @return underlying data
-     */
-    private DataTable getDataTable(final int cacheNoRows) {
-        try {
-            String contextName = KnimeContext.getSparkContext();
-
-            final String fetchParams = rowFetcherDef(cacheNoRows, getTableSpec().getName());
-
-            String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), fetchParams);
-
-            JobControler.waitForJob(jobId, null);
-
-            assert (JobStatus.OK != JobControler.getJobStatus(jobId));
-
-            return convertResultToDataTable(jobId);
-        } catch (Throwable t) {
-            LOGGER.error("Could not fetch data from Spark RDD, reason: " + t.getMessage(), t);
-            return null;
-        }
-    }
-
-    private String rowFetcherDef(final int aNumRows, final String aTableName) {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_DATA_PATH,
-                aTableName}});
-    }
-
-    private DataTable convertResultToDataTable(final String aJobId) throws GenericKnimeSparkException {
-
-        // now check result:
-        JobResult statusWithResult = JobControler.fetchJobResult(aJobId);
-         if (!"OK".equals(statusWithResult.getMessage())) {
-             //fetcher should return OK as result status
-             throw new GenericKnimeSparkException(statusWithResult.getMessage());
-         }
-        final Object[][] arrayRes = (Object[][])statusWithResult.getObjectResult();
-        assert (arrayRes != null) : "Row fetcher failed to return a result";
-
-        return new DataTable() {
-
-            @Override
-            public RowIterator iterator() {
-                return new RowIterator() {
-
-                    private int currentRow = 0;
-
-                    @Override
-                    public DataRow next() {
-                        final Object[] o = arrayRes[currentRow];
-                        currentRow++;
-                        return new DataRow() {
-
-                            @Override
-                            public Iterator<DataCell> iterator() {
-                                return new Iterator<DataCell>() {
-                                    private int current = 0;
-
-                                    @Override
-                                    public boolean hasNext() {
-                                        return current < o.length;
-                                    }
-
-                                    @Override
-                                    public DataCell next() {
-                                        DataCell cell = getCell(current);
-                                        current++;
-                                        return cell;
-                                    }
-
-                                    @Override
-                                    public void remove() {
-                                        throw new UnsupportedOperationException();
-                                    }
-                                };
-                            }
-
-                            @Override
-                            public int getNumCells() {
-                                return o.length;
-                            }
-
-                            @Override
-                            public RowKey getKey() {
-                                // TODO Auto-generated method stub
-                                return null;
-                            }
-
-                            @Override
-                            public DataCell getCell(final int index) {
-                                return new MyRDDDataCell(o, index);
-                            }
-                        };
-                    }
-
-                    @Override
-                    public boolean hasNext() {
-                        return currentRow < arrayRes.length;
-                    }
-                };
-            }
-
-            @Override
-            public DataTableSpec getDataTableSpec() {
-                final Object[] o = arrayRes[0];
-                final String[] names = new String[o.length];
-                final DataType[] types = new DataType[o.length];
-                for (int i=0; i<o.length; i++) {
-                    names[i] = "RDD-col"+i;
-                    types[i] = DataType.getType(MyRDDDataCell.class);
-                }
-                return new DataTableSpec(names, types);
-            }
-        };
-    }
-
-    private static class MyRDDDataCell extends DataCell {
-        private final int m_index;
-        private final Object[] m_row;
-
-        MyRDDDataCell(final Object[] aRow, final int aIndex) {
-            m_index = aIndex;
-            m_row = aRow;
-        }
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String toString() {
-            return m_row[m_index].toString();
-        }
-
-        @Override
-        public int hashCode() {
-            return toString().hashCode();
-        }
-
-        @Override
-        protected boolean equalsDataCell(final DataCell dc) {
-            return (dc != null && dc.toString().equals(toString()));
-        }
-    }
     /**
      * {@inheritDoc}
      */
