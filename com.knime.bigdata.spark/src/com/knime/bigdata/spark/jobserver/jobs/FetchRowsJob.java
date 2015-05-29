@@ -7,13 +7,13 @@ import java.util.logging.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.api.java.Row;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 
@@ -58,7 +58,7 @@ public class FetchRowsJob extends KnimeSparkJob {
 		if (msg == null && !aConfig.hasPath(PARAM_TABLE_NAME)) {
 			msg = "Input parameter '" + PARAM_TABLE_NAME + "' missing.";
 		} else if (!validateNamedRdd(aConfig.getString(PARAM_TABLE_NAME))) {
-			msg = "Input data table missing!";
+			msg = "Input data table missing for key: "+aConfig.getString(PARAM_TABLE_NAME);
 		}
 
 		if (msg != null) {

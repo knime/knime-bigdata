@@ -20,13 +20,13 @@ import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 
 import org.apache.spark.SparkContext;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
 
 /**

@@ -32,8 +32,6 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.sparkClient.jobs.ValidationResultConverter;
-import org.knime.utils.RDDUtils;
 
 import spark.jobserver.SparkJobValidation;
 
@@ -41,6 +39,8 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
@@ -152,7 +152,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		    idxs[idx++] = colIdx;
         }
 		//TODO: Use only the column indices when convert to vector
-		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDD(rowRDD, idxs);
+		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, idxs);
 
 		final KMeansModel model = execute(sc, aConfig, inputRDD);
 
