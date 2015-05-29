@@ -54,5 +54,17 @@
             factory-class="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scripting.snippet.SparkSnippetNodeFactory"
+            id="com.knime.bigdata.spark.node.scripting.snippet.SparkSnippetNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scripting.transformation.SparkTransformationSnippetNodeFactory"
+            id="com.knime.bigdata.spark.node.scripting.transformation.SparkTransformationSnippetNodeFactory">
+      </node>
    </extension>
 </plugin>

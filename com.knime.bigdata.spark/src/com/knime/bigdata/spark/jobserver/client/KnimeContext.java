@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.jobserver.client;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,29 @@ public class KnimeContext {
     }
 
     /**
+     * @param contextName the unique name of the context to check
+     * @return <code>true</code> if the context exists
+     * @throws GenericKnimeSparkException
+     */
+    public static boolean sparkContextExists(final String contextName) throws GenericKnimeSparkException {
+        if (contextName == null || contextName.isEmpty()) {
+            throw new IllegalArgumentException("contextName must not be empty");
+        }
+        //query server for existing context and re-use if there is one
+        //and it is (one of) the current user's context(s)
+        JsonArray contexts = RestClient.toJSONArray(CONTEXTS_PATH);
+        if (contexts.size() > 0) {
+            for (int i=0; i<contexts.size(); i++) {
+                if (contextName.equals(contexts.getString(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+
+    /**
      * create a new spark context (name prefix can be specified in the application.conf file), the postfix is number
      * between 0 and 10000
      *
@@ -68,7 +92,8 @@ public class KnimeContext {
         //upload jar with our extensions
         JobControler.uploadJobJar(KnimeConfigContainer.m_config.getString("spark.knimeJobJar"));
 
-        final String contextName =  CONTEXT_PREFIX + (int)(10000 * Math.random());
+//        final String contextName =  CONTEXT_PREFIX + (int)(10000 * Math.random());
+        final String contextName =  CONTEXT_PREFIX + "." + UUID.randomUUID();
 
         final int numCpuCores = KnimeConfigContainer.m_config.getInt("spark.numCPUCores");
         final String memPerNode = KnimeConfigContainer.m_config.getString("spark.memPerNode");

@@ -37,15 +37,20 @@ class SparkDataView extends JPanel {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param sparkData the {@link SparkData} to visualize
+     * @param sparkData the {@link SparkDataTable} to visualize
      */
-    SparkDataView(final SparkData sparkData) {
+    SparkDataView(final SparkRDD sparkData) {
         super(new GridBagLayout());
         super.setName("Spark Data");
         StringBuilder buf = new StringBuilder("<html><body>");
-        buf.append("<strong>Type:</strong>&nbsp;&nbsp;");
+        buf.append("<strong>Context:</strong>&nbsp;&nbsp;");
         buf.append("<tt>");
-        buf.append(sparkData.getTableName());
+        buf.append(sparkData.getContext());
+        buf.append("</tt>");
+        buf.append("<br/><br/>");
+        buf.append("<strong>Named RDD:</strong>&nbsp;&nbsp;");
+        buf.append("<tt>");
+        buf.append(sparkData.getID());
         buf.append("</tt>");
         buf.append("<br/><br/>");
         buf.append("</body></html>");
@@ -64,32 +69,6 @@ class SparkDataView extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
         super.add(jsp, c);
-//        c.anchor = GridBagConstraints.CENTER;
-//        c.fill = GridBagConstraints.BOTH;
-//        c.weightx = 1;
-//        c.weighty = 1;
-//        final JButton sqlButton = new JButton("Copy SQL to clipboard");
-//        sqlButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(final ActionEvent e) {
-//                try {
-//                    final StringSelection stringSelection = new StringSelection(sql);
-//                    final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-//                    clpbrd.setContents(stringSelection, null);
-//                } catch (Throwable ex) {
-//                    // catch any exception that might occur
-//                }
-//            }
-//        });
-//        c.gridy++;
-//        c.anchor = GridBagConstraints.LINE_END;
-//        c.fill = GridBagConstraints.NONE;
-//        c.weightx = 0;
-//        c.weighty = 0;
-//        c.insets = new Insets(5, 0, 5, 5);
-//        if (sql != null) {
-//            super.add(sqlButton, c);
-//        }
     }
 
 }

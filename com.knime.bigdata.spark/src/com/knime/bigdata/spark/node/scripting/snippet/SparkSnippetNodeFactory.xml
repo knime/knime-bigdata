@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
+	type="Manipulator" icon="icon.png">
+	<name>Spark Snippet</name>
+	<shortDescription></shortDescription>
+	<fullDescription>
+		<intro>
+			
+		</intro>
+	</fullDescription>
+
+	<ports>
+		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
+		<inPort index="0" name="Spark input">Spark input.</inPort>
+		<inPort index="1" optional="true" name="Spark input">Spark input.</inPort>
+		<outPort index="0" name="Result">Spark data object</outPort>
+	</ports>
+</knimeNode>

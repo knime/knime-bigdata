@@ -47,13 +47,13 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.BufferedDataTableView;
-import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.DataTableSpecView;
 import org.knime.core.util.SwingWorkerWithContext;
 
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
- * Spark data {@link PortObject} implementation which holds a reference to a {@link SparkData} object.
+ * Spark data {@link PortObject} implementation which holds a reference to a {@link SparkDataTable} object.
  *
  * @author Tobias Koetter, KNIME.com
  */
@@ -94,24 +94,16 @@ public class SparkDataPortObject implements PortObject {
             @Override
             public SparkDataPortObject loadPortObject(final PortObjectZipInputStream in,
                 final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                return new SparkDataPortObject(new SparkData(in));
+                return new SparkDataPortObject(new SparkDataTable(in));
             }
         };
     }
-    private SparkData m_data;
-
-    /**
-     * @param tableName the unique table name
-     * @param spec the {@link DataTableSpec} that describes the structure of the result table
-     */
-    public SparkDataPortObject(final String tableName, final DataTableSpec spec) {
-        this(new SparkData(tableName, spec));
-    }
+    private final SparkDataTable m_data;
 
     /**
      * @param data
      */
-    private SparkDataPortObject(final SparkData data) {
+    public SparkDataPortObject(final SparkDataTable data) {
         m_data = data;
     }
 
@@ -136,12 +128,9 @@ public class SparkDataPortObject implements PortObject {
     /**
      * @return the model
      */
-    public SparkData getData() {
+    public SparkDataTable getData() {
         return m_data;
     }
-
-    /** Credentials to connect to the database while previewing the data. */
-    private CredentialsProvider m_credentials;
 
     /**
      * Override this panel in order to set the CredentialsProvider
@@ -156,13 +145,6 @@ public class SparkDataPortObject implements PortObject {
         public DatabaseOutPortPanel(final LayoutManager lm) {
             super(lm);
         }
-        /**
-         * Set provider.
-         * @param cp {@link CredentialsProvider}
-         */
-        public void setCredentialsProvider(final CredentialsProvider cp) {
-            m_credentials = cp;
-        }
     }
 
     /**
@@ -170,7 +152,8 @@ public class SparkDataPortObject implements PortObject {
      */
     @Override
     public JComponent[] getViews() {
-        JComponent[] superViews = m_data.getViews();
+        final JComponent[] superViews =
+                new JComponent[]{new DataTableSpecView(getTableSpec()), new SparkDataView(m_data)};
         final JComponent[] panels = new JComponent[superViews.length + 1];
         @SuppressWarnings("serial")
         final BufferedDataTableView dataView = new BufferedDataTableView(null) {
@@ -210,7 +193,7 @@ public class SparkDataPortObject implements PortObject {
                     /** {@inheritDoc} */
                     @Override
                     protected DataTable doInBackgroundWithContext() throws Exception {
-                        return SparkDataTableCreator.getDataTable(getTableName(), getTableSpec(), value.get());
+                        return SparkDataTableCreator.getDataTable(getData(), value.get());
                     }
                     /** {@inheritDoc} */
                     @Override
@@ -274,14 +257,21 @@ public class SparkDataPortObject implements PortObject {
     }
 
     /**
-     * @return
+     * @return the context
      */
-    public String getTableName() {
-        return m_data.getTableName();
+    public String getContext() {
+        return m_data.getContext();
     }
 
     /**
-     * @return
+     * @return the unique table name
+     */
+    public String getTableName() {
+        return m_data.getID();
+    }
+
+    /**
+     * @return the {@link DataTableSpec} of the result table
      */
     public DataTableSpec getTableSpec(){
         return m_data.getTableSpec();
