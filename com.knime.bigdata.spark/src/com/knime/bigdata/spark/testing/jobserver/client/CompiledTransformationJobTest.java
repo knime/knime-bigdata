@@ -29,8 +29,8 @@ public class CompiledTransformationJobTest extends UnitSpec {
 
     private final String params2Json() {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, "someRDD"}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, "someRDD"}});
+            new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}});
     }
 
     /**
@@ -43,7 +43,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
 
         final String params =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_OUTPUT,
-                new String[]{ParameterConstants.PARAM_DATA_PATH, "someRDD"}});
+                new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}});
         File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();
 
@@ -52,7 +52,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
         final SparkJobCompiler testObj = new SparkJobCompiler();
 
         testObj
-            .addKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
+            .addPrecompiledKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
 
         //upload jar to job-server
         JobControler.uploadJobJar(jarPath);
@@ -83,7 +83,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
         final SparkJobCompiler testObj = new SparkJobCompiler();
 
         testObj
-            .addKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
+            .addPrecompiledKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
 
             //upload jar to job-server
             JobControler.uploadJobJar(jarPath);

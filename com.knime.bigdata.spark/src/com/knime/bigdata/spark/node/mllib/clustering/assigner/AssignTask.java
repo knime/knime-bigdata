@@ -50,8 +50,8 @@ public class AssignTask implements Serializable {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new String[]{ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString(aModel),
-                ParameterConstants.PARAM_DATA_PATH, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, aOutputTableName}});
+                ParameterConstants.PARAM_TABLE_1, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
     }
 
     void execute(final String contextName, final ExecutionContext exec, final String aTableName,

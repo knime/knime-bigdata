@@ -30,11 +30,18 @@ public class ParameterConstants {
 	 * number of iterations
 	 */
 	public static final String PARAM_NUM_ITERATIONS = "noOfIterations";
+
 	/**
-	 * path to data, may also be used as a key
+	 * path to first data table, may also be used as a key
 	 */
-	public static final String PARAM_DATA_PATH = "dataPath";
-	/**
+	public static final String PARAM_TABLE_1 = "table1";
+
+    /**
+     * path to second data table, may also be used as a key
+     */
+    public static final String PARAM_TABLE_2 = "table2";
+
+    /**
 	 * name of model
 	 */
 	public static final String PARAM_MODEL_NAME = "modelName";

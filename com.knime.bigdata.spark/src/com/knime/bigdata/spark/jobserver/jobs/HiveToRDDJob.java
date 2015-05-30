@@ -54,7 +54,7 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
         + ParameterConstants.PARAM_SQL_STATEMENT;
 
     private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_DATA_PATH;
+        + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(HiveToRDDJob.class.getName());
 

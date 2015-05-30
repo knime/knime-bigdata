@@ -96,8 +96,8 @@ public class KMeansTask {
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_includeColIdxs),
                 ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
-                "" + m_noOfIteration, ParameterConstants.PARAM_DATA_PATH, m_inputTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, m_outputTableName}});
+                "" + m_noOfIteration, ParameterConstants.PARAM_TABLE_1, m_inputTableName},
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
     }
 
 }

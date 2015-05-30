@@ -56,10 +56,10 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 
 	private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 
 	private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT
 			+ "." + ParameterConstants.PARAM_MODEL_NAME;
@@ -90,18 +90,15 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 		return ValidationResultConverter.valid();
 	}
 
-	private SparkJobValidation validateInput(final Config aConfig) {
+	private void validateInput(final Config aConfig) throws GenericKnimeSparkException  {
 		String msg = null;
 		if (!validateNamedRdd(aConfig.getString(PARAM_DATA_FILE_NAME))) {
 			msg = "Input data table missing!";
 		}
 		if (msg != null) {
 			LOGGER.severe(msg);
-			return ValidationResultConverter
-					.invalid(GenericKnimeSparkException.ERROR + msg);
+            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
 		}
-
-		return ValidationResultConverter.valid();
 	}
 
 	/**
@@ -109,13 +106,11 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 	 *
 	 * @return "OK" - the actual predictions are stored in a named rdd and can
 	 *         be retrieved by a separate job or used later on
+	 * @throws GenericKnimeSparkException
 	 */
 	@Override
-	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
-		SparkJobValidation validation = validateInput(aConfig);
-		if (!ValidationResultConverter.isValid(validation)) {
-            return JobResult.emptyJobResult().withMessage(validation.toString());
-		}
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+		validateInput(aConfig);
 
 		LOGGER.log(Level.INFO, "starting kMeans prediction job...");
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig

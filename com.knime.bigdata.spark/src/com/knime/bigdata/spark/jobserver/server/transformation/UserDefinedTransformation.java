@@ -15,5 +15,5 @@ import org.apache.spark.sql.api.java.Row;
 public interface UserDefinedTransformation extends Serializable {
 
 	@Nonnull
-	<T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull T input);
+	<T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull T aInput1, T aInput2);
 }

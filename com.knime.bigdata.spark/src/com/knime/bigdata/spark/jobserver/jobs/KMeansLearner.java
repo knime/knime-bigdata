@@ -60,9 +60,9 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 	private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_INPUT
 			+ "." + ParameterConstants.PARAM_NUM_ITERATIONS;
 	private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 	private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 	private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
             + "." + ParameterConstants.PARAM_COL_IDXS;
 
@@ -117,7 +117,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		return ValidationResultConverter.valid();
 	}
 
-	private SparkJobValidation validateInput(final Config aConfig) {
+	private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
 		String msg = null;
 		final String key = aConfig.getString(PARAM_DATA_FILE_NAME);
 		if (key == null) {
@@ -127,20 +127,17 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		}
 		if (msg != null) {
 			LOGGER.severe(msg);
-			return ValidationResultConverter.invalid(GenericKnimeSparkException.ERROR + msg);
+			throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
 		}
-		return ValidationResultConverter.valid();
 	}
 
 	/**
 	 * run the actual job, the result is serialized back to the client
+	 * @throws GenericKnimeSparkException
 	 */
 	@Override
-	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
-		SparkJobValidation validation = validateInput(aConfig);
-		if (!ValidationResultConverter.isValid(validation)) {
-			return JobResult.emptyJobResult().withMessage(validation.toString());
-		}
+	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+		validateInput(aConfig);
 		LOGGER.log(Level.INFO, "starting kMeans job...");
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
 				.getString(PARAM_DATA_FILE_NAME));

@@ -36,7 +36,7 @@ public class FetchRowsJob extends KnimeSparkJob {
 			+ "." + ParameterConstants.PARAM_NUMBER_ROWS;
 
 	private static final String PARAM_TABLE_NAME = ParameterConstants.PARAM_INPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 
 	/**
 	 * parse command line parameters
