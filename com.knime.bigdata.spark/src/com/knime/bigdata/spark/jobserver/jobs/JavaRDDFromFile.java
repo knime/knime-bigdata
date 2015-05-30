@@ -54,7 +54,7 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-			+ "." + ParameterConstants.PARAM_DATA_PATH;
+			+ "." + ParameterConstants.PARAM_TABLE_1;
 
 	private final static Logger LOGGER = Logger.getLogger(JavaRDDFromFile.class
 			.getName());

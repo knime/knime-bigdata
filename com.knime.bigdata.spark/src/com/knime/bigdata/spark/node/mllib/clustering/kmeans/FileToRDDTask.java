@@ -72,9 +72,9 @@ public class FileToRDDTask implements Serializable {
 
     private final String text2RDDDef(final String aFileName) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_DATA_PATH, aFileName},
+            new String[]{ParameterConstants.PARAM_TABLE_1, aFileName},
             //yes, same fileName - for the output this is just a key
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, aFileName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aFileName}});
     }
 
 }

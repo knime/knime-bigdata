@@ -78,12 +78,12 @@ public class JsonUtilsTest {
 	public void utilShouldConvertInputOutputGroups2JSon() throws Throwable {
 		String jsonStr = JsonUtils.asJson(new Object[] {
 				ParameterConstants.PARAM_INPUT,
-				new String[] { ParameterConstants.PARAM_DATA_PATH, "dataPath",
+				new String[] { ParameterConstants.PARAM_TABLE_1, "dataPath",
 						ParameterConstants.PARAM_NUM_CLUSTERS, "9",
 						ParameterConstants.PARAM_NUM_ITERATIONS, "63" },
 				ParameterConstants.PARAM_OUTPUT,
 				new String[] { ParameterConstants.PARAM_MODEL_NAME,
-						"modelFile", ParameterConstants.PARAM_DATA_PATH,
+						"modelFile", ParameterConstants.PARAM_TABLE_1,
 						"outputDataPath" }
 
 		});
@@ -102,7 +102,7 @@ public class JsonUtilsTest {
 
 		Config outputConfig = config.getConfig(ParameterConstants.PARAM_OUTPUT);
 		assertEquals("value should be accessible for key", "outputDataPath",
-				outputConfig.getString(ParameterConstants.PARAM_DATA_PATH));
+				outputConfig.getString(ParameterConstants.PARAM_TABLE_1));
 		assertEquals("value should be accessible for key", "modelFile",
 				outputConfig.getString(ParameterConstants.PARAM_MODEL_NAME));
 	}

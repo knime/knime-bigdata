@@ -54,10 +54,10 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
     private static final long serialVersionUID = 1L;
 
     private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_DATA_PATH;
+            + "." + ParameterConstants.PARAM_TABLE_1;
 
     private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT
-            + "." + ParameterConstants.PARAM_DATA_PATH;
+            + "." + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(TransformationTestJob.class
             .getName());
@@ -113,7 +113,7 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
                 .getString(PARAM_INPUT_TABLE_KEY));
 
-        final JavaRDD<Row> transformed = apply(rowRDD);
+        final JavaRDD<Row> transformed = apply(rowRDD, null);
 
         LOGGER.log(Level.INFO, "transformation completed");
         addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
@@ -127,7 +127,7 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
 
     @Override
     @Nonnull
-    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T input) {
+    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T input, final T aNullInput) {
         return input;
     }
 }

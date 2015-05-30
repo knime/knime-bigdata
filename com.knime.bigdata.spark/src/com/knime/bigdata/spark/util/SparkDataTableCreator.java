@@ -83,7 +83,7 @@ public final class SparkDataTableCreator {
     private static String rowFetcherDef(final int aNumRows, final String aTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_DATA_PATH,
+            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_TABLE_1,
                 aTableName}});
     }
 

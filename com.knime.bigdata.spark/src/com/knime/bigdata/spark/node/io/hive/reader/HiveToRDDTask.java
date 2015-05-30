@@ -66,7 +66,7 @@ public class HiveToRDDTask {
     private final String params2Json() {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             new String[]{ParameterConstants.PARAM_SQL_STATEMENT, m_hiveQuery},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_DATA_PATH, m_rdd.getID()}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_rdd.getID()}});
     }
 
 }

@@ -44,7 +44,7 @@ public class JobControlerTest extends UnitSpec {
     @Test
     public void jobControlerShouldCreateJobWithProperName() throws Throwable {
         final String params = JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "9", ParameterConstants.PARAM_DATA_PATH, "someRDD"}});
+            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "9", ParameterConstants.PARAM_TABLE_1, "someRDD"}});
 
         String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), params);
         assertNotNull("JobId should not be null", jobId);
