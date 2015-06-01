@@ -89,7 +89,7 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
             jobDescription = jobDescription.replace("$table2", "aInput2");
         }
         //now compile code, add to jar and upload jar:
-        final String jobClassName = addTransformationJob2JarAndExecuteOnServer(jobDescription);
+        final String jobClassName = addTransformationJob2Jar(jobDescription);
 
         //call the Spark job with the two rdds and use the tableName as id for the result RDD and
         //the job description as source code for the job
@@ -132,7 +132,7 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
             new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
     }
 
-    private String addTransformationJob2JarAndExecuteOnServer(final String aTransformationCode)
+    private String addTransformationJob2Jar(final String aTransformationCode)
         throws GenericKnimeSparkException {
 
         final String jarPath;

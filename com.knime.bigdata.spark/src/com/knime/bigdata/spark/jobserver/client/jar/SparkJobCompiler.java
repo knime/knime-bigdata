@@ -9,7 +9,6 @@ package com.knime.bigdata.spark.jobserver.client.jar;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -20,6 +19,10 @@ import javax.annotation.Nonnull;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
+
+import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
+import org.knime.ext.sun.nodes.script.compile.InMemorySourceJavaFileObject;
+import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -34,14 +37,6 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 final public class SparkJobCompiler {
 
     private final static Logger LOGGER = Logger.getLogger(SparkJobCompiler.class.getName());
-
-    // Create a CharSequenceCompiler instance which is used to compile
-    // expressions into Java classes which are then used to create the XY plots.
-    // The -target 1.5 options are simply an example of how to pass javac
-    // compiler
-    // options (the generated source in this example is Java 1.5 compatible.)
-    private final CharSequenceCompiler<KnimeSparkJob> compiler = new CharSequenceCompiler<KnimeSparkJob>(getClass()
-        .getClassLoader(), Arrays.asList(new String[]{"-target", "1.8"}));
 
     // for unique class names
     private int classNameSuffix = 0;
@@ -73,11 +68,11 @@ final public class SparkJobCompiler {
         @Nonnull final String aTargetJarPath, @Nonnull final String aAdditionalImports,
         @Nonnull final String validationCode, @Nonnull final String aExecutionCode,
         @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
-        KnimeSparkJob job = newKnimeSparkJob(aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
-        add2Jar(aSourceJarPath, aTargetJarPath, job.getClass().getCanonicalName());
-        return job;
+        SourceCompiler compiledJob =
+            compileKnimeSparkJob(aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
+        add2Jar(aSourceJarPath, aTargetJarPath, compiledJob.getClass().getCanonicalName(), compiledJob.getBytecode());
+        return compiledJob.getInstance();
     }
-
 
     /**
      * add pre-compiled job to a jar file
@@ -116,14 +111,14 @@ final public class SparkJobCompiler {
         @Nonnull final String aTransformationCode, @Nonnull final String aHelperMethodsCode)
         throws GenericKnimeSparkException {
         final String className = "kt" + (classNameSuffix++) + digits();
-        final String qName = PACKAGE_NAME + '.' + className;
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
-            fillTransformationTemplate(PACKAGE_NAME, className, aAdditionalImports, aTransformationCode, aHelperMethodsCode);
-        KnimeSparkJob job =  compileAndCreateInstance(className, source);
-        add2Jar(aSourceJarPath, aTargetJarPath, qName);
-        return job;
+            fillTransformationTemplate(PACKAGE_NAME, className, aAdditionalImports, aTransformationCode,
+                aHelperMethodsCode);
+        SourceCompiler compiledJob = compileAndCreateInstance(className, source);
+        add2Jar(aSourceJarPath, aTargetJarPath, compiledJob.getClass().getCanonicalName(), compiledJob.getBytecode());
+        return compiledJob.getInstance();
     }
 
     /**
@@ -135,12 +130,11 @@ final public class SparkJobCompiler {
      * @param qName
      * @throws GenericKnimeSparkException
      */
-    private void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String qName)
-        throws GenericKnimeSparkException {
+    private void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String qName,
+        final byte[] aBytes) throws GenericKnimeSparkException {
         try {
-            byte[] bytes = compiler.getClassByteCode(qName);
-            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, bytes);
-        } catch (IOException | ClassNotFoundException e) {
+            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, aBytes);
+        } catch (IOException e) {
             LOGGER.severe(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
@@ -148,20 +142,43 @@ final public class SparkJobCompiler {
 
     /**
      * compile the given source under the given class name
+     *
      * @param aClassName
      * @param aSource
      * @return new instance of compile class
      * @throws GenericKnimeSparkException
      */
-    private KnimeSparkJob compileAndCreateInstance(final String aClassName, final String aSource)
+    private SourceCompiler compileAndCreateInstance(final String aClassName, final String aSource)
         throws GenericKnimeSparkException {
-        Class<KnimeSparkJob> c = compileKnimeSparkJob(aClassName, aSource);
         try {
-            return c.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return new SourceCompiler(aClassName, aSource);
+        } catch (ClassNotFoundException | CompilationFailedException e) {
             LOGGER.severe(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
+    }
+
+    /**
+     * fill a template with source code, compile the code and return an instance of the compiled class
+     *
+     * @param aAdditionalImports
+     * @param validationCode
+     * @param aExecutionCode
+     * @param aHelperMethodsCode
+     * @return instance of compiled class
+     * @throws GenericKnimeSparkException
+     */
+    private SourceCompiler compileKnimeSparkJob(@Nonnull final String aAdditionalImports,
+        @Nonnull final String validationCode, @Nonnull final String aExecutionCode,
+        @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
+
+        final String className = "kj" + (classNameSuffix++) + digits();
+        // generate semi-secure unique package and class names
+        // compile the generated Java source
+        final String source =
+            fillJobTemplate(PACKAGE_NAME, className, aAdditionalImports, validationCode, aExecutionCode,
+                aHelperMethodsCode);
+        return compileAndCreateInstance(className, source);
     }
 
     /**
@@ -178,29 +195,8 @@ final public class SparkJobCompiler {
         @Nonnull final String validationCode, @Nonnull final String aExecutionCode,
         @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
 
-        final String className = "kj" + (classNameSuffix++) + digits();
-        final String qName = PACKAGE_NAME + '.' + className;
-        // generate semi-secure unique package and class names
-        // compile the generated Java source
-        final String source =
-            fillJobTemplate(PACKAGE_NAME, className, aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
-        return compileAndCreateInstance(className, source);
-    }
-
-    private Class<KnimeSparkJob> compileKnimeSparkJob(final String aClassName, final String aSource)
-        throws GenericKnimeSparkException {
-        try {
-            // compile the generated Java source
-            final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<JavaFileObject>();
-            Class<KnimeSparkJob> compiledCode =
-                compiler.compile(PACKAGE_NAME + '.' + aClassName, aSource, errs, new Class<?>[]{KnimeSparkJob.class});
-            log(errs);
-            return compiledCode;
-        } catch (CharSequenceCompilerException e) {
-            log(e.getDiagnostics());
-            LOGGER.severe(e.getMessage());
-            throw new GenericKnimeSparkException(e);
-        }
+        return compileKnimeSparkJob(aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode)
+            .getInstance();
     }
 
     /**
@@ -292,7 +288,7 @@ final public class SparkJobCompiler {
      *
      * @param diagnostics iterable compiler diagnostics
      */
-    private void log(final DiagnosticCollector<JavaFileObject> diagnostics) {
+    private String log(final DiagnosticCollector<JavaFileObject> diagnostics) {
         final StringBuilder msgs = new StringBuilder();
         for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
             msgs.append(diagnostic.getMessage(null)).append("\n");
@@ -300,5 +296,75 @@ final public class SparkJobCompiler {
         if (msgs.length() > 0) {
             LOGGER.log(Level.INFO, msgs.toString());
         }
+        return msgs.toString();
     }
+
+    private static class SourceCompiler {
+
+        private byte[] m_bytecode;
+
+        /**
+         * Creates a new CompiledModelPortObject from java code.
+         *
+         * @param javaCode the code
+         * @throws CompilationFailedException when the code cannot be compiled
+         * @throws ClassNotFoundException when the code has dependencies that cannot be resolved
+         */
+        SourceCompiler(final String aClassName, final String javaCode) throws CompilationFailedException,
+            ClassNotFoundException {
+            setCode(aClassName, javaCode);
+        }
+
+        private String m_javaCode;
+
+        private KnimeSparkJob m_jobInstance;
+
+        /**
+         * @return the bytecode
+         */
+        byte[] getBytecode() {
+            return m_bytecode;
+        }
+
+        /**
+         * Sets the java code for this port object.
+         *
+         * @param code the code
+         * @throws CompilationFailedException when the code cannot be compiled
+         * @throws ClassNotFoundException when the code has dependencies that cannot be resolved
+         */
+        private void setCode(final String aClassName, final String code) throws ClassNotFoundException,
+            CompilationFailedException {
+            m_javaCode = code;
+            compileModel(aClassName);
+        }
+
+        private void compileModel(final String aClassName) throws CompilationFailedException, ClassNotFoundException {
+            final JavaCodeCompiler compiler = new JavaCodeCompiler();
+
+            final InMemorySourceJavaFileObject modelFile = new InMemorySourceJavaFileObject(aClassName, m_javaCode);
+
+            compiler.setSources(modelFile);
+            compiler.compile();
+
+            final ClassLoader cl = compiler.createClassLoader(this.getClass().getClassLoader());
+
+            final Class<KnimeSparkJob> jobClass = (Class<KnimeSparkJob>)cl.loadClass(aClassName);
+            m_bytecode = compiler.getClassByteCode().get(jobClass);
+            try {
+                m_jobInstance = jobClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new CompilationFailedException("Failed to create instance: ", e);
+            }
+        }
+
+        /**
+         * @return the compiled class.
+         */
+        KnimeSparkJob getInstance() {
+            return m_jobInstance;
+        }
+
+    }
+
 }
