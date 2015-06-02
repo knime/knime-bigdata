@@ -26,8 +26,9 @@ Require-Bundle: org.knime.base;bundle-version="2.11.0",
  org.knime.workbench.repository;bundle-version="2.11.0",
  com.knime.bigdata.hive;bundle-version="1.0.0",
  org.knime.base.pmml.translation.java,
- org.junit
+ org.junit,
+ org.knime.ext.sun,
+ org.eclipse.ui;bundle-version="3.7.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.ui.plugin
 Bundle-Activator: com.knime.bigdata.spark.SparkPlugin
