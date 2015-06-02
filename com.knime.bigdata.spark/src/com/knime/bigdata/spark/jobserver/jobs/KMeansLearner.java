@@ -157,7 +157,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
 			LOGGER.log(Level.INFO, "Storing predicted data unter key: "
 					+ aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-			JavaRDD<Row> predictedData = KMeansPredictor.predict(sc, inputRDD,
+			JavaRDD<Row> predictedData = KMeansPredictor.predict(sc, inputRDD, rowRDD,
 					model);
 			try {
 				addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH),
