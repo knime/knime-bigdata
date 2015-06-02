@@ -5,4 +5,4 @@ jar uvf ..\resources\knimeJobs.jar com\knime\bigdata\spark\jobserver\jobs\*.clas
 
 cd ..
 
-jar uvf resources\knimeJobs.jar conf\hive-site.xml
+jar uvf resources\knimeJobs.jar conf\hortonworks\hive\hive-site.xml

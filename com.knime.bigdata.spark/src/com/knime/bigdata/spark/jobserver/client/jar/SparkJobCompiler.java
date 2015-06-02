@@ -7,23 +7,21 @@
 
 package com.knime.bigdata.spark.jobserver.client.jar;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaFileObject;
 
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.InMemorySourceJavaFileObject;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 
@@ -42,7 +40,7 @@ final public class SparkJobCompiler {
     private int classNameSuffix = 0;
 
     // package name; a random number is appended
-    private static final String PACKAGE_NAME = "org.knime.sparkClient.jobs";
+   // private static final String PACKAGE_NAME = "com.knime.bigdata.spark.jobserver.jobs";
 
     // for secure package name
     private static final Random random = new Random();
@@ -114,10 +112,10 @@ final public class SparkJobCompiler {
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
-            fillTransformationTemplate(PACKAGE_NAME, className, aAdditionalImports, aTransformationCode,
+            fillTransformationTemplate(className, aAdditionalImports, aTransformationCode,
                 aHelperMethodsCode);
         SourceCompiler compiledJob = compileAndCreateInstance(className, source);
-        add2Jar(aSourceJarPath, aTargetJarPath, compiledJob.getClass().getCanonicalName(), compiledJob.getBytecode());
+        add2Jar(aSourceJarPath, aTargetJarPath, className, compiledJob.getBytecode());
         return compiledJob.getInstance();
     }
 
@@ -176,7 +174,7 @@ final public class SparkJobCompiler {
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
-            fillJobTemplate(PACKAGE_NAME, className, aAdditionalImports, validationCode, aExecutionCode,
+            fillJobTemplate(className, aAdditionalImports, validationCode, aExecutionCode,
                 aHelperMethodsCode);
         return compileAndCreateInstance(className, source);
     }
@@ -215,7 +213,7 @@ final public class SparkJobCompiler {
      * @return source for the new class extending the KnimeSparkJob abstract class
      * @throws GenericKnimeSparkException
      */
-    private String fillJobTemplate(final String packageName, final String className, final String aAdditionalImports,
+    private String fillJobTemplate(final String className, final String aAdditionalImports,
         final String validationCode, final String executionCode, final String helperMethods)
         throws GenericKnimeSparkException {
         try {
@@ -223,7 +221,7 @@ final public class SparkJobCompiler {
                 sparkJobTemplate = readTemplate("SparkJob.java.template");
             }
             Map<String, String> snippets = new HashMap<String, String>();
-            snippets.put("$packageName", packageName);
+            snippets.put("$packageName", "");
             snippets.put("$className", className);
             snippets.put("$additionalImports", aAdditionalImports);
             snippets.put("$validationCode", validationCode);
@@ -237,7 +235,7 @@ final public class SparkJobCompiler {
 
     }
 
-    private String fillTransformationTemplate(final String packageName, final String className,
+    private String fillTransformationTemplate(final String className,
         final String aAdditionalImports, final String aTransformationCode, final String aHelperMethods)
         throws GenericKnimeSparkException {
         try {
@@ -245,7 +243,8 @@ final public class SparkJobCompiler {
                 transformationTemplate = readTemplate("UserDefinedTransformation.java.template");
             }
             Map<String, String> snippets = new HashMap<String, String>();
-            snippets.put("$packageName", packageName);
+            //package $packageName;
+            snippets.put("$packageName", "");
             snippets.put("$className", className);
             snippets.put("$additionalImports", aAdditionalImports);
             snippets.put("$transformationCode", aTransformationCode);
@@ -281,22 +280,6 @@ final public class SparkJobCompiler {
         }
         is.close();
         return new String(bytes, "US-ASCII");
-    }
-
-    /**
-     * Log diagnostics to logger
-     *
-     * @param diagnostics iterable compiler diagnostics
-     */
-    private String log(final DiagnosticCollector<JavaFileObject> diagnostics) {
-        final StringBuilder msgs = new StringBuilder();
-        for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-            msgs.append(diagnostic.getMessage(null)).append("\n");
-        }
-        if (msgs.length() > 0) {
-            LOGGER.log(Level.INFO, msgs.toString());
-        }
-        return msgs.toString();
     }
 
     private static class SourceCompiler {
@@ -336,21 +319,36 @@ final public class SparkJobCompiler {
         private void setCode(final String aClassName, final String code) throws ClassNotFoundException,
             CompilationFailedException {
             m_javaCode = code;
-            compileModel(aClassName);
+            compileCode(aClassName);
         }
 
-        private void compileModel(final String aClassName) throws CompilationFailedException, ClassNotFoundException {
+        private void compileCode(final String aClassName) throws CompilationFailedException, ClassNotFoundException {
             final JavaCodeCompiler compiler = new JavaCodeCompiler();
 
-            final InMemorySourceJavaFileObject modelFile = new InMemorySourceJavaFileObject(aClassName, m_javaCode);
+            final InMemorySourceJavaFileObject sourceContainer = new InMemorySourceJavaFileObject(aClassName, m_javaCode);
 
-            compiler.setSources(modelFile);
+            String[] orig = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
+            File[] classPathFiles = new File[orig.length + 4];
+            for (int i=0; i<orig.length; i++) {
+                classPathFiles[i] = new File(orig[i]);
+            }
+            final String root = SparkPlugin.getDefault().getPluginRootPath();
+            classPathFiles[orig.length+1] = new File(root+"/bin/");
+            classPathFiles[orig.length+2] = new File(root+"/lib/knimeSparkScalaClient.jar");
+            classPathFiles[orig.length+3] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
+            classPathFiles[orig.length] = new File(root+"/lib/job-server-api_2.10-0.5.1-SNAPSHOT.jar");
+            compiler.setClasspaths(classPathFiles);
+
+            compiler.setSources(sourceContainer);
+
+
             compiler.compile();
 
             final ClassLoader cl = compiler.createClassLoader(this.getClass().getClassLoader());
 
+            //final String className = (PACKAGE_NAME+ "/" + aClassName).replaceAll("\\.", "/");
             final Class<KnimeSparkJob> jobClass = (Class<KnimeSparkJob>)cl.loadClass(aClassName);
-            m_bytecode = compiler.getClassByteCode().get(jobClass);
+            m_bytecode =  compiler.getClassByteCode().get(aClassName);
             try {
                 m_jobInstance = jobClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {

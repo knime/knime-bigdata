@@ -66,8 +66,7 @@ public class KnimeContext {
         if (contextName == null || contextName.isEmpty()) {
             throw new IllegalArgumentException("contextName must not be empty");
         }
-        //query server for existing context and re-use if there is one
-        //and it is (one of) the current user's context(s)
+        //query server for existing context so that we can re-use it if there is one
         JsonArray contexts = RestClient.toJSONArray(CONTEXTS_PATH);
         if (contexts.size() > 0) {
             for (int i=0; i<contexts.size(); i++) {

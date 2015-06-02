@@ -310,8 +310,8 @@ public class JobControler {
         throws CanceledExecutionException, GenericKnimeSparkException {
         JobStatus status = waitForJob(jobId, exec);
         JobResult result = fetchJobResult(jobId);
-        if (JobStatus.isErrorStatus(status)) {
-            assert (false) : "Job failure: " + result.toString();
+        if (JobStatus.isErrorStatus(status) || result.isError()) {
+            throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
         }
         return result;
     }
