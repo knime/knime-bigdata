@@ -29,6 +29,8 @@ public class JarPacker {
             final String classPath = aClassPath.replaceAll("\\.", "/") + ".class";
             addClass(classPath, aByteCode, target);
         }
+
+        source.close();
     }
 
     static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath) throws IOException, ClassNotFoundException {

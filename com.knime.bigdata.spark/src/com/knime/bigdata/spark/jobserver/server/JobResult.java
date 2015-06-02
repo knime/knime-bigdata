@@ -68,10 +68,13 @@ public class JobResult implements Serializable {
      */
     private static final String OBJECT_IDENTIFIER = "model";
 
+    private static final String STATUS_IDENTIFIER = "status";
+
     /**
      *
      */
     private static final long serialVersionUID = 1L;
+
 
     /**
      * some String that is (part of) the result
@@ -88,18 +91,22 @@ public class JobResult implements Serializable {
      */
     private final Serializable m_object;
 
+    private final boolean m_isError;
+
     private JobResult(final String aMsg, final Map<String, StructType> aTables, final Serializable aObjectResult) {
         this(aMsg, aTables, aObjectResult, null);
     }
 
     private JobResult(final String aMsg, final Map<String, StructType> aTables, final Serializable aObjectResult,
-        final Throwable aThrowable) {
+        final String aStacktrace) {
         m_msg = aMsg;
         m_tables = aTables;
-        if (aThrowable != null) {
-            m_object = aThrowable.getStackTrace();
+        if (aStacktrace != null) {
+            m_object = aStacktrace;
+            m_isError = true;
         } else {
             m_object = aObjectResult;
+            m_isError = false;
         }
     }
 
@@ -142,7 +149,7 @@ public class JobResult implements Serializable {
      * @return copy of this with error set
      */
     public JobResult withException(final Throwable aThrowable) {
-        return new JobResult(m_msg, m_tables, m_object, aThrowable);
+        return new JobResult(m_msg, m_tables, m_object, aThrowable.getStackTrace().toString());
     }
 
     /**
@@ -173,6 +180,7 @@ public class JobResult implements Serializable {
     public static JobResult fromBase64String(@Nonnull final String aStringRepresentation) {
         Config config = ConfigFactory.parseString(aStringRepresentation);
         final String msg = config.getString(MSG_IDENTIFIER);
+        final boolean isError = config.getBoolean(STATUS_IDENTIFIER);
         final Map<String, StructType> m = new HashMap<>();
         ConfigObject c = config.getObject(TABLES_IDENTIFIER);
         for (Map.Entry<String, ConfigValue> entry : c.entrySet()) {
@@ -192,6 +200,10 @@ public class JobResult implements Serializable {
             }
             StructType structType = DataType.createStructType(fields);
             m.put(entry.getKey(), structType);
+        }
+        if (isError) {
+            return new JobResult(msg, Collections.unmodifiableMap(m), null, (String)ModelUtils.fromString(config
+                .getString(OBJECT_IDENTIFIER)));
         }
         if (config.hasPath(OBJECT_IDENTIFIER)) {
             return new JobResult(msg, Collections.unmodifiableMap(m), (Serializable)ModelUtils.fromString(config
@@ -223,6 +235,7 @@ public class JobResult implements Serializable {
             m.put(key, fields);
         }
         config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
+        config = config.withValue(STATUS_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_isError));
         if (m_object != null) {
             config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
         }
@@ -249,6 +262,13 @@ public class JobResult implements Serializable {
     @Nonnull
     public String getMessage() {
         return m_msg;
+    }
+
+    /**
+     * @return true if job terminated with an error
+     */
+    public boolean isError() {
+        return m_isError;
     }
 
     /**

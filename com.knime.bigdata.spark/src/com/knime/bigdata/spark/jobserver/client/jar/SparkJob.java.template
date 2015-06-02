@@ -1,4 +1,4 @@
-package $packageName;
+$packageName
 
 import org.apache.spark.SparkContext;
 import spark.jobserver.SparkJobValidation;

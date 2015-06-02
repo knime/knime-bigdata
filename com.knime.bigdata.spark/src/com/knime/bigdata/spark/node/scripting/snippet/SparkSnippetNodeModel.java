@@ -38,6 +38,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
@@ -89,13 +90,13 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
             jobDescription = jobDescription.replace("$table2", "aInput2");
         }
         //now compile code, add to jar and upload jar:
-        final String jobClassName = addTransformationJob2Jar(jobDescription);
+        final KnimeSparkJob job = addTransformationJob2Jar(jobDescription);
 
         //call the Spark job with the two rdds and use the tableName as id for the result RDD and
         //the job description as source code for the job
 
         //start job with proper parameters
-        String jobId = JobControler.startJob(table1.getContext(), jobClassName, params2Json(table1.getID(), table2Name, tableName));
+        String jobId = JobControler.startJob(table1.getContext(), job, params2Json(table1.getID(), table2Name, tableName));
 
         final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 
@@ -132,7 +133,7 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
             new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
     }
 
-    private String addTransformationJob2Jar(final String aTransformationCode)
+    private KnimeSparkJob addTransformationJob2Jar(final String aTransformationCode)
         throws GenericKnimeSparkException {
 
         final String jarPath;
@@ -148,13 +149,16 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
 
         final String additionalImports = "";
         final String helperMethodsCode = "";
+
+        final String root = SparkPlugin.getDefault().getPluginRootPath();
+
         final KnimeSparkJob job =
-            compiler.addTransformationSparkJob2Jar("resources/knimeJobs.jar", jarPath, additionalImports,
+            compiler.addTransformationSparkJob2Jar(root+"/resources/knimeJobs.jar", jarPath, additionalImports,
                 aTransformationCode, helperMethodsCode);
 
         //upload jar to job-server
         JobControler.uploadJobJar(jarPath);
-        return job.getClass().getCanonicalName();
+        return job;
     }
 
 }
