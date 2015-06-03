@@ -311,6 +311,7 @@ public class JobControler {
         JobStatus status = waitForJob(jobId, exec);
         JobResult result = fetchJobResult(jobId);
         if (JobStatus.isErrorStatus(status) || result.isError()) {
+            Object o = result.getObjectResult();
             throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
         }
         return result;

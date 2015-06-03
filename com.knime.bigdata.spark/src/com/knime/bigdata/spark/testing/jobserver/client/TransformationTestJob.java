@@ -20,16 +20,23 @@
  */
 package com.knime.bigdata.spark.testing.jobserver.client;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
 import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
 
+import scala.Tuple2;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -38,6 +45,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
+import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation;
 import com.typesafe.config.Config;
@@ -127,7 +135,62 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
 
     @Override
     @Nonnull
-    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T input, final T aNullInput) {
-        return input;
+    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T aInput1, final T aInput2) {
+
+        //aggregate by class
+        JavaPairRDD<String, Iterable<Row>> t = aInput1.groupBy(new Function<Row, String>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String call(final Row aRow) throws Exception {
+                //5th column is the class column
+                return aRow.getString(5);
+            }
+        });
+
+        //now add the class count to each row
+        return t.flatMap(new FlatMapFunction<Tuple2<String,Iterable<Row>>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Iterable<Row> call(final Tuple2<String, Iterable<Row>> rowsWithSameLabel) throws Exception {
+                //count number of elements
+                Iterator<Row> l = rowsWithSameLabel._2.iterator();
+                int ctr = 0;
+                while (l.hasNext()) {
+                    ctr++;
+                }
+
+                //add count to each row
+                l = rowsWithSameLabel._2.iterator();
+                List<Row> res = new ArrayList<>();
+                while (l.hasNext()) {
+                    res.add(RowBuilder.fromRow(l.next()).add(ctr).build());
+                }
+                return res;
+            }
+        });
+
+//        final Function<Row, Row> rowFunction = new Function<Row, Row>() {
+//            private static final long serialVersionUID = 1L;
+//
+//            @Override
+//            public Row call(final Row aRow) {
+//                String[] terms = aLine.split(" ");
+//                final ArrayList<Double> vals = new ArrayList<Double>();
+//                for (int i = 0; i < terms.length; i++) {
+//                    vals.add(Double.parseDouble(terms[i]));
+//                }
+//                return RowBuilder.emptyRow().addAll(vals).build();
+//            }
+//        };
+//
+//
+//        aInput1.reduceByKey(new Function2<Integer, Integer>() {
+//            public Integer call(final Integer a, final Integer b) { return a + b; }
+//          });
+//
+//        return aInput1.map(rowFunction);
     }
 }
