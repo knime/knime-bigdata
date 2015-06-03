@@ -85,11 +85,9 @@ final public class SparkJobCompiler {
         throws GenericKnimeSparkException {
         try {
             JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, aCanonicalClassPath);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             LOGGER.severe(e.getMessage());
             throw new GenericKnimeSparkException(e);
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
         }
     }
 

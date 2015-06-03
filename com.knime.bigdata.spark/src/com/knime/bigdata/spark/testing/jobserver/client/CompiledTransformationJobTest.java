@@ -15,6 +15,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
+import com.knime.bigdata.spark.jobserver.jobs.JavaRDDFromFile;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.testing.UnitSpec;
@@ -27,10 +28,10 @@ import com.typesafe.config.ConfigValueFactory;
  */
 public class CompiledTransformationJobTest extends UnitSpec {
 
-    private final String params2Json() {
+    private final String params2Json(final String aInputKey, final String aOutputKey) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}});
+            new String[]{ParameterConstants.PARAM_TABLE_1, aInputKey}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputKey}});
     }
 
     /**
@@ -75,6 +76,9 @@ public class CompiledTransformationJobTest extends UnitSpec {
     @Test
     public void addTransformationJob2JarAndExecuteOnServer() throws Throwable {
 
+        final String j1 = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(), params2Json("/home/spark/data/kmeans-input.txt", "unitTestRDD1"));
+        JobControler.waitForJob(j1, null);
+
         File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();
 
@@ -89,7 +93,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
             JobControler.uploadJobJar(jarPath);
             //start job
             String jobId =
-                JobControler.startJob(contextName, TransformationTestJob.class.getCanonicalName(), params2Json());
+                JobControler.startJob(contextName, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
 
             KnimeConfigContainer.m_config =
                 KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,

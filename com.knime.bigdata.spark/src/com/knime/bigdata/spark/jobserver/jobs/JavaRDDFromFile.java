@@ -35,6 +35,7 @@ import org.apache.spark.sql.api.java.StructType;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -51,84 +52,96 @@ import com.typesafe.config.Config;
  */
 public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-			+ "." + ParameterConstants.PARAM_TABLE_1;
+    static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
 
-	private final static Logger LOGGER = Logger.getLogger(JavaRDDFromFile.class
-			.getName());
+    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1;
 
-	/**
-	 * parse parameters - there are no default values, all values are required
-	 *
-	 */
-	@Override
-	public SparkJobValidation validate(final Config config) {
-		String msg = null;
+    private final static Logger LOGGER = Logger.getLogger(JavaRDDFromFile.class.getName());
 
-		if (!config.hasPath(PARAM_DATA_FILE_NAME)) {
-			msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
-		}
+    /**
+     * parse parameters - there are no default values, all values are required
+     *
+     */
+    @Override
+    public SparkJobValidation validate(final Config config) {
+        String msg = null;
 
-		// further checks - in this case we check whether the input data file
-		// exists
-		if (msg == null
-				&& !new File(config.getString(PARAM_DATA_FILE_NAME)).exists()) {
-			msg = "Input data file "
-					+ new File(config.getString(PARAM_DATA_FILE_NAME))
-							.getAbsolutePath() + " does not exist!";
-		}
-		if (msg != null) {
-			return ValidationResultConverter.invalid(msg);
-		}
-		return ValidationResultConverter.valid();
-	}
+        if (!config.hasPath(PARAM_DATA_FILE_NAME)) {
+            msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
+        }
 
-	/**
-	 * run the actual job, the result is serialized back to the client
-	 * the true result is stored in the map of named RDDs
-	 * @return "OK"
-	 */
-	@Override
-	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
-		LOGGER.log(Level.INFO, "reading and converting text file...");
-		final JavaRDD<Row> parsedData = javaRDDFromFile(sc, aConfig);
-		LOGGER.log(Level.INFO, "done");
+        if (msg != null && !config.hasPath(PARAM_TABLE_KEY)) {
+            msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
+        }
 
-		LOGGER.log(Level.INFO, "Storing predicted data unter key: "+aConfig.getString(PARAM_DATA_FILE_NAME));
-		LOGGER.log(Level.INFO, "Cashing data of size: "+parsedData.count());
-		addToNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME), parsedData);
+        if (msg != null) {
+            return ValidationResultConverter.invalid(msg);
+        }
+        return ValidationResultConverter.valid();
+    }
+
+    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+        String msg = null;
+        // further checks - in this case we check whether the input data file
+        // exists
+        if (!new File(aConfig.getString(PARAM_DATA_FILE_NAME)).exists()) {
+            msg =
+                "Input data file " + new File(aConfig.getString(PARAM_DATA_FILE_NAME)).getAbsolutePath()
+                    + " does not exist!";
+        }
+        if (msg != null) {
+            LOGGER.severe(msg);
+            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
+        }
+    }
+
+    /**
+     * run the actual job, the result is serialized back to the client the true result is stored in the map of named
+     * RDDs
+     *
+     * @return "OK"
+     * @throws GenericKnimeSparkException
+     */
+    @Override
+    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+        validateInput(aConfig);
+        LOGGER.log(Level.INFO, "reading and converting text file...");
+        final JavaRDD<Row> parsedData = javaRDDFromFile(sc, aConfig);
+        LOGGER.log(Level.INFO, "done");
+
+        LOGGER.log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_TABLE_KEY));
+        LOGGER.log(Level.INFO, "Cashing data of size: " + parsedData.count());
+        addToNamedRdds(aConfig.getString(PARAM_TABLE_KEY), parsedData);
         try {
             final StructType schema = StructTypeBuilder.fromRows(parsedData.take(10)).build();
             return JobResult.emptyJobResult().withMessage("OK")
-                    .withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schema);
+                .withTable(aConfig.getString(PARAM_TABLE_KEY), schema);
         } catch (InvalidSchemaException e) {
-            return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+            throw new GenericKnimeSparkException(e);
         }
-	}
+    }
 
-	static JavaRDD<Row> javaRDDFromFile(final SparkContext sc,
-			final Config config) {
-		@SuppressWarnings("resource")
-		JavaSparkContext ctx = new JavaSparkContext(sc);
-		String fName = config.getString(PARAM_DATA_FILE_NAME);
+    static JavaRDD<Row> javaRDDFromFile(final SparkContext sc, final Config config) {
+        @SuppressWarnings("resource")
+        JavaSparkContext ctx = new JavaSparkContext(sc);
+        String fName = config.getString(PARAM_DATA_FILE_NAME);
 
-		final Function<String, Row> rowFunction = new Function<String, Row>() {
-			private static final long serialVersionUID = 1L;
+        final Function<String, Row> rowFunction = new Function<String, Row>() {
+            private static final long serialVersionUID = 1L;
 
-			@Override
+            @Override
             public Row call(final String aLine) {
-				String[] terms = aLine.split(" ");
-				final ArrayList<Double> vals = new ArrayList<Double>();
-				for (int i = 0; i < terms.length; i++) {
-					vals.add(Double.parseDouble(terms[i]));
-				}
-				return RowBuilder.emptyRow().addAll(vals).build();
-			}
-		};
-		final JavaRDD<Row> parsedData = ctx.textFile(fName, 1).map(
-				rowFunction);
-		return parsedData;
-	}
+                String[] terms = aLine.split(" ");
+                final ArrayList<Double> vals = new ArrayList<Double>();
+                for (int i = 0; i < terms.length; i++) {
+                    vals.add(Double.parseDouble(terms[i]));
+                }
+                return RowBuilder.emptyRow().addAll(vals).build();
+            }
+        };
+        final JavaRDD<Row> parsedData = ctx.textFile(fName, 1).map(rowFunction);
+        return parsedData;
+    }
 }
