@@ -27,7 +27,7 @@ public class JarPacker {
 
         final String packagePath;
         if (aPackagePath.length() > 0) {
-            packagePath = aPackagePath.replaceAll("\\.", "/") + "/" ;
+            packagePath = aPackagePath.replaceAll("\\.", "/") + "/";
         } else {
             packagePath = "";
         }
@@ -45,20 +45,28 @@ public class JarPacker {
     static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
         throws IOException, ClassNotFoundException {
 
-        final String classPath = aClassPath.replaceAll("\\.", "/") + ".class";
+        final String path = aClassPath.replaceAll("\\.", "/");
+        //TODO - is there a better way to determine inner classes?
+        final String[] classPath =
+            new String[]{path + ".class", path + "$1.class", path + "$2.class", path + "$3.class", path + "$4.class"};
 
         final File f = new File(aSourceJarPath);
         if (!f.exists()) {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
         }
-        Class<?> c = Class.forName(aClassPath);
-        InputStream is = c.getResourceAsStream("/" + classPath);
-
         final JarFile source = new JarFile(aSourceJarPath);
         try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
             copyJarFile(source, target);
-            copyEntry(classPath, is, target);
+            final Class<?> c = Class.forName(aClassPath);
+            for (String cp : classPath) {
+                final InputStream is = c.getResourceAsStream("/" + cp);
+                if (is != null) {
+                    copyEntry(cp, is, target);
+                    is.close();
+                }
+            }
         }
+        source.close();
     }
 
     private static void addClass(final String aClassPath, final byte[] aByteCode,
