@@ -56,6 +56,8 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 
     static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
 
+    static final String PARAM_CSV_SEPARATOR = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SEPARATOR;
+
     static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(JavaRDDFromFile.class.getName());
@@ -97,6 +99,13 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
         }
     }
 
+    private static String getSeparator(final Config aConfig) {
+        if (aConfig.hasPath(PARAM_CSV_SEPARATOR)) {
+            return aConfig.getString(PARAM_CSV_SEPARATOR);
+        }
+        return " ";
+    }
+
     /**
      * run the actual job, the result is serialized back to the client the true result is stored in the map of named
      * RDDs
@@ -108,7 +117,7 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
     public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "reading and converting text file...");
-        final JavaRDD<Row> parsedData = javaRDDFromFile(sc, aConfig);
+        final JavaRDD<Row> parsedData = javaRDDFromFile(sc, aConfig, getSeparator(aConfig));
         LOGGER.log(Level.INFO, "done");
 
         LOGGER.log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_TABLE_KEY));
@@ -123,7 +132,7 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
         }
     }
 
-    static JavaRDD<Row> javaRDDFromFile(final SparkContext sc, final Config config) {
+    static JavaRDD<Row> javaRDDFromFile(final SparkContext sc, final Config config, final String aSeparator) {
         @SuppressWarnings("resource")
         JavaSparkContext ctx = new JavaSparkContext(sc);
         String fName = config.getString(PARAM_DATA_FILE_NAME);
@@ -133,10 +142,12 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 
             @Override
             public Row call(final String aLine) {
-                String[] terms = aLine.split(" ");
-                final ArrayList<Double> vals = new ArrayList<Double>();
+                String[] terms = aLine.split(aSeparator);
+                final ArrayList<Object> vals = new ArrayList<>();
+                //TODO - we need the column types here
                 for (int i = 0; i < terms.length; i++) {
-                    vals.add(Double.parseDouble(terms[i]));
+                    //vals.add(Double.parseDouble(terms[i]));
+                    vals.add(terms[i]);
                 }
                 return RowBuilder.emptyRow().addAll(vals).build();
             }

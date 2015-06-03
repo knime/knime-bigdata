@@ -81,4 +81,9 @@ public class ParameterConstants {
      * param for maximal number of bins
      */
     public static final String PARAM_MAX_BINS = "maxBins";
+
+    /**
+     * csv separator or some other separator
+     */
+    public static final String PARAM_SEPARATOR = "sep";
 }

@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -47,9 +49,21 @@ public class JarPacker {
 
         final String path = aClassPath.replaceAll("\\.", "/");
         //TODO - is there a better way to determine inner classes?
-        final String[] classPath =
-            new String[]{path + ".class", path + "$1.class", path + "$2.class", path + "$3.class", path + "$4.class"};
-
+        final List<String> classPath = new ArrayList<>();
+        classPath.add(path + ".class");
+        classPath.add(path + "$1.class");
+        classPath.add(path + "$2.class");
+        classPath.add(path + "$3.class");
+        classPath.add(path + "$4.class");
+        final Class<?> c = Class.forName(aClassPath);
+        Class<?>[] c2 = c.getDeclaredClasses();
+        for (Class<?> innerClass : c2) {
+            classPath.add(path+"$"+innerClass.getSimpleName()+".class");
+            classPath.add(path+"$"+innerClass.getSimpleName()+"$1.class");
+            classPath.add(path+"$"+innerClass.getSimpleName()+"$2.class");
+            classPath.add(path+"$"+innerClass.getSimpleName()+"$3.class");
+            classPath.add(path+"$"+innerClass.getSimpleName()+"$4.class");
+        }
         final File f = new File(aSourceJarPath);
         if (!f.exists()) {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
@@ -57,7 +71,7 @@ public class JarPacker {
         final JarFile source = new JarFile(aSourceJarPath);
         try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
             copyJarFile(source, target);
-            final Class<?> c = Class.forName(aClassPath);
+
             for (String cp : classPath) {
                 final InputStream is = c.getResourceAsStream("/" + cp);
                 if (is != null) {

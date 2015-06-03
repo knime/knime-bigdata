@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.testing.jobserver.client;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +31,8 @@ public class CompiledTransformationJobTest extends UnitSpec {
 
     private final String params2Json(final String aInputKey, final String aOutputKey) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aInputKey}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, aInputKey,
+            ParameterConstants.PARAM_SEPARATOR, " "}, ParameterConstants.PARAM_OUTPUT,
             new String[]{ParameterConstants.PARAM_TABLE_1, aOutputKey}});
     }
 
@@ -76,8 +78,10 @@ public class CompiledTransformationJobTest extends UnitSpec {
     @Test
     public void addTransformationJob2JarAndExecuteOnServer() throws Throwable {
 
-        final String j1 = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(), params2Json("/home/spark/data/kmeans-input.txt", "unitTestRDD1"));
-        JobControler.waitForJob(j1, null);
+        final String j1 = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(),
+            params2Json("/home/spark/data/iris-with-label.txt", "unitTestRDD1"));
+        JobStatus s1 = JobControler.waitForJob(j1, null);
+        assertFalse(s1.equals(JobStatus.ERROR));
 
         File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();

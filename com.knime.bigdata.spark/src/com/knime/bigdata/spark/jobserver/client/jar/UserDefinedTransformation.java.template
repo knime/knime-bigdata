@@ -57,7 +57,7 @@ $additionalImports
  *
  * @author dwk
  */
-public class $className extends KnimeSparkJob implements UserDefinedTransformation {
+public class $className extends KnimeSparkJob {
 	   
     /**
      *
@@ -133,7 +133,7 @@ public class $className extends KnimeSparkJob implements UserDefinedTransformati
           rowRDD2 = null;
         }
         
-        final JavaRDD<Row> transformed = apply(rowRDD1, rowRDD2);
+        final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD1, rowRDD2);
 
         LOGGER.log(Level.INFO, "transformation completed");
         addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
@@ -145,11 +145,20 @@ public class $className extends KnimeSparkJob implements UserDefinedTransformati
         }
     }
 
-    @Override
-    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(final T aInput1, final T aInput2) {
-		$transformationCode
+    /**
+     *
+     * note that this must be a static inner class - otherwise, Spark will
+     * throw a ClassNotFoundException
+     *
+     * @author dwk
+     */
+    private static class MyTransformer implements UserDefinedTransformation {
+        private static final long serialVersionUID = 1L;
+    	@Override
+    	public <T extends JavaRDD<Row>> JavaRDD<Row> apply(final T aInput1, final T aInput2) {
+			$transformationCode
+    	}
+    
+   	    $helperMethods
     }
-    
-    $helperMethods
-    
 }
