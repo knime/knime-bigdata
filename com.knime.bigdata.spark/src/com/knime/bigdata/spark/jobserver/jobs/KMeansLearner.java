@@ -102,7 +102,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
             try {
                 aConfig.getIntList(PARAM_COL_IDXS);
             } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_NUM_ITERATIONS
+                msg = "Input parameter '" + PARAM_COL_IDXS
                         + "' is not of expected type 'integer list'.";
             }
         }
@@ -142,13 +142,9 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
 				.getString(PARAM_DATA_FILE_NAME));
 		final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
-		int[] idxs = new int[colIdxs.size()];
-		int idx = 0;
-		for (Integer colIdx : colIdxs) {
-		    idxs[idx++] = colIdx;
-        }
-		//TODO: Use only the column indices when convert to vector
-		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, idxs);
+
+		//use only the column indices when converting to vector
+		final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
 
 		final KMeansModel model = execute(sc, aConfig, inputRDD);
 

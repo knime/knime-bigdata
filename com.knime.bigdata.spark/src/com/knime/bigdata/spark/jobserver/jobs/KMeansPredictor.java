@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 
 /**
  * applies previously learned MLlib KMeans model to given RDD, predictions are inserted into a new RDD and (temporarily)
@@ -54,14 +56,17 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
-
     private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
 
+    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
+            + "." + ParameterConstants.PARAM_COL_IDXS;
+
     private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_MODEL_NAME;
+            + ParameterConstants.PARAM_MODEL_NAME;
+
+    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
+            + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(KMeansPredictor.class.getName());
 
@@ -74,6 +79,18 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
         if (!aConfig.hasPath(PARAM_DATA_FILE_NAME)) {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
+
+        if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
+            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+        } else {
+            try {
+                aConfig.getIntList(PARAM_COL_IDXS);
+            } catch (ConfigException e) {
+                msg = "Input parameter '" + PARAM_COL_IDXS
+                        + "' is not of expected type 'integer list'.";
+            }
+        }
+
         if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
             msg = "Output parameter '" + PARAM_OUTPUT_DATA_PATH + "' missing.";
         }
@@ -111,7 +128,11 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "starting kMeans prediction job...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME));
-        final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectors(rowRDD);
+
+        final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
+
+        //use only the column indices when converting to vector
+        final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
 
         final KMeansModel kMeansModel = ModelUtils.fromString(aConfig.getString(PARAM_MODEL));
 
