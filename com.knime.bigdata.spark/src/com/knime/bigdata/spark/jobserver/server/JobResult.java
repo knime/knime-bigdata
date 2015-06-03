@@ -199,7 +199,8 @@ public class JobResult implements Serializable {
                 }
             }
             StructType structType = DataType.createStructType(fields);
-            m.put(entry.getKey(), structType);
+
+            m.put(stripQuotes(entry.getKey()), structType);
         }
         if (isError) {
             return new JobResult(msg, Collections.unmodifiableMap(m), null, (String)ModelUtils.fromString(config
@@ -249,9 +250,22 @@ public class JobResult implements Serializable {
      * @param aString
      * @return original string if it is already in quotes, quoted string otherwise
      */
-    private String ensureQuotes(final String aString) {
+    private static String ensureQuotes(final String aString) {
         if (!aString.startsWith("\"") || !aString.endsWith("\"")) {
             return "\"" + aString + "\"";
+        }
+        return aString;
+    }
+
+    /**
+     * remove quotes from start/end of given string
+     *
+     * @param aString
+     * @return original string if it is not in quotes, un-quoted string otherwise
+     */
+    private static String stripQuotes(final String aString) {
+        if (aString.startsWith("\"") && aString.endsWith("\"")) {
+            return aString.substring(1, aString.length()-1);
         }
         return aString;
     }
