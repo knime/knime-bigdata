@@ -22,15 +22,22 @@ package com.knime.bigdata.spark.node.scripting.snippet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import org.apache.spark.sql.api.java.StructField;
+import org.apache.spark.sql.api.java.StructType;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -100,18 +107,51 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
 
         final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 
+        StructType tableTypes = result.getTables().get(tableName);
+
         final List<DataColumnSpec> specs = new LinkedList<>();
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
-        specs.add(specCreator.createSpec());
-        specCreator.setName("Test2");
-        specCreator.setType(DoubleCell.TYPE);
-        specs.add(specCreator.createSpec());
+        for (StructField field : tableTypes.getFields()) {
+            specCreator.setName(field.getName());
+            specCreator.setType(KnimeDataTypeFromSqlDataType.get(field.getDataType()));
+            specs.add(specCreator.createSpec());
+        }
+
         final DataTableSpec resultSpec = new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
         SparkDataTable resultTable = new SparkDataTable(data1.getContext(), tableName, resultSpec);
         final SparkDataPortObject resultObject = new SparkDataPortObject(resultTable);
         return new PortObject[]{resultObject};
     }
 
+    /**
+     *
+     * TODO - move into separate class ..... and fix types
+     * @author dwk
+     */
+    private static class KnimeDataTypeFromSqlDataType {
+
+        public static final Map<org.apache.spark.sql.api.java.DataType, DataType> DATA_TYPES_BY_CLASS = new HashMap<>();
+        static {
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.BooleanType, BooleanCell.TYPE );
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.ByteType, IntCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.ShortType, IntCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.IntegerType, IntCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.LongType, DoubleCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.FloatType, DoubleCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.DoubleType, DoubleCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.DateType, StringCell.TYPE);
+          DATA_TYPES_BY_CLASS.put(org.apache.spark.sql.api.java.DataType.StringType, StringCell.TYPE);
+        }
+
+        /**
+         * @param aSqlDataType
+         * @return corresponding KNIME data type
+         */
+        public static DataType get(final org.apache.spark.sql.api.java.DataType aSqlDataType) {
+            return DATA_TYPES_BY_CLASS.get(aSqlDataType);
+        }
+
+    }
     /**
      * {@inheritDoc}
      */
@@ -120,21 +160,21 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
         return new PortObjectSpec[]{null};
     }
 
-    private final String params2Json(@Nonnull final String aInputTable1, final String aInputTable2, @Nonnull final String aOutputTable) {
+    private final String params2Json(@Nonnull final String aInputTable1, final String aInputTable2,
+        @Nonnull final String aOutputTable) {
         final String[] inputParams;
         if (aInputTable2 != null) {
-            inputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aInputTable1,
-                ParameterConstants.PARAM_TABLE_2, aInputTable2};
+            inputParams =
+                new String[]{ParameterConstants.PARAM_TABLE_1, aInputTable1, ParameterConstants.PARAM_TABLE_2,
+                    aInputTable2};
         } else {
             inputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aInputTable1};
         }
-        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            inputParams, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
+        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParams,
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
     }
 
-    private KnimeSparkJob addTransformationJob2Jar(final String aTransformationCode)
-        throws GenericKnimeSparkException {
+    private KnimeSparkJob addTransformationJob2Jar(final String aTransformationCode) throws GenericKnimeSparkException {
 
         final String jarPath;
         try {
@@ -153,7 +193,7 @@ public class SparkSnippetNodeModel extends AbstractSparkSnippetNodeModel {
         final String root = SparkPlugin.getDefault().getPluginRootPath();
 
         final KnimeSparkJob job =
-            compiler.addTransformationSparkJob2Jar(root+"/resources/knimeJobs.jar", jarPath, additionalImports,
+            compiler.addTransformationSparkJob2Jar(root + "/resources/knimeJobs.jar", jarPath, additionalImports,
                 aTransformationCode, helperMethodsCode);
 
         //upload jar to job-server
