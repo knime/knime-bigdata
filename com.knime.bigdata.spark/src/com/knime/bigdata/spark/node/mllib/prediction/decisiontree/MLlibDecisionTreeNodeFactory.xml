@@ -28,8 +28,8 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Hive query">Hive query</inPort>
-        <outPort index="0" name="Result">Result</outPort>
+		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
+		<outPort index="0" name="Result">The input data labeled with the DT predictions.</outPort>
         <outPort index="1" name="MLlib Tree Model">MLlib Tree Model</outPort>
     </ports>
 </knimeNode>

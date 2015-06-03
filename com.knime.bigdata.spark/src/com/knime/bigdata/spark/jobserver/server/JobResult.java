@@ -251,6 +251,9 @@ public class JobResult implements Serializable {
      * @return original string if it is already in quotes, quoted string otherwise
      */
     private static String ensureQuotes(final String aString) {
+        if (aString == null) {
+            return "";
+        }
         if (!aString.startsWith("\"") || !aString.endsWith("\"")) {
             return "\"" + aString + "\"";
         }

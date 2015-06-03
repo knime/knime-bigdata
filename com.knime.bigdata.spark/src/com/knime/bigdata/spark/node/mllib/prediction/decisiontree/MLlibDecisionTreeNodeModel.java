@@ -20,51 +20,47 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObject;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
-import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
-import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
+import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 
 /**
  *
  * @author knime
  */
-public class MLlibDecisionTreeNodeModel extends NodeModel {
+public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
 
-    private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
     private final SettingsModelString m_classCol = createClassColModel();
-//    private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
+
+    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+
+    //    private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
 //    private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
 //    private final SettingsModelString m_tableName = createTableNameModel();
 //    private final SettingsModelString m_colName = createColumnNameModel();
@@ -73,8 +69,8 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
      *
      */
     public MLlibDecisionTreeNodeModel() {
-        super(new PortType[]{DatabasePortObject.TYPE},
-            new PortType[]{SparkModelPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE},
+            new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
     }
 
     /**
@@ -117,31 +113,32 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
-        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
-            throw new InvalidSettingsException("Only Hive connections are supported");
+        if (inSpecs == null || inSpecs.length != 1) {
+            throw new InvalidSettingsException("No Hive connection available");
         }
-        return new PortObjectSpec[] {createMLSpec()};
+        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
+        DataTableSpec tableSpec = spec.getTableSpec();
+        FilterResult result = m_cols.applyTo(tableSpec);
+        final String[] includedCols = result.getIncludes();
+        if (includedCols == null || includedCols.length < 1) {
+            throw new InvalidSettingsException("No input columns available");
+        }
+        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(tableSpec), createMLSpec()};
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final DatabasePortObject db = (DatabasePortObject)inObjects[0];
-        final DataTableSpec tableSpec = db.getSpec().getDataTableSpec();
-//        final String resultTableName = m_tableName.getStringValue();
-        final CredentialsProvider cp = getCredentialsProvider();
-        final DatabaseQueryConnectionSettings connSettings = db.getConnectionSettings(cp);
-        exec.setMessage("Connecting to Spark...");
-        final SparkConf conf = new SparkConf().setMaster("local[1]").setAppName("knimeTest");
-//        conf.set("hive.metastore.uris", "thrift://sandbox.hortonworks.com:9083");
-        try (final JavaSparkContext sc = new JavaSparkContext(conf);) {
+    protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+        final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
+        final String aOutputTableName = SparkIDGenerator.createID();
+        exec.setMessage("Starting Decision Tree (SPARK) Learner");
         exec.checkCanceled();
-        exec.setMessage("Connecting to Hive...");
-        final JavaHiveContext sqlsc = new JavaHiveContext(sc);
-        exec.setMessage("Execute Hive Query...");
+        final DataTableSpec tableSpec = data.getTableSpec();
+        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
+        SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+
         final Collection<Integer> numericColIdx = new LinkedList<>();
         int classColIdx = -1;
         int counter = 0;
@@ -155,23 +152,10 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
             }
             counter++;
         }
-        final String sql = connSettings.getQuery();
-        final DecisionTreeTask task = new DecisionTreeTask(sql, numericColIdx, classColName, classColIdx);
-        final DecisionTreeModel model = task.execute(sqlsc);
-//        KMeansModel clusters = new KMeansModel(new Vector[] {new DenseVector(new double[] {1,0,1})});
+        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), numericColIdx, classColName, classColIdx, resultRDD);
+        final DecisionTreeModel model = task.execute(exec);
         return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model))};
-        }
-    }
 
-    /**
-     * @param type
-     * @return
-     */
-    private DataType getSparkType(final org.knime.core.data.DataType type) {
-        if (type.isCompatible(DoubleValue.class)) {
-            return DataType.DoubleType;
-        }
-        return DataType.StringType;
     }
 
     /**
@@ -179,6 +163,14 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
      */
     private SparkModelPortObjectSpec createMLSpec() {
         return new SparkModelPortObjectSpec("DecisionTree");
+    }
+
+    /**
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    static SettingsModelColumnFilter2 createColumnsModel() {
+        return new SettingsModelColumnFilter2("columns", DoubleValue.class);
     }
 
     /**
@@ -215,32 +207,6 @@ public class MLlibDecisionTreeNodeModel extends NodeModel {
 //        m_noOfIteration.loadSettingsFrom(settings);
 //        m_tableName.loadSettingsFrom(settings);
 //        m_colName.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // nothing to do
     }
 
 }

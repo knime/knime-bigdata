@@ -136,7 +136,7 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 
         final KMeansModel kMeansModel = ModelUtils.fromString(aConfig.getString(PARAM_MODEL));
 
-        final JavaRDD<Row> predictions = predict(sc, inputRDD, rowRDD, kMeansModel);
+        final JavaRDD<Row> predictions = ModelUtils.predict(sc, inputRDD, rowRDD, kMeansModel);
 
         LOGGER.log(Level.INFO, "kMeans prediction done");
         addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictions);
@@ -147,16 +147,5 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
         } catch (InvalidSchemaException e) {
             return JobResult.emptyJobResult().withMessage("ERROR: " + e.getMessage());
         }
-    }
-
-    static JavaRDD<Row> predict(final SparkContext aContext, final JavaRDD<Vector> aNumericData,
-        final JavaRDD<Row> rowRDD, final KMeansModel aModel) {
-        aNumericData.cache();
-
-        final JavaRDD<Integer> predictions = aModel.predict(aNumericData);
-
-        final JavaRDD<Row> predictedData = RDDUtils.addColumn(rowRDD.zip(predictions));
-
-        return predictedData;
     }
 }
