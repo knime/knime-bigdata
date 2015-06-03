@@ -54,26 +54,19 @@ import com.typesafe.config.Config;
  *
  * @author dwk
  */
-public class TransformationTestJob extends KnimeSparkJob implements UserDefinedTransformation {
+public class TransformationTestJob extends KnimeSparkJob {
+
+    private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_TABLE_1;
+
+    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
+        + ParameterConstants.PARAM_TABLE_1;
+
+    private final static Logger LOGGER = Logger.getLogger(TransformationTestJob.class.getName());
 
     /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
-    private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
-
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
-
-    private final static Logger LOGGER = Logger.getLogger(TransformationTestJob.class
-            .getName());
-
-    /**
-     * parse parameters - there are no default values, but two required values:
-     * - the key of the input JavaRDD
-     * - the key of the output JavaRDD
+     * parse parameters - there are no default values, but two required values: - the key of the input JavaRDD - the key
+     * of the output JavaRDD
      */
     @Override
     public SparkJobValidation validate(final Config aConfig) {
@@ -93,21 +86,20 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
     private SparkJobValidation validateInput(final Config aConfig) {
         String msg = null;
         if (!validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY))) {
-            msg = "Input data table missing for key: "+aConfig.getString(PARAM_INPUT_TABLE_KEY);
+            msg = "Input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY);
         }
         if (msg != null) {
             LOGGER.severe(msg);
-            return ValidationResultConverter
-                    .invalid(GenericKnimeSparkException.ERROR + ": " + msg);
+            return ValidationResultConverter.invalid(GenericKnimeSparkException.ERROR + ": " + msg);
         }
 
         return ValidationResultConverter.valid();
     }
 
     /**
-     * run the actual job, the result is serialized back to the client
-     * the primary result of this job should be a side effect - new new RDD in the
-     * map of named RDDs
+     * run the actual job, the result is serialized back to the client the primary result of this job should be a side
+     * effect - new new RDD in the map of named RDDs
+     *
      * @return JobResult with table information
      */
     @Override
@@ -118,79 +110,90 @@ public class TransformationTestJob extends KnimeSparkJob implements UserDefinedT
         }
 
         LOGGER.log(Level.INFO, "starting transformation job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
-                .getString(PARAM_INPUT_TABLE_KEY));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY));
 
-        final JavaRDD<Row> transformed = apply(rowRDD, null);
+        final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD, null);
 
         LOGGER.log(Level.INFO, "transformation completed");
         addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
         try {
             final StructType schema = StructTypeBuilder.fromRows(transformed.take(10)).build();
-            return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
+            return JobResult.emptyJobResult().withMessage("OK")
+                .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
         } catch (InvalidSchemaException e) {
-            return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+            return JobResult.emptyJobResult().withMessage("ERROR: " + e.getMessage());
         }
     }
 
-    @Override
-    @Nonnull
-    public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T aInput1, final T aInput2) {
+    /**
+     *
+     * note that this must be a static inner class - otherwise, Spark will
+     * throw a ClassNotFoundException
+     *
+     * @author dwk
+     */
+    private static class MyTransformer implements UserDefinedTransformation {
+        private static final long serialVersionUID = 1L;
 
-        //aggregate by class
-        JavaPairRDD<String, Iterable<Row>> t = aInput1.groupBy(new Function<Row, String>() {
+        @Override
+        @Nonnull
+        public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T aInput1, final T aInput2) {
 
-            private static final long serialVersionUID = 1L;
+            //aggregate by class
+            JavaPairRDD<String, Iterable<Row>> t = aInput1.groupBy(new Function<Row, String>() {
+                private static final long serialVersionUID = 1L;
 
-            @Override
-            public String call(final Row aRow) throws Exception {
-                //5th column is the class column
-                return aRow.getString(5);
-            }
-        });
-
-        //now add the class count to each row
-        return t.flatMap(new FlatMapFunction<Tuple2<String,Iterable<Row>>, Row>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Iterable<Row> call(final Tuple2<String, Iterable<Row>> rowsWithSameLabel) throws Exception {
-                //count number of elements
-                Iterator<Row> l = rowsWithSameLabel._2.iterator();
-                int ctr = 0;
-                while (l.hasNext()) {
-                    ctr++;
+                @Override
+                public String call(final Row aRow) throws Exception {
+                    //4th column (0-based) is the class column
+                    return aRow.getString(4);
                 }
+            });
 
-                //add count to each row
-                l = rowsWithSameLabel._2.iterator();
-                List<Row> res = new ArrayList<>();
-                while (l.hasNext()) {
-                    res.add(RowBuilder.fromRow(l.next()).add(ctr).build());
+            //now add the class count to each row
+            return t.flatMap(new FlatMapFunction<Tuple2<String, Iterable<Row>>, Row>() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public Iterable<Row> call(final Tuple2<String, Iterable<Row>> rowsWithSameLabel) throws Exception {
+                    //count number of elements
+                    Iterator<Row> l = rowsWithSameLabel._2.iterator();
+                    int ctr = 0;
+                    while (l.hasNext()) {
+                        ctr++;
+                        l.next();
+                    }
+
+                    //add count to each row
+                    l = rowsWithSameLabel._2.iterator();
+                    List<Row> res = new ArrayList<>();
+                    while (l.hasNext()) {
+                        res.add(RowBuilder.fromRow(l.next()).add(ctr).build());
+                    }
+                    return res;
                 }
-                return res;
-            }
-        });
+            });
 
-//        final Function<Row, Row> rowFunction = new Function<Row, Row>() {
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            public Row call(final Row aRow) {
-//                String[] terms = aLine.split(" ");
-//                final ArrayList<Double> vals = new ArrayList<Double>();
-//                for (int i = 0; i < terms.length; i++) {
-//                    vals.add(Double.parseDouble(terms[i]));
-//                }
-//                return RowBuilder.emptyRow().addAll(vals).build();
-//            }
-//        };
-//
-//
-//        aInput1.reduceByKey(new Function2<Integer, Integer>() {
-//            public Integer call(final Integer a, final Integer b) { return a + b; }
-//          });
-//
-//        return aInput1.map(rowFunction);
+            //        final Function<Row, Row> rowFunction = new Function<Row, Row>() {
+            //            private static final long serialVersionUID = 1L;
+            //
+            //            @Override
+            //            public Row call(final Row aRow) {
+            //                String[] terms = aLine.split(" ");
+            //                final ArrayList<Double> vals = new ArrayList<Double>();
+            //                for (int i = 0; i < terms.length; i++) {
+            //                    vals.add(Double.parseDouble(terms[i]));
+            //                }
+            //                return RowBuilder.emptyRow().addAll(vals).build();
+            //            }
+            //        };
+            //
+            //
+            //        aInput1.reduceByKey(new Function2<Integer, Integer>() {
+            //            public Integer call(final Integer a, final Integer b) { return a + b; }
+            //          });
+            //
+            //        return aInput1.map(rowFunction);
+        }
     }
 }
