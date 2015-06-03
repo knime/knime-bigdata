@@ -17,7 +17,7 @@
 			should consider to use the "Normalizer" as a preprocessing step).
 			
 			TODO: 
-			If the optional PMML inport is connected and contains preprocessing
+			If the optional PMML import is connected and contains preprocessing
 			operations in the TransformationDictionary those are added to the
 			learned model. The node can be configured as follows:
 		</intro>

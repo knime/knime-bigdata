@@ -45,13 +45,9 @@ public abstract class UnitSpec {
     @AfterClass
     public static void afterSuite() throws Exception {
         KnimeConfigContainer.m_config = origConfig;
-        try {
-            KnimeContext.destroySparkContext(contextName);
-        } finally {
-            KnimeContext.destroySparkContext(contextName);
-            //need to wait a bit before we can actually test whether it is really gone
-            Thread.sleep(200);
-        }
+        KnimeContext.destroySparkContext(contextName);
+        //need to wait a bit before we can actually test whether it is really gone
+        Thread.sleep(200);
         // TODO - what would be the expected status?
         assertTrue("context status should NOT be OK after destruction",
             KnimeContext.getSparkContextStatus(contextName) != JobStatus.OK);

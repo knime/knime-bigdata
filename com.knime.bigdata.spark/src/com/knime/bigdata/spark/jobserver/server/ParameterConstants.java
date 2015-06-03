@@ -86,4 +86,9 @@ public class ParameterConstants {
      * csv separator or some other separator
      */
     public static final String PARAM_SEPARATOR = "sep";
+
+    /**
+     * index of class label
+     */
+    public static final String PARAM_LABEL_INDEX = "labelIx";
 }

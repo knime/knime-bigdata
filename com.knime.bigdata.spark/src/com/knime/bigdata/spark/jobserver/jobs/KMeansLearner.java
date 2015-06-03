@@ -38,6 +38,7 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -153,7 +154,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
 			LOGGER.log(Level.INFO, "Storing predicted data unter key: "
 					+ aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-			JavaRDD<Row> predictedData = KMeansPredictor.predict(sc, inputRDD, rowRDD,
+			JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD,
 					model);
 			try {
 				addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH),

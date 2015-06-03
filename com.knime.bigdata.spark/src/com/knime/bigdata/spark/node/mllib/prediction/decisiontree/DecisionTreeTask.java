@@ -22,19 +22,18 @@ package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.linalg.Vectors;
-import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.hive.api.java.JavaHiveContext;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionContext;
+
+import com.knime.bigdata.spark.jobserver.client.JobControler;
+import com.knime.bigdata.spark.jobserver.client.JsonUtils;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
  *
@@ -43,58 +42,44 @@ import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 public class DecisionTreeTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private String m_query;
     private Collection<Integer> m_numericColIdx;
-    private int m_classColIdx;
-    private String m_classColName;
+    private final int m_classColIdx;
+    private final String m_classColName;
+    private final String m_context;
+    private String m_outputTableName;
+    private String m_inputTableName;
 
-    public DecisionTreeTask(final String sql, final Collection<Integer> numericColIdx, final String classColName,
-        final int classColIdx) {
-        m_query = sql;
+    DecisionTreeTask(final SparkRDD inputRDD, final Collection<Integer> numericColIdx, final String classColName,
+        final int classColIdx, final SparkRDD outputRDD) {
+        if (!inputRDD.compatible(outputRDD)) {
+            throw new IllegalArgumentException("Incompatible rdds");
+        }
+        m_context = inputRDD.getContext();
+        m_inputTableName = inputRDD.getID();
         m_numericColIdx = numericColIdx;
         m_classColName = classColName;
         m_classColIdx = classColIdx;
+        m_outputTableName = outputRDD.getID();
     }
 
-    public DecisionTreeModel execute(final JavaHiveContext sqlsc) {
-        final JavaSchemaRDD uniqeClassRDD =
-                sqlsc.sql("SELECT distinct(t." + m_classColName + ") FROM (" + m_query + ") as t");
-        final List<Row> classValRows = uniqeClassRDD.collect();
-        final Map<String, Double> classValMap = new HashMap<>();
-        for (Row row : classValRows) {
-            final String val = row.get(0).toString();
-            if (!classValMap.containsKey(val)) {
-                classValMap.put(val, Double.valueOf(classValMap.size()));
-            }
-        }
-        final JavaSchemaRDD inputData = sqlsc.sql(m_query);
-        final Function<Row, LabeledPoint> rowFunction = new Function<Row, LabeledPoint>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public LabeledPoint call(final Row r) {
-                final double[] vals = new double[m_numericColIdx.size()];
-                int colCount = 0;
-                for (Integer id : m_numericColIdx) {
-                    vals[colCount++] = r.getDouble(id.intValue());
-                }
-                final String classVal = r.get(m_classColIdx).toString();
-                return new LabeledPoint(classValMap.get(classVal).doubleValue(), Vectors.dense(vals));
-            }
-        };
-        final JavaRDD<LabeledPoint> parsedData = inputData.map(rowFunction);
-        parsedData.cache();
-        List<LabeledPoint> rows = parsedData.collect();
-        for (LabeledPoint row : rows) {
-            System.out.println(row);
-        }
-     // Cluster the data into two classes using KMeans
-        Map<Integer, Integer> categoricalFeaturesInfo = new HashMap<>();
-        String impurity = "variance";
-        Integer maxDepth = 5;
-        Integer maxBins = 32;
-        final DecisionTreeModel model =
-                DecisionTree.trainRegressor(parsedData, categoricalFeaturesInfo, impurity, maxDepth, maxBins);
-        return model;
+    DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
+        final String learnerParams = learnerDef();
+        final String jobId =
+                JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
+
+        final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+
+        return (DecisionTreeModel)result.getObjectResult();
+    }
+
+    private String learnerDef() {
+        return JsonUtils.asJson(new Object[]{
+            ParameterConstants.PARAM_INPUT,
+            new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, ParameterConstants.VALUE_GINI,
+                ParameterConstants.PARAM_MAX_BINS, "6",
+                ParameterConstants.PARAM_MAX_DEPTH, "8", ParameterConstants.PARAM_LABEL_INDEX,
+                m_classColIdx, ParameterConstants.PARAM_TABLE_1, m_inputTableName},
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
     }
 
 }
