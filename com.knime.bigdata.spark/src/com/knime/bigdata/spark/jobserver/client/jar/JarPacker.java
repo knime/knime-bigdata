@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -15,8 +16,8 @@ import java.util.jar.JarOutputStream;
  */
 public class JarPacker {
 
-    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath,
-        final byte[] aByteCode) throws IOException {
+    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aPackagePath,
+        final Map<String, byte[]> aClassByteCodes) throws IOException {
 
         final File f = new File(aSourceJarPath);
         if (!f.exists()) {
@@ -24,16 +25,25 @@ public class JarPacker {
         }
         final JarFile source = new JarFile(aSourceJarPath);
 
+        final String packagePath;
+        if (aPackagePath.length() > 0) {
+            packagePath = aPackagePath.replaceAll("\\.", "/") + "/" ;
+        } else {
+            packagePath = "";
+        }
         try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
             copyJarFile(source, target);
-            final String classPath = aClassPath.replaceAll("\\.", "/") + ".class";
-            addClass(classPath, aByteCode, target);
+            for (Map.Entry<String, byte[]> entry : aClassByteCodes.entrySet()) {
+                final String classPath = packagePath + entry.getKey() + ".class";
+                addClass(classPath, entry.getValue(), target);
+            }
         }
 
         source.close();
     }
 
-    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath) throws IOException, ClassNotFoundException {
+    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
+        throws IOException, ClassNotFoundException {
 
         final String classPath = aClassPath.replaceAll("\\.", "/") + ".class";
 
@@ -42,7 +52,7 @@ public class JarPacker {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
         }
         Class<?> c = Class.forName(aClassPath);
-        InputStream is = c.getResourceAsStream("/"+classPath);
+        InputStream is = c.getResourceAsStream("/" + classPath);
 
         final JarFile source = new JarFile(aSourceJarPath);
         try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
@@ -51,8 +61,8 @@ public class JarPacker {
         }
     }
 
-    private static void addClass(final String aClassPath, final byte[] aByteCode, final JarOutputStream aTargetOutputStream)
-        throws IOException {
+    private static void addClass(final String aClassPath, final byte[] aByteCode,
+        final JarOutputStream aTargetOutputStream) throws IOException {
         final JarEntry entry = new JarEntry(aClassPath);
         entry.setTime(System.currentTimeMillis());
         aTargetOutputStream.putNextEntry(entry);
@@ -60,8 +70,8 @@ public class JarPacker {
         aTargetOutputStream.closeEntry();
     }
 
-    private static void copyEntry(final String aClassPath, final InputStream is, final JarOutputStream aTargetOutputStream)
-        throws IOException {
+    private static void copyEntry(final String aClassPath, final InputStream is,
+        final JarOutputStream aTargetOutputStream) throws IOException {
         final JarEntry copy = new JarEntry(aClassPath);
         // create a new entry to avoid ZipException: invalid entry
         // compressed size
@@ -86,6 +96,5 @@ public class JarPacker {
             aTargetOutputStream.closeEntry();
         }
     }
-
 
 }

@@ -68,7 +68,7 @@ final public class SparkJobCompiler {
         @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
         SourceCompiler compiledJob =
             compileKnimeSparkJob(aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
-        add2Jar(aSourceJarPath, aTargetJarPath, compiledJob.getClass().getCanonicalName(), compiledJob.getBytecode());
+        add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
         return compiledJob.getInstance();
     }
 
@@ -115,7 +115,7 @@ final public class SparkJobCompiler {
             fillTransformationTemplate(className, aAdditionalImports, aTransformationCode,
                 aHelperMethodsCode);
         SourceCompiler compiledJob = compileAndCreateInstance(className, source);
-        add2Jar(aSourceJarPath, aTargetJarPath, className, compiledJob.getBytecode());
+        add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
         return compiledJob.getInstance();
     }
 
@@ -125,13 +125,13 @@ final public class SparkJobCompiler {
      *
      * @param aSourceJarPath
      * @param aTargetJarPath
-     * @param qName
+     * @param aPackageName
      * @throws GenericKnimeSparkException
      */
-    private void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String qName,
-        final byte[] aBytes) throws GenericKnimeSparkException {
+    private void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aPackageName,
+        final Map<String, byte[]> map) throws GenericKnimeSparkException {
         try {
-            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, qName, aBytes);
+            JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, aPackageName, map);
         } catch (IOException e) {
             LOGGER.severe(e.getMessage());
             throw new GenericKnimeSparkException(e);
@@ -284,7 +284,7 @@ final public class SparkJobCompiler {
 
     private static class SourceCompiler {
 
-        private byte[] m_bytecode;
+        private Map<String, byte[]> m_bytecode;
 
         /**
          * Creates a new CompiledModelPortObject from java code.
@@ -303,9 +303,9 @@ final public class SparkJobCompiler {
         private KnimeSparkJob m_jobInstance;
 
         /**
-         * @return the bytecode
+         * @return the bytecode for the class and possibly inner classes
          */
-        byte[] getBytecode() {
+        Map<String, byte[]> getBytecode() {
             return m_bytecode;
         }
 
@@ -348,7 +348,7 @@ final public class SparkJobCompiler {
 
             //final String className = (PACKAGE_NAME+ "/" + aClassName).replaceAll("\\.", "/");
             final Class<KnimeSparkJob> jobClass = (Class<KnimeSparkJob>)cl.loadClass(aClassName);
-            m_bytecode =  compiler.getClassByteCode().get(aClassName);
+            m_bytecode =  compiler.getClassByteCode();
             try {
                 m_jobInstance = jobClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {

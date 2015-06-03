@@ -22,6 +22,9 @@ $packageName
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -39,6 +42,14 @@ import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaExce
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation;
 import com.typesafe.config.Config;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
+
+import scala.Tuple2;
+
+import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
 $additionalImports
 
@@ -130,7 +141,7 @@ public class $className extends KnimeSparkJob implements UserDefinedTransformati
             final StructType schema = StructTypeBuilder.fromRows(transformed.take(10)).build();
             return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
         } catch (InvalidSchemaException e) {
-            return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+            throw new GenericKnimeSparkException(e);
         }
     }
 

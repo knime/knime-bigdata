@@ -19,6 +19,7 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
         try {
             return runJobWithContext((SparkContext)aSparkContext, aConfig);
         } catch (Throwable t) {
+            t.printStackTrace();
             return JobResult.emptyJobResult().withMessage(t.getMessage()).withException(t);
         }
     }

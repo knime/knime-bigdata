@@ -94,7 +94,7 @@ public class JsonUtilsTest {
 				config.hasPath(ParameterConstants.PARAM_OUTPUT));
 		Config inputConfig = config.getConfig(ParameterConstants.PARAM_INPUT);
 		assertEquals("value should be accessible for key", "dataPath",
-				inputConfig.getString("dataPath"));
+				inputConfig.getString(ParameterConstants.PARAM_TABLE_1));
 		assertEquals("value should be accessible for key", 9,
 				inputConfig.getInt(ParameterConstants.PARAM_NUM_CLUSTERS));
 		assertEquals("value should be accessible for key", 63,
