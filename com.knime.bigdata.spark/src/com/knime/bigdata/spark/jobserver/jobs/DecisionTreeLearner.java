@@ -40,6 +40,7 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.LabeledDataInfo;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
@@ -81,7 +82,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         + ParameterConstants.PARAM_TABLE_1;
 
     private static final String PARAM_LABEL_INDEX = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_LABEL_INDEX;
+        + ParameterConstants.PARAM_LABEL_INDEX;
 
     private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
@@ -171,18 +172,24 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             JobResult res = JobResult.emptyJobResult().withMessage("OK");
             StructType schema = StructTypeBuilder.fromRows(rowRDD.take(10)).build();
 
-            //TODO - this does not yet work !!! - it only works if all features (including the label) are numeric
+            //TODO - this does not yet work !!! - it only works if all features (except for the label) are numeric
             final int labelIndex = aConfig.getInt(PARAM_LABEL_INDEX);
-            final JavaRDD<LabeledPoint> inputRDD =
-                RDDUtils.toJavaLabeledPointRDDConvertNominalValues(rowRDD, schema, labelIndex);
+            final LabeledDataInfo info = RDDUtils.toJavaLabeledPointRDDConvertNominalValues(rowRDD, schema, labelIndex);
 
-            final DecisionTreeModel model = execute(sc, aConfig, inputRDD);
+            //TODO - we should somehow store and return the label to int mapping
+            LOGGER.log(Level.INFO, "Got label to int mapping: ");
+            for (Map.Entry<String, Integer> entry : info.getClassLabelToIntMapping().entrySet()) {
+                LOGGER.log(Level.INFO, entry.getKey() + ":" + entry.getValue());
+            }
+
+            final DecisionTreeModel model = execute(sc, aConfig, info.getLabeledPointRDD(), info.getNumberClasses());
             res = res.withObjectResult(model);
 
             if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
                 LOGGER
                     .log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-                JavaRDD<Vector> features = RDDUtils.toVectorRDDFromLabeledPointRDD(inputRDD);
+                JavaRDD<Vector> features = info.getVectorRDD();
+                //TODO - revert the label to int mapping
                 JavaRDD<Row> predictedData = ModelUtils.predict(sc, features, rowRDD, model);
                 try {
                     addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictedData);
@@ -205,14 +212,13 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * @param aContext
      * @param aConfig
      * @param aInputData - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
+     * @param aNumClasses - number of classes for classification.
      * @return DecisionTreeModel
      */
     private DecisionTreeModel execute(final SparkContext aContext, final Config aConfig,
-        final JavaRDD<LabeledPoint> aInputData) {
+        final JavaRDD<LabeledPoint> aInputData, final int aNumClasses) {
         aInputData.cache();
 
-        // number of classes for classification.
-        final int numClasses = 3;
         //Map storing arity of categorical features. E.g., an entry (n -> k) indicates that feature n is categorical with k categories indexed from 0: {0, 1, ..., k-1}.
         final Map<Integer, Integer> categoricalFeaturesInfo = new HashMap<>();
 
@@ -221,7 +227,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         final String impurity = aConfig.getString(PARAM_IMPURITY);
 
         // Cluster the data into m_noOfCluster classes using KMeans
-        return DecisionTree.trainClassifier(aInputData, numClasses, categoricalFeaturesInfo, impurity, maxDepth,
+        return DecisionTree.trainClassifier(aInputData, aNumClasses, categoricalFeaturesInfo, impurity, maxDepth,
             maxBins);
     }
 
