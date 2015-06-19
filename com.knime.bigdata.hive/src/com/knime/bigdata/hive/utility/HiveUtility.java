@@ -66,8 +66,9 @@ public class HiveUtility extends DatabaseUtility {
 
     /**
      * Constructor.
+     * @throws LicenseException
      */
-    public HiveUtility() {
+    public HiveUtility() throws LicenseException {
         super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction.Factory(),
             new SumDistinctDBAggregationFunction.Factory(), new AvgDistinctDBAggregationFunction.Factory(),
             new MinDBAggregationFunction.Factory(), new MaxDBAggregationFunction.Factory(),
@@ -77,6 +78,7 @@ public class HiveUtility extends DatabaseUtility {
             new CorrDBAggregationFunction.Factory(), new PercentileDBAggregationFunction.Factory(),
             new PercentileApproxDBAggregationFunction.Factory(),  new CollectSetDBAggregationFunction.Factory());
             //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
+        LICENSE_CHECKER.checkLicense();
     }
 
     /**

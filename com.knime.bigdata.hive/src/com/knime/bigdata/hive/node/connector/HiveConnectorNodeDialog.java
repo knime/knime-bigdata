@@ -38,6 +38,8 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
+import com.knime.bigdata.hive.utility.HiveUtility;
+
 /**
  * Dialog for the Hive Connector node.
  *
@@ -103,6 +105,7 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
+        HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
         try {
             m_settings.loadValidatedConnection(settings, getCredentialsProvider());
         } catch (InvalidSettingsException ex) {
