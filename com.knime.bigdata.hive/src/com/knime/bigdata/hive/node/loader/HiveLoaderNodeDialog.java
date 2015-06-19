@@ -49,6 +49,7 @@ import org.knime.core.node.util.ColumnFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
 
 import com.knime.bigdata.hive.utility.HiveLoaderSettings;
+import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Dialog for the Hive Loader node.
@@ -128,6 +129,7 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
+        HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
         m_settings.loadSettingsForDialog(settings);
         try {
             m_settings.guessTypeMapping((DataTableSpec)specs[1], true);

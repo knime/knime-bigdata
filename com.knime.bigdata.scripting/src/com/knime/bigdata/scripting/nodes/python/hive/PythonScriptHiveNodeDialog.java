@@ -75,6 +75,8 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.python.kernel.SQLEditorObjectWriter;
 
+import com.knime.bigdata.hive.utility.HiveUtility;
+
 /**
  * <code>NodeDialog</code> for the node.
  *
@@ -135,6 +137,7 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 	@Override
 	protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
 			throws NotConfigurableException {
+	    HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
 		if (specs == null || specs.length < 2 || specs[0] == null || specs[1] == null) {
 			throw new NotConfigurableException("Please connect the node");
 		}
