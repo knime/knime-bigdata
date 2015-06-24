@@ -16,26 +16,28 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 12.02.2015 by koetter
+ *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.pmml.predictor;
+package com.knime.bigdata.spark.node.scripting.java.sink;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
+
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class MLlibPMMLPredictorNodeFactory extends NodeFactory<MLlibPMMLPredictorNodeModel> {
+public class SparkJavaSnippetSinkNodeFactory extends NodeFactory<SparkJavaSnippetSinkNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibPMMLPredictorNodeModel createNodeModel() {
-        return new MLlibPMMLPredictorNodeModel();
+    public SparkJavaSnippetSinkNodeModel createNodeModel() {
+        return new SparkJavaSnippetSinkNodeModel();
     }
 
     /**
@@ -50,8 +52,7 @@ public class MLlibPMMLPredictorNodeFactory extends NodeFactory<MLlibPMMLPredicto
      * {@inheritDoc}
      */
     @Override
-    public NodeView<MLlibPMMLPredictorNodeModel>
-        createNodeView(final int viewIndex, final MLlibPMMLPredictorNodeModel nodeModel) {
+    public NodeView<SparkJavaSnippetSinkNodeModel> createNodeView(final int viewIndex, final SparkJavaSnippetSinkNodeModel nodeModel) {
         return null;
     }
 
@@ -68,7 +69,6 @@ public class MLlibPMMLPredictorNodeFactory extends NodeFactory<MLlibPMMLPredicto
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new MLlibPMMLPredictorAssignerNodeDialog();
+        return new SparkJavaSnippetNodeDialog(false, SparkJavaSnippetSinkNodeModel.createSnippet());
     }
-
 }

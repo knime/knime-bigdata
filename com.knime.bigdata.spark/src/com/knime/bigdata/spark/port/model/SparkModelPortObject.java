@@ -55,8 +55,7 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
      */
     private final SparkModelPortObjectSpec m_spec;
 
-    private SparkModel<M> m_model;
-
+    private final SparkModel<M> m_model;
 
     /**
      * {@inheritDoc}

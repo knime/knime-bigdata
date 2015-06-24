@@ -24,9 +24,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettings;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
@@ -41,14 +47,17 @@ public class SparkModel<M extends Serializable> {
     private static final String MODEL_ENTRY = "Model";
     private M m_model;
     private String m_type;
+    private final DataTableSpec m_tableSpec;
 
     /**
      * @param type model type
      * @param model the model
+     * @param spec the DataTableSpec of the table used to learn the model
      */
-    public SparkModel(final String type, final M model) {
+    public SparkModel(final String type, final M model, final DataTableSpec spec) {
         m_type = type;
         m_model = model;
+        m_tableSpec = spec;
     }
 
     /**
@@ -66,7 +75,9 @@ public class SparkModel<M extends Serializable> {
         try (final ObjectInputStream os = new ObjectInputStream(in);){
             m_type = (String)os.readObject();
             m_model = (M)os.readObject();
-        } catch (ClassNotFoundException e) {
+            NodeSettings config = (NodeSettings)os.readObject();
+            m_tableSpec = DataTableSpec.load(config);
+        } catch (ClassNotFoundException | InvalidSettingsException e) {
             throw new IOException(e);
         }
     }
@@ -78,9 +89,12 @@ public class SparkModel<M extends Serializable> {
      */
     public void write(final ExecutionMonitor exec, final PortObjectZipOutputStream out) throws IOException {
         out.putNextEntry(new ZipEntry(MODEL_ENTRY));
+        final NodeSettings config = new NodeSettings("bla");
+        m_tableSpec.save(config);
         try (final ObjectOutputStream os = new ObjectOutputStream(out)){
             os.writeObject(getType());
             os.writeObject(getModel());
+            os.writeObject(config);
         }
     }
 
@@ -105,4 +119,21 @@ public class SparkModel<M extends Serializable> {
         return m_model;
     }
 
+    /**
+     * @return the tableSpec
+     */
+    public DataTableSpec getTableSpec() {
+        return m_tableSpec;
+    }
+
+    /**
+     * @return the name of all learning columns
+     */
+    public Set<String> getColumnNames() {
+        final Set<String> colNames = new LinkedHashSet<>(m_tableSpec.getNumColumns());
+        for (DataColumnSpec dataColumnSpec : m_tableSpec) {
+            colNames.add(dataColumnSpec.getName());
+        }
+        return colNames;
+    }
 }

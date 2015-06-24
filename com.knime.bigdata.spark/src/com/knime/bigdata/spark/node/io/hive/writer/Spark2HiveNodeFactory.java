@@ -16,28 +16,26 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 29.05.2015 by koetter
+ *   Created on 27.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.transformation;
+package com.knime.bigdata.spark.node.io.hive.writer;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.node.scripting.SparkSnippetNodeDialog;
-
 /**
  *
  * @author koetter
  */
-public class SparkTransformationSnippetNodeFactory extends NodeFactory<SparkTransformationSnippetNodeModel> {
+public class Spark2HiveNodeFactory extends NodeFactory<Spark2HiveNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkTransformationSnippetNodeModel createNodeModel() {
-        return new SparkTransformationSnippetNodeModel();
+    public Spark2HiveNodeModel createNodeModel() {
+        return new Spark2HiveNodeModel();
     }
 
     /**
@@ -52,7 +50,7 @@ public class SparkTransformationSnippetNodeFactory extends NodeFactory<SparkTran
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkTransformationSnippetNodeModel> createNodeView(final int viewIndex, final SparkTransformationSnippetNodeModel nodeModel) {
+    public NodeView<Spark2HiveNodeModel> createNodeView(final int viewIndex, final Spark2HiveNodeModel nodeModel) {
         return null;
     }
 
@@ -69,6 +67,7 @@ public class SparkTransformationSnippetNodeFactory extends NodeFactory<SparkTran
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkSnippetNodeDialog();
+        return new Spark2HiveNodeDialog();
     }
+
 }

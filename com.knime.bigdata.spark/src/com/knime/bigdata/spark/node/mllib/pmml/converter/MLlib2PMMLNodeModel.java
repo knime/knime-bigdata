@@ -22,6 +22,11 @@ package com.knime.bigdata.spark.node.mllib.pmml.converter;
 
 import java.io.File;
 
+import org.apache.spark.mllib.clustering.KMeansModel;
+import org.apache.spark.mllib.linalg.Vector;
+import org.knime.base.node.mine.cluster.PMMLClusterTranslator;
+import org.knime.base.node.mine.cluster.PMMLClusterTranslator.ComparisonMeasure;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
@@ -31,13 +36,13 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
+import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 
 /**
  *
@@ -59,12 +64,9 @@ public class MLlib2PMMLNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[1];
-        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
-            throw new InvalidSettingsException("Only Hive connections are supported");
-        }
-        final PMMLPortObjectSpecCreator specCreator = new PMMLPortObjectSpecCreator(spec.getDataTableSpec());
-        return new PortObjectSpec[] {specCreator.createSpec()};
+        final SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec) inSpecs[0];
+//        final PMMLPortObjectSpecCreator specCreator = new PMMLPortObjectSpecCreator(spec.get);
+        return new PortObjectSpec[] {null};
     }
 
     /**
@@ -73,7 +75,19 @@ public class MLlib2PMMLNodeModel extends NodeModel {
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkModel<?> model = ((SparkModelPortObject<?>)inObjects[0]).getModel();
-        return new PortObject[] {new PMMLPortObject(null)};
+        final DataTableSpec learnerSpec = model.getTableSpec();
+        final KMeansModel kmeansModel = (KMeansModel) model.getModel();
+        PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(learnerSpec);
+        creator.setLearningCols(learnerSpec);
+        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
+        Vector[] clusterCenters = kmeansModel.clusterCenters();
+        final double[][] clusters = new double[clusterCenters.length][];
+        for (int i = 0; i < clusterCenters.length; i++) {
+            clusters[i] = clusterCenters[i].toArray();
+        }
+        outPMMLPort.addModelTranslater(new PMMLClusterTranslator(ComparisonMeasure.squaredEuclidean,
+                clusterCenters.length, clusters, null, model.getColumnNames()));
+        return new PortObject[] {outPMMLPort};
     }
 
     /**

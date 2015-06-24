@@ -53,7 +53,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -96,8 +99,6 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
 
     private final LinkedList<String> m_namedRDDs = new LinkedList<>();
 
-    private boolean m_destroyRDDs = true;
-
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
      * @param outPortTypes the output port types
@@ -107,19 +108,19 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     }
 
     /**
-     * @param destroy <code>true</code> if created networks should be destroyed
-     * on node reset. <code>false</code> if they should be removed from cache
-     * but not destroyed in the persistence layer.
-     */
-    protected void destroyRDDs(final boolean destroy) {
-        m_destroyRDDs = destroy;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        for (final PortObject portObject : inData) {
+            if (portObject instanceof  SparkDataPortObject) {
+                final String context = ((SparkDataPortObject)portObject).getContext();
+                if (!KnimeContext.sparkContextExists(context)) {
+                    throw new IllegalStateException(
+                        "Incoming Spark context no longer available. Please reset all preceding Spark nodes.");
+                }
+            }
+        }
         final PortObject[] portObjects = executeInternal(inData, exec);
         if (portObjects != null && portObjects.length > 0) {
             for (final PortObject portObject : portObjects) {
@@ -182,20 +183,19 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                     m_namedRDDs.add(uuid);
                 }
             }
-            final String[] context =
-                    config.getStringArray(CFG_CONTEXT);
-                if (context.length > 0) {
-                    for (int i = 0, length = context.length; i < length; i++) {
-                        final String uuid = context[i];
-                        m_contexts.add(uuid);
-                        if (!KnimeContext.sparkContextExists(uuid)) {
-                            setWarningMessage("Spark context no longer available. Reset node.");
-                        }
+            final String[] contexts = config.getStringArray(CFG_CONTEXT);
+            Set<String> uniqueContexts = new HashSet<>(Arrays.asList(contexts));
+            if (uniqueContexts.size() > 0) {
+                for (final String context : uniqueContexts) {
+                    m_contexts.add(context);
+                    if (!KnimeContext.sparkContextExists(context)) {
+                        setWarningMessage("Spark context no longer available. Reset node.");
                     }
                 }
+            }
             loadAdditionalInternals(nodeInternDir, exec);
-        } catch (final InvalidSettingsException | GenericKnimeSparkException e) {
-            throw new IOException("Invalid loadInternals settings file", e.getCause());
+        } catch (final InvalidSettingsException | GenericKnimeSparkException | RuntimeException e) {
+            throw new IOException("Failed to load named rdd", e.getCause());
         }
     }
 

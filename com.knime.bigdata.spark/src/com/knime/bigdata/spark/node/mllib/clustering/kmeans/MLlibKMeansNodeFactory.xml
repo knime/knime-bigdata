@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
 	type="Learner" icon="icon.png">
-	<name>MLlib k-Means</name>
+	<name>Spark k-Means</name>
 	<shortDescription>k-Means</shortDescription>
 	<fullDescription>
 		<intro>
@@ -36,7 +36,7 @@
 
 	<ports>
 		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
-		<outPort index="0" name="Result">The input data labeled with the cluster they are contained in.</outPort>
+		<outPort index="0" name="Labeled input">The input data labeled with the cluster they are contained in.</outPort>
 		<outPort index="1" name="MLlib Cluster Model">MLlib Cluster Model</outPort>
 	</ports>
 </knimeNode>

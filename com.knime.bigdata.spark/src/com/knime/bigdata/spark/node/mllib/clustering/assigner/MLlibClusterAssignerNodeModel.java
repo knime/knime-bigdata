@@ -20,19 +20,14 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -40,33 +35,24 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.port.JavaRDDPortObject;
+import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
+import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 /**
  *
  * @author koetter
  */
-public class MLlibClusterAssignerNodeModel extends NodeModel {
+public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
 
-    private final SettingsModelString m_hiveQuery = createHiveStatementModel();
-
-    private final SettingsModelString m_colName = createColumnNameModel();
-
-    /**
-     *
-     */
+    /**Constructor.*/
     public MLlibClusterAssignerNodeModel() {
-        super(new PortType[]{SparkModelPortObject.TYPE}, new PortType[]{JavaRDDPortObject.TYPE});
-    }
-
-    /**
-     * @return
-     */
-    static SettingsModelString createHiveStatementModel() {
-        return new SettingsModelString("hiveQuery", "select * from ");
+        super(new PortType[]{SparkModelPortObject.TYPE, SparkDataPortObject.TYPE},
+            new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**
@@ -81,35 +67,76 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        return new PortObjectSpec[]{createSpec(null)};
+        if (inSpecs == null || inSpecs.length != 2 || inSpecs[0] == null || inSpecs[1] == null) {
+            throw new InvalidSettingsException("Input missing");
+        }
+        final SparkDataPortObjectSpec inputRDD = (SparkDataPortObjectSpec)inSpecs[1];
+        final DataTableSpec resultTableSpec = createSpec(inputRDD.getTableSpec());
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(inputRDD.getContext(), resultTableSpec)};
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final String aOutputTableName = "kmeansPrediction" + System.currentTimeMillis();
+    protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         @SuppressWarnings("unchecked")
         final SparkModel<KMeansModel> model = ((SparkModelPortObject<KMeansModel>)inObjects[0]).getModel();
+        final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         exec.checkCanceled();
         exec.setMessage("Starting KMeans (SPARK) Predictor");
-
-        final String contextName = KnimeContext.getSparkContext();
+        final DataTableSpec inputSpec = data.getTableSpec();
+        final Integer[] colIdxs = getColumnIndices(model, inputSpec);
+        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(inputSpec);
+        final String aOutputTableName = SparkIDGenerator.createID();
+        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final AssignTask task = new AssignTask();
-        task.execute(contextName, exec, m_hiveQuery.getStringValue(), model.getModel(), aOutputTableName);
-
+        task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
         exec.setMessage("KMeans (SPARK) Prediction done.");
-        return new PortObject[]{};
+        return new PortObject[]{new SparkDataPortObject(resultRDD)};
+    }
+
+    private Integer[] getColumnIndices(final SparkModel<KMeansModel> model, final DataTableSpec inputSpec)
+            throws InvalidSettingsException {
+        final DataTableSpec learnerTabel = model.getTableSpec();
+        final Integer[]colIdxs = new Integer[learnerTabel.getNumColumns()];
+        int idx = 0;
+        for (DataColumnSpec col : learnerTabel) {
+            final String colName = col.getName();
+            final int colIdx = inputSpec.findColumnIndex(colName);
+            if (colIdx < 0) {
+                throw new InvalidSettingsException("Column with name " + colName + " not found in input data");
+            }
+            final DataType colType = inputSpec.getColumnSpec(colIdx).getType();
+            if (!colType.equals(col.getType())) {
+                throw new InvalidSettingsException("Column with name " + colName + " has incompatible type expected "
+            + col.getType() + " was " + colType);
+            }
+            colIdxs[idx++] = Integer.valueOf(colIdx);
+        }
+        return colIdxs;
     }
 
     /**
+     * @param inputSpec the input data spec
+     * @return the result spec
      */
-    public static DataTableSpec createSpec(final DataTableSpec originalSpec) throws InvalidSettingsException {
-        final String clusterColName = DataTableSpec.getUniqueColumnName(originalSpec, "Cluster");
-        DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
-        DataColumnSpec labelColSpec = creator.createSpec();
-        return new DataTableSpec(originalSpec, new DataTableSpec(labelColSpec));
+    public static DataTableSpec createSpec(final DataTableSpec inputSpec) {
+        return createSpec(inputSpec, "cluster");
+    }
+
+    /**
+     * Creates the typical cluster assignment spec with the cluster column as last column of type string.
+     * @param inputSpec the input data spec
+     * @param resultColName the name of the result column
+     * @return the result spec
+     */
+    public static DataTableSpec createSpec(final DataTableSpec inputSpec, final String resultColName) {
+        //TK_TODO: return Cluster instead of cluster
+        final String clusterColName = DataTableSpec.getUniqueColumnName(inputSpec, resultColName);
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
+        final DataColumnSpec labelColSpec = creator.createSpec();
+        return new DataTableSpec(inputSpec, new DataTableSpec(labelColSpec));
     }
 
     /**
@@ -117,8 +144,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_hiveQuery.saveSettingsTo(settings);
-        m_colName.saveSettingsTo(settings);
+        // nothing to do
     }
 
     /**
@@ -126,8 +152,7 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_hiveQuery.validateSettings(settings);
-        m_colName.validateSettings(settings);
+        // nothing to do
     }
 
     /**
@@ -135,33 +160,6 @@ public class MLlibClusterAssignerNodeModel extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_hiveQuery.loadSettingsFrom(settings);
-        m_colName.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
         // nothing to do
     }
 }

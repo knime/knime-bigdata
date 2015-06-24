@@ -23,13 +23,13 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
+import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -76,13 +76,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     /**
      * @return
      */
-    static SettingsModelString createColumnNameModel() {
-        return new SettingsModelString("columnName", "Cluster");
-    }
-
-    /**
-     * @return
-     */
     static SettingsModelIntegerBounded createNoOfClusterModel() {
         return new SettingsModelIntegerBounded("noOfCluster", 3, 1, Integer.MAX_VALUE);
     }
@@ -118,7 +111,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final String aOutputTableName = SparkIDGenerator.createID();
         exec.setMessage("Starting KMeans (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
@@ -128,15 +120,17 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = tableSpec.findColumnIndex(includedCols[i]);
         }
+        final ColumnRearranger rearranger = new ColumnRearranger(tableSpec);
+        rearranger.keepOnly(includeColIdxs);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
-        SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+        final String aOutputTableName = SparkIDGenerator.createID();
+        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
             m_noOfIteration.getIntValue(), resultRDD);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
-
         return new PortObject[]{new SparkDataPortObject(resultRDD),
-            new SparkModelPortObject<>(new SparkModel<>("KMeans", clusters))};
+            new SparkModelPortObject<>(new SparkModel<>("KMeans", clusters, rearranger.createSpec()))};
     }
 
 

@@ -16,25 +16,24 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 29.05.2015 by koetter
+ *   Created on 07.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting;
+package com.knime.bigdata.spark.node.io.hive.writer;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
 /**
  *
  * @author koetter
  */
-public class SparkSnippetNodeDialog extends DefaultNodeSettingsPane {
-
+public class Spark2HiveNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      *
      */
-    public SparkSnippetNodeDialog() {
-        addDialogComponent(
-            new DialogComponentMultiLineString(SparkSnippetSettings.createCodeModel(), "Spark script", true, 20, 20));
+    Spark2HiveNodeDialog() {
+        addDialogComponent(new DialogComponentString(Spark2HiveNodeModel.createTableNameModel(),
+            "Hive table name: ", true, 20));
     }
 }

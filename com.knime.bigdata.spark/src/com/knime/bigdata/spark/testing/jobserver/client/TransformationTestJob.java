@@ -33,6 +33,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
 
@@ -112,7 +113,7 @@ public class TransformationTestJob extends KnimeSparkJob {
         LOGGER.log(Level.INFO, "starting transformation job...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY));
 
-        final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD, null);
+        final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD, rowRDD);
 
         LOGGER.log(Level.INFO, "transformation completed");
         addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
@@ -138,6 +139,34 @@ public class TransformationTestJob extends KnimeSparkJob {
         @Override
         @Nonnull
         public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T aInput1, final T aInput2) {
+
+            JavaPairRDD<String, Row> pair1 = aInput1.mapToPair(new PairFunction<Row, String, Row>() {
+
+                @Override
+                public Tuple2<String, Row> call(final Row arg0) throws Exception {
+                    return new Tuple2<String, Row>(arg0.getString(4), arg0);
+                }
+            });
+            JavaPairRDD<String, Row> pair2 = aInput2.mapToPair(new PairFunction<Row, String, Row>() {
+
+                @Override
+                public Tuple2<String, Row> call(final Row arg0) throws Exception {
+                    return new Tuple2<String, Row>(arg0.getString(4), arg0);
+                }
+            });
+
+            JavaPairRDD<String, Tuple2<Row, Row>> result = pair1.join(pair2);
+            result.map(new Function<Tuple2<String,Tuple2<Row,Row>>, Row>() {
+
+                @Override
+                public Row call(final Tuple2<String, Tuple2<Row, Row>> arg0) throws Exception {
+                    RowBuilder builder = RowBuilder.fromRow(arg0._2._1);
+                    for (int i = 0; i < arg0._2._2.length(); ++i) {
+                        builder.add(arg0._2._2.get(i));
+                      }
+                    return builder.build();
+                }
+            });
 
             //aggregate by class
             JavaPairRDD<String, Iterable<Row>> t = aInput1.groupBy(new Function<Row, String>() {

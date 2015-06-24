@@ -97,6 +97,13 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
     }
 
     /**
+     * @return the Spark context
+     */
+    public final String getContext() {
+        return m_data.getContext();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

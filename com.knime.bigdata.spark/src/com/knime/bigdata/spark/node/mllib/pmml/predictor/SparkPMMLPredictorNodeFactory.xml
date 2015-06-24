@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Predictor" icon="icon.png">
+    <name>Spark PMML Predictor</name>
+    <shortDescription>k-Means</shortDescription>
+    <fullDescription>
+        <intro>
+            Bla
+        </intro>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="PMML Model">The model to be used for scoring</inPort>
+        <inPort index="1" name="Input Data">The data to be stored</inPort>
+        <outPort index="0" name="Scored Data">The scored data</outPort>
+    </ports>
+</knimeNode>

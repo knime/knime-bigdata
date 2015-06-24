@@ -106,13 +106,35 @@ final public class SparkJobCompiler {
         @Nonnull final String aTargetJarPath, @Nonnull final String aAdditionalImports,
         @Nonnull final String aTransformationCode, @Nonnull final String aHelperMethodsCode)
         throws GenericKnimeSparkException {
-        final String className = "kt" + (classNameSuffix++) + digits();
+        final String className = "Kt" + (classNameSuffix++) + digits();
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
             fillTransformationTemplate(className, aAdditionalImports, aTransformationCode,
                 aHelperMethodsCode);
         SourceCompiler compiledJob = compileAndCreateInstance(className, source);
+        add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
+        return compiledJob.getInstance();
+    }
+
+    /**
+     * compile the code and add it to a jar file
+     *
+     * @param aSourceJarPath
+     * @param aTargetJarPath
+     * @param aCode
+     * @param className
+     * @return canonical name of compiled class
+     * @throws GenericKnimeSparkException in case of some error
+     */
+    public KnimeSparkJob addSparkJob2Jar(@Nonnull final String aSourceJarPath,
+        @Nonnull final String aTargetJarPath, @Nonnull final String aCode, @Nonnull final String className)
+        throws GenericKnimeSparkException {
+        final String newClassName = "kt" + (classNameSuffix++) + digits();
+        final String code = aCode.replace("class " + className + " ", "class " + newClassName + " ");
+        // generate semi-secure unique package and class names
+        // compile the generated Java source
+        SourceCompiler compiledJob = compileAndCreateInstance(newClassName, code);
         add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
         return compiledJob.getInstance();
     }
