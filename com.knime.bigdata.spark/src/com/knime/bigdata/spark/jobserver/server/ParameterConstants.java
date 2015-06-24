@@ -42,9 +42,15 @@ public class ParameterConstants {
     public static final String PARAM_TABLE_2 = "table2";
 
     /**
-	 * name of model
+	 * name of model or the model itself
 	 */
 	public static final String PARAM_MODEL_NAME = "modelName";
+
+
+    /**
+     * boolean that indicates if probabilities should be added
+     */
+    public static final String PARAM_APPEND_PROBABILITIES = "appendProbabilities";
 
 	/**
 	 * number of rows
@@ -91,4 +97,9 @@ public class ParameterConstants {
      * index of class label
      */
     public static final String PARAM_LABEL_INDEX = "labelIx";
+
+    /**
+     * Schema of an RDD.
+     */
+    public static final String PARAM_SCHEMA = "tableSchema";
 }

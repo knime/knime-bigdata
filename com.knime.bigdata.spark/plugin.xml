@@ -45,7 +45,7 @@
       <node
             category-path="/labs/spark"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory"
+            factory-class="com.knime.bigdata.spark.node.mllib.pmml.predictor.SparkPMMLPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory">
       </node>
       <node
@@ -57,14 +57,32 @@
       <node
             category-path="/labs/spark"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.scripting.snippet.SparkSnippetNodeFactory"
-            id="com.knime.bigdata.spark.node.scripting.snippet.SparkSnippetNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"
+            id="com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeFactory">
       </node>
       <node
             category-path="/labs/spark"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scripting.transformation.SparkTransformationSnippetNodeFactory"
             id="com.knime.bigdata.spark.node.scripting.transformation.SparkTransformationSnippetNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory"
+            id="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory"
+            id="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"
+            id="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory">
       </node>
    </extension>
 </plugin>

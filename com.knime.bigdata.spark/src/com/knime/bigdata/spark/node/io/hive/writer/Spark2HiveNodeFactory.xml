@@ -2,8 +2,8 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
 	type="Other" icon="hiveSpark.png">
-	<name>Hive to Spark</name>
-	<shortDescription>Converts an incoming Hive query into a Spark data object</shortDescription>
+	<name>Spark to Hive</name>
+	<shortDescription>Converts an incoming Spark data object into a Hive table</shortDescription>
 	<fullDescription>
 		<intro>
 			
@@ -12,7 +12,7 @@
 
 	<ports>
 		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
-		<inPort index="0" name="Hive query">Input data (Hive query).</inPort>
-		<outPort index="0" name="Result">Spark data object</outPort>
+		<inPort index="0" name="Spark data">Spark data object</inPort>
+		<outPort index="0" name="Hive table">Hive table and query</outPort>
 	</ports>
 </knimeNode>

@@ -16,26 +16,28 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 12.02.2015 by koetter
+ *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering.assigner;
+package com.knime.bigdata.spark.node.scripting.java.source;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
+
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAssignerNodeModel> {
+public class SparkJavaSnippetSourceNodeFactory extends NodeFactory<SparkJavaSnippetSourceNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibClusterAssignerNodeModel createNodeModel() {
-        return new MLlibClusterAssignerNodeModel();
+    public SparkJavaSnippetSourceNodeModel createNodeModel() {
+        return new SparkJavaSnippetSourceNodeModel();
     }
 
     /**
@@ -50,8 +52,7 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      * {@inheritDoc}
      */
     @Override
-    public NodeView<MLlibClusterAssignerNodeModel>
-        createNodeView(final int viewIndex, final MLlibClusterAssignerNodeModel nodeModel) {
+    public NodeView<SparkJavaSnippetSourceNodeModel> createNodeView(final int viewIndex, final SparkJavaSnippetSourceNodeModel nodeModel) {
         return null;
     }
 
@@ -60,7 +61,7 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -68,7 +69,6 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new SparkJavaSnippetNodeDialog(false, SparkJavaSnippetSourceNodeModel.createSnippet());
     }
-
 }

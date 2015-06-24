@@ -33,7 +33,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
@@ -51,8 +50,6 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10);
     private final DialogComponentColumnFilter2 m_cols =
             new DialogComponentColumnFilter2(MLlibKMeansNodeModel.createColumnsModel(), 0);
-    private final DialogComponentString m_resultCol =
-            new DialogComponentString(MLlibKMeansNodeModel.createColumnNameModel(), "Column name: ", true, 30);
     /**
      *
      */
@@ -75,11 +72,6 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         gbc.weightx = 1;
         gbc.weighty = 1;
         panel.add(m_cols.getComponentPanel(), gbc);
-        gbc.gridy++;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        panel.add(m_resultCol.getComponentPanel(), gbc);
         addTab("Settings", panel);
     }
 
@@ -91,7 +83,6 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIterations.saveSettingsTo(settings);
         m_cols.saveSettingsTo(settings);
-        m_resultCol.saveSettingsTo(settings);
     }
 
     /**
@@ -107,6 +98,5 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         m_noOfCluster.loadSettingsFrom(settings, tableSpecs);
         m_noOfIterations.loadSettingsFrom(settings, tableSpecs);
         m_cols.loadSettingsFrom(settings, tableSpecs);
-        m_resultCol.loadSettingsFrom(settings, tableSpecs);
     }
 }

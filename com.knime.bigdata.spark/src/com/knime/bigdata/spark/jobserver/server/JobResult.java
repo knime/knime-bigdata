@@ -162,7 +162,7 @@ public class JobResult implements Serializable {
         return new JobResult(m_msg, m_tables, aObjectResult);
     }
 
-    private Class<?> getJavaTypeFromDataType(final DataType aType) {
+    public static Class<?> getJavaTypeFromDataType(final DataType aType) {
         for (Map.Entry<Class<?>, DataType> entry : StructTypeBuilder.DATA_TYPES_BY_CLASS.entrySet()) {
             if (entry.getValue().getClass().equals(aType.getClass())) {
                 return entry.getKey();

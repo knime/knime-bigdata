@@ -58,6 +58,7 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
         if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("No input Hive query found");
         }

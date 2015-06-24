@@ -140,8 +140,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 	public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
 		validateInput(aConfig);
 		LOGGER.log(Level.INFO, "starting kMeans job...");
-		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig
-				.getString(PARAM_DATA_FILE_NAME));
+		final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME));
 		final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
 
 		//use only the column indices when converting to vector

@@ -18,26 +18,26 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.snippet;
+package com.knime.bigdata.spark.node.scripting.java.snippet;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.node.scripting.SparkSnippetNodeDialog;
+import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class SparkSnippetNodeFactory extends NodeFactory<SparkSnippetNodeModel> {
+public class SparkJavaSnippetNodeFactory extends NodeFactory<SparkJavaSnippetNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkSnippetNodeModel createNodeModel() {
-        return new SparkSnippetNodeModel();
+    public SparkJavaSnippetNodeModel createNodeModel() {
+        return new SparkJavaSnippetNodeModel();
     }
 
     /**
@@ -52,7 +52,7 @@ public class SparkSnippetNodeFactory extends NodeFactory<SparkSnippetNodeModel> 
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkSnippetNodeModel> createNodeView(final int viewIndex, final SparkSnippetNodeModel nodeModel) {
+    public NodeView<SparkJavaSnippetNodeModel> createNodeView(final int viewIndex, final SparkJavaSnippetNodeModel nodeModel) {
         return null;
     }
 
@@ -69,6 +69,6 @@ public class SparkSnippetNodeFactory extends NodeFactory<SparkSnippetNodeModel> 
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkSnippetNodeDialog();
+        return new SparkJavaSnippetNodeDialog(false, SparkJavaSnippetNodeModel.createSnippet());
     }
 }
