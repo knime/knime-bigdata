@@ -48,6 +48,8 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -73,8 +75,8 @@ import com.typesafe.config.Config;
 public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
-//
-//    private final static Logger LOGGER = Logger.getLogger("KNIME Spark Java Snippet");
+
+    private final static Logger LOGGER = Logger.getLogger("KNIME Spark Java Snippet");
 
     private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
@@ -85,19 +87,13 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
     private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
 
-//    private SparkContext m_sparkContext;
-
     /**
-     * parse parameters - there are no default values, but two required values: - the key of the first input JavaRDD
-     * (the second input RDD is optional) - the key of the output JavaRDD
+     * parse parameters
      */
     @Override
     public final SparkJobValidation validate(final Config aConfig) {
         String msg = null;
-//        if (!aConfig.hasPath(PARAM_INPUT_TABLE_KEY)) {
-//            msg = "Input parameter '" + PARAM_INPUT_TABLE_KEY + "' missing.";
-//        }
-        if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
+        if (!aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
         }
         if (msg != null) {
@@ -116,24 +112,10 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
         }
 
         if (msg != null) {
-//            LOGGER.severe(msg);
+            LOGGER.severe(msg);
             throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
         }
     }
-//
-//    /**
-//     * @return the JavaSparkContext
-//     */
-//    public JavaSparkContext getJavaSparkContext() {
-//        return new JavaSparkContext(m_sparkContext);
-//    }
-//
-//    /**
-//     * @return the SparkContext
-//     */
-//    public SparkContext getSparkContext() {
-//        return m_sparkContext;
-//    }
 
     /**
      * run the actual job, the result is serialized back to the client the primary result of this job should be a side
@@ -141,12 +123,12 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
      *
      * @return JobResult with table information
      */
+    @SuppressWarnings("resource")
     @Override
     protected final JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig)
         throws GenericKnimeSparkException {
-//        m_sparkContext = aSparkContext;
         validateInput(aConfig);
-//        LOGGER.log(Level.INFO, "starting transformation job...");
+        LOGGER.log(Level.FINE, "starting transformation job...");
         final JavaRDD<Row> rowRDD1;
         if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1)) {
             rowRDD1 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY1));
@@ -161,14 +143,13 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
         }
 
         final JavaRDD<Row> resultRDD = apply(new JavaSparkContext(aSparkContext), rowRDD1, rowRDD2);
-//        LOGGER.log(Level.INFO, "transformation completed");
+        LOGGER.log(Level.FINE, "transformation completed");
         if (resultRDD != null) {
             addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), resultRDD);
         }
-
         try {
             if (resultRDD != null) {
-                final StructType schema = StructTypeBuilder.fromRows(resultRDD.take(10)).build();
+                final StructType schema = getSchema(resultRDD);
                 return JobResult.emptyJobResult().withMessage("OK")
                     .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
             }
@@ -176,6 +157,16 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
         } catch (InvalidSchemaException e) {
             throw new GenericKnimeSparkException(e);
         }
+    }
+
+    /**
+     * Overwrite this method to return a manual create {@link StructType}.
+     * @param resultRDD the Spark RDD that contains the result
+     * @return {@link StructType} that defines the column names and types
+     * @throws InvalidSchemaException if the schema is invalid
+     */
+    protected StructType getSchema(final JavaRDD<Row> resultRDD) throws InvalidSchemaException {
+        return StructTypeBuilder.fromRows(resultRDD.take(10)).build();
     }
 
     /**
@@ -188,79 +179,79 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
     public abstract JavaRDD<Row> apply(JavaSparkContext sc, JavaRDD<Row> rowRDD1, JavaRDD<Row> rowRDD2)
             throws GenericKnimeSparkException;
 
-//    /**
-//     * Write warning message to the logger.
-//     *
-//     * @param o The object to print.
-//     */
-//    protected void logWarn(final String o) {
-//        LOGGER.warning(o);
-//    }
-//
-//    /**
-//     * Write debugging message to the logger.
-//     *
-//     * @param o The object to print.
-//     */
-//    protected void logDebug(final String o) {
-//        LOGGER.finest(o);
-//    }
-//
-//    /**
-//     * Write info message to the logger.
-//     *
-//     * @param o The object to print.
-//     */
-//    protected void logInfo(final String o) {
-//        LOGGER.fine(o);
-//    }
-//
-//    /**
-//     * Write error message to the logger.
-//     *
-//     * @param o The object to print.
-//     */
-//    protected void logError(final String o) {
-//        LOGGER.log(Level.SEVERE, o);
-//    }
-//
-//    /**
-//     * Write warning message and throwable to the logger.
-//     *
-//     * @param o The object to print.
-//     * @param t The exception to log at debug level, including its stack trace.
-//     */
-//    protected void logWarn(final String o, final Throwable t) {
-//        LOGGER.log(Level.WARNING, o, t);
-//    }
-//
-//    /**
-//     * Write debugging message and throwable to the logger.
-//     *
-//     * @param o The object to print.
-//     * @param t The exception to log, including its stack trace.
-//     */
-//    protected void logDebug(final String o, final Throwable t) {
-//        LOGGER.log(Level.FINEST, o, t);
-//    }
-//
-//    /**
-//     * Write info message and throwable to the logger.
-//     *
-//     * @param o The object to print.
-//     * @param t The exception to log at debug level, including its stack trace.
-//     */
-//    protected void logInfo(final String o, final Throwable t) {
-//        LOGGER.log(Level.FINE, o, t);
-//    }
-//
-//    /**
-//     * Write error message and throwable to the logger.
-//     *
-//     * @param o The object to print.
-//     * @param t The exception to log at debug level, including its stack trace.
-//     */
-//    protected void logError(final String o, final Throwable t) {
-//        LOGGER.log(Level.SEVERE, o, t);
-//    }
+    /**
+     * Write warning message to the logger.
+     *
+     * @param o The object to print.
+     */
+    protected void logWarn(final String o) {
+        LOGGER.warning(o);
+    }
+
+    /**
+     * Write debugging message to the logger.
+     *
+     * @param o The object to print.
+     */
+    protected void logDebug(final String o) {
+        LOGGER.finest(o);
+    }
+
+    /**
+     * Write info message to the logger.
+     *
+     * @param o The object to print.
+     */
+    protected void logInfo(final String o) {
+        LOGGER.fine(o);
+    }
+
+    /**
+     * Write error message to the logger.
+     *
+     * @param o The object to print.
+     */
+    protected void logError(final String o) {
+        LOGGER.log(Level.SEVERE, o);
+    }
+
+    /**
+     * Write warning message and throwable to the logger.
+     *
+     * @param o The object to print.
+     * @param t The exception to log at debug level, including its stack trace.
+     */
+    protected void logWarn(final String o, final Throwable t) {
+        LOGGER.log(Level.WARNING, o, t);
+    }
+
+    /**
+     * Write debugging message and throwable to the logger.
+     *
+     * @param o The object to print.
+     * @param t The exception to log, including its stack trace.
+     */
+    protected void logDebug(final String o, final Throwable t) {
+        LOGGER.log(Level.FINEST, o, t);
+    }
+
+    /**
+     * Write info message and throwable to the logger.
+     *
+     * @param o The object to print.
+     * @param t The exception to log at debug level, including its stack trace.
+     */
+    protected void logInfo(final String o, final Throwable t) {
+        LOGGER.log(Level.FINE, o, t);
+    }
+
+    /**
+     * Write error message and throwable to the logger.
+     *
+     * @param o The object to print.
+     * @param t The exception to log at debug level, including its stack trace.
+     */
+    protected void logError(final String o, final Throwable t) {
+        LOGGER.log(Level.SEVERE, o, t);
+    }
 }

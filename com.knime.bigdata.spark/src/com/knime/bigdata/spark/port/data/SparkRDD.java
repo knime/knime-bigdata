@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.port.data;
 
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+
 /**
  * This class represents a data object within Spark. The object is identified by the Spark context
  * ({@link #getContext()}) it lives in and its unique id ({@link #getID()})
@@ -35,7 +37,7 @@ public interface SparkRDD {
     /**
      * @return the Spark context the object lives in
      */
-    public abstract String getContext();
+    public abstract KNIMESparkContext getContext();
 
     /**
      * @param other the other {@link SparkRDD} to check for compatibility

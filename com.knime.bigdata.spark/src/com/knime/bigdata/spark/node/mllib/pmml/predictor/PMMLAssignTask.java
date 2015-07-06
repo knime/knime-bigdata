@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.knime.base.pmml.translation.java.compile.CompiledModelPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -48,29 +49,28 @@ public class PMMLAssignTask implements Serializable {
     }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
-        final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String outputID) {
+        final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{
                     ParameterConstants.PARAM_TABLE_1, inputID,
                     ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString((Serializable)bytecode),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(colIdxs),
-                    ParameterConstants.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities)},
+                    ParameterConstants.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
+                    ParameterConstants.PARAM_MAIN_CLASS, mainClass},
                 ParameterConstants.PARAM_OUTPUT,
                     new String[]{ParameterConstants.PARAM_TABLE_1, outputID}});
     }
 
     void execute(final ExecutionContext exec, final SparkDataTable inputRDD,
-        final Map<String,byte[]> bytecode, final Integer[] colIdxs,
+        final CompiledModelPortObject pmml, final Integer[] colIdxs,
         final boolean appendProbabilities, final SparkDataTable resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
-        final String predictorParams =
-                predictorDef(inputRDD.getID(), colIdxs, bytecode, appendProbabilities, resultRDD.getID());
-        final String jobId = JobControler.startJob(inputRDD.getContext(), PMMLAssign.class.getCanonicalName(),
+        final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, pmml.getBytecode(), appendProbabilities,
+            "MainModel", resultRDD.getID());
+        final String jobId = JobControler.startJob(inputRDD.getContext().getContextName(), PMMLAssign.class.getCanonicalName(),
             predictorParams);
-
         assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
-
         assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
 
     }

@@ -154,7 +154,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         }
         final DecisionTreeTask task = new DecisionTreeTask(data.getData(), numericColIdx, classColName, classColIdx, resultRDD);
         final DecisionTreeModel model = task.execute(exec);
-        return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model))};
+        return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model, tableSpec))};
 
     }
 

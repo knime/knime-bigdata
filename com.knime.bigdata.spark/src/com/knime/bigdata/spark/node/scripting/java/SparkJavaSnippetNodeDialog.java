@@ -61,8 +61,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 
 import org.fife.rsta.ac.LanguageSupport;
 import org.fife.rsta.ac.LanguageSupportFactory;
@@ -73,10 +71,16 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.ui.FieldsTableModel;
+import org.knime.base.node.jsnippet.ui.FieldsTableModel.Column;
 import org.knime.base.node.jsnippet.ui.FlowVariableList;
 import org.knime.base.node.jsnippet.ui.InFieldsTable;
+import org.knime.base.node.jsnippet.ui.JSnippetFieldsController;
+import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
 import org.knime.base.node.jsnippet.ui.JarListPanel;
+import org.knime.base.node.jsnippet.ui.OutFieldsTable;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
@@ -87,9 +91,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
 
 import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippet;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippetDocument;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippetSettings;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippetTextArea;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 
 /**
@@ -103,18 +105,18 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 
     private static final String SNIPPET_TAB = "Java Snippet";
 
-    private SparkJavaSnippetTextArea m_snippetTextArea;
+    private JSnippetTextArea m_snippetTextArea;
     /** Component with a list of all input columns. */
 //    protected ColumnList m_colList;
     /** Component with a list of all input flow variables. */
     protected FlowVariableList m_flowVarsList;
 
     /** The settings. */
-    protected SparkJavaSnippetSettings m_settings;
+    protected JavaSnippetSettings m_settings;
     private SparkJavaSnippet m_snippet;
     private InFieldsTable m_inFieldsTable;
-//    private OutFieldsTable m_outFieldsTable;
-//    private JSnippetFieldsController m_fieldsController;
+    private OutFieldsTable m_outFieldsTable;
+    private JSnippetFieldsController m_fieldsController;
 
     private JarListPanel m_jarPanel;
 
@@ -151,13 +153,15 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //            final boolean isPreview) {
         public SparkJavaSnippetNodeDialog(final boolean isPreview, final SparkJavaSnippet snippet) {
 //        m_templateMetaCategory = templateMetaCategory;
-        m_settings = new SparkJavaSnippetSettings();
+        m_settings = new JavaSnippetSettings();
         m_snippet = snippet;
         JPanel panel = createPanel(isPreview);
+        m_fieldsController = new JSnippetFieldsController(m_snippet,
+            m_inFieldsTable, m_outFieldsTable);
 //        m_colList.install(m_snippetTextArea);
 //        m_colList.install(m_fieldsController);
         m_flowVarsList.install(m_snippetTextArea);
-//        m_flowVarsList.install(m_fieldsController);
+        m_flowVarsList.install(m_fieldsController);
         addTab(SNIPPET_TAB, panel);
         if (!isPreview) {
             panel.setPreferredSize(new Dimension(800, 600));
@@ -219,7 +223,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
         centerSplitPane.setResizeWeight(0.3); // colsAndVars expands to 0.3, the snippet to 0.7
 
         m_inFieldsTable = createInFieldsTable();
-//        m_outFieldsTable = createOutFieldsTable();
+        m_outFieldsTable = createOutFieldsTable();
 
         // use split pane for fields
         m_inFieldsTable.setBorder(BorderFactory.createTitledBorder("Input"));
@@ -228,13 +232,13 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
             new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         fieldsPane.setTopComponent(m_inFieldsTable);
 //        fieldsPane.setBottomComponent(m_outFieldsTable);
-//        fieldsPane.setOneTouchExpandable(true);
+        fieldsPane.setOneTouchExpandable(true);
 
         JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainSplitPane.setTopComponent(centerSplitPane);
         // minimize size of tables at the bottom
-//        fieldsPane.setPreferredSize(fieldsPane.getMinimumSize());
-//        mainSplitPane.setBottomComponent(fieldsPane);
+        fieldsPane.setPreferredSize(fieldsPane.getMinimumSize());
+        mainSplitPane.setBottomComponent(fieldsPane);
         mainSplitPane.setOneTouchExpandable(true);
         mainSplitPane.setResizeWeight(0.7); // snippet gets more space, table with in/out gets less extra space
 
@@ -294,36 +298,36 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //        return templateInfoPanel;
 //    }
 
-    private JPanel createJarPanel() {
-        m_jarPanel = new JarListPanel();
-        m_jarPanel.addListDataListener(new ListDataListener() {
-            private void updateSnippet() {
-                m_snippet.setJarFiles(m_jarPanel.getJarFiles());
-                // force reparsing of the snippet
-                for (int i = 0; i < m_snippetTextArea.getParserCount(); i++) {
-                    m_snippetTextArea.forceReparsing(i);
-                }
-                // update autocompletion
-                updateAutocompletion();
-            }
-
-            @Override
-            public void intervalRemoved(final ListDataEvent e) {
-                updateSnippet();
-            }
-
-            @Override
-            public void intervalAdded(final ListDataEvent e) {
-                updateSnippet();
-            }
-
-            @Override
-            public void contentsChanged(final ListDataEvent e) {
-                updateSnippet();
-            }
-        });
-        return m_jarPanel;
-    }
+//    private JPanel createJarPanel() {
+//        m_jarPanel = new JarListPanel();
+//        m_jarPanel.addListDataListener(new ListDataListener() {
+//            private void updateSnippet() {
+//                m_snippet.setJarFiles(m_jarPanel.getJarFiles());
+//                // force reparsing of the snippet
+//                for (int i = 0; i < m_snippetTextArea.getParserCount(); i++) {
+//                    m_snippetTextArea.forceReparsing(i);
+//                }
+//                // update autocompletion
+//                updateAutocompletion();
+//            }
+//
+//            @Override
+//            public void intervalRemoved(final ListDataEvent e) {
+//                updateSnippet();
+//            }
+//
+//            @Override
+//            public void intervalAdded(final ListDataEvent e) {
+//                updateSnippet();
+//            }
+//
+//            @Override
+//            public void contentsChanged(final ListDataEvent e) {
+//                updateSnippet();
+//            }
+//        });
+//        return m_jarPanel;
+//    }
 
 //    /** Create the templates tab. */
 //    private JPanel createTemplatesPanel() {
@@ -356,21 +360,21 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
         return table;
     }
 
-//    /**
-//     * Create table do display the ouput fields.
-//     * @return the table
-//     */
-//    protected OutFieldsTable createOutFieldsTable() {
-//        OutFieldsTable table = new OutFieldsTable(false);
-//        FieldsTableModel model = (FieldsTableModel)table.getTable().getModel();
-//        table.getTable().getColumnModel().getColumn(model.getIndex(
-//                Column.FIELD_TYPE)).setPreferredWidth(30);
-//        table.getTable().getColumnModel().getColumn(model.getIndex(
-//                Column.REPLACE_EXISTING)).setPreferredWidth(15);
-//        table.getTable().getColumnModel().getColumn(model.getIndex(
-//                Column.IS_COLLECTION)).setPreferredWidth(15);
-//        return table;
-//    }
+    /**
+     * Create table do display the ouput fields.
+     * @return the table
+     */
+    protected OutFieldsTable createOutFieldsTable() {
+        OutFieldsTable table = new OutFieldsTable(false);
+        FieldsTableModel model = (FieldsTableModel)table.getTable().getModel();
+        table.getTable().getColumnModel().getColumn(model.getIndex(
+                Column.FIELD_TYPE)).setPreferredWidth(30);
+        table.getTable().getColumnModel().getColumn(model.getIndex(
+                Column.REPLACE_EXISTING)).setPreferredWidth(15);
+        table.getTable().getColumnModel().getColumn(model.getIndex(
+                Column.IS_COLLECTION)).setPreferredWidth(15);
+        return table;
+    }
 
     /**
      * Create the panel with the snippet.
@@ -378,7 +382,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
     private JComponent createSnippetPanel() {
         updateAutocompletion();
 
-        m_snippetTextArea = new SparkJavaSnippetTextArea(m_snippet);
+        m_snippetTextArea = new JSnippetTextArea(m_snippet);
 
         // reset style which causes a recreation of the folds
         // this code is also executed in "onOpen" but that is not called for the template viewer tab
@@ -564,14 +568,12 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
         m_flowVarsList.setFlowVariables(getAvailableFlowVariables().values());
         m_snippet.setSettings(m_settings);
         m_jarPanel.setJarFiles(m_settings.getJarFiles());
-
-//        m_fieldsController.updateData(m_settings, specs[0],
-//                getAvailableFlowVariables());
+        SparkDataPortObjectSpec rddSpec = (SparkDataPortObjectSpec) specs[0];
+        m_fieldsController.updateData(m_settings, rddSpec.getTableSpec(), getAvailableFlowVariables());
 
         // set caret position to the start of the custom expression
         m_snippetTextArea.setCaretPosition(
-                m_snippet.getDocument().getGuardedSection(
-                SparkJavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset()
+                m_snippet.getDocument().getGuardedSection(JavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset()
                 + 1);
         m_snippetTextArea.requestFocusInWindow();
 
@@ -685,7 +687,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //                }
             }
         });
-        SparkJavaSnippetSettings s = m_snippet.getSettings();
+        JavaSnippetSettings s = m_snippet.getSettings();
 
         // if settings have less fields than defined in the table it means
         // that the tables contain errors
@@ -712,10 +714,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
      * the chance to modify the settings object.
      * @param s the settings
      */
-    protected void preSaveSettings(final SparkJavaSnippetSettings s) {
+    protected void preSaveSettings(final JavaSnippetSettings s) {
         // just a place holder.
     }
-
-
-
 }

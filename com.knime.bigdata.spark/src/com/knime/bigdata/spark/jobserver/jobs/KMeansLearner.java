@@ -50,7 +50,7 @@ import com.typesafe.config.ConfigException;
 /**
  * runs MLlib KMeans on a given RDD, model is returned as result
  *
- * @author koetter, dwk
+ * @author Tobias Koetter, KNIME.com, dwk
  */
 public class KMeansLearner extends KnimeSparkJob implements Serializable {
 
@@ -153,8 +153,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 		if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
 			LOGGER.log(Level.INFO, "Storing predicted data unter key: "
 					+ aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-			JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD,
-					model);
+			JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD, model);
 			try {
 				addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH),
 						predictedData);

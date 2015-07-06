@@ -50,7 +50,7 @@ import com.typesafe.config.ConfigException;
  * applies previously learned MLlib KMeans model to given RDD, predictions are inserted into a new RDD and (temporarily)
  * stored in the map of named RDDs, optionally saved to disk
  *
- * @author koetter, dwk
+ * @author Tobias Koetter, KNIME.com, dwk
  */
 public class KMeansPredictor extends KnimeSparkJob implements Serializable {
 

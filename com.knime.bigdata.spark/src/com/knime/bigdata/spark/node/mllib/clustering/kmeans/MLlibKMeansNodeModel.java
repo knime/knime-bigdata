@@ -114,7 +114,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         exec.setMessage("Starting KMeans (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
-        FilterResult result = m_cols.applyTo(tableSpec);
+        final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
         int[] includeColIdxs = new int[includedCols.length];
         for (int i = 0, length = includedCols.length; i < length; i++) {

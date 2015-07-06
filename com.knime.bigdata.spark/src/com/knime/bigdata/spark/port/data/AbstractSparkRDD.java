@@ -30,25 +30,28 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
+import org.knime.core.node.config.Config;
+
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class AbstractSparkRDD implements SparkRDD{
+public class AbstractSparkRDD implements SparkRDD {
     private static final String SPARK_DATA = "data";
     private static final String KEY_TABLE_NAME = "tableName";
     private static final String KEY_CONTEXT = "context";
 
     private final String m_id;
-    private final String m_context;
+    private final KNIMESparkContext m_context;
 
     /**
      * @param id the unique id of the Spark RDD
      * @param context the Spark context the RDD lives in
      *
      */
-    protected AbstractSparkRDD(final String context, final String id) {
+    protected AbstractSparkRDD(final KNIMESparkContext context, final String id) {
         if (context == null) {
             throw new NullPointerException("context must not be null");
         }
@@ -72,7 +75,7 @@ public class AbstractSparkRDD implements SparkRDD{
             }
             @SuppressWarnings("resource")
             final ModelContentRO sparkModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-            m_context = sparkModel.getString(KEY_CONTEXT);
+            m_context = new KNIMESparkContext(sparkModel.getConfig(KEY_CONTEXT));
             m_id = sparkModel.getString(KEY_TABLE_NAME);
         } catch (InvalidSettingsException ise) {
             throw new IOException(ise);
@@ -86,7 +89,8 @@ public class AbstractSparkRDD implements SparkRDD{
     @SuppressWarnings("resource")
     protected void save(final ZipOutputStream out) throws IOException {
         final ModelContent sparkModel = new ModelContent(SPARK_DATA);
-        sparkModel.addString(KEY_CONTEXT, m_context);
+        final Config contextConfig = sparkModel.addConfig(KEY_CONTEXT);
+        m_context.save(contextConfig);
         sparkModel.addString(KEY_TABLE_NAME, m_id);
         out.putNextEntry(new ZipEntry(SPARK_DATA));
         sparkModel.saveToXML(new NonClosableOutputStream.Zip(out));
@@ -104,7 +108,7 @@ public class AbstractSparkRDD implements SparkRDD{
      * {@inheritDoc}
      */
     @Override
-    public String getContext() {
+    public KNIMESparkContext getContext() {
         return m_context;
     }
 

@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 
 import org.knime.core.data.DataColumnSpec;
@@ -127,10 +127,10 @@ public class SparkModel<M extends Serializable> {
     }
 
     /**
-     * @return the name of all learning columns
+     * @return the name of all learning columns in the order they have been used during training
      */
-    public Set<String> getColumnNames() {
-        final Set<String> colNames = new LinkedHashSet<>(m_tableSpec.getNumColumns());
+    public List<String> getColumnNames() {
+        final List<String> colNames = new ArrayList<>(m_tableSpec.getNumColumns());
         for (DataColumnSpec dataColumnSpec : m_tableSpec) {
             colNames.add(dataColumnSpec.getName());
         }

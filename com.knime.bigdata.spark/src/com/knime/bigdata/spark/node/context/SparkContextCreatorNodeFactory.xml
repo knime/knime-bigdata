@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>Spark Context Creator</name>
+    
+    <shortDescription>Creates a new Spark Context.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a new Spark Context.
+        </intro>
+        <option name="Host">The host of the Spark job server.</option>
+        <option name="Port">The port of the Spark job server.</option>
+        <option name="User">The user.</option>
+        <option name="Context name">The unique name of the context.</option>
+        <option name="Memory">
+        	The memory to allocate on each cluster node
+        </option>
+        <option name="Number of cores">The number of cores per cluster node.</option>
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Spark context">Spark context.</outPort>
+    </ports>    
+</knimeNode>

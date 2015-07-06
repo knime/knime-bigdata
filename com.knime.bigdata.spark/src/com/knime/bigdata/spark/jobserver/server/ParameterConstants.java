@@ -46,6 +46,10 @@ public class ParameterConstants {
 	 */
 	public static final String PARAM_MODEL_NAME = "modelName";
 
+    /**
+     * String that contains the name of the main class to execute
+     */
+    public static final String PARAM_MAIN_CLASS = "mainClass";
 
     /**
      * boolean that indicates if probabilities should be added
@@ -65,6 +69,10 @@ public class ParameterConstants {
      * column indices starting with 0
      */
     public static final String PARAM_COL_IDXS = "colIndices";
+    /**
+     * Classification column index starting with 0
+     */
+    public static final String PARAM_CLASS_COL_IDX = "classColIndex";
     /**
      * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
      */

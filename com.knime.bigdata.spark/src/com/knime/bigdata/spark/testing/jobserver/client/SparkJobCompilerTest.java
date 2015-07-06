@@ -14,7 +14,7 @@ import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
-import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
+import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -114,10 +114,10 @@ public class SparkJobCompilerTest extends UnitSpec {
             //upload jar to job-server
             JobControler.uploadJobJar(aJarPath);
             //start job
-            String jobId = JobControler.startJob(contextName, jobInstance, configText);
+            String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
-            KnimeConfigContainer.m_config =
-                KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
+            KNIMEConfigContainer.m_config =
+                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                     ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
 
             assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
@@ -173,10 +173,10 @@ public class SparkJobCompilerTest extends UnitSpec {
            //upload jar to job-server
            JobControler.uploadJobJar(aJarPath);
            //start job
-           String jobId = JobControler.startJob(contextName, jobInstance, configText);
+           String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
-           KnimeConfigContainer.m_config =
-               KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
+           KNIMEConfigContainer.m_config =
+               KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                    ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
 
            assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);

@@ -22,15 +22,10 @@ package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 
 import org.knime.base.node.mine.util.PredictorHelper;
 import org.knime.base.pmml.translation.java.compile.CompiledModel;
-import org.knime.base.pmml.translation.java.compile.CompiledModel.MiningFunction;
 import org.knime.base.pmml.translation.java.compile.CompiledModelPortObject;
 import org.knime.base.pmml.translation.java.compile.CompiledModelPortObjectSpec;
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -91,34 +86,10 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
 
     private DataTableSpec createResultSpec(final DataTableSpec inSpec,
                                                           final CompiledModelPortObjectSpec cms) {
-        DataType cellType = cms.getMiningFunction() == MiningFunction.REGRESSION
-                ? DoubleCell.TYPE : StringCell.TYPE;
-        DataColumnSpec[] specs;
-
-        if (m_outputProbabilities.getBooleanValue()) {
-            specs = new DataColumnSpec[cms.getOutputFields().length];
-            for (int i = 1; i < specs.length; i++) {
-            specs[i] = new DataColumnSpecCreator(m_suffix.getStringValue() + "P (" + cms.getOutputFields()[0]
-                    + "=" + cms.getOutputFields()[i] + ")",
-                    DoubleCell.TYPE).createSpec();
-            }
-        } else {
-            specs = new DataColumnSpec[1];
-        }
-
-        String predictedColumnName = cms.getOutputFields()[0];
-        if (m_changePredColName.getBooleanValue()) {
-            predictedColumnName = m_predColName.getStringValue();
-        }
-        String finalPredictedColumnName = predictedColumnName;
-
-        int num = 0;
-        while (inSpec.containsName(finalPredictedColumnName)) {
-            num++;
-            finalPredictedColumnName = predictedColumnName + " (#" + num + ")";
-        }
-        specs[0] = new DataColumnSpecCreator(finalPredictedColumnName, cellType).createSpec();
-
+        final String predColName =
+                m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
+        final DataColumnSpec[] specs = cms.getResultColSpecs(inSpec, m_outputProbabilities.getBooleanValue(),
+                predColName, m_suffix.getStringValue());
         return new DataTableSpec(inSpec, new DataTableSpec(specs));
     }
 
@@ -133,10 +104,9 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-//        final SerializableCompiledModel compiledModel = new SerializableCompiledModel(pmml.getBytecode());
-//        final Integer[] colIdxs = getColumnIndices(data.getTableSpec(), pmml.getModel());
-//        final PMMLAssignTask assignTask = new PMMLAssignTask();
-//        assignTask.execute(exec, data.getData(), compiledModel, colIdxs, m_outputProbabilities.getBooleanValue(), resultRDD);
+        final Integer[] colIdxs = getColumnIndices(data.getTableSpec(), pmml.getModel());
+        final PMMLAssignTask assignTask = new PMMLAssignTask();
+        assignTask.execute(exec, data.getData(), pmml, colIdxs, m_outputProbabilities.getBooleanValue(), resultRDD);
         return new PortObject[] {new SparkDataPortObject(resultRDD)};
     }
 
@@ -144,13 +114,12 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
             throws InvalidSettingsException {
         final String[] inputFields = model.getInputFields();
         final Integer[] colIdxs = new Integer[inputFields.length];
-        int idx = 0;
         for (String fieldName : inputFields) {
             final int colIdx = inputSpec.findColumnIndex(fieldName);
             if (colIdx < 0) {
                 throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
             }
-            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(idx++);
+            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
         }
         return colIdxs;
     }

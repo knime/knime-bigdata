@@ -28,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -41,18 +43,13 @@ class SparkDataView extends JPanel {
      */
     SparkDataView(final SparkRDD sparkData) {
         super(new GridBagLayout());
-        super.setName("Spark Data");
-        StringBuilder buf = new StringBuilder("<html><body>");
-        buf.append("<strong>Context:</strong>&nbsp;&nbsp;");
-        buf.append("<tt>");
-        buf.append(sparkData.getContext());
-        buf.append("</tt>");
-        buf.append("<br/><br/>");
-        buf.append("<strong>Named RDD:</strong>&nbsp;&nbsp;");
-        buf.append("<tt>");
-        buf.append(sparkData.getID());
-        buf.append("</tt>");
-        buf.append("<br/><br/>");
+        super.setName("Spark");
+        final KNIMESparkContext context = sparkData.getContext();
+        final StringBuilder buf = new StringBuilder("<html><body>");
+        buf.append("<strong>Data</strong><hr>");
+        buf.append("<strong>Named RDD:</strong>&nbsp;&nbsp;<tt>" + sparkData.getID() + "</tt><br/>");
+        buf.append("<br/>");
+        buf.append(context.getHTMLDescription());
         buf.append("</body></html>");
         final JTextPane textArea = new JTextPane();
         textArea.setContentType("text/html");

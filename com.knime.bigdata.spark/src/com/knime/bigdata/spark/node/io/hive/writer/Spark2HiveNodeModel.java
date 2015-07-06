@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.io.hive.writer;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,21 +33,25 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
+import org.knime.core.node.port.database.DatabaseUtility;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
+import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
 /**
  *
@@ -56,12 +61,21 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
 
     private final SettingsModelString m_tableName = createTableNameModel();
 
+    private final SettingsModelBoolean m_dropExisting = createDropExistingModel();
+
     /**
      * Constructor.
      */
     Spark2HiveNodeModel() {
         super(new PortType[] {DatabaseConnectionPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[] {DatabasePortObject.TYPE});
+    }
+
+    /**
+     * @return the drop existing table model
+     */
+    static SettingsModelBoolean createDropExistingModel() {
+        return new SettingsModelBoolean("dropExistingTable", false);
     }
 
     /**
@@ -106,15 +120,29 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
         final DatabaseConnectionPortObject con = (DatabaseConnectionPortObject)inData[0];
+        final DatabaseConnectionSettings settings = con.getConnectionSettings(getCredentialsProvider());
+        final DatabaseUtility utility = settings.getUtility();
+        final String tableName = m_tableName.getStringValue();
+        try (final Connection connection = settings.createConnection(getCredentialsProvider());) {
+            if (utility.tableExists(connection, tableName)) {
+                if (m_dropExisting.getBooleanValue()) {
+                    final String dropTableStmt = utility.getStatementManipulator().dropTable(tableName, false);
+                    settings.execute(dropTableStmt, getCredentialsProvider());
+                } else {
+                    throw new InvalidSettingsException("Table " + tableName + " already exists");
+                }
+            }
+        }
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
         final DataTableSpec spec = rdd.getTableSpec();
         final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
         for (final DataColumnSpec colSpec : spec) {
-            StructField field = DataType.createStructField(colSpec.getName(), SparkJavaSnippetNodeModel.SqlDataTypeFromKnimeDataType.get(colSpec.getType()), true);
+            SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
+            StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
             structFields.add(field);
         }
         final StructType schema = DataType.createStructType(structFields);
-        final RDDToHiveTask task = new RDDToHiveTask(rdd.getData(), m_tableName.getStringValue(), schema);
+        final RDDToHiveTask task = new RDDToHiveTask(rdd.getData(), tableName, schema);
         task.execute(exec);
         final DatabasePortObjectSpec resultSpec = createResultSpec(con.getSpec(), rdd.getTableSpec());
         return new PortObject[] {new DatabasePortObject(resultSpec)};
@@ -126,6 +154,7 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_tableName.saveSettingsTo(settings);
+        m_dropExisting.saveSettingsTo(settings);
     }
 
     /**
@@ -137,6 +166,7 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Table name must not be empty");
         }
+        m_dropExisting.validateSettings(settings);
     }
 
     /**
@@ -145,5 +175,6 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_tableName.loadSettingsFrom(settings);
+        m_dropExisting.loadSettingsFrom(settings);
     }
 }

@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.pmml.converter;
 
 import java.io.File;
+import java.util.LinkedHashSet;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
@@ -39,18 +40,15 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class MLlib2PMMLNodeModel extends NodeModel {
-
-    private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
 
     /**
      *
@@ -86,7 +84,7 @@ public class MLlib2PMMLNodeModel extends NodeModel {
             clusters[i] = clusterCenters[i].toArray();
         }
         outPMMLPort.addModelTranslater(new PMMLClusterTranslator(ComparisonMeasure.squaredEuclidean,
-                clusterCenters.length, clusters, null, model.getColumnNames()));
+                clusterCenters.length, clusters, null, new LinkedHashSet<>(model.getColumnNames())));
         return new PortObject[] {outPMMLPort};
     }
 
