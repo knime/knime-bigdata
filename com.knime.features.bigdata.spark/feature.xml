@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.knime.features.bigdata.spark"
-      label="KNIME Big Data Executor for Spark"
+      label="KNIME Big Data Executor for Apache Spark"
       version="1.0.0.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
-      Big Data Executor for Spark.
+      Big Data Executor for Apache Spark.
    </description>
 
    <copyright>
