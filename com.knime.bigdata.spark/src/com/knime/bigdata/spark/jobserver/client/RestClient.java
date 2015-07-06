@@ -15,15 +15,15 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
  *
  */
 public class RestClient {
-
+//TK_TODO: We need to add support for multiple job servers
     private static class RestClientFactory {
 
         static IRestClient getClient() {
             final String host;
-            if (!KnimeConfigContainer.m_config.hasPath("spark.jobServer")) {
+            if (!KNIMEConfigContainer.m_config.hasPath("spark.jobServer")) {
                 host = null;
             } else {
-                host = KnimeConfigContainer.m_config.getString("spark.jobServer");
+                host = KNIMEConfigContainer.m_config.getString("spark.jobServer");
             }
             if (host == null || host.equals("dummy") || host.length() < 2) {
                 return new DummyRestClient();

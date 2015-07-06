@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.io.hive.writer;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
 /**
@@ -34,6 +35,8 @@ public class Spark2HiveNodeDialog extends DefaultNodeSettingsPane {
      */
     Spark2HiveNodeDialog() {
         addDialogComponent(new DialogComponentString(Spark2HiveNodeModel.createTableNameModel(),
-            "Hive table name: ", true, 20));
+            "Table name: ", true, 20));
+        addDialogComponent(new DialogComponentBoolean(Spark2HiveNodeModel.createDropExistingModel(),
+            "Drop existing table"));
     }
 }

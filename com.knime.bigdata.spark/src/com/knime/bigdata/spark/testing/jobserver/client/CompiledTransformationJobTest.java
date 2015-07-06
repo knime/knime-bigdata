@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
+import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.jobs.JavaRDDFromFile;
@@ -62,7 +62,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
         //start job
         boolean exceptionThrown = false;
         try {
-            JobControler.startJob(contextName, TransformationTestJob.class.getCanonicalName(), params);
+            JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params);
         } catch (GenericKnimeSparkException ge) {
             //this is what should happen
             //TODO - check that exception makes sense...
@@ -78,7 +78,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
     @Test
     public void addTransformationJob2JarAndExecuteOnServer() throws Throwable {
 
-        final String j1 = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(),
+        final String j1 = JobControler.startJob(CONTEXT_ID, JavaRDDFromFile.class.getCanonicalName(),
             params2Json("/home/spark/data/iris-with-label.txt", "unitTestRDD1"));
         JobStatus s1 = JobControler.waitForJob(j1, null);
         assertFalse(s1.equals(JobStatus.ERROR));
@@ -97,10 +97,10 @@ public class CompiledTransformationJobTest extends UnitSpec {
             JobControler.uploadJobJar(jarPath);
             //start job
             String jobId =
-                JobControler.startJob(contextName, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
+                JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
 
-            KnimeConfigContainer.m_config =
-                KnimeConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
+            KNIMEConfigContainer.m_config =
+                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                     ConfigValueFactory.fromAnyRef("{\"result\":\"OK\"}"));
 
             assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);

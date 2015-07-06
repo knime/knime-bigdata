@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
-import com.knime.bigdata.spark.jobserver.client.KnimeConfigContainer;
+import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.testing.UnitSpec;
 
@@ -27,25 +27,25 @@ public class KnimeContextTest extends UnitSpec {
 	public void any2KnimeContextsShouldHaveDifferentNamesButStartWithCorrectPrefix()
 			throws Throwable {
 
-		String prefix = KnimeConfigContainer.m_config
+		String prefix = KNIMEConfigContainer.m_config
 				.getString("spark.contextNamePrefix");
-		assertNotNull("context name must never be null", contextName);
+		assertNotNull("context name must never be null", CONTEXT_ID);
 		assertTrue("context names must start with proper prefix",
-		    contextName.startsWith(prefix));
+		    CONTEXT_ID.startsWith(prefix));
 		Thread.sleep(1000);
-		String contextName2 = KnimeContext.getSparkContext();
+		String contextName2 = KnimeContext.getSparkContext().getContextName();
 		assertNotNull("context name must never be null", contextName2);
 		assertTrue("context names must start with proper prefix",
 				contextName2.startsWith(prefix));
 		assertTrue("contexts should be re-used",
-		    contextName.equals(contextName2));
-		KnimeContext.destroySparkContext(contextName);
+		    CONTEXT_ID.equals(contextName2));
+		KnimeContext.destroySparkContext(CONTEXT_ID);
 
         Thread.sleep(1000);
-		String contextName3 = KnimeContext.getSparkContext();
+		String contextName3 = KnimeContext.getSparkContext().getContextName();
 		assertFalse("destroyed contexts should NOT be re-used",
-		    contextName.equals(contextName3));
-		contextName = contextName3;
+		    CONTEXT_ID.equals(contextName3));
+		CONTEXT_ID = contextName3;
 	}
 
     /**
@@ -56,8 +56,8 @@ public class KnimeContextTest extends UnitSpec {
 	public void knimeContextShouldBeAbleToCreateCheckStatusOfAndDestroyContext()
 			throws Throwable {
 
-			JobStatus status = KnimeContext.getSparkContextStatus(contextName);
-			assertTrue("Status of context "+contextName+" should be OK after creation, got: "
+			JobStatus status = KnimeContext.getSparkContextStatus(CONTEXT_ID);
+			assertTrue("Status of context "+CONTEXT_ID+" should be OK after creation, got: "
 					+ status, status == JobStatus.OK);
 
 	}

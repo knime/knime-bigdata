@@ -50,6 +50,7 @@ import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
 import org.knime.core.util.SwingWorkerWithContext;
 
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
@@ -159,7 +160,7 @@ public class SparkDataPortObject implements PortObject {
         final BufferedDataTableView dataView = new BufferedDataTableView(null) {
             @Override
             public String getName() {
-                return "Table Preview";
+                return "Data Preview";
             }
         };
         final JButton b = new JButton("Cache no. of rows: ");
@@ -189,7 +190,7 @@ public class SparkDataPortObject implements PortObject {
                         + " rows from database..."), BorderLayout.NORTH);
                 panels[0].repaint();
                 panels[0].revalidate();
-                new SwingWorkerWithContext<DataTable, Void>() {
+                final SwingWorkerWithContext<DataTable, Void> worker  = new SwingWorkerWithContext<DataTable, Void>() {
                     /** {@inheritDoc} */
                     @Override
                     protected DataTable doInBackgroundWithContext() throws Exception {
@@ -203,20 +204,20 @@ public class SparkDataPortObject implements PortObject {
                             dt = super.get();
                         } catch (ExecutionException ee) {
                             LOGGER.warn("Error during fetching data from "
-                                + "database, reason: " + ee.getMessage(), ee);
+                                + "Spark, reason: " + ee.getMessage(), ee);
                         } catch (InterruptedException ie) {
                             LOGGER.warn("Error during fetching data from "
-                                + "database, reason: " + ie.getMessage(), ie);
+                                + "Spark, reason: " + ie.getMessage(), ie);
                         }
                         @SuppressWarnings("serial")
                         final BufferedDataTableView dataView2 = new BufferedDataTableView(dt) {
                             /** {@inheritDoc} */
                             @Override
                             public String getName() {
-                                return "Table Preview";
+                                return "Data Preview";
                             }
                         };
-                        dataView2.setName("Table Preview");
+                        dataView2.setName("Data Preview");
                         panels[0].removeAll();
                         panels[0].add(p, BorderLayout.NORTH);
                         panels[0].add(dataView2, BorderLayout.CENTER);
@@ -224,7 +225,8 @@ public class SparkDataPortObject implements PortObject {
                         panels[0].repaint();
                         panels[0].revalidate();
                     }
-                }.execute();
+                };
+                worker.execute();
             }
         });
         for (int i = 1; i < panels.length; i++) {
@@ -259,7 +261,7 @@ public class SparkDataPortObject implements PortObject {
     /**
      * @return the context
      */
-    public String getContext() {
+    public KNIMESparkContext getContext() {
         return m_data.getContext();
     }
 

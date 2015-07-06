@@ -50,8 +50,7 @@ public class FetchRowsJob extends KnimeSparkJob {
 			try {
 				aConfig.getInt(PARAM_NUM_ROWS);
 			} catch (ConfigException e) {
-				msg = "Input parameter '" + PARAM_NUM_ROWS
-						+ "' is not of expected type 'integer'.";
+				msg = "Input parameter '" + PARAM_NUM_ROWS + "' is not of expected type 'integer'.";
 			}
 		}
 
@@ -73,8 +72,7 @@ public class FetchRowsJob extends KnimeSparkJob {
             throw new GenericKnimeSparkException("Input data table missing for key: "+aConfig.getString(PARAM_TABLE_NAME));
         }
 		final int numRows = aConfig.getInt(PARAM_NUM_ROWS);
-		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows
-				+ " rows from input RDD");
+		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows + " rows from input RDD");
 		final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getString(PARAM_TABLE_NAME));
 		final List<Row> res;
 		if (numRows > 0) {

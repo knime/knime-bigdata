@@ -45,7 +45,7 @@ public class DecisionTreeTask implements Serializable {
     private Collection<Integer> m_numericColIdx;
     private final int m_classColIdx;
     private final String m_classColName;
-    private final String m_context;
+    private final String m_contextID;
     private String m_outputTableName;
     private String m_inputTableName;
 
@@ -54,7 +54,7 @@ public class DecisionTreeTask implements Serializable {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
-        m_context = inputRDD.getContext();
+        m_contextID = inputRDD.getContext().getContextName();
         m_inputTableName = inputRDD.getID();
         m_numericColIdx = numericColIdx;
         m_classColName = classColName;
@@ -65,7 +65,7 @@ public class DecisionTreeTask implements Serializable {
     DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
         final String jobId =
-                JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
+                JobControler.startJob(m_contextID, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 

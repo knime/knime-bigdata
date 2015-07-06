@@ -30,6 +30,7 @@ import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.JavaRDDFromFile;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 
 /**
@@ -59,10 +60,10 @@ public class FileToRDDTask implements Serializable {
      * @throws Exception if anything goes wrong
      */
     public String execute(final ExecutionContext exec) throws Exception {
-        final String contextName = KnimeContext.getSparkContext();
+        final KNIMESparkContext context = KnimeContext.getSparkContext();
         final String params = text2RDDDef(m_inputTableName);
 
-        String jobId = JobControler.startJob(contextName, JavaRDDFromFile.class.getCanonicalName(), params);
+        String jobId = JobControler.startJob(context.getContextName(), JavaRDDFromFile.class.getCanonicalName(), params);
 
         JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 

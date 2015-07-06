@@ -49,6 +49,8 @@ package com.knime.bigdata.spark.node.scripting.util;
 
 import java.util.UUID;
 
+import org.knime.base.node.jsnippet.util.IJsnippetTemplate;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -59,7 +61,7 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Heiko Hofer
  */
 @SuppressWarnings("rawtypes")
-public class SparkJavaSnippetTemplate {
+public class SparkJavaSnippetTemplate implements IJsnippetTemplate {
     private static final String SNIPPET = "Snippet";
     private static final String META_CATEGORY = "Meta category";
     private static final String CATEGORY = "Category";
@@ -70,7 +72,7 @@ public class SparkJavaSnippetTemplate {
     /** The first version of templates. */
     public static final String VERSION_1_X = "version 1.x";
 
-    private SparkJavaSnippetSettings m_snippetSettings;
+    private JavaSnippetSettings m_snippetSettings;
     /** The meta category which typically is the dialog class this template
      * comes from.
      */
@@ -106,7 +108,7 @@ public class SparkJavaSnippetTemplate {
      * @param snippetSettings the settings
      */
     public SparkJavaSnippetTemplate(final Class metaCategory,
-            final SparkJavaSnippetSettings snippetSettings) {
+            final JavaSnippetSettings snippetSettings) {
         m_metaCategory = metaCategory;
         m_category = "default";
         m_description = "";
@@ -126,7 +128,7 @@ public class SparkJavaSnippetTemplate {
     /**
      * @return the snippetSettings
      */
-    public SparkJavaSnippetSettings getSnippetSettings() {
+    public JavaSnippetSettings getSnippetSettings() {
         return m_snippetSettings;
     }
 
@@ -138,8 +140,9 @@ public class SparkJavaSnippetTemplate {
     }
 
     /**
-     * @param category the category to set
+     * {@inheritDoc}
      */
+    @Override
     public void setCategory(final String category) {
         m_category = category;
     }
@@ -152,8 +155,9 @@ public class SparkJavaSnippetTemplate {
     }
 
     /**
-     * @param name the name to set
+     * {@inheritDoc}
      */
+    @Override
     public void setName(final String name) {
         m_name = name;
     }
@@ -166,8 +170,9 @@ public class SparkJavaSnippetTemplate {
     }
 
     /**
-     * @param description the description to set
+     * {@inheritDoc}
      */
+    @Override
     public void setDescription(final String description) {
         m_description = description;
     }
@@ -214,7 +219,7 @@ public class SparkJavaSnippetTemplate {
             m_version = settings.getString(m_version,
                     SparkJavaSnippetTemplate.VERSION_1_X);
             NodeSettingsRO snippet = settings.getNodeSettings(SNIPPET);
-            m_snippetSettings = new SparkJavaSnippetSettings();
+            m_snippetSettings = new JavaSnippetSettings();
             m_snippetSettings.loadSettingsForDialog(snippet);
             m_uuid = m_snippetSettings.getTemplateUUID();
         } catch (ClassNotFoundException e) {

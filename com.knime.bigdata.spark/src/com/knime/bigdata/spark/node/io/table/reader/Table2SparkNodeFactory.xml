@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
+	type="Other" icon="icon.png">
+	<name>Spark Writer</name>
+	<shortDescription>Creates a Spark data object from the KNIME table.</shortDescription>
+	<fullDescription>
+		<intro>
+			Creates a Spark data object from the KNIME table.
+		</intro>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="KNIME table">KNIME table</inPort>
+		<outPort index="0" name="Spark data">Spark data object</outPort>
+	</ports>
+</knimeNode>

@@ -46,7 +46,7 @@ public class KMeansTask {
 
     private final Integer[] m_includeColIdxs;
 
-    private final String m_context;
+    private final String m_contextID;
 
     /**
      * constructor - simply stores parameters
@@ -61,7 +61,7 @@ public class KMeansTask {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
-        m_context = inputRDD.getContext();
+        m_contextID = inputRDD.getContext().getContextName();
         m_inputTableName = inputRDD.getID();
         m_includeColIdxs = new Integer[includeColIdxs.length];
         int i = 0;
@@ -84,7 +84,7 @@ public class KMeansTask {
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
         final String jobId =
-                JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+                JobControler.startJob(m_contextID, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
 

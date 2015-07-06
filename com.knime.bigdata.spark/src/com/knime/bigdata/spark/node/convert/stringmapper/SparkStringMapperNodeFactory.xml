@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
+	type="Other" icon="hiveSpark.png">
+	<name>Spark String Mapper</name>
+	<shortDescription>Maps a nominal column to a double column</shortDescription>
+	<fullDescription>
+		<intro>
+			Maps a nominal column to a double column.
+		</intro>
+		<option name="Column name">The name of the column to convert</option>
+		<option name="Mapping column name">The name of the new mapping column</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Input data">Input data.</inPort>
+		<outPort index="0" name="Mapped input data">Mapped input data</outPort>
+		<outPort index="1" name="Mapping dictionary">Mapping dictionary</outPort>
+	</ports>
+</knimeNode>

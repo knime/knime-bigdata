@@ -49,7 +49,7 @@ package com.knime.bigdata.spark.node.scripting.util;
 
 import java.util.Map;
 
-import org.knime.base.node.jsnippet.JavaSnippetSettings;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.workflow.FlowVariable;
 

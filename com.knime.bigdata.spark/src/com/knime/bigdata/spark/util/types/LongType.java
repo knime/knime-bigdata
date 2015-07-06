@@ -1,0 +1,118 @@
+/* ------------------------------------------------------------------
+ * This source code, its documentation and all appendant files
+ * are protected by copyright law. All rights reserved.
+ *
+ * Copyright by KNIME.com, Zurich, Switzerland
+ *
+ * You may not modify, publish, transmit, transfer or sell, reproduce,
+ * create derivative works from, distribute, perform, display, or in
+ * any way exploit any of the content, in whole or in part, except as
+ * otherwise expressly permitted in writing by the copyright owner or
+ * as specified in the license file distributed with this product.
+ *
+ * If you have any questions please contact the copyright holder:
+ * website: www.knime.com
+ * email: contact@knime.com
+ * ---------------------------------------------------------------------
+ *
+ * History
+ *   Created on 05.07.2015 by koetter
+ */
+package com.knime.bigdata.spark.util.types;
+
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataType;
+import org.knime.core.data.LongValue;
+import org.knime.core.data.def.LongCell;
+
+import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
+
+/**
+ *
+ * @author Tobias Koetter, KNIME.com
+ */
+public class LongType implements SparkTypeConverter<LongCell, Long> {
+
+    private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
+        org.apache.spark.sql.api.java.DataType.LongType};
+
+    private static final DataType[] KNIME = new DataType[] {LongCell.TYPE};
+
+    private static volatile LongType instance;
+
+    private LongType() {
+        //avoid object creation
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public org.apache.spark.sql.api.java.DataType getSparkSqlType() {
+        return getSparkSqlTypes()[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DataType getKNIMEType() {
+        return getKNIMETypes()[0];
+    }
+
+    /**
+     * Returns the only instance of this class.
+     * @return the only instance
+     */
+    public static LongType getInstance() {
+        if (instance == null) {
+            synchronized (LongType.class) {
+                if (instance == null) {
+                    instance = new LongType();
+                }
+            }
+        }
+        return instance;
+    }
+
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
+        return SPARK;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DataType[] getKNIMETypes() {
+        return KNIME;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LongCell convert(final Object sparkObject) {
+        if (sparkObject instanceof Long) {
+            Long val = (Long) sparkObject;
+            return new LongCell(val);
+        }
+        return (LongCell)DataType.getMissingCell();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long convert(final DataCell cell) {
+        if (cell instanceof LongValue) {
+            return ((LongValue)cell).getLongValue();
+        }
+        return null;
+    }
+}

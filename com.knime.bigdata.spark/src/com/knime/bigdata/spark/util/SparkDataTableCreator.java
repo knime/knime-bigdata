@@ -41,7 +41,7 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public final class SparkDataTableCreator {
 
@@ -67,7 +67,7 @@ public final class SparkDataTableCreator {
         try {
             final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
-            String jobId = JobControler.startJob(data.getContext(), FetchRowsJob.class.getCanonicalName(), fetchParams);
+            String jobId = JobControler.startJob(data.getContext().getContextName(), FetchRowsJob.class.getCanonicalName(), fetchParams);
 
             JobControler.waitForJob(jobId, null);
 

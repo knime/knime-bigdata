@@ -12,7 +12,7 @@ import com.typesafe.config.ConfigFactory;
  * @author dwk
  *
  */
-public class KnimeConfigContainer {
+public class KNIMEConfigContainer {
 
     /**
      * mutable configuration object

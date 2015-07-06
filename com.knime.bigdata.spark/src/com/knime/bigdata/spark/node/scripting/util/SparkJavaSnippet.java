@@ -51,13 +51,18 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseFileObject;
 import org.fife.ui.rsyntaxtextarea.parser.Parser;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.guarded.GuardedSection;
+import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
+import org.knime.base.node.jsnippet.ui.JSnippetParser;
 import org.knime.base.node.jsnippet.util.FlowVariableRepository;
+import org.knime.base.node.jsnippet.util.IJavaSnippet;
 import org.knime.base.node.jsnippet.util.JavaField;
 import org.knime.base.node.jsnippet.util.JavaField.InCol;
 import org.knime.base.node.jsnippet.util.JavaField.InVar;
 import org.knime.base.node.jsnippet.util.JavaField.OutCol;
 import org.knime.base.node.jsnippet.util.JavaField.OutVar;
+import org.knime.base.node.jsnippet.util.JavaSnippetCompiler;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.base.node.jsnippet.util.JavaSnippetUtil;
 import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.core.data.DataTableSpec;
@@ -76,7 +81,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
  *
  * @author koetter
  */
-public class SparkJavaSnippet {
+public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> {
     private static File jSnippetJar;
     private String[] m_jarFiles;
     // caches the jSnippetJar and the jarFiles.
@@ -89,9 +94,9 @@ public class SparkJavaSnippet {
     // true when the document has changed and the m_snippet is not up to date.
     private boolean m_dirty;
 
-    private SparkJavaSnippetParser m_parser;
+    private JSnippetParser m_parser;
 
-    private SparkJavaSnippetSettings m_settings;
+    private JavaSnippetSettings m_settings;
     private JavaSnippetFields m_fields;
 
 
@@ -131,7 +136,7 @@ public class SparkJavaSnippet {
      * Create a new snippet with the given settings.
      * @param settings the settings
      */
-    public void setSettings(final SparkJavaSnippetSettings settings) {
+    public void setSettings(final JavaSnippetSettings settings) {
         m_settings = settings;
         setJavaSnippetFields(settings.getJavaSnippetFields());
         setJarFiles(settings.getJarFiles());
@@ -149,7 +154,7 @@ public class SparkJavaSnippet {
      * Get the updated settings java snippet.
      * @return the settings
      */
-    public SparkJavaSnippetSettings getSettings() {
+    public JavaSnippetSettings getSettings() {
         updateSettings();
         return m_settings;
     }
@@ -157,12 +162,12 @@ public class SparkJavaSnippet {
     private void updateSettings() {
         try {
             GuardedDocument doc = getDocument();
-            m_settings.setScriptImports(doc.getTextBetween(SparkJavaSnippetDocument.GUARDED_IMPORTS,
-                SparkJavaSnippetDocument.GUARDED_FIELDS));
-            m_settings.setScriptFields(doc.getTextBetween(SparkJavaSnippetDocument.GUARDED_FIELDS,
-                SparkJavaSnippetDocument.GUARDED_BODY_START));
-            m_settings.setScriptBody(doc.getTextBetween(SparkJavaSnippetDocument.GUARDED_BODY_START,
-                SparkJavaSnippetDocument.GUARDED_BODY_END));
+            m_settings.setScriptImports(doc.getTextBetween(JavaSnippetDocument.GUARDED_IMPORTS,
+                JavaSnippetDocument.GUARDED_FIELDS));
+            m_settings.setScriptFields(doc.getTextBetween(JavaSnippetDocument.GUARDED_FIELDS,
+                JavaSnippetDocument.GUARDED_BODY_START));
+            m_settings.setScriptBody(doc.getTextBetween(JavaSnippetDocument.GUARDED_BODY_START,
+                JavaSnippetDocument.GUARDED_BODY_END));
         } catch (BadLocationException e) {
             // this should never happen
             throw new IllegalStateException(e);
@@ -179,6 +184,7 @@ public class SparkJavaSnippet {
      * @return the jar files for the class path
      * @throws IOException when a file could not be loaded
      */
+    @Override
     public File[] getClassPath() throws IOException {
         // use cached list if present
         if (filesExist(m_jarFileCache)) {
@@ -194,11 +200,11 @@ public class SparkJavaSnippet {
             final List<File> jarFiles = new ArrayList<>();
             //add the default jar files to the class path which are also available on the Spark cluster
             final String root = SparkPlugin.getDefault().getPluginRootPath();
-            jarFiles.add(new File(root+"/bin/"));
+//            jarFiles.add(new File(root+"/bin/"));
             jarFiles.add(new File(root+"/lib/knimeSparkScalaClient.jar"));
             jarFiles.add(new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar"));
             jarFiles.add(new File(root+"/lib/job-server-api_2.10-0.5.1-SNAPSHOT.jar"));
-//            jarFiles.add(new File(root+"/resources/knimeJobs.jar"));
+            jarFiles.add(new File(root+"/resources/knimeJobs.jar"));
 //            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\lib\\spark-assembly-1.2.1-hadoop2.4.0.jar"));
 //            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\lib\\job-server-api_2.10-0.5.1-SNAPSHOT.jar"));
 //            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\resources\\knimeJobs.jar"));
@@ -241,6 +247,7 @@ public class SparkJavaSnippet {
      * @return the files to compile
      * @throws IOException When files cannot be created.
      */
+    @Override
     public Iterable<? extends JavaFileObject> getCompilationUnits()
         throws IOException {
 
@@ -290,6 +297,7 @@ public class SparkJavaSnippet {
      * @param source the source
      * @return if this snippet is the given source
      */
+    @Override
     public boolean isSnippetSource(final JavaFileObject source) {
         return null != m_snippet ? source.equals(m_snippet) : false;
     }
@@ -400,7 +408,6 @@ public class SparkJavaSnippet {
                 jar.flush();
                 jar.closeEntry();
             }
-
         }
     }
 
@@ -432,6 +439,7 @@ public class SparkJavaSnippet {
                 , "org.apache.spark.api.java.function.*"
                 , "org.apache.spark.sql.api.java.*"
                 , "com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException"
+                , "com.knime.bigdata.spark.jobserver.server.transformation.*"
 //                , "com.knime.bigdata.spark.node.scripting.util.*"
                 , "java.io.Serializable"
                 , m_abstractClass.getName()};
@@ -442,6 +450,7 @@ public class SparkJavaSnippet {
      * Get the document with the code of the snippet.
      * @return the document
      */
+    @Override
     public GuardedDocument getDocument() {
         // Lazy initialization of the document
         if (m_document == null) {
@@ -471,7 +480,7 @@ public class SparkJavaSnippet {
 
     /** Create the document with the default skeleton. */
     private GuardedDocument createDocument() {
-        return new SparkJavaSnippetDocument(m_methodSignature);
+        return new JavaSnippetDocument(m_methodSignature);
     }
 
     /** Initialize document with information from the settings. */
@@ -479,11 +488,11 @@ public class SparkJavaSnippet {
         try {
             initGuardedSections(doc);
             if (null != m_settings) {
-                doc.replaceBetween(SparkJavaSnippetDocument.GUARDED_IMPORTS, SparkJavaSnippetDocument.GUARDED_FIELDS,
+                doc.replaceBetween(JavaSnippetDocument.GUARDED_IMPORTS, JavaSnippetDocument.GUARDED_FIELDS,
                         m_settings.getScriptImports());
-                doc.replaceBetween(SparkJavaSnippetDocument.GUARDED_FIELDS, SparkJavaSnippetDocument.GUARDED_BODY_START,
+                doc.replaceBetween(JavaSnippetDocument.GUARDED_FIELDS, JavaSnippetDocument.GUARDED_BODY_START,
                         m_settings.getScriptFields());
-                doc.replaceBetween(SparkJavaSnippetDocument.GUARDED_BODY_START, SparkJavaSnippetDocument.GUARDED_BODY_END,
+                doc.replaceBetween(JavaSnippetDocument.GUARDED_BODY_START, JavaSnippetDocument.GUARDED_BODY_END,
                         m_settings.getScriptBody());
             }
         } catch (BadLocationException e) {
@@ -496,9 +505,9 @@ public class SparkJavaSnippet {
      */
     private void initGuardedSections(final GuardedDocument doc) {
         try {
-            GuardedSection imports = doc.getGuardedSection(SparkJavaSnippetDocument.GUARDED_IMPORTS);
+            GuardedSection imports = doc.getGuardedSection(JavaSnippetDocument.GUARDED_IMPORTS);
             imports.setText(createImportsSection());
-            GuardedSection fields = doc.getGuardedSection(SparkJavaSnippetDocument.GUARDED_FIELDS);
+            GuardedSection fields = doc.getGuardedSection(JavaSnippetDocument.GUARDED_FIELDS);
             fields.setText(createFieldsSection());
         } catch (BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -591,10 +600,11 @@ public class SparkJavaSnippet {
      * Get the parser for the snippet's document.
      * @return the parser
      */
+    @Override
     public Parser getParser() {
         // lazy initialization of the parser
         if (m_parser == null) {
-            m_parser = new SparkJavaSnippetParser(this);
+            m_parser = new JSnippetParser(this);
         }
         return m_parser;
     }
@@ -638,8 +648,7 @@ public class SparkJavaSnippet {
 //        }
         // check input variables
         for (InVar field : m_fields.getInVarFields()) {
-            FlowVariable var = flowVariableRepository.getFlowVariable(
-                    field.getKnimeName());
+            FlowVariable var = flowVariableRepository.getFlowVariable(field.getKnimeName());
             if (var != null) {
                 if (!var.getType().equals(field.getKnimeType())) {
                     errors.add("The type of the flow variable \""
@@ -670,22 +679,21 @@ public class SparkJavaSnippet {
 //        }
 
         // check output variables
-        for (OutVar field : m_fields.getOutVarFields()) {
-            FlowVariable var = flowVariableRepository.getFlowVariable(
-                    field.getKnimeName());
-            if (field.getReplaceExisting() && var == null) {
-                errors.add("The output flow variable \""
-                        + field.getKnimeName()
-                        + "\" is marked to be a replacement, "
-                        + "but an input with this name does not exist.");
-            }
-            if (!field.getReplaceExisting() && var != null) {
-                errors.add("The output flow variable \""
-                        + field.getKnimeName()
-                        + "\" is marked to be new, "
-                        + "but an input with this name does exist.");
-            }
-        }
+//        for (OutVar field : m_fields.getOutVarFields()) {
+//            FlowVariable var = flowVariableRepository.getFlowVariable(field.getKnimeName());
+//            if (field.getReplaceExisting() && var == null) {
+//                errors.add("The output flow variable \""
+//                        + field.getKnimeName()
+//                        + "\" is marked to be a replacement, "
+//                        + "but an input with this name does not exist.");
+//            }
+//            if (!field.getReplaceExisting() && var != null) {
+//                errors.add("The output flow variable \""
+//                        + field.getKnimeName()
+//                        + "\" is marked to be new, "
+//                        + "but an input with this name does exist.");
+//            }
+//        }
 
         try {
             // test if snippet compiles and if the file can be created
@@ -818,6 +826,7 @@ public class SparkJavaSnippet {
      * @param metaCategory the meta category of the template
      * @return the template with a new uuid.
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public SparkJavaSnippetTemplate createTemplate(final Class metaCategory) {
         SparkJavaSnippetTemplate template = new SparkJavaSnippetTemplate(metaCategory,
@@ -825,10 +834,11 @@ public class SparkJavaSnippet {
         return template;
     }
 
-    /** Get the path to the temporary directory of this java snippet.
-     * @return the path to the temporary directory
+    /**
+     * {@inheritDoc}
      */
-    File getTempClassPath() {
+    @Override
+    public File getTempClassPath() {
         return m_tempClassPathDir;
     }
 
@@ -844,6 +854,7 @@ public class SparkJavaSnippet {
      * Set the system fields in the java snippet.
      * @param fields the fields to set
      */
+    @Override
     public void setJavaSnippetFields(final JavaSnippetFields fields) {
         m_fields = fields;
         if (null != m_document) {
@@ -868,7 +879,7 @@ public class SparkJavaSnippet {
      */
     @SuppressWarnings("unchecked")
     private Class<? extends AbstractSparkJavaSnippet> createSnippetClass() {
-        SparkJavaSnippetCompiler compiler = new SparkJavaSnippetCompiler(this);
+        JavaSnippetCompiler compiler = new JavaSnippetCompiler(this);
         StringWriter log = new StringWriter();
         DiagnosticCollector<JavaFileObject> digsCollector = new DiagnosticCollector<>();
         CompilationTask compileTask = null;
@@ -880,22 +891,17 @@ public class SparkJavaSnippet {
         boolean success = compileTask.call();
         if (success) {
             try {
-                ClassLoader loader = compiler.createClassLoader(
-                        this.getClass().getClassLoader());
-                return (Class<? extends AbstractSparkJavaSnippet>)
-                    loader.loadClass(m_className);
+                ClassLoader loader = compiler.createClassLoader(this.getClass().getClassLoader());
+                return (Class<? extends AbstractSparkJavaSnippet>) loader.loadClass(m_className);
             } catch (ClassNotFoundException e) {
-                throw new IllegalStateException(
-                        "Could not load class file.", e);
+                throw new IllegalStateException("Could not load class file.", e);
             } catch (IOException e) {
-                throw new IllegalStateException(
-                        "Could not load jar files.", e);
+                throw new IllegalStateException("Could not load jar files.", e);
             }
         } else {
-            StringBuilder msg = new StringBuilder();
+            final StringBuilder msg = new StringBuilder();
             msg.append("Compile with errors:\n");
-            for (Diagnostic<? extends JavaFileObject> d
-                    : digsCollector.getDiagnostics()) {
+            for (Diagnostic<? extends JavaFileObject> d : digsCollector.getDiagnostics()) {
                 boolean isSnippet = this.isSnippetSource(d.getSource());
                 if (isSnippet && d.getKind().equals(javax.tools.Diagnostic.Kind.ERROR)) {
                     msg.append("Error: ");
@@ -903,7 +909,6 @@ public class SparkJavaSnippet {
                     msg.append('\n');
                 }
             }
-
             throw new IllegalStateException(msg.toString());
         }
     }

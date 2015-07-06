@@ -6,7 +6,7 @@
 	<shortDescription>Converts an incoming Hive query into a Spark data object</shortDescription>
 	<fullDescription>
 		<intro>
-			
+			Converts an incoming Hive query into a Spark data object.
 		</intro>
 	</fullDescription>
 

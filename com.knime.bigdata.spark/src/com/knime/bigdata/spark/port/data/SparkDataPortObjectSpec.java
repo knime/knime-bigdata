@@ -30,6 +30,8 @@ import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.workflow.DataTableSpecView;
 
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+
 /**
  * Spark data port object specification.
  * @author Tobias Koetter, KNIME.com
@@ -68,7 +70,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
      * @param context
      * @param spec
      */
-    public SparkDataPortObjectSpec(final String context, final DataTableSpec spec) {
+    public SparkDataPortObjectSpec(final KNIMESparkContext context, final DataTableSpec spec) {
         this(new SparkDataTable(context, "dummy", spec));
     }
 
@@ -99,7 +101,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec {
     /**
      * @return the Spark context
      */
-    public final String getContext() {
+    public final KNIMESparkContext getContext() {
         return m_data.getContext();
     }
 

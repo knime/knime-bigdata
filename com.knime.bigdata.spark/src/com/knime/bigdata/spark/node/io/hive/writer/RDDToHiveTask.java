@@ -53,7 +53,8 @@ public class RDDToHiveTask {
     /**
      * constructor - simply stores parameters
      * @param rdd - the {@link SparkRDD} to generate
-     * @param hiveQuery - the hive query to execute
+     * @param tableName the name of the table
+     * @param schema the schema of the RDD
      */
     public RDDToHiveTask(final SparkRDD rdd, final String tableName, final StructType schema) {
         m_rdd = rdd;
@@ -68,7 +69,7 @@ public class RDDToHiveTask {
      */
     public void execute(final ExecutionContext exec) throws Exception {
         final String jsonArgs = params2Json();
-        String jobId = JobControler.startJob(m_rdd.getContext(), RDDToHiveJob.class.getCanonicalName(), jsonArgs);
+        String jobId = JobControler.startJob(m_rdd.getContext().getContextName(), RDDToHiveJob.class.getCanonicalName(), jsonArgs);
         JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));
     }

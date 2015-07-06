@@ -52,15 +52,15 @@ class DummyRestClient implements IRestClient {
         throws GenericKnimeSparkException {
 
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH)) {
-            KnimeConfigContainer.m_config =
-                KnimeConfigContainer.m_config.withValue(
+            KNIMEConfigContainer.m_config =
+                KNIMEConfigContainer.m_config.withValue(
                     KnimeContext.CONTEXTS_PATH,
                     ConfigValueFactory.fromAnyRef("[\"" + aPath.substring(KnimeContext.CONTEXTS_PATH.length() + 1)
                         + "\"]"));
         }
         if (aPath.startsWith(JobControler.JOBS_PATH)) {
-            KnimeConfigContainer.m_config =
-                KnimeConfigContainer.m_config.withValue(
+            KNIMEConfigContainer.m_config =
+                KNIMEConfigContainer.m_config.withValue(
                     JobControler.JOBS_PATH,
                     ConfigValueFactory.fromAnyRef("{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf"
                         + System.currentTimeMillis() + "\"}}"));
@@ -72,7 +72,7 @@ class DummyRestClient implements IRestClient {
     @Override
     public Response delete(final String aPath) throws GenericKnimeSparkException {
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH + "/")) {
-            KnimeConfigContainer.m_config = KnimeConfigContainer.m_config.withoutPath(KnimeContext.CONTEXTS_PATH);
+            KNIMEConfigContainer.m_config = KNIMEConfigContainer.m_config.withoutPath(KnimeContext.CONTEXTS_PATH);
         }
         return Response.ok().build();
     }
@@ -80,8 +80,8 @@ class DummyRestClient implements IRestClient {
     @Override
     public JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException {
         String val = "[]";
-        if (KnimeConfigContainer.m_config.hasPath(aType)) {
-            val = KnimeConfigContainer.m_config.getString(aType);
+        if (KNIMEConfigContainer.m_config.hasPath(aType)) {
+            val = KNIMEConfigContainer.m_config.getString(aType);
         }
         return Json.createReader(new StringReader(val)).readArray();
     }
@@ -89,8 +89,8 @@ class DummyRestClient implements IRestClient {
     @Override
     public JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException {
         String val = "{\"result\":\"OK\"}";
-        if (KnimeConfigContainer.m_config.hasPath(aType)) {
-            val = KnimeConfigContainer.m_config.getString(aType);
+        if (KNIMEConfigContainer.m_config.hasPath(aType)) {
+            val = KNIMEConfigContainer.m_config.getString(aType);
         }
         return Json.createReader(new StringReader(val)).readObject();
     }
@@ -109,7 +109,7 @@ class DummyRestClient implements IRestClient {
         throws GenericKnimeSparkException {
         String val = "";
         if (aSubField.equals("jobId")) {
-            val = KnimeConfigContainer.m_config.getString(JobControler.JOBS_PATH);
+            val = KNIMEConfigContainer.m_config.getString(JobControler.JOBS_PATH);
         }
 
         JsonObject jsonObject = Json.createReader(new StringReader(val)).readObject();

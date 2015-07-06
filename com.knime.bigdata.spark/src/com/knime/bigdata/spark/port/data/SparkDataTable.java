@@ -32,6 +32,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 /**
@@ -48,7 +49,7 @@ public class SparkDataTable extends AbstractSparkRDD {
      * @param context the context the Spark data table lives in
      * @param spec the {@link DataTableSpec} of the Spark data table
      */
-    public SparkDataTable(final String context, final DataTableSpec spec) {
+    public SparkDataTable(final KNIMESparkContext context, final DataTableSpec spec) {
         this(context, SparkIDGenerator.createID(), spec);
     }
 
@@ -57,7 +58,7 @@ public class SparkDataTable extends AbstractSparkRDD {
      * @param tableName the unique name of the Spark data table
      * @param spec the {@link DataTableSpec} of the Spark data table
      */
-    public SparkDataTable(final String context, final String tableName, final DataTableSpec spec) {
+    public SparkDataTable(final KNIMESparkContext context, final String tableName, final DataTableSpec spec) {
         super(context, tableName);
         if (spec == null) {
             throw new NullPointerException("spec must not be null");

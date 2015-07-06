@@ -240,7 +240,7 @@ final public class SparkJobCompiler {
             if (sparkJobTemplate == null) {
                 sparkJobTemplate = readTemplate("SparkJob.java.template");
             }
-            Map<String, String> snippets = new HashMap<String, String>();
+            Map<String, String> snippets = new HashMap<>();
             snippets.put("$packageName", "");
             snippets.put("$className", className);
             snippets.put("$additionalImports", aAdditionalImports);
@@ -262,7 +262,7 @@ final public class SparkJobCompiler {
             if (transformationTemplate == null) {
                 transformationTemplate = readTemplate("UserDefinedTransformation.java.template");
             }
-            Map<String, String> snippets = new HashMap<String, String>();
+            Map<String, String> snippets = new HashMap<>();
             //package $packageName;
             snippets.put("$packageName", "");
             snippets.put("$className", className);

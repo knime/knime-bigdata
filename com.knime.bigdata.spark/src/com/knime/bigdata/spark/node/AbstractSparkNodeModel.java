@@ -53,10 +53,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -68,11 +66,14 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.config.Config;
 import org.knime.core.node.config.ConfigRO;
+import org.knime.core.node.config.ConfigWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
+import org.knime.core.util.Pair;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 
 
@@ -81,8 +82,6 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
  * @author Tobias Koetter, University of Konstanz
  */
 public abstract class AbstractSparkNodeModel extends NodeModel {
-
-//    private static final String NET_DIR_PREFIX = "net_";
 
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(AbstractSparkNodeModel.class);
@@ -95,9 +94,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
 
     private static final String CFG_NAMED_RDD_UUIDS = "namedRDDs";
 
-    private final LinkedList<String> m_contexts = new LinkedList<>();
-
-    private final LinkedList<String> m_namedRDDs = new LinkedList<>();
+    private final List<Pair<KNIMESparkContext, String>> m_namedRDDs = new LinkedList<>();
 
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
@@ -112,12 +109,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
         for (final PortObject portObject : inData) {
             if (portObject instanceof  SparkDataPortObject) {
-                final String context = ((SparkDataPortObject)portObject).getContext();
+                final KNIMESparkContext context = ((SparkDataPortObject)portObject).getContext();
                 if (!KnimeContext.sparkContextExists(context)) {
                     throw new IllegalStateException(
-                        "Incoming Spark context no longer available. Please reset all preceding Spark nodes.");
+                        "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
                 }
             }
         }
@@ -125,27 +123,30 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         if (portObjects != null && portObjects.length > 0) {
             for (final PortObject portObject : portObjects) {
                 if (portObject instanceof  SparkDataPortObject) {
-                   addObject((SparkDataPortObject)portObject);
+                   addSparkObject((SparkDataPortObject)portObject);
                 }
             }
         }
         return portObjects;
     }
 
-    private void addObject(final SparkDataPortObject sparkObject) {
-        m_contexts.add(sparkObject.getContext());
-        m_namedRDDs.add(sparkObject.getTableName());
+    private void addSparkObject(final SparkDataPortObject sparkObject) {
+        m_namedRDDs.add(new Pair<>(sparkObject.getContext(), sparkObject.getTableName()));
+
     }
 
     /**
      * {@inheritDoc}
+     * Gets called when the node is reseted or deleted.
      */
     @Override
     protected final void reset() {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
         }
-        m_contexts.clear();
+        for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
+            KnimeContext.deleteNamedRDD(rdd.getSecond());
+        }
         m_namedRDDs.clear();
         resetInternal();
     }
@@ -175,26 +176,15 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         final File settingFile = new File(nodeInternDir, CFG_FILE);
         try(final FileInputStream inData = new FileInputStream(settingFile)){
             final ConfigRO config = NodeSettings.loadFromXML(inData);
-            final String[] namedRDDUUIDs =
-                config.getStringArray(CFG_NAMED_RDD_UUIDS);
-            if (namedRDDUUIDs.length > 0) {
-                for (int i = 0, length = namedRDDUUIDs.length; i < length; i++) {
-                    final String uuid = namedRDDUUIDs[i];
-                    m_namedRDDs.add(uuid);
-                }
-            }
-            final String[] contexts = config.getStringArray(CFG_CONTEXT);
-            Set<String> uniqueContexts = new HashSet<>(Arrays.asList(contexts));
-            if (uniqueContexts.size() > 0) {
-                for (final String context : uniqueContexts) {
-                    m_contexts.add(context);
-                    if (!KnimeContext.sparkContextExists(context)) {
-                        setWarningMessage("Spark context no longer available. Reset node.");
-                    }
-                }
+            final String[] namedRDDUUIDs = config.getStringArray(CFG_NAMED_RDD_UUIDS);
+            final int noOfContexts = namedRDDUUIDs.length;
+            for (int i = 0; i < noOfContexts; i++) {
+                final ConfigRO contextConfig = config.getConfig(CFG_CONTEXT + i);
+                final KNIMESparkContext context = new KNIMESparkContext(contextConfig);
+                m_namedRDDs.add(new Pair<>(context, namedRDDUUIDs[i]));
             }
             loadAdditionalInternals(nodeInternDir, exec);
-        } catch (final InvalidSettingsException | GenericKnimeSparkException | RuntimeException e) {
+        } catch (final InvalidSettingsException | RuntimeException e) {
             throw new IOException("Failed to load named rdd", e.getCause());
         }
     }
@@ -208,9 +198,15 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         final File settingFile = new File(nodeInternDir, CFG_FILE);
         try (final FileOutputStream dataOS = new FileOutputStream(settingFile)){
             final Config config = new NodeSettings(CFG_SETTING);
-            exec.checkCanceled();
-            config.addStringArray(CFG_CONTEXT, m_contexts.toArray(new String[0]));
-            config.addStringArray(CFG_NAMED_RDD_UUIDS, m_namedRDDs.toArray(new String[0]));
+            final String[] rdds = new String[m_namedRDDs.size()];
+            int idx = 0;
+            for (Pair<KNIMESparkContext, String> p : m_namedRDDs) {
+                rdds[idx] = p.getSecond();
+                final ConfigWO contextConfig = config.addConfig(CFG_CONTEXT + idx++);
+                p.getFirst().save(contextConfig);
+                exec.checkCanceled();
+            }
+            config.addStringArray(CFG_NAMED_RDD_UUIDS, rdds);
             config.saveToXML(dataOS);
         } catch (final Exception e) {
             throw new IOException(e.getMessage(), e.getCause());
@@ -254,24 +250,4 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
             throws IOException, CanceledExecutionException {
         // override if you need to save some internal data
     }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void onDispose() {
-//        try {
-//            //detach all networks from the repository
-//            //when the workflow is closed or the node is removed from the
-//            //workflow
-//            if (!m_namedRDDs.isEmpty()) {
-//                for (final String id : m_namedRDDs) {
-////                    GraphRepository.getInstance().detach(id);
-//                }
-//                m_namedRDDs.clear();
-//            }
-//        } catch (final Throwable e) {
-//            LOGGER.debug("Exception while finalizing Spark node: " + e.getMessage());
-//        }
-//    }
 }

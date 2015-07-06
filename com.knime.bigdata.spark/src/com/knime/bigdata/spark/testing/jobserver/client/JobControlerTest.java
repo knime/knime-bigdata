@@ -46,7 +46,7 @@ public class JobControlerTest extends UnitSpec {
         final String params = JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "9", ParameterConstants.PARAM_TABLE_1, "someRDD"}});
 
-        String jobId = JobControler.startJob(contextName, FetchRowsJob.class.getCanonicalName(), params);
+        String jobId = JobControler.startJob(CONTEXT_ID, FetchRowsJob.class.getCanonicalName(), params);
         assertNotNull("JobId should not be null", jobId);
         assertTrue("JobId should be some lengthy string", jobId.length() > 25);
     }

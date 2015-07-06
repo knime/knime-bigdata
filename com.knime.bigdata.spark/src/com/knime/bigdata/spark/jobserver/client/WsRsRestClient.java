@@ -35,9 +35,9 @@ class WsRsRestClient implements IRestClient {
     private final static Logger LOGGER = Logger.getLogger(WsRsRestClient.class.getName());
 
     // Config: host, port, use https2?, credentials
-    private static final String host = KnimeConfigContainer.m_config.getString("spark.jobServer");
+    private static final String host = KNIMEConfigContainer.m_config.getString("spark.jobServer");
 
-    private static final int port = KnimeConfigContainer.m_config.getInt("spark.jobServerPort");
+    private static final int port = KNIMEConfigContainer.m_config.getInt("spark.jobServerPort");
 
     private static final Client client = ClientBuilder.newClient();
 
