@@ -125,6 +125,7 @@
             id="com.knime.bigdata.spark.node.util.renameregex.SparkColumnRenameRegexNodeFactory">
       </node>
       <node
+            category-path="/labs/spark"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
             id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
