@@ -60,11 +60,6 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
 
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
-    //    private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
-//    private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
-//    private final SettingsModelString m_tableName = createTableNameModel();
-//    private final SettingsModelString m_colName = createColumnNameModel();
-
     /**
      *
      */
@@ -91,21 +86,21 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     static SettingsModelString createColumnNameModel() {
-        return new SettingsModelString("columnName", "Cluster");
+        return new SettingsModelString("columnName", "Prediction");
     }
 
     /**
      * @return
      */
-    static SettingsModelIntegerBounded createNoOfClusterModel() {
-        return new SettingsModelIntegerBounded("noOfCluster", 3, 1, Integer.MAX_VALUE);
+    static SettingsModelIntegerBounded createMaxNumberBinsModel() {
+        return new SettingsModelIntegerBounded("maxNumBins", 10, 1, Integer.MAX_VALUE);
     }
 
     /**
      * @return
      */
-    static SettingsModelIntegerBounded createNoOfIterationModel() {
-        return new SettingsModelIntegerBounded("noOfIteration", 30, 1, Integer.MAX_VALUE);
+    static SettingsModelIntegerBounded createMaxDepthModel() {
+        return new SettingsModelIntegerBounded("maxDepth", 25, 1, Integer.MAX_VALUE);
     }
 
     /**
