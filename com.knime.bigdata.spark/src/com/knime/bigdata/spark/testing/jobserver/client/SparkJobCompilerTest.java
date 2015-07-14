@@ -112,7 +112,7 @@ public class SparkJobCompilerTest extends UnitSpec {
                     "");
 
             //upload jar to job-server
-            JobControler.uploadJobJar(aJarPath);
+            JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
             //start job
             String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
@@ -120,11 +120,11 @@ public class SparkJobCompilerTest extends UnitSpec {
                 KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                     ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
 
-            assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
+            assertNotSame("job should have finished properly", JobControler.waitForJob(CONTEXT_ID, jobId, null), JobStatus.UNKNOWN);
 
-            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(jobId));
+            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-            JsonObject res = RestClient.toJSONObject(JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+            JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
             assertTrue("job result", res.getString("result").contains(RES_STR));
 
     }
@@ -171,7 +171,7 @@ public class SparkJobCompilerTest extends UnitSpec {
                    "");
 
            //upload jar to job-server
-           JobControler.uploadJobJar(aJarPath);
+           JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
            //start job
            String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
@@ -179,11 +179,11 @@ public class SparkJobCompilerTest extends UnitSpec {
                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                    ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
 
-           assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
+           assertNotSame("job should have finished properly", JobControler.waitForJob(CONTEXT_ID, jobId, null), JobStatus.UNKNOWN);
 
-           assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(jobId));
+           assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-           JsonObject res = RestClient.toJSONObject(JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+           JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
            assertTrue("job result", res.getString("result").contains(RES_STR));
 
 

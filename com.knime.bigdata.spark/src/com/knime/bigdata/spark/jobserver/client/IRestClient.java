@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  *
@@ -44,27 +45,29 @@ interface IRestClient {
      */
     void checkStatus(Response response, String aErrorMsg, Status... aStatus) throws GenericKnimeSparkException;
 
-    <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException;
+    <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException;
 
-    Response delete(final String aPath) throws GenericKnimeSparkException;
+    Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException;
 
     /**
      * send the given type of command to the REST server and convert the result to a JSon array
      *
+     * @param aContextContainer context configuration container
      * @param aType
      * @return JSonArray with result
      * @throws GenericKnimeSparkException
      */
-    JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException;
+    JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException;
 
     /**
      * send the given type of command to the REST server and convert the result to a JSon object
      *
+     * @param aContextContainer context configuration container
      * @param aType
      * @return JsonObject with result
      * @throws GenericKnimeSparkException
      */
-    JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException;
+    JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException;
 
     /**
      * return the string value of the given field / sub-field combination from the given response

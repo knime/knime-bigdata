@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  * creates and handles REST requests
@@ -34,20 +35,15 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 class WsRsRestClient implements IRestClient {
     private final static Logger LOGGER = Logger.getLogger(WsRsRestClient.class.getName());
 
-    // Config: host, port, use https2?, credentials
-    private static final String host = KNIMEConfigContainer.m_config.getString("spark.jobServer");
-
-    private static final int port = KNIMEConfigContainer.m_config.getInt("spark.jobServerPort");
-
     private static final Client client = ClientBuilder.newClient();
 
     static {
         client.register(MultiPartFeature.class);
     }
 
-    private static WebTarget getTarget(final String aPath, final String aQuery, final String aFragment)
+    private static WebTarget getTarget(final KNIMESparkContext aContextContainer, final String aPath, final String aQuery, final String aFragment)
         throws URISyntaxException {
-        WebTarget target = client.target(new URI("http", null, host, port, aPath, aQuery, aFragment));
+        WebTarget target = client.target(new URI("http", null, aContextContainer.getHost(), aContextContainer.getPort(), aPath, aQuery, aFragment));
         return target;
     }
 
@@ -83,11 +79,11 @@ class WsRsRestClient implements IRestClient {
      * @return builder
      * @throws GenericKnimeSparkException
      */
-    private Invocation.Builder getInvocationBuilder(final String aPath, @Nullable final String[] aParams)
+    private Invocation.Builder getInvocationBuilder(final KNIMESparkContext aContextContainer, final String aPath, @Nullable final String[] aParams)
         throws GenericKnimeSparkException {
         WebTarget target;
         try {
-            target = getTarget(aPath, null, null);
+            target = getTarget(aContextContainer, aPath, null, null);
         } catch (URISyntaxException e) {
             LOGGER.severe(e.getMessage());
             throw new GenericKnimeSparkException(e);
@@ -102,14 +98,14 @@ class WsRsRestClient implements IRestClient {
     }
 
     @Override
-    public <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aPath, aArgs);
+    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
+        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aPath, aArgs);
         return builder.post(aEntity);
     }
 
     @Override
-    public Response delete(final String aPath) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aPath, null);
+    public Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
+        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aPath, null);
         return builder.buildDelete().invoke();
     }
 
@@ -120,8 +116,8 @@ class WsRsRestClient implements IRestClient {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aType, null);
+    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
         Response response = builder.get();
         return JsonUtils.toJsonArray(responseToString(response));
     }
@@ -134,8 +130,8 @@ class WsRsRestClient implements IRestClient {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aType, null);
+    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
         Response response = builder.get();
         return Json.createReader(new StringReader(responseToString(response))).readObject();
     }

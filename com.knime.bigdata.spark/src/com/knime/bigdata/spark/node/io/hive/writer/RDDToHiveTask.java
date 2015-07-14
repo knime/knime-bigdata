@@ -31,6 +31,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.RDDToHiveJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -69,8 +70,9 @@ public class RDDToHiveTask {
      */
     public void execute(final ExecutionContext exec) throws Exception {
         final String jsonArgs = params2Json();
-        String jobId = JobControler.startJob(m_rdd.getContext().getContextName(), RDDToHiveJob.class.getCanonicalName(), jsonArgs);
-        JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        final KNIMESparkContext context = m_rdd.getContext();
+        String jobId = JobControler.startJob(context, RDDToHiveJob.class.getCanonicalName(), jsonArgs);
+        JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));
     }
 

@@ -28,10 +28,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.licenses.LicenseChecker;
-import com.knime.licenses.LicenseFeatures;
-import com.knime.licenses.LicenseUtil;
-
 
 /**
  *
@@ -46,7 +42,7 @@ public class SparkPlugin extends AbstractUIPlugin {
     /**
      * {@link LicenseChecker} to use.
      */
-    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.SparkExecutor);
+    //public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.SparkExecutor);
 
     /**
      * The constructor.

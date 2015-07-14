@@ -28,6 +28,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
@@ -46,7 +47,7 @@ public class KMeansTask {
 
     private final Integer[] m_includeColIdxs;
 
-    private final String m_contextID;
+    private final KNIMESparkContext m_context;
 
     /**
      * constructor - simply stores parameters
@@ -61,7 +62,7 @@ public class KMeansTask {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
-        m_contextID = inputRDD.getContext().getContextName();
+        m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
         m_includeColIdxs = new Integer[includeColIdxs.length];
         int i = 0;
@@ -84,9 +85,9 @@ public class KMeansTask {
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
         final String jobId =
-                JobControler.startJob(m_contextID, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+                JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
-        final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
         return (KMeansModel)result.getObjectResult();
     }

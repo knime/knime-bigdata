@@ -57,11 +57,12 @@ public class KNIMESparkContext implements Serializable {
 
     private final String m_memPerNode;
 
+
     /**
-     * @param contextName the id of the Spark context
+     * create spark context container with default values
      */
-    public KNIMESparkContext(final String contextName) {
-        this(contextName, KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"),
+    public KNIMESparkContext() {
+        this(KNIMEConfigContainer.CONTEXT_NAME, KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"),
             KNIMEConfigContainer.m_config.getString("spark.memPerNode"));
     }
 

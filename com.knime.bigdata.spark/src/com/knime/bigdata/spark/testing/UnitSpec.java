@@ -9,6 +9,7 @@ import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.Config;
 
 /**
@@ -20,7 +21,7 @@ public abstract class UnitSpec {
 
     private static Config origConfig = KNIMEConfigContainer.m_config;
 
-    protected static String CONTEXT_ID;
+    protected static KNIMESparkContext CONTEXT_ID;
 
     /**
      * make sure that we do not connect to the server
@@ -34,7 +35,7 @@ public abstract class UnitSpec {
         //KnimeConfigContainer.m_config =
         //    KnimeConfigContainer.m_config.withValue("spark.jobServer", ConfigValueFactory.fromAnyRef("dummy"));
 
-        CONTEXT_ID = KnimeContext.getSparkContext().getContextName();
+        CONTEXT_ID = KnimeContext.getSparkContext();
     }
 
     /**

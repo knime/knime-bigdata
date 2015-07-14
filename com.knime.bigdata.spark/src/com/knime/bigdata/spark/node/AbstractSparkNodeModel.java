@@ -71,7 +71,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
 import org.knime.core.util.Pair;
 
-import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -109,7 +108,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
+        //SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
         for (final PortObject portObject : inData) {
             if (portObject instanceof  SparkDataPortObject) {
                 final KNIMESparkContext context = ((SparkDataPortObject)portObject).getContext();
@@ -145,7 +144,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
             LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
         }
         for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
-            KnimeContext.deleteNamedRDD(rdd.getSecond());
+            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
         }
         m_namedRDDs.clear();
         resetInternal();

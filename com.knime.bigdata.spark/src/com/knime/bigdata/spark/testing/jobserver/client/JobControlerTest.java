@@ -25,7 +25,7 @@ public class JobControlerTest extends UnitSpec {
      */
     @Test(expected = GenericKnimeSparkException.class)
     public void jobControlerShouldCheckForJar() throws GenericKnimeSparkException {
-        JobControler.uploadJobJar("");
+        JobControler.uploadJobJar(CONTEXT_ID, "");
     }
 
     /**
@@ -34,7 +34,7 @@ public class JobControlerTest extends UnitSpec {
      */
     @Test
     public void jobControlerShouldBeAbleToUploadJar() throws Throwable {
-        JobControler.uploadJobJar("resources/knimeJobs.jar");
+        JobControler.uploadJobJar(CONTEXT_ID, "resources/knimeJobs.jar");
     }
 
     /**

@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigValueFactory;
 
 /**
@@ -48,7 +49,7 @@ class DummyRestClient implements IRestClient {
     }
 
     @Override
-    public <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity)
+    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity)
         throws GenericKnimeSparkException {
 
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH)) {
@@ -70,7 +71,7 @@ class DummyRestClient implements IRestClient {
     }
 
     @Override
-    public Response delete(final String aPath) throws GenericKnimeSparkException {
+    public Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH + "/")) {
             KNIMEConfigContainer.m_config = KNIMEConfigContainer.m_config.withoutPath(KnimeContext.CONTEXTS_PATH);
         }
@@ -78,7 +79,7 @@ class DummyRestClient implements IRestClient {
     }
 
     @Override
-    public JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException {
+    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
         String val = "[]";
         if (KNIMEConfigContainer.m_config.hasPath(aType)) {
             val = KNIMEConfigContainer.m_config.getString(aType);
@@ -87,7 +88,7 @@ class DummyRestClient implements IRestClient {
     }
 
     @Override
-    public JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException {
+    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
         String val = "{\"result\":\"OK\"}";
         if (KNIMEConfigContainer.m_config.hasPath(aType)) {
             val = KNIMEConfigContainer.m_config.getString(aType);

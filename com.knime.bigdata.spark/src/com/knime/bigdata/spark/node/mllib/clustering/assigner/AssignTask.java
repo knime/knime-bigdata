@@ -62,12 +62,12 @@ public class AssignTask implements Serializable {
     void execute(final ExecutionContext exec, final SparkDataTable inputRDD, final KMeansModel model,
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
-        final String jobId = JobControler.startJob(inputRDD.getContext().getContextName(), KMeansPredictor.class.getCanonicalName(),
+        final String jobId = JobControler.startJob(inputRDD.getContext(), KMeansPredictor.class.getCanonicalName(),
             predictorKMeansParams);
 
-        assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
+        assert (JobControler.waitForJob(inputRDD.getContext(), jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
 
-        assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
+        assert (JobStatus.OK != JobControler.getJobStatus(inputRDD.getContext(), jobId)); //"job should not be running anymore",
 
     }
 
