@@ -33,6 +33,7 @@ import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
@@ -45,7 +46,7 @@ public class DecisionTreeTask implements Serializable {
     private Collection<Integer> m_numericColIdx;
     private final int m_classColIdx;
     private final String m_classColName;
-    private final String m_contextID;
+    private final KNIMESparkContext m_context;
     private String m_outputTableName;
     private String m_inputTableName;
 
@@ -54,7 +55,7 @@ public class DecisionTreeTask implements Serializable {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
-        m_contextID = inputRDD.getContext().getContextName();
+        m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
         m_numericColIdx = numericColIdx;
         m_classColName = classColName;
@@ -65,9 +66,9 @@ public class DecisionTreeTask implements Serializable {
     DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
         final String jobId =
-                JobControler.startJob(m_contextID, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
+                JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
 
-        final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
         return (DecisionTreeModel)result.getObjectResult();
     }

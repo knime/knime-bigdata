@@ -32,9 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
-import org.knime.base.node.jsnippet.util.FlowVariableRepository;
-import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
-import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -177,8 +174,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         //the job description as source code for the job
 
         //start job with proper parameters
-        final String jobId = JobControler.startJob(context.getContextName(), job, params2Json(table1Name, table2Name, tableName));
-        final JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        final String jobId = JobControler.startJob(context, job, params2Json(table1Name, table2Name, tableName));
+        final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final StructType tableTypes = result.getTables().get(tableName);
         if (tableTypes != null) {
             final List<DataColumnSpec> specs = new LinkedList<>();
@@ -242,7 +239,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
 //            field.set(m_jsnippet, v);
 //        }
         //upload jar to job-server
-        JobControler.uploadJobJar(jarPath);
+        JobControler.uploadJobJar(context, jarPath);
         return job;
     }
 

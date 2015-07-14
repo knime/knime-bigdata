@@ -37,6 +37,7 @@ import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
@@ -67,13 +68,14 @@ public final class SparkDataTableCreator {
         try {
             final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
-            String jobId = JobControler.startJob(data.getContext().getContextName(), FetchRowsJob.class.getCanonicalName(), fetchParams);
+            final KNIMESparkContext context = data.getContext();
+            String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
 
-            JobControler.waitForJob(jobId, null);
+            JobControler.waitForJob(context, jobId, null);
 
-            assert (JobStatus.OK != JobControler.getJobStatus(jobId));
+            assert (JobStatus.OK != JobControler.getJobStatus(context, jobId));
 
-            return convertResultToDataTable(jobId, data.getTableSpec());
+            return convertResultToDataTable(context, jobId, data.getTableSpec());
         } catch (Throwable t) {
             LOGGER.error("Could not fetch data from Spark RDD, reason: " + t.getMessage(), t);
             return null;
@@ -87,10 +89,10 @@ public final class SparkDataTableCreator {
                 aTableName}});
     }
 
-    private static DataTable convertResultToDataTable(final String aJobId, final DataTableSpec spec)
+    private static DataTable convertResultToDataTable(final KNIMESparkContext context, final String aJobId, final DataTableSpec spec)
             throws GenericKnimeSparkException {
         // now check result:
-        JobResult statusWithResult = JobControler.fetchJobResult(aJobId);
+        JobResult statusWithResult = JobControler.fetchJobResult(context, aJobId);
         final String message = statusWithResult.getMessage();
         //TODO:  Returned message is "OK" and not OK
         if (!"\"OK\"".equals(message)) {

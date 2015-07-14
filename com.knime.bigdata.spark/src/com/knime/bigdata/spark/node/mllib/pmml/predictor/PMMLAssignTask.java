@@ -35,6 +35,7 @@ import com.knime.bigdata.spark.jobserver.jobs.PMMLAssign;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
@@ -68,10 +69,11 @@ public class PMMLAssignTask implements Serializable {
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, pmml.getBytecode(), appendProbabilities,
             "MainModel", resultRDD.getID());
-        final String jobId = JobControler.startJob(inputRDD.getContext().getContextName(), PMMLAssign.class.getCanonicalName(),
+        KNIMESparkContext context = inputRDD.getContext();
+        final String jobId = JobControler.startJob(context, PMMLAssign.class.getCanonicalName(),
             predictorParams);
-        assert (JobControler.waitForJob(jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
-        assert (JobStatus.OK != JobControler.getJobStatus(jobId)); //"job should not be running anymore",
+        assert (JobControler.waitForJob(context, jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
+        assert (JobStatus.OK != JobControler.getJobStatus(context, jobId)); //"job should not be running anymore",
 
     }
 

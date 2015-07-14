@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  * creates and handles REST requests
@@ -15,7 +16,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
  *
  */
 public class RestClient {
-//TK_TODO: We need to add support for multiple job servers
     private static class RestClientFactory {
 
         static IRestClient getClient() {
@@ -49,46 +49,51 @@ public class RestClient {
 
     /**
      * post the given request
+     * @param aContextContainer context configuration container
+     *
      * @param aPath
      * @param aArgs
      * @param aEntity
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public static <T>  Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
-        return client.post(aPath, aArgs, aEntity);
+    public static <T>  Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
+        return client.post(aContextContainer, aPath, aArgs, aEntity);
     }
 
     /**
      * post the given delete request
+     * @param aContextContainer context configuration container
      * @param aPath
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public static Response delete(final String aPath) throws GenericKnimeSparkException {
-        return client.delete(aPath);
+    public static Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
+        return client.delete(aContextContainer, aPath);
     }
 
     /**
      * send the given type of command to the REST server and convert the result to a JSon array
      *
+     * @param aContextContainer context configuration container
      * @param aType
      * @return JSonArray with result
      * @throws GenericKnimeSparkException
      */
-    public static JsonArray toJSONArray(final String aType) throws GenericKnimeSparkException {
-        return client.toJSONArray(aType);
+    public static JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+        return client.toJSONArray(aContextContainer, aType);
     }
 
     /**
      * send the given type of command to the REST server and convert the result to a JSon object
      *
+     * @param aContextContainer context configuration container
      * @param aType
      * @return JsonObject with result
      * @throws GenericKnimeSparkException
      */
-    public static JsonObject toJSONObject(final String aType) throws GenericKnimeSparkException {
-        return client.toJSONObject(aType);
+    public static JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+        return client.toJSONObject(aContextContainer, aType);
     }
 
     /**

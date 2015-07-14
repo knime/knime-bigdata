@@ -63,9 +63,9 @@ public class FileToRDDTask implements Serializable {
         final KNIMESparkContext context = KnimeContext.getSparkContext();
         final String params = text2RDDDef(m_inputTableName);
 
-        String jobId = JobControler.startJob(context.getContextName(), JavaRDDFromFile.class.getCanonicalName(), params);
+        String jobId = JobControler.startJob(context, JavaRDDFromFile.class.getCanonicalName(), params);
 
-        JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
 
         //TODO - we ignore everything but the actual key, do something with the result
         return result.getFirstTableKey();

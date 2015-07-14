@@ -122,6 +122,7 @@ public class SVMLearnerJob extends KnimeSparkJob {
                 final String val = r.getString(i);
                 try {
                     builder.add(new Integer(Integer.parseInt(val)));
+                }
                 catch (Exception e) {
                     builder.add(val);
                 }

@@ -58,8 +58,8 @@ public class HiveToRDDTask {
     public void execute(final ExecutionContext exec) throws Exception {
         final String jsonArgs = params2Json();
 
-        String jobId = JobControler.startJob(m_rdd.getContext().getContextName(), HiveToRDDJob.class.getCanonicalName(), jsonArgs);
-        JobResult result = JobControler.waitForJobAndFetchResult(jobId, exec);
+        String jobId = JobControler.startJob(m_rdd.getContext(), HiveToRDDJob.class.getCanonicalName(), jsonArgs);
+        JobResult result = JobControler.waitForJobAndFetchResult(m_rdd.getContext(), jobId, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));
     }
 

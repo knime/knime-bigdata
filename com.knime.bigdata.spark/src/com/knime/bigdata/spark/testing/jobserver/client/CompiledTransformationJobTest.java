@@ -58,7 +58,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
             .addPrecompiledKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
 
         //upload jar to job-server
-        JobControler.uploadJobJar(jarPath);
+        JobControler.uploadJobJar(CONTEXT_ID, jarPath);
         //start job
         boolean exceptionThrown = false;
         try {
@@ -80,7 +80,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
 
         final String j1 = JobControler.startJob(CONTEXT_ID, JavaRDDFromFile.class.getCanonicalName(),
             params2Json("/home/spark/data/iris-with-label.txt", "unitTestRDD1"));
-        JobStatus s1 = JobControler.waitForJob(j1, null);
+        JobStatus s1 = JobControler.waitForJob(CONTEXT_ID, j1, null);
         assertFalse(s1.equals(JobStatus.ERROR));
 
         File f = File.createTempFile("knimeJobUtils", ".jar");
@@ -94,7 +94,7 @@ public class CompiledTransformationJobTest extends UnitSpec {
             .addPrecompiledKnimeSparkJob2Jar("resources/knimeJobs.jar", jarPath, TransformationTestJob.class.getCanonicalName());
 
             //upload jar to job-server
-            JobControler.uploadJobJar(jarPath);
+            JobControler.uploadJobJar(CONTEXT_ID, jarPath);
             //start job
             String jobId =
                 JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
@@ -103,11 +103,11 @@ public class CompiledTransformationJobTest extends UnitSpec {
                 KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
                     ConfigValueFactory.fromAnyRef("{\"result\":\"OK\"}"));
 
-            assertNotSame("job should have finished properly", JobControler.waitForJob(jobId, null), JobStatus.UNKNOWN);
+            assertNotSame("job should have finished properly", JobControler.waitForJob(CONTEXT_ID, jobId, null), JobStatus.UNKNOWN);
 
-            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(jobId));
+            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-            JsonObject res = RestClient.toJSONObject(JobControler.JOBS_PATH + jobId);
+            JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId);
             assertTrue("invalid job result: " + res.toString(), res.getString("result").contains("OK"));
 
     }
