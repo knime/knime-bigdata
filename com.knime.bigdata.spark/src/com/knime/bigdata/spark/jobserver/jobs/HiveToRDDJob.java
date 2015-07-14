@@ -90,8 +90,11 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
     public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
         LOGGER.log(Level.INFO, "reading hive table...");
 
+        LOGGER.log(Level.INFO, "context: "+sc.conf().toDebugString());
+
         final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
         final String sqlStatement = aConfig.getString(PARAM_SQL);
+        LOGGER.log(Level.INFO, "sql statement: ..."+sqlStatement);
 
         final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
 

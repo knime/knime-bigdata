@@ -187,7 +187,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
 
             if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
                 LOGGER
-                    .log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
+                    .log(Level.INFO, "Storing predicted data under key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
                 JavaRDD<Vector> features = info.getVectorRDD();
                 //TODO - revert the label to int mapping
                 JavaRDD<Row> predictedData = ModelUtils.predict(sc, features, rowRDD, model);
