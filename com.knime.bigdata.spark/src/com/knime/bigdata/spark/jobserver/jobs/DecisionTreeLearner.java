@@ -43,7 +43,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.LabeledDataInfo;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
@@ -174,7 +174,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
 
             //TODO - this does not yet work !!! - it only works if all features (except for the label) are numeric
             final int labelIndex = aConfig.getInt(PARAM_LABEL_INDEX);
-            final LabeledDataInfo info = RDDUtils.toJavaLabeledPointRDDConvertNominalValues(rowRDD, schema, labelIndex);
+            final LabeledDataInfo info = RDDUtilsInJava.toJavaLabeledPointRDDConvertNominalValues(rowRDD, schema, labelIndex);
 
             //TODO - we should somehow store and return the label to int mapping
             LOGGER.log(Level.INFO, "Got label to int mapping: ");
