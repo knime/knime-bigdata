@@ -10,8 +10,6 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 
-import java.util.Map;
-
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
@@ -23,18 +21,18 @@ import org.apache.spark.mllib.regression.LabeledPoint;
  */
 public class LabeledDataInfo {
   private final JavaRDD<LabeledPoint> m_labeledPointRDD;
-  private final Map<String, Integer> m_classLabelToIntMapping;
+  private final NominalValueMapping m_labelToIntMapping;
 
   /**
    * stores references to given args, no copies are made
-   * 
+   *
    * @param aLabeledPointRDD
-   * @param aClassLabelToIntMapping
+   * @param aLabelToIntMapping mapping of nominal values to ints
    */
-  public LabeledDataInfo(final JavaRDD<LabeledPoint> aLabeledPointRDD, 
-      final Map<String, Integer> aClassLabelToIntMapping) {
+  public LabeledDataInfo(final JavaRDD<LabeledPoint> aLabeledPointRDD,
+      final NominalValueMapping aLabelToIntMapping) {
     m_labeledPointRDD = aLabeledPointRDD;
-    m_classLabelToIntMapping = aClassLabelToIntMapping;
+    m_labelToIntMapping = aLabelToIntMapping;
   }
 
   /**
@@ -55,13 +53,13 @@ public class LabeledDataInfo {
    * @return number of classes (aka class labels)
    */
   public int getNumberClasses() {
-    return m_classLabelToIntMapping.size();
+    return m_labelToIntMapping.size();
   }
 
   /**
-   * @return mapping of String class label to integer class
+   * @return mapping of String (class) label to integer class
    */
-  public Map<String, Integer> getClassLabelToIntMapping() {
-    return m_classLabelToIntMapping;
+  public NominalValueMapping getClassLabelToIntMapping() {
+    return m_labelToIntMapping;
   }
 }
