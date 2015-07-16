@@ -110,4 +110,9 @@ public class ParameterConstants {
      * Schema of an RDD.
      */
     public static final String PARAM_SCHEMA = "tableSchema";
+
+    /**
+     * some string parameter
+     */
+    public static final String PARAM_STRING = "stringParam";
 }
