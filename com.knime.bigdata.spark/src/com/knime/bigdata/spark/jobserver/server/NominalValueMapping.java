@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -52,6 +53,11 @@ public interface NominalValueMapping extends Serializable {
      */
     int getNumberOfValues(int aNominalColumnIx);
 
+    /**
+     * @return iterator over all columns and value of this record, columns are
+     * -1 for global mapping
+     */
+    Iterator<MyRecord> iterator();
 }
 
 class GlobalMapping implements NominalValueMapping {
@@ -82,6 +88,12 @@ class GlobalMapping implements NominalValueMapping {
     public int getNumberOfValues(final int aNominalColumnIx) {
         return 0;
     }
+
+    @Override
+    public Iterator<MyRecord> iterator() {
+        return null;
+    }
+
 }
 
 class ColumnMapping implements NominalValueMapping {
@@ -120,6 +132,11 @@ class ColumnMapping implements NominalValueMapping {
     @Override
     public int getNumberOfValues(final int aNominalColumnIx) {
         return m_colMappings.get(aNominalColumnIx).size();
+    }
+
+    @Override
+    public Iterator<MyRecord> iterator() {
+        return null;
     }
 
 }

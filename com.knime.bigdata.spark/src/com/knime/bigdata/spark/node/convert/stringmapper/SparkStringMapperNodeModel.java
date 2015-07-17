@@ -26,7 +26,6 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.CellFactory;
@@ -45,6 +44,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.server.MappingType;
+import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -72,11 +72,11 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
      */
     @SuppressWarnings("unchecked")
     static SettingsModelColumnFilter2 createColumnsModel() {
-        return new SettingsModelColumnFilter2("columns", DoubleValue.class);
+        return new SettingsModelColumnFilter2("columns", StringValue.class);
     }
 
     static SettingsModelString createMappingTypeModel() {
-        return new SettingsModelString("mappingType", "Column");
+        return new SettingsModelString("mappingType", MappingType.COLUMN.toString());
     }
 
     /**
@@ -89,28 +89,30 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         }
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec spec = sparkSpec.getTableSpec();
-        final String colName = "TODO"; //m_col.getStringValue();
-        DataColumnSpec origColSpec = null;
-        if (colName == null) {
-            //preset it with the first nominal column
-            for (DataColumnSpec colSpec : spec) {
-                if (colSpec.getType().isCompatible(StringValue.class)) {
-                    //TODO m_col.setStringValue(colSpec.getName());
-                    setWarningMessage("Column name preset to " + colSpec.getName());
-                    origColSpec = colSpec;
-                    break;
-                }
-            }
-        } else {
-            origColSpec = spec.getColumnSpec(colName);
-        }
-        if (origColSpec == null) {
-            throw new InvalidSettingsException("Column " + colName + " not found in input spec");
-        }
+//        final String colName = "TODO"; //m_col.getStringValue();
+//        DataColumnSpec origColSpec = null;
+//        if (colName == null) {
+//            //preset it with the first nominal column
+//            for (DataColumnSpec colSpec : spec) {
+//                if (colSpec.getType().isCompatible(StringValue.class)) {
+//                    //TODO m_col.setStringValue(colSpec.getName());
+//                    setWarningMessage("Column name preset to " + colSpec.getName());
+//                    origColSpec = colSpec;
+//                    break;
+//                }
+//            }
+//        } else {
+//            origColSpec = spec.getColumnSpec(colName);
+//        }
+//        if (origColSpec == null) {
+//            throw new InvalidSettingsException("Column " + colName + " not found in input spec");
+//        }
         final DataTableSpec firstSpec = createAppendSpec(spec);
-        final DataTableSpec secondSpec = createMapSpec(spec, origColSpec);
+//        final DataTableSpec secondSpec = createMapSpec(spec, origColSpec);
         return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), firstSpec),
-            new SparkDataPortObjectSpec(sparkSpec.getContext(), secondSpec)};
+//            new SparkDataPortObjectSpec(sparkSpec.getContext(), secondSpec)};
+           //TODO - this should be the map with the mappings
+            new SparkDataPortObjectSpec(sparkSpec.getContext(), firstSpec)};
     }
 
     /**
@@ -134,10 +136,14 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
 
 //        final DataTableSpec secondSpec = createMapSpec(spec, spec.getColumnSpec(colIdx));
         final String outputTableName = SparkIDGenerator.createID();
+        final String outputMappingTableName = SparkIDGenerator.createID();
 
         final ValueConverterTask task = new ValueConverterTask(rdd.getData(), includeColIdxs,
-            MappingType.valueOf(m_mappingType.getStringValue()), outputTableName);
-        final Object mapping = task.execute(exec);
+            MappingType.valueOf(m_mappingType.getStringValue()), outputTableName, outputMappingTableName);
+        //TODO - create port object from mapping
+        final NominalValueMapping mapping = task.execute(exec);
+
+        // TODO - we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
 
         return null; //new PortObject[]{new SparkDataPortObject(resultRDD)};
@@ -198,6 +204,7 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_cols.validateSettings(settings);
+        //TODO - need to validate that selected columns are non-numeric!
        // m_mappingType.validateSettings(settings);
     }
 
@@ -207,6 +214,6 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_cols.loadSettingsFrom(settings);
-        m_mappingType.loadSettingsFrom(settings);
+        //m_mappingType.loadSettingsFrom(settings);
     }
 }

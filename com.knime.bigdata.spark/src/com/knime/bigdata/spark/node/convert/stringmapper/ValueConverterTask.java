@@ -43,6 +43,8 @@ public class ValueConverterTask {
 
     private final String m_outputTableName;
 
+    private final String m_outputMappingTableName;
+
     private final MappingType m_mappingType;
 
     private final Integer[] m_includeColIdxs;
@@ -55,9 +57,10 @@ public class ValueConverterTask {
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param aMappingType - type of value mapping (global, per column or binary)
      * @param aOutputRDD - table identifier (output data)
+     * @param aOutputMappingRDD
      */
     public ValueConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs, final MappingType aMappingType,
-        final String aOutputRDD) {
+        final String aOutputRDD, final String aOutputMappingRDD) {
 
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
@@ -67,6 +70,7 @@ public class ValueConverterTask {
             m_includeColIdxs[i++] = Integer.valueOf(value);
         }
         m_outputTableName = aOutputRDD;
+        m_outputMappingTableName = aOutputMappingRDD;
         m_mappingType = aMappingType;
     }
 
@@ -74,16 +78,19 @@ public class ValueConverterTask {
      * run the job on the server
      *
      * @param exec
-     *
+     * @return NominalValueMapping the mapping
      * @throws Exception
      */
-    public Object execute(final ExecutionContext exec) throws Exception {
+    public NominalValueMapping execute(final ExecutionContext exec) throws Exception {
         final String params = paramDef();
         final String jobId =
                 JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        //TODO - not sure whether this is of any help
         StructType tableSchema = result.getTables().get(m_outputTableName);
+
+        //TODO - need to create result data table specs
 
         NominalValueMapping mapping = (NominalValueMapping)result.getObjectResult();
 
@@ -96,7 +103,8 @@ public class ValueConverterTask {
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_includeColIdxs),
                 ParameterConstants.PARAM_STRING, m_mappingType.toString(), ParameterConstants.PARAM_TABLE_1, m_inputTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName,
+                ParameterConstants.PARAM_TABLE_2, m_outputMappingTableName}});
     }
 
 }
