@@ -16,7 +16,6 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.core.util.Pair;
 
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -36,7 +35,7 @@ public class RDDUtilsInJava {
      * @param aMappingType indicates how values are to be mapped
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
-    public static Pair<JavaRDD<Row>, NominalValueMapping> convertNominalValuesForSelectedIndices(
+    public static MappedRDDContainer convertNominalValuesForSelectedIndices(
         final JavaRDD<Row> aInputRdd, final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
@@ -64,8 +63,7 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-
-        return new Pair<JavaRDD<Row>, NominalValueMapping>(rddWithConvertedValues, mappings);
+        return new MappedRDDContainer(rddWithConvertedValues, mappings);
     }
 
     /**

@@ -23,9 +23,9 @@ import org.apache.spark.sql.api.java.StructType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
-import org.knime.core.util.Pair;
 
 import com.knime.bigdata.spark.jobserver.server.LabeledDataInfo;
+import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
@@ -252,11 +252,11 @@ public class RDDUtilsInJavaTest {
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:
-        Pair<JavaRDD<Row>, NominalValueMapping> info =
+        MappedRDDContainer info =
             RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 2, 3, 4}, MappingType.GLOBAL);
 
-        JavaRDD<Row> rddWithConvertedValues = info.getFirst();
-        NominalValueMapping mappings = info.getSecond();
+        JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
+        NominalValueMapping mappings = info.m_Mappings;
 
         assertEquals("Incorrect number of mapped values", 18, mappings.size());
 
@@ -291,11 +291,11 @@ public class RDDUtilsInJavaTest {
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:
-        Pair<JavaRDD<Row>, NominalValueMapping> info =
+        MappedRDDContainer info =
             RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 2, 3, 4}, MappingType.COLUMN);
 
-        JavaRDD<Row> rddWithConvertedValues = info.getFirst();
-        NominalValueMapping mappings = info.getSecond();
+        JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
+        NominalValueMapping mappings = info.m_Mappings;
 
         assertEquals("Incorrect number of mapped values", 32, mappings.size());
 
@@ -329,11 +329,11 @@ public class RDDUtilsInJavaTest {
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:
-        Pair<JavaRDD<Row>, NominalValueMapping> info =
+        MappedRDDContainer info =
             RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 2, 3, 4}, MappingType.BINARY);
 
-        JavaRDD<Row> rddWithConvertedValues = info.getFirst();
-        NominalValueMapping mappings = info.getSecond();
+        JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
+        NominalValueMapping mappings = info.m_Mappings;
 
         assertEquals("Conversion changed the number of rows ", rddWithConvertedValues.count(), 25);
 
