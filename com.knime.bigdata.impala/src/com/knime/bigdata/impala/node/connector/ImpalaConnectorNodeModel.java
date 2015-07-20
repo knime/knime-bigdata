@@ -65,13 +65,13 @@ class ImpalaConnectorNodeModel extends NodeModel {
         ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
         m_settings.setDriver("org.apache.hive.jdbc.HiveDriver");
 
-        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
-            throw new InvalidSettingsException("No hostname for database server given");
-        }
         final String userName = m_settings.getUserName(getCredentialsProvider());
         if ((m_settings.getCredentialName() == null)
-            && ((userName == null) || userName.isEmpty())) {
+                && ((userName == null) || userName.isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
+        }
+        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
+            throw new InvalidSettingsException("No hostname for database server given");
         }
 
         return new PortObjectSpec[]{createSpec()};

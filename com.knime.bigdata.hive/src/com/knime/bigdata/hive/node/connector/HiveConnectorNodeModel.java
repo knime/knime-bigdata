@@ -65,13 +65,13 @@ class HiveConnectorNodeModel extends NodeModel {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
         m_settings.setDriver("org.apache.hive.jdbc.HiveDriver");
 
+        if ((m_settings.getCredentialName() == null)
+                && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
+                    getCredentialsProvider()).isEmpty())) {
+            throw new InvalidSettingsException("No credentials or username for authentication given");
+        }
         if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
             throw new InvalidSettingsException("No hostname for database server given");
-        }
-        if ((m_settings.getCredentialName() == null)
-            && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
-                getCredentialsProvider()).isEmpty())) {
-            throw new InvalidSettingsException("No credentials or username for authentication given");
         }
 
         return new PortObjectSpec[]{createSpec()};
