@@ -17,7 +17,6 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
 
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -76,8 +75,8 @@ public class RDDUtilsInJava {
      * @param aMappingType
      * @return mapping from distinct value to unique integer value
      */
-    public static NominalValueMapping toLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aNominalColumnIndices,
-        final MappingType aMappingType) {
+    public static NominalValueMapping toLabelMapping(final JavaRDD<Row> aInputRdd,
+        final int[] aNominalColumnIndices, final MappingType aMappingType) {
 
         switch (aMappingType) {
             case GLOBAL: {
@@ -85,9 +84,9 @@ public class RDDUtilsInJava {
             }
             case COLUMN: {
                 if (aNominalColumnIndices.length < 2) {
-                    return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
+                    return toLabelMappingGlobalMapping(aInputRdd,  aNominalColumnIndices);
                 }
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingColumnMapping(aInputRdd,  aNominalColumnIndices);
             }
             case BINARY: {
                 return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
@@ -191,22 +190,24 @@ public class RDDUtilsInJava {
      * other indices must be numeric
      *
      * @param aInputRdd Row RDD to be converted
-     * @param aSchema - table schema type
+     * @param aColumnIndices column selector (and, possibly, re-ordering)
      * @param aLabelColumnIndex index of label column (can be numeric or string)
      * @return container with mapped data and mapping
      * @throws IllegalArgumentException if values are encountered that are neither numeric nor string
      */
     public static LabeledDataInfo toJavaLabeledPointRDDConvertNominalValues(final JavaRDD<Row> aInputRdd,
-        final StructType aSchema, final int aLabelColumnIndex) {
+        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
         final NominalValueMapping labelMapping =
             toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
-        final JavaRDD<LabeledPoint> labeledRdd = toLabeledVectorRdd(aInputRdd, aLabelColumnIndex, labelMapping);
+        final JavaRDD<LabeledPoint> labeledRdd =
+            toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, labelMapping);
 
         return new LabeledDataInfo(labeledRdd, labelMapping);
     }
 
-    private static JavaRDD<LabeledPoint> toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final int labelColumnIndex,
-        @Nullable final NominalValueMapping labelMapping) {
+    private static JavaRDD<LabeledPoint>
+        toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex,
+            @Nullable final NominalValueMapping labelMapping) {
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
@@ -214,7 +215,7 @@ public class RDDUtilsInJava {
             public LabeledPoint call(final Row row) {
                 double[] convertedValues = new double[row.length() - 1];
                 int insertionIndex = 0;
-                for (int idx = 0; idx < row.length(); idx++) {
+                for (int idx : aColumnIndices) {
                     if (idx != labelColumnIndex) {
                         convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
                         insertionIndex += 1;
@@ -233,18 +234,19 @@ public class RDDUtilsInJava {
         });
     }
 
-
     /**
      *
-     * convert a RDD of Rows to JavaRDD of LabeledPoint, all row values must be numeric
+     * convert a RDD of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric
      *
      * @param aInputRdd Row RDD to be converted
+     * @param aColumnIndices column selector (and, possibly, re-ordering)
      * @param aLabelColumnIndex index of label column (must be numeric)
      * @return container with mapped data and mapping
      * @throws IllegalArgumentException if values are encountered that are not numeric
      */
-    public static JavaRDD<LabeledPoint> toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd, final int aLabelColumnIndex) {
-        return toLabeledVectorRdd(aInputRdd, aLabelColumnIndex, null);
+    public static JavaRDD<LabeledPoint> toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd,
+        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
+        return toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, null);
     }
 
 }

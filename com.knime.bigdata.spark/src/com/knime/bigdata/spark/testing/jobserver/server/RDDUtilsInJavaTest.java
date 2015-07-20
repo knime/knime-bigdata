@@ -19,7 +19,6 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
@@ -30,13 +29,13 @@ import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
-import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 
 /**
  *
  * @author dwk
  *
  */
+@SuppressWarnings("javadoc")
 public class RDDUtilsInJavaTest {
     private static class SparkContextResource extends ExternalResource {
         private static final SparkConf conf = new SparkConf().setAppName(RDDUtilsInJavaTest.class.getSimpleName())
@@ -217,8 +216,11 @@ public class RDDUtilsInJavaTest {
     public void conversionOfJavaRowRDDWithNominalValues2JavaRDDWithLabeledPoint() throws Exception {
         JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalLabels(o).cache();
-        StructType schema = StructTypeBuilder.fromRows(v.take(2)).build();
-        LabeledDataInfo info = RDDUtilsInJava.toJavaLabeledPointRDDConvertNominalValues(v, schema, 3);
+        List<Integer> selector = new ArrayList<>();
+        selector.add(0);
+        selector.add(1);
+        selector.add(2);
+        LabeledDataInfo info = RDDUtilsInJava.toJavaLabeledPointRDDConvertNominalValues(v, selector, 3);
 
         assertEquals("Incorrect number of classes", 5, info.getNumberClasses());
 
@@ -239,6 +241,7 @@ public class RDDUtilsInJavaTest {
                     .label());
         }
     }
+
 
     /**
      * convert all nominal values in selected columns to corresponding columns with numbers (not binary), use one
@@ -347,7 +350,7 @@ public class RDDUtilsInJavaTest {
                 int colIx = mappings.getNumberForValue(0, row.getString(0));
                 assertEquals("incorrect number of values for 'teams'", MyMapper.teams.length,
                     mappings.getNumberOfValues(0));
-                assertTrue("row "+i+": converted values should be in proper column", colIx >= 0
+                assertTrue("row " + i + ": converted values should be in proper column", colIx >= 0
                     && colIx < MyMapper.teams.length);
                 assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
                 offset += MyMapper.teams.length;
@@ -355,45 +358,43 @@ public class RDDUtilsInJavaTest {
 
             //teams
             {
-                int colIx =  mappings.getNumberForValue(3, row.getString(3));
+                int colIx = mappings.getNumberForValue(3, row.getString(3));
                 assertEquals("incorrect number of values for 'teams'", MyMapper.teams.length,
                     mappings.getNumberOfValues(3));
-                assertTrue("converted values should be in proper column", colIx >= 0
-                    && colIx < MyMapper.teams.length);
+                assertTrue("converted values should be in proper column", colIx >= 0 && colIx < MyMapper.teams.length);
                 assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
                 offset += mappings.getNumberOfValues(3);
             }
 
             {
                 int colIx = mappings.getNumberForValue(2, row.getString(2));
-                assertTrue("converted values should be in proper column", colIx >= 0
-                    && colIx < mappings.getNumberOfValues(2));
-                assertEquals("converted values should be 1", 1, (int)row.getDouble(offset+colIx));
+                assertTrue("converted values should be in proper column",
+                    colIx >= 0 && colIx < mappings.getNumberOfValues(2));
+                assertEquals("converted values should be 1", 1, (int)row.getDouble(offset + colIx));
                 offset += mappings.getNumberOfValues(2);
             }
 
             //4 values
             {
-                int colIx =  mappings.getNumberForValue(4, row.getString(4));
+                int colIx = mappings.getNumberForValue(4, row.getString(4));
                 assertEquals("incorrect number of values for first letter of 'colors'", 4,
                     mappings.getNumberOfValues(4));
-                assertTrue("converted values should be in proper column", colIx >= 0
-                    && colIx < 4);
+                assertTrue("converted values should be in proper column", colIx >= 0 && colIx < 4);
                 assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
                 offset += mappings.getNumberOfValues(4);
             }
 
             //5 colors, but not mapped!
-//            {
-//                int colIx =  mappings.getNumberForValue(0, row.getString(4));
-//                assertEquals("incorrect number of values for 'colors'", MyMapper.colors.length,
-//                    mappings.getNumberOfValues(4));
-//                assertTrue("converted values should be in proper column", colIx >= 0
-//                    && colIx < 4);
-//                assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
-//                offset += mappings.getNumberOfValues(4);
-//            }
-            assertEquals("incorrect number of new columns added ", 6+ 32, offset);
+            //            {
+            //                int colIx =  mappings.getNumberForValue(0, row.getString(4));
+            //                assertEquals("incorrect number of values for 'colors'", MyMapper.colors.length,
+            //                    mappings.getNumberOfValues(4));
+            //                assertTrue("converted values should be in proper column", colIx >= 0
+            //                    && colIx < 4);
+            //                assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
+            //                offset += mappings.getNumberOfValues(4);
+            //            }
+            assertEquals("incorrect number of new columns added ", 6 + 32, offset);
 
         }
     }

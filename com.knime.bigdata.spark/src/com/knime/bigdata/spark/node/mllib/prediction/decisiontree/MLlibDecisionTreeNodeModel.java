@@ -20,8 +20,8 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.data.DataColumnSpec;
@@ -134,7 +134,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
         SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
 
-        final Collection<Integer> numericColIdx = new LinkedList<>();
+        final List<Integer> numericColIdx = new LinkedList<>();
         int classColIdx = -1;
         int counter = 0;
         final String classColName = m_classCol.getStringValue();
@@ -147,7 +147,11 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
             }
             counter++;
         }
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), numericColIdx, classColName, classColIdx, resultRDD);
+
+//       TODO - this is not the correct spec
+        SparkDataTable mappingRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+
+        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), numericColIdx, classColName, classColIdx, mappingRDD, resultRDD);
         final DecisionTreeModel model = task.execute(exec);
         return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model, tableSpec))};
 

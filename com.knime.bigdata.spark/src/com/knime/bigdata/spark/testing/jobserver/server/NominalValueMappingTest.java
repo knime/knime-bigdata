@@ -41,23 +41,7 @@ public class NominalValueMappingTest {
 
     @Test
     public void iteratorForColumnMappingShouldIterateOverAllRecords() throws Exception {
-        final Map<Integer, Map<String, Integer>> mapping = new HashMap<Integer, Map<String, Integer>>();
-        {
-            final Map<String, Integer> colMapping = new HashMap<>();
-            colMapping.put("val1", 0);
-            colMapping.put("val2", 1);
-            colMapping.put("val3", 2);
-
-            mapping.put(1, colMapping);
-        }
-        {
-            final Map<String, Integer> colMapping = new HashMap<>();
-            colMapping.put("XXXval1", 0);
-            colMapping.put("XXXval2", 1);
-            colMapping.put("YYYval3", 2);
-            colMapping.put("YYYval88", 3);
-            mapping.put(7, colMapping);
-        }
+        final Map<Integer, Map<String, Integer>> mapping = getColumnMappingMap();
 
         NominalValueMapping testObj = NominalValueMappingFactory.createColumnMapping(mapping);
         assertEquals("mapping should have proper size", 7, testObj.size());
@@ -95,18 +79,10 @@ public class NominalValueMappingTest {
         }
     }
 
+
     @Test
     public void iteratorForGlobalMappingShouldIterateOverAllRecords() throws Exception {
-        final Map<String, Integer> mapping = new HashMap<>();
-
-        mapping.put("val1", 0);
-        mapping.put("val2", 1);
-        mapping.put("val3", 2);
-
-        mapping.put("XXXval1", 3);
-        mapping.put("XXXval2", 4);
-        mapping.put("YYYval3", 5);
-        mapping.put("YYYval88", 6);
+        final Map<String, Integer> mapping = getGlobalMappingMap();
 
         NominalValueMapping testObj = NominalValueMappingFactory.createGlobalMapping(mapping);
         assertEquals("mapping should have proper size", 7, testObj.size());
@@ -134,6 +110,46 @@ public class NominalValueMappingTest {
             }
 
         }
+    }
+
+    /**
+     * @return
+     */
+    private Map<Integer, Map<String, Integer>> getColumnMappingMap() {
+        final Map<Integer, Map<String, Integer>> mapping = new HashMap<Integer, Map<String, Integer>>();
+        {
+            final Map<String, Integer> colMapping = new HashMap<>();
+            colMapping.put("val1", 0);
+            colMapping.put("val2", 1);
+            colMapping.put("val3", 2);
+
+            mapping.put(1, colMapping);
+        }
+        {
+            final Map<String, Integer> colMapping = new HashMap<>();
+            colMapping.put("XXXval1", 0);
+            colMapping.put("XXXval2", 1);
+            colMapping.put("YYYval3", 2);
+            colMapping.put("YYYval88", 3);
+            mapping.put(7, colMapping);
+        }
+        return mapping;
+    }
+    /**
+     * @return
+     */
+    private Map<String, Integer> getGlobalMappingMap() {
+        final Map<String, Integer> mapping = new HashMap<>();
+
+        mapping.put("val1", 0);
+        mapping.put("val2", 1);
+        mapping.put("val3", 2);
+
+        mapping.put("XXXval1", 3);
+        mapping.put("XXXval2", 4);
+        mapping.put("YYYval3", 5);
+        mapping.put("YYYval88", 6);
+        return mapping;
     }
 
 }
