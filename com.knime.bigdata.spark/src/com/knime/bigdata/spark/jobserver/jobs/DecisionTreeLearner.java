@@ -39,9 +39,9 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.LabeledDataInfo;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
@@ -174,16 +174,15 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
 
             //note: requires that all features (including for the label) are numeric !!!
             final int labelIndex = aConfig.getInt(PARAM_LABEL_INDEX);
-            final LabeledDataInfo info =
-                RDDUtilsInJava.toJavaLabeledPointRDD(rowRDD, labelIndex);
+            final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(rowRDD, labelIndex);
 
-            final DecisionTreeModel model = execute(sc, aConfig, info.getLabeledPointRDD(), info.getNumberClasses());
+            final DecisionTreeModel model = execute(sc, aConfig, inputRdd, info.getNumberClasses());
             res = res.withObjectResult(model);
 
             if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
                 LOGGER
                     .log(Level.INFO, "Storing predicted data under key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-                JavaRDD<Vector> features = info.getVectorRDD();
+                JavaRDD<Vector> features = RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd);
                 //TODO - revert the label to int mapping ????
                 JavaRDD<Row> predictedData = ModelUtils.predict(sc, features, rowRDD, model);
                 try {
