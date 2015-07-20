@@ -79,10 +79,10 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
         if (!config.hasPath(PARAM_DATA_FILE_NAME)) {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
-        if (!config.hasPath(PARAM_DATA_SCHEMA)) {
+        if (msg == null && !config.hasPath(PARAM_DATA_SCHEMA)) {
             msg = "Input parameter '" + PARAM_DATA_SCHEMA + "' missing.";
         }
-        if (!config.hasPath(PARAM_RESULT_TABLE_NAME)) {
+        if (msg == null && !config.hasPath(PARAM_RESULT_TABLE_NAME)) {
             msg = "Output parameter '" + PARAM_RESULT_TABLE_NAME + "' missing.";
         }
         if (msg != null) {

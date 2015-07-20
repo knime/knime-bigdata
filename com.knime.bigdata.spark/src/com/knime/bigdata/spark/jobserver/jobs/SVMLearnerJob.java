@@ -33,19 +33,22 @@ import com.typesafe.config.ConfigException;
  */
 public class SVMLearnerJob extends KnimeSparkJob {
 
-	private final static Logger LOGGER = Logger.getLogger(SVMLearnerJob.class
-			.getName());
+    private final static Logger LOGGER = Logger.getLogger(SVMLearnerJob.class.getName());
 
-	private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_NUM_ITERATIONS;
-	private static final String PARAM_CLASS_COL_IDX = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_CLASS_COL_IDX;
-	private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
-	        + "." + ParameterConstants.PARAM_COL_IDXS;
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_NUM_ITERATIONS;
+
+    private static final String PARAM_CLASS_COL_IDX = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_CLASS_COL_IDX;
+
+    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_COL_IDXS;
+
+    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_TABLE_1;
+
+    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
+        + ParameterConstants.PARAM_TABLE_1;
 
     /**
      * parse parameters
@@ -54,7 +57,7 @@ public class SVMLearnerJob extends KnimeSparkJob {
     @Override
     public SparkJobValidation validate(final Config aConfig) {
         String msg = null;
-        if (msg == null && !aConfig.hasPath(PARAM_NUM_ITERATIONS)) {
+        if (!aConfig.hasPath(PARAM_NUM_ITERATIONS)) {
             msg = "Input parameter '" + PARAM_NUM_ITERATIONS + "' missing.";
         } else {
             try {
@@ -63,22 +66,27 @@ public class SVMLearnerJob extends KnimeSparkJob {
                 msg = "Input parameter '" + PARAM_NUM_ITERATIONS + "' is not of expected type 'integer'.";
             }
         }
-        if (msg == null && !aConfig.hasPath(PARAM_CLASS_COL_IDX)) {
-            msg = "Input parameter '" + PARAM_CLASS_COL_IDX + "' missing.";
-        } else {
-            try {
-                aConfig.getInt(PARAM_CLASS_COL_IDX);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_CLASS_COL_IDX + "' is not of expected type 'integer'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_CLASS_COL_IDX)) {
+                msg = "Input parameter '" + PARAM_CLASS_COL_IDX + "' missing.";
+            } else {
+                try {
+                    aConfig.getInt(PARAM_CLASS_COL_IDX);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_CLASS_COL_IDX + "' is not of expected type 'integer'.";
+                }
             }
         }
-        if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
-            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-        } else {
-            try {
-                aConfig.getIntList(PARAM_COL_IDXS);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
+                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+            } else {
+                try {
+                    aConfig.getIntList(PARAM_COL_IDXS);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                }
             }
         }
 
@@ -108,6 +116,7 @@ public class SVMLearnerJob extends KnimeSparkJob {
 
     /**
      * run the actual job, the result is serialized back to the client
+     *
      * @throws GenericKnimeSparkException
      */
     @Override
@@ -122,8 +131,7 @@ public class SVMLearnerJob extends KnimeSparkJob {
                 final String val = r.getString(i);
                 try {
                     builder.add(new Integer(Integer.parseInt(val)));
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     builder.add(val);
                 }
             }
@@ -135,26 +143,21 @@ public class SVMLearnerJob extends KnimeSparkJob {
         //use only the column indices when converting to vector
         final JavaRDD<LabeledPoint> inputRDD = RDDUtils.toJavaLabeledPointRDD(rowRDD, classColIdx, colIdxs);
 
-
         final SVMWithSGD svmAlg = new SVMWithSGD();
         svmAlg.optimizer().setNumIterations(noOfIteration).setRegParam(0.1).setUpdater(new L1Updater());
         final SVMModel model = svmAlg.run(inputRDD);
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
         if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
-            LOGGER.log(Level.INFO, "Storing predicted data unter key: "
-                    + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-            JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD,
-                    model);
+            LOGGER.log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
+            JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD, model);
             try {
-                addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH),
-                        predictedData);
+                addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictedData);
                 try {
                     final StructType schema = StructTypeBuilder.fromRows(predictedData.take(10)).build();
-                    res = res
-                            .withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schema);
+                    res = res.withTable(aConfig.getString(PARAM_DATA_FILE_NAME), schema);
                 } catch (InvalidSchemaException e) {
-                    return JobResult.emptyJobResult().withMessage("ERROR: "+e.getMessage());
+                    return JobResult.emptyJobResult().withMessage("ERROR: " + e.getMessage());
                 }
             } catch (Exception e) {
                 LOGGER.severe("ERROR: failed to predict and store results for training data.");

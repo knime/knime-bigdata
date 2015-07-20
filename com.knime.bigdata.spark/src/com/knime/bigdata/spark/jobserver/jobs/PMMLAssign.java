@@ -58,19 +58,19 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         + ParameterConstants.PARAM_TABLE_1;
 
     private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_MODEL_NAME;
+        + ParameterConstants.PARAM_MODEL_NAME;
 
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_COL_IDXS;
+    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_COL_IDXS;
 
     private static final String PARAM_PROBS = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_APPEND_PROBABILITIES;
+        + ParameterConstants.PARAM_APPEND_PROBABILITIES;
 
     private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_MAIN_CLASS;
+        + ParameterConstants.PARAM_MAIN_CLASS;
 
     private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
-            + ParameterConstants.PARAM_TABLE_1;
+        + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(PMMLAssign.class.getName());
 
@@ -84,16 +84,18 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
-            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-        } else {
-            try {
-                aConfig.getIntList(PARAM_COL_IDXS);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_COL_IDXS
-                        + "' is not of expected type 'integer list'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
+                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+            } else {
+                try {
+                    aConfig.getIntList(PARAM_COL_IDXS);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                }
             }
         }
+
         if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
             msg = "Output parameter '" + PARAM_OUTPUT_DATA_PATH + "' missing.";
         }
@@ -142,14 +144,16 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         try {
             final Function<Row, Row> predict = new Function<Row, Row>() {
                 private static final long serialVersionUID = 1L;
+
                 //use transient since a Method can not be serialized
                 private transient Method m_evalMethod;
-                /**{@inheritDoc}*/
+
+                /** {@inheritDoc} */
                 @Override
                 public Row call(final Row r) throws Exception {
                     if (m_evalMethod == null) {
                         final ClassLoader cl = new ClassLoader(Thread.currentThread().getContextClassLoader()) {
-                            /**{@inheritDoc}*/
+                            /** {@inheritDoc} */
                             @Override
                             protected Class<?> findClass(final String name) throws ClassNotFoundException {
                                 byte[] bc = bytecode.get(name);
@@ -175,8 +179,8 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
             final JavaRDD<Row> predicted = rowRDD.map(predict);
             addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predicted);
             LOGGER.log(Level.FINE, "pmml prediction done");
-            return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getString(PARAM_OUTPUT_DATA_PATH),
-                null);
+            return JobResult.emptyJobResult().withMessage("OK")
+                .withTable(aConfig.getString(PARAM_OUTPUT_DATA_PATH), null);
         } catch (Exception e) {
             final String msg = "Exception in pmml prediction job: " + e.getMessage();
             LOGGER.log(Level.SEVERE, msg, e);

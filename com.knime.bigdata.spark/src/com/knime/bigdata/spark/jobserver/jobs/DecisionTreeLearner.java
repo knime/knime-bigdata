@@ -33,7 +33,6 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
 
 import spark.jobserver.SparkJobValidation;
 
@@ -45,8 +44,6 @@ import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
-import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 
@@ -106,23 +103,27 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
                 msg = "Input parameter '" + PARAM_MAX_DEPTH + "' is not of expected type 'integer'.";
             }
         }
-        if (msg == null && !aConfig.hasPath(PARAM_MAX_BINS)) {
-            msg = "Input parameter '" + PARAM_MAX_BINS + "' missing.";
-        } else {
-            try {
-                aConfig.getInt(PARAM_MAX_BINS);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_MAX_BINS + "' is not of expected type 'integer'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_MAX_BINS)) {
+                msg = "Input parameter '" + PARAM_MAX_BINS + "' missing.";
+            } else {
+                try {
+                    aConfig.getInt(PARAM_MAX_BINS);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_MAX_BINS + "' is not of expected type 'integer'.";
+                }
             }
         }
 
-        if (!aConfig.hasPath(PARAM_LABEL_INDEX)) {
-            msg = "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
-        } else {
-            try {
-                aConfig.getInt(PARAM_LABEL_INDEX);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_LABEL_INDEX)) {
+                msg = "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
+            } else {
+                try {
+                    aConfig.getInt(PARAM_LABEL_INDEX);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
+                }
             }
         }
 
@@ -168,19 +169,13 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_TRAINING_RDD));
 
-        try {
+
             JobResult res = JobResult.emptyJobResult().withMessage("OK");
-            StructType schema = StructTypeBuilder.fromRows(rowRDD.take(10)).build();
 
-            //TODO - this does not yet work !!! - it only works if all features (except for the label) are numeric
+            //note: requires that all features (including for the label) are numeric !!!
             final int labelIndex = aConfig.getInt(PARAM_LABEL_INDEX);
-            final LabeledDataInfo info = RDDUtilsInJava.toJavaLabeledPointRDDConvertNominalValues(rowRDD, schema, labelIndex);
-
-            //TODO - we should somehow store and return the label to int mapping
-            LOGGER.log(Level.INFO, "Got label to int mapping: ");
-            for (Map.Entry<String, Integer> entry : info.getClassLabelToIntMapping().entrySet()) {
-                LOGGER.log(Level.INFO, entry.getKey() + ":" + entry.getValue());
-            }
+            final LabeledDataInfo info =
+                RDDUtilsInJava.toJavaLabeledPointRDD(rowRDD, labelIndex);
 
             final DecisionTreeModel model = execute(sc, aConfig, info.getLabeledPointRDD(), info.getNumberClasses());
             res = res.withObjectResult(model);
@@ -189,7 +184,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
                 LOGGER
                     .log(Level.INFO, "Storing predicted data under key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
                 JavaRDD<Vector> features = info.getVectorRDD();
-                //TODO - revert the label to int mapping
+                //TODO - revert the label to int mapping ????
                 JavaRDD<Row> predictedData = ModelUtils.predict(sc, features, rowRDD, model);
                 try {
                     addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictedData);
@@ -202,9 +197,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             LOGGER.log(Level.INFO, "Decision Tree Learner done");
             // note that with Spark 1.4 we can use PMML instead
             return res;
-        } catch (InvalidSchemaException e) {
-            throw new GenericKnimeSparkException(e);
-        }
+
     }
 
     /**

@@ -89,26 +89,41 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
             msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
-            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-        } else {
-            try {
-                aConfig.getIntList(PARAM_COL_IDXS);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
+                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+            } else {
+                try {
+                    List<Integer> vals = aConfig.getIntList(PARAM_COL_IDXS);
+                    if (vals.size() < 1) {
+                        msg = "Input parameter '" + PARAM_COL_IDXS + "' is empty.";
+                    }
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                }
             }
         }
 
-        if (msg != null && !aConfig.hasPath(PARAM_MAPPING_TYPE)) {
-            msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' missing.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_MAPPING_TYPE)) {
+                msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' missing.";
+            } else {
+                try {
+                    MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
+                } catch (Exception e) {
+                    msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' has an invalid value.";
+                }
+            }
         }
 
-        if (msg != null && !aConfig.hasPath(PARAM_RESULT_TABLE)) {
+        if (msg == null && !aConfig.hasPath(PARAM_RESULT_TABLE)) {
             msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
-        if (msg != null && !aConfig.hasPath(PARAM_RESULT_MAPPING)) {
-            msg = "Output parameter '" + PARAM_RESULT_MAPPING + "' missing.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_RESULT_MAPPING)) {
+                msg = "Output parameter '" + PARAM_RESULT_MAPPING + "' missing.";
+            }
         }
 
         if (msg != null) {
@@ -167,9 +182,8 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
                 }
                 {
                     JavaRDD<Row> mappingRdd =
-                            storeMappingsInRdd(sc, mappedData.m_Mappings, aConfig.getString(PARAM_RESULT_MAPPING));
-                    final StructType schema =
-                        StructTypeBuilder.fromRows(mappingRdd.take(10)).build();
+                        storeMappingsInRdd(sc, mappedData.m_Mappings, aConfig.getString(PARAM_RESULT_MAPPING));
+                    final StructType schema = StructTypeBuilder.fromRows(mappingRdd.take(10)).build();
                     res = res.withTable(aConfig.getString(PARAM_RESULT_MAPPING), schema);
                 }
             } catch (InvalidSchemaException e) {

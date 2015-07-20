@@ -16,7 +16,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 17.07.2015 by Dietrich
+ *   Created on 17.07.2015 by dwk
  */
 package com.knime.bigdata.spark.jobserver.server;
 
@@ -40,7 +40,8 @@ public class MyRecord implements Serializable {
     final public String m_nominalValue;
 
     /**
-     * the mapped value
+     * the mapped value (for column mapping actual value, for binary mapping new column index, but counting
+     * from 0 for each respective column)
      */
     final public int m_numberValue;
 

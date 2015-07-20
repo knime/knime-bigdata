@@ -74,7 +74,7 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
 
-        if (msg != null && !config.hasPath(PARAM_TABLE_KEY)) {
+        if (msg == null && !config.hasPath(PARAM_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
         }
 
