@@ -43,25 +43,26 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
 public class DecisionTreeTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private List<Integer> m_numericColIdx;
+    private Integer[] m_numericColIdx;
     private final int m_classColIdx;
     private final String m_classColName;
     private final KNIMESparkContext m_context;
     private String m_outputTableName;
     private String m_mappingTableName;
     private String m_inputTableName;
-    private final List<String> m_colNames;
+    private final String[] m_colNames;
 
-    DecisionTreeTask(final SparkRDD inputRDD, final List<Integer> numericColIdx, final String classColName,
+    DecisionTreeTask(final SparkRDD inputRDD, final List<Integer> numericColIdx, final List<String> aNumericColNames, final String classColName,
         final int classColIdx, final SparkRDD mappingRDD, final SparkRDD outputRDD) {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_numericColIdx = numericColIdx;
+        m_numericColIdx = numericColIdx.toArray(new Integer[numericColIdx.size()]);
         m_classColName = classColName;
-        m_colNames = null;//TODO - need column names!
+        aNumericColNames.add(classColName);
+        m_colNames = aNumericColNames.toArray(new String[aNumericColNames.size()]);
         m_classColIdx = classColIdx;
         m_outputTableName = outputRDD.getID();
         m_mappingTableName = mappingRDD.getID();

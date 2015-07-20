@@ -71,7 +71,10 @@ public class JsonUtils {
             if (i > 0) {
                 sb.append(",");
             }
-            if (!(aElems[i] instanceof Object[])) {
+            if (aElems instanceof Integer[]) {
+                sb.append(aElems[i].toString());
+            }
+            else if (!(aElems[i] instanceof Object[])) {
                 sb.append( "\"" + aElems[i].toString() + "\"");
             } else {
                 sb.append("{");

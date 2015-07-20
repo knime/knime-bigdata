@@ -31,6 +31,7 @@
 
     <ports>
 		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
+		<inPort index="1" name="MappingRDD">Mapping of nominal values</inPort>
 		<outPort index="0" name="Labeled input">The input data labeled with the DT predictions.</outPort>
         <outPort index="1" name="MLlib Tree Model">MLlib Tree Model</outPort>
     </ports>
