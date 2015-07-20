@@ -158,12 +158,12 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
 
         if (msg == null) {
             if (!aConfig.hasPath(PARAM_COL_IDXS)) {
-
                 msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
             } else {
                 try {
                     aConfig.getIntList(PARAM_COL_IDXS);
                 } catch (ConfigException e) {
+                    e.printStackTrace();
                     msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
                 }
             }
@@ -208,7 +208,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         final String mappingTable = aConfig.getString(PARAM_MAPPING_TABLE);
         if (mappingTable == null) {
             msg = "Input parameter at port 2 is missing!";
-        } else if (!validateNamedRdd(key)) {
+        } else if (!validateNamedRdd(mappingTable)) {
             msg = "Input table with value mappings is missing!";
         }
 

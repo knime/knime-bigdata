@@ -49,7 +49,6 @@ import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkIDGenerator;
 
-
 /**
  *
  * @author knime
@@ -64,8 +63,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      *
      */
     public MLlibDecisionTreeNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE},
-            new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE,
+            SparkModelPortObject.TYPE});
     }
 
     /**
@@ -135,25 +134,28 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
 
         final List<Integer> numericColIdx = new LinkedList<>();
+        final List<String> numericColNames = new LinkedList<>();
         int classColIdx = -1;
         int counter = 0;
         final String classColName = m_classCol.getStringValue();
         for (DataColumnSpec colSpec : tableSpec) {
             if (colSpec.getName().equals(classColName)) {
                 classColIdx = counter;
-            }
-            if (colSpec.getType().isCompatible(DoubleValue.class)) {
+            } else if (colSpec.getType().isCompatible(DoubleValue.class)) {
                 numericColIdx.add(Integer.valueOf(counter));
+                numericColNames.add(colSpec.getName());
             }
             counter++;
         }
 
-//       TODO - this is not the correct spec
+        //       TODO - this is not the correct spec
         SparkDataTable mappingRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
 
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), numericColIdx, classColName, classColIdx, mappingRDD, resultRDD);
+        final DecisionTreeTask task =
+            new DecisionTreeTask(data.getData(), numericColIdx, numericColNames, classColName, classColIdx, mappingRDD,
+                resultRDD);
         final DecisionTreeModel model = task.execute(exec);
-        return new PortObject[] {new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model, tableSpec))};
+        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model, tableSpec))};
 
     }
 
@@ -178,10 +180,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_classCol.saveSettingsTo(settings);
-//        m_noOfCluster.saveSettingsTo(settings);
-//        m_noOfIteration.saveSettingsTo(settings);
-//        m_tableName.saveSettingsTo(settings);
-//        m_colName.saveSettingsTo(settings);
+        //        m_noOfCluster.saveSettingsTo(settings);
+        //        m_noOfIteration.saveSettingsTo(settings);
+        //        m_tableName.saveSettingsTo(settings);
+        //        m_colName.saveSettingsTo(settings);
     }
 
     /**
@@ -190,10 +192,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.validateSettings(settings);
-//        m_noOfCluster.validateSettings(settings);
-//        m_noOfIteration.validateSettings(settings);
-//        m_tableName.validateSettings(settings);
-//        m_colName.validateSettings(settings);
+        //        m_noOfCluster.validateSettings(settings);
+        //        m_noOfIteration.validateSettings(settings);
+        //        m_tableName.validateSettings(settings);
+        //        m_colName.validateSettings(settings);
     }
 
     /**
@@ -202,10 +204,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.loadSettingsFrom(settings);
-//        m_noOfCluster.loadSettingsFrom(settings);
-//        m_noOfIteration.loadSettingsFrom(settings);
-//        m_tableName.loadSettingsFrom(settings);
-//        m_colName.loadSettingsFrom(settings);
+        //        m_noOfCluster.loadSettingsFrom(settings);
+        //        m_noOfIteration.loadSettingsFrom(settings);
+        //        m_tableName.loadSettingsFrom(settings);
+        //        m_colName.loadSettingsFrom(settings);
     }
 
 }
