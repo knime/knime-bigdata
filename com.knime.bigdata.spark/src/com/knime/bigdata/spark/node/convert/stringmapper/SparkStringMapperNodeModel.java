@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.convert.stringmapper;
 
+import java.util.Map;
+
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -43,8 +45,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
+import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
-import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -129,6 +131,7 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         final FilterResult result = m_cols.applyTo(firstSpec);
         final String[] includedCols = result.getIncludes();
         int[] includeColIdxs = new int[includedCols.length];
+
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = firstSpec.findColumnIndex(includedCols[i]);
         }
@@ -138,10 +141,15 @@ class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         final String outputTableName = SparkIDGenerator.createID();
         final String outputMappingTableName = SparkIDGenerator.createID();
 
-        final ValueConverterTask task = new ValueConverterTask(rdd.getData(), includeColIdxs,
+        final ValueConverterTask task = new ValueConverterTask(rdd.getData(), includeColIdxs,includedCols,
             MappingType.valueOf(m_mappingType.getStringValue()), outputTableName, outputMappingTableName);
         //TODO - create port object from mapping
-        final NominalValueMapping mapping = task.execute(exec);
+        final MappedRDDContainer mapping = task.execute(exec);
+
+        //these are all the column names of the original (selected) and the mapped columns
+        // (original columns that were not selected are not included, but the index of the new
+        //  columns is still correct)
+        Map<Integer, String> names = mapping.getColumnNames();
 
         // TODO - we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");

@@ -16,7 +16,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 16.07.2015 by Dietrich
+ *   Created on 16.07.2015 by dwk
  */
 package com.knime.bigdata.spark.jobserver.server;
 

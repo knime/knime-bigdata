@@ -21,17 +21,17 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
 
 import spark.jobserver.SparkJobValidation;
 
@@ -40,14 +40,9 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
-import com.knime.bigdata.spark.jobserver.server.MyRecord;
-import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
-import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 
@@ -68,6 +63,9 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
 
     private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_COL_IDXS;
+
+    private static final String PARAM_COL_NAMES = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING;
 
     private static final String PARAM_RESULT_TABLE = ParameterConstants.PARAM_OUTPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
@@ -100,6 +98,21 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
                     }
                 } catch (ConfigException e) {
                     msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                }
+            }
+        }
+
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_COL_NAMES)) {
+                msg = "Input parameter '" + PARAM_COL_NAMES + "' missing.";
+            } else {
+                try {
+                    List<String> vals = aConfig.getStringList(PARAM_COL_NAMES);
+                    if (vals.size() < 1) {
+                        msg = "Input parameter '" + PARAM_COL_NAMES + "' is empty.";
+                    }
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_COL_NAMES + "' is not of expected type 'string list'.";
                 }
             }
         }
@@ -156,11 +169,15 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "starting job to convert nominal values...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE));
+        final List<String> colNames = aConfig.getStringList(PARAM_COL_NAMES);
         final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
         final int[] colIds = new int[colIdxs.size()];
+        final Map<Integer, String> colNameForIndex = new HashMap<>();
         int i = 0;
         for (Integer ix : colIdxs) {
-            colIds[i++] = ix;
+            colIds[i] = ix;
+            colNameForIndex.put(ix, colNames.get(i));
+            i++;
         }
         final MappingType type = MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
 
@@ -168,54 +185,98 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
         final MappedRDDContainer mappedData =
             RDDUtilsInJava.convertNominalValuesForSelectedIndices(rowRDD, colIds, type);
 
-        JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData.m_Mappings);
-
         LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getString(PARAM_RESULT_TABLE));
         try {
             addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData.m_RddWithConvertedValues);
 
-            try {
-                {
-                    final StructType schema =
-                        StructTypeBuilder.fromRows(mappedData.m_RddWithConvertedValues.take(10)).build();
-                    res = res.withTable(aConfig.getString(PARAM_RESULT_TABLE), schema);
-                }
-                {
-                    JavaRDD<Row> mappingRdd =
-                        storeMappingsInRdd(sc, mappedData.m_Mappings, aConfig.getString(PARAM_RESULT_MAPPING));
-                    final StructType schema = StructTypeBuilder.fromRows(mappingRdd.take(10)).build();
-                    res = res.withTable(aConfig.getString(PARAM_RESULT_MAPPING), schema);
-                }
-            } catch (InvalidSchemaException e) {
-                return JobResult.emptyJobResult().withMessage("ERROR: " + e.getMessage());
-            }
+            //number of all (!)  columns in input data table
+            int offset = rowRDD.take(1).get(0).length();
+
+            storeMappingsInRdd(sc, mappedData, colNameForIndex, aConfig.getString(PARAM_RESULT_MAPPING), type, offset);
         } catch (Exception e) {
-            LOGGER.severe("ERROR: failed to predict and store results for training data.");
+            e.printStackTrace();
+            LOGGER.severe("ERROR: failed to store mappings in RDD.");
             LOGGER.severe(e.getMessage());
+            return JobResult.emptyJobResult().withException(e);
         }
 
+        JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
         LOGGER.log(Level.INFO, "done");
         return res;
     }
 
-    private JavaRDD<Row> storeMappingsInRdd(final SparkContext aSparkContext, final NominalValueMapping aMappings,
-        final String aRddName) {
+    /**
+     * stores the mapping in a RDD
+     *
+     * note that we are adding two rows for each mapping - one with the original column name and one for the new numeric
+     * column name
+     *
+     * @param aSparkContext
+     * @param aMappedData
+     * @param aColNameForIndex
+     * @param aRddName
+     * @param aMappingType
+     * @param aOffset
+     */
+    private void storeMappingsInRdd(final SparkContext aSparkContext, final MappedRDDContainer aMappedData,
+        final Map<Integer, String> aColNameForIndex, final String aRddName, final MappingType aMappingType, final int aOffset) {
         @SuppressWarnings("resource")
         JavaSparkContext javaContext = new JavaSparkContext(aSparkContext);
 
-        Iterator<MyRecord> iter = aMappings.iterator();
-        List<Row> rows = new ArrayList<Row>();
-        while (iter.hasNext()) {
-
-            MyRecord record = iter.next();
-            RowBuilder builder = RowBuilder.emptyRow();
-            builder.add(record.m_nominalColumnIndex).add(record.m_nominalValue).add(record.m_numberValue);
-            rows.add(builder.build());
-        }
+        List<Row> rows = aMappedData.createMappingTable(aColNameForIndex, aMappingType, aOffset);
 
         JavaRDD<Row> mappingRdd = javaContext.parallelize(rows);
         LOGGER.log(Level.INFO, "Storing mapping under key: " + aRddName);
         addToNamedRdds(aRddName, mappingRdd);
-        return mappingRdd;
     }
+
+    /**
+     * @param aMappingRDD
+     * @param aColumnName
+     * @return the number of distinct values for the given column index (as computed by the nominal to number value
+     *         mapping above)
+     */
+    public static long getNumberValuesOfColumn(final JavaRDD<Row> aMappingRDD, final String aColumnName) {
+        final long count = aMappingRDD.filter(new Function<Row, Boolean>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Boolean call(final Row aRow) throws Exception {
+                return aRow.getString(0).equals(aColumnName);
+            }
+        }).count();
+
+        if (count == 1) {
+            //binary mapping, we store only one mapping, but there are 2 values
+            return 2;
+        }
+        return count;
+    }
+
+    /**
+     * extract Map storing arity of categorical features from the mapping RDD
+     *
+     * @param aColNames list of columns to be used
+     * @param aMappingRDD
+     * @return Map storing arity of categorical features. E.g., an entry (n -> k) indicates that feature n is
+     *         categorical with k categories indexed from 0: {0, 1, ..., k-1}.
+     */
+    public static Map<Integer, Integer> extractNominalFeatureInfo(final List<String> aColNames,
+        final JavaRDD<Row> aMappingRDD) {
+        final Map<Integer, Integer> categoricalFeaturesInfo = new HashMap<>();
+        int ix = 0;
+        for (String colNames : aColNames) {
+            //note that 'colIx' is the index of the numeric column, but getNumberValuesOfColumn requires
+            // the index of the original nominal column
+            final Long numValues = ConvertNominalValuesJob.getNumberValuesOfColumn(aMappingRDD, colNames);
+            //note that 'colIx' is the index of the numeric column, but the DT learner requires the index in the vector
+            if (numValues > 0) {
+                //if there is no entry then we assume that it is a true numeric feature
+                categoricalFeaturesInfo.put(ix, numValues.intValue());
+            }
+            ix++;
+        }
+        return categoricalFeaturesInfo;
+    }
+
 }

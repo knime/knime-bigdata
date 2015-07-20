@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,39 @@ public class NominalValueMappingFactory {
         return new ColumnMapping(aMappings);
     }
 
-    private static class GlobalMapping implements NominalValueMapping {
+    private static abstract class Mapping implements NominalValueMapping {
+        private static final long serialVersionUID = 1L;
+
+        protected abstract List<MyRecord> toList();
+
+        @Override
+        public Iterator<MyRecord> iterator() {
+            return new Iterator<MyRecord>() {
+                final List<MyRecord> values = toList();
+
+                @Override
+                public boolean hasNext() {
+                    return values.size() > 0;
+                }
+
+                @Override
+                public MyRecord next() {
+                    if (values.size() > 0) {
+                        return values.remove(0);
+                    }
+                    throw new IllegalStateException("Iterator has no more elements");
+                }
+
+                @Override
+                public void remove() {
+                    next();
+                }
+            };
+        }
+    }
+
+    private static class GlobalMapping extends Mapping {
+        private static final long serialVersionUID = 1L;
         /**
          * {@inheritDoc}
          */
@@ -87,12 +120,10 @@ public class NominalValueMappingFactory {
             return true;
         }
 
-        private static final long serialVersionUID = 1L;
-
         final Map<String, Integer> m_globalMappings;
 
         GlobalMapping(final Map<String, Integer> aMappings) {
-            m_globalMappings = aMappings;
+            m_globalMappings = Collections.unmodifiableMap(aMappings);
         }
 
         @Override
@@ -116,42 +147,17 @@ public class NominalValueMappingFactory {
             return 0;
         }
 
-        private List<MyRecord> toList() {
+        @Override
+        protected List<MyRecord> toList() {
             final List<MyRecord> values = new ArrayList<>(size());
             for (Entry<String, Integer> entry : m_globalMappings.entrySet()) {
                 values.add(new MyRecord(-1, entry.getKey(), entry.getValue()));
             }
             return values;
         }
-
-        @Override
-        public Iterator<MyRecord> iterator() {
-            return new Iterator<MyRecord>() {
-                final List<MyRecord> values = toList();
-
-                @Override
-                public boolean hasNext() {
-                    return values.size() > 0;
-                }
-
-                @Override
-                public MyRecord next() {
-                    if (values.size() > 0) {
-                        return values.remove(0);
-                    }
-                    throw new IllegalStateException("Iterator has no more elements");
-                }
-
-                @Override
-                public void remove() {
-                    next();
-                }
-            };
-        }
-
     }
 
-    private static class ColumnMapping implements NominalValueMapping {
+    private static class ColumnMapping extends Mapping {
         /**
          * {@inheritDoc}
          */
@@ -190,10 +196,10 @@ public class NominalValueMappingFactory {
 
         private static final long serialVersionUID = 1L;
 
-        final Map<Integer, Map<String, Integer>> m_colMappings;
+        private final Map<Integer, Map<String, Integer>> m_colMappings;
 
         ColumnMapping(final Map<Integer, Map<String, Integer>> aMappings) {
-            m_colMappings = aMappings;
+            m_colMappings = Collections.unmodifiableMap(aMappings);
         }
 
         @Override
@@ -225,7 +231,8 @@ public class NominalValueMappingFactory {
             return m_colMappings.get(aNominalColumnIx).size();
         }
 
-        private List<MyRecord> toList() {
+        @Override
+        protected List<MyRecord> toList() {
             final List<MyRecord> values = new ArrayList<>(size());
             for (Entry<Integer, Map<String, Integer>> colEntries : m_colMappings.entrySet()) {
                 for (Entry<String, Integer> entry : colEntries.getValue().entrySet()) {
@@ -233,31 +240,6 @@ public class NominalValueMappingFactory {
                 }
             }
             return values;
-        }
-
-        @Override
-        public Iterator<MyRecord> iterator() {
-            return new Iterator<MyRecord>() {
-                final List<MyRecord> values = toList();
-
-                @Override
-                public boolean hasNext() {
-                    return values.size() > 0;
-                }
-
-                @Override
-                public MyRecord next() {
-                    if (values.size() > 0) {
-                        return values.remove(0);
-                    }
-                    throw new IllegalStateException("Iterator has no more elements");
-                }
-
-                @Override
-                public void remove() {
-                    next();
-                }
-            };
         }
 
     }

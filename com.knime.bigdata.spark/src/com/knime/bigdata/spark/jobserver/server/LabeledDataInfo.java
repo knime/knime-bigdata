@@ -5,7 +5,7 @@
  * display, or in any way exploit any of the content, in whole or in part, except as otherwise expressly permitted in
  * writing by the copyright owner or as specified in the license file distributed with this product. If you have any
  * questions please contact the copyright holder: website: www.knime.com email: contact@knime.com
- * --------------------------------------------------------------------- History Created on 04.06.2015 by Dietrich
+ * --------------------------------------------------------------------- History Created on 04.06.2015 by dwk
  */
 package com.knime.bigdata.spark.jobserver.server;
 
