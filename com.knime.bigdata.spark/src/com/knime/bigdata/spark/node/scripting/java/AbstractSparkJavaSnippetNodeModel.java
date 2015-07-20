@@ -32,6 +32,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
+import org.knime.base.node.jsnippet.util.FlowVariableRepository;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
+import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -166,7 +169,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         }
         String tableName = SparkIDGenerator.createID();
         //now compile code, add to jar and upload jar:
-        final KnimeSparkJob job = addJob2Jar(m_snippet);
+        final KnimeSparkJob job = addJob2Jar(context, m_snippet);
 //        String jobDescription = "return aInput1;";
 //        final KnimeSparkJob job = addTransformationJob2Jar(jobDescription);
 
@@ -209,7 +212,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
     }
 
-    private KnimeSparkJob addJob2Jar(final SparkJavaSnippet snippet) throws GenericKnimeSparkException, BadLocationException {
+    private KnimeSparkJob addJob2Jar(final KNIMESparkContext context, final SparkJavaSnippet snippet)
+            throws GenericKnimeSparkException, BadLocationException {
         final GuardedDocument codeDoc = m_snippet.getDocument();
         final String code = codeDoc.getText(0, codeDoc.getLength());
         final String jarPath;
