@@ -25,9 +25,10 @@ import com.typesafe.config.ConfigFactory;
  * @author dwk
  *
  */
+@SuppressWarnings("javadoc")
 public class KMeansLearnerTest {
 
-	public static String getInputOutputParamPair(final String aInputDataPath,
+	static String getInputOutputParamPair(final String aInputDataPath,
 			final String aNumClusters, final String aNumIterations,
 			final String aOutputDataPath) {
 		StringBuilder params = new StringBuilder("");
@@ -75,7 +76,7 @@ public class KMeansLearnerTest {
 		return params.toString();
 	}
 
-	@Test
+    @Test
 	public void jobValidationShouldCheckMissingInputDataParameter()
 			throws Throwable {
 		String params = getParams(null, "6", "99", "~spark/data/spark");

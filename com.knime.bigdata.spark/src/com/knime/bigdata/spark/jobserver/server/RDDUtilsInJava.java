@@ -246,4 +246,22 @@ public class RDDUtilsInJava {
         });
     }
 
+    /**
+     *
+     * convert a RDD of Rows to JavaRDD of LabeledPoint, all row values must be numeric
+     *
+     * @param aInputRdd Row RDD to be converted
+     * @param aLabelColumnIndex index of label column (must be numeric)
+     * @return container with mapped data and mapping
+     * @throws IllegalArgumentException if values are encountered that are not numeric
+     */
+    public static LabeledDataInfo toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd,
+        final int aLabelColumnIndex) {
+        final NominalValueMapping labelMapping =
+            toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
+        final JavaRDD<LabeledPoint> labeledRdd = toLabeledVector(aInputRdd, aLabelColumnIndex, labelMapping);
+
+        return new LabeledDataInfo(labeledRdd, labelMapping);
+    }
+
 }

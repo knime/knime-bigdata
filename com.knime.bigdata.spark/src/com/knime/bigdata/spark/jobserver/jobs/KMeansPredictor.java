@@ -59,14 +59,14 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
     private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_COL_IDXS;
+    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_COL_IDXS;
 
     private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_MODEL_NAME;
+        + ParameterConstants.PARAM_MODEL_NAME;
 
     private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
-            + ParameterConstants.PARAM_TABLE_1;
+        + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(KMeansPredictor.class.getName());
 
@@ -80,14 +80,15 @@ public class KMeansPredictor extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_COL_IDXS)) {
-            msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-        } else {
-            try {
-                aConfig.getIntList(PARAM_COL_IDXS);
-            } catch (ConfigException e) {
-                msg = "Input parameter '" + PARAM_COL_IDXS
-                        + "' is not of expected type 'integer list'.";
+        if (msg == null) {
+            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
+                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+            } else {
+                try {
+                    aConfig.getIntList(PARAM_COL_IDXS);
+                } catch (ConfigException e) {
+                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                }
             }
         }
 

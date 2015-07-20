@@ -330,7 +330,7 @@ public class RDDUtilsInJavaTest {
 
         //convert all but the last column with nominal values:
         MappedRDDContainer info =
-            RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 2, 3, 4}, MappingType.BINARY);
+            RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 3, 2, 4}, MappingType.BINARY);
 
         JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
         NominalValueMapping mappings = info.m_Mappings;
@@ -353,14 +353,6 @@ public class RDDUtilsInJavaTest {
                 offset += MyMapper.teams.length;
             }
 
-            {
-                int colIx = mappings.getNumberForValue(2, row.getString(2));
-                assertTrue("converted values should be in proper column", colIx >= 0
-                    && colIx < mappings.getNumberOfValues(2));
-                assertEquals("converted values should be 1", 1, (int)row.getDouble(offset+colIx));
-                offset += mappings.getNumberOfValues(2);
-            }
-
             //teams
             {
                 int colIx =  mappings.getNumberForValue(3, row.getString(3));
@@ -370,6 +362,14 @@ public class RDDUtilsInJavaTest {
                     && colIx < MyMapper.teams.length);
                 assertEquals("converted values should be 1", 1, (int)row.getDouble(colIx + offset));
                 offset += mappings.getNumberOfValues(3);
+            }
+
+            {
+                int colIx = mappings.getNumberForValue(2, row.getString(2));
+                assertTrue("converted values should be in proper column", colIx >= 0
+                    && colIx < mappings.getNumberOfValues(2));
+                assertEquals("converted values should be 1", 1, (int)row.getDouble(offset+colIx));
+                offset += mappings.getNumberOfValues(2);
             }
 
             //4 values
