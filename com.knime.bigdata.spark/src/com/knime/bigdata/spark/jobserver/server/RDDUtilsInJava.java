@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
@@ -35,8 +37,8 @@ public class RDDUtilsInJava {
      * @param aMappingType indicates how values are to be mapped
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
-    public static MappedRDDContainer convertNominalValuesForSelectedIndices(
-        final JavaRDD<Row> aInputRdd, final int[] aColumnIds, final MappingType aMappingType) {
+    public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
+        final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
@@ -49,7 +51,7 @@ public class RDDUtilsInJava {
                     Integer labelOrIndex = mappings.getNumberForValue(ix, row.getString(ix));
                     if (aMappingType == MappingType.BINARY) {
                         int numValues = mappings.getNumberOfValues(ix);
-                        for (int i=0; i<numValues; i++) {
+                        for (int i = 0; i < numValues; i++) {
                             if (labelOrIndex == i) {
                                 builder.add(1.0d);
                             } else {
@@ -91,8 +93,7 @@ public class RDDUtilsInJava {
                 return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
             }
             default: {
-                throw new UnsupportedOperationException(
-                        "ERROR: unknown mapping type !");
+                throw new UnsupportedOperationException("ERROR: unknown mapping type !");
             }
         }
     }
@@ -121,7 +122,7 @@ public class RDDUtilsInJava {
             idx += 1;
         }
 
-        return new GlobalMapping(labelMapping);
+        return NominalValueMappingFactory.createGlobalMapping(labelMapping);
     }
 
     private static NominalValueMapping toLabelMappingColumnMapping(final JavaRDD<Row> aInputRdd,
@@ -140,29 +141,8 @@ public class RDDUtilsInJava {
             labelMapping.put(entry.getKey(), mapping);
         }
 
-        return new ColumnMapping(labelMapping);
+        return NominalValueMappingFactory.createColumnMapping(labelMapping);
     }
-
-//    private static NominalValueMapping toLabelMappingBinaryMapping(final JavaRDD<Row> aInputRdd,
-//        final int[] aNominalColumnIndices) {
-//
-//        Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
-//
-//        //this is the only difference to the above method 'toLabelMappingColumnMapping'
-//        // the idx is the index of the new column
-//        int idx = 0;
-//        Map<Integer, Map<String, Integer>> labelMapping = new HashMap<>(labels.size());
-//        for (Map.Entry<Integer, Set<String>> entry : labels.entrySet()) {
-//            Set<String> values = entry.getValue();
-//            Map<String, Integer> mapping = new HashMap<>(values.size());
-//            for (String val : values) {
-//                mapping.put(val, idx++);
-//            }
-//            labelMapping.put(entry.getKey(), mapping);
-//        }
-//
-//        return new BinaryMapping(labelMapping);
-//    }
 
     /**
      * @param aInputRdd
@@ -220,13 +200,13 @@ public class RDDUtilsInJava {
         final StructType aSchema, final int aLabelColumnIndex) {
         final NominalValueMapping labelMapping =
             toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
-        final JavaRDD<LabeledPoint> labeledRdd = toLabeledVector(aInputRdd, aLabelColumnIndex, labelMapping);
+        final JavaRDD<LabeledPoint> labeledRdd = toLabeledVectorRdd(aInputRdd, aLabelColumnIndex, labelMapping);
 
         return new LabeledDataInfo(labeledRdd, labelMapping);
     }
 
-    private static JavaRDD<LabeledPoint> toLabeledVector(final JavaRDD<Row> inputRdd, final int labelColumnIndex,
-        final NominalValueMapping labelMapping) {
+    private static JavaRDD<LabeledPoint> toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final int labelColumnIndex,
+        @Nullable final NominalValueMapping labelMapping) {
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
@@ -240,11 +220,19 @@ public class RDDUtilsInJava {
                         insertionIndex += 1;
                     }
                 }
-                Integer label = labelMapping.getNumberForValue(labelColumnIndex, row.getString(labelColumnIndex));
-                return new LabeledPoint(label.doubleValue(), Vectors.dense(convertedValues));
+                final double label;
+                if (labelMapping != null) {
+                    label =
+                        labelMapping.getNumberForValue(labelColumnIndex, row.getString(labelColumnIndex)).doubleValue();
+                } else {
+                    //no mapping given - label must already be numeric
+                    label = row.getDouble(labelColumnIndex);
+                }
+                return new LabeledPoint(label, Vectors.dense(convertedValues));
             }
         });
     }
+
 
     /**
      *
@@ -255,13 +243,8 @@ public class RDDUtilsInJava {
      * @return container with mapped data and mapping
      * @throws IllegalArgumentException if values are encountered that are not numeric
      */
-    public static LabeledDataInfo toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd,
-        final int aLabelColumnIndex) {
-        final NominalValueMapping labelMapping =
-            toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
-        final JavaRDD<LabeledPoint> labeledRdd = toLabeledVector(aInputRdd, aLabelColumnIndex, labelMapping);
-
-        return new LabeledDataInfo(labeledRdd, labelMapping);
+    public static JavaRDD<LabeledPoint> toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd, final int aLabelColumnIndex) {
+        return toLabeledVectorRdd(aInputRdd, aLabelColumnIndex, null);
     }
 
 }

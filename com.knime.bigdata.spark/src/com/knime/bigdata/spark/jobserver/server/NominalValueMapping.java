@@ -16,14 +16,12 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 16.07.2015 by Dietrich
+ *   Created on 16.07.2015 by dwk
  */
 package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  *
@@ -60,83 +58,3 @@ public interface NominalValueMapping extends Serializable {
     Iterator<MyRecord> iterator();
 }
 
-class GlobalMapping implements NominalValueMapping {
-    private static final long serialVersionUID = 1L;
-    final Map<String, Integer> m_globalMappings;
-
-    GlobalMapping(final Map<String, Integer> aMappings) {
-        m_globalMappings = aMappings;
-    }
-
-    @Override
-    public Integer getNumberForValue(final int aColumnIx, final String aValue) {
-        return m_globalMappings.get(aValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return m_globalMappings.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfValues(final int aNominalColumnIx) {
-        return 0;
-    }
-
-    @Override
-    public Iterator<MyRecord> iterator() {
-        return null;
-    }
-
-}
-
-class ColumnMapping implements NominalValueMapping {
-    private static final long serialVersionUID = 1L;
-    final Map<Integer, Map<String, Integer>> m_colMappings;
-
-    ColumnMapping(final Map<Integer, Map<String, Integer>> aMappings) {
-        m_colMappings = aMappings;
-    }
-
-    @Override
-    public Integer getNumberForValue(final int aColumnIx, final String aValue) {
-        Map<String, Integer> m = m_colMappings.get(aColumnIx);
-        if (m != null && m.containsKey(aValue))
-        {
-            return m.get(aValue);
-        }
-        return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        int s = 0;
-        for (Entry<Integer, Map<String, Integer>> entry : m_colMappings.entrySet()) {
-            s += entry.getValue().size();
-        }
-        return s;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNumberOfValues(final int aNominalColumnIx) {
-        return m_colMappings.get(aNominalColumnIx).size();
-    }
-
-    @Override
-    public Iterator<MyRecord> iterator() {
-        return null;
-    }
-
-}
