@@ -52,11 +52,6 @@
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory">
-      </node>      <node
-            category-path="/labs/spark/mining"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -101,18 +96,6 @@
             id="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
-      </node>
-      <node
-            category-path="/labs/spark/io"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
-      </node>
-      <node
             category-path="/labs/spark/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.util.rename.SparkRenameColumnNodeFactory"
@@ -125,16 +108,16 @@
             id="com.knime.bigdata.spark.node.util.renameregex.SparkColumnRenameRegexNodeFactory">
       </node>
       <node
-            category-path="/labs/spark"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
-            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
-      </node>
-      <node
             category-path="/labs/spark/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory"
             id="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory">
       </node>
     </extension>
 </plugin>

@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.convert.stringmapper;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
@@ -32,8 +33,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.jobserver.server.MappingType;
@@ -45,29 +45,28 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
  */
 class SparkStringMapperNodeDialog extends NodeDialogPane {
 
-    @SuppressWarnings("unchecked")
-
     private final DialogComponentColumnFilter2 m_cols =
     new DialogComponentColumnFilter2(SparkStringMapperNodeModel.createColumnsModel(), 0);
 
-//    private final DialogComponentColumnNameSelection m_col = new DialogComponentColumnNameSelection(
-//        SparkStringMapperNodeModel.createColModel(), "Column name", 0, StringValue.class);
-//    private final DialogComponentString m_colName = new DialogComponentString(
-//        SparkStringMapperNodeModel.createColNameModel(), "Mapping column name: ", true, 20);
-
     private final String[] mappings = {MappingType.GLOBAL.toString(), MappingType.COLUMN.toString(), MappingType.BINARY.toString()};
 
-    private final DialogComponentStringListSelection m_mappingType = new DialogComponentStringListSelection(
-    new SettingsModelStringArray("Mapping type", new String[] {MappingType.COLUMN.toString()}),
-    "Mapping type", mappings);
+    private final DialogComponentStringSelection m_mappingType = new DialogComponentStringSelection(
+        SparkStringMapperNodeModel.createMappingTypeModel(), "Mapping type: ", mappings);
 
     SparkStringMapperNodeDialog() {
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints gc = new GridBagConstraints();
         gc.gridx = 0;
         gc.gridy = 0;
-        panel.add(m_cols.getComponentPanel(), gc);
+        gc.weightx = 1;
+        gc.weighty = 1;
+        gc.fill = GridBagConstraints.BOTH;
+        final JPanel colsPanel = m_cols.getComponentPanel();
+        colsPanel.setBorder(BorderFactory.createTitledBorder(" Columns to convert "));
+        panel.add(colsPanel, gc);
         gc.gridy++;
+        gc.weightx = 1;
+        gc.weighty = 0;
         panel.add(m_mappingType.getComponentPanel(), gc);
         addTab("Settings", panel);
     }

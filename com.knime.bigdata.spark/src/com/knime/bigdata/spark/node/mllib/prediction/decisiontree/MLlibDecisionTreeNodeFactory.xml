@@ -16,23 +16,23 @@
 
            The node can be configured as follows:
 		</intro>
-                
-		<option name="Criterion">
-			  Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
-		</option>
-		<option name="Max number of bins">
+    	<option name="Max number of bins">
 			Maximum number of bins used for discretizing continuous features and 
 			for choosing how to split on features at each node.
 		</option>
 		<option name="Max depth">
 			Maximum depth of the tree (>= 0).
 		</option>
+		<option name="Quality measure">
+			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".
+		</option>
+		<option name="Feature Columns">The feature columns to learn the model from.</option>
+		<option name="Class column">The classification column.</option>
 	</fullDescription>
 
     <ports>
 		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
-		<inPort index="1" name="MappingRDD">Mapping of nominal values</inPort>
-		<outPort index="0" name="Labeled input">The input data labeled with the DT predictions.</outPort>
-        <outPort index="1" name="MLlib Tree Model">MLlib Tree Model</outPort>
+		<inPort optional="true" index="1" name="Mapping dictionary">Mapping of nominal values</inPort>
+        <outPort index="0" name="MLlib Tree Model">MLlib Tree Model</outPort>
     </ports>
 </knimeNode>
