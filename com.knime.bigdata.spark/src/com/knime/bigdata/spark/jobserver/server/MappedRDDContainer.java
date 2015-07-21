@@ -75,12 +75,6 @@ public class MappedRDDContainer implements Serializable {
     }
 
     /**
-     * @param aNominalColumnIx
-     * @return name of the original nominal column with this index
-     */
-    //String getNameOfNominalColumn(int aNominalColumnIx);
-
-    /**
      *
      * @return map with column names and their corresponding indices, includes original columns and mapped columns, does
      *         not include columns that were not converted
