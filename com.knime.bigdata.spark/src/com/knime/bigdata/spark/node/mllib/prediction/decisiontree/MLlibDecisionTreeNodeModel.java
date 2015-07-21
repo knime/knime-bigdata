@@ -43,7 +43,6 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibUtil;
-import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -138,7 +137,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         if (featureColIdxs.contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
         }
-        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(tableSpec), createMLSpec()};
+        //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
+        return new PortObjectSpec[]{createMLSpec()};
     }
 
     /**
