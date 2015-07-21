@@ -21,7 +21,9 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -140,9 +142,9 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_TRAINING_RDD + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_MAPPING_TABLE)) {
-            msg = "Input parameter '" + PARAM_MAPPING_TABLE + "' missing.";
-        }
+//        if (msg == null && !aConfig.hasPath(PARAM_MAPPING_TABLE)) {
+//            msg = "Input parameter '" + PARAM_MAPPING_TABLE + "' missing.";
+//        }
 
         if (msg == null) {
             if (!aConfig.hasPath(PARAM_LABEL_INDEX)) {
@@ -204,12 +206,11 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         } else if (!validateNamedRdd(key)) {
             msg = "Input data table missing!";
         }
-
-        final String mappingTable = aConfig.getString(PARAM_MAPPING_TABLE);
-        if (mappingTable == null) {
-            msg = "Input parameter at port 2 is missing!";
-        } else if (!validateNamedRdd(mappingTable)) {
-            msg = "Input table with value mappings is missing!";
+        if (aConfig.hasPath(PARAM_MAPPING_TABLE)) {
+            final String mappingTable = aConfig.getString(PARAM_MAPPING_TABLE);
+            if (!validateNamedRdd(mappingTable)) {
+                msg = "Input table with value mappings is missing!";
+            }
         }
 
         if (msg != null) {
@@ -272,23 +273,32 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * @param aInputData - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
      * @return DecisionTreeModel
      */
+    @SuppressWarnings("unchecked")
     private DecisionTreeModel execute(final SparkContext aContext, final Config aConfig,
         final JavaRDD<LabeledPoint> aInputData) {
         aInputData.cache();
 
         List<String> names = aConfig.getStringList(PARAM_COL_NAMES);
-
-        final JavaRDD<Row> mappingRDD = getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE));
-        final Long numClasses =
-            ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, names.get(names.size()-1));
+        final Long numClasses;
+        final Map<Integer, Integer> nominalFeatureInfo;
+        if (aConfig.hasPath(PARAM_MAPPING_TABLE)) {
+            final JavaRDD<Row> mappingRDD = getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE));
+            numClasses =
+                    ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, names.get(names.size()-1));
+            nominalFeatureInfo = ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD);
+        } else {
+            //TK_TODO: Get the number of classes from the inputdata rdd
+            numClasses = new Long(2);
+            nominalFeatureInfo = Collections.EMPTY_MAP;
+        }
 
         final int maxDepth = aConfig.getInt(PARAM_MAX_DEPTH);
         final int maxBins = aConfig.getInt(PARAM_MAX_BINS);
         final String impurity = aConfig.getString(PARAM_IMPURITY);
 
         // Cluster the data into m_noOfCluster classes using KMeans
-        return DecisionTree.trainClassifier(aInputData, numClasses.intValue(),
-            ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD), impurity, maxDepth, maxBins);
+        return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo, impurity,
+            maxDepth, maxBins);
     }
 
 

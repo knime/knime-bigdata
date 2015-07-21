@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
-	type="Other" icon="hiveSpark.png">
-	<name>Spark String Mapper</name>
-	<shortDescription>Maps a nominal column to a double column</shortDescription>
+	type="Manipulator" icon="icon.png">
+	<name>Spark Category To Number</name>
+	<shortDescription>Maps nominal columns to double column</shortDescription>
 	<fullDescription>
 		<intro>
-			Maps a nominal column to a double column.
+			Maps nominal column to double columns.
 		</intro>
-		<option name="Column name">The name of the column to convert</option>
-		<option name="Mapping column name">The name of the new mapping column</option>
+		<option name="Columns to convert">The columns to convert</option>
+		<option name="Mapping type">The mapping type to use.
+		<ul>
+		  <li><b>Column: </b>Uses a separate dictionary for each column</li>
+		  <li><b>Global: </b>Uses a global dictionary for all columns</li>
+		  <li><b>Binary: </b>Converts the selected columns into binary vectors by 
+		  generating a new column for each unique column value.</li>
+		</ul>
+		  
+		</option>
 	</fullDescription>
 
 	<ports>

@@ -25,11 +25,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettings;
@@ -42,22 +46,63 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
  * @author Tobias Koetter, KNIME.com
  * @param <M> the model
  */
-public class SparkModel<M extends Serializable> {
+public class SparkModel <M extends Serializable> {
 
     private static final String MODEL_ENTRY = "Model";
-    private M m_model;
-    private String m_type;
+    private final M m_model;
+    private final String m_type;
     private final DataTableSpec m_tableSpec;
+    private final String m_classColumnName;
+    private final SparkModelInterpreter<M> m_interpreter;
+
+
+    /**
+     * @param type model type
+     * @param model the model
+     * @param origSpec the {@link DataTableSpec} of the original input table
+     * @param classColName the name of the class column if appropriate otherwise <code>null</code>
+     * @param featureColNames the names of the feature columns
+     */
+    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+        final DataTableSpec origSpec, final String classColName, final List<String> featureColNames) {
+        this(type, model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
+    }
+
+    /**
+     * @param type model type
+     * @param model the model
+     * @param origSpec the {@link DataTableSpec} of the original input table
+     * @param classColName the name of the class column if appropriate otherwise <code>null</code>
+     * @param featureColNames the names of the feature columns
+     */
+    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+        final DataTableSpec origSpec, final String classColName, final String... featureColNames) {
+        this(type, model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
+    }
 
     /**
      * @param type model type
      * @param model the model
      * @param spec the DataTableSpec of the table used to learn the model
      */
-    public SparkModel(final String type, final M model, final DataTableSpec spec) {
+    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+        final DataTableSpec spec) {
+        this(type, model, interperter, spec, null);
+    }
+
+    /**
+     * @param type model type
+     * @param model the model
+     * @param spec the DataTableSpec of the table used to learn the model including the class column name
+     * @param classColName the name of the class column if appropriate otherwise <code>null</code>
+     */
+    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+        final DataTableSpec spec, final String classColName) {
         m_type = type;
         m_model = model;
+        m_interpreter = interperter;
         m_tableSpec = spec;
+        m_classColumnName = classColName;
     }
 
     /**
@@ -74,7 +119,9 @@ public class SparkModel<M extends Serializable> {
         }
         try (final ObjectInputStream os = new ObjectInputStream(in);){
             m_type = (String)os.readObject();
+            m_classColumnName = (String)os.readObject();
             m_model = (M)os.readObject();
+            m_interpreter = (SparkModelInterpreter<M>)os.readObject();
             NodeSettings config = (NodeSettings)os.readObject();
             m_tableSpec = DataTableSpec.load(config);
         } catch (ClassNotFoundException | InvalidSettingsException e) {
@@ -93,9 +140,18 @@ public class SparkModel<M extends Serializable> {
         m_tableSpec.save(config);
         try (final ObjectOutputStream os = new ObjectOutputStream(out)){
             os.writeObject(getType());
+            os.writeObject(m_classColumnName);
             os.writeObject(getModel());
+            os.writeObject(m_interpreter);
             os.writeObject(config);
         }
+    }
+
+    /**
+     * @return the interpreter
+     */
+    public SparkModelInterpreter<M> getInterpreter() {
+        return m_interpreter;
     }
 
     /**
@@ -120,20 +176,110 @@ public class SparkModel<M extends Serializable> {
     }
 
     /**
-     * @return the tableSpec
+     * @return the tableSpec used to learn the mode including the class column if present
+     * @see #getClassColumnName()
      */
     public DataTableSpec getTableSpec() {
         return m_tableSpec;
     }
 
     /**
+     * @return the name of the class column or <code>null</code> if not needed
+     */
+    public String getClassColumnName() {
+        return m_classColumnName;
+    }
+
+    /**
      * @return the name of all learning columns in the order they have been used during training
      */
-    public List<String> getColumnNames() {
+    public List<String> getLearningColumnNames() {
+        return getColNames(getClassColumnName());
+    }
+
+    /**
+     * @return the name of all columns (learning and class columns)
+     */
+    public List<String> getAllColumnNames() {
+        return getColNames(null);
+    }
+
+    /**
+     * @return
+     */
+    private List<String> getColNames(final String filterColName) {
         final List<String> colNames = new ArrayList<>(m_tableSpec.getNumColumns());
         for (DataColumnSpec dataColumnSpec : m_tableSpec) {
-            colNames.add(dataColumnSpec.getName());
+            final String colName = dataColumnSpec.getName();
+            if (!colName.equals(filterColName)) {
+                colNames.add(colName);
+            }
         }
         return colNames;
+    }
+
+    /**
+     * @param inputSpec the {@link DataTableSpec} to find the learning columns
+     * @return the index of each learning column in the order they should be presented to the model
+     * @throws InvalidSettingsException if a column is not present or has an invalid data type
+     */
+    public Integer[] getLearningColumnIndices(final DataTableSpec inputSpec)
+            throws InvalidSettingsException {
+        final DataTableSpec learnerTabel = getTableSpec();
+        final String classColumnName = getClassColumnName();
+        final Integer[]colIdxs;
+        if (classColumnName != null) {
+            colIdxs = new Integer[learnerTabel.getNumColumns() - 1];
+        } else {
+            colIdxs = new Integer[learnerTabel.getNumColumns()];
+        }
+        int idx = 0;
+        for (DataColumnSpec col : learnerTabel) {
+            final String colName = col.getName();
+            if (colName.equals(classColumnName)) {
+                //skip the class column name
+                continue;
+            }
+            final int colIdx = inputSpec.findColumnIndex(colName);
+            if (colIdx < 0) {
+                throw new InvalidSettingsException("Column with name " + colName + " not found in input data");
+            }
+            final DataType colType = inputSpec.getColumnSpec(colIdx).getType();
+            if (!colType.equals(col.getType())) {
+                throw new InvalidSettingsException("Column with name " + colName + " has incompatible type expected "
+            + col.getType() + " was " + colType);
+            }
+            colIdxs[idx++] = Integer.valueOf(colIdx);
+        }
+        return colIdxs;
+    }
+
+    /**
+     * @param origSpec the original {@link DataTableSpec}
+     * @param classColName can be <code>null</code>
+     * @param featureColNames the names of all feature columns used for model learning
+     * @return the {@link DataTableSpec} that includes only the feature and class column names
+     */
+    public static DataTableSpec createLearningSpec(final DataTableSpec origSpec, final String classColName,
+        final List<String> featureColNames) {
+        final ColumnRearranger rearranger = new ColumnRearranger(origSpec);
+        final List<String> retainedColName = new LinkedList<>(featureColNames);
+        if (classColName != null) {
+            retainedColName.add(classColName);
+        }
+        rearranger.keepOnly(retainedColName.toArray(new String[0]));
+        final DataTableSpec learnerSpec = rearranger.createSpec();
+        return learnerSpec;
+    }
+
+    /**
+     * @param origSpec the original {@link DataTableSpec}
+     * @param classColName can be <code>null</code>
+     * @param featureColNames the names of all feature columns used for model learning
+     * @return the {@link DataTableSpec} that includes only the feature and class column names
+     */
+    public static DataTableSpec createLearningSpec(final DataTableSpec origSpec, final String classColName,
+        final String[] featureColNames) {
+        return createLearningSpec(origSpec, classColName, Arrays.asList(featureColNames));
     }
 }

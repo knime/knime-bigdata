@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
@@ -47,25 +48,28 @@ public class DecisionTreeTask implements Serializable {
     private final int m_classColIdx;
     private final String m_classColName;
     private final KNIMESparkContext m_context;
-    private String m_outputTableName;
     private String m_mappingTableName;
     private String m_inputTableName;
     private final String[] m_colNames;
+    private int m_maxDepth;
+    private int m_maxNoOfBins;
+    private String m_qualityMeasure;
 
-    DecisionTreeTask(final SparkRDD inputRDD, final List<Integer> numericColIdx, final List<String> aNumericColNames, final String classColName,
-        final int classColIdx, final SparkRDD mappingRDD, final SparkRDD outputRDD) {
-        if (!inputRDD.compatible(outputRDD)) {
-            throw new IllegalArgumentException("Incompatible rdds");
-        }
+    DecisionTreeTask(final SparkRDD inputRDD, final List<Integer> numericColIdx, final List<String> aNumericColNames,
+        final String classColName, final int classColIdx, final SparkRDD mappingRDD, final int maxDepth,
+        final int maxNoOfBins, final String qualityMeasure) {
+        m_maxDepth = maxDepth;
+        m_maxNoOfBins = maxNoOfBins;
+        m_qualityMeasure = qualityMeasure;
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
         m_numericColIdx = numericColIdx.toArray(new Integer[numericColIdx.size()]);
         m_classColName = classColName;
-        aNumericColNames.add(classColName);
-        m_colNames = aNumericColNames.toArray(new String[aNumericColNames.size()]);
+        final List<String> allColNames = new LinkedList<>(aNumericColNames);
+        allColNames.add(classColName);
+        m_colNames = allColNames.toArray(new String[allColNames.size()]);
         m_classColIdx = classColIdx;
-        m_outputTableName = outputRDD.getID();
-        m_mappingTableName = mappingRDD.getID();
+        m_mappingTableName = mappingRDD == null ? null : mappingRDD.getID();
     }
 
     DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
@@ -83,17 +87,27 @@ public class DecisionTreeTask implements Serializable {
          */
 
         private String learnerDef() {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, ParameterConstants.VALUE_GINI,
-                ParameterConstants.PARAM_MAX_BINS, "6",
-                ParameterConstants.PARAM_MAX_DEPTH, "8", ParameterConstants.PARAM_LABEL_INDEX,
+        final Object[] inputParamas;
+        if (m_mappingTableName == null) {
+            inputParamas = new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins,
+                ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth, ParameterConstants.PARAM_LABEL_INDEX,
+                m_classColIdx,
+                ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING, JsonUtils.toJsonArray(m_colNames),
+                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_numericColIdx),
+                ParameterConstants.PARAM_TABLE_1, m_inputTableName};
+        } else {
+            inputParamas = new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins,
+                ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth, ParameterConstants.PARAM_LABEL_INDEX,
                 m_classColIdx,
                 ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING, JsonUtils.toJsonArray(m_colNames),
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_numericColIdx),
                 ParameterConstants.PARAM_TABLE_1, m_inputTableName,
-                ParameterConstants.PARAM_TABLE_2, m_mappingTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
+                ParameterConstants.PARAM_TABLE_2, m_mappingTableName};
+        }
+        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
+            ParameterConstants.PARAM_OUTPUT, new String[]{}});
     }
 
 }

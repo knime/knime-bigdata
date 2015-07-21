@@ -127,7 +127,7 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
      */
     @Override
     public JComponent[] getViews() {
-        return m_spec.getViews();
+        return new JComponent[]{new SparkModelView(m_model)};
     }
 
     /**

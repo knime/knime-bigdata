@@ -187,7 +187,7 @@ public class SparkDataPortObject implements PortObject {
                 }
                 panels[0].removeAll();
                 panels[0].add(new JLabel("Fetching " + value.get()
-                        + " rows from database..."), BorderLayout.NORTH);
+                        + " rows from Spark..."), BorderLayout.NORTH);
                 panels[0].repaint();
                 panels[0].revalidate();
                 final SwingWorkerWithContext<DataTable, Void> worker  = new SwingWorkerWithContext<DataTable, Void>() {

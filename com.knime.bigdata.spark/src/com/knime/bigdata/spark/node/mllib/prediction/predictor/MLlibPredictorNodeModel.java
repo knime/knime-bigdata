@@ -18,9 +18,8 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.clustering.assigner;
+package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
-import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -46,10 +45,10 @@ import com.knime.bigdata.spark.util.SparkIDGenerator;
  *
  * @author koetter
  */
-public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
+public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
 
     /**Constructor.*/
-    public MLlibClusterAssignerNodeModel() {
+    public MLlibPredictorNodeModel() {
         super(new PortType[]{SparkModelPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
     }
@@ -79,19 +78,18 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        @SuppressWarnings("unchecked")
-        final SparkModel<KMeansModel> model = ((SparkModelPortObject<KMeansModel>)inObjects[0]).getModel();
+        final SparkModel<?> model = ((SparkModelPortObject<?>)inObjects[0]).getModel();
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         exec.checkCanceled();
-        exec.setMessage("Starting KMeans (SPARK) Predictor");
+        exec.setMessage("Starting (SPARK) predictor");
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(inputSpec);
+        final DataTableSpec resultSpec = MLlibPredictorNodeModel.createSpec(inputSpec);
         final String aOutputTableName = SparkIDGenerator.createID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final AssignTask task = new AssignTask();
+        final PredictionTask task = new PredictionTask();
         task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
-        exec.setMessage("KMeans (SPARK) Prediction done.");
+        exec.setMessage("(SPARK) prediction done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
     }
 
@@ -100,6 +98,7 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
      * @return the result spec
      */
     public static DataTableSpec createSpec(final DataTableSpec inputSpec) {
+        //TK_TODO: Here we need to create the right spec
         return createSpec(inputSpec, "cluster");
     }
 

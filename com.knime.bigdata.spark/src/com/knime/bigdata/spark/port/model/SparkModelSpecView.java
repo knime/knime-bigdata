@@ -35,14 +35,14 @@ import org.knime.core.node.ModelContentRO;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkModelConnectionView extends JPanel {
+public class SparkModelSpecView extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * @param model the serialised {@link SparkModelPortObjectSpec}
      */
-    public SparkModelConnectionView(final ModelContentRO model) {
+    public SparkModelSpecView(final ModelContentRO model) {
         super(new GridBagLayout());
         final SparkModelPortObjectSpec spec = new SparkModelPortObjectSpec(model);
         super.setName("MLlib");

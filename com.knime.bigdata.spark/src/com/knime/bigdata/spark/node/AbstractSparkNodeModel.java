@@ -143,9 +143,9 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
         }
-        for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
-            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
-        }
+//        for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
+//            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
+//        }
         m_namedRDDs.clear();
         resetInternal();
     }

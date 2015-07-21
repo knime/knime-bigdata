@@ -84,7 +84,7 @@ public class MLlib2PMMLNodeModel extends NodeModel {
             clusters[i] = clusterCenters[i].toArray();
         }
         outPMMLPort.addModelTranslater(new PMMLClusterTranslator(ComparisonMeasure.squaredEuclidean,
-                clusterCenters.length, clusters, null, new LinkedHashSet<>(model.getColumnNames())));
+                clusterCenters.length, clusters, null, new LinkedHashSet<>(model.getLearningColumnNames())));
         return new PortObject[] {outPMMLPort};
     }
 

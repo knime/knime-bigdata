@@ -20,11 +20,10 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
@@ -32,6 +31,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
@@ -39,15 +39,16 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.mllib.MLlibUtil;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
 
 /**
  *
@@ -57,46 +58,53 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
 
     private final SettingsModelString m_classCol = createClassColModel();
 
+    private final SettingsModelString m_qualityMeasure = createQualityMeasureModel();
+
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
+    private final SettingsModelInteger m_maxNumberOfBins = createMaxNumberBinsModel();
+
+    private final SettingsModelInteger m_maxDepth = createMaxDepthModel();
+
     /**
-     *
+     * Constructor.
      */
-    public MLlibDecisionTreeNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE,
-            SparkModelPortObject.TYPE});
+    MLlibDecisionTreeNodeModel() {
+        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
+            new PortType[]{SparkModelPortObject.TYPE});
     }
 
     /**
-     * @return
+     * @return the quality measure model
+     */
+    static SettingsModelString createQualityMeasureModel() {
+        return new SettingsModelString("qualityMeasure", ParameterConstants.VALUE_GINI);
+    }
+
+    /**
+     * @return the class column model
      */
     static SettingsModelString createClassColModel() {
-        return new SettingsModelString("classCol", null);
+        return new SettingsModelString("classColumn", null);
     }
 
     /**
-     * @return
+     * @return the feature column model
      */
-    static SettingsModelString createTableNameModel() {
-        return new SettingsModelString("tableName", "result");
+    @SuppressWarnings("unchecked")
+    static SettingsModelColumnFilter2 createColumnsModel() {
+        return new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
     }
 
     /**
-     * @return
-     */
-    static SettingsModelString createColumnNameModel() {
-        return new SettingsModelString("columnName", "Prediction");
-    }
-
-    /**
-     * @return
+     * @return the maximum number of bins model
      */
     static SettingsModelIntegerBounded createMaxNumberBinsModel() {
         return new SettingsModelIntegerBounded("maxNumBins", 10, 1, Integer.MAX_VALUE);
     }
 
     /**
-     * @return
+     * @return the maximum depth model
      */
     static SettingsModelIntegerBounded createMaxDepthModel() {
         return new SettingsModelIntegerBounded("maxDepth", 25, 1, Integer.MAX_VALUE);
@@ -107,15 +115,28 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (inSpecs == null || inSpecs.length != 1) {
-            throw new InvalidSettingsException("No Hive connection available");
+        if (inSpecs == null || inSpecs.length != 2) {
+            throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        DataTableSpec tableSpec = spec.getTableSpec();
-        FilterResult result = m_cols.applyTo(tableSpec);
-        final String[] includedCols = result.getIncludes();
-        if (includedCols == null || includedCols.length < 1) {
-            throw new InvalidSettingsException("No input columns available");
+        final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
+        if (mapSpec != null && !SparkStringMapperNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+        }
+        final DataTableSpec tableSpec = spec.getTableSpec();
+        final String classColName = m_classCol.getStringValue();
+        if (classColName == null) {
+            throw new InvalidSettingsException("No class column selected");
+        }
+        int classColIdx = tableSpec.findColumnIndex(classColName);
+        if (classColIdx < 0) {
+            throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
+        }
+        final FilterResult result = m_cols.applyTo(tableSpec);
+        final List<String> featureColNames =  Arrays.asList(result.getIncludes());
+        List<Integer> featureColIdxs = MLlibUtil.getColumnIndices(tableSpec, featureColNames);
+        if (featureColIdxs.contains(Integer.valueOf(classColIdx))) {
+            throw new InvalidSettingsException("Class column also selected as feature column");
         }
         return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(tableSpec), createMLSpec()};
     }
@@ -126,36 +147,29 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final String aOutputTableName = SparkIDGenerator.createID();
+        final SparkDataPortObject mapping = (SparkDataPortObject)inObjects[1];
         exec.setMessage("Starting Decision Tree (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
-        SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-
-        final List<Integer> numericColIdx = new LinkedList<>();
-        final List<String> numericColNames = new LinkedList<>();
-        int classColIdx = -1;
-        int counter = 0;
         final String classColName = m_classCol.getStringValue();
-        for (DataColumnSpec colSpec : tableSpec) {
-            if (colSpec.getName().equals(classColName)) {
-                classColIdx = counter;
-            } else if (colSpec.getType().isCompatible(DoubleValue.class)) {
-                numericColIdx.add(Integer.valueOf(counter));
-                numericColNames.add(colSpec.getName());
-            }
-            counter++;
+        int classColIdx = tableSpec.findColumnIndex(classColName);
+        if (classColIdx < 0) {
+            throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
         }
-
-        //       TODO - this is not the correct spec
-        SparkDataTable mappingRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-
-        final DecisionTreeTask task =
-            new DecisionTreeTask(data.getData(), numericColIdx, numericColNames, classColName, classColIdx, mappingRDD,
-                resultRDD);
-        final DecisionTreeModel model = task.execute(exec);
-        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>("DecisionTree", model, tableSpec))};
+        final FilterResult filterResult = m_cols.applyTo(tableSpec);
+        final List<String> featureColNames = Arrays.asList(filterResult.getIncludes());
+        final List<Integer> featureColIdxs = MLlibUtil.getColumnIndices(tableSpec, featureColNames);
+        if (featureColIdxs.contains(Integer.valueOf(classColIdx))) {
+            throw new InvalidSettingsException("Class column also selected as feature column");
+        }
+        final int maxDepth = m_maxDepth.getIntValue();
+        final int maxNoOfBins = m_maxNumberOfBins.getIntValue();
+        final String qualityMeasure = m_qualityMeasure.getStringValue();
+        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), featureColIdxs, featureColNames, classColName,
+            classColIdx, mapping == null ? null : mapping.getData(), maxDepth, maxNoOfBins, qualityMeasure);
+        final DecisionTreeModel treeModel = task.execute(exec);
+        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>("DecisionTree", treeModel,
+                MLlibDecisionTreeInterpreter.getInstance(), tableSpec, classColName, featureColNames))};
 
     }
 
@@ -167,23 +181,15 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     }
 
     /**
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    static SettingsModelColumnFilter2 createColumnsModel() {
-        return new SettingsModelColumnFilter2("columns", DoubleValue.class);
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_classCol.saveSettingsTo(settings);
-        //        m_noOfCluster.saveSettingsTo(settings);
-        //        m_noOfIteration.saveSettingsTo(settings);
-        //        m_tableName.saveSettingsTo(settings);
-        //        m_colName.saveSettingsTo(settings);
+        m_cols.saveSettingsTo(settings);
+        m_maxNumberOfBins.saveSettingsTo(settings);
+        m_maxDepth.saveSettingsTo(settings);
+        m_qualityMeasure.saveSettingsTo(settings);
     }
 
     /**
@@ -192,10 +198,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.validateSettings(settings);
-        //        m_noOfCluster.validateSettings(settings);
-        //        m_noOfIteration.validateSettings(settings);
-        //        m_tableName.validateSettings(settings);
-        //        m_colName.validateSettings(settings);
+        m_cols.validateSettings(settings);
+        m_maxNumberOfBins.validateSettings(settings);
+        m_maxDepth.validateSettings(settings);
+        m_qualityMeasure.validateSettings(settings);
     }
 
     /**
@@ -204,10 +210,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.loadSettingsFrom(settings);
-        //        m_noOfCluster.loadSettingsFrom(settings);
-        //        m_noOfIteration.loadSettingsFrom(settings);
-        //        m_tableName.loadSettingsFrom(settings);
-        //        m_colName.loadSettingsFrom(settings);
+        m_cols.loadSettingsFrom(settings);
+        m_maxNumberOfBins.loadSettingsFrom(settings);
+        m_maxDepth.loadSettingsFrom(settings);
+        m_qualityMeasure.loadSettingsFrom(settings);
     }
 
 }

@@ -23,7 +23,6 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -36,6 +35,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.mllib.MLlibUtil;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -116,12 +116,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec tableSpec = data.getTableSpec();
         final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
-        int[] includeColIdxs = new int[includedCols.length];
-        for (int i = 0, length = includedCols.length; i < length; i++) {
-            includeColIdxs[i] = tableSpec.findColumnIndex(includedCols[i]);
-        }
-        final ColumnRearranger rearranger = new ColumnRearranger(tableSpec);
-        rearranger.keepOnly(includeColIdxs);
+        final int[] includeColIdxs = MLlibUtil.getColumnIndices(tableSpec, includedCols);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
         final String aOutputTableName = SparkIDGenerator.createID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
@@ -129,8 +124,8 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
             m_noOfIteration.getIntValue(), resultRDD);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
-        return new PortObject[]{new SparkDataPortObject(resultRDD),
-            new SparkModelPortObject<>(new SparkModel<>("KMeans", clusters, rearranger.createSpec()))};
+        return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
+                "KMeans", clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
     }
 
 
@@ -168,6 +163,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);
-        m_cols.validateSettings(settings);
+        m_cols.loadSettingsFrom(settings);
     }
 }
