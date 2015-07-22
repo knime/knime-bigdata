@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -74,7 +75,6 @@ public class JobResult implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-
 
     /**
      * some String that is (part of) the result
@@ -162,6 +162,11 @@ public class JobResult implements Serializable {
         return new JobResult(m_msg, m_tables, aObjectResult);
     }
 
+    /**
+     *
+     * @param aType
+     * @return Java primitive class of given data type
+     */
     public static Class<?> getJavaTypeFromDataType(final DataType aType) {
         for (Map.Entry<Class<?>, DataType> entry : StructTypeBuilder.DATA_TYPES_BY_CLASS.entrySet()) {
             if (entry.getValue().getClass().equals(aType.getClass())) {
@@ -184,23 +189,28 @@ public class JobResult implements Serializable {
         final Map<String, StructType> m = new HashMap<>();
         ConfigObject c = config.getObject(TABLES_IDENTIFIER);
         for (Map.Entry<String, ConfigValue> entry : c.entrySet()) {
-            ConfigList types = (ConfigList)entry.getValue();
-            StructField[] fields = new StructField[types.size()];
-            int f = 0;
-            for (ConfigValue v : types) {
-                List<Object> dt = ((ConfigList)v).unwrapped();
-                DataType t;
-                try {
-                    t = StructTypeBuilder.DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
-                    fields[f++] =
-                        DataType.createStructField(dt.get(0).toString(), t, Boolean.parseBoolean(dt.get(2).toString()));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+            if (entry.getValue() instanceof ConfigList) {
+                ConfigList types = (ConfigList)entry.getValue();
+                StructField[] fields = new StructField[types.size()];
+                int f = 0;
+                for (ConfigValue v : types) {
+                    List<Object> dt = ((ConfigList)v).unwrapped();
+                    DataType t;
+                    try {
+                        t = StructTypeBuilder.DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
+                        fields[f++] =
+                            DataType.createStructField(dt.get(0).toString(), t,
+                                Boolean.parseBoolean(dt.get(2).toString()));
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            StructType structType = DataType.createStructType(fields);
+                StructType structType = DataType.createStructType(fields);
 
-            m.put(stripQuotes(entry.getKey()), structType);
+                m.put(stripQuotes(entry.getKey()), structType);
+            } else {
+                m.put(stripQuotes(entry.getKey()), null);
+            }
         }
         if (isError) {
             return new JobResult(msg, Collections.unmodifiableMap(m), null, (String)ModelUtils.fromString(config
@@ -225,15 +235,20 @@ public class JobResult implements Serializable {
         Map<String, ArrayList<ArrayList<String>>> m = new HashMap<>();
         for (Map.Entry<String, StructType> entry : m_tables.entrySet()) {
             ArrayList<ArrayList<String>> fields = new ArrayList<>();
-            for (StructField field : entry.getValue().getFields()) {
-                ArrayList<String> f = new ArrayList<>();
-                f.add(field.getName());
-                f.add(getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
-                f.add("" + field.isNullable());
-                fields.add(f);
+            final String key = ensureQuotes(entry.getKey());
+            final StructType value = entry.getValue();
+            if (value != null) {
+                for (StructField field : value.getFields()) {
+                    ArrayList<String> f = new ArrayList<>();
+                    f.add(field.getName());
+                    f.add(getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
+                    f.add("" + field.isNullable());
+                    fields.add(f);
+                }
+                m.put(key, fields);
+            } else {
+                m.put(key, null);
             }
-            String key = ensureQuotes(entry.getKey());
-            m.put(key, fields);
         }
         config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
         config = config.withValue(STATUS_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_isError));
@@ -268,7 +283,7 @@ public class JobResult implements Serializable {
      */
     private static String stripQuotes(final String aString) {
         if (aString.startsWith("\"") && aString.endsWith("\"")) {
-            return aString.substring(1, aString.length()-1);
+            return aString.substring(1, aString.length() - 1);
         }
         return aString;
     }
@@ -289,11 +304,21 @@ public class JobResult implements Serializable {
     }
 
     /**
-     * @return job result tables, may be empty map, but never null (map is immutable)
+     * @return job result tables, may be empty set, but never null
      */
     @Nonnull
-    public Map<String, StructType> getTables() {
-        return m_tables;
+    public Set<String> getTableNames() {
+        return m_tables.keySet();
+    }
+
+    /**
+     * @param aTableName name of table to retrieve (key in collection of named rdds)
+     * @return StructType of job result table with given name, might be null if computation failed or struct type was
+     *         not computed (not all jobs compute the struct type)
+     */
+    @CheckForNull
+    public StructType getTableStructType(final String aTableName) {
+        return m_tables.get(aTableName);
     }
 
     /**

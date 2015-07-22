@@ -19,7 +19,7 @@ import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.testing.UnitSpec;
+import com.knime.bigdata.spark.testing.SparkSpec;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
@@ -29,7 +29,7 @@ import com.typesafe.config.ConfigValueFactory;
  * @author dwk
  *
  */
-public class SparkJobCompilerTest extends UnitSpec {
+public class SparkJobCompilerTest extends SparkSpec {
 
     /**
      *

@@ -26,7 +26,7 @@ public class JobResultTest extends UnitSpec {
     public void emptyJobResultHasEmptyMessageAndTableAndNoModel() {
         final JobResult testObj = JobResult.emptyJobResult();
         assertEquals("empty message expected", "", testObj.getMessage());
-        assertEquals("empty map of table schemas expected", 0, testObj.getTables().size());
+        assertEquals("empty map of table schemas expected", 0, testObj.getTableNames().size());
         assertEquals("no model expected", null, testObj.getObjectResult());
     }
 
@@ -37,7 +37,7 @@ public class JobResultTest extends UnitSpec {
     public void jobResultWithMsgHasMessageAndEmptyTableAndNoModel() {
         final JobResult testObj = JobResult.emptyJobResult().withMessage("my message");
         assertEquals("non-empty message expected", "my message", testObj.getMessage());
-        assertEquals("empty map of table schemas expected", 0, testObj.getTables().size());
+        assertEquals("empty map of table schemas expected", 0, testObj.getTableNames().size());
         assertEquals("no model expected", null, testObj.getObjectResult());
     }
 
@@ -52,7 +52,7 @@ public class JobResultTest extends UnitSpec {
                 DataType.createStructType(new StructField[]{DataType.createStructField("name", DataType.StringType,
                     false)}));
         assertEquals("empty message expected", "", testObj.getMessage());
-        assertEquals("non-empty map of table schemas expected", 1, testObj.getTables().size());
+        assertEquals("non-empty map of table schemas expected", 1, testObj.getTableNames().size());
         assertEquals("no model expected", null, testObj.getObjectResult());
     }
 
@@ -63,7 +63,7 @@ public class JobResultTest extends UnitSpec {
     public void jobResultWithObjectHasNoMessageAndNoTableAndModel() {
         final JobResult testObj = JobResult.emptyJobResult().withObjectResult(new KMeansModel(null));
         assertEquals("empty message expected", "", testObj.getMessage());
-        assertEquals("empty map of table schemas expected", 0, testObj.getTables().size());
+        assertEquals("empty map of table schemas expected", 0, testObj.getTableNames().size());
         assertTrue("model expected", testObj.getObjectResult() != null);
     }
 

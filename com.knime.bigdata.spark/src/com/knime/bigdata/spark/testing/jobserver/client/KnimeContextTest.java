@@ -10,7 +10,7 @@ import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.testing.UnitSpec;
+import com.knime.bigdata.spark.testing.SparkSpec;
 
 
 /**
@@ -18,7 +18,7 @@ import com.knime.bigdata.spark.testing.UnitSpec;
  * @author dwk
  *
  */
-public class KnimeContextTest extends UnitSpec {
+public class KnimeContextTest extends SparkSpec {
 
     /**
      *

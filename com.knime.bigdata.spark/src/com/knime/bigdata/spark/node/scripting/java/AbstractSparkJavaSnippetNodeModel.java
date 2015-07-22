@@ -32,9 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
-import org.knime.base.node.jsnippet.util.FlowVariableRepository;
-import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
-import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -179,7 +176,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         //start job with proper parameters
         final String jobId = JobControler.startJob(context, job, params2Json(table1Name, table2Name, tableName));
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
-        final StructType tableTypes = result.getTables().get(tableName);
+        final StructType tableTypes = result.getTableStructType(tableName);
         if (tableTypes != null) {
             final List<DataColumnSpec> specs = new LinkedList<>();
             final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
