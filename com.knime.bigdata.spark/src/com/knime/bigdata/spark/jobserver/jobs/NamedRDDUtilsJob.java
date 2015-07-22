@@ -31,6 +31,7 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
 
@@ -41,9 +42,21 @@ import com.typesafe.config.Config;
  */
 public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
 
+    /**
+     * delete operation
+     */
+    public static final String OP_DELETE = "delete";
+
+    /**
+     * list names of active named RDDs operation
+     */
+    public static final String OP_INFO = "info";
+
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
+
+    private static final String PARAM_OP = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING;
 
     private final static Logger LOGGER = Logger.getLogger(NamedRDDUtilsJob.class.getName());
 
@@ -55,9 +68,14 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
     public SparkJobValidation validate(final Config config) {
         String msg = null;
 
-        if (!config.hasPath(PARAM_TABLE_KEY)) {
+        if (!config.hasPath(PARAM_OP)) {
+            msg = "Input parameter '" + PARAM_OP + "' missing.";
+        }
+
+        if (msg != null && !config.hasPath(PARAM_TABLE_KEY) && config.getString(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
             msg = "Input parameter '" + PARAM_TABLE_KEY + "' missing.";
         }
+
 
         if (msg != null) {
             return ValidationResultConverter.invalid(msg);
@@ -66,12 +84,31 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
     }
 
     /**
-     * remove the given named RDD from the map of named RDDs
+     * executes operations on named RDDs, currently one of:
+     * - remove the given named RDD from the map of named RDDs
+     * - return list of known named RDDs
      *
-     * @return "OK" result of named rdd does not exist anymore after execution, "ERROR" result otherwise
+     * @return "OK" result if named rdd does not exist anymore after execution (deletion),
+     * names of known named RDDS (info), "ERROR" result otherwise
      */
     @Override
     public JobResult runJobWithContext(final SparkContext sc, final Config aConfig)  {
+        if (aConfig.getString(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
+            return deleteNamedRDD(aConfig);
+        }
+        JobResult res = JobResult.emptyJobResult();
+        for (String name : RDDUtils.activeNamedRDDs(this)) {
+            res = res.withTable(name, null);
+        }
+        return res.withMessage("OK");
+
+    }
+
+    /**
+     * @param aConfig
+     * @return
+     */
+    private JobResult deleteNamedRDD(final Config aConfig) {
         final String rddName = aConfig.getString(PARAM_TABLE_KEY);
         LOGGER.log(Level.INFO, "deleting reference to named RDD " + rddName);
         deleteNamedRdd(rddName);

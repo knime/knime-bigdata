@@ -1,6 +1,8 @@
 package com.knime.bigdata.spark.jobserver.client;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +16,7 @@ import org.knime.core.node.CanceledExecutionException;
 import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
@@ -168,15 +171,44 @@ public class KnimeContext {
     public static void deleteNamedRDD(final KNIMESparkContext aContextContainer, final String aNamedRdd) {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-                new String[]{ParameterConstants.PARAM_TABLE_1, aNamedRdd}});
+                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_DELETE, ParameterConstants.PARAM_TABLE_1, aNamedRdd}});
         try {
             String jobId =
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
             JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
+            //just for testing:
+            Set<String> names = listNamedRDDs(aContextContainer);
+            int ix = 1;
+            for (String name : names){
+                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
+            }
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
         } catch (GenericKnimeSparkException e) {
             LOGGER.warning("Failed to remove reference to named RDD on server.");
+        }
+    }
+
+    /**
+     * query given context for names of currently referenced named RDDs
+     *
+     * @param aContextContainer context configuration container
+     * @return Set of named RDD names
+     */
+    public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
+        String jsonArgs =
+            JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_INFO}});
+        try {
+            String jobId =
+                JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
+            JobResult res = JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
+            return res.getTableNames();
+        } catch (CanceledExecutionException e) {
+            // impossible with null execution context
+            return Collections.emptySet();
+        } catch (GenericKnimeSparkException e) {
+            LOGGER.warning("Failed to query server for set of named RDDs.");
+            return Collections.emptySet();
         }
     }
 

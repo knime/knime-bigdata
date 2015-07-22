@@ -10,14 +10,14 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.testing.UnitSpec;
+import com.knime.bigdata.spark.testing.SparkSpec;
 
 /**
  *
  * @author dwk
  *
  */
-public class JobControlerTest extends UnitSpec {
+public class JobControlerTest extends SparkSpec {
 
     /**
      *

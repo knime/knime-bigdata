@@ -19,7 +19,7 @@ import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.jobs.JavaRDDFromFile;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.testing.UnitSpec;
+import com.knime.bigdata.spark.testing.SparkSpec;
 import com.typesafe.config.ConfigValueFactory;
 
 /**
@@ -27,7 +27,7 @@ import com.typesafe.config.ConfigValueFactory;
  * @author dwk
  *
  */
-public class CompiledTransformationJobTest extends UnitSpec {
+public class CompiledTransformationJobTest extends SparkSpec {
 
     private final String params2Json(final String aInputKey, final String aOutputKey) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
