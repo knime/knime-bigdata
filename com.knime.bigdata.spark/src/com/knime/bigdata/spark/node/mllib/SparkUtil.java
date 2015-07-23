@@ -20,7 +20,6 @@
  */
 package com.knime.bigdata.spark.node.mllib;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.knime.core.data.DataTableSpec;
@@ -30,12 +29,12 @@ import org.knime.core.node.InvalidSettingsException;
  *
  * @author koetter
  */
-public final class MLlibUtil {
+public final class SparkUtil {
 
     /**
      * Prevent object creation.
      */
-    private MLlibUtil() {}
+    private SparkUtil() {}
 
     /**
      * @param tableSpec the {@link DataTableSpec}
@@ -43,18 +42,19 @@ public final class MLlibUtil {
      * @return the indices of the columns in the same order as in the input list
      * @throws InvalidSettingsException if the input list is empty or a column name could not be found in the input spec
      */
-    public static List<Integer> getColumnIndices(final DataTableSpec tableSpec, final List<String> colNames)
+    public static Integer[] getColumnIndices(final DataTableSpec tableSpec, final List<String> colNames)
         throws InvalidSettingsException {
         if (colNames == null || colNames.isEmpty()) {
             throw new InvalidSettingsException("No columns selected");
         }
-        final List<Integer> numericColIdx = new LinkedList<>();
+        final Integer[] numericColIdx = new Integer[colNames.size()];
+        int idx = 0;
         for (String numericColName : colNames) {
             final int colIdx = tableSpec.findColumnIndex(numericColName);
             if (colIdx < 0) {
                 throw new InvalidSettingsException("Column: " + numericColName + " not found in input data");
             }
-            numericColIdx.add(Integer.valueOf(colIdx));
+            numericColIdx[idx++] = Integer.valueOf(colIdx);
         }
         return numericColIdx;
     }
@@ -65,7 +65,7 @@ public final class MLlibUtil {
      * @return the indices of the columns in the same order as in the input list
      * @throws InvalidSettingsException if the input list is empty or a column name could not be found in the input spec
      */
-    public static int[] getColumnIndices(final DataTableSpec tableSpec, final String[] featureColNames)
+    public static int[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
         throws InvalidSettingsException {
         if (featureColNames == null || featureColNames.length < 1) {
             throw new InvalidSettingsException("No columns selected");
