@@ -34,6 +34,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
@@ -74,7 +75,7 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
         if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
-        final SparkDataPortObject spec = (SparkDataPortObject)inSpecs[0];
+        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         return new PortObjectSpec[] {spec.getTableSpec()};
     }
 
