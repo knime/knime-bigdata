@@ -97,12 +97,12 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
      * {@inheritDoc}
      */
     @Override
-    public LongCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject instanceof Long) {
             Long val = (Long) sparkObject;
             return new LongCell(val);
         }
-        return (LongCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**

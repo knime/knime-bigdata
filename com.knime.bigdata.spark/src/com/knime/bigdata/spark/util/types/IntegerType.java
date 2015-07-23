@@ -98,12 +98,12 @@ public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
      * {@inheritDoc}
      */
     @Override
-    public IntCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject instanceof Integer) {
             Integer val = (Integer) sparkObject;
             return new IntCell(val);
         }
-        return (IntCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**

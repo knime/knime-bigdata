@@ -35,33 +35,34 @@ public interface SparkTypeConverter<K extends DataCell, S extends Object> {
      * @return the preferred Spark {@link org.apache.spark.sql.api.java.DataType} type this converter converts
      * the supported KNIME types to
      */
-    public abstract org.apache.spark.sql.api.java.DataType getSparkSqlType();
+    public org.apache.spark.sql.api.java.DataType getSparkSqlType();
 
     /**
      * @return the Spark {@link org.apache.spark.sql.api.java.DataType}s that are supported by this converter
      */
-    public abstract org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes();
+    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes();
 
     /**
      * @return the preferred KNIME {@link DataType} this converter converts the supported Spark types to
      */
-    public abstract DataType getKNIMEType();
+    public DataType getKNIMEType();
 
     /**
      * @return the KNIME {@link DataType}s that are supported by this converter
      */
-    public abstract DataType[] getKNIMETypes();
+    public DataType[] getKNIMETypes();
 
     /**
      * @param sparkObject the Spark data object to convert into a KNIME {@link DataCell}
-     * @return corresponding KNIME {@link DataCell} or {@link DataType#getMissingCell()}
+     * @return corresponding KNIME {@link DataCell} or {@link DataType#getMissingCell()} if the opject is
+     * <code>null</code>
      */
-    public abstract K convert(Object sparkObject);
+    public DataCell convert(Object sparkObject);
 
     /**
      * @param cell the {@link DataCell} to convert
      * @return the corresponding Spark object
      */
-    public abstract S convert(DataCell cell);
+    public S convert(DataCell cell);
 
 }

@@ -95,12 +95,12 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      * {@inheritDoc}
      */
     @Override
-    public DoubleCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject instanceof Double) {
             Double val = (Double) sparkObject;
             return new DoubleCell(val);
         }
-        return (DoubleCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**
