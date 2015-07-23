@@ -42,7 +42,7 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibUtil;
+import com.knime.bigdata.spark.node.mllib.SparkUtil;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -133,8 +133,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         }
         final FilterResult result = m_cols.applyTo(tableSpec);
         final List<String> featureColNames =  Arrays.asList(result.getIncludes());
-        List<Integer> featureColIdxs = MLlibUtil.getColumnIndices(tableSpec, featureColNames);
-        if (featureColIdxs.contains(Integer.valueOf(classColIdx))) {
+        Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
+        if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
         }
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
@@ -158,8 +158,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         }
         final FilterResult filterResult = m_cols.applyTo(tableSpec);
         final List<String> featureColNames = Arrays.asList(filterResult.getIncludes());
-        final List<Integer> featureColIdxs = MLlibUtil.getColumnIndices(tableSpec, featureColNames);
-        if (featureColIdxs.contains(Integer.valueOf(classColIdx))) {
+        final Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
+        if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
         }
         final int maxDepth = m_maxDepth.getIntValue();
