@@ -35,7 +35,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibUtil;
+import com.knime.bigdata.spark.node.mllib.SparkUtil;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -116,7 +116,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec tableSpec = data.getTableSpec();
         final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
-        final int[] includeColIdxs = MLlibUtil.getColumnIndices(tableSpec, includedCols);
+        final int[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
         final String aOutputTableName = SparkIDGenerator.createID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
