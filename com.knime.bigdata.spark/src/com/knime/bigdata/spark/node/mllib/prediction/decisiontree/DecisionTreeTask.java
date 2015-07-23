@@ -55,7 +55,7 @@ public class DecisionTreeTask implements Serializable {
     private int m_maxNoOfBins;
     private String m_qualityMeasure;
 
-    DecisionTreeTask(final SparkRDD inputRDD, final List<Integer> numericColIdx, final List<String> aNumericColNames,
+    DecisionTreeTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> aNumericColNames,
         final String classColName, final int classColIdx, final SparkRDD mappingRDD, final int maxDepth,
         final int maxNoOfBins, final String qualityMeasure) {
         m_maxDepth = maxDepth;
@@ -63,7 +63,7 @@ public class DecisionTreeTask implements Serializable {
         m_qualityMeasure = qualityMeasure;
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_numericColIdx = numericColIdx.toArray(new Integer[numericColIdx.size()]);
+        m_numericColIdx = featureColIdxs;
         m_classColName = classColName;
         final List<String> allColNames = new LinkedList<>(aNumericColNames);
         allColNames.add(classColName);
