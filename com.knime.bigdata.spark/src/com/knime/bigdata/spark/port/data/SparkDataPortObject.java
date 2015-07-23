@@ -186,10 +186,10 @@ public class SparkDataPortObject implements PortObject {
                     cacheRows.setText(Integer.toString(value.get()));
                 }
                 panels[0].removeAll();
-                panels[0].add(new JLabel("Fetching " + value.get()
-                        + " rows from Spark..."), BorderLayout.NORTH);
+                panels[0].add(new JLabel("Fetching " + value.get() + " rows from Spark..."), BorderLayout.NORTH);
                 panels[0].repaint();
                 panels[0].revalidate();
+                //TK_TODO: Add job cancel button to the dialog to allow users to stop the fetching job
                 final SwingWorkerWithContext<DataTable, Void> worker  = new SwingWorkerWithContext<DataTable, Void>() {
                     /** {@inheritDoc} */
                     @Override
@@ -202,28 +202,44 @@ public class SparkDataPortObject implements PortObject {
                         DataTable dt = null;
                         try {
                             dt = super.get();
-                        } catch (ExecutionException ee) {
-                            LOGGER.warn("Error during fetching data from "
-                                + "Spark, reason: " + ee.getMessage(), ee);
-                        } catch (InterruptedException ie) {
-                            LOGGER.warn("Error during fetching data from "
-                                + "Spark, reason: " + ie.getMessage(), ie);
-                        }
-                        @SuppressWarnings("serial")
-                        final BufferedDataTableView dataView2 = new BufferedDataTableView(dt) {
-                            /** {@inheritDoc} */
-                            @Override
-                            public String getName() {
-                                return "Data Preview";
+                        } catch (ExecutionException|InterruptedException ee) {
+                            LOGGER.warn("Error during fetching data from Spark, reason: " + ee.getMessage(), ee);
+                            final Throwable cause = ee.getCause();
+                            final String msg;
+                            if (cause != null) {
+                                msg = cause.getMessage();
+                            } else {
+                                msg = ee.getMessage();
                             }
-                        };
-                        dataView2.setName("Data Preview");
-                        panels[0].removeAll();
-                        panels[0].add(p, BorderLayout.NORTH);
-                        panels[0].add(dataView2, BorderLayout.CENTER);
-                        panels[0].setName(dataView2.getName());
-                        panels[0].repaint();
-                        panels[0].revalidate();
+                            panels[0].removeAll();
+                            panels[0].add(new JLabel("Error fetching rows from Spark: " + msg), BorderLayout.NORTH);
+                            panels[0].repaint();
+                            panels[0].revalidate();
+                            return;
+                        }
+                        if (dt == null) {
+                            panels[0].removeAll();
+                            panels[0].add(new JLabel("Error fetching " + value.get()
+                                    + " rows from Spark. For details see log file."), BorderLayout.NORTH);
+                            panels[0].repaint();
+                            panels[0].revalidate();
+                        } else {
+                            @SuppressWarnings("serial")
+                            final BufferedDataTableView dataView2 = new BufferedDataTableView(dt) {
+                                /** {@inheritDoc} */
+                                @Override
+                                public String getName() {
+                                    return "Data Preview";
+                                }
+                            };
+                            dataView2.setName("Data Preview");
+                            panels[0].removeAll();
+                            panels[0].add(p, BorderLayout.NORTH);
+                            panels[0].add(dataView2, BorderLayout.CENTER);
+                            panels[0].setName(dataView2.getName());
+                            panels[0].repaint();
+                            panels[0].revalidate();
+                        }
                     }
                 };
                 worker.execute();
