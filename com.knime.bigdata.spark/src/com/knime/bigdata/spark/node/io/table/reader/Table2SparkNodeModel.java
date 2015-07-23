@@ -20,9 +20,12 @@
  */
 package com.knime.bigdata.spark.node.io.table.reader;
 
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -37,6 +40,8 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
+import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
 /**
  *
@@ -70,10 +75,28 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         if (inData == null || inData.length != 1 || inData[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
-        exec.setMessage("Retrieving data from Spark...");
+        exec.setMessage("Converting data table...");
+        final ExecutionMonitor subExec = exec.createSubProgress(0.7);
         final BufferedDataTable table = (BufferedDataTable)inData[0];
-        SparkDataTable resultTable = new SparkDataTable(getContext(), table.getDataTableSpec());
-        //TK_TODO: Create a KNIME2RDD Spark job
+        final int rowCount = table.getRowCount();
+        final DataTableSpec spec = table.getSpec();
+        final SparkTypeConverter<?, ?>[] converter = SparkTypeRegistry.getConverter(spec);
+        final Object[][] data = new Object[rowCount][converter.length];
+        int rowIdx = 0;
+        for (final DataRow row : table) {
+            subExec.setProgress(rowIdx / (double)rowCount, "Processing row " + rowIdx + " of " + rowCount);
+            exec.checkCanceled();
+            int colIdx = 0;
+            for (final DataCell cell : row) {
+                data[rowIdx][colIdx] = converter[colIdx++].convert(cell);
+            }
+            rowIdx++;
+        }
+        exec.setMessage("Sending data to Spark...");
+        final SparkDataTable resultTable = new SparkDataTable(getContext(), table.getDataTableSpec());
+        //TK_TODO: Hier müssen wir noch den SparkJob starten der das Object array zu Spark schickt und ein RDD
+        //daraus generiert
+        exec.setProgress(1, "Spark data object created");
         return new PortObject[] {new SparkDataPortObject(resultTable)};
     }
 
