@@ -32,6 +32,13 @@
             name="Convert &amp; Replace"
             path="/labs/spark">
       </category>
+      <category
+            icon="resources/missing.gif"
+            level-id="split"
+            locked="true"
+            name="Split &amp; Combine"
+            path="/labs/spark">
+      </category>
    </extension>
    <extension
          point="org.knime.workbench.repository.nodes">
@@ -98,14 +105,14 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.util.rename.SparkRenameColumnNodeFactory"
-            id="com.knime.bigdata.spark.node.util.rename.SparkRenameColumnNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory">
       </node>
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.util.renameregex.SparkColumnRenameRegexNodeFactory"
-            id="com.knime.bigdata.spark.node.util.renameregex.SparkColumnRenameRegexNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory">
       </node>
       <node
             category-path="/labs/spark/convert"
@@ -118,6 +125,18 @@
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/split"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/io"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
       </node>
     </extension>
 </plugin>
