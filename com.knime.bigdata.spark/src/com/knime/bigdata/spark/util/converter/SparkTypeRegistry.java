@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeLogger;
@@ -167,9 +169,23 @@ public class SparkTypeRegistry {
     }
 
     /**
-     * @return the default converter to use for all unknqon type
+     * @return the default converter to use for all unknown type
      */
     public static SparkTypeConverter<StringCell, String> getDefaultConverter() {
         return StringType.getInstance();
+    }
+
+    /**
+     * @param spec {@link DataTableSpec} to get the converter for
+     * @return {@link SparkTypeConverter} array with the appropriate converter for each data column of the
+     * input spec int he same order as the input columns
+     */
+    public static SparkTypeConverter<?, ?>[] getConverter(final DataTableSpec spec) {
+        SparkTypeConverter<?, ?>[] converter = new SparkTypeConverter<?, ?>[spec.getNumColumns()];
+        int idx = 0;
+        for (DataColumnSpec colSpec : spec) {
+            converter[idx++] = get(colSpec.getType());
+        }
+        return converter;
     }
 }

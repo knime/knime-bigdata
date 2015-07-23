@@ -97,12 +97,12 @@ public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
      * {@inheritDoc}
      */
     @Override
-    public BooleanCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject instanceof Boolean) {
             Boolean b = (Boolean) sparkObject;
             return BooleanCell.get(b);
         }
-        return (BooleanCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**

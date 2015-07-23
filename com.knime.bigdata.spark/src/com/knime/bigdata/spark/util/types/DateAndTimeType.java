@@ -26,7 +26,6 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.date.DateAndTimeCell;
 import org.knime.core.data.date.DateAndTimeValue;
-import org.knime.core.data.def.BooleanCell;
 
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 
@@ -39,7 +38,7 @@ public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date
     private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
             org.apache.spark.sql.api.java.DataType.DateType};
 
-    private static final DataType[] KNIME = new DataType[] {BooleanCell.TYPE};
+    private static final DataType[] KNIME = new DataType[] {DateAndTimeCell.TYPE};
 
     private static volatile DateAndTimeType instance;
 
@@ -98,12 +97,12 @@ public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date
      * {@inheritDoc}
      */
     @Override
-    public DateAndTimeCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject instanceof Date) {
             Date val = (Date) sparkObject;
             return new DateAndTimeCell(val.getTime(), true, true, true);
         }
-        return (DateAndTimeCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**

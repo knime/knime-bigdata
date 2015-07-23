@@ -97,11 +97,11 @@ public class StringType implements SparkTypeConverter<StringCell, String> {
      * {@inheritDoc}
      */
     @Override
-    public StringCell convert(final Object sparkObject) {
+    public DataCell convert(final Object sparkObject) {
         if (sparkObject != null) {
             return new StringCell(sparkObject.toString());
         }
-        return (StringCell)DataType.getMissingCell();
+        return DataType.getMissingCell();
     }
 
     /**
