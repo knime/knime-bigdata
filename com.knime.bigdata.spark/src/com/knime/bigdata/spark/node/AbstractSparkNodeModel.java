@@ -55,12 +55,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettings;
@@ -109,12 +111,23 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         //SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
+        Set<String> listNamedRDDs = null;
+        KNIMESparkContext context = null;
         for (final PortObject portObject : inData) {
             if (portObject instanceof  SparkDataPortObject) {
-                final KNIMESparkContext context = ((SparkDataPortObject)portObject).getContext();
-                if (!KnimeContext.sparkContextExists(context)) {
+                final SparkDataPortObject data = (SparkDataPortObject)portObject;
+                final KNIMESparkContext newContext = data.getContext();
+                if (context == null || !context.equals(newContext)) {
+                    context = newContext;
+                    if (!KnimeContext.sparkContextExists(context)) {
+                        throw new IllegalStateException(
+                            "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
+                    }
+                    listNamedRDDs = KnimeContext.listNamedRDDs(context);
+                }
+                if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
                     throw new IllegalStateException(
-                        "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
+                            "Incoming Spark data object no longer exists. Please reset all preceding Spark nodes.");
                 }
             }
         }
@@ -143,10 +156,29 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
         }
-        for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
-            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
+        if (m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
+            KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
+                @Override
+                public void run() {
+                    final long startTime = System.currentTimeMillis();
+                    final NodeLogger logger = NodeLogger.getLogger(AbstractSparkNodeModel.class);
+                    for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
+                        try {
+                            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
+                        } catch (final Throwable e) {
+                           logger.error("Exception while deleting named RDD: "
+                                   + rdd.getSecond() + " Exception: " + e.getMessage(), e);
+                        }
+                    }
+                    if (logger.isDebugEnabled()) {
+                        final long endTime = System.currentTimeMillis();
+                            final long durationTime = endTime - startTime;
+                        logger.debug("Time deleting " + m_namedRDDs.size() + "namedRDDs: " + durationTime + " ms");
+                    }
+                    m_namedRDDs.clear();
+                }
+            });
         }
-        m_namedRDDs.clear();
         resetInternal();
     }
 
