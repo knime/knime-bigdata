@@ -211,6 +211,14 @@ public class KNIMESparkContext implements Serializable {
     }
 
     /**
+     * @param context {@link KNIMESparkContext} to check for compatibility
+     * @return <code>true</code> if the contexts are compatible and can talk to each other
+     */
+    public boolean compatible(final KNIMESparkContext context) {
+        return this.equals(context);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
