@@ -28,6 +28,7 @@ import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.RowKey;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
@@ -39,6 +40,8 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
+import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
 /**
  *
@@ -53,8 +56,10 @@ public final class SparkDataTableCreator {
      * Retrieves all rows of the given rdd and converts them into a KNIME data table
      * @param data the Spark data object
      * @return the named RDD as a DataTable
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
      */
-    public static DataTable getDataTable(final SparkDataTable data) {
+    public static DataTable getDataTable(final SparkDataTable data) throws CanceledExecutionException, GenericKnimeSparkException {
         return getDataTable(data, -1);
     }
 
@@ -63,23 +68,21 @@ public final class SparkDataTableCreator {
      * @param data the Spark data object
      * @param cacheNoRows the number of rows to retrieve
      * @return the named RDD as a DataTable
+     * @throws CanceledExecutionException
+     * @throws GenericKnimeSparkException
      */
-    public static DataTable getDataTable(final SparkDataTable data, final int cacheNoRows) {
-        try {
-            final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
+    public static DataTable getDataTable(final SparkDataTable data, final int cacheNoRows)
+            throws CanceledExecutionException, GenericKnimeSparkException {
+        final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
-            final KNIMESparkContext context = data.getContext();
-            String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
+        final KNIMESparkContext context = data.getContext();
+        String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
 
-            JobControler.waitForJob(context, jobId, null);
+        JobControler.waitForJob(context, jobId, null);
 
-            assert (JobStatus.OK != JobControler.getJobStatus(context, jobId));
+        assert (JobStatus.OK != JobControler.getJobStatus(context, jobId));
 
-            return convertResultToDataTable(context, jobId, data.getTableSpec());
-        } catch (Throwable t) {
-            LOGGER.error("Could not fetch data from Spark RDD, reason: " + t.getMessage(), t);
-            return null;
-        }
+        return convertResultToDataTable(context, jobId, data.getTableSpec());
     }
 
     private static String rowFetcherDef(final int aNumRows, final String aTableName) {
@@ -101,6 +104,8 @@ public final class SparkDataTableCreator {
          }
         final Object[][] arrayRes = (Object[][])statusWithResult.getObjectResult();
         assert (arrayRes != null) : "Row fetcher failed to return a result";
+
+        final SparkTypeConverter<?, ?>[] converter = SparkTypeRegistry.getConverter(spec);
 
         return new DataTable() {
 
@@ -152,8 +157,7 @@ public final class SparkDataTableCreator {
 
                             @Override
                             public DataCell getCell(final int index) {
-                                //TK_TODO: Generate the right DataCells e.g. DoubleCell, etc. based on the TableSpec
-                                return new MyRDDDataCell(o, index);
+                                return converter[index].convert(o[index]);
                             }
                         };
                     }
@@ -170,34 +174,5 @@ public final class SparkDataTableCreator {
                 return spec;
             }
         };
-    }
-
-    private static class MyRDDDataCell extends DataCell {
-        private final int m_index;
-        private final Object[] m_row;
-
-        MyRDDDataCell(final Object[] aRow, final int aIndex) {
-            m_index = aIndex;
-            m_row = aRow;
-        }
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String toString() {
-            return m_row[m_index].toString();
-        }
-
-        @Override
-        public int hashCode() {
-            return toString().hashCode();
-        }
-
-        @Override
-        protected boolean equalsDataCell(final DataCell dc) {
-            return (dc != null && dc.toString().equals(toString()));
-        }
     }
 }
