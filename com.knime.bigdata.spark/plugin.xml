@@ -26,6 +26,7 @@
             path="/labs/spark">
       </category>
       <category
+            after="/labs/spark/io"
             icon="resources/missing.gif"
             level-id="convert"
             locked="true"
@@ -137,6 +138,12 @@
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
             id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/io"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
     </extension>
 </plugin>
