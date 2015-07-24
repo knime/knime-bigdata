@@ -81,6 +81,11 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         final int rowCount = table.getRowCount();
         final DataTableSpec spec = table.getSpec();
         final SparkTypeConverter<?, ?>[] converter = SparkTypeRegistry.getConverter(spec);
+        //extract primitive Java Types
+        final Class<?>[] primitiveTypes = new Class<?>[converter.length];
+        for (int colIx = 0; colIx < converter.length; colIx++) {
+            primitiveTypes[colIx] = converter[colIx].getPrimitiveType();
+        }
         final Object[][] data = new Object[rowCount][converter.length];
         int rowIdx = 0;
         for (final DataRow row : table) {

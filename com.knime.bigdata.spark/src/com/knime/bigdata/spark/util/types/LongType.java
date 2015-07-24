@@ -45,6 +45,21 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
     }
 
     /**
+     * Returns the only instance of this class.
+     * @return the only instance
+     */
+    public static LongType getInstance() {
+        if (instance == null) {
+            synchronized (LongType.class) {
+                if (instance == null) {
+                    instance = new LongType();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -61,21 +76,12 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
     }
 
     /**
-     * Returns the only instance of this class.
-     * @return the only instance
+     * {@inheritDoc}
      */
-    public static LongType getInstance() {
-        if (instance == null) {
-            synchronized (LongType.class) {
-                if (instance == null) {
-                    instance = new LongType();
-                }
-            }
-        }
-        return instance;
+    @Override
+    public Class<Long> getPrimitiveType() {
+        return Long.class;
     }
-
-
 
     /**
      * {@inheritDoc}

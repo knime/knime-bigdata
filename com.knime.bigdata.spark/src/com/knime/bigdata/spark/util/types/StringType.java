@@ -45,6 +45,21 @@ public class StringType implements SparkTypeConverter<StringCell, String> {
     }
 
     /**
+     * Returns the only instance of this class.
+     * @return the only instance
+     */
+    public static StringType getInstance() {
+        if (instance == null) {
+            synchronized (StringType.class) {
+                if (instance == null) {
+                    instance = new StringType();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -61,21 +76,12 @@ public class StringType implements SparkTypeConverter<StringCell, String> {
     }
 
     /**
-     * Returns the only instance of this class.
-     * @return the only instance
+     * {@inheritDoc}
      */
-    public static StringType getInstance() {
-        if (instance == null) {
-            synchronized (StringType.class) {
-                if (instance == null) {
-                    instance = new StringType();
-                }
-            }
-        }
-        return instance;
+    @Override
+    public Class<String> getPrimitiveType() {
+        return String.class;
     }
-
-
 
     /**
      * {@inheritDoc}

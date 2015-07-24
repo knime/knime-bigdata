@@ -46,6 +46,21 @@ public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
     }
 
     /**
+     * Returns the only instance of this class.
+     * @return the only instance
+     */
+    public static IntegerType getInstance() {
+        if (instance == null) {
+            synchronized (IntegerType.class) {
+                if (instance == null) {
+                    instance = new IntegerType();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -62,21 +77,12 @@ public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
     }
 
     /**
-     * Returns the only instance of this class.
-     * @return the only instance
+     * {@inheritDoc}
      */
-    public static IntegerType getInstance() {
-        if (instance == null) {
-            synchronized (IntegerType.class) {
-                if (instance == null) {
-                    instance = new IntegerType();
-                }
-            }
-        }
-        return instance;
+    @Override
+    public Class<Integer> getPrimitiveType() {
+        return Integer.class;
     }
-
-
 
     /**
      * {@inheritDoc}

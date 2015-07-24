@@ -45,6 +45,21 @@ public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
     }
 
     /**
+     * Returns the only instance of this class.
+     * @return the only instance
+     */
+    public static BooleanType getInstance() {
+        if (instance == null) {
+            synchronized (BooleanType.class) {
+                if (instance == null) {
+                    instance = new BooleanType();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -61,21 +76,12 @@ public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
     }
 
     /**
-     * Returns the only instance of this class.
-     * @return the only instance
+     * {@inheritDoc}
      */
-    public static BooleanType getInstance() {
-        if (instance == null) {
-            synchronized (BooleanType.class) {
-                if (instance == null) {
-                    instance = new BooleanType();
-                }
-            }
-        }
-        return instance;
+    @Override
+    public Class<Boolean> getPrimitiveType() {
+        return Boolean.class;
     }
-
-
 
     /**
      * {@inheritDoc}

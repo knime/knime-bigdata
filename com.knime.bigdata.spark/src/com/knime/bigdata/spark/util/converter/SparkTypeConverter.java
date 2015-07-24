@@ -53,8 +53,13 @@ public interface SparkTypeConverter<K extends DataCell, S extends Object> {
     public DataType[] getKNIMETypes();
 
     /**
+     * @return the preferred primitive {@link Class} type
+     */
+    public Class<S> getPrimitiveType();
+
+    /**
      * @param sparkObject the Spark data object to convert into a KNIME {@link DataCell}
-     * @return corresponding KNIME {@link DataCell} or {@link DataType#getMissingCell()} if the opject is
+     * @return corresponding KNIME {@link DataCell} or {@link DataType#getMissingCell()} if the object is
      * <code>null</code>
      */
     public DataCell convert(Object sparkObject);
