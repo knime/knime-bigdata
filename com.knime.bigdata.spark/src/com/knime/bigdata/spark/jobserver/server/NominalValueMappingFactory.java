@@ -33,14 +33,6 @@ import java.util.Map.Entry;
  */
 public class NominalValueMappingFactory {
 
-    /**
-     *
-     * @param aMappings
-     * @return new global mapping of string to nominal values
-     */
-    public static NominalValueMapping createGlobalMapping(final Map<String, Integer> aMappings) {
-        return new GlobalMapping(aMappings);
-    }
 
     /**
      *

@@ -1,9 +1,7 @@
 package com.knime.bigdata.spark.jobserver.server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +9,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.mllib.linalg.Vectors;
@@ -75,8 +72,8 @@ public class RDDUtilsInJava {
      * @param aMappingType
      * @return mapping from distinct value to unique integer value
      */
-    public static NominalValueMapping toLabelMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices, final MappingType aMappingType) {
+    public static NominalValueMapping toLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aNominalColumnIndices,
+        final MappingType aMappingType) {
 
         switch (aMappingType) {
             case GLOBAL: {
@@ -84,9 +81,9 @@ public class RDDUtilsInJava {
             }
             case COLUMN: {
                 if (aNominalColumnIndices.length < 2) {
-                    return toLabelMappingGlobalMapping(aInputRdd,  aNominalColumnIndices);
+                    return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
                 }
-                return toLabelMappingColumnMapping(aInputRdd,  aNominalColumnIndices);
+                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
             }
             case BINARY: {
                 return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
@@ -100,28 +97,31 @@ public class RDDUtilsInJava {
     private static NominalValueMapping toLabelMappingGlobalMapping(final JavaRDD<Row> aInputRdd,
         final int[] aNominalColumnIndices) {
 
-        List<String> labels = aInputRdd.flatMap(new FlatMapFunction<Row, String>() {
-            private static final long serialVersionUID = 1L;
+        Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
 
-            @Override
-            public Iterable<String> call(final Row row) {
-                ArrayList<String> val = new ArrayList<>();
-                for (int ix : aNominalColumnIndices) {
-                    val.add(row.getString(ix));
-                }
-                return val;
+        Map<String, Integer> mappings = new HashMap<>();
+        {
+            Set<String> allValues = new HashSet<String>();
+            for (Set<String> labs : labels.values()) {
+                allValues.addAll(labs);
             }
-        }).distinct().collect();
 
-        Map<String, Integer> labelMapping = new java.util.HashMap<String, Integer>(labels.size());
-        int idx = 0;
-        Iterator<String> iter = labels.iterator();
-        while (iter.hasNext()) {
-            labelMapping.put(iter.next(), idx);
-            idx += 1;
+            int idx = 0;
+            for (String label : allValues) {
+                mappings.put(label, idx++);
+            }
         }
 
-        return NominalValueMappingFactory.createGlobalMapping(labelMapping);
+        Map<Integer, Map<String, Integer>> labelMapping = new HashMap<>(labels.size());
+        for (Map.Entry<Integer, Set<String>> entry : labels.entrySet()) {
+            Set<String> values = entry.getValue();
+            Map<String, Integer> mapping = new HashMap<>(values.size());
+            for (String val : values) {
+                mapping.put(val, mappings.get(val));
+            }
+            labelMapping.put(entry.getKey(), mapping);
+        }
+        return NominalValueMappingFactory.createColumnMapping(labelMapping);
     }
 
     private static NominalValueMapping toLabelMappingColumnMapping(final JavaRDD<Row> aInputRdd,

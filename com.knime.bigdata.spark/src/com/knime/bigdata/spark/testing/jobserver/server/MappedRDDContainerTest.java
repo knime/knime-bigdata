@@ -56,6 +56,29 @@ public class MappedRDDContainerTest {
         }
     }
 
+    @Test
+    public void columnMappingShouldGenerateSensibleColumnNamesForGlobalMapping() throws Exception {
+
+        final int offset = 8;
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap()));
+        testObj.createMappingTable(names, MappingType.GLOBAL, offset);
+
+        for (Entry<Integer, String> entry : testObj.getColumnNames().entrySet()) {
+            final String n;
+            if (names.containsKey(entry.getKey())) {
+                n = names.get(entry.getKey());
+            } else if (entry.getKey() == offset) {
+                n = "Col1"+NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+            } else if (entry.getKey() == offset+1) {
+                n = "Col2"+NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+            } else if (entry.getKey() == offset+2) {
+                n = "Col7"+NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+            } else {
+                n = null;
+            }
+            assertEquals("incorrect column name, ", n, entry.getValue());
+        }
+    }
 
     @Test
     public void columnMappingShouldGenerateSensibleColumnNamesForBinaryMappings() throws Exception {
@@ -114,21 +137,22 @@ public class MappedRDDContainerTest {
         }
         return mapping;
     }
-    /**
-     * @return
-     */
-    private Map<String, Integer> getGlobalMappingMap() {
-        final Map<String, Integer> mapping = new HashMap<>();
 
-        mapping.put("val1", 0);
-        mapping.put("val2", 1);
-        mapping.put("val3", 2);
-
-        mapping.put("XXXval1", 3);
-        mapping.put("XXXval2", 4);
-        mapping.put("YYYval3", 5);
-        mapping.put("YYYval88", 6);
-        return mapping;
-    }
+//    /**
+//     * @return
+//     */
+//    private Map<String, Integer> getGlobalMappingMap() {
+//        final Map<String, Integer> mapping = new HashMap<>();
+//
+//        mapping.put("val1", 0);
+//        mapping.put("val2", 1);
+//        mapping.put("val3", 2);
+//
+//        mapping.put("XXXval1", 3);
+//        mapping.put("XXXval2", 4);
+//        mapping.put("YYYval3", 5);
+//        mapping.put("YYYval88", 6);
+//        return mapping;
+//    }
 
 }
