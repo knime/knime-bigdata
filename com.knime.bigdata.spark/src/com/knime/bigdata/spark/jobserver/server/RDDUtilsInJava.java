@@ -260,18 +260,23 @@ public class RDDUtilsInJava {
      * @param aKeys keys to be extracted
      * @return pair rdd with keys and original rows as values (no columns are filtered out)
      */
-    public static JavaPairRDD<Object[], Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
-        return aRdd.mapToPair(new PairFunction<Row, Object[], Row>() {
+    public static JavaPairRDD<String, Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
+        return aRdd.mapToPair(new PairFunction<Row, String, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Tuple2<Object[], Row> call(final Row aRow) throws Exception {
-                Object[] keyValues = new Object[aKeys.length];
+            public Tuple2<String, Row> call(final Row aRow) throws Exception {
+                StringBuilder keyValues = new StringBuilder();
                 int ix = 0;
+                boolean first = true;
                 for (int keyIx : aKeys) {
-                    keyValues[ix++] = aRow.get(keyIx);
+                    if (!first) {
+                        keyValues.append("|");
+                        first = false;
+                    }
+                    keyValues.append(aRow.get(keyIx));
                 }
-                return new Tuple2<Object[], Row>(keyValues, aRow);
+                return new Tuple2<String, Row>(keyValues.toString(), aRow);
             }
         });
     }
@@ -302,7 +307,7 @@ public class RDDUtilsInJava {
              * @param builder
              */
             private void extractColumns(final List<Integer> aColIdx, final Row aRow, final RowBuilder builder) {
-                for (int ix : aColIdxLeft) {
+                for (int ix : aColIdx) {
                     builder.add(aRow.get(ix));
                 }
             }
