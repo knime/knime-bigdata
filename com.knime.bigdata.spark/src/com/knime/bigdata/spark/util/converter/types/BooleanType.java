@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.util.types;
+package com.knime.bigdata.spark.util.converter.types;
 
 import org.knime.core.data.BooleanValue;
 import org.knime.core.data.DataCell;

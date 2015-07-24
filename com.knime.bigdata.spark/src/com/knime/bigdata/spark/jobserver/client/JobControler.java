@@ -45,7 +45,7 @@ public class JobControler {
     private final static Logger LOGGER = Logger.getLogger(JobControler.class.getName());
 
     // TODO - this should probably be configurable and user-specific
-    final static String appName = "app";
+    final static String appName = "knimeJobs";
 
     /**
      * upload a jar file to the server TODO - need to dynamically create jar file
@@ -56,7 +56,20 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      */
     public static void uploadJobJar(final KNIMESparkContext aContextContainer, final String aJarPath) throws GenericKnimeSparkException {
+        uploadJar(aContextContainer, aJarPath, appName);
+    }
 
+    /**
+     * upload a jar file to the server
+     *
+     * @param aContextContainer context configuration container
+     * @param aJarPath
+     * @param name the application name for the jar
+     *
+     * @throws GenericKnimeSparkException
+     */
+    public static void uploadJar(final KNIMESparkContext aContextContainer, final String aJarPath, final String name)
+        throws GenericKnimeSparkException {
         final File jarFile = new File(aJarPath);
         if (!jarFile.exists()) {
             final String msg =
@@ -71,10 +84,9 @@ public class JobControler {
         // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
         // localhost:8090/jars/test
         Response response =
-            RestClient.post(aContextContainer, "/jars/" + appName, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
+            RestClient.post(aContextContainer, "/jars/" + name, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
 
         RestClient.checkStatus(response, "Error: failed to upload jar to server", Status.OK);
-
     }
 
     /**

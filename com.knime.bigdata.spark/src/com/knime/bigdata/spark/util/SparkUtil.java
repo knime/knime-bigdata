@@ -18,12 +18,21 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib;
+package com.knime.bigdata.spark.util;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.spark.sql.api.java.StructField;
+import org.apache.spark.sql.api.java.StructType;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.InvalidSettingsException;
+
+import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
+import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
 /**
  *
@@ -80,5 +89,21 @@ public final class SparkUtil {
             colIdxs[i] = colIdx;
         }
         return colIdxs;
+    }
+
+    /**
+     * @param tableStructure {@link StructType} that describes the columns
+     * @return the corresponding {@link DataTableSpec}
+     */
+    public static DataTableSpec createTableSpec(final StructType tableStructure) {
+        final List<DataColumnSpec> specs = new LinkedList<>();
+        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
+        for (final StructField field : tableStructure.getFields()) {
+            specCreator.setName(field.getName());
+            final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
+            specCreator.setType(typeConverter.getKNIMEType());
+            specs.add(specCreator.createSpec());
+        }
+        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
     }
 }

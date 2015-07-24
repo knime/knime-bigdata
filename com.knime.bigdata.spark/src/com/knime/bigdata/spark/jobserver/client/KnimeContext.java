@@ -101,6 +101,7 @@ public class KnimeContext {
         final String jobJarPath =
             SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
                 + "knimeJobs.jar";
+        //TODO: Upload the static jobs jar only if not exists
         JobControler.uploadJobJar(contextContainer, jobJarPath);
 
         // curl command would be:
@@ -177,11 +178,11 @@ public class KnimeContext {
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
             JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
             //just for testing:
-            Set<String> names = listNamedRDDs(aContextContainer);
-            int ix = 1;
-            for (String name : names){
-                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
-            }
+//            Set<String> names = listNamedRDDs(aContextContainer);
+//            int ix = 1;
+//            for (String name : names){
+//                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
+//            }
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
         } catch (GenericKnimeSparkException e) {

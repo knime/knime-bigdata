@@ -18,12 +18,14 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.util.types;
+package com.knime.bigdata.spark.util.converter.types;
+
+import java.sql.Date;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.date.DateAndTimeCell;
+import org.knime.core.data.date.DateAndTimeValue;
 
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 
@@ -31,16 +33,16 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
+public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date> {
 
     private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-        org.apache.spark.sql.api.java.DataType.DoubleType, org.apache.spark.sql.api.java.DataType.FloatType};
+            org.apache.spark.sql.api.java.DataType.DateType};
 
-    private static final DataType[] KNIME = new DataType[] {DoubleCell.TYPE};
+    private static final DataType[] KNIME = new DataType[] {DateAndTimeCell.TYPE};
 
-    private static volatile DoubleType instance;
+    private static volatile DateAndTimeType instance;
 
-    private DoubleType() {
+    private DateAndTimeType() {
         //avoid object creation
     }
 
@@ -48,11 +50,11 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static DoubleType getInstance() {
+    public static DateAndTimeType getInstance() {
         if (instance == null) {
-            synchronized (DoubleType.class) {
+            synchronized (DateAndTimeType.class) {
                 if (instance == null) {
-                    instance = new DoubleType();
+                    instance = new DateAndTimeType();
                 }
             }
         }
@@ -79,8 +81,8 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      * {@inheritDoc}
      */
     @Override
-    public Class<Double> getPrimitiveType() {
-        return Double.class;
+    public Class<Date> getPrimitiveType() {
+        return Date.class;
     }
 
     /**
@@ -104,9 +106,9 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      */
     @Override
     public DataCell convert(final Object sparkObject) {
-        if (sparkObject instanceof Double) {
-            Double val = (Double) sparkObject;
-            return new DoubleCell(val);
+        if (sparkObject instanceof Date) {
+            Date val = (Date) sparkObject;
+            return new DateAndTimeCell(val.getTime(), true, true, true);
         }
         return DataType.getMissingCell();
     }
@@ -115,9 +117,9 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      * {@inheritDoc}
      */
     @Override
-    public Double convert(final DataCell cell) {
-        if (cell instanceof DoubleValue) {
-            return ((DoubleValue)cell).getDoubleValue();
+    public Date convert(final DataCell cell) {
+        if (cell instanceof DateAndTimeValue) {
+            return new Date(((DateAndTimeValue)cell).getUTCTimeInMillis());
         }
         return null;
     }
