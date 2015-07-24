@@ -25,8 +25,7 @@ import java.awt.Dimension;
 import javax.swing.JPanel;
 
 import org.knime.base.node.mine.util.PredictorNodeDialog;
-import org.knime.base.pmml.translation.java.compile.CompiledModel.MiningFunction;
-import org.knime.base.pmml.translation.java.compile.CompiledModelPortObjectSpec;
+import org.knime.base.pmml.translation.CompiledModel.MiningFunction;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.DoubleCell;
@@ -35,6 +34,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 import org.knime.core.node.port.PortObjectSpec;
+
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
 /**
  *

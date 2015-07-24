@@ -23,7 +23,6 @@ package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.knime.base.pmml.translation.java.compile.CompiledModelPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -37,6 +36,7 @@ import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 /**
  *
@@ -58,7 +58,8 @@ public class PMMLAssignTask implements Serializable {
                     ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString((Serializable)bytecode),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(colIdxs),
                     ParameterConstants.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
-                    ParameterConstants.PARAM_MAIN_CLASS, mainClass},
+                    //we have to replace the . with / since the key in the map uses / instead of .
+                    ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')},
                 ParameterConstants.PARAM_OUTPUT,
                     new String[]{ParameterConstants.PARAM_TABLE_1, outputID}});
     }
@@ -68,7 +69,7 @@ public class PMMLAssignTask implements Serializable {
         final boolean appendProbabilities, final SparkDataTable resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, pmml.getBytecode(), appendProbabilities,
-            "MainModel", resultRDD.getID());
+            pmml.getModelClassName(), resultRDD.getID());
         KNIMESparkContext context = inputRDD.getContext();
         final String jobId = JobControler.startJob(context, PMMLAssign.class.getCanonicalName(),
             predictorParams);
