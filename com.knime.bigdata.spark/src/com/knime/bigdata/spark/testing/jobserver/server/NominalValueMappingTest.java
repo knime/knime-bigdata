@@ -32,14 +32,6 @@ public class NominalValueMappingTest {
     }
 
     @Test
-    public void emptyGlobalMappingShouldHaveSize0() throws Exception {
-        final Map<String, Integer> mapping = new HashMap<>();
-        NominalValueMapping testObj = NominalValueMappingFactory.createGlobalMapping(mapping);
-        assertEquals("empty mapping should have size 0", 0, testObj.size());
-        assertFalse("empty mapping should have empty iterator", testObj.iterator().hasNext());
-    }
-
-    @Test
     public void iteratorForColumnMappingShouldIterateOverAllRecords() throws Exception {
         final Map<Integer, Map<String, Integer>> mapping = getColumnMappingMap();
 
@@ -80,38 +72,6 @@ public class NominalValueMappingTest {
     }
 
 
-    @Test
-    public void iteratorForGlobalMappingShouldIterateOverAllRecords() throws Exception {
-        final Map<String, Integer> mapping = getGlobalMappingMap();
-
-        NominalValueMapping testObj = NominalValueMappingFactory.createGlobalMapping(mapping);
-        assertEquals("mapping should have proper size", 7, testObj.size());
-        Iterator<MyRecord> iterator = testObj.iterator();
-        assertTrue("non-empty mapping should have non-empty iterator", iterator.hasNext());
-        for (int i = 0; i < 7; i++) {
-            MyRecord r = iterator.next();
-            assertEquals("column index for global mapping should be", -1, r.m_nominalColumnIndex);
-            if (r.m_nominalValue.equals("val1")) {
-                assertEquals("number value for 'val1' should be", 0, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("val2")) {
-                assertEquals("number value for 'val2' should be", 1, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("val3")) {
-                assertEquals("number value for 'val3' should be", 2, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("XXXval1")) {
-                assertEquals("number value for 'XXXval1' should be", 3, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("XXXval2")) {
-                assertEquals("number value for 'XXXval2' should be", 4, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("YYYval3")) {
-                assertEquals("number value for 'YYYval3' should be", 5, r.m_numberValue);
-            } else if (r.m_nominalValue.equals("YYYval88")) {
-                assertEquals("number value for 'YYYval88' should be", 6, r.m_numberValue);
-            } else {
-                fail("unexpected nominal value: " + r.m_nominalValue);
-            }
-
-        }
-    }
-
     /**
      * @return
      */
@@ -135,21 +95,4 @@ public class NominalValueMappingTest {
         }
         return mapping;
     }
-    /**
-     * @return
-     */
-    private Map<String, Integer> getGlobalMappingMap() {
-        final Map<String, Integer> mapping = new HashMap<>();
-
-        mapping.put("val1", 0);
-        mapping.put("val2", 1);
-        mapping.put("val3", 2);
-
-        mapping.put("XXXval1", 3);
-        mapping.put("XXXval2", 4);
-        mapping.put("YYYval3", 5);
-        mapping.put("YYYval88", 6);
-        return mapping;
-    }
-
-}
+ }
