@@ -63,7 +63,8 @@ public class ImportKNIMETableJobTest extends SparkSpec {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
         final String resTableName = "knimeTab1";
-        String jobId = importTestTable(contextName, resTableName);
+        String jobId = importTestTable(contextName, TEST_TABLE, new Class<?>[]{Integer.class,
+            Boolean.class, Double.class, String.class}, resTableName);
 
 
         // result is serialized as a string
@@ -80,11 +81,10 @@ public class ImportKNIMETableJobTest extends SparkSpec {
      * @throws GenericKnimeSparkException
      * @throws CanceledExecutionException
      */
-    static String importTestTable(final KNIMESparkContext contextName, final String resTableName)
+    static String importTestTable(final KNIMESparkContext contextName, final Object[][] aTable, final Class<?>[] aTypes, final String resTableName)
         throws GenericKnimeSparkException, CanceledExecutionException {
         String params =
-            getParams(TEST_TABLE, new Class<?>[]{Integer.class,
-                Boolean.class, Double.class, String.class}, resTableName);
+            getParams(aTable, aTypes, resTableName);
         String jobId = JobControler.startJob(contextName, ImportKNIMETableJob.class.getCanonicalName(), params.toString());
 
         JobControler.waitForJobAndFetchResult(contextName, jobId, null);

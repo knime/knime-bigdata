@@ -1,9 +1,11 @@
 package com.knime.bigdata.spark.testing.jobserver.jobs;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -105,25 +107,71 @@ public class JoinJobTest extends SparkSpec {
     }
 
     @Test
-    public void runningJoinJobDirectlyShouldProduceResult() throws Throwable {
+    public void innerJoinOfIdenticalTableWithOneMatchingColumn() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
+            Integer.class, Boolean.class, Double.class, String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
+            Integer.class, Boolean.class, Double.class, String.class}, "tab2");
 
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{1,3}, new Integer[]{1, 3},
+            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{1, 3}, new Integer[]{1, 3},
                 new Integer[]{0, 1, 2, 3}, new Integer[]{0, 1, 2, 3}, resTableName);
 
         String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
 
+        Object[][] expected = new Object[4][];
+        for (int i = 0; i < expected.length; i++) {
+            expected[i] =
+                new Object[]{ImportKNIMETableJobTest.TEST_TABLE[i][0], ImportKNIMETableJobTest.TEST_TABLE[i][1],
+                    ImportKNIMETableJobTest.TEST_TABLE[i][2], ImportKNIMETableJobTest.TEST_TABLE[i][3],
+                    ImportKNIMETableJobTest.TEST_TABLE[i][0], ImportKNIMETableJobTest.TEST_TABLE[i][1],
+                    ImportKNIMETableJobTest.TEST_TABLE[i][2], ImportKNIMETableJobTest.TEST_TABLE[i][3]};
+        }
         JobControler.waitForJobAndFetchResult(contextName, jobId, null);
-        checkResult(contextName, resTableName);
+        checkResult(contextName, resTableName, expected);
     }
 
-    private void checkResult(final KNIMESparkContext aContextName, final String resTableName) throws Exception {
+    @Test
+    public void innerJoinOfTwoTablesWithTwoMatchingColumn() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
+            Integer.class, Boolean.class, Double.class, String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{0, 3}, new Integer[]{0, 2},
+                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[2][];
+
+        expected[0] =
+            new Object[]{ImportKNIMETableJobTest.TEST_TABLE[0][0], ImportKNIMETableJobTest.TEST_TABLE[0][1],
+                ImportKNIMETableJobTest.TEST_TABLE[0][2], TEST_TABLE_2[0][2], TEST_TABLE_2[0][1]};
+        expected[1] =
+            new Object[]{ImportKNIMETableJobTest.TEST_TABLE[0][0], ImportKNIMETableJobTest.TEST_TABLE[0][1],
+                ImportKNIMETableJobTest.TEST_TABLE[0][2], TEST_TABLE_2[1][2], TEST_TABLE_2[1][1]};
+
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
+
+    private void
+        checkResult(final KNIMESparkContext aContextName, final String resTableName, final Object[][] aExpected)
+            throws Exception {
 
         // now check result:
         String takeJobId =
@@ -134,13 +182,19 @@ public class JoinJobTest extends SparkSpec {
         assertNotNull("row fetcher must return a result", res);
 
         Object[][] arrayRes = (Object[][])res.getObjectResult();
-        assertEquals("fetcher should return correct number of rows", 4, arrayRes.length);
-        assertArrayEquals(ImportKNIMETableJobTest.TEST_TABLE[0], arrayRes[0]);
-        assertArrayEquals(ImportKNIMETableJobTest.TEST_TABLE[1], arrayRes[1]);
-        assertArrayEquals(ImportKNIMETableJobTest.TEST_TABLE[2], arrayRes[2]);
-        assertArrayEquals(ImportKNIMETableJobTest.TEST_TABLE[3], arrayRes[3]);
+        assertEquals("fetcher should return correct number of rows", aExpected.length, arrayRes.length);
+        for (int i = 0; i < arrayRes.length; i++) {
+            boolean found = false;
+            for (int j = 0; j < aExpected.length; j++) {
+                found = found || Arrays.equals(arrayRes[i], aExpected[j]);
+            }
+            assertTrue("result row[" + i + "]: " + Arrays.toString(arrayRes[i]) + " - not found.", found);
+        }
     }
 
+    static final Object[][] TEST_TABLE_2 = new Object[][]{new Object[]{1, "Ping", "my string"},
+        new Object[]{1, "Pong", "my string"}, new Object[]{1, "Ping2", "my other string"},
+        new Object[]{1, "Pong2", "my other string"}};
 
     private String rowFetcherDef(final int aNumRows, final String aTableName) {
         return JsonUtils.asJson(new Object[]{

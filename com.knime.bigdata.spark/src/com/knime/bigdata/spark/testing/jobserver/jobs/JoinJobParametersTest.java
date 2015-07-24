@@ -1,24 +1,15 @@
 package com.knime.bigdata.spark.testing.jobserver.jobs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
-import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
-import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -224,58 +215,4 @@ public class JoinJobParametersTest {
        }
 
     }
-
-    //@Test
-    public void runningJoinJobDirectlyShouldProduceResult() throws Throwable {
-        KNIMESparkContext contextName = KnimeContext.getSparkContext();
-        try {
-
-            String params =
-                getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5,
-                    2, 7}, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
-
-            String jobId =
-                JobControler.startJob(contextName, ConvertNominalValuesJob.class.getCanonicalName(), params.toString());
-
-            assertFalse("job should have finished properly",
-                JobControler.waitForJob(contextName, jobId, null).equals(JobStatus.UNKNOWN));
-
-            // result is serialized as a string
-            assertFalse("job should not be running anymore",
-                JobStatus.OK.equals(JobControler.getJobStatus(contextName, jobId)));
-
-            checkResult(contextName);
-
-        } finally {
-            KnimeContext.destroySparkContext(contextName);
-        }
-
-    }
-
-    private void checkResult(final KNIMESparkContext aContextName) throws Exception {
-
-        // now check result:
-        String takeJobId =
-            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(),
-                rowFetcherDef(10, "/home/spark/..."));
-        assertFalse("job should have finished properly",
-            JobControler.waitForJob(aContextName, takeJobId, null).equals(JobStatus.UNKNOWN));
-        JobResult res = JobControler.fetchJobResult(aContextName, takeJobId);
-        assertNotNull("row fetcher must return a result", res);
-        assertEquals("fetcher should return OK as result status", "OK", res.getMessage());
-        Object[][] arrayRes = (Object[][])res.getObjectResult();
-        assertEquals("fetcher should return correct number of rows", 10, arrayRes.length);
-        for (int i = 0; i < arrayRes.length; i++) {
-            Object[] o = arrayRes[i];
-            System.out.println("row[" + i + "]: " + o);
-        }
-    }
-
-    private String rowFetcherDef(final int aNumRows, final String aTableName) {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_TABLE_1,
-                aTableName}});
-    }
-
 }
