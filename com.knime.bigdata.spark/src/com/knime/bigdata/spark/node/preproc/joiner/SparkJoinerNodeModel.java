@@ -101,6 +101,8 @@ public class SparkJoinerNodeModel extends AbstractSparkNodeModel {
         final JoinMode joinMode = m_settings.getJoinMode();
         final DataTableSpec outputSpec = joiner.getOutputSpec();
         final SparkDataTable result = new SparkDataTable(context, outputSpec);
+        SparkJoinerTask task = new SparkJoinerTask(left.getData(), right.getData(), joinMode, leftJoinColumns, rightJoinColumns, leftIncludCols, rightIncludCols, result.getID());
+        task.execute(exec);
         return new PortObject[] {new SparkDataPortObject(result)};
     }
 

@@ -8,12 +8,16 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
+
+import scala.Tuple2;
 
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -249,4 +253,59 @@ public class RDDUtilsInJava {
         return toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, null);
     }
 
+    /**
+     * extracts the given keys from the given rdd and constructs a pair rdd from it
+     *
+     * @param aRdd Row JavaRDD to be converted
+     * @param aKeys keys to be extracted
+     * @return pair rdd with keys and original rows as values (no columns are filtered out)
+     */
+    public static JavaPairRDD<Object[], Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
+        return aRdd.mapToPair(new PairFunction<Row, Object[], Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Tuple2<Object[], Row> call(final Row aRow) throws Exception {
+                Object[] keyValues = new Object[aKeys.length];
+                int ix = 0;
+                for (int keyIx : aKeys) {
+                    keyValues[ix++] = aRow.get(keyIx);
+                }
+                return new Tuple2<Object[], Row>(keyValues, aRow);
+            }
+        });
+    }
+
+    /**
+     * merge the given pairs of rows into a single row while selecting only some columns
+     * @param aTuples
+     * @param aColIdxLeft indices of columns to keep from the left row
+     * @param aColIdxRight indices of columns to keep from the right row
+     * @return JavaRDD with merge rows
+     */
+    public static JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<Row, Row>> aTuples, final List<Integer> aColIdxLeft,
+        final List<Integer> aColIdxRight) {
+        return aTuples.map(new Function<Tuple2<Row, Row>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Tuple2<Row, Row> aTuple) throws Exception {
+                RowBuilder builder = RowBuilder.emptyRow();
+                extractColumns(aColIdxLeft, aTuple._1, builder);
+                extractColumns(aColIdxRight, aTuple._2, builder);
+                return builder.build();
+            }
+
+            /**
+             * @param aColIdxLeft
+             * @param aTuple
+             * @param builder
+             */
+            private void extractColumns(final List<Integer> aColIdx, final Row aRow, final RowBuilder builder) {
+                for (int ix : aColIdxLeft) {
+                    builder.add(aRow.get(ix));
+                }
+            }
+        });
+    }
 }
