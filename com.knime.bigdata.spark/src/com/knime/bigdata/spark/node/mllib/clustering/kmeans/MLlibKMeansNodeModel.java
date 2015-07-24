@@ -35,7 +35,6 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.SparkUtil;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -44,6 +43,7 @@ import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *

@@ -18,12 +18,12 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.util.types;
+package com.knime.bigdata.spark.util.converter.types;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
-import org.knime.core.data.LongValue;
-import org.knime.core.data.def.LongCell;
+import org.knime.core.data.StringValue;
+import org.knime.core.data.def.StringCell;
 
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 
@@ -31,16 +31,16 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LongType implements SparkTypeConverter<LongCell, Long> {
+public class StringType implements SparkTypeConverter<StringCell, String> {
 
     private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-        org.apache.spark.sql.api.java.DataType.LongType};
+            org.apache.spark.sql.api.java.DataType.StringType};
 
-    private static final DataType[] KNIME = new DataType[] {LongCell.TYPE};
+    private static final DataType[] KNIME = new DataType[] {StringCell.TYPE};
 
-    private static volatile LongType instance;
+    private static volatile StringType instance;
 
-    private LongType() {
+    private StringType() {
         //avoid object creation
     }
 
@@ -48,11 +48,11 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static LongType getInstance() {
+    public static StringType getInstance() {
         if (instance == null) {
-            synchronized (LongType.class) {
+            synchronized (StringType.class) {
                 if (instance == null) {
-                    instance = new LongType();
+                    instance = new StringType();
                 }
             }
         }
@@ -79,8 +79,8 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
      * {@inheritDoc}
      */
     @Override
-    public Class<Long> getPrimitiveType() {
-        return Long.class;
+    public Class<String> getPrimitiveType() {
+        return String.class;
     }
 
     /**
@@ -104,9 +104,8 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
      */
     @Override
     public DataCell convert(final Object sparkObject) {
-        if (sparkObject instanceof Long) {
-            Long val = (Long) sparkObject;
-            return new LongCell(val);
+        if (sparkObject != null) {
+            return new StringCell(sparkObject.toString());
         }
         return DataType.getMissingCell();
     }
@@ -115,10 +114,11 @@ public class LongType implements SparkTypeConverter<LongCell, Long> {
      * {@inheritDoc}
      */
     @Override
-    public Long convert(final DataCell cell) {
-        if (cell instanceof LongValue) {
-            return ((LongValue)cell).getLongValue();
+    public String convert(final DataCell cell) {
+        if (cell instanceof StringValue) {
+            return ((StringValue)cell).getStringValue();
         }
         return null;
     }
+
 }

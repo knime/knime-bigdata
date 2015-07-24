@@ -19,18 +19,18 @@
             path="/labs/spark">
       </category>
       <category
-            icon="resources/category_learner.gif"
-            level-id="mining"
-            locked="true"
-            name="Mining"
-            path="/labs/spark">
-      </category>
-      <category
-            after="/labs/spark/io"
+            after="/labs/spark/io/"
             icon="resources/missing.gif"
             level-id="convert"
             locked="true"
             name="Convert &amp; Replace"
+            path="/labs/spark">
+      </category>
+      <category
+            icon="resources/category_learner.gif"
+            level-id="mining"
+            locked="true"
+            name="Mining"
             path="/labs/spark">
       </category>
       <category

@@ -37,7 +37,7 @@ final public class SparkJobCompiler {
     private final static Logger LOGGER = Logger.getLogger(SparkJobCompiler.class.getName());
 
     // for unique class names
-    private int classNameSuffix = 0;
+    private static int classNameSuffix = 0;
 
     // package name; a random number is appended
    // private static final String PACKAGE_NAME = "com.knime.bigdata.spark.jobserver.jobs";
@@ -106,7 +106,7 @@ final public class SparkJobCompiler {
         @Nonnull final String aTargetJarPath, @Nonnull final String aAdditionalImports,
         @Nonnull final String aTransformationCode, @Nonnull final String aHelperMethodsCode)
         throws GenericKnimeSparkException {
-        final String className = "Kt" + (classNameSuffix++) + digits();
+        final String className = generateUniqueClassName("Kt");
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
@@ -129,14 +129,20 @@ final public class SparkJobCompiler {
      */
     public KnimeSparkJob addSparkJob2Jar(@Nonnull final String aSourceJarPath,
         @Nonnull final String aTargetJarPath, @Nonnull final String aCode, @Nonnull final String className)
-        throws GenericKnimeSparkException {
-        final String newClassName = "kt" + (classNameSuffix++) + digits();
-        final String code = aCode.replace("class " + className + " ", "class " + newClassName + " ");
+                throws GenericKnimeSparkException {
         // generate semi-secure unique package and class names
         // compile the generated Java source
-        SourceCompiler compiledJob = compileAndCreateInstance(newClassName, code);
+        SourceCompiler compiledJob = compileAndCreateInstance(className, aCode);
         add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
         return compiledJob.getInstance();
+    }
+
+    /**
+     * @param prefix the class name prefix
+     * @return the unique class name with the given prefix
+     */
+    public String generateUniqueClassName(final String prefix) {
+        return prefix + (classNameSuffix++) + digits();
     }
 
     /**
@@ -166,7 +172,7 @@ final public class SparkJobCompiler {
      * @return new instance of compile class
      * @throws GenericKnimeSparkException
      */
-    private SourceCompiler compileAndCreateInstance(final String aClassName, final String aSource)
+    public SourceCompiler compileAndCreateInstance(final String aClassName, final String aSource)
         throws GenericKnimeSparkException {
         try {
             return new SourceCompiler(aClassName, aSource);
@@ -190,7 +196,7 @@ final public class SparkJobCompiler {
         @Nonnull final String validationCode, @Nonnull final String aExecutionCode,
         @Nonnull final String aHelperMethodsCode) throws GenericKnimeSparkException {
 
-        final String className = "kj" + (classNameSuffix++) + digits();
+        final String className = generateUniqueClassName("kj");
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
@@ -302,7 +308,7 @@ final public class SparkJobCompiler {
         return new String(bytes, "US-ASCII");
     }
 
-    private static class SourceCompiler {
+    public static class SourceCompiler {
 
         private Map<String, byte[]> m_bytecode;
 
@@ -325,7 +331,7 @@ final public class SparkJobCompiler {
         /**
          * @return the bytecode for the class and possibly inner classes
          */
-        Map<String, byte[]> getBytecode() {
+        public Map<String, byte[]> getBytecode() {
             return m_bytecode;
         }
 
@@ -379,7 +385,7 @@ final public class SparkJobCompiler {
         /**
          * @return the compiled class.
          */
-        KnimeSparkJob getInstance() {
+         public KnimeSparkJob getInstance() {
             return m_jobInstance;
         }
 

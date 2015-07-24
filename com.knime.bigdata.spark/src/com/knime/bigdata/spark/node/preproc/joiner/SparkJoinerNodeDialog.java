@@ -89,7 +89,7 @@ public class SparkJoinerNodeDialog extends Joiner2NodeDialog {
      */
     @Override
     protected JComponent createColumnSelectionTab(final String leftTitle, final String rightTitle) {
-        return super.createColumnSelectionTab("Left RDD", "Right RDD");
+        return super.createColumnSelectionTab("First RDD", "Second RDD");
     }
     /**
      * {@inheritDoc}

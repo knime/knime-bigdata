@@ -33,12 +33,12 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.util.types.BooleanType;
-import com.knime.bigdata.spark.util.types.DateAndTimeType;
-import com.knime.bigdata.spark.util.types.DoubleType;
-import com.knime.bigdata.spark.util.types.IntegerType;
-import com.knime.bigdata.spark.util.types.LongType;
-import com.knime.bigdata.spark.util.types.StringType;
+import com.knime.bigdata.spark.util.converter.types.BooleanType;
+import com.knime.bigdata.spark.util.converter.types.DateAndTimeType;
+import com.knime.bigdata.spark.util.converter.types.DoubleType;
+import com.knime.bigdata.spark.util.converter.types.IntegerType;
+import com.knime.bigdata.spark.util.converter.types.LongType;
+import com.knime.bigdata.spark.util.converter.types.StringType;
 
 /**
  *
