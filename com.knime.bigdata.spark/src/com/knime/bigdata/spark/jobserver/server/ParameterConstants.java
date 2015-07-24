@@ -115,4 +115,15 @@ public class ParameterConstants {
      * some string parameter
      */
     public static final String PARAM_STRING = "stringParam";
+
+    /**
+     * utility function to append a counter post fix to a parameter so that we
+     * do not have to have too many PARAM_X1, PARAM_X2... constants (such as PARAM_TABLE1 and PARAM_TABLE2)
+     * @param aParamConstant
+     * @param aParamIx
+     * @return a new parameter 'constant' that can be referenced by client and server
+     */
+    public static final String NUMBERED_PARAM(final String aParamConstant, final int aParamIx) {
+        return aParamConstant + "_" + aParamIx;
+    }
 }

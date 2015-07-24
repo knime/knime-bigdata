@@ -33,8 +33,12 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.spark.jobserver.client.JobControler;
+import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -49,9 +53,9 @@ import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
  */
 public class Table2SparkNodeModel extends AbstractSparkNodeModel {
 
-    /**Constructor.*/
+    /** Constructor. */
     Table2SparkNodeModel() {
-        super(new PortType[] {BufferedDataTable.TYPE}, new PortType[] {SparkDataPortObject.TYPE});
+        super(new PortType[]{BufferedDataTable.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**
@@ -64,7 +68,7 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         }
         DataTableSpec spec = (DataTableSpec)inSpecs[0];
         final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(), spec);
-        return new PortObjectSpec[] {resultSpec};
+        return new PortObjectSpec[]{resultSpec};
     }
 
     /**
@@ -97,12 +101,12 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
             }
             rowIdx++;
         }
+
         exec.setMessage("Sending data to Spark...");
         final SparkDataTable resultTable = new SparkDataTable(getContext(), table.getDataTableSpec());
-        //TK_TODO: Hier müssen wir noch den SparkJob starten der das Object array zu Spark schickt und ein RDD
-        //daraus generiert
+        executeSparkJob(exec, data, primitiveTypes, resultTable);
         exec.setProgress(1, "Spark data object created");
-        return new PortObject[] {new SparkDataPortObject(resultTable)};
+        return new PortObject[]{new SparkDataPortObject(resultTable)};
     }
 
     private KNIMESparkContext getContext() throws InvalidSettingsException {
@@ -111,6 +115,29 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         } catch (GenericKnimeSparkException e) {
             throw new InvalidSettingsException(e.getMessage());
         }
+    }
+
+    /**
+     * run the job on the server: send table as object array to server and create RDD from it
+     *
+     * @param exec
+     * @throws Exception
+     */
+    private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final Class<?>[] aPrimitiveTypes,
+        final SparkDataTable resultTable) throws Exception {
+        final String params = paramDef(data, aPrimitiveTypes, resultTable.getID());
+        final String jobId =
+            JobControler.startJob(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(), params);
+
+        JobControler.waitForJobAndFetchResult(resultTable.getContext(), jobId, exec);
+    }
+
+    private String paramDef(final Object[][] data, final Class<?>[] aPrimitiveTypes, final String aResultTableName) {
+        return JsonUtils.asJson(new Object[]{
+            ParameterConstants.PARAM_INPUT,
+            new Object[]{ParameterConstants.PARAM_TABLE_1, JsonUtils.toJson2DimArray(data),
+                ParameterConstants.PARAM_SCHEMA, JsonUtils.toJsonArray(aPrimitiveTypes)},
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
     }
 
     /**
