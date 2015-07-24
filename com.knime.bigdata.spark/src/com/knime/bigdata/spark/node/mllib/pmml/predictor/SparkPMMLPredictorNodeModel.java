@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 
 import org.knime.base.node.mine.util.PredictorHelper;
-import org.knime.base.pmml.translation.java.compile.CompiledModel;
-import org.knime.base.pmml.translation.java.compile.CompiledModelPortObject;
-import org.knime.base.pmml.translation.java.compile.CompiledModelPortObjectSpec;
+import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -41,6 +39,8 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
 /**
  *
@@ -88,8 +88,8 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
                                                           final CompiledModelPortObjectSpec cms) {
         final String predColName =
                 m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
-        final DataColumnSpec[] specs = cms.getResultColSpecs(inSpec, m_outputProbabilities.getBooleanValue(),
-                predColName, m_suffix.getStringValue());
+        final DataColumnSpec[] specs = cms.getResultColSpecs(inSpec, predColName,
+            m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
         return new DataTableSpec(inSpec, new DataTableSpec(specs));
     }
 
