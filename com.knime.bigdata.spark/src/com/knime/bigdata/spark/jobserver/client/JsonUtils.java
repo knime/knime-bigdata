@@ -88,6 +88,30 @@ public class JsonUtils {
     }
 
     /**
+     * convert the given array of element to a JSon string that represents an array
+     *
+     * @param aElems
+     * @return json string representing an array
+     */
+    public static String toJson2DimArray(final Object[][] aElems) {
+        final StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < aElems.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("[");
+            for (int j = 0; j < aElems[i].length; j++) {
+                if (j > 0) {
+                    sb.append(",");
+                }
+                sb.append( "\"" + aElems[i][j].toString() + "\"");
+            }
+            sb.append("]");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    /**
      * convert the given string representation of a Json array to a JsonArray object
      * @param aJsonArrayString
      * @return the parse JsonArray
