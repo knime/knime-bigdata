@@ -79,6 +79,14 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      * {@inheritDoc}
      */
     @Override
+    public Class<Double> getPrimitiveType() {
+        return Double.class;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
         return SPARK;
     }

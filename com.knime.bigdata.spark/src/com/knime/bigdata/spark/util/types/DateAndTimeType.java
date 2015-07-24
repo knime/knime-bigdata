@@ -81,6 +81,14 @@ public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date
      * {@inheritDoc}
      */
     @Override
+    public Class<Date> getPrimitiveType() {
+        return Date.class;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
         return SPARK;
     }

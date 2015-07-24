@@ -137,8 +137,8 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec spec = rdd.getTableSpec();
         final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
         for (final DataColumnSpec colSpec : spec) {
-            SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
-            StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
+            final SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
+            final StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
             structFields.add(field);
         }
         final StructType schema = DataType.createStructType(structFields);

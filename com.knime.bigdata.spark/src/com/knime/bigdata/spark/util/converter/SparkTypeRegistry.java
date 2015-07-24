@@ -110,8 +110,8 @@ public class SparkTypeRegistry {
                     continue;
                 }
                 try {
-                    final SparkTypeConverter<?,?> typeConverter =
-                            (SparkTypeConverter<?,?>)elem.createExecutableExtension(EXT_POINT_ATTR_DF);
+                    final SparkTypeConverter<?, ?> typeConverter =
+                            (SparkTypeConverter<?, ?>)elem.createExecutableExtension(EXT_POINT_ATTR_DF);
                     addConverter(typeConverter);
                 } catch (final Throwable t) {
                     LOGGER.error("Problems during initialization of Spark TypeConverter (with id '" + converter
