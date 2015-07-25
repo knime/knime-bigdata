@@ -33,6 +33,7 @@ import org.apache.spark.sql.api.java.Row;
 import scala.Tuple2;
 import spark.jobserver.SparkJobValidation;
 
+import com.google.common.base.Optional;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
@@ -189,27 +190,55 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "computing " + mode.toString() + " of two RDDs...");
 
         final List<Integer> joinIdxLeft = aConfig.getIntList(PARAM_JOIN_INDEXES_LEFT);
-        JavaPairRDD<String, Row> leftRdd = RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_LEFT_RDD)), joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
+        JavaPairRDD<String, Row> leftRdd =
+            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_LEFT_RDD)),
+                joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
         final List<Integer> joinIdxRight = aConfig.getIntList(PARAM_JOIN_INDEXES_RIGHT);
-        JavaPairRDD<String, Row> rightRdd = RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_RIGHT_RDD)), joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
-
-        printRDD(leftRdd.collect(), "Left table:");
-        printRDD(rightRdd.collect(), "Right table:");
-        JavaPairRDD<String, Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd);
-
-        printJoinedRDD(joinedRdd.collect(), "Joined table:");
+        JavaPairRDD<String, Row> rightRdd =
+            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_RIGHT_RDD)),
+                joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
 
         final List<Integer> colIdxLeft = aConfig.getIntList(PARAM_SELECT_INDEXES_LEFT);
         final List<Integer> colIdxRight = aConfig.getIntList(PARAM_SELECT_INDEXES_RIGHT);
-        final JavaRDD<Row> resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
 
-        printSelectedRDD(resultRdd.collect(), "Result table:");
+        //printRDD(leftRdd.collect(), "Left table:");
+        //printRDD(rightRdd.collect(), "Right table:");
+        final JavaRDD<Row> resultRdd;
+        switch (mode) {
+            case InnerJoin: {
+                JavaPairRDD<String, Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd);
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                break;
+            }
+            case LeftOuterJoin: {
+                JavaPairRDD<String, Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd);
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                break;
+            }
+            case RightOuterJoin: {
+                JavaPairRDD<String, Tuple2<Optional<Row>, Row>> joinedRdd = leftRdd.rightOuterJoin(rightRdd);
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                break;
+            }
+            case FullOuterJoin: {
+                JavaPairRDD<String, Tuple2<Optional<Row>, Optional<Row>>> joinedRdd = leftRdd.fullOuterJoin(rightRdd);
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                break;
+            }
+            default: {
+                throw new GenericKnimeSparkException("ERROR: unsupported join mode: "+mode);
+            }
+        }
+
+        //printJoinedRDD(joinedRdd.collect(), "Joined table:");
+
+        //printSelectedRDD(resultRdd.collect(), "Result table:");
 
         LOGGER.log(Level.INFO, "done");
 
         final String key = aConfig.getString(PARAM_RESULT_TABLE_KEY);
         LOGGER.log(Level.INFO, "Storing join result under key: " + key);
-        addToNamedRdds(key,  resultRdd);
+        addToNamedRdds(key, resultRdd);
         return JobResult.emptyJobResult().withMessage("OK");
     }
 
@@ -219,10 +248,10 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      */
     private void printSelectedRDD(final List<Row> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
-        for(Row tuple : aRdd) {
+        for (Row tuple : aRdd) {
             LOGGER.log(Level.INFO, tuple.toString());
         }
-        LOGGER.log(Level.INFO,"<---- END OF TABLE");
+        LOGGER.log(Level.INFO, "<---- END OF TABLE");
     }
 
     /**
@@ -231,10 +260,10 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      */
     private void printJoinedRDD(final List<Tuple2<String, Tuple2<Row, Row>>> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
-        for(Tuple2<String, Tuple2<Row, Row>> tuple : aRdd) {
-            LOGGER.log(Level.INFO, "keys:\t"+(tuple._1) + "\tvalues: "+tuple._2);
+        for (Tuple2<String, Tuple2<Row, Row>> tuple : aRdd) {
+            LOGGER.log(Level.INFO, "keys:\t" + (tuple._1) + "\tvalues: " + tuple._2);
         }
-        LOGGER.log(Level.INFO,"<---- END OF TABLE");
+        LOGGER.log(Level.INFO, "<---- END OF TABLE");
     }
 
     /**
@@ -242,11 +271,10 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      */
     private void printRDD(final List<Tuple2<String, Row>> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
-        for(Tuple2<String, Row> tuple : aRdd) {
-            LOGGER.log(Level.INFO, "keys:\t"+(tuple._1) + "\tvalues: "+tuple._2);
+        for (Tuple2<String, Row> tuple : aRdd) {
+            LOGGER.log(Level.INFO, "keys:\t" + (tuple._1) + "\tvalues: " + tuple._2);
         }
-        LOGGER.log(Level.INFO,"<---- END OF TABLE");
+        LOGGER.log(Level.INFO, "<---- END OF TABLE");
     }
-
 
 }
