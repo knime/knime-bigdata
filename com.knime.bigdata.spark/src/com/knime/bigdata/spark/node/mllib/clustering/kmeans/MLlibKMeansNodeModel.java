@@ -42,7 +42,7 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -118,7 +118,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final String[] includedCols = result.getIncludes();
         final int[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
-        final String aOutputTableName = SparkIDGenerator.createID();
+        final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
             m_noOfIteration.getIntValue(), resultRDD);

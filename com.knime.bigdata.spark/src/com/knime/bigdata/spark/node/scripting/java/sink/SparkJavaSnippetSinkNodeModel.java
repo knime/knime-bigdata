@@ -28,7 +28,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippetSink;
 import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
@@ -59,7 +59,9 @@ public class SparkJavaSnippetSinkNodeModel extends AbstractSparkJavaSnippetNodeM
         if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
-        return super.configure(inSpecs);
+        //call configure to check that the parameters are alright
+        super.configure(inSpecs);
+        return new PortObjectSpec[0];
     }
 
     /**

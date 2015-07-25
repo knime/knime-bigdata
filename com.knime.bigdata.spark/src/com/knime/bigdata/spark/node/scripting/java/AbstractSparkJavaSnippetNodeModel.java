@@ -21,49 +21,66 @@
 package com.knime.bigdata.spark.node.scripting.java;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.base.node.jsnippet.guarded.GuardedSection;
+import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
+import org.knime.base.node.jsnippet.util.FlowVariableRepository;
+import org.knime.base.node.jsnippet.util.JavaField.InVar;
+import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
+import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.StringCell;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.config.Config;
+import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Type;
+import org.knime.core.util.FileUtil;
 
-import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.client.jar.JarPacker;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
+import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler.SourceCompiler;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.AbstractSparkRDD;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
-import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
-import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
+import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
@@ -71,8 +88,18 @@ import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
  */
 public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNodeModel {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(AbstractSparkJavaSnippetNodeModel.class);
+
+    private static final String CLASS_PREFIX = "SJS";
+    private static final String CFG_FILE_NAME = "snippet.xml";
+    private static final String CFG_CLASS_NAMES = "classNames";
+    //Use an empty package path for now since the start job method will not find the class if we add a package name
+    private static final String PACKAGE_PATH = "";
+    private static final File SNIPPET_FILE = getSnippetFile();
     private final JavaSnippetSettings m_settings;
     private final SparkJavaSnippet m_snippet;
+    private String[] m_classNames;
+
 
     /**
      * @param inPortTypes
@@ -95,8 +122,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         m_snippet.setSettings(m_settings);
         FlowVariableRepository flowVarRepository =
             new FlowVariableRepository(getAvailableInputFlowVariables());
-        ValidationReport report = m_snippet.validateSettings(inSpecs,
-                flowVarRepository);
+        ValidationReport report = m_snippet.validateSettings(inSpecs, flowVarRepository);
         if (report.hasWarnings()) {
             setWarningMessage(StringUtils.join(report.getWarnings(), "\n"));
         }
@@ -104,8 +130,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             throw new InvalidSettingsException(
                     StringUtils.join(report.getErrors(), "\n"));
         }
-        DataTableSpec outSpec = m_snippet.configure(inSpecs,
-                flowVarRepository);
+        final DataTableSpec outSpec = m_snippet.configure(inSpecs, flowVarRepository);
         for (FlowVariable flowVar : flowVarRepository.getModified()) {
             if (flowVar.getType().equals(Type.INTEGER)) {
                 pushFlowVariableInt(flowVar.getName(), flowVar.getIntValue());
@@ -138,7 +163,6 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             data1 = (SparkDataPortObject)inData[0];
             data2 = (SparkDataPortObject)inData[1];
         }
-
         final KNIMESparkContext context;
         final String table1Name;
         final AbstractSparkRDD table1;
@@ -164,29 +188,14 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         if (table1 != null && table2 != null && !table1.compatible(table2)) {
             throw new InvalidSettingsException("Input objects belong to two different Spark contexts");
         }
-        String tableName = SparkIDGenerator.createID();
-        //now compile code, add to jar and upload jar:
+        final String tableName = SparkIDs.createRDDID();
         final KnimeSparkJob job = addJob2Jar(context, m_snippet);
-//        String jobDescription = "return aInput1;";
-//        final KnimeSparkJob job = addTransformationJob2Jar(jobDescription);
-
-        //call the Spark job with the two rdds and use the tableName as id for the result RDD and
-        //the job description as source code for the job
-
-        //start job with proper parameters
-        final String jobId = JobControler.startJob(context, job, params2Json(table1Name, table2Name, tableName));
+        final String config = params2Json(table1Name, table2Name, tableName);
+        final String jobId = JobControler.startJob(context, job, config);
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
-        final StructType tableTypes = result.getTableStructType(tableName);
-        if (tableTypes != null) {
-            final List<DataColumnSpec> specs = new LinkedList<>();
-            final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
-            for (final StructField field : tableTypes.getFields()) {
-                specCreator.setName(field.getName());
-                final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
-                specCreator.setType(typeConverter.getKNIMEType());
-                specs.add(specCreator.createSpec());
-            }
-            final DataTableSpec resultSpec = new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
+        final StructType tableStructure = result.getTableStructType(tableName);
+        if (tableStructure != null) {
+            final DataTableSpec resultSpec = SparkUtil.createTableSpec(tableStructure);
             final SparkDataTable resultTable = new SparkDataTable(context, tableName, resultSpec);
             final SparkDataPortObject resultObject = new SparkDataPortObject(resultTable);
             return new PortObject[]{resultObject};
@@ -195,7 +204,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         }
     }
 
-    private final String params2Json(@Nonnull final String aInputTable1, final String aInputTable2, @Nonnull final String aOutputTable) {
+    private final String params2Json(@Nonnull final String aInputTable1, final String aInputTable2,
+        @Nonnull final String aOutputTable) {
         final List<String> inputParams = new LinkedList<>();
         if (aInputTable1 != null) {
             inputParams.add(ParameterConstants.PARAM_TABLE_1);
@@ -210,66 +220,153 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
     }
 
     private KnimeSparkJob addJob2Jar(final KNIMESparkContext context, final SparkJavaSnippet snippet)
-            throws GenericKnimeSparkException, BadLocationException {
-        final GuardedDocument codeDoc = m_snippet.getDocument();
-        final String code = codeDoc.getText(0, codeDoc.getLength());
-        final String jarPath;
-        try {
-            File f = File.createTempFile("knimeJobUtils", ".jar");
-            f.deleteOnExit();
-            jarPath = f.toString();
-        } catch (IOException e) {
-            throw new GenericKnimeSparkException(e);
-        }
-
-        //TK_TODO: Use the SparkJavaSnippetCompiler instead of the SparkJobCompiler
+            throws Exception {
+        final String code = insertFieldValues(m_snippet, getAvailableInputFlowVariables());
         final SparkJobCompiler compiler = new SparkJobCompiler();
-        final String root = SparkPlugin.getDefault().getPluginRootPath();
-        //do not overwrite the knimeJobs.jar but create a unique jar each time or a unique jar per session to prevent
-        //that multiple users overwrite the job jars while jobs are still running
-        final KnimeSparkJob job =
-            compiler.addSparkJob2Jar(root + "/resources/knimeJobs.jar", jarPath, code, m_snippet.getClassName());
-     // populate the system input flow variable fields with data
-//        FlowVariableRepository flowVarRepo =
-//                new FlowVariableRepository(getAvailableInputFlowVariables());
-//        for (InVar inCol : m_snippet.getSystemFields().getInVarFields()) {
-//            Field field = m_jsnippet.getClass().getField(
-//                    inCol.getJavaName());
-//            Object v = flowVarRepo.getValueOfType(inCol.getKnimeName(),
-//                    inCol.getJavaType());
-//            field.set(m_jsnippet, v);
-//        }
-        //upload jar to job-server
-        JobControler.uploadJobJar(context, jarPath);
+        String newClassName = compiler.generateUniqueClassName(CLASS_PREFIX);
+        final String newCode = code.replace("class " + m_snippet.getClassName() + " ", "class " + newClassName + " ");
+        final SourceCompiler compiledJob = compiler.compileAndCreateInstance(newClassName, newCode);
+        final Map<String, byte[]> classMap = compiledJob.getBytecode();
+        m_classNames = classMap.keySet().toArray(new String[0]);
+        synchronized (SNIPPET_FILE) {
+            //TODO: We always also use the potentially out dated standard job classes if the snippet jar file exists
+            //I would be better if we would keep the snippet jars and job jar separately and always merge the two jars
+            //instead of reusing (copying) the same mixed jar over and over
+            try {
+                if (!SNIPPET_FILE.exists()) {
+                    //create the standard job jar for this user
+                    final File jobsJar = new File(SparkUtil.getJobJarPath());
+                    FileUtil.copy(jobsJar, SNIPPET_FILE);
+                }
+                //create a new file that will contain all previous classes plus the new snippet classes
+                final File tempFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
+                JarPacker.add2Jar(SNIPPET_FILE.getPath(), tempFile.getPath(), PACKAGE_PATH, classMap);
+                //replace the old java snippet jar with the new one
+                SNIPPET_FILE.delete();
+                tempFile.renameTo(SNIPPET_FILE);
+                JobControler.uploadJobJar(context, SNIPPET_FILE.getPath());
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
+                throw new GenericKnimeSparkException(e);
+            }
+        }
+        final KnimeSparkJob job = compiledJob.getInstance();
         return job;
     }
 
-//    private KnimeSparkJob addTransformationJob2Jar(final String aTransformationCode) throws GenericKnimeSparkException {
-//
-//        final String jarPath;
-//        try {
-//            File f = File.createTempFile("knimeJobUtils", ".jar");
-//            f.deleteOnExit();
-//            jarPath = f.toString();
-//        } catch (IOException e) {
-//            throw new GenericKnimeSparkException(e);
-//        }
-//
-//        final SparkJobCompiler compiler = new SparkJobCompiler();
-//
-//        final String additionalImports = "";
-//        final String helperMethodsCode = "";
-//
-//        final String root = SparkPlugin.getDefault().getPluginRootPath();
-//
-//        final KnimeSparkJob job =
-//            compiler.addTransformationSparkJob2Jar(root + "/resources/knimeJobs.jar", jarPath, additionalImports,
-//                aTransformationCode, helperMethodsCode);
-//
-//        //upload jar to job-server
-//        JobControler.uploadJobJar(jarPath);
-//        return job;
-//    }
+    private static String insertFieldValues(final SparkJavaSnippet snippet, final Map<String, FlowVariable> flowVars)
+            throws BadLocationException {
+        final GuardedDocument codeDoc = snippet.getDocument();
+        // populate the system input flow variable fields with data
+        final FlowVariableRepository flowVarRepo = new FlowVariableRepository(flowVars);
+        //get the guarded flow variable fields section
+        final GuardedSection fieldsSection = codeDoc.getGuardedSection(JavaSnippetDocument.GUARDED_FIELDS);
+        String fieldsText = fieldsSection.getText();
+        for (final InVar inCol : snippet.getSystemFields().getInVarFields()) {
+            final Class<?> javaType = inCol.getJavaType();
+            final FlowVariable flowVariable = flowVarRepo.getFlowVariable(inCol.getKnimeName());
+            final Object v = flowVarRepo.getValueOfType(inCol.getKnimeName(), javaType);
+            final String valueString;
+            if (v == null) {
+                valueString = "null";
+            } else {
+                final Type type = flowVariable.getType();
+                switch (type) {
+                    case DOUBLE:
+                        valueString = ((Double)v).toString();
+                        break;
+                    case INTEGER:
+                        valueString = ((Integer)v).toString();
+                        break;
+                    default:
+                        //this is the String and fallback case
+                        valueString = "\"" + StringEscapeUtils.escapeJava(v.toString())  + "\"";
+                        break;
+                }
+            }
+            final String fieldName = inCol.getJavaName();
+            fieldsText = fieldsText.replace(fieldName + ";", fieldName + " = " + valueString + ";");
+        }
+        final String origCode = codeDoc.getText(0, codeDoc.getLength());
+        final Position start = fieldsSection.getStart();
+        final Position end = fieldsSection.getEnd();
+        final StringBuilder buf = new StringBuilder(origCode.substring(0, start.getOffset()));
+        buf.append(fieldsText);
+        buf.append(origCode.substring(end.getOffset() + 1));
+        return buf.toString();
+    }
+
+    /**
+     * @return
+     */
+    private static File getSnippetFile() {
+        final String appID = SparkIDs.getSparkApplicationID();
+        final File sparkSnippetDir = new File(KNIMEConstants.getKNIMEHomeDir(), "sparksnippet");
+        if (!sparkSnippetDir.exists()) {
+            sparkSnippetDir.mkdirs();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Creates snippet jar directory: " + sparkSnippetDir.getPath());
+            }
+        }
+        final File sparkJavaSnippetJar = new File(sparkSnippetDir, "j_"+ appID + ".jar");
+        return sparkJavaSnippetJar;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void resetInternal() {
+        if (m_classNames != null && m_classNames.length > 0) {
+            //remove the generated classes from the jar file
+            try {
+                final Set<String> entryNames = new HashSet<>(m_classNames.length);
+                for (int i = 0, length = m_classNames.length; i < length; i++) {
+                    final String packagePath =
+                            PACKAGE_PATH == null || PACKAGE_PATH.isEmpty() ? "" : PACKAGE_PATH + "/";
+                    entryNames.add(packagePath + m_classNames[i] + ".class");
+                }
+                synchronized (SNIPPET_FILE) {
+                    JarPacker.removeFromJar(SNIPPET_FILE, entryNames);
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Exception while removeing class from Spark Snipper jar: " + e.getMessage(), e);
+            }
+            m_classNames = null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
+        CanceledExecutionException {
+        final File settingFile = new File(nodeInternDir, CFG_FILE_NAME);
+        try(final FileInputStream inData = new FileInputStream(settingFile)){
+            final ConfigRO config = NodeSettings.loadFromXML(inData);
+            m_classNames = config.getStringArray(CFG_CLASS_NAMES);
+
+        } catch (final InvalidSettingsException | RuntimeException e) {
+            throw new IOException("Failed to load snippet settings", e.getCause());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
+        CanceledExecutionException {
+        final File settingFile = new File(nodeInternDir, CFG_FILE_NAME);
+        try (final FileOutputStream dataOS = new FileOutputStream(settingFile)){
+            final Config config = new NodeSettings("saveInternalsSettings");
+            config.addStringArray(CFG_CLASS_NAMES, m_classNames);
+            config.saveToXML(dataOS);
+        } catch (final Exception e) {
+            throw new IOException(e.getMessage(), e.getCause());
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -286,7 +383,6 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         final JavaSnippetSettings s = new JavaSnippetSettings();
         s.loadSettings(settings);
-        // TODO: Check settings
     }
 
     /**

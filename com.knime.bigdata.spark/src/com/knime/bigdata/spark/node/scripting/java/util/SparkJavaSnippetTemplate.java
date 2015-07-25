@@ -45,7 +45,7 @@
  * History
  *   02.04.2012 (hofer): created
  */
-package com.knime.bigdata.spark.node.scripting.util;
+package com.knime.bigdata.spark.node.scripting.java.util;
 
 import java.util.UUID;
 

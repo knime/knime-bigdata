@@ -39,7 +39,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  *
@@ -85,7 +85,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
         final DataTableSpec resultSpec = MLlibPredictorNodeModel.createSpec(inputSpec);
-        final String aOutputTableName = SparkIDGenerator.createID();
+        final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final PredictionTask task = new PredictionTask();
         task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);

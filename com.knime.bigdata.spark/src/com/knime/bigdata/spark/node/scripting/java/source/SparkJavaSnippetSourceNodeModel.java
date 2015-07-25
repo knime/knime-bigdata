@@ -27,7 +27,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippetSource;
 import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 
 /**

@@ -18,7 +18,7 @@
  * History
  *   Created on 19.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.util;
+package com.knime.bigdata.spark.node.scripting.java.util;
 
 import java.io.File;
 import java.io.FileOutputStream;

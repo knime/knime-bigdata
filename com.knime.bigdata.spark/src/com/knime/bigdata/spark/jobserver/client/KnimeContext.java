@@ -1,6 +1,5 @@
 package com.knime.bigdata.spark.jobserver.client;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
@@ -13,12 +12,12 @@ import javax.ws.rs.core.Response.Status;
 
 import org.knime.core.node.CanceledExecutionException;
 
-import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  * handles the client side of the job-server in all requests related to contexts
@@ -98,9 +97,7 @@ public class KnimeContext {
         KNIMESparkContext contextContainer = new KNIMESparkContext();
 
         //upload jar with our extensions
-        final String jobJarPath =
-            SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
-                + "knimeJobs.jar";
+        final String jobJarPath = SparkUtil.getJobJarPath();
         //TODO: Upload the static jobs jar only if not exists
         JobControler.uploadJobJar(contextContainer, jobJarPath);
 

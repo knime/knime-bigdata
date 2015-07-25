@@ -81,6 +81,7 @@ import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
 import org.knime.base.node.jsnippet.ui.JarListPanel;
 import org.knime.base.node.jsnippet.ui.OutFieldsTable;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
@@ -90,7 +91,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
 
-import com.knime.bigdata.spark.node.scripting.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 
@@ -523,7 +524,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //            m_colList.setEnabled(enabled);
             m_flowVarsList.setEnabled(enabled);
             m_inFieldsTable.setEnabled(enabled);
-//            m_outFieldsTable.setEnabled(enabled);
+            m_outFieldsTable.setEnabled(enabled);
             m_jarPanel.setEnabled(enabled);
             m_snippetTextArea.setEnabled(enabled);
         }
@@ -567,9 +568,15 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //        m_colList.setSpec(specs[0]);
         m_flowVarsList.setFlowVariables(getAvailableFlowVariables().values());
         m_snippet.setSettings(m_settings);
-        m_jarPanel.setJarFiles(m_settings.getJarFiles());
-        SparkDataPortObjectSpec rddSpec = (SparkDataPortObjectSpec) specs[0];
-        m_fieldsController.updateData(m_settings, rddSpec.getTableSpec(), getAvailableFlowVariables());
+//        m_jarPanel.setJarFiles(m_settings.getJarFiles());
+        final DataTableSpec tableSpec;
+        if (specs == null || specs.length < 1 || specs[0] == null) {
+            tableSpec = new DataTableSpec();
+        } else {
+            SparkDataPortObjectSpec rddSpec = (SparkDataPortObjectSpec) specs[0];
+            tableSpec = rddSpec.getTableSpec();
+        }
+        m_fieldsController.updateData(m_settings, tableSpec, getAvailableFlowVariables());
 
         // set caret position to the start of the custom expression
         m_snippetTextArea.setCaretPosition(
