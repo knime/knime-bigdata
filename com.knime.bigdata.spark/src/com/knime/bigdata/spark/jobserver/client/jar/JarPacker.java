@@ -5,9 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -18,7 +20,7 @@ import java.util.jar.JarOutputStream;
  */
 public class JarPacker {
 
-    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aPackagePath,
+    public static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aPackagePath,
         final Map<String, byte[]> aClassByteCodes) throws IOException {
 
         final File f = new File(aSourceJarPath);
@@ -44,7 +46,7 @@ public class JarPacker {
         source.close();
     }
 
-    static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
+    public static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
         throws IOException, ClassNotFoundException {
 
         final String path = aClassPath.replaceAll("\\.", "/");
@@ -106,17 +108,43 @@ public class JarPacker {
     }
 
     private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream)
+            throws IOException {
+        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<String>emptySet());
+    }
+
+    private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream,
+        final Set<String> entryNames2Filter)
         throws IOException {
         Enumeration<JarEntry> entries = aSourceJarFile.entries();
 
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
             InputStream is = aSourceJarFile.getInputStream(entry);
-            copyEntry(entry.getName(), is, aTargetOutputStream);
+            final String entryName = entry.getName();
+            if (entryNames2Filter == null || !entryNames2Filter.contains(entryName)) {
+                copyEntry(entryName, is, aTargetOutputStream);
+            }
             is.close();
             aTargetOutputStream.flush();
             aTargetOutputStream.closeEntry();
         }
     }
 
+    /**
+     * This method copies all entries except the filter entries from the given jar file into a new temp file
+     * which in the end replaces the input file.
+     * @param jarFile the jar file to remove the given classes from
+     * @param entryNames the names of the jar entries to remove
+     * @throws IOException if a new file could not be created
+     */
+    public static void removeFromJar(final File jarFile, final Set<String> entryNames) throws IOException {
+        final File tempFile = File.createTempFile("snippet", ".jar", jarFile.getParentFile());
+        final String jarFilePath = jarFile.getPath();
+        try (   final JarFile source = new JarFile(jarFilePath);
+                final JarOutputStream target = new JarOutputStream(new FileOutputStream(tempFile));) {
+            copyJarFile(source, target, entryNames);
+        }
+        jarFile.delete();
+        tempFile.renameTo(jarFile);
+    }
 }

@@ -48,6 +48,8 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,16 +57,15 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 
@@ -72,17 +73,23 @@ import com.typesafe.config.Config;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements Serializable {
+public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
+    private final static Logger LOGGER = Logger.getLogger("KNIME Spark Java Snippet");
 
     private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
 
     private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_2;
+
+    private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_MODEL_NAME;
+
+    private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_INPUT + "."
+        + ParameterConstants.PARAM_MAIN_CLASS;
 
     private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
         + ParameterConstants.PARAM_TABLE_1;
@@ -95,6 +102,12 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
         String msg = null;
         if (!aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
+        }
+        if (msg == null && !aConfig.hasPath(PARAM_MODEL)) {
+            msg = "Compiled snippet class missing!";
+        }
+        if (msg == null && !aConfig.hasPath(PARAM_MAIN_CLASS)) {
+            msg = "Main class name missing!";
         }
         if (msg != null) {
             return ValidationResultConverter.invalid(msg);
@@ -123,134 +136,68 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
      *
      * @return JobResult with table information
      */
-    @SuppressWarnings("resource")
     @Override
     protected final JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig)
         throws GenericKnimeSparkException {
         validateInput(aConfig);
-        LOGGER.log(Level.FINE, "starting transformation job...");
-        final JavaRDD<Row> rowRDD1;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1)) {
-            rowRDD1 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY1));
-        } else {
-            rowRDD1 = null;
-        }
-        final JavaRDD<Row> rowRDD2;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2)) {
-            rowRDD2 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY2));
-        } else {
-            rowRDD2 = null;
-        }
-        final JavaRDD<Row> resultRDD = apply(new JavaSparkContext(aSparkContext), rowRDD1, rowRDD2);
-        LOGGER.log(Level.FINE, "transformation completed");
-            if (resultRDD == null) {
-                LOGGER.log(Level.FINE, "no result found");
-                return JobResult.emptyJobResult().withMessage("OK");
+        try {
+            final JavaRDD<Row> rowRDD1;
+            if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1)) {
+                rowRDD1 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY1));
+            } else {
+                rowRDD1 = null;
             }
+            final JavaRDD<Row> rowRDD2;
+            if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2)) {
+                rowRDD2 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY2));
+            } else {
+                rowRDD2 = null;
+            }
+            final String mainClass = aConfig.getString(PARAM_MAIN_CLASS);
+            System.out.println("Main class: " + mainClass);
+            final Map<String, byte[]> bytecode = ModelUtils.fromString(aConfig.getString(PARAM_MODEL));
+            final ClassLoader cl = new ClassLoader(Thread.currentThread().getContextClassLoader()) {
+                /** {@inheritDoc} */
+                @Override
+                protected Class<?> findClass(final String name) throws ClassNotFoundException {
+                    System.out.println("In class loader: " + name);
+                    byte[] bc = bytecode.get(name);
+                    return defineClass(name, bc, 0, bc.length);
+                }
+            };
+            System.out.println("Loading class:" + mainClass);
+            final Class<?> modelClass = cl.loadClass(mainClass);
+            System.out.println("Class loaded: " + modelClass);
+            final Object instance = modelClass.newInstance();
+            System.out.println("Object create: " + instance);
+            Method applyMethod = modelClass.getMethod("apply", JavaSparkContext.class, JavaRDD.class, JavaRDD.class);
+            System.out.println("Apply method loaded");
+            LOGGER.log(Level.FINE, "starting transformation job...");
+            System.out.println("Call apply method");
+//            final JavaRDD<Row> resultRDD = apply(new JavaSparkContext(aSparkContext), rowRDD1, rowRDD2);
+            final JavaRDD<Row> resultRDD =
+                    (JavaRDD<Row>) applyMethod.invoke(instance, new JavaSparkContext(aSparkContext), rowRDD1, rowRDD2);
+            System.out.println("AbstractSparkJavaSnippet Apply resultRDD: " + resultRDD);
+            LOGGER.log(Level.FINE, "transformation completed");
             try {
-                LOGGER.log(Level.FINE, "result found");
-                addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), resultRDD);
-                final StructType schema = getSchema(resultRDD);
-                return JobResult.emptyJobResult().withMessage("OK")
-                        .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
-            } catch (InvalidSchemaException e) {
-                throw new GenericKnimeSparkException("Could not determine result schema. Error: " + e, e);
+                if (resultRDD != null) {
+                    System.out.println("Getting schema for result");
+                    addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), resultRDD);
+//                    Method schemaMethod = modelClass.getMethod("getSchema", JavaRDD.class);
+//                    System.out.println("Schema method loaded");
+//                    System.out.println("Call schema method");
+//                    final StructType schema = (StructType) schemaMethod.invoke(instance, resultRDD);
+////                    final StructType schema = getSchema(resultRDD);
+//                    System.out.println("Schema: " + schema);
+                    return JobResult.emptyJobResult().withMessage("OK")
+                        .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), StructTypeBuilder.fromRows(resultRDD.take(10)).build());
+                }
+                return JobResult.emptyJobResult().withMessage("OK");
+            } catch (Exception e) {
+                throw new GenericKnimeSparkException(e);
             }
-    }
-
-    /**
-     * Overwrite this method to return a manual create {@link StructType}.
-     * @param resultRDD the Spark RDD that contains the result
-     * @return {@link StructType} that defines the column names and types
-     * @throws InvalidSchemaException if the schema is invalid
-     */
-    protected StructType getSchema(final JavaRDD<Row> resultRDD) throws InvalidSchemaException {
-        return StructTypeBuilder.fromRows(resultRDD.take(10)).build();
-    }
-
-    /**
-     * @param sc the JavaSparkContext
-     * @param rowRDD1 the first input RDD. Might be <code>null</code> if not connected.
-     * @param rowRDD2 the second input RDD. Might be <code>null</code> if not connected.
-     * @return the resulting RDD or <code>null</code>
-     * @throws GenericKnimeSparkException if an exception occurs
-     */
-    public abstract JavaRDD<Row> apply(JavaSparkContext sc, JavaRDD<Row> rowRDD1, JavaRDD<Row> rowRDD2)
-            throws GenericKnimeSparkException;
-
-    /**
-     * Write warning message to the logger.
-     *
-     * @param o The object to print.
-     */
-    protected void logWarn(final String o) {
-        LOGGER.warning(o);
-    }
-
-    /**
-     * Write debugging message to the logger.
-     *
-     * @param o The object to print.
-     */
-    protected void logDebug(final String o) {
-        LOGGER.finest(o);
-    }
-
-    /**
-     * Write info message to the logger.
-     *
-     * @param o The object to print.
-     */
-    protected void logInfo(final String o) {
-        LOGGER.fine(o);
-    }
-
-    /**
-     * Write error message to the logger.
-     *
-     * @param o The object to print.
-     */
-    protected void logError(final String o) {
-        LOGGER.log(Level.SEVERE, o);
-    }
-
-    /**
-     * Write warning message and throwable to the logger.
-     *
-     * @param o The object to print.
-     * @param t The exception to log at debug level, including its stack trace.
-     */
-    protected void logWarn(final String o, final Throwable t) {
-        LOGGER.log(Level.WARNING, o, t);
-    }
-
-    /**
-     * Write debugging message and throwable to the logger.
-     *
-     * @param o The object to print.
-     * @param t The exception to log, including its stack trace.
-     */
-    protected void logDebug(final String o, final Throwable t) {
-        LOGGER.log(Level.FINEST, o, t);
-    }
-
-    /**
-     * Write info message and throwable to the logger.
-     *
-     * @param o The object to print.
-     * @param t The exception to log at debug level, including its stack trace.
-     */
-    protected void logInfo(final String o, final Throwable t) {
-        LOGGER.log(Level.FINE, o, t);
-    }
-
-    /**
-     * Write error message and throwable to the logger.
-     *
-     * @param o The object to print.
-     * @param t The exception to log at debug level, including its stack trace.
-     */
-    protected void logError(final String o, final Throwable t) {
-        LOGGER.log(Level.SEVERE, o, t);
+        } catch (Exception e) {
+            throw new GenericKnimeSparkException(e);
+        }
     }
 }

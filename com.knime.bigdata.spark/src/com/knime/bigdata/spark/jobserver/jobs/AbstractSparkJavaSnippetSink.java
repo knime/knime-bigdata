@@ -20,6 +20,9 @@
  */
 package com.knime.bigdata.spark.jobserver.jobs;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.Row;
@@ -32,6 +35,8 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
  */
 public abstract class AbstractSparkJavaSnippetSink extends AbstractSparkJavaSnippet {
 
+    private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippetSink.class.getName());
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -40,7 +45,9 @@ public abstract class AbstractSparkJavaSnippetSink extends AbstractSparkJavaSnip
     @Override
     public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)
             throws GenericKnimeSparkException {
+        LOGGER.log(Level.FINE, "starting apply...");
         apply(sc, rowRDD1);
+        LOGGER.log(Level.FINE, "apply finished...");
         return null;
     }
 

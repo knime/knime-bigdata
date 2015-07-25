@@ -56,7 +56,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  *
@@ -131,8 +131,8 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
             includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
         }
 
-        final String outputTableName = SparkIDGenerator.createID();
-        final String outputMappingTableName = SparkIDGenerator.createID();
+        final String outputTableName = SparkIDs.createRDDID();
+        final String outputMappingTableName = SparkIDs.createRDDID();
 
         final ValueConverterTask task = new ValueConverterTask(rdd.getData(), includeColIdxs, includedCols,
             mappingType, outputTableName, outputMappingTableName);

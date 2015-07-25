@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
@@ -100,7 +100,7 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final CompiledModelPortObject pmml = (CompiledModelPortObject)inObjects[0];
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
-        final String aOutputTableName = SparkIDGenerator.createID();
+        final String aOutputTableName = SparkIDs.createRDDID();
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);

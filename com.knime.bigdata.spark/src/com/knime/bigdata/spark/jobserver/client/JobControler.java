@@ -26,6 +26,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.util.SparkIDs;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -44,8 +45,8 @@ public class JobControler {
 
     private final static Logger LOGGER = Logger.getLogger(JobControler.class.getName());
 
-    // TODO - this should probably be configurable and user-specific
-    final static String appName = "knimeJobs";
+    /**We use the Spark application ID which is based on the KNIME id which is unique per workspace.*/
+    final static String appName = SparkIDs.getSparkApplicationID();
 
     /**
      * upload a jar file to the server TODO - need to dynamically create jar file
@@ -55,7 +56,8 @@ public class JobControler {
      *
      * @throws GenericKnimeSparkException
      */
-    public static void uploadJobJar(final KNIMESparkContext aContextContainer, final String aJarPath) throws GenericKnimeSparkException {
+    public static void uploadJobJar(final KNIMESparkContext aContextContainer, final String aJarPath)
+            throws GenericKnimeSparkException {
         uploadJar(aContextContainer, aJarPath, appName);
     }
 

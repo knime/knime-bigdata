@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.util;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.InvalidSettingsException;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
@@ -105,5 +107,13 @@ public final class SparkUtil {
             specs.add(specCreator.createSpec());
         }
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
+    }
+
+    /**
+     * @return the path to the standard KNIME job jar
+     */
+    public static String getJobJarPath() {
+        return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
+            + "knimeJobs.jar";
     }
 }

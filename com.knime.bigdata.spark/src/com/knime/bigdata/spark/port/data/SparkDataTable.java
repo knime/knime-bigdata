@@ -33,7 +33,7 @@ import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.util.SparkIDGenerator;
+import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  * This class represents a Spark SchemaRDD or data frame which represents a data table with columns and rows.
@@ -50,7 +50,7 @@ public class SparkDataTable extends AbstractSparkRDD {
      * @param spec the {@link DataTableSpec} of the Spark data table
      */
     public SparkDataTable(final KNIMESparkContext context, final DataTableSpec spec) {
-        this(context, SparkIDGenerator.createID(), spec);
+        this(context, SparkIDs.createRDDID(), spec);
     }
 
     /**
