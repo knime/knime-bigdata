@@ -136,7 +136,7 @@ public class JoinJobTest extends SparkSpec {
     }
 
     @Test
-    public void innerJoinOfTwoTablesWithTwoMatchingColumn() throws Throwable {
+    public void innerJoinOfTwoTablesWithTwoMatchingColumns() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
         ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
@@ -169,6 +169,216 @@ public class JoinJobTest extends SparkSpec {
         checkResult(contextName, resTableName, expected);
     }
 
+    @Test
+    public void innerJoinOfTwoTablesWithMultipleMatches() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
+                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[6][];
+
+        expected[0] =
+            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], TEST_TABLE_2[0][2],
+                TEST_TABLE_2[0][1]};
+        expected[1] =
+            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], TEST_TABLE_2[1][2],
+                TEST_TABLE_2[1][1]};
+        expected[2] =
+            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], TEST_TABLE_2[0][2],
+                TEST_TABLE_2[0][1]};
+        expected[3] =
+            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], TEST_TABLE_2[1][2],
+                TEST_TABLE_2[1][1]};
+        expected[4] =
+            new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], TEST_TABLE_2[2][2],
+                TEST_TABLE_2[2][1]};
+        expected[5] =
+            new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], TEST_TABLE_2[3][2],
+                TEST_TABLE_2[3][1]};
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
+
+    @Test
+    public void leftOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.LeftOuterJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
+                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[7][];
+
+        expected[0] =
+            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], TEST_TABLE_2[0][2],
+                TEST_TABLE_2[0][1]};
+        expected[1] =
+            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], TEST_TABLE_2[1][2],
+                TEST_TABLE_2[1][1]};
+        expected[2] =
+            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], TEST_TABLE_2[0][2],
+                TEST_TABLE_2[0][1]};
+        expected[3] =
+            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], TEST_TABLE_2[1][2],
+                TEST_TABLE_2[1][1]};
+        expected[4] =
+            new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], TEST_TABLE_2[2][2],
+                TEST_TABLE_2[2][1]};
+        expected[5] =
+            new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], TEST_TABLE_2[3][2],
+                TEST_TABLE_2[3][1]};
+        expected[6] = new Object[]{TEST_TABLE_3[2][0], TEST_TABLE_3[2][1], TEST_TABLE_3[2][2], null, null};
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
+
+    @Test
+    public void rightOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.RightOuterJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
+                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[7][];
+
+        expected[0] =
+            new Object[]{TEST_TABLE_2[0][0], TEST_TABLE_2[0][1], TEST_TABLE_2[0][2], TEST_TABLE_3[0][2],
+                TEST_TABLE_3[0][1]};
+        expected[1] =
+            new Object[]{TEST_TABLE_2[0][0], TEST_TABLE_2[0][1], TEST_TABLE_2[0][2], TEST_TABLE_3[1][2],
+                TEST_TABLE_3[1][1]};
+        expected[2] =
+            new Object[]{TEST_TABLE_2[1][0], TEST_TABLE_2[1][1], TEST_TABLE_2[1][2], TEST_TABLE_3[0][2],
+                TEST_TABLE_3[0][1]};
+        expected[3] =
+            new Object[]{TEST_TABLE_2[1][0], TEST_TABLE_2[1][1], TEST_TABLE_2[1][2], TEST_TABLE_3[1][2],
+                TEST_TABLE_3[1][1]};
+        expected[4] =
+            new Object[]{TEST_TABLE_2[2][0], TEST_TABLE_2[2][1], TEST_TABLE_2[2][2], TEST_TABLE_3[3][2],
+                TEST_TABLE_3[3][1]};
+        expected[5] =
+            new Object[]{TEST_TABLE_2[3][0], TEST_TABLE_2[3][1], TEST_TABLE_2[3][2], TEST_TABLE_3[3][2],
+                TEST_TABLE_3[3][1]};
+        expected[6] = new Object[]{null, null, null, TEST_TABLE_3[2][2], TEST_TABLE_3[2][1]};
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
+
+    @Test
+    public void fullOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.FullOuterJoin.toString(), new Integer[]{1}, new Integer[]{1},
+                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[6][];
+
+        expected[0] =
+            new Object[]{TEST_TABLE_2[0][0], TEST_TABLE_2[0][1], TEST_TABLE_2[0][2], TEST_TABLE_3[0][2],
+                TEST_TABLE_3[0][1]};
+        expected[1] =
+            new Object[]{TEST_TABLE_2[1][0], TEST_TABLE_2[1][1], TEST_TABLE_2[1][2], TEST_TABLE_3[1][2],
+                TEST_TABLE_3[1][1]};
+        expected[2] = new Object[]{TEST_TABLE_2[2][0], TEST_TABLE_2[2][1], TEST_TABLE_2[2][2], null, null};
+        expected[3] = new Object[]{TEST_TABLE_2[3][0], TEST_TABLE_2[3][1], TEST_TABLE_2[3][2], null, null};
+        expected[4] = new Object[]{null, null, null, TEST_TABLE_3[2][2], TEST_TABLE_3[2][1]};
+        expected[5] = new Object[]{null, null, null, TEST_TABLE_3[3][2], TEST_TABLE_3[3][1]};
+
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
+
+
+    @Test
+    public void fullOuterJoinOfTwoTablesWithNoMatches() throws Throwable {
+        KNIMESparkContext contextName = KnimeContext.getSparkContext();
+
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
+            String.class}, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_4, new Class<?>[]{Integer.class}, "tab2");
+
+        final String resTableName = "OutTab";
+
+        String params =
+            getParams("tab1", "tab2", JoinMode.FullOuterJoin.toString(), new Integer[]{0}, new Integer[]{0},
+                new Integer[]{0, 1, 2}, new Integer[]{0}, resTableName);
+
+        Config config = ConfigFactory.parseString(params);
+        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
+            new JoinJob().validate(config));
+
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+
+        Object[][] expected = new Object[6][];
+
+        expected[0] =
+            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], null};
+        expected[1] =
+            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], null};
+        expected[2] = new Object[]{TEST_TABLE_3[2][0], TEST_TABLE_3[2][1], TEST_TABLE_3[2][2], null};
+        expected[3] = new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], null};
+        expected[4] = new Object[]{null, null, null, TEST_TABLE_4[0][0]};
+        expected[5] = new Object[]{null, null, null, TEST_TABLE_4[1][0]};
+
+        JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+        checkResult(contextName, resTableName, expected);
+    }
     private void
         checkResult(final KNIMESparkContext aContextName, final String resTableName, final Object[][] aExpected)
             throws Exception {
@@ -195,6 +405,12 @@ public class JoinJobTest extends SparkSpec {
     static final Object[][] TEST_TABLE_2 = new Object[][]{new Object[]{1, "Ping", "my string"},
         new Object[]{1, "Pong", "my string"}, new Object[]{1, "Ping2", "my other string"},
         new Object[]{1, "Pong2", "my other string"}};
+
+    static final Object[][] TEST_TABLE_3 = new Object[][]{new Object[]{1, "Ping", "my string"},
+        new Object[]{1, "Pong", "my string"}, new Object[]{2, "Ping2x", "my other string"},
+        new Object[]{1, "Pong2a", "my other string"}};
+
+    static final Object[][] TEST_TABLE_4 = new Object[][]{new Object[]{88}, new Object[]{99}};
 
     private String rowFetcherDef(final int aNumRows, final String aTableName) {
         return JsonUtils.asJson(new Object[]{

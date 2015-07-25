@@ -19,6 +19,7 @@ import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
 
+import com.google.common.base.Optional;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
 /**
@@ -283,34 +284,117 @@ public class RDDUtilsInJava {
 
     /**
      * merge the given pairs of rows into a single row while selecting only some columns
+     *
      * @param aTuples
      * @param aColIdxLeft indices of columns to keep from the left row
      * @param aColIdxRight indices of columns to keep from the right row
      * @return JavaRDD with merge rows
      */
-    public static JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<Row, Row>> aTuples, final List<Integer> aColIdxLeft,
+//    public static JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<Row, Row>> aTuples, final List<Integer> aColIdxLeft,
+//        final List<Integer> aColIdxRight) {
+//        return aTuples.map(new Function<Tuple2<Row, Row>, Row>() {
+//            private static final long serialVersionUID = 1L;
+//
+//            @Override
+//            public Row call(final Tuple2<Row, Row> aTuple) throws Exception {
+//                RowBuilder builder = RowBuilder.emptyRow();
+//                extractColumns(aColIdxLeft, aTuple._1, builder);
+//                extractColumns(aColIdxRight, aTuple._2, builder);
+//                return builder.build();
+//            }
+//
+//        });
+//    }
+//
+//    public static JavaRDD<Row> mergeRowsLO(final JavaRDD<Tuple2<Row, Optional<Row>>> aTuples,
+//        final List<Integer> aColIdxLeft, final List<Integer> aColIdxRight) {
+//        return aTuples.map(new Function<Tuple2<Row, Optional<Row>>, Row>() {
+//            private static final long serialVersionUID = 1L;
+//
+//            @Override
+//            public Row call(final Tuple2<Row, Optional<Row>> aTuple) throws Exception {
+//                RowBuilder builder = RowBuilder.emptyRow();
+//                extractColumns(aColIdxLeft, aTuple._1, builder);
+//                extractColumns(aColIdxRight, aTuple._2, builder);
+//                return builder.build();
+//            }
+//
+//        });
+//    }
+
+    public static <L, R> JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<L, R>> aTuples, final List<Integer> aColIdxLeft,
         final List<Integer> aColIdxRight) {
-        return aTuples.map(new Function<Tuple2<Row, Row>, Row>() {
+        return aTuples.map(new Function<Tuple2<L, R>, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Row call(final Tuple2<Row, Row> aTuple) throws Exception {
+            public Row call(final Tuple2<L, R> aTuple) throws Exception {
                 RowBuilder builder = RowBuilder.emptyRow();
                 extractColumns(aColIdxLeft, aTuple._1, builder);
                 extractColumns(aColIdxRight, aTuple._2, builder);
                 return builder.build();
             }
 
-            /**
-             * @param aColIdxLeft
-             * @param aTuple
-             * @param builder
-             */
-            private void extractColumns(final List<Integer> aColIdx, final Row aRow, final RowBuilder builder) {
-                for (int ix : aColIdx) {
-                    builder.add(aRow.get(ix));
-                }
-            }
         });
     }
+
+//    public static JavaRDD<Row> mergeRowsOO(final JavaRDD<Tuple2<Optional<Row>, Optional<Row>>> aTuples,
+//        final List<Integer> aColIdxLeft, final List<Integer> aColIdxRight) {
+//        return aTuples.map(new Function<Tuple2<Optional<Row>, Optional<Row>>, Row>() {
+//            private static final long serialVersionUID = 1L;
+//
+//            @Override
+//            public Row call(final Tuple2<Optional<Row>, Optional<Row>> aTuple) throws Exception {
+//                RowBuilder builder = RowBuilder.emptyRow();
+//                extractColumns(aColIdxLeft, aTuple._1, builder);
+//                extractColumns(aColIdxRight, aTuple._2, builder);
+//                return builder.build();
+//            }
+//
+//        });
+//    }
+
+    /**
+     * @param aColIdxLeft
+     * @param aTuple
+     * @param builder
+     */
+    private static <J> void extractColumns(final List<Integer> aColIdx, final J aRow, final RowBuilder builder) {
+        for (int ix : aColIdx) {
+            if (aRow instanceof Row) {
+                builder.add(((Row)aRow).get(ix));
+            } else if ((aRow instanceof Optional<?>) && ((Optional<Row>)aRow).isPresent()) {
+                builder.add(((Optional<Row>)aRow).get().get(ix));
+            } else {
+                builder.add(null);
+            }
+        }
+    }
+
+//    /**
+//     * @param aColIdxLeft
+//     * @param aTuple
+//     * @param builder
+//     */
+//    private static void extractColumns(final List<Integer> aColIdx, final Row aRow, final RowBuilder builder) {
+//        for (int ix : aColIdx) {
+//            builder.add(aRow.get(ix));
+//        }
+//    }
+//
+//    /**
+//     * @param aColIdxLeft
+//     * @param aTuple
+//     * @param builder
+//     */
+//    private static void extractColumns(final List<Integer> aColIdx, final Optional<Row> aRow, final RowBuilder builder) {
+//        for (int ix : aColIdx) {
+//            if (aRow.isPresent()) {
+//                builder.add(aRow.get().get(ix));
+//            } else {
+//                builder.add(null);
+//            }
+//        }
+//    }
+
 }
