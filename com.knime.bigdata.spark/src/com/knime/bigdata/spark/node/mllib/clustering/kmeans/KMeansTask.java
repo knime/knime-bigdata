@@ -95,7 +95,7 @@ public class KMeansTask {
     private String kmeansLearnerDef() {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_includeColIdxs),
+            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_includeColIdxs),
                 ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
                 "" + m_noOfIteration, ParameterConstants.PARAM_TABLE_1, m_inputTableName},
             ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});

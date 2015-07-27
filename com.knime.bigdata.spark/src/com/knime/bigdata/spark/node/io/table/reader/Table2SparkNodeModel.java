@@ -136,7 +136,7 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_TABLE_1, JsonUtils.toJson2DimArray(data),
-                ParameterConstants.PARAM_SCHEMA, JsonUtils.toJsonArray(aPrimitiveTypes)},
+                ParameterConstants.PARAM_SCHEMA, JsonUtils.toJsonArray((Object[])aPrimitiveTypes)},
             ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
     }
 

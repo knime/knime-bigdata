@@ -44,15 +44,25 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
 public class DecisionTreeTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     private Integer[] m_numericColIdx;
+
     private final int m_classColIdx;
+
     private final String m_classColName;
+
     private final KNIMESparkContext m_context;
+
     private String m_mappingTableName;
+
     private String m_inputTableName;
+
     private final String[] m_colNames;
+
     private int m_maxDepth;
+
     private int m_maxNoOfBins;
+
     private String m_qualityMeasure;
 
     DecisionTreeTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> aNumericColNames,
@@ -72,39 +82,41 @@ public class DecisionTreeTask implements Serializable {
         m_mappingTableName = mappingRDD == null ? null : mappingRDD.getID();
     }
 
-    DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
+        CanceledExecutionException {
         final String learnerParams = learnerDef();
         final String jobId =
-                JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
+            JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
         return (DecisionTreeModel)result.getObjectResult();
     }
 
-        /**
-         * names of the columns (must include label column), required for value mapping info
-         */
+    /**
+     * names of the columns (must include label column), required for value mapping info
+     */
 
-        private String learnerDef() {
+    private String learnerDef() {
         final Object[] inputParamas;
         if (m_mappingTableName == null) {
-            inputParamas = new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins,
-                ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth, ParameterConstants.PARAM_LABEL_INDEX,
-                m_classColIdx,
-                ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING, JsonUtils.toJsonArray(m_colNames),
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_numericColIdx),
-                ParameterConstants.PARAM_TABLE_1, m_inputTableName};
+            inputParamas =
+                new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                    ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins, ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth,
+                    ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
+                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
+                    JsonUtils.toJsonArray((Object[])m_colNames), ParameterConstants.PARAM_COL_IDXS,
+                    JsonUtils.toJsonArray((Object[])m_numericColIdx), ParameterConstants.PARAM_TABLE_1,
+                    m_inputTableName};
         } else {
-            inputParamas = new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins,
-                ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth, ParameterConstants.PARAM_LABEL_INDEX,
-                m_classColIdx,
-                ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING, JsonUtils.toJsonArray(m_colNames),
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(m_numericColIdx),
-                ParameterConstants.PARAM_TABLE_1, m_inputTableName,
-                ParameterConstants.PARAM_TABLE_2, m_mappingTableName};
+            inputParamas =
+                new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                    ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins, ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth,
+                    ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
+                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
+                    JsonUtils.toJsonArray((Object[])m_colNames), ParameterConstants.PARAM_COL_IDXS,
+                    JsonUtils.toJsonArray((Object[])m_numericColIdx), ParameterConstants.PARAM_TABLE_1, m_inputTableName,
+                    ParameterConstants.PARAM_TABLE_2, m_mappingTableName};
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{}});

@@ -36,7 +36,6 @@ import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
-import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 /**
  *
@@ -56,7 +55,7 @@ public class PMMLAssignTask implements Serializable {
             new Object[]{
                     ParameterConstants.PARAM_TABLE_1, inputID,
                     ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString((Serializable)bytecode),
-                    ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(colIdxs),
+                    ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
                     ParameterConstants.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
                     //we have to replace the . with / since the key in the map uses / instead of .
                     ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')},

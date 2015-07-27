@@ -55,7 +55,7 @@ public enum JoinMode {
     /**
      * convert string representation of KNIME join mode to this join mode
      * @param aString
-     * @return
+     * @return Enum value corresponding to given string
      */
     public static JoinMode fromKnimeJoinMode(final String aString) {
         if (InnerJoin.toString().equals(aString)) {

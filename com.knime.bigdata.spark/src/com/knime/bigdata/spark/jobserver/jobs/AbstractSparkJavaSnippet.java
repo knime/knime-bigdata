@@ -123,7 +123,6 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
      *
      * @return JobResult with table information
      */
-    @SuppressWarnings("resource")
     @Override
     protected final JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig)
         throws GenericKnimeSparkException {

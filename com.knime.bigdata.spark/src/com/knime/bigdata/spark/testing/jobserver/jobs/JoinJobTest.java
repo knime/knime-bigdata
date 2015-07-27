@@ -17,7 +17,6 @@ import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -56,22 +55,22 @@ public class JoinJobTest extends SparkSpec {
         if (aJoinColIdxesLeft != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0)).append("\": ")
-                .append(JsonUtils.toJsonArray(aJoinColIdxesLeft)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesLeft)).append(",\n");
         }
         if (aJoinColIdxesRight != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1)).append("\": ")
-                .append(JsonUtils.toJsonArray(aJoinColIdxesRight)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesRight)).append(",\n");
         }
         if (aSelectColIdxesLeft != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2)).append("\": ")
-                .append(JsonUtils.toJsonArray(aSelectColIdxesLeft)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesLeft)).append(",\n");
         }
         if (aSelectColIdxesRight != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3)).append("\": ")
-                .append(JsonUtils.toJsonArray(aSelectColIdxesRight)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesRight)).append(",\n");
         }
 
         params.append("    }\n");
@@ -95,16 +94,6 @@ public class JoinJobTest extends SparkSpec {
         return params.toString();
     }
 
-    private void myCheck(final String params, final String aParam, final String aPrefix) {
-        myCheck(params, aPrefix + " parameter '" + aParam + "' missing.");
-    }
-
-    private void myCheck(final String params, final String aMsg) {
-        KnimeSparkJob testObj = new JoinJob();
-        Config config = ConfigFactory.parseString(params);
-        assertEquals("Configuration should be recognized as invalid", ValidationResultConverter.invalid(aMsg),
-            testObj.validate(config));
-    }
 
     @Test
     public void innerJoinOfIdenticalTableWithOneMatchingColumn() throws Throwable {

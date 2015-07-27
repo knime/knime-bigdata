@@ -20,6 +20,14 @@ import java.util.jar.JarOutputStream;
  */
 public class JarPacker {
 
+    /**
+     * add the given byte code to the given jar and put it into a new jar
+     * @param aSourceJarPath
+     * @param aTargetJarPath
+     * @param aPackagePath
+     * @param aClassByteCodes
+     * @throws IOException
+     */
     public static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aPackagePath,
         final Map<String, byte[]> aClassByteCodes) throws IOException {
 
@@ -46,6 +54,14 @@ public class JarPacker {
         source.close();
     }
 
+    /**
+     *
+     * @param aSourceJarPath
+     * @param aTargetJarPath
+     * @param aClassPath
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
         throws IOException, ClassNotFoundException {
 

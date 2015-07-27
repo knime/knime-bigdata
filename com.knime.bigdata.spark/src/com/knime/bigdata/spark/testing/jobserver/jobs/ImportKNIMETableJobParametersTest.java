@@ -35,7 +35,7 @@ public class ImportKNIMETableJobParametersTest {
         }
         if (aPrimitiveTypes != null) {
             params.append("         \"").append(ParameterConstants.PARAM_SCHEMA).append("\": ")
-                .append(JsonUtils.toJsonArray(aPrimitiveTypes)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aPrimitiveTypes)).append(",\n");
         }
 
         params.append("    }\n");
