@@ -5,18 +5,18 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.classification.SVMWithSGD;
 import org.apache.spark.mllib.optimization.L1Updater;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.mllib.regression.LinearRegressionWithSGD;
 
 import com.typesafe.config.Config;
 
 /**
- * @author Tobias Koetter, KNIME.com
+ * @author dwk
  */
-public class SVMLearnerJob extends SGDJob {
+public class LinearRegressionWithSGDJob extends SGDJob {
 
-    private final static Logger LOGGER = Logger.getLogger(SVMLearnerJob.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(LinearRegressionWithSGDJob.class.getName());
 
     /**
      * @param sc
@@ -27,12 +27,11 @@ public class SVMLearnerJob extends SGDJob {
     @Override
     Serializable execute(final SparkContext sc, final Config aConfig, final JavaRDD<LabeledPoint> inputRdd) {
         final int noOfIteration = aConfig.getInt(PARAM_NUM_ITERATIONS);
-        final SVMWithSGD svmAlg = new SVMWithSGD();
-        svmAlg.optimizer().setNumIterations(noOfIteration).setRegParam(aConfig.getDouble(PARAM_REGULARIZATION))
-            .setUpdater(new L1Updater());
-        return svmAlg.run(inputRdd.rdd());
+        final LinearRegressionWithSGD alg = new LinearRegressionWithSGD();
+        alg.optimizer().setNumIterations(noOfIteration).setRegParam(aConfig.getDouble(PARAM_REGULARIZATION))
+        .setUpdater(new L1Updater());
+        return alg.run(inputRdd.rdd());
     }
-
 
     /**
      * {@inheritDoc}
@@ -47,6 +46,6 @@ public class SVMLearnerJob extends SGDJob {
      */
     @Override
     String getAlgName() {
-        return "SVM learner";
+        return "Linear Regression With SGD";
     }
 }

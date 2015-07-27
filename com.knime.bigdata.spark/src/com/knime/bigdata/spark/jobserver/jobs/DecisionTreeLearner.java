@@ -21,15 +21,13 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
@@ -40,10 +38,9 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
+import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
@@ -75,33 +72,6 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      */
     private static final String PARAM_MAX_BINS = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_MAX_BINS;
-
-    private static final String PARAM_TRAINING_RDD = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
-
-    /**
-     * table with feature and label mappings
-     */
-    private static final String PARAM_MAPPING_TABLE = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
-
-    /**
-     * selector for columns to be used for learning
-     */
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_COL_IDXS;
-
-    /**
-     * names of the columns (must include label column), required for value mapping info
-     */
-    private static final String PARAM_COL_NAMES = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING;
-
-    private static final String PARAM_LABEL_INDEX = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_LABEL_INDEX;
-
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(DecisionTreeLearner.class.getName());
 
@@ -138,55 +108,13 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_IMPURITY + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_TRAINING_RDD)) {
-            msg = "Input parameter '" + PARAM_TRAINING_RDD + "' missing.";
-        }
-
-//        if (msg == null && !aConfig.hasPath(PARAM_MAPPING_TABLE)) {
-//            msg = "Input parameter '" + PARAM_MAPPING_TABLE + "' missing.";
-//        }
-
-        if (msg == null) {
-            if (!aConfig.hasPath(PARAM_LABEL_INDEX)) {
-                msg = "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
-            } else {
-                try {
-                    aConfig.getInt(PARAM_LABEL_INDEX);
-                } catch (ConfigException e) {
-                    msg = "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
-                }
-            }
+        if (msg == null && !aConfig.hasPath(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
+            msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
         }
 
         if (msg == null) {
-            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
-                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-            } else {
-                try {
-                    aConfig.getIntList(PARAM_COL_IDXS);
-                } catch (ConfigException e) {
-                    e.printStackTrace();
-                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
-                }
-            }
+            msg = SupervisedLearnerUtils.checkConfig(aConfig);
         }
-
-        if (msg == null) {
-            if (!aConfig.hasPath(PARAM_COL_NAMES)) {
-
-                msg = "Input parameter '" + PARAM_COL_NAMES + "' missing.";
-            } else {
-                try {
-                   List<String> names = aConfig.getStringList(PARAM_COL_NAMES);
-                   if (names.size() != aConfig.getIntList(PARAM_COL_IDXS).size() + 1) {
-                       msg = "Input parameter '" + PARAM_COL_NAMES + "' is of unexpected length. It must have one entry for each select input column and 1 for the label column.";
-                   }
-                } catch (ConfigException e) {
-                    msg = "Input parameter '" + PARAM_COL_NAMES + "' is not of expected type 'string list'.";
-                }
-            }
-        }
-
         //	    input - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
         //	    numClasses - number of classes for classification.
         //	    categoricalFeaturesInfo - Map storing arity of categorical features.
@@ -198,72 +126,28 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
-        String msg = null;
-        final String key = aConfig.getString(PARAM_TRAINING_RDD);
-        if (key == null) {
-            msg = "Input parameter at port 1 is missing!";
-        } else if (!validateNamedRdd(key)) {
-            msg = "Input data table missing!";
-        }
-        if (aConfig.hasPath(PARAM_MAPPING_TABLE)) {
-            final String mappingTable = aConfig.getString(PARAM_MAPPING_TABLE);
-            if (!validateNamedRdd(mappingTable)) {
-                msg = "Input table with value mappings is missing!";
-            }
-        }
-
-        if (msg != null) {
-            LOGGER.severe(msg);
-            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
-        }
-    }
-
     /**
      * run the actual job, the result is serialized back to the client
      */
     @Override
     public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
-        validateInput(aConfig);
+        SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_TRAINING_RDD));
-        final JavaRDD<LabeledPoint> inputRdd = getTrainingData(aConfig, rowRDD);
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
 
         final DecisionTreeModel model = execute(sc, aConfig, inputRdd);
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
-            LOGGER.log(Level.INFO, "Storing predicted data under key: " + aConfig.getString(PARAM_OUTPUT_DATA_PATH));
-            JavaRDD<Vector> features = RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd);
-            //TODO - revert the label to int mapping ????
-            JavaRDD<Row> predictedData = ModelUtils.predict(sc, features, rowRDD, model);
-            try {
-                addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predictedData);
-            } catch (Exception e) {
-                LOGGER.severe("ERROR: failed to predict and store results for training data.");
-                LOGGER.severe(e.getMessage());
-            }
+        if (aConfig.hasPath(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
+            SupervisedLearnerUtils.storePredictions(sc, aConfig, this, rowRDD,
+                RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model, LOGGER);
         }
-
         LOGGER.log(Level.INFO, "Decision Tree Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return res;
 
-    }
-
-    /**
-     * @param aConfig
-     * @param aRowRDD
-     * @return
-     */
-    private JavaRDD<LabeledPoint> getTrainingData(final Config aConfig, final JavaRDD<Row> aRowRDD) {
-        final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
-
-        //note: requires that all features (including the label) are numeric !!!
-        final int labelIndex = aConfig.getInt(PARAM_LABEL_INDEX);
-        final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(aRowRDD, colIdxs, labelIndex);
-        return inputRdd;
     }
 
     /**
@@ -273,33 +157,21 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * @param aInputData - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
      * @return DecisionTreeModel
      */
-    @SuppressWarnings("unchecked")
     private DecisionTreeModel execute(final SparkContext aContext, final Config aConfig,
         final JavaRDD<LabeledPoint> aInputData) {
         aInputData.cache();
 
-        List<String> names = aConfig.getStringList(PARAM_COL_NAMES);
         final Long numClasses;
-        final Map<Integer, Integer> nominalFeatureInfo;
-        if (aConfig.hasPath(PARAM_MAPPING_TABLE)) {
-            final JavaRDD<Row> mappingRDD = getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE));
-            numClasses =
-                    ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, names.get(names.size()-1));
-            nominalFeatureInfo = ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD);
-        } else {
-            //TK_TODO: Get the number of classes from the inputdata rdd
-            numClasses = new Long(2);
-            nominalFeatureInfo = Collections.EMPTY_MAP;
-        }
+        final Map<Integer, Integer> nominalFeatureInfo = new HashMap<>();
+        numClasses = SupervisedLearnerUtils.extractFeatureInfo(aConfig, this, nominalFeatureInfo);
 
         final int maxDepth = aConfig.getInt(PARAM_MAX_DEPTH);
         final int maxBins = aConfig.getInt(PARAM_MAX_BINS);
         final String impurity = aConfig.getString(PARAM_IMPURITY);
 
         // Cluster the data into m_noOfCluster classes using KMeans
-        return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo, impurity,
-            maxDepth, maxBins);
+        return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo, impurity, maxDepth,
+            maxBins);
     }
-
 
 }
