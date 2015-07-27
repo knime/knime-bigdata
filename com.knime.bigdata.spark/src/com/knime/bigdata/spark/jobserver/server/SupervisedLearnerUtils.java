@@ -100,6 +100,11 @@ public class SupervisedLearnerUtils {
      */
     @CheckForNull
     public static String checkConfig(final Config aConfig) {
+
+        if (!aConfig.hasPath(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
+            return "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+        }
+
         if (!aConfig.hasPath(PARAM_LABEL_INDEX)) {
             return "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
         } else {

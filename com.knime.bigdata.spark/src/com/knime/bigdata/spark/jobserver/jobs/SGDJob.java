@@ -26,6 +26,9 @@ import com.typesafe.config.ConfigException;
  */
 public abstract class SGDJob extends KnimeSparkJob {
 
+    /**
+     * number of optimization iterations
+     */
     protected static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_NUM_ITERATIONS;
 
