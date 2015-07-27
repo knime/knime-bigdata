@@ -108,10 +108,6 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_IMPURITY + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-            msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
-        }
-
         if (msg == null) {
             msg = SupervisedLearnerUtils.checkConfig(aConfig);
         }
