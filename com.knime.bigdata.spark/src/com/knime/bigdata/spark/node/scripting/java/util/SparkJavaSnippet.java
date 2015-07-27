@@ -54,7 +54,7 @@ import org.knime.base.node.jsnippet.guarded.GuardedSection;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.ui.JSnippetParser;
 import org.knime.base.node.jsnippet.util.FlowVariableRepository;
-import org.knime.base.node.jsnippet.util.IJavaSnippet;
+import org.knime.base.node.jsnippet.util.JSnippet;
 import org.knime.base.node.jsnippet.util.JavaField;
 import org.knime.base.node.jsnippet.util.JavaField.InCol;
 import org.knime.base.node.jsnippet.util.JavaField.InVar;
@@ -78,10 +78,10 @@ import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 
 /**
- *
- * @author koetter
+ * {@link JSnippet} implementation for the SPark Java Snippet nodes.
+ * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> {
+public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     private static File jSnippetJar;
     private String[] m_jarFiles;
     // caches the jSnippetJar and the jarFiles.
@@ -130,7 +130,6 @@ public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> 
         }
         m_tempClassPathDir = tempDir;
     }
-
 
     /**
      * Create a new snippet with the given settings.
@@ -602,7 +601,7 @@ public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> 
      */
     @Override
     public Parser getParser() {
-        // lazy initialization of the parser
+        // lazy initialisation of the parser
         if (m_parser == null) {
             m_parser = new JSnippetParser(this);
         }
@@ -738,89 +737,6 @@ public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> 
         return null;
     }
 
-//
-//    /**
-//     * Execute the snippet.
-//     * @param table the data table at the inport
-//     * @param flowVariableRepository the flow variables at the inport
-//     * @param exec the execution context to report progress
-//     * @return the table for the output
-//     * @throws InvalidSettingsException when settings are inconsistent with
-//     * the table or the flow variables at the input
-//     * @throws CanceledExecutionException when execution is canceled by the user
-//     */
-//    public BufferedDataTable execute(
-//            final BufferedDataTable table,
-//            final FlowVariableRepository flowVariableRepository,
-//            final ExecutionContext exec) throws CanceledExecutionException,
-//            InvalidSettingsException  {
-//        OutColList outFields = m_fields.getOutColFields();
-//        if (outFields.size() > 0) {
-//            ColumnRearranger rearranger = createRearranger(
-//                    table.getDataTableSpec(),
-//                    flowVariableRepository, table.getRowCount());
-//
-//            return exec.createColumnRearrangeTable(table,
-//                    rearranger, exec);
-//        } else {
-//            CellFactory factory = new JavaSnippetCellFactory(this,
-//                    table.getDataTableSpec(),
-//                    flowVariableRepository, table.getRowCount());
-//            for (DataRow row : table) {
-//                factory.getCells(row);
-//            }
-//            return table;
-//        }
-//    }
-//
-//    /**
-//     * The execution method when no input table is present. I.e. used by
-//     * the java edit variable node.
-//     * @param flowVariableRepository flow variables at the input
-//     * @param exec the execution context to report progress, may be null when
-//     * this method is called from configure
-//     */
-//    public void execute(final FlowVariableRepository flowVariableRepository,
-//            final ExecutionContext exec) {
-//        DataTableSpec spec = new DataTableSpec();
-//        CellFactory factory = new JavaSnippetCellFactory(this, spec,
-//                flowVariableRepository, 1);
-//        factory.getCells(new DefaultRow(RowKey.createRowKey(0),
-//                new DataCell[0]));
-//    }
-//
-//    /** The rearranger is the working horse for creating the ouput table. */
-//    private ColumnRearranger createRearranger(final DataTableSpec spec,
-//            final FlowVariableRepository flowVariableRepository,
-//            final int rowCount)
-//        throws InvalidSettingsException {
-//        int offset = spec.getNumColumns();
-//        CellFactory factory = new JavaSnippetCellFactory(this, spec,
-//                flowVariableRepository, rowCount);
-//        ColumnRearranger c = new ColumnRearranger(spec);
-//        // add factory to the column rearranger
-//        c.append(factory);
-//
-//        // define which new columns do replace others
-//        OutColList outFields = m_fields.getOutColFields();
-//        for (int i = outFields.size() - 1; i >= 0; i--) {
-//            OutCol field = outFields.get(i);
-//            int index = spec.findColumnIndex(field.getKnimeName());
-//            if (index >= 0) {
-//                if (field.getReplaceExisting()) {
-//                    c.remove(index);
-//                    c.move(offset + i - 1, index);
-//                } else {
-//                    throw new InvalidSettingsException("Field \""
-//                            + field.getJavaName() + "\" is configured to "
-//                            + "replace no existing columns.");
-//                }
-//            }
-//        }
-//
-//        return c;
-//    }
-
     /**
      * Create a template for this snippet.
      * @param metaCategory the meta category of the template
@@ -829,8 +745,7 @@ public class SparkJavaSnippet implements IJavaSnippet<SparkJavaSnippetTemplate> 
     @Override
     @SuppressWarnings("rawtypes")
     public SparkJavaSnippetTemplate createTemplate(final Class metaCategory) {
-        SparkJavaSnippetTemplate template = new SparkJavaSnippetTemplate(metaCategory,
-                getSettings());
+        SparkJavaSnippetTemplate template = new SparkJavaSnippetTemplate(metaCategory, getSettings());
         return template;
     }
 

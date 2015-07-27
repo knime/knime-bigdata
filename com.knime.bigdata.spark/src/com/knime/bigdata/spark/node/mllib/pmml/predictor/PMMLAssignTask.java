@@ -36,6 +36,7 @@ import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 /**
  *

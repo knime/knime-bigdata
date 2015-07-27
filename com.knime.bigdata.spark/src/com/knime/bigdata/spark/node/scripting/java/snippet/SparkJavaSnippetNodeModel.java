@@ -37,8 +37,8 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel {
-    private static final String CLASS_NAME = "SparkJavaSnippet";
-    private static String METHOD_SIGNATURE =
+    static final String CLASS_NAME = "SparkJavaSnippet";
+    static String METHOD_SIGNATURE =
         "public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)"
             + " throws GenericKnimeSparkException";
 
