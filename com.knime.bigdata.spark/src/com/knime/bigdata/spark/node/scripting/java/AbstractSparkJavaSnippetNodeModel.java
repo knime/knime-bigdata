@@ -301,7 +301,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
      */
     private static File getSnippetFile() {
         final String appID = SparkIDs.getSparkApplicationID();
-        final File sparkSnippetDir = new File(KNIMEConstants.getKNIMEHomeDir(), "sparksnippet");
+        final File sparkSnippetDir = new File(KNIMEConstants.getKNIMEHomeDir(), "sparkSnippetJars");
         if (!sparkSnippetDir.exists()) {
             sparkSnippetDir.mkdirs();
             if (LOGGER.isDebugEnabled()) {

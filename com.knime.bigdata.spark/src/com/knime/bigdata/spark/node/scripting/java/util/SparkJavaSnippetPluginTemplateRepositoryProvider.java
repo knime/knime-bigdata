@@ -43,51 +43,47 @@
  * ------------------------------------------------------------------------
  *
  * History
- *   02.04.2012 (hofer): created
+ *   07.06.2012 (hofer): created
  */
 package com.knime.bigdata.spark.node.scripting.java.util;
 
-import org.knime.base.node.jsnippet.template.JavaSnippetTemplate;
-import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
+import org.knime.base.node.jsnippet.template.PluginTemplateRepositoryProvider;
+import org.knime.base.node.jsnippet.template.SnippetTemplateFactory;
+import org.knime.base.node.jsnippet.template.TemplateRepository;
+import org.knime.base.node.jsnippet.template.TemplateRepositoryProvider;
 import org.knime.core.node.NodeSettingsRO;
 
+
 /**
- * A settings class for Java Snippet templates.
+ * A m_file template provider for templates relative to a plugin. Since the
+ * templates are shipped out by a plugin, they cannot be removed or replaced.
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetTemplate extends JavaSnippetTemplate {
+ public class SparkJavaSnippetPluginTemplateRepositoryProvider
+ implements TemplateRepositoryProvider<SparkJavaSnippetTemplate> {
+
+     private static final PluginTemplateRepositoryProvider<SparkJavaSnippetTemplate> PROVIDER =
+             new PluginTemplateRepositoryProvider<>("com.knime.bigdata.spark", "snippetTemplates",
+                     new SnippetTemplateFactory<SparkJavaSnippetTemplate>() {
+         @Override
+         public SparkJavaSnippetTemplate create(final NodeSettingsRO settings) {
+             return SparkJavaSnippetTemplate.create(settings);
+         }
+     });
 
     /**
-     * @param metaCategory
-     * @param snippetSettings
+     * Create a instance for the bundle "com.knime.bigdata.spark" and the relative
+     * path "/snippetTemplates".
      */
-    public SparkJavaSnippetTemplate(@SuppressWarnings("rawtypes") final Class metaCategory,
-        final JavaSnippetSettings snippetSettings) {
-        super(metaCategory, snippetSettings);
-    }
-
-    private SparkJavaSnippetTemplate() {
-        // fields will be set with loadSettingsFor...
-        super();
-    }
-
-    /**
-     * Create a template and read parameters from the settings object.
-     * @param settings the settings
-     * @return a new instance
-     */
-    public static SparkJavaSnippetTemplate create(final NodeSettingsRO settings) {
-        final SparkJavaSnippetTemplate template = new SparkJavaSnippetTemplate();
-        template.loadSettings(settings);
-        return template;
+    public SparkJavaSnippetPluginTemplateRepositoryProvider() {
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Class<? extends Object> getMetaCategoryClass(final String metaCategory) throws ClassNotFoundException {
-        return metaCategory != null ? Class.forName(metaCategory) : SparkJavaSnippetTemplate.class;
+    public TemplateRepository<SparkJavaSnippetTemplate> getRepository() {
+        return PROVIDER.getRepository();
     }
 }

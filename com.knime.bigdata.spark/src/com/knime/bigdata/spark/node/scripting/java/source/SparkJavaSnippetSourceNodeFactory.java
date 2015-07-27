@@ -24,6 +24,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippetSource;
 import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
 
 /**
@@ -69,6 +70,7 @@ public class SparkJavaSnippetSourceNodeFactory extends NodeFactory<SparkJavaSnip
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkJavaSnippetNodeDialog(false, SparkJavaSnippetSourceNodeModel.createSnippet());
+        return new SparkJavaSnippetNodeDialog(this.getClass(), SparkJavaSnippetSourceNodeModel.CLASS_NAME,
+            AbstractSparkJavaSnippetSource.class, SparkJavaSnippetSourceNodeModel.METHOD_SIGNATURE);
     }
 }

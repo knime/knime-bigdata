@@ -49,16 +49,27 @@ package com.knime.bigdata.spark.node.scripting.java;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
@@ -72,35 +83,44 @@ import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
+import org.knime.base.node.jsnippet.template.AddTemplateDialog;
+import org.knime.base.node.jsnippet.template.DefaultTemplateController;
+import org.knime.base.node.jsnippet.template.TemplateNodeDialog;
+import org.knime.base.node.jsnippet.template.TemplateProvider;
+import org.knime.base.node.jsnippet.template.TemplatesPanel;
 import org.knime.base.node.jsnippet.ui.FieldsTableModel;
 import org.knime.base.node.jsnippet.ui.FieldsTableModel.Column;
 import org.knime.base.node.jsnippet.ui.FlowVariableList;
 import org.knime.base.node.jsnippet.ui.InFieldsTable;
 import org.knime.base.node.jsnippet.ui.JSnippetFieldsController;
 import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
-import org.knime.base.node.jsnippet.ui.JarListPanel;
 import org.knime.base.node.jsnippet.ui.OutFieldsTable;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
+import org.knime.core.node.workflow.FlowVariable;
 
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetTemplate;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetTemplateProvider;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 
 /**
- * The dialog of the java snippet node.
+ * The dialog that is used in all Spark java snippet nodes.
  *
- * @author Heiko Hofer
+ * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
+public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements TemplateNodeDialog<SparkJavaSnippetTemplate> {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(
             SparkJavaSnippetNodeDialog.class);
 
@@ -119,43 +139,47 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
     private OutFieldsTable m_outFieldsTable;
     private JSnippetFieldsController m_fieldsController;
 
-    private JarListPanel m_jarPanel;
+//    private JarListPanel m_jarPanel;
 
-//    private DefaultTemplateController m_templatesController;
+    private DefaultTemplateController<SparkJavaSnippetTemplate> m_templatesController;
     private boolean m_isEnabled;
 
     private File[] m_autoCompletionJars;
 
-
-//    @SuppressWarnings("rawtypes")
     /** The templates category for templates viewed or edited by this dialog. */
-//    protected Class m_templateMetaCategory;
-//    private JLabel m_templateLocation;
+    @SuppressWarnings("rawtypes")
+    protected Class m_templateMetaCategory;
+    private JLabel m_templateLocation;
 
+    private String m_className;
 
-//    /**
-//     * Create a new Dialog.
-//     * @param templateMetaCategory the meta category used in the templates
-//     * tab or to create templates
-//     */
-//    @SuppressWarnings("rawtypes")
-//    public SparkJavaSnippetNodeDialog(final Class templateMetaCategory) {
-//        this(templateMetaCategory, false);
-//    }
+    private Class<? extends KnimeSparkJob> m_abstractClass;
+
+    private String m_methodSignature;
 
     /**
      * Create a new Dialog.
+     * @param templateMetaCategory the meta category used in the templates
      * tab or to create templates
-     * @param isPreview if this is a preview used for showing templates.
-     * @param snippet the SparkJavaSnippet to use
+     * @param className the name of the class in the node dialog
+     * @param abstractClass the abstract class the class in the dialog extends
+     * @param methodSignature the method name
      */
-//    @SuppressWarnings("rawtypes")
-//    protected SparkJavaSnippetNodeDialog(final Class templateMetaCategory,
-//            final boolean isPreview) {
-        public SparkJavaSnippetNodeDialog(final boolean isPreview, final SparkJavaSnippet snippet) {
-//        m_templateMetaCategory = templateMetaCategory;
+    @SuppressWarnings("rawtypes")
+    public SparkJavaSnippetNodeDialog(final Class templateMetaCategory, final String className,
+        final Class<? extends KnimeSparkJob> abstractClass, final String methodSignature) {
+        this(false, templateMetaCategory, className, abstractClass, methodSignature);
+    }
+
+    private SparkJavaSnippetNodeDialog(final boolean isPreview,
+            final Class<?> templateMetaCategory, final String className, final Class<? extends KnimeSparkJob> abstractClass,
+            final String methodSignature) {
+        m_templateMetaCategory = templateMetaCategory;
+        m_className = className;
+        m_abstractClass = abstractClass;
+        m_methodSignature = methodSignature;
         m_settings = new JavaSnippetSettings();
-        m_snippet = snippet;
+        m_snippet = new SparkJavaSnippet(m_className, m_abstractClass, m_methodSignature);
         JPanel panel = createPanel(isPreview);
         m_fieldsController = new JSnippetFieldsController(m_snippet,
             m_inFieldsTable, m_outFieldsTable);
@@ -168,10 +192,10 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
             panel.setPreferredSize(new Dimension(800, 600));
         }
 //        addTab("Additional Libraries", createJarPanel());
-//        if (!isPreview) {
-//            // The preview does not have the templates tab
-//            addTab("Templates", createTemplatesPanel());
-//        }
+        if (!isPreview) {
+            // The preview does not have the templates tab
+            addTab("Templates", createTemplatesPanel());
+        }
         m_isEnabled = true;
         setEnabled(!isPreview);
 //        m_outFieldsTable.addPropertyChangeListener(
@@ -246,8 +270,8 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
         centerPanel.add(mainSplitPane);
 
         p.add(centerPanel, BorderLayout.CENTER);
-//        JPanel templateInfoPanel = createTemplateInfoPanel(isPreview);
-//        p.add(templateInfoPanel, BorderLayout.NORTH);
+        JPanel templateInfoPanel = createTemplateInfoPanel(isPreview);
+        p.add(templateInfoPanel, BorderLayout.NORTH);
         JPanel optionsPanel = createOptionsPanel();
         if (optionsPanel != null) {
             p.add(optionsPanel, BorderLayout.SOUTH);
@@ -255,49 +279,46 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
         return p;
     }
 
-//    /**
-//     * The panel at the to with the "Create Template..." Button.
-//     */
-//    private JPanel createTemplateInfoPanel(final boolean isPreview) {
-//        final JButton addTemplateButton = new JButton("Create Template...");
-//        addTemplateButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(final ActionEvent e) {
-//                Frame parent = (Frame)SwingUtilities.getAncestorOfClass(
-//                        Frame.class, addTemplateButton);
-//                SparkJavaSnippetTemplate newTemplate =
-//                    AddTemplateDialog.openUserDialog(
-//                        parent, m_snippet,
-//                        m_templateMetaCategory);
-//                if (null != newTemplate) {
-//                    TemplateProvider.getDefault().addTemplate(newTemplate);
-//                    // update the template UUID of the current snippet
-//                    m_settings.setTemplateUUID(newTemplate.getUUID());
-//                    String loc = TemplateProvider.getDefault().
-//                        getDisplayLocation(newTemplate);
-//                    m_templateLocation.setText(loc);
-//                    SparkJavaSnippetNodeDialog.this.getPanel().validate();
-//                }
-//            }
-//        });
-//        JPanel templateInfoPanel = new JPanel(new BorderLayout());
-//        TemplateProvider provider = TemplateProvider.getDefault();
-//        String uuid = m_settings.getTemplateUUID();
-//        SparkJavaSnippetTemplate template = null != uuid ? provider.getTemplate(
-//                UUID.fromString(uuid)) : null;
-//        String loc = null != template
-//                ? createTemplateLocationText(template)
-//                : "";
-//        m_templateLocation = new JLabel(loc);
-//        if (isPreview) {
-//            templateInfoPanel.add(m_templateLocation, BorderLayout.CENTER);
-//        } else {
-//            templateInfoPanel.add(addTemplateButton, BorderLayout.LINE_END);
-//        }
-//        templateInfoPanel.setBorder(
-//                BorderFactory.createEmptyBorder(4, 4, 4, 4));
-//        return templateInfoPanel;
-//    }
+    /**
+     * The panel at the to with the "Create Template..." Button.
+     */
+    private JPanel createTemplateInfoPanel(final boolean isPreview) {
+        final JButton addTemplateButton = new JButton("Create Template...");
+        addTemplateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Frame parent = (Frame)SwingUtilities.getAncestorOfClass(
+                        Frame.class, addTemplateButton);
+                SparkJavaSnippetTemplate newTemplate = AddTemplateDialog.openUserDialog(parent, m_snippet,
+                    m_templateMetaCategory, getTemplateProvider());
+                if (null != newTemplate) {
+                    getTemplateProvider().addTemplate(newTemplate);
+                    // update the template UUID of the current snippet
+                    m_settings.setTemplateUUID(newTemplate.getUUID());
+                    String loc = getTemplateProvider().getDisplayLocation(newTemplate);
+                    m_templateLocation.setText(loc);
+                    SparkJavaSnippetNodeDialog.this.getPanel().validate();
+                }
+            }
+        });
+        JPanel templateInfoPanel = new JPanel(new BorderLayout());
+        TemplateProvider<SparkJavaSnippetTemplate> provider = getTemplateProvider();
+        String uuid = m_settings.getTemplateUUID();
+        SparkJavaSnippetTemplate template = null != uuid ? provider.getTemplate(
+                UUID.fromString(uuid)) : null;
+        String loc = null != template
+                ? createTemplateLocationText(template)
+                : "";
+        m_templateLocation = new JLabel(loc);
+        if (isPreview) {
+            templateInfoPanel.add(m_templateLocation, BorderLayout.CENTER);
+        } else {
+            templateInfoPanel.add(addTemplateButton, BorderLayout.LINE_END);
+        }
+        templateInfoPanel.setBorder(
+                BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        return templateInfoPanel;
+    }
 
 //    private JPanel createJarPanel() {
 //        m_jarPanel = new JarListPanel();
@@ -330,27 +351,24 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
 //        return m_jarPanel;
 //    }
 
-//    /** Create the templates tab. */
-//    private JPanel createTemplatesPanel() {
-//        SparkJavaSnippetNodeDialog preview = createPreview();
-//
-//        m_templatesController = new DefaultTemplateController(
-//                this, preview);
-//        TemplatesPanel templatesPanel = new TemplatesPanel(
-//                Collections.singleton(m_templateMetaCategory),
-//                m_templatesController);
-//        return templatesPanel;
-//    }
+    /** Create the templates tab. */
+    private JPanel createTemplatesPanel() {
+        SparkJavaSnippetNodeDialog preview = createPreview();
+        m_templatesController = new DefaultTemplateController<>(this, preview);
+        TemplatesPanel<SparkJavaSnippetTemplate> templatesPanel = new TemplatesPanel<>(
+                Collections.singleton(m_templateMetaCategory), m_templatesController, getTemplateProvider());
+        return templatesPanel;
+    }
 
-//    /**
-//     * Create a non editable preview to be used to display a template. This
-//     * method is typically overridden by subclasses.
-//     * @return a new instance prepared to display a preview.
-//     */
-//    protected SparkJavaSnippetNodeDialog createPreview() {
-//        return new SparkJavaSnippetNodeDialog(m_templateMetaCategory, true);
-//        return new SparkJavaSnippetNodeDialog(true);
-//    }
+    /**
+     * Create a non editable preview to be used to display a template. This
+     * method is typically overridden by subclasses.
+     * @return a new instance prepared to display a preview.
+     */
+    protected SparkJavaSnippetNodeDialog createPreview() {
+        return new SparkJavaSnippetNodeDialog(true, m_templateMetaCategory, m_className, m_abstractClass,
+            m_methodSignature);
+    }
 
     /**
      * Create table do display the input fields.
@@ -525,7 +543,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
             m_flowVarsList.setEnabled(enabled);
             m_inFieldsTable.setEnabled(enabled);
             m_outFieldsTable.setEnabled(enabled);
-            m_jarPanel.setEnabled(enabled);
+//            m_jarPanel.setEnabled(enabled);
             m_snippetTextArea.setEnabled(enabled);
         }
         m_isEnabled = enabled;
@@ -584,17 +602,17 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
                 + 1);
         m_snippetTextArea.requestFocusInWindow();
 
-//        m_templatesController.setDataTableSpec(specs[0]);
-//        m_templatesController.setFlowVariables(getAvailableFlowVariables());
+        m_templatesController.setDataTableSpec(tableSpec);
+        m_templatesController.setFlowVariables(getAvailableFlowVariables());
 
         // update template info panel
-//        TemplateProvider provider = TemplateProvider.getDefault();
-//        String uuid = m_settings.getTemplateUUID();
-//        SparkJavaSnippetTemplate template = null != uuid ? provider.getTemplate(
-//                UUID.fromString(uuid)) : null;
-//        String loc = null != template ? createTemplateLocationText(template)
-//                : "";
-//        m_templateLocation.setText(loc);
+        TemplateProvider<SparkJavaSnippetTemplate> provider = getTemplateProvider();
+        String uuid = m_settings.getTemplateUUID();
+        SparkJavaSnippetTemplate template = null != uuid ? provider.getTemplate(
+                UUID.fromString(uuid)) : null;
+        String loc = null != template ? createTemplateLocationText(template)
+                : "";
+        m_templateLocation.setText(loc);
     }
 
     /**
@@ -603,52 +621,53 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
      * @param flowVariables the flow variables at the input
      * @param spec the input spec
      */
-//    public void applyTemplate(final JSnippetTemplate template,
-//            final DataTableSpec spec,
-//            final Map<String, FlowVariable> flowVariables) {
-//        // save and read settings to decouple objects.
-//        NodeSettings settings = new NodeSettings(template.getUUID());
-//        template.getSnippetSettings().saveSettings(settings);
-//        ByteArrayOutputStream os = new ByteArrayOutputStream();
-//        try {
-//            settings.saveToXML(os);
-//            NodeSettingsRO settingsro = NodeSettings.loadFromXML(
-//                    new ByteArrayInputStream(
-//                            os.toString("UTF-8").getBytes("UTF-8")));
-//            m_settings.loadSettings(settingsro);
-//        } catch (Exception e) {
-//            LOGGER.error("Cannot apply template.", e);
-//        }
-//
+    @Override
+    public void applyTemplate(final SparkJavaSnippetTemplate template,
+            final DataTableSpec spec,
+            final Map<String, FlowVariable> flowVariables) {
+        // save and read settings to decouple objects.
+        NodeSettings settings = new NodeSettings(template.getUUID());
+        template.getSnippetSettings().saveSettings(settings);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            settings.saveToXML(os);
+            NodeSettingsRO settingsro = NodeSettings.loadFromXML(
+                    new ByteArrayInputStream(
+                            os.toString("UTF-8").getBytes("UTF-8")));
+            m_settings.loadSettings(settingsro);
+        } catch (Exception e) {
+            LOGGER.error("Cannot apply template.", e);
+        }
+
 //        m_colList.setSpec(spec);
-//        m_flowVarsList.setFlowVariables(flowVariables.values());
-//        m_snippet.setSettings(m_settings);
+        m_flowVarsList.setFlowVariables(flowVariables.values());
+        m_snippet.setSettings(m_settings);
 //        m_jarPanel.setJarFiles(m_settings.getJarFiles());
-//
-//        m_fieldsController.updateData(m_settings, spec,
-//                flowVariables);
-//        // update template info panel
-//        m_templateLocation.setText(createTemplateLocationText(template));
-//
-//        setSelected(SNIPPET_TAB);
-//        // set caret position to the start of the custom expression
-//        m_snippetTextArea.setCaretPosition(
-//                m_snippet.getDocument().getGuardedSection(
-//                JavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset()
-//                + 1);
-//        m_snippetTextArea.requestFocus();
-//
-//    }
-//
-//    /**
-//     * Get the template's location for display.
-//     * @param template the template
-//     * @return the template's loacation for display
-//     */
-//    private String createTemplateLocationText(final JSnippetTemplate template) {
-//        TemplateProvider provider = TemplateProvider.getDefault();
-//        return provider.getDisplayLocation(template);
-//    }
+
+        m_fieldsController.updateData(m_settings, spec,
+                flowVariables);
+        // update template info panel
+        m_templateLocation.setText(createTemplateLocationText(template));
+
+        setSelected(SNIPPET_TAB);
+        // set caret position to the start of the custom expression
+        m_snippetTextArea.setCaretPosition(
+                m_snippet.getDocument().getGuardedSection(
+                JavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset()
+                + 1);
+        m_snippetTextArea.requestFocus();
+
+    }
+
+    /**
+     * Get the template's location for display.
+     * @param template the template
+     * @return the template's loacation for display
+     */
+    private String createTemplateLocationText(final SparkJavaSnippetTemplate template) {
+        TemplateProvider<SparkJavaSnippetTemplate> provider = getTemplateProvider();
+        return provider.getDisplayLocation(template);
+    }
 
     /**
      * {@inheritDoc}
@@ -723,5 +742,12 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane {
      */
     protected void preSaveSettings(final JavaSnippetSettings s) {
         // just a place holder.
+    }
+
+    /**
+     * @return
+     */
+    private TemplateProvider<SparkJavaSnippetTemplate> getTemplateProvider() {
+        return SparkJavaSnippetTemplateProvider.getDefault();
     }
 }

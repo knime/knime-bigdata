@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.knime.bigdata.Spark.SparkTypeConverter" name="SparkTypeConverter" schema="schema/SparkTypeConverter.exsd"/>
+   <extension-point id="com.knime.bigdata.spark.SparkTypeConverter" name="SparkTypeConverter" schema="schema/SparkTypeConverter.exsd"/>
+   <extension-point id="com.knime.bigdata.spark.TemplateRepository" name="Spark Java Snippet Template Repository" schema="schema/TemplateRepository.exsd"/>
    <extension
          point="org.knime.workbench.repository.categories">
       <category
@@ -160,4 +161,15 @@
             id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
     </extension>
+   <extension
+         point="com.knime.bigdata.spark.TemplateRepository">
+      <template-repository
+            id="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetFileTemplateRepositoryProvider"
+            provider-class="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetFileTemplateRepositoryProvider">
+      </template-repository>
+      <template-repository
+            id="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetPluginTemplateRepositoryProvider"
+            provider-class="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetPluginTemplateRepositoryProvider">
+      </template-repository>
+   </extension>
 </plugin>

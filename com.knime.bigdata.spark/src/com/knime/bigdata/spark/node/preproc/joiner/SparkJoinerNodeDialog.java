@@ -42,7 +42,15 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 public class SparkJoinerNodeDialog extends Joiner2NodeDialog {
 
     /**
-     * @since 2.12
+     * Constructor.
+     */
+    public SparkJoinerNodeDialog() {
+        super(true);
+        init();
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     protected JPanel createJoinerSettingsTab() {
@@ -55,26 +63,14 @@ public class SparkJoinerNodeDialog extends Joiner2NodeDialog {
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 1;
-
         c.weighty = 0;
-
         p.add(createJoinModeUIControls(), c);
 
-
         c.gridy++;
-
         c.weightx = 1;
         c.weighty = 1;
         p.add(createJoinPredicateUIControls(false, false), c);
 
-//        c.gridy++;
-//        c.weightx = 0;
-//        c.weighty = 0;
-//        p.add(createPerformanceUIControls(), c);
-//        c.gridy++;
-//        c.weightx = 0;
-//        c.weighty = 0;
-//        p.add(createRowKeyUIControls(), c);
         c.gridy++;
         c.weightx = 100;
         c.weighty = 100;
@@ -88,20 +84,13 @@ public class SparkJoinerNodeDialog extends Joiner2NodeDialog {
      * {@inheritDoc}
      */
     @Override
-    protected JComponent createColumnSelectionTab(final String leftTitle, final String rightTitle) {
-        return super.createColumnSelectionTab("First RDD", "Second RDD");
-    }
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings,
         final PortObjectSpec[] specs) throws NotConfigurableException {
+        if (specs == null || specs.length < 2 || specs[0] == null || specs[1] == null) {
+            throw new NotConfigurableException("No input specification available");
+        }
         final SparkDataPortObjectSpec spec0 = (SparkDataPortObjectSpec)specs[0];
         final SparkDataPortObjectSpec spec1 = (SparkDataPortObjectSpec)specs[1];
-        if (spec0 == null || spec1 == null) {
-            throw new NotConfigurableException("No input spec available");
-        }
         super.loadSettingsFrom(settings, new DataTableSpec[] {spec0.getTableSpec(), spec1.getTableSpec()});
     }
 }
