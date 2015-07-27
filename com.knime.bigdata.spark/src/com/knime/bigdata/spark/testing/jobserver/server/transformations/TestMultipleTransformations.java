@@ -28,7 +28,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaExce
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 
-
+@SuppressWarnings("javadoc")
 public class TestMultipleTransformations {
   private static final SparkConf conf = new SparkConf().setAppName(TestMultipleTransformations.class.getSimpleName())
       .setMaster("local");
@@ -38,8 +38,8 @@ public class TestMultipleTransformations {
 
     private final C constant;
 
-    public ConstantAppender(final C constant) {
-      this.constant = constant;
+    public ConstantAppender(final C aConstant) {
+      this.constant = aConstant;
     }
 
     @Override

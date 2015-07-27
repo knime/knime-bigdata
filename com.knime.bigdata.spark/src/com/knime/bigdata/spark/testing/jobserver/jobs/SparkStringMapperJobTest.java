@@ -43,7 +43,7 @@ public class SparkStringMapperJobTest {
         }
         if (aColIdxes != null) {
             params.append("         \"").append(ParameterConstants.PARAM_COL_IDXS).append("\": ")
-                .append(JsonUtils.toJsonArray(aColIdxes)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aColIdxes)).append(",\n");
         }
         params.append("    }\n");
         params.append("    \"").append(ParameterConstants.PARAM_OUTPUT).append("\" {\n");

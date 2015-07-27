@@ -246,6 +246,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      * @param collect
      * @param string
      */
+    @SuppressWarnings("unused")
     private void printSelectedRDD(final List<Row> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
         for (Row tuple : aRdd) {
@@ -258,6 +259,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      * @param collect
      * @param aMsg
      */
+    @SuppressWarnings("unused")
     private void printJoinedRDD(final List<Tuple2<String, Tuple2<Row, Row>>> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
         for (Tuple2<String, Tuple2<Row, Row>> tuple : aRdd) {
@@ -269,6 +271,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
     /**
      * @param collect
      */
+    @SuppressWarnings("unused")
     private void printRDD(final List<Tuple2<String, Row>> aRdd, final String aMsg) {
         LOGGER.log(Level.INFO, aMsg);
         for (Tuple2<String, Row> tuple : aRdd) {

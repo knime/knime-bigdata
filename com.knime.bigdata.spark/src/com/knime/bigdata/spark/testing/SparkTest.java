@@ -70,6 +70,7 @@ public class SparkTest {
             }
             JavaRDD<Integer> dataSet = sc.parallelize(l, slices);
             int count = dataSet.map(new Function<Integer, Integer>() {
+                private static final long serialVersionUID = 1L;
                 @Override
                 public Integer call(final Integer integer) {
                     double x = Math.random() * 2 - 1;
@@ -77,6 +78,7 @@ public class SparkTest {
                     return (x * x + y * y < 1) ? 1 : 0;
                 }
             }).reduce(new Function2<Integer, Integer, Integer>() {
+                private static final long serialVersionUID = 1L;
                 @Override
                 public Integer call(final Integer integer, final Integer integer2) {
                     return integer + integer2;

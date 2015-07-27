@@ -267,7 +267,9 @@ public class RDDUtilsInJava {
 
             @Override
             public Tuple2<String, Row> call(final Row aRow) throws Exception {
-                StringBuilder keyValues = new StringBuilder();
+                final StringBuilder keyValues = new StringBuilder();
+                //TODO - do we really need to merge the keys into a single String?
+                // (Object[] did not work)
                 int ix = 0;
                 boolean first = true;
                 for (int keyIx : aKeys) {
@@ -283,45 +285,14 @@ public class RDDUtilsInJava {
     }
 
     /**
-     * merge the given pairs of rows into a single row while selecting only some columns
+     * <L> and <R> must be either of class Row or of class Optional<Row>
      *
      * @param aTuples
-     * @param aColIdxLeft indices of columns to keep from the left row
-     * @param aColIdxRight indices of columns to keep from the right row
-     * @return JavaRDD with merge rows
+     * @param aColIdxLeft - indices of <L> to be kept
+     * @param aColIdxRight - indices of <R> to be kept
+     * @return corresponding rows from left and right merged into instances of Row (one for each original pair),
+     *         possibly with null values for outer joins
      */
-//    public static JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<Row, Row>> aTuples, final List<Integer> aColIdxLeft,
-//        final List<Integer> aColIdxRight) {
-//        return aTuples.map(new Function<Tuple2<Row, Row>, Row>() {
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            public Row call(final Tuple2<Row, Row> aTuple) throws Exception {
-//                RowBuilder builder = RowBuilder.emptyRow();
-//                extractColumns(aColIdxLeft, aTuple._1, builder);
-//                extractColumns(aColIdxRight, aTuple._2, builder);
-//                return builder.build();
-//            }
-//
-//        });
-//    }
-//
-//    public static JavaRDD<Row> mergeRowsLO(final JavaRDD<Tuple2<Row, Optional<Row>>> aTuples,
-//        final List<Integer> aColIdxLeft, final List<Integer> aColIdxRight) {
-//        return aTuples.map(new Function<Tuple2<Row, Optional<Row>>, Row>() {
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            public Row call(final Tuple2<Row, Optional<Row>> aTuple) throws Exception {
-//                RowBuilder builder = RowBuilder.emptyRow();
-//                extractColumns(aColIdxLeft, aTuple._1, builder);
-//                extractColumns(aColIdxRight, aTuple._2, builder);
-//                return builder.build();
-//            }
-//
-//        });
-//    }
-
     public static <L, R> JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<L, R>> aTuples, final List<Integer> aColIdxLeft,
         final List<Integer> aColIdxRight) {
         return aTuples.map(new Function<Tuple2<L, R>, Row>() {
@@ -338,27 +309,12 @@ public class RDDUtilsInJava {
         });
     }
 
-//    public static JavaRDD<Row> mergeRowsOO(final JavaRDD<Tuple2<Optional<Row>, Optional<Row>>> aTuples,
-//        final List<Integer> aColIdxLeft, final List<Integer> aColIdxRight) {
-//        return aTuples.map(new Function<Tuple2<Optional<Row>, Optional<Row>>, Row>() {
-//            private static final long serialVersionUID = 1L;
-//
-//            @Override
-//            public Row call(final Tuple2<Optional<Row>, Optional<Row>> aTuple) throws Exception {
-//                RowBuilder builder = RowBuilder.emptyRow();
-//                extractColumns(aColIdxLeft, aTuple._1, builder);
-//                extractColumns(aColIdxRight, aTuple._2, builder);
-//                return builder.build();
-//            }
-//
-//        });
-//    }
-
     /**
      * @param aColIdxLeft
      * @param aTuple
      * @param builder
      */
+    @SuppressWarnings("unchecked")
     private static <J> void extractColumns(final List<Integer> aColIdx, final J aRow, final RowBuilder builder) {
         for (int ix : aColIdx) {
             if (aRow instanceof Row) {
@@ -370,31 +326,5 @@ public class RDDUtilsInJava {
             }
         }
     }
-
-//    /**
-//     * @param aColIdxLeft
-//     * @param aTuple
-//     * @param builder
-//     */
-//    private static void extractColumns(final List<Integer> aColIdx, final Row aRow, final RowBuilder builder) {
-//        for (int ix : aColIdx) {
-//            builder.add(aRow.get(ix));
-//        }
-//    }
-//
-//    /**
-//     * @param aColIdxLeft
-//     * @param aTuple
-//     * @param builder
-//     */
-//    private static void extractColumns(final List<Integer> aColIdx, final Optional<Row> aRow, final RowBuilder builder) {
-//        for (int ix : aColIdx) {
-//            if (aRow.isPresent()) {
-//                builder.add(aRow.get().get(ix));
-//            } else {
-//                builder.add(null);
-//            }
-//        }
-//    }
 
 }

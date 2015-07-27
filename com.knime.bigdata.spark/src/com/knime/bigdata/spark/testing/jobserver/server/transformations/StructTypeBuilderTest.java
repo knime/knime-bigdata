@@ -33,6 +33,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder
 /**
  * Unit tests for {@link StructTypeBuilder}.
  */
+@SuppressWarnings("javadoc")
 public class StructTypeBuilderTest {
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector();
@@ -266,10 +267,10 @@ public class StructTypeBuilderTest {
 
             public final boolean isNullable;
 
-            public MethodArgs(final int fieldIndex, final DataType dataType, final boolean isNullable) {
-                this.fieldIndex = fieldIndex;
-                this.dataType = dataType;
-                this.isNullable = isNullable;
+            public MethodArgs(final int aFieldIndex, final DataType aDataType, final boolean aIsNullable) {
+                this.fieldIndex = aFieldIndex;
+                this.dataType = aDataType;
+                this.isNullable = aIsNullable;
             }
 
             @Override

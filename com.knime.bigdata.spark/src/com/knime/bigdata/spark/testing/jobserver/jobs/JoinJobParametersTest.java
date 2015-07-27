@@ -57,22 +57,22 @@ public class JoinJobParametersTest {
         if (aJoinColIdxesLeft != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0)).append("\": ")
-                .append(JsonUtils.toJsonArray(aJoinColIdxesLeft)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesLeft)).append(",\n");
         }
         if (aJoinColIdxesRight != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1)).append("\": ")
-                .append(JsonUtils.toJsonArray(aJoinColIdxesRight)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesRight)).append(",\n");
         }
         if (aSelectColIdxesLeft != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2)).append("\": ")
-                .append(JsonUtils.toJsonArray(aSelectColIdxesLeft)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesLeft)).append(",\n");
         }
         if (aSelectColIdxesRight != null) {
             params.append("         \"")
                 .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3)).append("\": ")
-                .append(JsonUtils.toJsonArray(aSelectColIdxesRight)).append(",\n");
+                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesRight)).append(",\n");
         }
 
         params.append("    }\n");

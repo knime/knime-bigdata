@@ -308,6 +308,11 @@ final public class SparkJobCompiler {
         return new String(bytes, "US-ASCII");
     }
 
+    /**
+     *
+     *
+     * @author ?
+     */
     public static class SourceCompiler {
 
         private Map<String, byte[]> m_bytecode;

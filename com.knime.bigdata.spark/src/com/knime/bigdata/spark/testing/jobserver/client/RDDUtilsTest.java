@@ -23,6 +23,7 @@ import com.knime.bigdata.spark.testing.jobserver.server.transformations.TestMult
  * @author dwk
  *
  */
+@SuppressWarnings("javadoc")
 public class RDDUtilsTest  {
 
 	private static final SparkConf conf = new SparkConf().setAppName(

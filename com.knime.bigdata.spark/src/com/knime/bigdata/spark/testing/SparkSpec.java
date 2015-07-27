@@ -24,6 +24,7 @@ public abstract class SparkSpec extends UnitSpec {
 
     private static Config origConfig = KNIMEConfigContainer.m_config;
 
+    @SuppressWarnings("javadoc")
     protected static KNIMESparkContext CONTEXT_ID;
 
     /**

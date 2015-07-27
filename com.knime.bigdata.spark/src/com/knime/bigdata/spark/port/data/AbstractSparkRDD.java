@@ -73,7 +73,6 @@ public class AbstractSparkRDD implements SparkRDD {
                 throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
                     + SPARK_DATA + "\".");
             }
-            @SuppressWarnings("resource")
             final ModelContentRO sparkModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
             m_context = new KNIMESparkContext(sparkModel.getConfig(KEY_CONTEXT));
             m_id = sparkModel.getString(KEY_TABLE_NAME);
@@ -86,7 +85,6 @@ public class AbstractSparkRDD implements SparkRDD {
      * @param out
      * @throws IOException
      */
-    @SuppressWarnings("resource")
     protected void save(final ZipOutputStream out) throws IOException {
         final ModelContent sparkModel = new ModelContent(SPARK_DATA);
         final Config contextConfig = sparkModel.addConfig(KEY_CONTEXT);

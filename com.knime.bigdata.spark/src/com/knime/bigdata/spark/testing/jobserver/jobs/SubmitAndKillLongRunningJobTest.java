@@ -15,9 +15,10 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  * @author dwk
  *
  */
+@SuppressWarnings("javadoc")
 public class SubmitAndKillLongRunningJobTest {
 
-	@Test
+    @Test
 	public void jobControlerShouldCreateAndKillLongRunningJob()
 			throws Throwable {
 		KNIMESparkContext contextName = KnimeContext.getSparkContext();

@@ -141,6 +141,7 @@ public class TransformationTestJob extends KnimeSparkJob {
         public <T extends JavaRDD<Row>> JavaRDD<Row> apply(@Nonnull final T aInput1, final T aInput2) {
 
             JavaPairRDD<String, Row> pair1 = aInput1.mapToPair(new PairFunction<Row, String, Row>() {
+                private static final long serialVersionUID = 1L;
 
                 @Override
                 public Tuple2<String, Row> call(final Row arg0) throws Exception {
@@ -148,6 +149,7 @@ public class TransformationTestJob extends KnimeSparkJob {
                 }
             });
             JavaPairRDD<String, Row> pair2 = aInput2.mapToPair(new PairFunction<Row, String, Row>() {
+                private static final long serialVersionUID = 1L;
 
                 @Override
                 public Tuple2<String, Row> call(final Row arg0) throws Exception {
@@ -157,6 +159,7 @@ public class TransformationTestJob extends KnimeSparkJob {
 
             JavaPairRDD<String, Tuple2<Row, Row>> result = pair1.join(pair2);
             result.map(new Function<Tuple2<String,Tuple2<Row,Row>>, Row>() {
+                private static final long serialVersionUID = 1L;
 
                 @Override
                 public Row call(final Tuple2<String, Tuple2<Row, Row>> arg0) throws Exception {
