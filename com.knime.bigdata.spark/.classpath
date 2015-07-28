@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/jobServerUtilsAPI.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jobServerUtilsApi.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mimepull-1.9.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.annotation-api-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance-repackaged-2.4.0-b10.jar"/>
