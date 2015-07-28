@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.knime.features.bigdata"
-      label="Big Data Connectors"
+      label="KNIME Big Data Connectors"
       version="1.2.0.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
