@@ -359,15 +359,14 @@ final public class SparkJobCompiler {
             final InMemorySourceJavaFileObject sourceContainer = new InMemorySourceJavaFileObject(aClassName, m_javaCode);
 
             String[] orig = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
-            File[] classPathFiles = new File[orig.length + 4];
+            File[] classPathFiles = new File[orig.length + 3];
             for (int i=0; i<orig.length; i++) {
                 classPathFiles[i] = new File(orig[i]);
             }
             final String root = SparkPlugin.getDefault().getPluginRootPath();
+            classPathFiles[orig.length] = new File(root+"/lib/jobServerUtilsApi.jar");
             classPathFiles[orig.length+1] = new File(root+"/bin/");
-            classPathFiles[orig.length+2] = new File(root+"/lib/knimeSparkScalaClient.jar");
-            classPathFiles[orig.length+3] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
-            classPathFiles[orig.length] = new File(root+"/lib/job-server-api_2.10-0.5.1-SNAPSHOT.jar");
+            classPathFiles[orig.length+2] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
             compiler.setClasspaths(classPathFiles);
 
             compiler.setSources(sourceContainer);

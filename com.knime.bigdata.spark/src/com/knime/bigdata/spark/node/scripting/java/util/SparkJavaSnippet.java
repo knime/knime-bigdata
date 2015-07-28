@@ -200,13 +200,9 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
             //add the default jar files to the class path which are also available on the Spark cluster
             final String root = SparkPlugin.getDefault().getPluginRootPath();
 //            jarFiles.add(new File(root+"/bin/"));
-            jarFiles.add(new File(root+"/lib/knimeSparkScalaClient.jar"));
+            jarFiles.add(new File(root+"/lib/jobServerUtilsApi.jar"));
             jarFiles.add(new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar"));
-            jarFiles.add(new File(root+"/lib/job-server-api_2.10-0.5.1-SNAPSHOT.jar"));
             jarFiles.add(new File(root+"/resources/knimeJobs.jar"));
-//            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\lib\\spark-assembly-1.2.1-hadoop2.4.0.jar"));
-//            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\lib\\job-server-api_2.10-0.5.1-SNAPSHOT.jar"));
-//            jarFiles.add(new File("C:\\DEVELOPMENT\\workspaces\\trunk\\com.knime.bigdata.spark\\resources\\knimeJobs.jar"));
             jarFiles.add(jSnippetJar);
             if (null != m_jarFiles && m_jarFiles.length > 0) {
                 for (int i = 0; i < m_jarFiles.length; i++) {
