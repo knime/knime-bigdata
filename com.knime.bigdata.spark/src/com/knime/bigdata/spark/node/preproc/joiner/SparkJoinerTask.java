@@ -26,6 +26,8 @@ import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
+import spark.jobserver.SparkJobValidation;
+
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
@@ -33,6 +35,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -63,11 +66,30 @@ public class SparkJoinerTask implements Serializable {
     SparkJoinerTask(final SparkRDD aLeftRDD, final SparkRDD aRightRDD, final JoinMode aJoinMode,
         final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
         final Integer[] aSelectColIdxesLeft, final Integer[] aSelectColIdxesRight, final String aResultRDD) {
-
-        m_context = aLeftRDD.getContext();
+        this(aLeftRDD.getContext(), aLeftRDD.getID(), aRightRDD.getID(), aJoinMode, aJoinColIdxesLeft, aJoinColIdxesRight, aSelectColIdxesLeft, aSelectColIdxesRight, aResultRDD);
         aLeftRDD.compatible(aRightRDD);
-        m_LeftTableName = aLeftRDD.getID();
-        m_RightTableName = aRightRDD.getID();
+    }
+
+    /**
+     * (public for unit testing)
+     * stores references to given parameters
+     * @param aContext
+     * @param aLeftRDD
+     * @param aRightRDD
+     * @param aJoinMode
+     * @param aJoinColIdxesLeft
+     * @param aJoinColIdxesRight
+     * @param aSelectColIdxesLeft
+     * @param aSelectColIdxesRight
+     * @param aResultRDD
+     */
+    public SparkJoinerTask(final KNIMESparkContext aContext, final String aLeftRDD, final String aRightRDD, final JoinMode aJoinMode,
+        final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
+        final Integer[] aSelectColIdxesLeft, final Integer[] aSelectColIdxesRight, final String aResultRDD) {
+
+        m_context = aContext;
+        m_LeftTableName = aLeftRDD;
+        m_RightTableName = aRightRDD;
         m_ResultTableName = aResultRDD;
         m_JoinMode = aJoinMode;
 
@@ -95,22 +117,33 @@ public class SparkJoinerTask implements Serializable {
         JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
     }
 
+
     private String joinParams() {
 
         final Object[] inputParamas =
-            {ParameterConstants.PARAM_TABLE_1, m_LeftTableName, ParameterConstants.PARAM_TABLE_1, m_RightTableName,
+            {ParameterConstants.PARAM_TABLE_1, m_LeftTableName, ParameterConstants.PARAM_TABLE_2, m_RightTableName,
                 ParameterConstants.PARAM_STRING, m_JoinMode.toString(),
                 ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0),
-                JsonUtils.toJsonArray(m_JoinColIdxesLeft),
+                JsonUtils.toJsonArray((Object[])m_JoinColIdxesLeft),
                 ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1),
-                JsonUtils.toJsonArray(m_JoinColIdxesRight),
+                JsonUtils.toJsonArray((Object[])m_JoinColIdxesRight),
                 ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2),
-                JsonUtils.toJsonArray(m_SelectColIdxesLeft),
+                JsonUtils.toJsonArray((Object[])m_SelectColIdxesLeft),
                 ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3),
-                JsonUtils.toJsonArray(m_SelectColIdxesRight)};
+                JsonUtils.toJsonArray((Object[])m_SelectColIdxesRight)};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_ResultTableName}});
+    }
+
+    /**
+     * (unit testing only)
+     * check that all required parameters are properly set and can be verified (this does not
+     * make any calls to the server)
+     * @return validation result
+     */
+    public SparkJobValidation validate() {
+        return new JoinJob().validate(ConfigFactory.parseString(joinParams()));
     }
 
 }
