@@ -174,8 +174,13 @@ public class SupervisedLearnerUtils {
     }
 
     /**
+     * @param sc
      * @param aConfig
-     * @param model
+     * @param aJob
+     * @param aInputRdd
+     * @param aFeatures
+     * @param aModel
+     * @param aLogger
      * @throws GenericKnimeSparkException
      */
     public static void storePredictions(final SparkContext sc, final Config aConfig, final KnimeSparkJob aJob,
@@ -194,9 +199,10 @@ public class SupervisedLearnerUtils {
 
 
     /**
+     * @param aConfig configuration with column names and mapping table name
      * @param aJob
-     * @param nominalFeatureInfo
-     * @return
+     * @param nominalFeatureInfo - will be filled with feature information as a side effect !
+     * @return number of classes
      */
     public static Long extractFeatureInfo(final Config aConfig, final KnimeSparkJob aJob,
         final Map<Integer, Integer> nominalFeatureInfo) {
