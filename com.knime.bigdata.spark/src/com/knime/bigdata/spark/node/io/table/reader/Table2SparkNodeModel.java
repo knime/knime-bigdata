@@ -97,6 +97,9 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
             exec.checkCanceled();
             int colIdx = 0;
             for (final DataCell cell : row) {
+                if (cell.isMissing()) {
+                    throw new InvalidSettingsException("Missing value found in row with id: " + row.getKey());
+                }
                 data[rowIdx][colIdx] = converter[colIdx++].convert(cell);
             }
             rowIdx++;
