@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.knime.features.bigdata.spark"
-      label="Big Data Executor for Spark"
+      label="KNIME Big Data Executor for Spark"
       version="0.5.0.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
