@@ -2,19 +2,20 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Learner" icon="icon.png">
     <name>MLlib Decision Tree</name>
-	<shortDescription>DT</shortDescription>
+	<shortDescription>Decision tree induction performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			This node utilizes the Apache Spark implementation of a Decision Tree 
-            learning algorithm.
+			This node applies the Apache Spark 
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html">Decision Tree</a> algorithm.
 			It outputs the original data and the decision tree predictions for the 
 			result preview as well as the learned model for later application.
 			
 			Please note that all data must be numeric, including the label column. 
-			Use the corresponding conversion nodes to convert nominal values to
-			numeric columns.
+			Use the Spark Category To Number nodes to convert nominal values to
+			numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
+			
+			Use the Spark Predictor node to apply the learned model to unseen data.
 
-           The node can be configured as follows:
 		</intro>
     	<option name="Max number of bins">
 			Maximum number of bins used for discretizing continuous features and 
@@ -25,14 +26,16 @@
 		</option>
 		<option name="Quality measure">
 			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".
+			  For more details on the available methods see the 
+			  <a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
 		</option>
-		<option name="Feature Columns">The feature columns to learn the model from.</option>
-		<option name="Class column">The classification column.</option>
+		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+		<option name="Class column">The classification column. Must be numeric.</option>
 	</fullDescription>
 
     <ports>
-		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
-		<inPort optional="true" index="1" name="Mapping dictionary">Mapping of nominal values</inPort>
-        <outPort index="0" name="MLlib Tree Model">MLlib Tree Model</outPort>
+		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+		<inPort optional="true" index="1" name="Mapping dictionary">Spark RDD with the mapping dictionary of nominal values</inPort>
+        <outPort index="0" name="Decision Tree Model">Spark MLlib Decision Tree Model</outPort>
     </ports>
 </knimeNode>
