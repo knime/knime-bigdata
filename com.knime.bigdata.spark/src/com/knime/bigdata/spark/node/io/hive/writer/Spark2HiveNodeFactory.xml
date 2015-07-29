@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
+	type="Other" icon="hiveSpark.png">
+	<name>Spark to Hive</name>
+	<shortDescription>Converts an incoming Spark data object into a Hive table</shortDescription>
+	<fullDescription>
+		<intro>
+			Converts an incoming Spark data object into a Hive table
+		</intro>
+		<option name="Table name">The name of the table to create</option>
+		<option name="Drop existing table">Select this option to drop an existing table</option>
+	</fullDescription>
+
+	<ports>
+		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
+		<inPort index="0" name="Spark data">Spark data object</inPort>
+		<outPort index="0" name="Hive table">Hive table and query</outPort>
+	</ports>
+</knimeNode>

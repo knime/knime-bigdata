@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="baseIcon.svg"
+   inkscape:export-filename="C:\DEVELOPMENT\workspaces\trunk\com.knime.bigdata.spark\src\com\knime\bigdata\spark\node\mllib\sampling\icon.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="8"
+     inkscape:cy="8"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer3"
+     showgrid="false"
+     inkscape:window-width="1538"
+     inkscape:window-height="877"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3772"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="sampling"
+     style="display:inline">
+    <image
+       y="2"
+       x="-2"
+       id="image3037"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAXNJREFU
+OI2dkT8oRWEYxn/v951zzyAGkzsY7iKFRQxicLOQ0bVIGQwUGZmESMqou5AFpVAmURKLbBYGJaUk
+JRn8Cel6Dcc913FdLk99nfd3zvs+vc/5RFUBmGuOKUYRA2KURat02TeMVeTjYBVjFcTv6Zi9FocP
+3RV7dNWeYhwHiVjaIi7WcxDPxXgOxnMh4mAiLsY1rMxeAxAYFN2+sL5dmmODN8Q+f9mAsMFlWQmJ
+if00UrDaR2V7MuDjL9w/XU3HZwOAqGMyA79wWpL+iaMDdRqrqMlqyHQCCiI+Pp3v0zN5KKENEuUP
+Qd06EmVj7CrgpaNiOqtuM9/PhB4ge6ccWl7zQtzy6mRHsFEPNHt4R6BJ4yC7/guNk7raYnTmQFBV
+VJXB3ga9eFK9efTP0MhUUH/LvfWqqpkILylB8s0DPKdsOEJfd6MWlrbkbXB/sUlyfi98C8Pxk6Ae
+3y3/kQcX/Gfet5BLoQh/HU7O70lg8F+9AyIoqsf4CeawAAAAAElFTkSuQmCC
+"
+       height="16"
+       width="16" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="pmmlPredictor"
+     style="display:none"
+     sodipodi:insensitive="true">
+    <image
+       y="0"
+       x="0"
+       id="image3026"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAM9JREFU
+OI2VUTESgjAQ3CA6dKSRGT+DnYW1oH/hKfwA7ehiQ2fNI5yRJ1CtBWMmQJKJO7NFcjd7t7cgCRvL
+knTVTLoLIIGBQEEA08f/AhPz/MOm6ewCZqOPUo5WgQiBmIatEZEQNs7bHqjrl0vZfYM0HVlVvTcN
+j8CdQKYT2FT2FAQd5tq2ZZIk+n3GCdkuw/s4zO25NpBSUghBAFRKMVbQvPUFrRtsn8Jx6zV+2wTH
+uARBv4UlTQvX/qIteFIATcYKPHT7VRLBG5hTg2IMxRdEkMmwi1E+qwAAAABJRU5ErkJggg==
+"
+       height="16"
+       width="16" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer5"
+     inkscape:label="converter"
+     sodipodi:insensitive="true"
+     style="display:none">
+    <rect
+       style="fill:#0000ff;fill-opacity:1;stroke:none"
+       id="rect3793"
+       width="9"
+       height="9"
+       x="3"
+       y="5" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer6"
+     inkscape:label="sparkPredictor"
+     style="display:none"
+     sodipodi:insensitive="true">
+    <image
+       y="8.8817842e-016"
+       x="0"
+       id="image3804"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAdFJREFU OI2lUk9oknEYft5PXfrtT1QY4yuouctYKEHioTK8tLVLhuAuC8TDZOyi4KXOBdIl6DLEQ0QHM2E7 GYyo5mGDosYc1ghiRDBs2RZtc6Oc+uzSxH8Nai888Ps9PLwv7/O8QhKHKX0rUkRailsNUw41vraB iFBE/nkfBQDi8TgBIPpwAiJCl8s1k0gkuh0Oh9FsNhsO7EASJGFSTXz/dZ4rv5YJgEPuwRwA2u32 WJPWZDLs/6tkOBwmAC5uzVWRWnzKm+PDbO9QGQqFuK+thdQ6e7pXqzx696Apgu3NHTx/ksbkxDNc 6T9VSU4v6Oo8EBFg2nayT13Np1+lkS+u1GHb+AOX/Dbcf3sbmve8IiKcTd5aAgA9Xo8IAGIjW9AZ j/1eK37D6u6Rv3q2yXUAQHnpXgZvcmcEADh5VAfPz/KJnq7y6MtrTbdR3Ckhm/xcenEno/d4PN/H blg+XVWjPpQKy+DU8c4/JpYA0P/xYhXDMxd4zqcRAL1e71QgEOiuNbAuGr1R4dDsWV7PWnj5sUZt oKMCgJFI5ANJWK3WrsY4+SXRBpKIxWJbANh3VyUAOp3Ojca4UqlUZzAYNDTy1YeiE7rd7pZZH4S6 O/if2gMS/UKm7zCOmAAAAABJRU5ErkJggg== "
+       height="16"
+       width="16" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="k-means"
+     sodipodi:insensitive="true"
+     style="display:none">
+    <image
+       y="0"
+       x="0"
+       id="image3763"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAA3NCSVQICAjb4U/gAAABpElEQVQo kX2RMavqQBCFJ3oRgoWCIuIPEMTG2iYs2JhtUlgogk0aC1Fs9C9EsBNBwcZGxDKgaUQIgo2ICAEL EUSLgAQRDBZCmFfkkRd9996v2jmzZ3d2DxBCVFVFF+fzudPpuJVGoyHLsr0GTdMymcx0OnXahmEo iuI2UEpPp9NfAyIej8dsNjsajfA7brcbx3GWZf0zIKKu64Ig9Hq9/w3L5bJcLjulBwAAIBqNDgYD VVUlSYJ39vt9IpFwSgYRncI0zUqlEovFLpeLI/p8PlEU0+n0ZDJhWZZBxNVqFQgEkskkAMxms8Vi IYqiY7jf7/F4PBQKXa9Xr9f7BQDhcJhlWbsdDAZfr5d7BkmS1ut1tVqNRCIAAB9P1DStVCohoqIo HMfZsRBCHo/H2y/ZbLfbYrHYbrc/TqnX68Ph8M1wOBxqtRql1EnUzW63o5TaUTC6rvf7fVVVeZ4f j8fwA36/v9ls8jwPhJBut+uM+BPz+bxQKCAiGIbx+1Yby7IEQdhsNt5Wq/Vxez6fN00zlUq5RYZh PB6PLMtvSf/O8/nM5XJ/ADSGwbG2HnI3AAAAAElFTkSuQmCC "
+       height="16"
+       width="16" />
+  </g>
+  <g
+     inkscape:label="base"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-1036.3622)"
+     sodipodi:insensitive="true">
+    <path
+       style="fill:#000000"
+       d=""
+       id="path2998"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#000000"
+       d=""
+       id="path2996"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#e77215;fill-opacity:1;stroke:#e77215;stroke-width:1.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 13.001873,1046.0685 c -0.934336,-0.114 -1.536509,-0.3558 -1.536509,-0.6166 0,-0.181 0.252108,-0.2265 0.768043,-0.1385 0.598039,0.1019 0.684711,0.096 0.838698,-0.058 0.112757,-0.1128 0.130182,-0.1634 0.130182,-0.3786 0,-0.2718 -0.148516,-0.7682 -0.427341,-1.4285 -0.309007,-0.7319 -0.25496,-0.9639 0.46249,-1.985 0.625409,-0.8902 0.759306,-1.2492 0.539887,-1.4479 -0.140357,-0.127 -0.622624,-0.133 -1.559654,-0.019 -0.479885,0.059 -0.888354,0.086 -1.004967,0.068 -0.274624,-0.041 -0.47538,-0.2345 -0.691194,-0.6655 -0.243896,-0.4871 -0.452751,-0.7626 -0.6787475,-0.895 -0.629116,-0.3687 -1.131673,0.2477 -1.231943,1.5113 -0.05273,0.6644 -0.08935,0.781 -0.307373,0.9779 -0.228787,0.2067 -0.331133,0.2562 -1.0115876,0.4893 -0.6861965,0.2351 -1.0588855,0.416 -1.2738174,0.6187 -0.3922926,0.3699 -0.2345883,0.7183 0.5256284,1.1606 0.2202294,0.1282 0.4070818,0.2676 0.415226,0.3098 0.032661,0.1697 -0.8219307,0.06 -1.52905,-0.1955 -0.9916905,-0.3589 -1.2331145,-0.7744 -0.7145053,-1.2297 0.2668756,-0.2341 0.778914,-0.4936 1.5615171,-0.7907 1.554738,-0.5907 1.7613918,-0.7773 2.0213998,-1.8268 0.05462,-0.2205 0.138965,-0.5611 0.187427,-0.7572 0.189855,-0.7675 0.471696,-1.4845 0.637836,-1.6225 0.05615,-0.047 0.09662,-0.047 0.199921,-0.012 0.208774,0.086 0.7573735,0.6903 1.2154715,1.3378 0.630031,0.8905 0.812037,1.0575 1.263539,1.1587 0.351252,0.079 0.837319,-0.013 2.145162,-0.407 1.01151,-0.3044 1.304534,-0.3154 1.302376,-0.049 -0.0022,0.2543 -0.25556,0.6711 -1.052927,1.732 -0.484121,0.6441 -0.820593,1.2425 -0.90608,1.6112 -0.03054,0.1317 -0.0461,0.3813 -0.03479,0.5578 0.02271,0.3537 0.116296,0.5759 0.515533,1.2238 0.535498,0.8688 0.599511,1.5425 0.163877,1.7245 -0.141007,0.059 -0.593469,0.074 -0.93374,0.034 l 0,0 z"
+       id="path3770"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
