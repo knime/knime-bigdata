@@ -24,9 +24,7 @@ import java.util.Map;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
 import org.knime.core.data.StringValue;
-import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -50,8 +48,6 @@ import com.knime.bigdata.spark.util.SparkIDs;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
-
-    private static final DataType MAP_TYPE = DoubleCell.TYPE;
 
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
