@@ -21,6 +21,8 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,6 +45,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueType;
 
 /**
  *
@@ -117,6 +120,7 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
 
     /**
      * convert object array in config object to List<Row>
+     *
      * @param aConfig
      * @return data as list of Row objects
      * @throws GenericKnimeSparkException
@@ -124,31 +128,48 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
     public static List<Row> getInputData(final Config aConfig) throws GenericKnimeSparkException {
         final List<Class<?>> types = getColumnTypes(aConfig);
 
-        final List<Row> rows = new ArrayList<>();
         try {
             final ConfigList data = aConfig.getList(PARAM_DATA_ARRAY);
-            for (ConfigValue rowData : data) {
-                RowBuilder row = RowBuilder.emptyRow();
-                ConfigList s = (ConfigList)rowData;
-                int ix = 0;
-                for (ConfigValue cell : s) {
-                    final String v = cell.unwrapped().toString();
-                    if (types.get(ix).equals(Integer.class)) {
-                        row.add(Integer.valueOf(v));
-                    } else if (types.get(ix).equals(Double.class)) {
-                        row.add(Double.valueOf(v));
-                    } else if (types.get(ix).equals(Boolean.class)) {
-                        row.add(Boolean.valueOf(v));
-                    } else if (types.get(ix).equals(String.class)) {
-                        row.add(v);
-                    }
-                    ix++;
-                }
-                rows.add(row.build());
-            }
+            return getInputData(types, data);
         } catch (ConfigException e) {
             throw new GenericKnimeSparkException("Input parameter '" + PARAM_DATA_ARRAY
                 + "' is not of expected type 'Object[][]': " + e.getMessage());
+        }
+    }
+
+    /**
+     * @param aTypes
+     * @param aData
+     * @return data as list of Row objects
+     */
+    public static List<Row> getInputData(final List<Class<?>> aTypes, final ConfigList aData) {
+        final List<Row> rows = new ArrayList<>();
+        for (ConfigValue rowData : aData) {
+            RowBuilder row = RowBuilder.emptyRow();
+            ConfigList s = (ConfigList)rowData;
+            int ix = 0;
+            for (ConfigValue cell : s) {
+                if (cell.valueType() == ConfigValueType.NULL) {
+                    row.add(null);
+                } else {
+                    final String v = cell.unwrapped().toString();
+                    if (aTypes.get(ix).equals(Integer.class)) {
+                        row.add(Integer.valueOf(v));
+                    } else if (aTypes.get(ix).equals(Double.class)) {
+                        row.add(Double.valueOf(v));
+                    } else if (aTypes.get(ix).equals(Boolean.class)) {
+                        row.add(Boolean.valueOf(v));
+                    } else if (aTypes.get(ix).equals(String.class)) {
+                        try {
+                            row.add(URLDecoder.decode(v, "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            row.add(null);
+                        }
+                    }
+                }
+                ix++;
+            }
+            rows.add(row.build());
         }
         return rows;
     }

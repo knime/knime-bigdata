@@ -109,7 +109,7 @@ public class KnimeContext {
         final Response response =
             RestClient.post(contextContainer, CONTEXTS_PATH + "/" + contextContainer.getContextName(),
                 new String[]{"num-cpu-cores", "" + contextContainer.getNumCpuCores(), "memory-per-node",
-                    contextContainer.getMemPerNode()}, Entity.text(""));
+                    contextContainer.getMemPerNode(), "spark.yarn.executor.memoryOverhead", "1000"}, Entity.text(""));
 
         // String response = builder.post(Entity.text(entity)entity("",
         // MediaType.APPLICATION_JSON),
@@ -120,6 +120,7 @@ public class KnimeContext {
         return contextContainer;
     }
 
+    // "WARN yarn.YarnAllocationHandler: Container killed by YARN for exceeding memory limits. 2.1 GB of 2.1 GB virtual memory used. Consider boosting spark.yarn.executor.memoryOverhead.
     /**
      * query the job-server for the status of the given context
      *
