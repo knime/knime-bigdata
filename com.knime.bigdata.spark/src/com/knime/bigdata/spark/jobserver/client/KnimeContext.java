@@ -109,7 +109,9 @@ public class KnimeContext {
         final Response response =
             RestClient.post(contextContainer, CONTEXTS_PATH + "/" + contextContainer.getContextName(),
                 new String[]{"num-cpu-cores", "" + contextContainer.getNumCpuCores(), "memory-per-node",
-                    contextContainer.getMemPerNode(), "spark.yarn.executor.memoryOverhead", "1000"}, Entity.text(""));
+                    contextContainer.getMemPerNode(),
+                    //TODO - make this configurable
+                    "spark.yarn.executor.memoryOverhead", "1000"}, Entity.text(""));
 
         // String response = builder.post(Entity.text(entity)entity("",
         // MediaType.APPLICATION_JSON),

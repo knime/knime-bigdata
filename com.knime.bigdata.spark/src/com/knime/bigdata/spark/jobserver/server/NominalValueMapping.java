@@ -53,7 +53,8 @@ public interface NominalValueMapping extends Serializable {
     int getNumberOfValues(int aNominalColumnIx);
 
     /**
-     * @return iterator over all columns and value of this record, columns are -1 for global mapping
+     * @return iterator over all columns and value of this record, columns are -1 for global mapping, records are sorted
+     *         by nominal column and mapped value
      */
     Iterator<MyRecord> iterator();
 
@@ -61,6 +62,5 @@ public interface NominalValueMapping extends Serializable {
      * post fix for numeric column names (binary columns have a '_' plus the nominal value as a post-fix)
      */
     final static String NUMERIC_COLUMN_NAME_POSTFIX = "_num";
-
 
 }

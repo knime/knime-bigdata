@@ -50,4 +50,15 @@ public class MyRecord implements Serializable {
         m_nominalValue = nomVal;
         m_numberValue = numVal;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(m_nominalColumnIndex);
+        sb.append("|");
+        sb.append(m_nominalValue);
+        sb.append("|");
+        sb.append(m_numberValue);
+        return sb.toString();
+    }
 }
