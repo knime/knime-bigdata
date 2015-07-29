@@ -35,7 +35,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -46,9 +45,6 @@ class SparkStringMapperApplyNodeDialog extends NodeDialogPane {
 
     private final DialogComponentColumnFilter2 m_cols =
     new DialogComponentColumnFilter2(SparkStringMapperApplyNodeModel.createColumnsModel(), 0);
-
-    private final String[] mappings = {MappingType.GLOBAL.toString(), MappingType.COLUMN.toString(), MappingType.BINARY.toString()};
-
 
     SparkStringMapperApplyNodeDialog() {
         final JPanel panel = new JPanel(new GridBagLayout());

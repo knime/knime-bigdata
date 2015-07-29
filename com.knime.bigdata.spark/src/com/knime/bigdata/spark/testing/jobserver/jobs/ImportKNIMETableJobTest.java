@@ -17,6 +17,7 @@ import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.testing.SparkSpec;
 
@@ -32,31 +33,6 @@ public class ImportKNIMETableJobTest extends SparkSpec {
                 new Object[]{2, false, 3.2d, "my string"},
                 new Object[]{3, true, 38d, "my other string"},
                 new Object[]{4, false, 34.2d, "my other string"}};
-
-    private static String getParams(final Object[][] data, final Class<?>[] aPrimitiveTypes,
-        final String aResultTableName) {
-        StringBuilder params = new StringBuilder("{\n");
-        params.append("   \"").append(ParameterConstants.PARAM_INPUT).append("\" {\n");
-
-        if (data != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": ")
-                .append(JsonUtils.toJson2DimArray(data)).append(",\n");
-        }
-        if (aPrimitiveTypes != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_SCHEMA).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aPrimitiveTypes)).append(",\n");
-        }
-
-        params.append("    }\n");
-        params.append("    \"").append(ParameterConstants.PARAM_OUTPUT).append("\" {\n");
-        if (aResultTableName != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": \"")
-                .append(aResultTableName).append("\"\n");
-        }
-        params.append("    }\n");
-        params.append("    \n}");
-        return params.toString();
-    }
 
     @Test
     public void runningImportJobDirectlyShouldProduceResult() throws Throwable {
@@ -84,7 +60,7 @@ public class ImportKNIMETableJobTest extends SparkSpec {
     static String importTestTable(final KNIMESparkContext contextName, final Object[][] aTable, final Class<?>[] aTypes, final String resTableName)
         throws GenericKnimeSparkException, CanceledExecutionException {
         String params =
-            getParams(aTable, aTypes, resTableName);
+                Table2SparkNodeModel.paramDef(aTable, aTypes, resTableName);
         String jobId = JobControler.startJob(contextName, ImportKNIMETableJob.class.getCanonicalName(), params.toString());
 
         JobControler.waitForJobAndFetchResult(contextName, jobId, null);

@@ -38,6 +38,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -98,9 +99,11 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
             int colIdx = 0;
             for (final DataCell cell : row) {
                 if (cell.isMissing()) {
-                    throw new InvalidSettingsException("Missing value found in row with id: " + row.getKey());
+                    //throw new InvalidSettingsException("Missing value found in row with id: " + row.getKey());
+                    data[rowIdx][colIdx] = null;
+                } else {
+                    data[rowIdx][colIdx] = converter[colIdx++].convert(cell);
                 }
-                data[rowIdx][colIdx] = converter[colIdx++].convert(cell);
             }
             rowIdx++;
         }
@@ -135,10 +138,17 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         JobControler.waitForJobAndFetchResult(resultTable.getContext(), jobId, exec);
     }
 
-    private String paramDef(final Object[][] data, final Class<?>[] aPrimitiveTypes, final String aResultTableName) {
+    /**
+     *
+     * @param data
+     * @param aPrimitiveTypes
+     * @param aResultTableName
+     * @return
+     */
+    public static String paramDef(final Object[][] data, final Class<?>[] aPrimitiveTypes, final String aResultTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_TABLE_1, JsonUtils.toJson2DimArray(data),
+            new Object[]{ParameterConstants.PARAM_TABLE_1, ModelUtils.toString(data),
                 ParameterConstants.PARAM_SCHEMA, JsonUtils.toJsonArray((Object[])aPrimitiveTypes)},
             ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
     }
