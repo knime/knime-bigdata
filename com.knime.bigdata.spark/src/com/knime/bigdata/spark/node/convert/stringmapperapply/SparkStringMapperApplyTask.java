@@ -24,7 +24,7 @@ import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
+import com.knime.bigdata.spark.jobserver.jobs.ApplyNominalValueMappingJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -82,7 +82,7 @@ public class SparkStringMapperApplyTask {
      */
     public MappedRDDContainer execute(final ExecutionContext exec) throws Exception {
         final String params = paramDef();
-        final String jobId = JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
+        final String jobId = JobControler.startJob(m_context, ApplyNominalValueMappingJob.class.getCanonicalName(), params);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
         return (MappedRDDContainer)result.getObjectResult();
