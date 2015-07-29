@@ -88,12 +88,10 @@ public class MappedRDDContainer implements Serializable {
      * container
      *
      * @param aColNameForIndex
-     * @param aMappingType
      * @param aOffset
      * @return list of rows with mapping values
      */
-    public List<Row> createMappingTable(final Map<Integer, String> aColNameForIndex, final MappingType aMappingType,
-        int aOffset) {
+    public List<Row> createMappingTable(final Map<Integer, String> aColNameForIndex, int aOffset) {
         final Map<Integer, String> colNames = new HashMap<>(aColNameForIndex);
         final Iterator<MyRecord> iter = m_Mappings.iterator();
         final List<Row> rows = new ArrayList<Row>();
@@ -103,7 +101,7 @@ public class MappedRDDContainer implements Serializable {
             final String colName = aColNameForIndex.get(record.m_nominalColumnIndex);
             RowBuilder builder = RowBuilder.emptyRow();
             final String name;
-            if (aMappingType == MappingType.BINARY) {
+            if (m_Mappings.getType() == MappingType.BINARY) {
                 name = colName + "_" + record.m_nominalValue;
                 colNames.put(aOffset++, name);
             } else {

@@ -59,6 +59,11 @@ public interface NominalValueMapping extends Serializable {
     Iterator<MyRecord> iterator();
 
     /**
+     * @return the type of mapping
+     */
+    MappingType getType();
+
+    /**
      * post fix for numeric column names (binary columns have a '_' plus the nominal value as a post-fix)
      */
     final static String NUMERIC_COLUMN_NAME_POSTFIX = "_num";

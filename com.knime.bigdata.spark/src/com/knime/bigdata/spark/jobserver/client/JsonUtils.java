@@ -68,23 +68,26 @@ public class JsonUtils {
      * @return json string representing an array
      */
     public static String toJsonArray(final Object... aElems) {
-        final StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < aElems.length; i++) {
-            if (i > 0) {
-                sb.append(",");
-            }
-            if (aElems[i] == null) {
-                sb.append("null");
-            } else if (!(aElems[i] instanceof Object[])) {
-                sb.append("\"" + aElems[i].toString() + "\"");
-            } else {
-                sb.append("{");
-                sb.append(asJson(aElems[i]));
-                sb.append("}");
-            }
+        final StringBuilder sb = new StringBuilder();
+        if (aElems != null) {
+            sb.append("[");
+            for (int i = 0; i < aElems.length; i++) {
+                if (i > 0) {
+                    sb.append(",");
+                }
+                if (aElems[i] == null) {
+                    sb.append("null");
+                } else if (!(aElems[i] instanceof Object[])) {
+                    sb.append("\"" + aElems[i].toString() + "\"");
+                } else {
+                    sb.append("{");
+                    sb.append(asJson(aElems[i]));
+                    sb.append("}");
+                }
 
+            }
+            sb.append("]");
         }
-        sb.append("]");
         return sb.toString();
     }
 
