@@ -160,6 +160,12 @@
             factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
             id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">
