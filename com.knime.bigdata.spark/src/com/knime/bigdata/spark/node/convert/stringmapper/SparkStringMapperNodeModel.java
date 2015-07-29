@@ -89,10 +89,6 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         return new SettingsModelString("mappingType", MappingType.COLUMN.toString());
     }
 
-    static SettingsModelString createMappingColPostfixModel() {
-        return new SettingsModelString("mappingColumnPostfix", "_val");
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -173,7 +169,12 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         return new PortObject[]{new SparkDataPortObject(firstRDD), new SparkDataPortObject(secondRDD)};
     }
 
-    private DataColumnSpec[] createMappingSpecs(final DataTableSpec spec, final Map<Integer, String> names) {
+    /**
+     * @param spec input table spec
+     * @param names mapping column names from the MappedRDDContainer
+     * @return the appended mapped value columns
+     */
+    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec spec, final Map<Integer, String> names) {
         System.out.println(names);
         final DataColumnSpec[] specList = new DataColumnSpec[names.size()];
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Dummy", MAP_TYPE);
