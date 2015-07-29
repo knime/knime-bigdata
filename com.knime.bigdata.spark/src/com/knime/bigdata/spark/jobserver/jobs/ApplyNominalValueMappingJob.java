@@ -33,6 +33,7 @@ import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMappingFactory;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -48,7 +49,6 @@ import com.typesafe.config.Config;
 public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
 
     private static final long serialVersionUID = 1L;
-
 
     private static final String PARAM_MAPPING_TABLE = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_TABLE_2;
@@ -93,8 +93,8 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
      * {@inheritDoc}
      */
     @Override
-    JobResult execute(final SparkContext aContext, final Config aConfig, final JavaRDD<Row> aInputRdd, final int[] aColIds,
-        final Map<Integer, String> aColNameForIndex) throws GenericKnimeSparkException {
+    JobResult execute(final SparkContext aContext, final Config aConfig, final JavaRDD<Row> aInputRdd,
+        final int[] aColIds, final Map<Integer, String> aColNameForIndex) throws GenericKnimeSparkException {
         // construct NominalValueMapping from mapping RDD
         final List<Row> mappingsTable = getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE)).collect();
         NominalValueMapping mappings = NominalValueMappingFactory.fromTable(mappingsTable);
@@ -106,8 +106,12 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
         LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getString(PARAM_RESULT_TABLE));
         addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData);
 
+        final MappedRDDContainer mappedDataContainer = new MappedRDDContainer(mappedData, mappings);
+        //number of all (!)  columns in input data table
+        final int offset = aInputRdd.take(1).get(0).length();
+        mappedDataContainer.createMappingTable(aColNameForIndex, offset);
         LOGGER.log(Level.INFO, "done");
-        return JobResult.emptyJobResult().withMessage("OK");
+        return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedDataContainer);
     }
 
 }
