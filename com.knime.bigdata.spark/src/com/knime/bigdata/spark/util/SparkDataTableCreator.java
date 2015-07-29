@@ -29,7 +29,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.RowKey;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.NodeLogger;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
@@ -49,36 +49,36 @@ import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
  */
 public final class SparkDataTableCreator {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkDataTableCreator.class);
-
-
     /**
      * Retrieves all rows of the given rdd and converts them into a KNIME data table
+     * @param exec optional ExecutionMonitor to check for cancel. Can be <code>null</code>.
      * @param data the Spark data object
      * @return the named RDD as a DataTable
      * @throws GenericKnimeSparkException
      * @throws CanceledExecutionException
      */
-    public static DataTable getDataTable(final SparkDataTable data) throws CanceledExecutionException, GenericKnimeSparkException {
-        return getDataTable(data, -1);
+    public static DataTable getDataTable(final ExecutionMonitor exec, final SparkDataTable data)
+            throws CanceledExecutionException, GenericKnimeSparkException {
+        return getDataTable(exec, data, -1);
     }
 
     /**
      * Retrieves the given number of rows from the given rdd and converts them into a KNIME data table
+     * @param exec optional ExecutionMonitor to check for cancel. Can be <code>null</code>.
      * @param data the Spark data object
      * @param cacheNoRows the number of rows to retrieve
      * @return the named RDD as a DataTable
      * @throws CanceledExecutionException
      * @throws GenericKnimeSparkException
      */
-    public static DataTable getDataTable(final SparkDataTable data, final int cacheNoRows)
+    public static DataTable getDataTable(final ExecutionMonitor exec, final SparkDataTable data, final int cacheNoRows)
             throws CanceledExecutionException, GenericKnimeSparkException {
         final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
         final KNIMESparkContext context = data.getContext();
         String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
 
-        JobControler.waitForJob(context, jobId, null);
+        JobControler.waitForJob(context, jobId, exec);
 
         assert (JobStatus.OK != JobControler.getJobStatus(context, jobId));
 
@@ -95,7 +95,7 @@ public final class SparkDataTableCreator {
     private static DataTable convertResultToDataTable(final KNIMESparkContext context, final String aJobId, final DataTableSpec spec)
             throws GenericKnimeSparkException {
         // now check result:
-        JobResult statusWithResult = JobControler.fetchJobResult(context, aJobId);
+        final JobResult statusWithResult = JobControler.fetchJobResult(context, aJobId);
         final String message = statusWithResult.getMessage();
         //TODO:  Returned message is "OK" and not OK
         if (!"\"OK\"".equals(message)) {

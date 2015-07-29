@@ -62,7 +62,8 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
      * @return fetch size model
      */
     static SettingsModelIntegerBounded createFetchSizeModel() {
-        SettingsModelIntegerBounded model = new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
+        final SettingsModelIntegerBounded model =
+                new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
         model.setEnabled(false);
         return model;
     }
@@ -91,9 +92,9 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
         final SparkDataPortObject dataObject = (SparkDataPortObject)inData[0];
         final DataTable dataTable;
         if (m_fetchAll.getBooleanValue()) {
-            dataTable = SparkDataTableCreator.getDataTable(dataObject.getData());
+            dataTable = SparkDataTableCreator.getDataTable(exec, dataObject.getData());
         } else {
-            dataTable = SparkDataTableCreator.getDataTable(dataObject.getData(), m_fetchSize.getIntValue());
+            dataTable = SparkDataTableCreator.getDataTable(exec, dataObject.getData(), m_fetchSize.getIntValue());
         }
         exec.setMessage("Create KNIME data table...");
         final BufferedDataTable result = exec.createBufferedDataTable(dataTable, exec);
