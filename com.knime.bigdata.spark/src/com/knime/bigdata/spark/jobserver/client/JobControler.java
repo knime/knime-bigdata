@@ -17,6 +17,7 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import spark.jobserver.SparkJobValidation;
 
@@ -245,7 +246,7 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionContext aExecutionContext)
+    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionMonitor aExecutionContext)
         throws CanceledExecutionException {
         return waitForJob(aContextContainer, aJobId, aExecutionContext, 1000, 1);
     }
@@ -262,7 +263,7 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionContext aExecutionContext,
+    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionMonitor aExecutionContext,
         final int aTimeoutInSeconds, final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
         if (aExecutionContext != null) {
             aExecutionContext.setMessage("Waiting for Spark job to finish...");
