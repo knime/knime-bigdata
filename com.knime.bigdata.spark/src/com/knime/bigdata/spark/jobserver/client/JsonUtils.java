@@ -1,6 +1,8 @@
 package com.knime.bigdata.spark.jobserver.client;
 
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -39,7 +41,7 @@ public class JsonUtils {
             sb.append(asJson(keyValuePairs[1]));
             sb.append("}");
         } else if (keyValuePairs[1] == null) {
-            sb.append("\"\"");
+            sb.append("null");
         } else {
             String val = keyValuePairs[1].toString();
             if (!val.startsWith("[")) {
@@ -71,11 +73,10 @@ public class JsonUtils {
             if (i > 0) {
                 sb.append(",");
             }
-            if (aElems instanceof Integer[]) {
-                sb.append(aElems[i].toString());
-            }
-            else if (!(aElems[i] instanceof Object[])) {
-                sb.append( "\"" + aElems[i].toString() + "\"");
+            if (aElems[i] == null) {
+                sb.append("null");
+            } else if (!(aElems[i] instanceof Object[])) {
+                sb.append("\"" + aElems[i].toString() + "\"");
             } else {
                 sb.append("{");
                 sb.append(asJson(aElems[i]));
@@ -90,6 +91,7 @@ public class JsonUtils {
     /**
      * convert the given array of element to a JSon string that represents an array
      *
+     * @note String are URLEncoded (UTF-8) and must be decoded again!
      * @param aElems
      * @return json string representing an array
      */
@@ -104,19 +106,31 @@ public class JsonUtils {
                 if (j > 0) {
                     sb.append(",");
                 }
-                sb.append( "\"" + aElems[i][j].toString() + "\"");
+                if (aElems[i][j] == null) {
+                    sb.append("null");
+                } else if (aElems[i][j] instanceof String) {
+                    try {
+                        sb.append("\"" + URLEncoder.encode(aElems[i][j].toString(), "UTF-8") + "\"");
+                    } catch (UnsupportedEncodingException e) {
+                        sb.append("null");
+                    }
+                } else {
+                    sb.append("\"" + aElems[i][j].toString() + "\"");
+                }
             }
             sb.append("]");
         }
         sb.append("]");
         return sb.toString();
     }
+
     /**
      * convert the given string representation of a Json array to a JsonArray object
+     *
      * @param aJsonArrayString
      * @return the parse JsonArray
      */
     public static JsonArray toJsonArray(final String aJsonArrayString) {
-	    return Json.createReader(new StringReader(aJsonArrayString)).readArray();
-	}
+        return Json.createReader(new StringReader(aJsonArrayString)).readArray();
+    }
 }

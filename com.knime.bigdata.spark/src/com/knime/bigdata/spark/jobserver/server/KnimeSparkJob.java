@@ -14,6 +14,7 @@ import com.typesafe.config.Config;
  */
 public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
 
+    //TODO - wrap Config so that we can provide some utilities and encode String arguments
     @Override
     public Object runJob(final Object aSparkContext, final Config aConfig) {
         try {
