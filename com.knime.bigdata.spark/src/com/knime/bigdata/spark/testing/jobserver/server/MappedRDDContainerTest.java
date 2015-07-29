@@ -5,13 +5,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
+import com.knime.bigdata.spark.jobserver.server.MyRecord;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMappingFactory;
 
@@ -36,8 +40,8 @@ public class MappedRDDContainerTest {
     public void columnMappingShouldGenerateSensibleColumnNames() throws Exception {
 
         final int offset = 8;
-        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap()));
-        testObj.createMappingTable(names, MappingType.COLUMN, offset);
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap(), MappingType.COLUMN));
+        testObj.createMappingTable(names, offset);
 
         for (Entry<Integer, String> entry : testObj.getColumnNames().entrySet()) {
             final String n;
@@ -60,8 +64,8 @@ public class MappedRDDContainerTest {
     public void columnMappingShouldGenerateSensibleColumnNamesForGlobalMapping() throws Exception {
 
         final int offset = 8;
-        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap()));
-        testObj.createMappingTable(names, MappingType.GLOBAL, offset);
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap(), MappingType.GLOBAL));
+        testObj.createMappingTable(names, offset);
 
         for (Entry<Integer, String> entry : testObj.getColumnNames().entrySet()) {
             final String n;
@@ -84,8 +88,8 @@ public class MappedRDDContainerTest {
     public void columnMappingShouldGenerateSensibleColumnNamesForBinaryMappings() throws Exception {
 
         final int offset = 8;
-        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap()));
-        testObj.createMappingTable(names, MappingType.BINARY, offset);
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap(), MappingType.BINARY));
+        testObj.createMappingTable(names, offset);
 
         for (Entry<Integer, String> entry : testObj.getColumnNames().entrySet()) {
 
@@ -110,6 +114,63 @@ public class MappedRDDContainerTest {
         }
     }
 
+    @Test
+    public void  convertMappingsToTableAndBack() throws Exception {
+
+        final int offset = 8;
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap(), MappingType.BINARY));
+        List<Row> rows = testObj.createMappingTable(names, offset);
+
+        NominalValueMapping mapping = NominalValueMappingFactory.fromTable(rows);
+
+        Iterator<MyRecord> records = mapping.iterator();
+        checkRecord(records.next(), "val1", 1, 0);
+        checkRecord(records.next(), "val2", 1, 1);
+        checkRecord(records.next(), "val3", 1, 2);
+
+        checkRecord(records.next(), "Col2val1", 2, 0);
+        checkRecord(records.next(), "Col2val2", 2, 1);
+        checkRecord(records.next(), "Col2val3", 2, 2);
+
+        checkRecord(records.next(), "XXXval1", 7, 0);
+        checkRecord(records.next(), "XXXval2", 7, 1);
+        checkRecord(records.next(), "YYYval3", 7, 2);
+        checkRecord(records.next(), "YYYval88", 7, 3);
+
+        assertEquals("mapping type must be extracted from row information", MappingType.BINARY, mapping.getType());
+    }
+
+    @Test
+    public void  convertMappingsToTableAndBackColumnMapping() throws Exception {
+
+        final int offset = 8;
+        MappedRDDContainer testObj = new MappedRDDContainer(null, NominalValueMappingFactory.createColumnMapping(getColumnMappingMap(), MappingType.COLUMN));
+        List<Row> rows = testObj.createMappingTable(names, offset);
+
+        NominalValueMapping mapping = NominalValueMappingFactory.fromTable(rows);
+
+        Iterator<MyRecord> records = mapping.iterator();
+        checkRecord(records.next(), "val1", 1, 0);
+        checkRecord(records.next(), "val2", 1, 1);
+        checkRecord(records.next(), "val3", 1, 2);
+
+        checkRecord(records.next(), "Col2val1", 2, 0);
+        checkRecord(records.next(), "Col2val2", 2, 1);
+        checkRecord(records.next(), "Col2val3", 2, 2);
+
+        checkRecord(records.next(), "XXXval1", 7, 0);
+        checkRecord(records.next(), "XXXval2", 7, 1);
+        checkRecord(records.next(), "YYYval3", 7, 2);
+        checkRecord(records.next(), "YYYval88", 7, 3);
+
+        assertEquals("mapping type must be extracted from row information", MappingType.COLUMN, mapping.getType());
+    }
+
+    private void checkRecord(final MyRecord aRecord, final String aNomVal, final int aNomColPos, final int aNumColPos) {
+        assertEquals(aNomColPos, aRecord.m_nominalColumnIndex);
+        assertEquals("incorrect number value", aNumColPos, aRecord.m_numberValue);
+        assertEquals("incorrect nominal value", aNomVal, aRecord.m_nominalValue);
+    }
 
     /**
      * @return
@@ -144,21 +205,5 @@ public class MappedRDDContainerTest {
         return mapping;
     }
 
-//    /**
-//     * @return
-//     */
-//    private Map<String, Integer> getGlobalMappingMap() {
-//        final Map<String, Integer> mapping = new HashMap<>();
-//
-//        mapping.put("val1", 0);
-//        mapping.put("val2", 1);
-//        mapping.put("val3", 2);
-//
-//        mapping.put("XXXval1", 3);
-//        mapping.put("XXXval2", 4);
-//        mapping.put("YYYval3", 5);
-//        mapping.put("YYYval88", 6);
-//        return mapping;
-//    }
 
 }

@@ -42,7 +42,7 @@ public class RDDUtilsInJava {
         final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
-        JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, aMappingType, mappings);
+        final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
         return new MappedRDDContainer(rddWithConvertedValues, mappings);
     }
 
@@ -50,12 +50,11 @@ public class RDDUtilsInJava {
      * apply the given mapping to the given input RDD
      * @param aInputRdd
      * @param aColumnIds
-     * @param aMappingType
      * @param aMappings
      * @return JavaRDD<Row> with converted data (columns are appended)
      */
     public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
-        final MappingType aMappingType, final NominalValueMapping aMappings) {
+        final NominalValueMapping aMappings) {
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
@@ -64,7 +63,7 @@ public class RDDUtilsInJava {
                 RowBuilder builder = RowBuilder.fromRow(row);
                 for (int ix : aColumnIds) {
                     Integer labelOrIndex = aMappings.getNumberForValue(ix, row.getString(ix));
-                    if (aMappingType == MappingType.BINARY) {
+                    if (aMappings.getType() == MappingType.BINARY) {
                         int numValues = aMappings.getNumberOfValues(ix);
                         for (int i = 0; i < numValues; i++) {
                             if (labelOrIndex == i) {
@@ -96,16 +95,13 @@ public class RDDUtilsInJava {
 
         switch (aMappingType) {
             case GLOBAL: {
-                return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             case COLUMN: {
-                if (aNominalColumnIndices.length < 2) {
-                    return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
-                }
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
+               return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             case BINARY: {
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             default: {
                 throw new UnsupportedOperationException("ERROR: unknown mapping type !");
@@ -114,7 +110,7 @@ public class RDDUtilsInJava {
     }
 
     private static NominalValueMapping toLabelMappingGlobalMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices) {
+        final int[] aNominalColumnIndices, final MappingType aMappingType) {
 
         Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
 
@@ -140,11 +136,11 @@ public class RDDUtilsInJava {
             }
             labelMapping.put(entry.getKey(), mapping);
         }
-        return NominalValueMappingFactory.createColumnMapping(labelMapping);
+        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
     }
 
     private static NominalValueMapping toLabelMappingColumnMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices) {
+        final int[] aNominalColumnIndices, final MappingType aMappingType) {
 
         Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
 
@@ -159,7 +155,7 @@ public class RDDUtilsInJava {
             labelMapping.put(entry.getKey(), mapping);
         }
 
-        return NominalValueMappingFactory.createColumnMapping(labelMapping);
+        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
     }
 
     /**
