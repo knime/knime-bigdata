@@ -18,7 +18,7 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.writer;
+package com.knime.bigdata.spark.node.io.table.reader;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.node.BufferedDataTable;

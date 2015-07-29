@@ -2,15 +2,15 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Predictor" icon="icon.png">
     <name>Spark Predictor</name>
-    <shortDescription>Predicts input data based on a previously learned model.</shortDescription>
+    <shortDescription>Predicts input data based on a previously learned Spark MLlib model (e.g. decision tree).</shortDescription>
     <fullDescription>
         <intro>
-            This node labels new data points using a learn model e.g. a decision tree.
+            This node labels new data points using a learned Spark MLlib model e.g. a decision tree.
         </intro>
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="MLlib Model">MLlib model</inPort>
+        <inPort index="0" name="Spark MLlib Model">Spark MLlib model</inPort>
         <inPort index="1" name="Input Data">Spark RDD containing the input data to predict</inPort>
         <outPort index="0" name="Labelled Data">Labelled input data</outPort>
     </ports>

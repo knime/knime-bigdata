@@ -3,26 +3,18 @@
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
 	type="Manipulator" icon="icon.png">
 	<name>Spark Category To Number (Apply)</name>
-	<shortDescription>Maps nominal columns to double column</shortDescription>
+	<shortDescription>Maps nominal columns to double columns based on a provided mapping dictionary</shortDescription>
 	<fullDescription>
 		<intro>
-			Maps nominal column to double columns.
+			Maps nominal column to double columns based on a provided mapping dictionary. The dictionary
+			is produced by the Spark Category To Number node.S
 		</intro>
 		<option name="Columns to convert">The columns to convert</option>
-		<option name="Mapping type">The mapping type to use.
-		<ul>
-		  <li><b>Column: </b>Uses a separate dictionary for each column</li>
-		  <li><b>Global: </b>Uses a global dictionary for all columns</li>
-		  <li><b>Binary: </b>Converts the selected columns into binary vectors by 
-		  generating a new column for each unique column value.</li>
-		</ul>
-		  
-		</option>
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Input data">Input data.</inPort>
-		<inPort index="1" name="Mapping dictionary">Mapping dictionary</inPort>
-		<outPort index="0" name="Mapped input data">Mapped input data</outPort>
+		<inPort index="0" name="Input data">Input Spark RDD.</inPort>
+		<inPort index="1" name="Mapping dictionary">Mapping dictionary as Spark RDD</inPort>
+		<outPort index="0" name="Mapped input data">Mapped Spark RDD</outPort>
 	</ports>
 </knimeNode>
