@@ -17,7 +17,7 @@ The Job-Server must be installed a on (Linux) server that is co-located in the s
 1. Download and unpack the pre-packaged zip file (TODO - TOBIAS provide link) into your installation directory. 
 2. Edit `environment.sh` as appropriate. The most important settings are:    
   2.1 `master` use `master = "yarn-client"` (default) when running Yarn or `master = "spark://localhost:7077"` (or similar) when running in stand-alone mode. 
-  2.2 `rootdir` use `rootdir = /tmp/jobserver` (default) or some other tempory directory. This is where job information and jar files are kept (see also 'Hints' below).
+  2.2 `rootdir` use `rootdir = /tmp/jobserver` (default) or some other temporary directory. This is where job information and jar files are kept (see also 'Hints' below).
   Please note that some settings are overwritten by the KNIME configuration. Examples of overwritten settings are `num-cpu-cores` and `memory-per-node`.
 3. Edit `settings.sh` as appropriate.    
   3.1 `INSTALL_DIR` this should point to the installation directory (but is not used)     
