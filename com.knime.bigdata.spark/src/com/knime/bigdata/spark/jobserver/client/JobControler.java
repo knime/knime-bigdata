@@ -16,7 +16,6 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 
 import spark.jobserver.SparkJobValidation;
@@ -329,7 +328,7 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      * @throws AssertionError if job failed
      */
-    public static JobResult waitForJobAndFetchResult(final KNIMESparkContext aContextContainer, final String jobId, final ExecutionContext exec)
+    public static JobResult waitForJobAndFetchResult(final KNIMESparkContext aContextContainer, final String jobId, final ExecutionMonitor exec)
         throws CanceledExecutionException, GenericKnimeSparkException {
         JobStatus status = waitForJob(aContextContainer, jobId, exec);
         JobResult result = fetchJobResult(aContextContainer, jobId);
