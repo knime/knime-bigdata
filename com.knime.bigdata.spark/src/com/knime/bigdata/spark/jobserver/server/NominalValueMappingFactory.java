@@ -20,8 +20,10 @@
  */
 package com.knime.bigdata.spark.jobserver.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,6 @@ import java.util.Map.Entry;
  * @author dwk
  */
 public class NominalValueMappingFactory {
-
 
     /**
      *
@@ -156,8 +157,32 @@ public class NominalValueMappingFactory {
                     values.add(new MyRecord(colEntries.getKey(), entry.getKey(), entry.getValue()));
                 }
             }
+            Collections.sort(values, new MyComparator());
             return values;
         }
 
+        private static class MyComparator implements Comparator<MyRecord>, Serializable {
+            private static final long serialVersionUID = 1L;
+
+            /**
+             * sort first by initial column index, then by mapped number value {@inheritDoc}
+             */
+            @Override
+            public int compare(final MyRecord aRecord0, final MyRecord aRecord1) {
+                if (aRecord0.m_nominalColumnIndex < aRecord1.m_nominalColumnIndex) {
+                    return -1;
+                }
+                if (aRecord0.m_nominalColumnIndex > aRecord1.m_nominalColumnIndex) {
+                    return 1;
+                }
+                if (aRecord0.m_numberValue < aRecord1.m_numberValue) {
+                    return -1;
+                }
+                if (aRecord0.m_numberValue > aRecord1.m_numberValue) {
+                    return 1;
+                }
+                return 0;
+            }
+        }
     }
 }

@@ -1,19 +1,19 @@
 package com.knime.bigdata.spark.testing;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.knime.bigdata.spark.SparkPlugin;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
+import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.util.SparkUtil;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  *
@@ -40,12 +40,18 @@ public abstract class SparkSpec extends UnitSpec {
                 return new File(".").getAbsolutePath();
             }
         };
+
+        KNIMEConfigContainer.m_config = KNIMEConfigContainer.m_config.withValue("unitTestMode", ConfigValueFactory.fromAnyRef("true"));
         //comment this out if you want to test the real server
         //use a dummy RestClient to be able to test things locally
 //        KNIMEConfigContainer.m_config =
 //                KNIMEConfigContainer.m_config.withValue("spark.jobServer", ConfigValueFactory.fromAnyRef("dummy"));
 
         CONTEXT_ID = KnimeContext.getSparkContext();
+
+        final String jobJarPath = SparkUtil.getJobJarPath();
+        //TODO: Upload the static jobs jar only if not exists
+        JobControler.uploadJobJar(CONTEXT_ID, jobJarPath);
     }
 
     /**
@@ -56,12 +62,12 @@ public abstract class SparkSpec extends UnitSpec {
     @AfterClass
     public static void afterSuite() throws Exception {
         KNIMEConfigContainer.m_config = origConfig;
-        KnimeContext.destroySparkContext(CONTEXT_ID);
-        //need to wait a bit before we can actually test whether it is really gone
-        Thread.sleep(200);
-        // TODO - what would be the expected status?
-        assertTrue("context status should NOT be OK after destruction",
-            KnimeContext.getSparkContextStatus(CONTEXT_ID) != JobStatus.OK);
+//        KnimeContext.destroySparkContext(CONTEXT_ID);
+//        //need to wait a bit before we can actually test whether it is really gone
+//        Thread.sleep(200);
+//        // TODO - what would be the expected status?
+//        assertTrue("context status should NOT be OK after destruction",
+//            KnimeContext.getSparkContextStatus(CONTEXT_ID) != JobStatus.OK);
 
     }
 

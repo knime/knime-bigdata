@@ -92,8 +92,14 @@ public class MappedRDDContainerTest {
             if (names.containsKey(entry.getKey())) {
                 final String n = names.get(entry.getKey());
                 assertEquals("incorrect column name, ", n, entry.getValue());
-            } else if (entry.getKey() > 7 && entry.getKey() < 11) {
-                assertTrue("values of Col1 must be added first", entry.getValue().startsWith("Col1_val"));
+            } else if (entry.getKey() == 8) {
+                assertEquals("value 0 of Col1 must be added first", "Col1_val1", entry.getValue());
+            } else if (entry.getKey() == 9) {
+                assertEquals("value 1 of Col1 must be added second", "Col1_val2", entry.getValue());
+            } else if (entry.getKey() == 10) {
+                assertEquals("value 2 of Col1 must be added third", "Col1_val3", entry.getValue());
+            } else if (entry.getKey() == 11) {
+                assertEquals("values of Col2 must be added after values of Col1 ", "Col2_Col2val1", entry.getValue());
             } else if (entry.getKey() > 10 && entry.getKey() < 14) {
                 assertTrue("values of Col2 must be added second", entry.getValue().startsWith("Col2_Col2val"));
             } else if (entry.getKey() > 13 && entry.getKey() < 18) {
@@ -113,26 +119,26 @@ public class MappedRDDContainerTest {
         {
             final Map<String, Integer> colMapping = new HashMap<>();
             colMapping.put("val1", 0);
-            colMapping.put("val2", 1);
             colMapping.put("val3", 2);
+            colMapping.put("val2", 1);
 
             mapping.put(1, colMapping);
         }
 
         {
             final Map<String, Integer> colMapping = new HashMap<>();
-            colMapping.put("Col2val1", 0);
             colMapping.put("Col2val2", 1);
             colMapping.put("Col2val3", 2);
+            colMapping.put("Col2val1", 0);
 
             mapping.put(2, colMapping);
         }
         {
             final Map<String, Integer> colMapping = new HashMap<>();
             colMapping.put("XXXval1", 0);
+            colMapping.put("YYYval88", 3);
             colMapping.put("XXXval2", 1);
             colMapping.put("YYYval3", 2);
-            colMapping.put("YYYval88", 3);
             mapping.put(7, colMapping);
         }
         return mapping;

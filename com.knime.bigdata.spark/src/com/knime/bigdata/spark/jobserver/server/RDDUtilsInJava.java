@@ -42,6 +42,20 @@ public class RDDUtilsInJava {
         final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
+        JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, aMappingType, mappings);
+        return new MappedRDDContainer(rddWithConvertedValues, mappings);
+    }
+
+    /**
+     * apply the given mapping to the given input RDD
+     * @param aInputRdd
+     * @param aColumnIds
+     * @param aMappingType
+     * @param aMappings
+     * @return JavaRDD<Row> with converted data (columns are appended)
+     */
+    public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
+        final MappingType aMappingType, final NominalValueMapping aMappings) {
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
@@ -49,9 +63,9 @@ public class RDDUtilsInJava {
             public Row call(final Row row) {
                 RowBuilder builder = RowBuilder.fromRow(row);
                 for (int ix : aColumnIds) {
-                    Integer labelOrIndex = mappings.getNumberForValue(ix, row.getString(ix));
+                    Integer labelOrIndex = aMappings.getNumberForValue(ix, row.getString(ix));
                     if (aMappingType == MappingType.BINARY) {
-                        int numValues = mappings.getNumberOfValues(ix);
+                        int numValues = aMappings.getNumberOfValues(ix);
                         for (int i = 0; i < numValues; i++) {
                             if (labelOrIndex == i) {
                                 builder.add(1.0d);
@@ -66,7 +80,7 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-        return new MappedRDDContainer(rddWithConvertedValues, mappings);
+        return rddWithConvertedValues;
     }
 
     /**
