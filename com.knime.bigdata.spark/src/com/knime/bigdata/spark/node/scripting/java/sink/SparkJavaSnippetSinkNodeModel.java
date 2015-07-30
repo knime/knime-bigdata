@@ -55,12 +55,12 @@ public class SparkJavaSnippetSinkNodeModel extends AbstractSparkJavaSnippetNodeM
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
         //call configure to check that the parameters are alright
-        super.configure(inSpecs);
+        super.configureInternal(inSpecs);
         return new PortObjectSpec[0];
     }
 

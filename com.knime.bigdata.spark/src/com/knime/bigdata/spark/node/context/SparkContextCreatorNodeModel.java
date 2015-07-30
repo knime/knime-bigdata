@@ -50,7 +50,7 @@ class SparkContextCreatorNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         return new PortObjectSpec[] {new SparkContextPortObject(m_settings.createContext())};
     }
 
