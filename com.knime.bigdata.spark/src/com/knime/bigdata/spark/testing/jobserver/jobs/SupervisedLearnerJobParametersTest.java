@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -20,41 +20,8 @@ public class SupervisedLearnerJobParametersTest {
 
     static String getParams(final String aTable, final String aMappingTable, final Integer[] aColIdxs,
         final String[] aColNames, final Integer aLabelIx, final String aResultTableName) {
-        StringBuilder params = new StringBuilder("{\n");
-        params.append("   \"").append(ParameterConstants.PARAM_INPUT).append("\" {\n");
 
-        if (aTable != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": ").append(aTable)
-                .append(",\n");
-        }
-        if (aMappingTable != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_2).append("\": ").append(aMappingTable)
-                .append(",\n");
-        }
-        if (aColIdxs != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_COL_IDXS).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aColIdxs)).append(",\n");
-        }
-
-        if (aColNames != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING)
-                .append("\": ").append(JsonUtils.toJsonArray((Object[])aColNames)).append(",\n");
-        }
-
-        if (aLabelIx != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_LABEL_INDEX).append("\": ").append(aLabelIx)
-                .append(",\n");
-        }
-
-        params.append("    }\n");
-        params.append("    \"").append(ParameterConstants.PARAM_OUTPUT).append("\" {\n");
-        if (aResultTableName != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": \"")
-                .append(aResultTableName).append("\"\n");
-        }
-        params.append("    }\n");
-        params.append("    \n}");
-        return params.toString();
+        return SGDLearnerTask.learnerDef(aTable, aMappingTable, aColNames, aColIdxs, aLabelIx, 10, 0.5d);
     }
 
     @Test
@@ -66,14 +33,15 @@ public class SupervisedLearnerJobParametersTest {
     @Test
     public void jobValidationShouldCheckMissingColumnSelectionParameter() throws Throwable {
         String params = getParams("data", "mapping", null, new String[]{"a", "b", "c"}, 2, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS, "Input");
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+            + "' is not of expected type 'integer list'.");
     }
 
     @Test
     public void jobValidationShouldCheckMissingColumnNamesParameter() throws Throwable {
         String params = getParams("data", "mapping", new Integer[]{0, 1}, null, 2, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
-            + ParameterConstants.PARAM_STRING, "Input");
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+            + ParameterConstants.PARAM_STRING + "' is not of expected type 'string list'.");
     }
 
     @Test

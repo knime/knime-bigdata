@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 
 import org.apache.spark.sql.api.java.Row;
 
@@ -141,12 +142,12 @@ public class NominalValueMappingFactory {
         }
 
         @Override
-        public Integer getNumberForValue(final int aColumnIx, final String aValue) {
+        public Integer getNumberForValue(final int aColumnIx, final String aValue) throws NoSuchElementException {
             Map<String, Integer> m = m_colMappings.get(aColumnIx);
             if (m != null && m.containsKey(aValue)) {
                 return m.get(aValue);
             }
-            return -1;
+            throw new NoSuchElementException("ERROR: no mapping available for nominal column "+aColumnIx+" and value '"+aValue+"'.");
         }
 
         /**
@@ -167,6 +168,14 @@ public class NominalValueMappingFactory {
         @Override
         public int getNumberOfValues(final int aNominalColumnIx) {
             return m_colMappings.get(aNominalColumnIx).size();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean hasMappingForColumn(final int aNominalColumnIx) {
+            return m_colMappings.containsKey(aNominalColumnIx);
         }
 
         @Override
