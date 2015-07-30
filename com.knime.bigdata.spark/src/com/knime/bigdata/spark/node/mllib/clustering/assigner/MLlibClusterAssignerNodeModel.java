@@ -48,6 +48,8 @@ import com.knime.bigdata.spark.util.SparkIDs;
  */
 public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
 
+    private final SettingsModelString m_colName = createColumnNameModel();
+
     /**Constructor.*/
     public MLlibClusterAssignerNodeModel() {
         super(new PortType[]{SparkModelPortObject.TYPE, SparkDataPortObject.TYPE},
@@ -83,15 +85,15 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
         final SparkModel<KMeansModel> model = ((SparkModelPortObject<KMeansModel>)inObjects[0]).getModel();
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         exec.checkCanceled();
-        exec.setMessage("Starting KMeans (SPARK) Predictor");
+        exec.setMessage("Starting Spark Predictor");
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(inputSpec);
+        final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final AssignTask task = new AssignTask();
         task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
-        exec.setMessage("KMeans (SPARK) Prediction done.");
+        exec.setMessage("Spark Predictor finished.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
     }
 
@@ -99,8 +101,8 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
      * @param inputSpec the input data spec
      * @return the result spec
      */
-    public static DataTableSpec createSpec(final DataTableSpec inputSpec) {
-        return createSpec(inputSpec, "cluster");
+    public DataTableSpec createSpec(final DataTableSpec inputSpec) {
+        return createSpec(inputSpec, m_colName.getStringValue());
     }
 
     /**
@@ -117,12 +119,13 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
         return new DataTableSpec(inputSpec, new DataTableSpec(labelColSpec));
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        // nothing to do
+        m_colName.saveSettingsTo(settings);
     }
 
     /**
@@ -130,7 +133,7 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // nothing to do
+        m_colName.validateSettings(settings);
     }
 
     /**
@@ -138,6 +141,6 @@ public class MLlibClusterAssignerNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // nothing to do
+        m_colName.loadSettingsFrom(settings);
     }
 }
