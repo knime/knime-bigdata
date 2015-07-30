@@ -166,6 +166,18 @@
             factory-class="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
             id="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">

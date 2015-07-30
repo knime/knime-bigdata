@@ -47,9 +47,9 @@ public class SparkModelView extends JPanel {
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<strong>Type:</strong>&nbsp;&nbsp;");
         buf.append("<tt>" + model.getType() + "</tt>");
-        buf.append("<br/>");
-        buf.append("<strong>Description:</strong>&nbsp;&nbsp;");
-        buf.append("<tt>" + interpreter.getDescription(model.getModel()) + "</tt>");
+        buf.append("<br/><hr>");
+//        buf.append("<strong>Details:</strong>&nbsp;&nbsp;<br><hr>");
+        buf.append(interpreter.getDescription(model.getModel()));
         buf.append("<br/><br/>");
         buf.append("</body></html>");
         final JTextPane textArea = new JTextPane();

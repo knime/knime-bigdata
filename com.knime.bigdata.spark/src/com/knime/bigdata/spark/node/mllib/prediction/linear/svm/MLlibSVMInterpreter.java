@@ -18,9 +18,9 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
-import org.apache.spark.mllib.tree.model.DecisionTreeModel;
+import org.apache.spark.mllib.classification.SVMModel;
 
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
@@ -28,13 +28,13 @@ import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<DecisionTreeModel> {
+public class MLlibSVMInterpreter implements SparkModelInterpreter<SVMModel> {
 
     private static final long serialVersionUID = 1L;
 
-    private static volatile MLlibDecisionTreeInterpreter instance;
+    private static volatile MLlibSVMInterpreter instance;
 
-    private MLlibDecisionTreeInterpreter() {
+    private MLlibSVMInterpreter() {
         //avoid object creation
     }
 
@@ -42,11 +42,11 @@ public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<Decis
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static MLlibDecisionTreeInterpreter getInstance() {
+    public static MLlibSVMInterpreter getInstance() {
         if (instance == null) {
-            synchronized (MLlibDecisionTreeInterpreter.class) {
+            synchronized (MLlibSVMInterpreter.class) {
                 if (instance == null) {
-                    instance = new MLlibDecisionTreeInterpreter();
+                    instance = new MLlibSVMInterpreter();
                 }
             }
         }
@@ -58,23 +58,23 @@ public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<Decis
      */
     @Override
     public String getModelName() {
-        return "DecisionTree";
+        return "Linear SVM";
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final DecisionTreeModel model) {
-        return "Tree depth: " + model.depth();
+    public String getSummary(final SVMModel model) {
+        return "Model weights: " + model.weights();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final DecisionTreeModel model) {
-        return "Tree depth: " + model.depth();
+    public String getDescription(final SVMModel model) {
+        return "Model weights: " + model.weights();
     }
 
 }

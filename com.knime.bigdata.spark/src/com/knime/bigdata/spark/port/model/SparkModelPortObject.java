@@ -70,9 +70,7 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
      */
     @Override
     public String getSummary() {
-        StringBuilder buf = new StringBuilder();
-        buf.append("Type: ").append(m_model.getType());
-        return buf.toString();
+        return m_model.getSummary();
     }
 
     /**

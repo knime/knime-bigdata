@@ -16,8 +16,10 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.sql.api.java.Row;
 
@@ -45,9 +47,17 @@ public class ModelUtils {
 
         final JavaRDD<? extends Object> predictions;
         if (aModel instanceof KMeansModel) {
+            LOGGER.fine("KMeansModel found for predcition");
             predictions = ((KMeansModel)aModel).predict(aNumericData);
         } else if (aModel instanceof DecisionTreeModel) {
+            LOGGER.fine("DecisionTreeModel found for predcition");
             predictions = ((DecisionTreeModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof SVMModel) {
+            LOGGER.fine("SVMModel found for predcition");
+            predictions = ((SVMModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof LinearRegressionModel) {
+            LOGGER.fine("LinearRegressionModel found for predcition");
+            predictions = ((LinearRegressionModel)aModel).predict(aNumericData);
         } else {
             throw new GenericKnimeSparkException("ERROR: unknown model type: "+aModel.getClass());
         }
