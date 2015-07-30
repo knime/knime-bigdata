@@ -33,7 +33,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
@@ -49,7 +48,7 @@ import com.knime.bigdata.spark.util.SparkIDs;
  */
 public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
 
-    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+//    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
     SparkStringMapperApplyNodeModel() {
         super(new PortType[] {SparkDataPortObject.TYPE, SparkDataPortObject.TYPE},
@@ -73,13 +72,13 @@ public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
         if (inSpecs == null || inSpecs.length < 2 || inSpecs[0] == null || inSpecs[1] == null) {
             throw new InvalidSettingsException("No input spec available");
         }
-        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)inSpecs[0];
-        final DataTableSpec spec = sparkSpec.getTableSpec();
-        FilterResult filterResult = m_cols.applyTo(spec);
-        final String[] includedCols = filterResult.getIncludes();
-        if (includedCols == null || includedCols.length < 1) {
-            throw new InvalidSettingsException("No nominal columns selected");
-        }
+//        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)inSpecs[0];
+//        final DataTableSpec spec = sparkSpec.getTableSpec();
+//        FilterResult filterResult = m_cols.applyTo(spec);
+//        final String[] includedCols = filterResult.getIncludes();
+//        if (includedCols == null || includedCols.length < 1) {
+//            throw new InvalidSettingsException("No nominal columns selected");
+//        }
         final SparkDataPortObjectSpec mappingSparkSpec = (SparkDataPortObjectSpec)inSpecs[1];
         if (!SparkStringMapperNodeModel.MAP_SPEC.equals(mappingSparkSpec.getTableSpec())) {
             throw new InvalidSettingsException("Invalid mapping RDD found.");
@@ -96,10 +95,12 @@ public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
         final SparkDataPortObject mappingRdd = (SparkDataPortObject)inData[1];
         final DataTableSpec spec = rdd.getTableSpec();
         exec.checkCanceled();
-        final FilterResult result = m_cols.applyTo(spec);
-        final String[] includedCols = result.getIncludes();
-        int[] includeColIdxs = new int[includedCols.length];
+        //we always pass all columns to the method which ignores all unknown columns
+        final String[] includedCols = spec.getColumnNames();
+//        final FilterResult result = m_cols.applyTo(spec);
+//        final String[] includedCols = result.getIncludes();
 
+        int[] includeColIdxs = new int[includedCols.length];
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
         }
@@ -130,7 +131,7 @@ public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_cols.saveSettingsTo(settings);
+//        m_cols.saveSettingsTo(settings);
     }
 
     /**
@@ -138,7 +139,7 @@ public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_cols.validateSettings(settings);
+//        m_cols.validateSettings(settings);
     }
 
     /**
@@ -146,6 +147,6 @@ public class SparkStringMapperApplyNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_cols.loadSettingsFrom(settings);
+//        m_cols.loadSettingsFrom(settings);
     }
 }
