@@ -30,7 +30,7 @@ public class LinearRegressionWithSGDJob extends SGDJob {
         final LinearRegressionWithSGD alg = new LinearRegressionWithSGD();
         alg.optimizer().setNumIterations(noOfIteration).setRegParam(aConfig.getDouble(PARAM_REGULARIZATION))
         .setUpdater(new L1Updater());
-        return alg.run(inputRdd.rdd());
+        return alg.run(inputRdd.rdd().cache());
     }
 
     /**

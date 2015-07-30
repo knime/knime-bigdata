@@ -151,6 +151,32 @@ public class RDDUtilsInJavaTest {
     }
 
     @Test
+    public void toLabeledPointRDDShouldCreateVectorsForIndicatedColumnsOnly() throws Exception {
+
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+        JavaRDD<Vector> v = new MyMapper().apply(o);
+        JavaRDD<Row> rowRDD = RDDUtils.toJavaRDDOfRows(v.zip(o));
+
+        List<Integer> colIdxs = new ArrayList<>();
+        colIdxs.add(1);
+        colIdxs.add(3);
+        final List<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(rowRDD, colIdxs, 2).collect();
+
+        List<Row> rows = rowRDD.collect();
+        assertEquals("number of rows must not change", rows.size(), inputRdd.size());
+
+        int ix = 0;
+        for (LabeledPoint p : inputRdd) {
+            assertEquals("length of feature vector must be equivalent to length of colum selector", colIdxs.size(), p.features().size());
+            assertEquals("selected features incorrect (col 1 of row["+ix+"])", rows.get(ix).get(1), p.features().apply(0));
+            assertEquals("selected features incorrect (col 3 of row["+ix+"])", rows.get(ix).get(3), p.features().apply(1));
+            ix++;
+        }
+    }
+
+
+
+    @Test
     public void conversionOfJavaPairedRDD2JavaRDDWithRows() throws Exception {
         JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
         JavaRDD<Vector> v = new MyMapper().apply(o);

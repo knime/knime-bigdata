@@ -230,15 +230,17 @@ public class RDDUtilsInJava {
     private static JavaRDD<LabeledPoint>
         toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex,
             @Nullable final NominalValueMapping labelMapping) {
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length()-1);
+
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public LabeledPoint call(final Row row) {
-                double[] convertedValues = new double[row.length() - 1];
                 int insertionIndex = 0;
+                final double[] convertedValues = new double[numFeatures];
                 for (int idx : aColumnIndices) {
-                    if (idx != labelColumnIndex) {
+                    if (idx != labelColumnIndex && idx < row.length()) {
                         convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
                         insertionIndex += 1;
                     }

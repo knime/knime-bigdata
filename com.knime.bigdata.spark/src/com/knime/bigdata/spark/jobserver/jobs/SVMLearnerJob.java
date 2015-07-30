@@ -30,7 +30,7 @@ public class SVMLearnerJob extends SGDJob {
         final SVMWithSGD svmAlg = new SVMWithSGD();
         svmAlg.optimizer().setNumIterations(noOfIteration).setRegParam(aConfig.getDouble(PARAM_REGULARIZATION))
             .setUpdater(new L1Updater());
-        return svmAlg.run(inputRdd.rdd());
+        return svmAlg.run(inputRdd.rdd().cache());
     }
 
 
