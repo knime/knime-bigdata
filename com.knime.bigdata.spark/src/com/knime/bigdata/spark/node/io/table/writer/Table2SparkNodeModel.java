@@ -47,7 +47,6 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
-import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -134,7 +133,6 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
     private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final Class<?>[] aPrimitiveTypes,
         final SparkDataTable resultTable) throws Exception {
         final String params = paramDef(data, aPrimitiveTypes, resultTable.getID());
-        Object[][] t = ModelUtils.fromString(ConfigFactory.parseString(params).getString(ParameterConstants.PARAM_INPUT+"."+ParameterConstants.PARAM_TABLE_1));
         final String jobId =
             JobControler.startJob(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(), params);
 
