@@ -57,7 +57,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     static SettingsModelString createColumnNameModel() {
-        return new SettingsModelString("columnName", "Cluster");
+        return new SettingsModelString("columnName", "class");
     }
 
     /**
@@ -99,7 +99,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      */
     public static DataTableSpec createSpec(final DataTableSpec inputSpec) {
         //TK_TODO: Here we need to create the right spec
-        return createSpec(inputSpec, "cluster");
+        return createSpec(inputSpec, "class");
     }
 
     /**

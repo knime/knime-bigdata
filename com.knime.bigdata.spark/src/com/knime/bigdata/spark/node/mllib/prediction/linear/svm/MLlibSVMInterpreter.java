@@ -20,15 +20,19 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
+import java.util.List;
+
 import org.apache.spark.mllib.classification.SVMModel;
 
+import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearMethodsNodeModel;
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibSVMInterpreter implements SparkModelInterpreter<SVMModel> {
+public class MLlibSVMInterpreter implements SparkModelInterpreter<SparkModel<SVMModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,16 +69,20 @@ public class MLlibSVMInterpreter implements SparkModelInterpreter<SVMModel> {
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SVMModel model) {
-        return "Model weights: " + model.weights();
+    public String getSummary(final SparkModel<SVMModel> model) {
+        final SVMModel svmModel = model.getModel();
+        return "Model weights: " + svmModel.weights();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SVMModel model) {
-        return "Model weights: " + model.weights();
+    public String getDescription(final SparkModel<SVMModel> model) {
+        final SVMModel svmModel = model.getModel();
+        final List<String> columnNames = model.getLearningColumnNames();
+        final double[] weights = svmModel.weights().toArray();
+        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight:", columnNames, weights);
     }
 
 }

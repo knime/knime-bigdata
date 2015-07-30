@@ -68,14 +68,15 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
 
     private Class<? extends SGDJob> m_jobClassPath;
 
-    private SparkModelInterpreter<M> m_interpreter;
+    private SparkModelInterpreter<SparkModel<M>> m_interpreter;
 
     /**
      * Constructor.
      * @param jobClassPath the class path to the job class
      * @param interpreter the SparkModelInterpreter
      */
-    public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath, final SparkModelInterpreter<M> interpreter) {
+    public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath,
+        final SparkModelInterpreter<SparkModel<M>> interpreter) {
         super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
             new PortType[]{SparkModelPortObject.TYPE});
         m_jobClassPath = jobClassPath;
@@ -213,6 +214,45 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
         m_cols.loadSettingsFrom(settings);
         m_noOfIterations.loadSettingsFrom(settings);
         m_regularization.loadSettingsFrom(settings);
+    }
+
+    /**
+     * @param numericColName the title of the numeric column
+     * @param columnNames the column names
+     * @param weights the weight of each column
+     * @return a string of an HTML list with the columns and their weight
+     */
+    public static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
+        final double[] weights) {
+        final StringBuilder buf = new StringBuilder();
+//        for (String string : columnNames) {
+//            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
+//            buf.append("&nbsp;").append(weights[idx++]).append("<br>");
+//        }
+      buf.append("<table border ='0'>");
+      buf.append("<tr>");
+      buf.append("<th>").append("Column Name").append("</th>");
+      buf.append("<th>").append(numericColName).append("</th>");
+      buf.append("</tr>");
+      int idx = 0;
+      for (String colName : columnNames) {
+          if (idx % 2 == 0) {
+              buf.append("<tr>");
+          } else {
+              buf.append("<tr bgcolor='#EEEEEE'>");
+          }
+          buf.append("<th align='left'>").append(colName).append("</th>");
+          buf.append("<td align='right'>&nbsp;&nbsp;").append(weights[idx++]).append("</td>");
+          buf.append("</tr>");
+      }
+      buf.append("</table>");
+//        buf.append("<dl>");
+//        for (String string : columnNames) {
+//            buf.append("<dt>&nbsp;&nbsp;").append(string).append("</dt>");
+//            buf.append("<dd>").append(weights[idx++]).append("</dd>");
+//        }
+//        buf.append("</dl>");
+        return buf.toString();
     }
 
 }
