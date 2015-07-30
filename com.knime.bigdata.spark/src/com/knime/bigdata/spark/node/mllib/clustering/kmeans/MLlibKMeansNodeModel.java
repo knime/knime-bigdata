@@ -133,7 +133,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec("kmeans");
+        return new SparkModelPortObjectSpec(MLlibKMeansInterpreter.getInstance().getModelName());
     }
 
     /**

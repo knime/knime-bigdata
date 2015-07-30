@@ -74,7 +74,7 @@ public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<L
      */
     @Override
     public String getDescription(final LinearRegressionModel model) {
-        return "Model: " + model.weights();
+        return "Model weights: " + model.weights();
     }
 
 }
