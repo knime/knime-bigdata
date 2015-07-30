@@ -64,7 +64,7 @@ public class SparkModel <M extends Serializable> {
      */
     public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec origSpec, final String classColName, final List<String> featureColNames) {
-        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
+        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames), classColName);
     }
 
     /**
@@ -76,17 +76,7 @@ public class SparkModel <M extends Serializable> {
      */
     public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec origSpec, final String classColName, final String... featureColNames) {
-        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
-    }
-
-    /**
-     * @param model the model
-     * @param interperter the {@link SparkModelInterpreter}
-     * @param spec the DataTableSpec of the table used to learn the model
-     */
-    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
-        final DataTableSpec spec) {
-        this(model, interperter, spec, null);
+        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames), classColName);
     }
 
     /**

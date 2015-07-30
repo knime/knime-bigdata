@@ -202,6 +202,7 @@ public class SupervisedLearnerUtils {
      * @param aConfig configuration with column names and mapping table name
      * @param aJob
      * @param nominalFeatureInfo - will be filled with feature information as a side effect !
+     * TODO - refactor and write tests for this method !!!
      * @return number of classes
      */
     public static Long extractFeatureInfo(final Config aConfig, final KnimeSparkJob aJob,
@@ -209,9 +210,11 @@ public class SupervisedLearnerUtils {
         nominalFeatureInfo.clear();
         final Long numClasses;
         if (aConfig.hasPath(PARAM_MAPPING_TABLE)) {
+            //final int labelColIx = aConfig.getInt(PARAM_LABEL_INDEX);
             final List<String> names = aConfig.getStringList(SupervisedLearnerUtils.PARAM_COL_NAMES);
+            final String classColName = names.remove(names.size() - 1);
             final JavaRDD<Row> mappingRDD = aJob.getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE));
-            numClasses = ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, names.get(names.size() - 1));
+            numClasses = ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, classColName);
             nominalFeatureInfo.putAll(ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD));
         } else {
             //TK_TODO: Get the number of classes from the inputdata rdd

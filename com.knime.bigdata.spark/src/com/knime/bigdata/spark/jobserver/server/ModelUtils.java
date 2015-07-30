@@ -47,16 +47,16 @@ public class ModelUtils {
 
         final JavaRDD<? extends Object> predictions;
         if (aModel instanceof KMeansModel) {
-            LOGGER.fine("KMeansModel found for predcition");
+            LOGGER.fine("KMeansModel found for prediction");
             predictions = ((KMeansModel)aModel).predict(aNumericData);
         } else if (aModel instanceof DecisionTreeModel) {
-            LOGGER.fine("DecisionTreeModel found for predcition");
+            LOGGER.fine("DecisionTreeModel found for prediction");
             predictions = ((DecisionTreeModel)aModel).predict(aNumericData);
         } else if (aModel instanceof SVMModel) {
-            LOGGER.fine("SVMModel found for predcition");
+            LOGGER.fine("SVMModel found for prediction");
             predictions = ((SVMModel)aModel).predict(aNumericData);
         } else if (aModel instanceof LinearRegressionModel) {
-            LOGGER.fine("LinearRegressionModel found for predcition");
+            LOGGER.fine("LinearRegressionModel found for prediction");
             predictions = ((LinearRegressionModel)aModel).predict(aNumericData);
         } else {
             throw new GenericKnimeSparkException("ERROR: unknown model type: "+aModel.getClass());
