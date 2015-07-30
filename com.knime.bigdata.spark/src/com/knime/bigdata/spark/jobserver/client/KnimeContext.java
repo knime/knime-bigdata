@@ -2,15 +2,15 @@ package com.knime.bigdata.spark.jobserver.client;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.json.JsonArray;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -35,7 +35,7 @@ public class KnimeContext {
      */
     public static final String CONTEXTS_PATH = "/contexts";
 
-    private final static Logger LOGGER = Logger.getLogger(KnimeContext.class.getName());
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(KnimeContext.class.getName());
 
     /**
      * get the current spark context (name prefix can be specified in the application.conf file), the postfix is number
@@ -52,15 +52,22 @@ public class KnimeContext {
         final KNIMESparkContext defaultContext = new KNIMESparkContext();
         //query server for existing context and re-use if there is one
         //and it is (one of) the current user's context(s)
-        final JsonArray contexts = RestClient.toJSONArray(defaultContext, CONTEXTS_PATH);
-        if (contexts.size() > 0) {
-            for (int i = 0; i < contexts.size(); i++) {
-                if (contexts.getString(i).equals(KNIMEConfigContainer.CONTEXT_NAME)) {
-                    return defaultContext;
+        try {
+            final JsonArray contexts = RestClient.toJSONArray(defaultContext, CONTEXTS_PATH);
+            if (contexts.size() > 0) {
+                for (int i = 0; i < contexts.size(); i++) {
+                    if (contexts.getString(i).equals(KNIMEConfigContainer.CONTEXT_NAME)) {
+                        return defaultContext;
+                    }
                 }
             }
+            return createSparkContext();
+        } catch (ProcessingException e) {
+            final String msg = "Could not establish connection to Spark Jobserver. Exception: "
+                    + e.getMessage();
+            LOGGER.error(msg, e);
+            throw new GenericKnimeSparkException(msg);
         }
-        return createSparkContext();
 
     }
 
@@ -155,7 +162,7 @@ public class KnimeContext {
         // we don't care about the response as long as it is "OK"
         // if it were not OK, then an exception would be thrown by the handler
         // client.delete("/contexts/" + contextName, Status.Ok).run;
-        LOGGER.log(Level.INFO, "Shutting down context " + aContextContainer.getContextName());
+        LOGGER.info("Shutting down context " + aContextContainer.getContextName());
         Response response =
             RestClient.delete(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName());
         // we don't care about the response as long as it is "OK"
@@ -186,7 +193,7 @@ public class KnimeContext {
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
         } catch (GenericKnimeSparkException e) {
-            LOGGER.warning("Failed to remove reference to named RDD on server.");
+            LOGGER.warn("Failed to remove reference to named RDD on server.");
         }
     }
 
@@ -208,7 +215,7 @@ public class KnimeContext {
             // impossible with null execution context
             return Collections.emptySet();
         } catch (GenericKnimeSparkException e) {
-            LOGGER.warning("Failed to query server for set of named RDDs.");
+            LOGGER.warn("Failed to query server for set of named RDDs.");
             return Collections.emptySet();
         }
     }

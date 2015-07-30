@@ -59,7 +59,7 @@ public class SparkStringMapperApplyNodeFactory extends NodeFactory<SparkStringMa
      */
     @Override
     protected boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -67,7 +67,7 @@ public class SparkStringMapperApplyNodeFactory extends NodeFactory<SparkStringMa
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkStringMapperApplyNodeDialog();
+        return null;//new SparkStringMapperApplyNodeDialog();
     }
 
 }
