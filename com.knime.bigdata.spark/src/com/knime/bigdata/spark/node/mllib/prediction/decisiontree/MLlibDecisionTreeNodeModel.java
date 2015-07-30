@@ -178,7 +178,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec("DecisionTree");
+        return new SparkModelPortObjectSpec(MLlibDecisionTreeInterpreter.getInstance().getModelName());
     }
 
     /**

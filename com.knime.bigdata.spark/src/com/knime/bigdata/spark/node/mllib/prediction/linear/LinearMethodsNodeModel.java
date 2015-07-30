@@ -179,7 +179,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
      * @return
      */
     private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec("DecisionTree");
+        return new SparkModelPortObjectSpec(m_interpreter.getModelName());
     }
 
     /**
