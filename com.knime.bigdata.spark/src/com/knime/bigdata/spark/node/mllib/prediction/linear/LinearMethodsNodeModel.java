@@ -42,7 +42,7 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;

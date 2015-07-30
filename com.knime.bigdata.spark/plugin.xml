@@ -133,8 +133,8 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory"
-            id="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -163,8 +163,8 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
-            id="com.knime.bigdata.spark.node.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"

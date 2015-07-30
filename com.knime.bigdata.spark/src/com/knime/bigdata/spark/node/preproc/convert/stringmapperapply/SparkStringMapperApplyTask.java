@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapperapply;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapperapply;
 
 import org.knime.core.node.ExecutionContext;
 
