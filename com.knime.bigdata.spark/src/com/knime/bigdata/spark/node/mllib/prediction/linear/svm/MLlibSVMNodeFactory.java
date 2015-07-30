@@ -16,32 +16,37 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 21.07.2015 by koetter
+ *   Created on 30.07.2015 by koetter
  */
-package com.knime.bigdata.spark.port.model;
+package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
-import java.io.Serializable;
+import org.apache.spark.mllib.classification.SVMModel;
+
+import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.jobserver.jobs.SVMLearnerJob;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
+import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
- * @author Tobias Koetter, KNIME.com
- * @param <M> the model
+ *
+ * @author koetter
  */
-public interface SparkModelInterpreter <M extends Serializable> extends Serializable {
+public class MLlibSVMNodeFactory extends AbstractLinearMethodsNodeFactory<SVMModel> {
 
     /**
-     * @return the unique name of the model
+     * {@inheritDoc}
      */
-    public String getModelName();
+    @Override
+    protected SparkModelInterpreter<SVMModel> getModelInterpreter() {
+        return MLlibSVMInterpreter.getInstance();
+    }
 
     /**
-     * @param model the model
-     * @return the string description of the model. Can contain html formatting information
+     * {@inheritDoc}
      */
-    public String getDescription(M model);
+    @Override
+    protected Class<? extends SGDJob> getJobClassPath() {
+        return SVMLearnerJob.class;
+    }
 
-    /**
-     * @param model the model
-     * @return summary of the model to show in the port tooltip
-     */
-    public String getSummary(M model);
 }

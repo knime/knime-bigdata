@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Learner" icon="icon.png">
-    <name>MLlib Decision Tree</name>
+    <name>Spark Decision Tree</name>
 	<shortDescription>Decision tree induction performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
@@ -9,13 +9,14 @@
 			<a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html">Decision Tree</a> algorithm.
 			It outputs the original data and the decision tree predictions for the 
 			result preview as well as the learned model for later application.
-			
-			Please note that all data must be numeric, including the label column. 
-			Use the Spark Category To Number nodes to convert nominal values to
-			numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
-			
-			Use the Spark Predictor node to apply the learned model to unseen data.
-
+			<p>
+            Please note that all data must be numeric, including the label column. 
+            Use the Spark Category To Number nodes to convert nominal values to
+            numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
+            </p>
+            <p>
+            Use the Spark Predictor node to apply the learned model to unseen data.
+            </p>
 		</intro>
     	<option name="Max number of bins">
 			Maximum number of bins used for discretizing continuous features and 

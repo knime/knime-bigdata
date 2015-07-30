@@ -18,12 +18,12 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
@@ -31,6 +31,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
+import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -39,45 +40,46 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
- * @author knime
+ * @author koetter
+ * @param <M> the MLlib model
  */
-public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
+public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSparkNodeModel {
 
     private final SettingsModelString m_classCol = createClassColModel();
 
-    private final SettingsModelString m_qualityMeasure = createQualityMeasureModel();
-
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
-    private final SettingsModelInteger m_maxNumberOfBins = createMaxNumberBinsModel();
+    private final SettingsModelInteger m_noOfIterations = createNumberOfIterationsModel();
 
-    private final SettingsModelInteger m_maxDepth = createMaxDepthModel();
+    private final SettingsModelDouble m_regularization = createRegularizationModel();
+
+    private Class<? extends SGDJob> m_jobClassPath;
+
+    private SparkModelInterpreter<M> m_interpreter;
 
     /**
      * Constructor.
+     * @param jobClassPath the class path to the job class
+     * @param interpreter the SparkModelInterpreter
      */
-    MLlibDecisionTreeNodeModel() {
+    public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath, final SparkModelInterpreter<M> interpreter) {
         super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
             new PortType[]{SparkModelPortObject.TYPE});
-    }
-
-    /**
-     * @return the quality measure model
-     */
-    static SettingsModelString createQualityMeasureModel() {
-        return new SettingsModelString("qualityMeasure", ParameterConstants.VALUE_GINI);
+        m_jobClassPath = jobClassPath;
+        m_interpreter = interpreter;
     }
 
     /**
@@ -98,15 +100,15 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     /**
      * @return the maximum number of bins model
      */
-    static SettingsModelIntegerBounded createMaxNumberBinsModel() {
-        return new SettingsModelIntegerBounded("maxNumBins", 10, 1, Integer.MAX_VALUE);
+    static SettingsModelIntegerBounded createNumberOfIterationsModel() {
+        return new SettingsModelIntegerBounded("numberOfIteration", 100, 1, Integer.MAX_VALUE);
     }
 
     /**
-     * @return the maximum depth model
+     * @return the regularization model
      */
-    static SettingsModelIntegerBounded createMaxDepthModel() {
-        return new SettingsModelIntegerBounded("maxDepth", 25, 1, Integer.MAX_VALUE);
+    static SettingsModelDouble createRegularizationModel() {
+        return new SettingsModelDouble("regularization", 0);
     }
 
     /**
@@ -148,7 +150,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
         final SparkDataPortObject mapping = (SparkDataPortObject)inObjects[1];
-        exec.setMessage("Starting Decision Tree (SPARK) Learner");
+        exec.setMessage("Starting " + m_interpreter.getModelName() + " learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final String classColName = m_classCol.getStringValue();
@@ -162,15 +164,14 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
         }
-        final int maxDepth = m_maxDepth.getIntValue();
-        final int maxNoOfBins = m_maxNumberOfBins.getIntValue();
-        final String qualityMeasure = m_qualityMeasure.getStringValue();
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), featureColIdxs, featureColNames, classColName,
-            classColIdx, mapping == null ? null : mapping.getData(), maxDepth, maxNoOfBins, qualityMeasure);
-        final DecisionTreeModel treeModel = task.execute(exec);
-        final MLlibDecisionTreeInterpreter interpreter = MLlibDecisionTreeInterpreter.getInstance();
-        return new PortObject[]{new SparkModelPortObject<>(
-                new SparkModel<>(treeModel, interpreter, tableSpec, classColName, featureColNames))};
+        final double regularization = m_regularization.getDoubleValue();
+        final int noOfIterations = m_noOfIterations.getIntValue();
+        final SGDLearnerTask task = new SGDLearnerTask(data.getData(), featureColIdxs, featureColNames, classColName,
+            classColIdx, mapping == null ? null : mapping.getData(), noOfIterations, regularization, m_jobClassPath);
+        @SuppressWarnings("unchecked")
+        final M linearModel = (M)task.execute(exec);
+        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel,
+                m_interpreter, tableSpec, classColName, featureColNames))};
 
     }
 
@@ -188,9 +189,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_classCol.saveSettingsTo(settings);
         m_cols.saveSettingsTo(settings);
-        m_maxNumberOfBins.saveSettingsTo(settings);
-        m_maxDepth.saveSettingsTo(settings);
-        m_qualityMeasure.saveSettingsTo(settings);
+        m_noOfIterations.saveSettingsTo(settings);
+        m_regularization.saveSettingsTo(settings);
     }
 
     /**
@@ -200,9 +200,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.validateSettings(settings);
         m_cols.validateSettings(settings);
-        m_maxNumberOfBins.validateSettings(settings);
-        m_maxDepth.validateSettings(settings);
-        m_qualityMeasure.validateSettings(settings);
+        m_noOfIterations.validateSettings(settings);
+        m_regularization.validateSettings(settings);
     }
 
     /**
@@ -212,9 +211,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.loadSettingsFrom(settings);
         m_cols.loadSettingsFrom(settings);
-        m_maxNumberOfBins.loadSettingsFrom(settings);
-        m_maxDepth.loadSettingsFrom(settings);
-        m_qualityMeasure.loadSettingsFrom(settings);
+        m_noOfIterations.loadSettingsFrom(settings);
+        m_regularization.loadSettingsFrom(settings);
     }
 
 }

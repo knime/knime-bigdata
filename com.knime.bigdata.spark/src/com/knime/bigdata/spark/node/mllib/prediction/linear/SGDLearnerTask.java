@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -29,8 +29,7 @@ import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
-import com.knime.bigdata.spark.jobserver.jobs.SVMLearnerJob;
+import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -61,11 +60,11 @@ public class SGDLearnerTask implements Serializable {
 
     private final double m_regularizationValue;
 
-    private final String m_algoName;
+    private final String m_jobClassPath;
 
     SGDLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> aNumericColNames,
         final String classColName, final int classColIdx, final SparkRDD mappingRDD, final int aNumIterations,
-        final double aRegularizationValue, final String aAlgo) {
+        final double aRegularizationValue, final Class<? extends SGDJob> jobClass) {
         m_numIterations = aNumIterations;
         m_regularizationValue = aRegularizationValue;
         m_context = inputRDD.getContext();
@@ -76,21 +75,13 @@ public class SGDLearnerTask implements Serializable {
         m_colNames = allColNames.toArray(new String[allColNames.size()]);
         m_classColIdx = classColIdx;
         m_mappingTableName = mappingRDD == null ? null : mappingRDD.getID();
-        m_algoName = aAlgo;
+        m_jobClassPath = jobClass.getCanonicalName();
     }
 
     Serializable execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
-        final String jobId;
-
-        if (m_algoName.equalsIgnoreCase("svm")) {
-            jobId =  JobControler.startJob(m_context, SVMLearnerJob.class.getCanonicalName(), learnerParams);
-        } else {
-            jobId =  JobControler.startJob(m_context, LinearRegressionWithSGDJob.class.getCanonicalName(), learnerParams);
-        }
-
+        final String jobId = JobControler.startJob(m_context, m_jobClassPath, learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
-
         return (Serializable)result.getObjectResult();
     }
 

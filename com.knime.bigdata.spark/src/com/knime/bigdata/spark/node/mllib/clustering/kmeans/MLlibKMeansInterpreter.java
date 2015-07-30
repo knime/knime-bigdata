@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
+import java.util.Arrays;
+
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 
@@ -58,9 +60,39 @@ public class MLlibKMeansInterpreter implements SparkModelInterpreter<KMeansModel
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final KMeansModel model) {
+    public String getModelName() {
+        return "KMeans";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSummary(final KMeansModel model) {
         final Vector[] clusterCenters = model.clusterCenters();
         return "No of cluster centers: " + clusterCenters.length;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription(final KMeansModel model) {
+        final Vector[] clusterCenters = model.clusterCenters();
+        return "<b>No of cluster centers: </b>" + clusterCenters.length + "<br>"
+                + "<b>Cluster centers: </b>" + convertToString(clusterCenters);
+    }
+
+    private String convertToString(final Vector[] clusterCenters) {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("<ol>");
+        for (Vector vector : clusterCenters) {
+            buf.append("<li>");
+            buf.append(Arrays.toString(vector.toArray()));
+            buf.append("</li>");
+        }
+        buf.append("</ol>");
+        return buf.toString();
     }
 
 }

@@ -50,55 +50,53 @@ public class SparkModel <M extends Serializable> {
 
     private static final String MODEL_ENTRY = "Model";
     private final M m_model;
-    private final String m_type;
     private final DataTableSpec m_tableSpec;
     private final String m_classColumnName;
     private final SparkModelInterpreter<M> m_interpreter;
 
 
     /**
-     * @param type model type
      * @param model the model
+     * @param interperter the {@link SparkModelInterpreter}
      * @param origSpec the {@link DataTableSpec} of the original input table
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      * @param featureColNames the names of the feature columns
      */
-    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec origSpec, final String classColName, final List<String> featureColNames) {
-        this(type, model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
+        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
     }
 
     /**
-     * @param type model type
      * @param model the model
+     * @param interperter the {@link SparkModelInterpreter}
      * @param origSpec the {@link DataTableSpec} of the original input table
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      * @param featureColNames the names of the feature columns
      */
-    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec origSpec, final String classColName, final String... featureColNames) {
-        this(type, model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
+        this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames));
     }
 
     /**
-     * @param type model type
      * @param model the model
+     * @param interperter the {@link SparkModelInterpreter}
      * @param spec the DataTableSpec of the table used to learn the model
      */
-    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec spec) {
-        this(type, model, interperter, spec, null);
+        this(model, interperter, spec, null);
     }
 
     /**
-     * @param type model type
      * @param model the model
+     * @param interperter the {@link SparkModelInterpreter}
      * @param spec the DataTableSpec of the table used to learn the model including the class column name
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      */
-    public SparkModel(final String type, final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
         final DataTableSpec spec, final String classColName) {
-        m_type = type;
         m_model = model;
         m_interpreter = interperter;
         m_tableSpec = spec;
@@ -118,7 +116,6 @@ public class SparkModel <M extends Serializable> {
             throw new IOException("Invalid zip entry");
         }
         try (final ObjectInputStream os = new ObjectInputStream(in);){
-            m_type = (String)os.readObject();
             m_classColumnName = (String)os.readObject();
             m_model = (M)os.readObject();
             m_interpreter = (SparkModelInterpreter<M>)os.readObject();
@@ -139,7 +136,6 @@ public class SparkModel <M extends Serializable> {
         final NodeSettings config = new NodeSettings("bla");
         m_tableSpec.save(config);
         try (final ObjectOutputStream os = new ObjectOutputStream(out)){
-            os.writeObject(getType());
             os.writeObject(m_classColumnName);
             os.writeObject(getModel());
             os.writeObject(m_interpreter);
@@ -165,7 +161,7 @@ public class SparkModel <M extends Serializable> {
      * @return the type
      */
     public String getType() {
-        return m_type;
+        return m_interpreter.getModelName();
     }
 
     /**
@@ -281,5 +277,12 @@ public class SparkModel <M extends Serializable> {
     public static DataTableSpec createLearningSpec(final DataTableSpec origSpec, final String classColName,
         final String[] featureColNames) {
         return createLearningSpec(origSpec, classColName, Arrays.asList(featureColNames));
+    }
+
+    /**
+     * @return the summary of this model to use in the port tooltip
+     */
+    public String getSummary() {
+        return m_interpreter.getSummary(getModel());
     }
 }

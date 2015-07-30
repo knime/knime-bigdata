@@ -125,7 +125,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
-                "KMeans", clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
+                 clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
     }
 
 
