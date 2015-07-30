@@ -52,7 +52,7 @@ public class SparkModel <M extends Serializable> {
     private final M m_model;
     private final DataTableSpec m_tableSpec;
     private final String m_classColumnName;
-    private final SparkModelInterpreter<M> m_interpreter;
+    private final SparkModelInterpreter<SparkModel<M>> m_interpreter;
 
 
     /**
@@ -62,7 +62,7 @@ public class SparkModel <M extends Serializable> {
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      * @param featureColNames the names of the feature columns
      */
-    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec origSpec, final String classColName, final List<String> featureColNames) {
         this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames), classColName);
     }
@@ -74,7 +74,7 @@ public class SparkModel <M extends Serializable> {
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      * @param featureColNames the names of the feature columns
      */
-    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec origSpec, final String classColName, final String... featureColNames) {
         this(model, interperter, createLearningSpec(origSpec, classColName, featureColNames), classColName);
     }
@@ -85,7 +85,7 @@ public class SparkModel <M extends Serializable> {
      * @param spec the DataTableSpec of the table used to learn the model including the class column name
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      */
-    public SparkModel(final M model, final SparkModelInterpreter<M> interperter,
+    public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec spec, final String classColName) {
         m_model = model;
         m_interpreter = interperter;
@@ -108,7 +108,7 @@ public class SparkModel <M extends Serializable> {
         try (final ObjectInputStream os = new ObjectInputStream(in);){
             m_classColumnName = (String)os.readObject();
             m_model = (M)os.readObject();
-            m_interpreter = (SparkModelInterpreter<M>)os.readObject();
+            m_interpreter = (SparkModelInterpreter<SparkModel<M>>)os.readObject();
             NodeSettings config = (NodeSettings)os.readObject();
             m_tableSpec = DataTableSpec.load(config);
         } catch (ClassNotFoundException | InvalidSettingsException e) {
@@ -136,7 +136,7 @@ public class SparkModel <M extends Serializable> {
     /**
      * @return the interpreter
      */
-    public SparkModelInterpreter<M> getInterpreter() {
+    public SparkModelInterpreter<SparkModel<M>> getInterpreter() {
         return m_interpreter;
     }
 
@@ -273,6 +273,6 @@ public class SparkModel <M extends Serializable> {
      * @return the summary of this model to use in the port tooltip
      */
     public String getSummary() {
-        return m_interpreter.getSummary(getModel());
+        return m_interpreter.getSummary(this);
     }
 }

@@ -25,6 +25,7 @@ import org.apache.spark.mllib.regression.LinearRegressionModel;
 import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
@@ -37,7 +38,7 @@ public class MLlibLinearRegressionNodeFactory extends AbstractLinearMethodsNodeF
      * {@inheritDoc}
      */
     @Override
-    protected SparkModelInterpreter<LinearRegressionModel> getModelInterpreter() {
+    protected SparkModelInterpreter<SparkModel<LinearRegressionModel>> getModelInterpreter() {
         return MLlibLinearRegressionInterpreter.getInstance();
     }
 

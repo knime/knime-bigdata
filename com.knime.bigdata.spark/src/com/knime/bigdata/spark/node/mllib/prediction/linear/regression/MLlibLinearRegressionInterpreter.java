@@ -20,15 +20,19 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.linear.regression;
 
+import java.util.List;
+
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 
+import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearMethodsNodeModel;
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<LinearRegressionModel> {
+public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<SparkModel<LinearRegressionModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,16 +69,20 @@ public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<L
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final LinearRegressionModel model) {
-        return "Model weights: " + model.weights();
+    public String getSummary(final SparkModel<LinearRegressionModel> model) {
+        final LinearRegressionModel regressionModel = model.getModel();
+        return "Model weights: " + regressionModel.weights();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final LinearRegressionModel model) {
-        return "Model weights: " + model.weights();
+    public String getDescription(final SparkModel<LinearRegressionModel> model) {
+        final LinearRegressionModel regressionModel = model.getModel();
+        List<String> columnNames = model.getLearningColumnNames();
+        final double[] weights = regressionModel.weights().toArray();
+        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight", columnNames, weights);
     }
 
 }

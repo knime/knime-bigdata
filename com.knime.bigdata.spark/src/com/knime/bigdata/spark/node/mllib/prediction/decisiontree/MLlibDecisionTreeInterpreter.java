@@ -22,13 +22,14 @@ package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<DecisionTreeModel> {
+public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<SparkModel<DecisionTreeModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,16 +66,26 @@ public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<Decis
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final DecisionTreeModel model) {
-        return "Tree depth: " + model.depth();
+    public String getSummary(final SparkModel<DecisionTreeModel> model) {
+        final DecisionTreeModel treeModel = model.getModel();
+        return "Tree depth: " + treeModel.depth() + " Number of nodes: " + treeModel.numNodes();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final DecisionTreeModel model) {
-        return "Tree depth: " + model.depth();
+    public String getDescription(final SparkModel<DecisionTreeModel> model) {
+        final DecisionTreeModel treeModel = model.getModel();
+        String debugString = treeModel.toDebugString();
+        //remove first line
+        debugString = debugString.replaceFirst(".*\n", "");
+        debugString = debugString.replaceAll("\\n", "<br>");
+        debugString = debugString.replaceAll("\\s", "&nbsp;");
+        final String desc = "Tree depth: " + treeModel.depth()
+                + " Number of nodes: " + treeModel.numNodes()
+                + "<br>" + debugString;
+        return desc;
     }
 
 }

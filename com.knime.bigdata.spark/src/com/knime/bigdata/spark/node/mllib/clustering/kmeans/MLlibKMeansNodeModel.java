@@ -102,7 +102,9 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         if (includedCols == null || includedCols.length < 1) {
             throw new InvalidSettingsException("No input columns available");
         }
-        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(tableSpec), createMLSpec()};
+        final SparkDataPortObjectSpec asignedSpec =
+                new SparkDataPortObjectSpec(spec.getContext(), MLlibClusterAssignerNodeModel.createSpec(tableSpec));
+        return new PortObjectSpec[]{asignedSpec, createMLSpec()};
     }
 
     /**

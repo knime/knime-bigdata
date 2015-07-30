@@ -26,7 +26,7 @@ import java.io.Serializable;
  * @author Tobias Koetter, KNIME.com
  * @param <M> the model
  */
-public interface SparkModelInterpreter <M extends Serializable> extends Serializable {
+public interface SparkModelInterpreter <M extends SparkModel<? extends Serializable>> extends Serializable {
 
     /**
      * @return the unique name of the model

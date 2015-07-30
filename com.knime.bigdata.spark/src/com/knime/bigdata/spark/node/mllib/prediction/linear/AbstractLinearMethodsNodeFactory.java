@@ -27,6 +27,7 @@ import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
@@ -48,7 +49,7 @@ extends NodeFactory<LinearMethodsNodeModel<M>> {
     /**
      * @return the SparkModelInterpreter
      */
-    protected abstract SparkModelInterpreter<M> getModelInterpreter();
+    protected abstract SparkModelInterpreter<SparkModel<M>> getModelInterpreter();
 
     /**
      * @return the SGDJob class

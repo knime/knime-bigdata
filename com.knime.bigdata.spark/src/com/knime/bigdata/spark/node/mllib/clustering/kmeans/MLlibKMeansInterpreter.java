@@ -20,18 +20,19 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 
+import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
  *
  * @author koetter
  */
-public class MLlibKMeansInterpreter implements SparkModelInterpreter<KMeansModel> {
+public class MLlibKMeansInterpreter implements SparkModelInterpreter<SparkModel<KMeansModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -68,8 +69,8 @@ public class MLlibKMeansInterpreter implements SparkModelInterpreter<KMeansModel
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final KMeansModel model) {
-        final Vector[] clusterCenters = model.clusterCenters();
+    public String getSummary(final SparkModel<KMeansModel> model) {
+        final Vector[] clusterCenters = model.getModel().clusterCenters();
         return "No of cluster centers: " + clusterCenters.length;
     }
 
@@ -77,22 +78,33 @@ public class MLlibKMeansInterpreter implements SparkModelInterpreter<KMeansModel
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final KMeansModel model) {
-        final Vector[] clusterCenters = model.clusterCenters();
-        return "<b>No of cluster centers: </b>" + clusterCenters.length + "<br>"
-                + "<b>Cluster centers: </b>" + convertToString(clusterCenters);
-    }
-
-    private String convertToString(final Vector[] clusterCenters) {
+    public String getDescription(final SparkModel<KMeansModel> model) {
+        final Vector[] clusterCenters = model.getModel().clusterCenters();
         final StringBuilder buf = new StringBuilder();
-        buf.append("<ol>");
-        for (Vector vector : clusterCenters) {
-            buf.append("<li>");
-            buf.append(Arrays.toString(vector.toArray()));
-            buf.append("</li>");
+//        buf.append("<b>No of cluster centers: </b>").append(clusterCenters.length).append("<br>");
+        List<String> columnNames = model.getLearningColumnNames();
+        buf.append("<table border=0>");
+        buf.append("<tr>");
+        buf.append("<th>Cluster</th>");
+        for (String colName : columnNames) {
+            buf.append("<th>").append(colName).append("</th>");
         }
-        buf.append("</ol>");
+        buf.append("</tr>");
+        int idx = 1;
+        for (Vector center : clusterCenters) {
+            if (idx % 2 == 0) {
+                buf.append("<tr bgcolor='#EEEEEE'>");
+            } else {
+                buf.append("<tr>");
+            }
+            buf.append("<th>").append(idx++).append("</th>");
+            double[] dims = center.toArray();
+            for (double dim : dims) {
+                buf.append("<td>").append(dim).append("</td>");
+            }
+            buf.append("</tr>");
+        }
+        buf.append("</table>");
         return buf.toString();
     }
-
 }
