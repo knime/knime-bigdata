@@ -29,7 +29,7 @@ import org.knime.core.node.ExecutionContext;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.KMeansPredictor;
+import com.knime.bigdata.spark.jobserver.jobs.Predictor;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -62,7 +62,7 @@ public class AssignTask implements Serializable {
     void execute(final ExecutionContext exec, final SparkDataTable inputRDD, final KMeansModel model,
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
-        final String jobId = JobControler.startJob(inputRDD.getContext(), KMeansPredictor.class.getCanonicalName(),
+        final String jobId = JobControler.startJob(inputRDD.getContext(), Predictor.class.getCanonicalName(),
             predictorKMeansParams);
 
         assert (JobControler.waitForJob(inputRDD.getContext(), jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
