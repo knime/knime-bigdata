@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
 
 import java.util.Arrays;
 import java.util.Map;

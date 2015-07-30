@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapperapply;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapperapply;
 
 import java.util.Map;
 
@@ -36,7 +36,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;

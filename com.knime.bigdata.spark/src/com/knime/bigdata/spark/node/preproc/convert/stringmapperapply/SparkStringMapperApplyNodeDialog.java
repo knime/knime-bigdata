@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapperapply;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapperapply;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
