@@ -50,13 +50,6 @@ public class LabeledDataInfo {
   }
 
   /**
-   * @return number of classes (aka class labels)
-   */
-  public int getNumberClasses() {
-    return m_labelToIntMapping.size();
-  }
-
-  /**
    * @return mapping of String (class) label to integer class
    */
   public NominalValueMapping getClassLabelToIntMapping() {
