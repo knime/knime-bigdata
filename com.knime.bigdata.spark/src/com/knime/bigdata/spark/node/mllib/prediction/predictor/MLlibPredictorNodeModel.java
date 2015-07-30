@@ -23,7 +23,7 @@ package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -47,6 +47,8 @@ import com.knime.bigdata.spark.util.SparkIDs;
  */
 public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
 
+    private final SettingsModelString m_colName = createColumnNameModel();
+
     /**Constructor.*/
     public MLlibPredictorNodeModel() {
         super(new PortType[]{SparkModelPortObject.TYPE, SparkDataPortObject.TYPE},
@@ -57,7 +59,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     static SettingsModelString createColumnNameModel() {
-        return new SettingsModelString("columnName", "class");
+        return new SettingsModelString("columnName", "Prediction");
     }
 
     /**
@@ -84,7 +86,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
         exec.setMessage("Starting (SPARK) predictor");
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
-        final DataTableSpec resultSpec = MLlibPredictorNodeModel.createSpec(inputSpec);
+        final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final PredictionTask task = new PredictionTask();
@@ -97,9 +99,9 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      * @param inputSpec the input data spec
      * @return the result spec
      */
-    public static DataTableSpec createSpec(final DataTableSpec inputSpec) {
+    public DataTableSpec createSpec(final DataTableSpec inputSpec) {
         //TK_TODO: Here we need to create the right spec
-        return createSpec(inputSpec, "class");
+        return createSpec(inputSpec, m_colName.getStringValue());
     }
 
     /**
@@ -111,7 +113,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
     public static DataTableSpec createSpec(final DataTableSpec inputSpec, final String resultColName) {
         //TK_TODO: return Cluster instead of cluster
         final String clusterColName = DataTableSpec.getUniqueColumnName(inputSpec, resultColName);
-        final DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, DoubleCell.TYPE);
         final DataColumnSpec labelColSpec = creator.createSpec();
         return new DataTableSpec(inputSpec, new DataTableSpec(labelColSpec));
     }
@@ -121,7 +123,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        // nothing to do
+        m_colName.saveSettingsTo(settings);
     }
 
     /**
@@ -129,7 +131,7 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // nothing to do
+        m_colName.validateSettings(settings);
     }
 
     /**
@@ -137,6 +139,6 @@ public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // nothing to do
+        m_colName.loadSettingsFrom(settings);
     }
 }

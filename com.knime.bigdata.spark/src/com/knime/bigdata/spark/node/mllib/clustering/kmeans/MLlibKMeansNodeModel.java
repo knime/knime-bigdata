@@ -103,7 +103,8 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
             throw new InvalidSettingsException("No input columns available");
         }
         final SparkDataPortObjectSpec asignedSpec =
-                new SparkDataPortObjectSpec(spec.getContext(), MLlibClusterAssignerNodeModel.createSpec(tableSpec));
+                new SparkDataPortObjectSpec(spec.getContext(),
+                    MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster"));
         return new PortObjectSpec[]{asignedSpec, createMLSpec()};
     }
 
@@ -119,7 +120,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
         final int[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
+        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
