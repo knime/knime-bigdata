@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -70,9 +71,11 @@ import org.knime.core.node.config.Config;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.util.Pair;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -109,8 +112,29 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
+    protected final PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
+        return configureInternal(inSpecs);
+    }
+
+    /**
+     *  @param inSpecs The input data table specs. Items of the array could be null if no spec is available from the
+     *            corresponding input port (i.e. not connected or upstream node does not produce an output spec). If a
+     *            port is of type {@link BufferedDataTable#TYPE} and no spec is available the framework will replace
+     *            null by an empty {@link DataTableSpec} (no columns) unless the port is marked as optional as per
+     *            constructor.
+     * @return The output objects specs or null.
+     * @throws InvalidSettingsException If this node can't be configured.
+     * @see #configure(PortObjectSpec[])
+     */
+    protected abstract PortObjectSpec[] configureInternal(PortObjectSpec[] inSpecs)  throws InvalidSettingsException;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        //SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
+        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
         Set<String> listNamedRDDs = null;
         KNIMESparkContext context = null;
         for (final PortObject portObject : inData) {
@@ -126,8 +150,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                     listNamedRDDs = KnimeContext.listNamedRDDs(context);
                 }
                 if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
-                    throw new IllegalStateException(
+                    //wait a bit and try again
+                    Thread.sleep(1000);
+                    listNamedRDDs = KnimeContext.listNamedRDDs(context);
+                    if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
+                        throw new IllegalStateException(
                             "Incoming Spark data object no longer exists. Please reset all preceding Spark nodes.");
+                    }
                 }
             }
         }
