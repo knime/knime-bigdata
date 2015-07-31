@@ -365,8 +365,8 @@ final public class SparkJobCompiler {
             }
             final String root = SparkPlugin.getDefault().getPluginRootPath();
             classPathFiles[orig.length] = new File(root+"/lib/jobServerUtilsApi.jar");
-            classPathFiles[orig.length+1] = new File(root+"/bin/");
-            classPathFiles[orig.length+2] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
+            classPathFiles[orig.length+1] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
+            classPathFiles[orig.length+2] = new File(root+"/resources/knimeJobs.jar");
             compiler.setClasspaths(classPathFiles);
 
             compiler.setSources(sourceContainer);
