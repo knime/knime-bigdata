@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
 
 import org.knime.core.node.ExecutionContext;
 
@@ -47,12 +47,14 @@ public class ValueConverterTask {
     private final MappingType m_mappingType;
 
     private final Integer[] m_includeColIdxs;
+
     private final String[] m_includeColNames;
 
     private final KNIMESparkContext m_context;
 
     /**
      * constructor - simply stores parameters
+     *
      * @param inputRDD input RDD
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param aIncludedColsNames
@@ -60,8 +62,8 @@ public class ValueConverterTask {
      * @param aOutputRDD - table identifier (output data)
      * @param aOutputMappingRDD
      */
-    public ValueConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs, final String[] aIncludedColsNames, final MappingType aMappingType,
-        final String aOutputRDD, final String aOutputMappingRDD) {
+    public ValueConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs, final String[] aIncludedColsNames,
+        final MappingType aMappingType, final String aOutputRDD, final String aOutputMappingRDD) {
 
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
@@ -85,22 +87,38 @@ public class ValueConverterTask {
      */
     public MappedRDDContainer execute(final ExecutionContext exec) throws Exception {
         final String params = paramDef();
-        final String jobId =
-                JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
+        final String jobId = JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
         return (MappedRDDContainer)result.getObjectResult();
     }
 
     private String paramDef() {
+        return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName, m_outputTableName,
+            m_outputMappingTableName);
+    }
+
+    /**
+     * (for better unit testing)
+     * @param includeColIdxs
+     * @param includeColNames
+     * @param mappingType
+     * @param inputTableName
+     * @param outputTableName
+     * @param outputMappingTableName
+     * @return Json String with parameter settings
+     */
+    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames, final String mappingType,
+        final String inputTableName, final String outputTableName, final String outputMappingTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_includeColIdxs),
-                ParameterConstants.PARAM_COL_IDXS+ParameterConstants.PARAM_STRING, JsonUtils.toJsonArray((Object[])m_includeColNames),
-                ParameterConstants.PARAM_STRING, m_mappingType.toString(), ParameterConstants.PARAM_TABLE_1, m_inputTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName,
-                ParameterConstants.PARAM_TABLE_2, m_outputMappingTableName}});
+            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),
+                ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
+                JsonUtils.toJsonArray((Object[])includeColNames), ParameterConstants.PARAM_STRING,
+                mappingType, ParameterConstants.PARAM_TABLE_1, inputTableName},
+            ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, outputTableName, ParameterConstants.PARAM_TABLE_2,
+                outputMappingTableName}});
     }
 
 }
-

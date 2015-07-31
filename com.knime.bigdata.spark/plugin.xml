@@ -133,8 +133,8 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory"
-            id="com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -151,14 +151,32 @@
       <node
             category-path="/labs/spark/io"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory">
       </node>
       <node
             category-path="/labs/spark/io"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">
       </node>
     </extension>
    <extension

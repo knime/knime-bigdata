@@ -1,8 +1,6 @@
 package com.knime.bigdata.spark.jobserver.client;
 
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -68,23 +66,26 @@ public class JsonUtils {
      * @return json string representing an array
      */
     public static String toJsonArray(final Object... aElems) {
-        final StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < aElems.length; i++) {
-            if (i > 0) {
-                sb.append(",");
-            }
-            if (aElems[i] == null) {
-                sb.append("null");
-            } else if (!(aElems[i] instanceof Object[])) {
-                sb.append("\"" + aElems[i].toString() + "\"");
-            } else {
-                sb.append("{");
-                sb.append(asJson(aElems[i]));
-                sb.append("}");
-            }
+        final StringBuilder sb = new StringBuilder();
+        if (aElems != null) {
+            sb.append("[");
+            for (int i = 0; i < aElems.length; i++) {
+                if (i > 0) {
+                    sb.append(",");
+                }
+                if (aElems[i] == null) {
+                    sb.append("null");
+                } else if (!(aElems[i] instanceof Object[])) {
+                    sb.append("\"" + aElems[i].toString() + "\"");
+                } else {
+                    sb.append("{");
+                    sb.append(asJson(aElems[i]));
+                    sb.append("}");
+                }
 
+            }
+            sb.append("]");
         }
-        sb.append("]");
         return sb.toString();
     }
 
@@ -94,7 +95,6 @@ public class JsonUtils {
      * @note String are URLEncoded (UTF-8) and must be decoded again!
      * @param aElems
      * @return json string representing an array
-     */
     public static String toJson2DimArray(final Object[][] aElems) {
         final StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < aElems.length; i++) {
@@ -123,6 +123,7 @@ public class JsonUtils {
         sb.append("]");
         return sb.toString();
     }
+     */
 
     /**
      * convert the given string representation of a Json array to a JsonArray object

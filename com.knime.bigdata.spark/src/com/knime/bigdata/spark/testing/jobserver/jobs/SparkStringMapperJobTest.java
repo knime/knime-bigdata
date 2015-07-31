@@ -16,6 +16,7 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.preproc.convert.stringmapper.ValueConverterTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -29,7 +30,8 @@ import com.typesafe.config.ConfigFactory;
 public class SparkStringMapperJobTest {
 
     static String getInputOutputParamPair(final String aInputDataPath, final String aQualityMeasure,
-        final Integer[] aColIdxes, final String aOutputDataPath1, final String aOutputDataPath2) {
+        final Integer[] aColIdxes, final String[] aColNames, final String aOutputDataPath1,
+        final String aOutputDataPath2) {
         StringBuilder params = new StringBuilder("");
         params.append("   \"").append(ParameterConstants.PARAM_INPUT).append("\" {\n");
 
@@ -44,6 +46,10 @@ public class SparkStringMapperJobTest {
         if (aColIdxes != null) {
             params.append("         \"").append(ParameterConstants.PARAM_COL_IDXS).append("\": ")
                 .append(JsonUtils.toJsonArray((Object[])aColIdxes)).append(",\n");
+        }
+        if (aColNames != null) {
+            params.append("         \"").append(ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING)
+                .append("\": ").append(JsonUtils.toJsonArray((Object[])aColNames)).append(",\n");
         }
         params.append("    }\n");
         params.append("    \"").append(ParameterConstants.PARAM_OUTPUT).append("\" {\n");
@@ -60,45 +66,49 @@ public class SparkStringMapperJobTest {
         return params.toString();
     }
 
-    private static String getParams(final String aInputDataPath, final String aQualityMeasure, final Integer[] aColIdxes,
-        final String aOutputDataPath1, final String aOutputDataPath2) {
-        StringBuilder params = new StringBuilder("{\n");
-        params.append(getInputOutputParamPair(aInputDataPath, aQualityMeasure, aColIdxes, aOutputDataPath1,
-            aOutputDataPath2));
-        params.append("}");
-        return params.toString();
+    private static String getParams(final String aInputDataPath, final String aType, final Integer[] aColIdxes,
+        final String[] aColNames, final String aOutputDataPath1, final String aOutputDataPath2) {
+        return ValueConverterTask.paramDef(aColIdxes, aColNames, aType, aInputDataPath, aOutputDataPath1,
+            aOutputDataPath2);
     }
 
     @Test
     public void jobValidationShouldCheckMissingInputDataParameter() throws Throwable {
-        String params = getParams(null, MappingType.COLUMN.toString(),new Integer[] {1,5,2,7}, "tab1", "tab2");
+        String params =
+            getParams(null, MappingType.COLUMN.toString(), new Integer[]{1, 5, 2, 7}, new String[]{"a", "b", "c", "d"},
+                "tab1", "tab2");
         myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1, "Input");
     }
 
     @Test
-    public void jobValidationShouldCheckMissingQualityMeasureParameter() throws Throwable {
-        String params = getParams("xx", null, new Integer[] {9}, "tab1", "tab2");
+    public void jobValidationShouldCheckMissingMappingTypeParameter() throws Throwable {
+        String params = getParams("xx", null, new Integer[]{9}, new String[]{"a", "b", "c", "d"}, "tab1", "tab2");
         myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING, "Input");
     }
 
     @Test
-    public void jobValidationShouldCheckIncorrectQualityMeasureParameter() throws Throwable {
-        String params = getParams("xx", "notproper", new Integer[] {99}, "tab1", "tab2");
+    public void jobValidationShouldCheckIncorrectMappingTypeParameter() throws Throwable {
+        String params =
+            getParams("xx", "notproper", new Integer[]{99}, new String[]{"a", "b", "c", "d"}, "tab1", "tab2");
         String msg =
-                "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING
-                    + "' has an invalid value.";
-        myCheck(params,msg);
+            "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING
+                + "' has an invalid value.";
+        myCheck(params, msg);
     }
 
     @Test
     public void jobValidationShouldCheckMissingColSelectionParameter() throws Throwable {
-        String params = getParams("tab1", MappingType.COLUMN.toString(), null , "tab1", "tab2");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS, "Input");
+        String params =
+            getParams("tab1", MappingType.COLUMN.toString(), null, new String[]{"a", "b", "c", "d"}, "tab1", "tab2");
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+            + "' is not of expected type 'integer list'.");
     }
 
     @Test
     public void jobValidationShouldCheckIncorrectColSelectionParameter() throws Throwable {
-        String params = getParams("tab1", MappingType.COLUMN.toString(), new Integer[] {}, "tab1", "tab2");
+        String params =
+            getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{}, new String[]{"a", "b", "c", "d"}, "tab1",
+                "tab2");
         String msg =
             "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
                 + "' is empty.";
@@ -108,14 +118,18 @@ public class SparkStringMapperJobTest {
 
     @Test
     public void jobValidationShouldCheckMissingOuputParameter1() throws Throwable {
-        String params = getParams("tab1", MappingType.COLUMN.toString(), new Integer[] {1,5,2}, null, "tab2");
+        String params =
+            getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"},
+                null, "tab2");
         myCheck(params, ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1, "Output");
 
     }
 
     @Test
     public void jobValidationShouldCheckMissingOuputParameter2() throws Throwable {
-        String params = getParams("tab1", MappingType.COLUMN.toString(), new Integer[] {1,5,2}, "tab1", null);
+        String params =
+            getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"},
+                "tab1", null);
         myCheck(params, ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_2, "Output");
 
     }
@@ -136,7 +150,9 @@ public class SparkStringMapperJobTest {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
         try {
 
-            String params = getParams("tab1", MappingType.COLUMN.toString(), new Integer[] {1,5,2}, "tab1", "tab2");
+            String params =
+                getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{1, 5, 2}, new String[]{"a", "b", "c"},
+                    "tab1", "tab2");
 
             String jobId =
                 JobControler.startJob(contextName, ConvertNominalValuesJob.class.getCanonicalName(), params.toString());

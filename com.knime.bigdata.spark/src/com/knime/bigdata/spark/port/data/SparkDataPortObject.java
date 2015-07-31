@@ -194,7 +194,7 @@ public class SparkDataPortObject implements PortObject {
                     /** {@inheritDoc} */
                     @Override
                     protected DataTable doInBackgroundWithContext() throws Exception {
-                        return SparkDataTableCreator.getDataTable(getData(), value.get());
+                        return SparkDataTableCreator.getDataTable(null, getData(), value.get());
                     }
                     /** {@inheritDoc} */
                     @Override

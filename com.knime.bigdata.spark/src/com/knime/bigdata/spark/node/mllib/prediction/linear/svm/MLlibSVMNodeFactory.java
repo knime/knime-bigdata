@@ -16,58 +16,38 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 26.06.2015 by koetter
+ *   Created on 30.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.writer;
+package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.apache.spark.mllib.classification.SVMModel;
+
+import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.jobserver.jobs.SVMLearnerJob;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 
 /**
  *
  * @author koetter
  */
-public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
+public class MLlibSVMNodeFactory extends AbstractLinearMethodsNodeFactory<SVMModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Spark2TableNodeModel createNodeModel() {
-        return new Spark2TableNodeModel();
+    protected SparkModelInterpreter<SparkModel<SVMModel>> getModelInterpreter() {
+        return MLlibSVMInterpreter.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<Spark2TableNodeModel> createNodeView(final int viewIndex, final Spark2TableNodeModel nodeModel) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new Spark2TableNodeDialog();
+    protected Class<? extends SGDJob> getJobClassPath() {
+        return SVMLearnerJob.class;
     }
 
 }

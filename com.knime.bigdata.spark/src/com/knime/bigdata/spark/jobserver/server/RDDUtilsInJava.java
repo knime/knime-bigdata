@@ -36,11 +36,28 @@ public class RDDUtilsInJava {
      * @param aInputRdd Row RDD to be processed
      * @param aColumnIds array of indices to be converted
      * @param aMappingType indicates how values are to be mapped
+     * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
     public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType) {
+        final int[] aColumnIds, final MappingType aMappingType)  {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
+
+        final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
+        return new MappedRDDContainer(rddWithConvertedValues, mappings);
+    }
+
+    /**
+     * apply the given mapping to the given input RDD
+     *
+     * @param aInputRdd
+     * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
+     * @param aMappings
+     * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
+     * @return JavaRDD<Row> with converted data (columns are appended)
+     */
+    public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
+        final NominalValueMapping aMappings) {
 
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
@@ -49,24 +66,27 @@ public class RDDUtilsInJava {
             public Row call(final Row row) {
                 RowBuilder builder = RowBuilder.fromRow(row);
                 for (int ix : aColumnIds) {
-                    Integer labelOrIndex = mappings.getNumberForValue(ix, row.getString(ix));
-                    if (aMappingType == MappingType.BINARY) {
-                        int numValues = mappings.getNumberOfValues(ix);
-                        for (int i = 0; i < numValues; i++) {
-                            if (labelOrIndex == i) {
-                                builder.add(1.0d);
-                            } else {
-                                builder.add(0.0d);
+                    //ignore columns that have no mapping
+                    if (aMappings.hasMappingForColumn(ix)) {
+                        Integer labelOrIndex = aMappings.getNumberForValue(ix, row.getString(ix));
+                        if (aMappings.getType() == MappingType.BINARY) {
+                            int numValues = aMappings.getNumberOfValues(ix);
+                            for (int i = 0; i < numValues; i++) {
+                                if (labelOrIndex == i) {
+                                    builder.add(1.0d);
+                                } else {
+                                    builder.add(0.0d);
+                                }
                             }
+                        } else {
+                            builder.add(labelOrIndex.doubleValue());
                         }
-                    } else {
-                        builder.add(labelOrIndex.doubleValue());
                     }
                 }
                 return builder.build();
             }
         });
-        return new MappedRDDContainer(rddWithConvertedValues, mappings);
+        return rddWithConvertedValues;
     }
 
     /**
@@ -82,16 +102,13 @@ public class RDDUtilsInJava {
 
         switch (aMappingType) {
             case GLOBAL: {
-                return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             case COLUMN: {
-                if (aNominalColumnIndices.length < 2) {
-                    return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices);
-                }
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             case BINARY: {
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices);
+                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
             }
             default: {
                 throw new UnsupportedOperationException("ERROR: unknown mapping type !");
@@ -100,7 +117,7 @@ public class RDDUtilsInJava {
     }
 
     private static NominalValueMapping toLabelMappingGlobalMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices) {
+        final int[] aNominalColumnIndices, final MappingType aMappingType) {
 
         Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
 
@@ -126,11 +143,11 @@ public class RDDUtilsInJava {
             }
             labelMapping.put(entry.getKey(), mapping);
         }
-        return NominalValueMappingFactory.createColumnMapping(labelMapping);
+        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
     }
 
     private static NominalValueMapping toLabelMappingColumnMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices) {
+        final int[] aNominalColumnIndices, final MappingType aMappingType) {
 
         Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
 
@@ -145,7 +162,7 @@ public class RDDUtilsInJava {
             labelMapping.put(entry.getKey(), mapping);
         }
 
-        return NominalValueMappingFactory.createColumnMapping(labelMapping);
+        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
     }
 
     /**
@@ -213,15 +230,17 @@ public class RDDUtilsInJava {
     private static JavaRDD<LabeledPoint>
         toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex,
             @Nullable final NominalValueMapping labelMapping) {
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length()-1);
+
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public LabeledPoint call(final Row row) {
-                double[] convertedValues = new double[row.length() - 1];
                 int insertionIndex = 0;
+                final double[] convertedValues = new double[numFeatures];
                 for (int idx : aColumnIndices) {
-                    if (idx != labelColumnIndex) {
+                    if (idx != labelColumnIndex && idx < row.length()) {
                         convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
                         insertionIndex += 1;
                     }

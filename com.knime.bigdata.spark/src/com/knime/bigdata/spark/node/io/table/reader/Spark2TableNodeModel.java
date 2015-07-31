@@ -18,7 +18,7 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.writer;
+package com.knime.bigdata.spark.node.io.table.reader;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.node.BufferedDataTable;
@@ -62,7 +62,8 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
      * @return fetch size model
      */
     static SettingsModelIntegerBounded createFetchSizeModel() {
-        SettingsModelIntegerBounded model = new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
+        final SettingsModelIntegerBounded model =
+                new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
         model.setEnabled(false);
         return model;
     }
@@ -71,7 +72,7 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
@@ -91,9 +92,9 @@ public class Spark2TableNodeModel extends AbstractSparkNodeModel {
         final SparkDataPortObject dataObject = (SparkDataPortObject)inData[0];
         final DataTable dataTable;
         if (m_fetchAll.getBooleanValue()) {
-            dataTable = SparkDataTableCreator.getDataTable(dataObject.getData());
+            dataTable = SparkDataTableCreator.getDataTable(exec, dataObject.getData());
         } else {
-            dataTable = SparkDataTableCreator.getDataTable(dataObject.getData(), m_fetchSize.getIntValue());
+            dataTable = SparkDataTableCreator.getDataTable(exec, dataObject.getData(), m_fetchSize.getIntValue());
         }
         exec.setMessage("Create KNIME data table...");
         final BufferedDataTable result = exec.createBufferedDataTable(dataTable, exec);

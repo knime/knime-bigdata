@@ -2,20 +2,17 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Predictor" icon="icon.png">
     <name>Spark Predictor</name>
-    <shortDescription>Predicts input data based on a previously learned model.</shortDescription>
+    <shortDescription>Predicts input data based on a previously learned Spark MLlib model (e.g. decision tree).</shortDescription>
     <fullDescription>
         <intro>
-            This node assigns new data to an existing set of prototypes, which
-            are obtained e.g. by a k-means clustering.
-            Each data point is assigned to its nearest prototype.
+            This node labels new data points using a learned Spark MLlib model e.g. a decision tree.
         </intro>
+        <option name="Prediction column">The name of the prediction column.</option>
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="MLlib Prototypes">MLlib Prototype model</inPort>
-        <inPort index="1" name="Input Data">Spark RDD containing the input data that
-        will be assigned to the prototypes</inPort>
-        <outPort index="0" name="Assigned Data">Input data assigned to cluster
-        prototypes</outPort>
+        <inPort index="0" name="Spark MLlib Model">Spark MLlib model</inPort>
+        <inPort index="1" name="Input Data">Spark RDD containing the input data to predict</inPort>
+        <outPort index="0" name="Labelled Data">Labelled input data</outPort>
     </ports>
 </knimeNode>

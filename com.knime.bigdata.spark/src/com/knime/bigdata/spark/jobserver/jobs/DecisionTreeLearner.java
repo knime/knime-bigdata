@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.jobserver.jobs;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -165,6 +166,11 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         final int maxBins = aConfig.getInt(PARAM_MAX_BINS);
         final String impurity = aConfig.getString(PARAM_IMPURITY);
 
+        LOGGER.log(Level.SEVERE, "Training decision tree for "+numClasses+" classes.");
+        LOGGER.log(Level.SEVERE, "Training decision tree with info for "+nominalFeatureInfo.size()+" nominal features: ");
+        for (Entry<Integer, Integer> entry : nominalFeatureInfo.entrySet()) {
+            LOGGER.log(Level.SEVERE, "Feature["+entry.getKey()+"] has "+entry.getValue()+" distinct values.");
+        }
         // Cluster the data into m_noOfCluster classes using KMeans
         return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo, impurity, maxDepth,
             maxBins);

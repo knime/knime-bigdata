@@ -8,6 +8,7 @@ import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -19,41 +20,23 @@ import com.typesafe.config.ConfigFactory;
 @SuppressWarnings("javadoc")
 public class SGDJobParametersTest {
 
-    private static String getParams(final Integer aNumIterations, final Double aRegParam) {
-        StringBuilder params = new StringBuilder("{\n");
-        params.append("   \"").append(ParameterConstants.PARAM_INPUT).append("\" {\n");
-
-        if (aNumIterations != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_NUM_ITERATIONS).append("\": ")
-                .append(aNumIterations).append(",\n");
-        }
-        if (aRegParam != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_STRING).append("\": ")
-                .append(aRegParam).append(",\n");
-        }
-
-        params.append("    }\n");
-        params.append("    \n}");
-        return params.toString();
-    }
-
     @Test
     public void jobValidationShouldCheckMissingNumIterationsParameter() throws Throwable {
         String params =
-            getParams(null, 5d);
+                SGDLearnerTask.learnerDef("tab1", "map1", new String[] {"a", "b"}, new Integer[] {0, 1}, 1, null, 0.5);
         myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_NUM_ITERATIONS, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingRegularizationParameter() throws Throwable {
-        String params = getParams(10, null);
+        String params =
+                SGDLearnerTask.learnerDef("tab1", "map1", new String[] {"a", "b"}, new Integer[] {0, 1}, 1, 10, null);
         myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckAllValidParams() throws Throwable {
-        String params =
-            getParams(100, 0.4d);
+        String params = SGDLearnerTask.learnerDef("tab1", "map1", new String[] {"a", "b"}, new Integer[] {0, 1}, 1, 10, 0.4d);
         KnimeSparkJob testObj = new LinearRegressionWithSGDJob();
         Config config = ConfigFactory.parseString(params);
         Config config2 = ConfigFactory.parseString(SupervisedLearnerJobParametersTest.allValidParams()).withFallback(config);

@@ -59,7 +59,7 @@ public class SparkJoinerNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkDataPortObjectSpec left = (SparkDataPortObjectSpec)inSpecs[0];
         final SparkDataPortObjectSpec reight = (SparkDataPortObjectSpec)inSpecs[1];
         final KNIMESparkContext context = left.getContext();

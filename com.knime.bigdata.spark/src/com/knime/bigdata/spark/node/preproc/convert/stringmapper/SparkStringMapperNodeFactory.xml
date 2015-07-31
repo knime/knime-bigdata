@@ -21,8 +21,8 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Input data">Input data.</inPort>
-		<outPort index="0" name="Mapped input data">Mapped input data</outPort>
-		<outPort index="1" name="Mapping dictionary">Mapping dictionary</outPort>
+		<inPort index="0" name="Input data">Input Spark RDD.</inPort>
+		<outPort index="0" name="Mapped input data">Mapped input Spark RDD</outPort>
+		<outPort index="1" name="Mapping dictionary">Mapping dictionary as Spark RDD</outPort>
 	</ports>
 </knimeNode>

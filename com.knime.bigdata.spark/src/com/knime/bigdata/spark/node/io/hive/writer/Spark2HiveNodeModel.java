@@ -89,7 +89,7 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
         if (inSpecs == null || inSpecs.length != 2 || inSpecs[0] == null || inSpecs[1] == null) {
             throw new InvalidSettingsException("No input data found");

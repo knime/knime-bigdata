@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 06.07.2015 by koetter
+ *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapper;
+package com.knime.bigdata.spark.node.io.table.reader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author koetter
  */
-public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperNodeModel> {
+public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkStringMapperNodeModel createNodeModel() {
-        return new SparkStringMapperNodeModel();
+    public Spark2TableNodeModel createNodeModel() {
+        return new Spark2TableNodeModel();
     }
 
     /**
@@ -50,7 +50,7 @@ public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperN
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkStringMapperNodeModel> createNodeView(final int viewIndex, final SparkStringMapperNodeModel nodeModel) {
+    public NodeView<Spark2TableNodeModel> createNodeView(final int viewIndex, final Spark2TableNodeModel nodeModel) {
         return null;
     }
 
@@ -67,7 +67,7 @@ public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperN
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkStringMapperNodeDialog();
+        return new Spark2TableNodeDialog();
     }
 
 }

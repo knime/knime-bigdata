@@ -78,7 +78,7 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
         return new PortObjectSpec[] {createResultSpec(sparkSpec.getTableSpec(), pmmlSpec)};

@@ -91,7 +91,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length != 1) {
             throw new InvalidSettingsException("No Hive connection available");
         }
@@ -102,7 +102,10 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         if (includedCols == null || includedCols.length < 1) {
             throw new InvalidSettingsException("No input columns available");
         }
-        return new PortObjectSpec[]{MLlibClusterAssignerNodeModel.createSpec(tableSpec), createMLSpec()};
+        final SparkDataPortObjectSpec asignedSpec =
+                new SparkDataPortObjectSpec(spec.getContext(),
+                    MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster"));
+        return new PortObjectSpec[]{asignedSpec, createMLSpec()};
     }
 
     /**
@@ -117,7 +120,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
         final int[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec);
+        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
@@ -125,7 +128,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
-                "KMeans", clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
+                 clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
     }
 
 
@@ -133,7 +136,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec("kmeans");
+        return new SparkModelPortObjectSpec(MLlibKMeansInterpreter.getInstance().getModelName());
     }
 
     /**

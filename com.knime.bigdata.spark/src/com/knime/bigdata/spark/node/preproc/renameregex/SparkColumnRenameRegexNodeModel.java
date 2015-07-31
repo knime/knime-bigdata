@@ -50,7 +50,7 @@ public class SparkColumnRenameRegexNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
         final DataTableSpec outSpec = createNewSpec(sparkSpec.getTableSpec());
         return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContext(), outSpec)};

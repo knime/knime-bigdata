@@ -118,7 +118,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         m_snippet.setSettings(m_settings);
         FlowVariableRepository flowVarRepository =
             new FlowVariableRepository(getAvailableInputFlowVariables());

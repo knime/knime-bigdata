@@ -3,14 +3,18 @@ package com.knime.bigdata.spark.testing.jobserver.server;
 import static org.apache.spark.mllib.random.RandomRDDs.normalJavaRDD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.SparkException;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -108,6 +112,10 @@ public class RDDUtilsInJavaTest {
         }
 
         JavaRDD<Row> toRowRddWithNominalValues(final JavaDoubleRDD o) {
+            return toRowRddWithNominalValues(o, colors);
+        }
+
+        JavaRDD<Row> toRowRddWithNominalValues(final JavaDoubleRDD o, final String[] aColors) {
             return o.map(new Function<Double, Row>() {
                 private static final long serialVersionUID = 1L;
 
@@ -115,7 +123,7 @@ public class RDDUtilsInJavaTest {
 
                 @Override
                 public Row call(final Double x) {
-                    final String color = colors[ix % colors.length];
+                    final String color = aColors[ix % aColors.length];
                     final String team = teams[ix % teams.length];
                     ix = ix + 1;
                     return Row.create(team, x, team + color, team, color.substring(0, 1), color);
@@ -143,9 +151,34 @@ public class RDDUtilsInJavaTest {
     }
 
     @Test
+    public void toLabeledPointRDDShouldCreateVectorsForIndicatedColumnsOnly() throws Exception {
+
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+        JavaRDD<Vector> v = new MyMapper().apply(o);
+        JavaRDD<Row> rowRDD = RDDUtils.toJavaRDDOfRows(v.zip(o));
+
+        List<Integer> colIdxs = new ArrayList<>();
+        colIdxs.add(1);
+        colIdxs.add(3);
+        final List<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(rowRDD, colIdxs, 2).collect();
+
+        List<Row> rows = rowRDD.collect();
+        assertEquals("number of rows must not change", rows.size(), inputRdd.size());
+
+        int ix = 0;
+        for (LabeledPoint p : inputRdd) {
+            assertEquals("length of feature vector must be equivalent to length of colum selector", colIdxs.size(), p.features().size());
+            assertEquals("selected features incorrect (col 1 of row["+ix+"])", rows.get(ix).get(1), p.features().apply(0));
+            assertEquals("selected features incorrect (col 3 of row["+ix+"])", rows.get(ix).get(3), p.features().apply(1));
+            ix++;
+        }
+    }
+
+
+
+    @Test
     public void conversionOfJavaPairedRDD2JavaRDDWithRows() throws Exception {
-        // JavaRDD input1 = sparkContext.makeRDD();
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 2);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
         JavaRDD<Vector> v = new MyMapper().apply(o);
         JavaRDD<Row> rowRDD = RDDUtils.toJavaRDDOfRows(v.zip(o));
 
@@ -153,10 +186,23 @@ public class RDDUtilsInJavaTest {
         assertEquals("conversion should create correct length of rows ", 5, rowRDD.collect().get(0).length());
     }
 
+    private final Map<String, JavaDoubleRDD> m_randomRDDs = new HashMap<>();
+
+    /**
+     * @return
+     */
+    private JavaDoubleRDD getRandomDoubleRDD(final long aNumRows, final int aNumCols) {
+        JavaDoubleRDD cached = m_randomRDDs.get(aNumRows + "-" + aNumCols);
+        if (cached == null) {
+            cached = normalJavaRDD(sparkContextResource.sparkContext, aNumRows, aNumCols);
+            m_randomRDDs.put(aNumRows + "-" + aNumCols, cached);
+        }
+        return cached;
+    }
+
     @Test
     public void conversionOfJavaRowRDD2JavaRDDWithVector() throws Exception {
-        // JavaRDD input1 = sparkContext.makeRDD();
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 2);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
         JavaRDD<Row> v = new MyMapper().toRowRdd(o);
         JavaRDD<Vector> rowRDD = RDDUtils.toJavaRDDOfVectors(v);
 
@@ -166,8 +212,7 @@ public class RDDUtilsInJavaTest {
 
     @Test
     public void addColumn2JavaRowRDD() throws Exception {
-        // JavaRDD input1 = sparkContext.makeRDD();
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 2);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
         JavaRDD<Row> v = new MyMapper().toRowRdd(o);
 
         JavaRDD<Row> rowRDD = RDDUtils.addColumn(v.zip(o));
@@ -178,8 +223,7 @@ public class RDDUtilsInJavaTest {
 
     @Test
     public void conversionOfJavaRowRDD2JavaRDDWithVectorKeepOnlySomeFeatures() throws Exception {
-        // JavaRDD input1 = sparkContext.makeRDD();
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 2);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
         JavaRDD<Row> v = new MyMapper().toRowRdd(o);
         List<Integer> ix = new ArrayList<Integer>();
         ix.add(0);
@@ -194,8 +238,7 @@ public class RDDUtilsInJavaTest {
 
     @Test
     public void conversionOfJavaRowRDD2JavaRDDWithLabeledPoint() throws Exception {
-        // JavaRDD input1 = sparkContext.makeRDD();
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 1);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRdd(o);
         JavaRDD<LabeledPoint> rowRDD = RDDUtils.toJavaLabeledPointRDD(v, 2);
 
@@ -214,7 +257,7 @@ public class RDDUtilsInJavaTest {
 
     @Test
     public void conversionOfJavaRowRDDWithNominalValues2JavaRDDWithLabeledPoint() throws Exception {
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 100L, 1);
+        JavaDoubleRDD o = getRandomDoubleRDD(100L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalLabels(o).cache();
         List<Integer> selector = new ArrayList<>();
         selector.add(0);
@@ -222,7 +265,7 @@ public class RDDUtilsInJavaTest {
         selector.add(2);
         LabeledDataInfo info = RDDUtilsInJava.toJavaLabeledPointRDDConvertNominalValues(v, selector, 3);
 
-        assertEquals("Incorrect number of classes", 5, info.getNumberClasses());
+        assertEquals("Incorrect number of classes", 5, info.getClassLabelToIntMapping().size());
 
         JavaRDD<LabeledPoint> rowRDD = info.getLabeledPointRDD();
         assertEquals("Conversion changed the number of rows ", rowRDD.count(), 100);
@@ -242,7 +285,6 @@ public class RDDUtilsInJavaTest {
         }
     }
 
-
     /**
      * convert all nominal values in selected columns to corresponding columns with numbers (not binary), use one
      * mapping for all columns
@@ -251,7 +293,7 @@ public class RDDUtilsInJavaTest {
      */
     @Test
     public void conversionOfNominalValuesInRDDOfRowsOneMap() throws Exception {
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 10L, 1);
+        JavaDoubleRDD o = getRandomDoubleRDD(10L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:
@@ -261,7 +303,7 @@ public class RDDUtilsInJavaTest {
         JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
         NominalValueMapping mappings = info.m_Mappings;
 
-        assertEquals("Incorrect number of mapped values", 18, mappings.size());
+        assertEquals("Incorrect number of mapped values", 22, mappings.size());
 
         assertEquals("Conversion changed the number of rows ", rddWithConvertedValues.count(), 10);
 
@@ -282,6 +324,49 @@ public class RDDUtilsInJavaTest {
         }
     }
 
+    @Test
+    public void applyLabelMappingShouldIgnoreUnknownColumns() throws Exception {
+        JavaDoubleRDD o = getRandomDoubleRDD(10L, 1);
+        // v has 6 columns: team, x, team + color, team, color.substring(0, 1), color
+        JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
+
+        MappedRDDContainer info =
+            RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{0, 2}, MappingType.GLOBAL);
+
+        // 3 and 5 were not mapped, should be ignored
+        List<Row> rows = RDDUtilsInJava.applyLabelMapping(v, new int[]{0, 2, 3, 5}, info.m_Mappings).collect();
+        for (int i = 0; i < rows.size(); i++) {
+            Row row = rows.get(i);
+            //6 original columns + 2! converted columns
+            assertEquals("conversion should create correct length of rows ", 6 + 2, row.length());
+
+            assertTrue("converted values should be numbers and at the end",
+                info.m_Mappings.getNumberForValue(0, row.getString(0)) == (int)row.getDouble(6));
+            assertTrue("converted values should be numbers and at the end",
+                info.m_Mappings.getNumberForValue(2, row.getString(2)) == (int)row.getDouble(7));
+        }
+    }
+
+    @Test(expected = SparkException.class)
+    public void applyLabelMappingShouldReportUnknownValuesInKnownColumns() throws Throwable {
+        JavaDoubleRDD o = getRandomDoubleRDD(10L, 1);
+        // v has 6 columns: team, x, team + color, team, color.substring(0, 1), color
+        JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
+
+        MappedRDDContainer info =
+            RDDUtilsInJava.convertNominalValuesForSelectedIndices(v, new int[]{2}, MappingType.GLOBAL);
+        JavaRDD<Row> v2 = new MyMapper().toRowRddWithNominalValues(o, new String[]{"red", "blue", "v1", "v2"}).cache();
+
+        try {
+            RDDUtilsInJava.applyLabelMapping(v2, new int[]{2}, info.m_Mappings).collect();
+        } catch (Exception nse) {
+            nse.printStackTrace();
+            throw nse;
+        }
+        // not strictly required, but easier for debugging:
+        fail("Expected exception not thrown");
+    }
+
     /**
      * convert all nominal values in selected columns to corresponding columns with numbers (not binary), use separate
      * mappings for each column
@@ -290,7 +375,7 @@ public class RDDUtilsInJavaTest {
      */
     @Test
     public void conversionOfNominalValuesInRDDOfRowsSeparateMaps() throws Exception {
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 25L, 1);
+        JavaDoubleRDD o = getRandomDoubleRDD(25L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:
@@ -328,7 +413,7 @@ public class RDDUtilsInJavaTest {
      */
     @Test
     public void conversionOfNominalValuesInRDDOfRowsBinary() throws Exception {
-        JavaDoubleRDD o = normalJavaRDD(sparkContextResource.sparkContext, 25L, 1);
+        JavaDoubleRDD o = getRandomDoubleRDD(25L, 1);
         JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
 
         //convert all but the last column with nominal values:

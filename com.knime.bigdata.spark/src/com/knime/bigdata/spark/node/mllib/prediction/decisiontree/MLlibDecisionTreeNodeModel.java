@@ -41,7 +41,7 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -113,7 +113,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length != 2) {
             throw new InvalidSettingsException("");
         }
@@ -168,8 +168,9 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         final DecisionTreeTask task = new DecisionTreeTask(data.getData(), featureColIdxs, featureColNames, classColName,
             classColIdx, mapping == null ? null : mapping.getData(), maxDepth, maxNoOfBins, qualityMeasure);
         final DecisionTreeModel treeModel = task.execute(exec);
-        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>("DecisionTree", treeModel,
-                MLlibDecisionTreeInterpreter.getInstance(), tableSpec, classColName, featureColNames))};
+        final MLlibDecisionTreeInterpreter interpreter = MLlibDecisionTreeInterpreter.getInstance();
+        return new PortObject[]{new SparkModelPortObject<>(
+                new SparkModel<>(treeModel, interpreter, tableSpec, classColName, featureColNames))};
 
     }
 
@@ -177,7 +178,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      * @return
      */
     private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec("DecisionTree");
+        return new SparkModelPortObjectSpec(MLlibDecisionTreeInterpreter.getInstance().getModelName());
     }
 
     /**

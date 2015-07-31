@@ -18,27 +18,21 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.RowKey;
 import org.knime.core.data.StringValue;
-import org.knime.core.data.container.CellFactory;
-import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -70,11 +64,17 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
 
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
 
+    /**
+     * {@link DataTableSpec} of the mapping RDD.
+     */
     public static final DataTableSpec MAP_SPEC = createMapSpec();
 
     SparkStringMapperNodeModel() {
+        //TODO: Also implement the PMML mapping
         super(new PortType[] {SparkDataPortObject.TYPE},
+//                , new PortType(PMMLPortObject.class, true)},
             new PortType[] {SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
+//        , PMMLPortObject.TYPE});
     }
 
     /**
@@ -89,15 +89,11 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         return new SettingsModelString("mappingType", MappingType.COLUMN.toString());
     }
 
-    static SettingsModelString createMappingColPostfixModel() {
-        return new SettingsModelString("mappingColumnPostfix", "_val");
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("No input spec available");
         }
@@ -108,8 +104,13 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         if (includedCols == null || includedCols.length < 1) {
             throw new InvalidSettingsException("No nominal columns selected");
         }
-        return new PortObjectSpec[] {null,
-            new SparkDataPortObjectSpec(sparkSpec.getContext(), MAP_SPEC)};
+        return new PortObjectSpec[] {null, new SparkDataPortObjectSpec(sparkSpec.getContext(), MAP_SPEC)};
+//        //PMML section
+//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[2];
+//        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(pmmlSpec, spec);
+//        pmmlSpecCreator.addPreprocColNames(Arrays.asList(includedCols));
+//        return new PortObjectSpec[] {null, new SparkDataPortObjectSpec(sparkSpec.getContext(), MAP_SPEC),
+//            pmmlSpecCreator.createSpec()};
     }
 
     /**
@@ -138,6 +139,7 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
             mappingType, outputTableName, outputMappingTableName);
         //create port object from mapping
         final MappedRDDContainer mapping = task.execute(exec);
+        //TODO: Use the MappedRDDContainer to also ouput a PMML of the mapping
 
         //these are all the column names of the original (selected) and the mapped columns
         // (original columns that were not selected are not included, but the index of the new
@@ -146,13 +148,34 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
 
         //we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
-        final DataTableSpec firstSpec = createResultSpec(spec, names);
+        final DataColumnSpec[] mappingSpecs = createMappingSpecs(spec, names);
+        final DataTableSpec firstSpec = new DataTableSpec(spec, new DataTableSpec(mappingSpecs));
         SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
         SparkDataTable secondRDD = new SparkDataTable(context, outputMappingTableName, MAP_SPEC);
+
+     // the optional PMML in port (can be null)
+//        final PMMLPortObject inPMMLPort = (PMMLPortObject)inData[2];
+//        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(inPMMLPort, firstSpec);
+//
+//        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec(), inPMMLPort);
+
+//        int colIdx = spec.getNumColumns();
+//        for (DataColumnSpec col : mappingSpecs) {
+//            PMMLMapValuesTranslator trans = new PMMLMapValuesTranslator(
+//                    factory.getConfig(), new DerivedFieldMapper(inPMMLPort));
+//            outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
+//        }
+
         return new PortObject[]{new SparkDataPortObject(firstRDD), new SparkDataPortObject(secondRDD)};
     }
 
-    private DataTableSpec createResultSpec(final DataTableSpec spec, final Map<Integer, String> names) {
+    /**
+     * @param spec input table spec
+     * @param names mapping column names from the MappedRDDContainer
+     * @return the appended mapped value columns
+     */
+    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec spec, final Map<Integer, String> names) {
+        System.out.println(names);
         final DataColumnSpec[] specList = new DataColumnSpec[names.size()];
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Dummy", MAP_TYPE);
         int count = 0;
@@ -166,25 +189,7 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
             }
         }
         final DataColumnSpec[] specs = Arrays.copyOfRange(specList, 0, count);
-        final ColumnRearranger rearranger = new ColumnRearranger(spec);
-        rearranger.append(new CellFactory() {
-            @Override
-            public void setProgress(final int curRowNr, final int rowCount, final RowKey lastKey,
-                final ExecutionMonitor exec) {
-                //nothing to do
-            }
-
-            @Override
-            public DataColumnSpec[] getColumnSpecs() {
-                return specs;
-            }
-
-            @Override
-            public DataCell[] getCells(final DataRow row) {
-                return null;
-            }
-        });
-        return rearranger.createSpec();
+        return specs;
     }
 
     private static DataTableSpec createMapSpec() {
