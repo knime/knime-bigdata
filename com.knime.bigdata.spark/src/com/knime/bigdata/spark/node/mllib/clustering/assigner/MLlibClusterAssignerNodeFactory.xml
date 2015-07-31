@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Predictor" icon="icon.png">
-    <name>Spark Cluster Asigner</name>
+    <name>Spark Cluster Assigner</name>
     <shortDescription>Assigns data to a set of prototypes.</shortDescription>
     <fullDescription>
         <intro>
@@ -9,6 +9,7 @@
             are obtained e.g. by a k-means clustering.
             Each data point is assigned to its nearest prototype.
         </intro>
+        <option name="Cluster column">The name of the cluster column.</option>
     </fullDescription>
 
     <ports>

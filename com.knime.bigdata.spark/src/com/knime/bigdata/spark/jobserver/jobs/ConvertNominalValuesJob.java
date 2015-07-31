@@ -20,7 +20,6 @@
  */
 package com.knime.bigdata.spark.jobserver.jobs;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,38 +36,24 @@ import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns
  *
  * @author dwk
  */
-public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializable {
+public class ConvertNominalValuesJob extends AbstractStringMapperJob {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_INPUT_TABLE = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
-
     private static final String PARAM_MAPPING_TYPE = ParameterConstants.PARAM_INPUT + "."
         + ParameterConstants.PARAM_STRING;
-
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_COL_IDXS;
-
-    private static final String PARAM_COL_NAMES = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING;
-
-    private static final String PARAM_RESULT_TABLE = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
 
     private static final String PARAM_RESULT_MAPPING = ParameterConstants.PARAM_OUTPUT + "."
         + ParameterConstants.PARAM_TABLE_2;
@@ -81,41 +66,7 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
      */
     @Override
     public SparkJobValidation validate(final Config aConfig) {
-        String msg = null;
-
-        if (!aConfig.hasPath(PARAM_INPUT_TABLE)) {
-            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
-        }
-
-        if (msg == null) {
-            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
-                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-            } else {
-                try {
-                    List<Integer> vals = aConfig.getIntList(PARAM_COL_IDXS);
-                    if (vals.size() < 1) {
-                        msg = "Input parameter '" + PARAM_COL_IDXS + "' is empty.";
-                    }
-                } catch (ConfigException e) {
-                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
-                }
-            }
-        }
-
-        if (msg == null) {
-            if (!aConfig.hasPath(PARAM_COL_NAMES)) {
-                msg = "Input parameter '" + PARAM_COL_NAMES + "' missing.";
-            } else {
-                try {
-                    List<String> vals = aConfig.getStringList(PARAM_COL_NAMES);
-                    if (vals.size() < 1) {
-                        msg = "Input parameter '" + PARAM_COL_NAMES + "' is empty.";
-                    }
-                } catch (ConfigException e) {
-                    msg = "Input parameter '" + PARAM_COL_NAMES + "' is not of expected type 'string list'.";
-                }
-            }
-        }
+        String msg = super.validateParam(aConfig);
 
         if (msg == null) {
             if (!aConfig.hasPath(PARAM_MAPPING_TYPE)) {
@@ -127,10 +78,6 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
                     msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' has an invalid value.";
                 }
             }
-        }
-
-        if (msg == null && !aConfig.hasPath(PARAM_RESULT_TABLE)) {
-            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg == null) {
@@ -145,64 +92,34 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
-        String msg = null;
-        final String key = aConfig.getString(PARAM_INPUT_TABLE);
-        if (key == null) {
-            msg = "Input parameter at port 1 is missing!";
-        } else if (!validateNamedRdd(key)) {
-            msg = "Input data table missing!";
-        }
-        if (msg != null) {
-            LOGGER.severe(msg);
-            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
-        }
-    }
-
     /**
-     * run the actual job, the result is serialized back to the client
-     *
-     * @throws GenericKnimeSparkException
+     * @param aContext
+     * @param aConfig
+     * @param aRowRDD
+     * @param aColIds
+     * @param aColNameForIndex
+     * @param aMappingType
+     * @return
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
-        validateInput(aConfig);
-        LOGGER.log(Level.INFO, "starting job to convert nominal values...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE));
-        final List<String> colNames = aConfig.getStringList(PARAM_COL_NAMES);
-        final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
-        final int[] colIds = new int[colIdxs.size()];
-        final Map<Integer, String> colNameForIndex = new HashMap<>();
-        int i = 0;
-        for (Integer ix : colIdxs) {
-            colIds[i] = ix;
-            colNameForIndex.put(ix, colNames.get(i));
-            i++;
-        }
-        final MappingType type = MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
+    JobResult execute(final SparkContext aContext, final Config aConfig, final JavaRDD<Row> aRowRDD,
+        final int[] aColIds, final Map<Integer, String> aColNameForIndex)
+        throws GenericKnimeSparkException {
+        final MappingType mappingType = MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
 
         //use only the column indices when converting
         final MappedRDDContainer mappedData =
-            RDDUtilsInJava.convertNominalValuesForSelectedIndices(rowRDD, colIds, type);
+            RDDUtilsInJava.convertNominalValuesForSelectedIndices(aRowRDD, aColIds, mappingType);
 
         LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getString(PARAM_RESULT_TABLE));
-        try {
-            addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData.m_RddWithConvertedValues);
 
-            //number of all (!)  columns in input data table
-            int offset = rowRDD.take(1).get(0).length();
+        addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData.m_RddWithConvertedValues);
 
-            storeMappingsInRdd(sc, mappedData, colNameForIndex, aConfig.getString(PARAM_RESULT_MAPPING), type, offset);
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.severe("ERROR: failed to store mappings in RDD.");
-            LOGGER.severe(e.getMessage());
-            return JobResult.emptyJobResult().withException(e);
-        }
+        //number of all (!)  columns in input data table
+        int offset = aRowRDD.take(1).get(0).length();
 
-        JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
-        LOGGER.log(Level.INFO, "done");
-        return res;
+        storeMappingsInRdd(aContext, mappedData, aColNameForIndex, aConfig.getString(PARAM_RESULT_MAPPING), offset);
+        return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
     }
 
     /**
@@ -219,11 +136,11 @@ public class ConvertNominalValuesJob extends KnimeSparkJob implements Serializab
      * @param aOffset
      */
     private void storeMappingsInRdd(final SparkContext aSparkContext, final MappedRDDContainer aMappedData,
-        final Map<Integer, String> aColNameForIndex, final String aRddName, final MappingType aMappingType, final int aOffset) {
+        final Map<Integer, String> aColNameForIndex, final String aRddName, final int aOffset) {
         @SuppressWarnings("resource")
         JavaSparkContext javaContext = new JavaSparkContext(aSparkContext);
 
-        List<Row> rows = aMappedData.createMappingTable(aColNameForIndex, aMappingType, aOffset);
+        List<Row> rows = aMappedData.createMappingTable(aColNameForIndex, aOffset);
 
         JavaRDD<Row> mappingRdd = javaContext.parallelize(rows);
         LOGGER.log(Level.INFO, "Storing mapping under key: " + aRddName);

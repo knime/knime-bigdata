@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
+	type="Manipulator" icon="icon.png">
+	<name>Spark Category To Number (Apply)</name>
+	<shortDescription>Maps nominal columns to double columns based on a provided mapping dictionary</shortDescription>
+	<fullDescription>
+		<intro>
+			Maps nominal column to double columns based on a provided mapping dictionary. The dictionary
+			is produced by the Spark Category To Number node.S
+		</intro>
+		<option name="Columns to convert">The columns to convert</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Input data">Input Spark RDD.</inPort>
+		<inPort index="1" name="Mapping dictionary">Mapping dictionary as Spark RDD</inPort>
+		<outPort index="0" name="Mapped input data">Mapped Spark RDD</outPort>
+	</ports>
+</knimeNode>

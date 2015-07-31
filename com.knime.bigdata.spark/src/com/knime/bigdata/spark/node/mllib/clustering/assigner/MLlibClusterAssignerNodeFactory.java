@@ -60,7 +60,7 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -68,7 +68,7 @@ public class MLlibClusterAssignerNodeFactory extends NodeFactory<MLlibClusterAss
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new MLLibClusterAssignerNodeDialog();
     }
 
 }

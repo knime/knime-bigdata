@@ -3,16 +3,16 @@
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
 	type="Other" icon="hiveSpark.png">
 	<name>Hive to Spark</name>
-	<shortDescription>Converts an incoming Hive query into a Spark data object</shortDescription>
+	<shortDescription>Converts an incoming Hive query into a Spark RDD</shortDescription>
 	<fullDescription>
 		<intro>
-			Converts an incoming Hive query into a Spark data object.
+			Converts an incoming Hive query into a Spark RDD.
 		</intro>
 	</fullDescription>
 
 	<ports>
 		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
 		<inPort index="0" name="Hive query">Input data (Hive query).</inPort>
-		<outPort index="0" name="Result">Spark data object</outPort>
+		<outPort index="0" name="Spark data">Spark RDD</outPort>
 	</ports>
 </knimeNode>

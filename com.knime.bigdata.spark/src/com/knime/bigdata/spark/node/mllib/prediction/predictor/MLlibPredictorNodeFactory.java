@@ -60,7 +60,7 @@ public class MLlibPredictorNodeFactory extends NodeFactory<MLlibPredictorNodeMod
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -68,7 +68,7 @@ public class MLlibPredictorNodeFactory extends NodeFactory<MLlibPredictorNodeMod
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new MLLibPredictorNodeDialog();
     }
 
 }

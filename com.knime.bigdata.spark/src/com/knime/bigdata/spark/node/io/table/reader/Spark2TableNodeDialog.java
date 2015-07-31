@@ -18,7 +18,7 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.writer;
+package com.knime.bigdata.spark.node.io.table.reader;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

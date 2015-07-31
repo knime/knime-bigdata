@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.MyRecord;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMappingFactory;
@@ -26,7 +27,7 @@ public class NominalValueMappingTest {
     @Test
     public void emptyColumnMappingShouldHaveSize0() throws Exception {
         final Map<Integer, Map<String, Integer>> mapping = new HashMap<>();
-        NominalValueMapping testObj = NominalValueMappingFactory.createColumnMapping(mapping);
+        NominalValueMapping testObj = NominalValueMappingFactory.createColumnMapping(mapping, MappingType.COLUMN);
         assertEquals("empty mapping should have size 0", 0, testObj.size());
         assertFalse("empty mapping should have empty iterator", testObj.iterator().hasNext());
     }
@@ -35,7 +36,7 @@ public class NominalValueMappingTest {
     public void iteratorForColumnMappingShouldIterateOverAllRecords() throws Exception {
         final Map<Integer, Map<String, Integer>> mapping = getColumnMappingMap();
 
-        NominalValueMapping testObj = NominalValueMappingFactory.createColumnMapping(mapping);
+        NominalValueMapping testObj = NominalValueMappingFactory.createColumnMapping(mapping, MappingType.COLUMN);
         assertEquals("mapping should have proper size", 7, testObj.size());
         Iterator<MyRecord> iterator = testObj.iterator();
         assertTrue("non-empty mapping should have non-empty iterator", iterator.hasNext());

@@ -16,27 +16,45 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 26.06.2015 by koetter
+ *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package com.knime.bigdata.spark.node.mllib.prediction.linear;
+
+import java.io.Serializable;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+
 /**
  *
  * @author koetter
+ * @param <M> the MLlib model
  */
-public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
+public abstract class AbstractLinearMethodsNodeFactory<M extends Serializable>
+extends NodeFactory<LinearMethodsNodeModel<M>> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Table2SparkNodeModel createNodeModel() {
-        return new Table2SparkNodeModel();
+    public LinearMethodsNodeModel<M> createNodeModel() {
+        return new LinearMethodsNodeModel<M>(getJobClassPath(), getModelInterpreter());
     }
+
+    /**
+     * @return the SparkModelInterpreter
+     */
+    protected abstract SparkModelInterpreter<SparkModel<M>> getModelInterpreter();
+
+    /**
+     * @return the SGDJob class
+     */
+    protected abstract Class<? extends SGDJob> getJobClassPath();
 
     /**
      * {@inheritDoc}
@@ -50,7 +68,8 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public NodeView<Table2SparkNodeModel> createNodeView(final int viewIndex, final Table2SparkNodeModel nodeModel) {
+    public NodeView<LinearMethodsNodeModel<M>> createNodeView(final int viewIndex,
+        final LinearMethodsNodeModel<M> nodeModel) {
         return null;
     }
 
@@ -59,7 +78,7 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -67,7 +86,7 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new LinearMethodsNodeDialog();
     }
 
 }
