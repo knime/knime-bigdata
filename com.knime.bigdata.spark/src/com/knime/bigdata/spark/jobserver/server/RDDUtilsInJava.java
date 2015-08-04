@@ -1,5 +1,8 @@
 package com.knime.bigdata.spark.jobserver.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,8 +16,11 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
+import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
@@ -40,7 +46,7 @@ public class RDDUtilsInJava {
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
     public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType)  {
+        final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
         final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
@@ -206,6 +212,60 @@ public class RDDUtilsInJava {
     }
 
     /**
+     * convert given RDD to an RDD<Vector> with selected columns and compute statistics for these columns
+     * @param aInputRdd
+     * @param aColumnIndices
+     * @return MultivariateStatisticalSummary
+     */
+    public static MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd, final Collection<Integer> aColumnIndices) {
+
+        List<Integer> columnIndices = new ArrayList<Integer>();
+        columnIndices.addAll(aColumnIndices);
+        Collections.sort(columnIndices);
+
+        JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
+
+         // Compute column summary statistics.
+         MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
+         return summary;
+    }
+
+    /**
+     * computes the scale and translation parameters from the given data and according to the given normalization settings,
+     * then applies these parameters to the input RDD
+     * @param aInputRdd
+     * @param aColumnIndices indices of numeric columns to be normalized
+     * @param aNormalization
+     * @return container with normalization parameters for each of the given columns, other columns are just copied
+     *         over
+     */
+    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices, final NormalizationSettings aNormalization) {
+
+       MultivariateStatisticalSummary stats = findColumnStats(aInputRdd, aColumnIndices);
+       final NormalizedRDDContainer rddNormalizer = NormalizedRDDContainerFactory.getNormalizedRDDContainer(stats, aNormalization);
+
+       rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        return rddNormalizer;
+    }
+
+    /**
+     * applies the given the scale and translation parameters to the given data to the input RDD
+     * @param aInputRdd
+     * @param aColumnIndices indices of numeric columns to be normalized
+     * @return container with normalization parameters for each of the given columns, other columns are just copied
+     *         over
+     */
+    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices, final Double[][] aScalesAndTranslations) {
+
+       final NormalizedRDDContainer rddNormalizer = NormalizedRDDContainerFactory.getNormalizedRDDContainer(aScalesAndTranslations[0],aScalesAndTranslations[1]);
+
+       rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        return rddNormalizer;
+    }
+
+    /**
      * Note that now only the class label is converted (no matter whether it is already numeric or not)
      *
      * convert a RDD of Rows to JavaRDD of LabeledPoint, the string label column is converted to integer values, all
@@ -230,7 +290,7 @@ public class RDDUtilsInJava {
     private static JavaRDD<LabeledPoint>
         toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex,
             @Nullable final NominalValueMapping labelMapping) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length()-1);
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length() - 1);
 
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;

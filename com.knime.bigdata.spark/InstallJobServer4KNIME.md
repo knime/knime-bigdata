@@ -15,9 +15,9 @@ The Job-Server must be installed a on (Linux) server that is co-located in the s
 
 0. Create some directory for the Job-Server installation. For example /usr/local/jobserver.
 1. Download and unpack the pre-packaged zip file (TODO - TOBIAS provide link) into your installation directory. 
-2. Edit `environment.sh` as appropriate. The most important settings are:    
-  2.1 `master` use `master = "yarn-client"` (default) when running Yarn or `master = "spark://localhost:7077"` (or similar) when running in stand-alone mode. 
-  2.2 `rootdir` use `rootdir = /tmp/jobserver` (default) or some other temporary directory. This is where job information and jar files are kept (see also 'Hints' below).
+2. Edit `environment.conf` as appropriate. The most important settings are:    
+  2.1 `master` use `master = "yarn-client"` (default) when running Yarn or `master = "spark://localhost:7077"` (or similar) when running in stand-alone mode.     
+  2.2 `rootdir` use `rootdir = /tmp/jobserver/data` (default) or some other temporary directory. This is where job information and jar files are kept (see also 'Hints' below).
   Please note that some settings are overwritten by the KNIME configuration. Examples of overwritten settings are `num-cpu-cores` and `memory-per-node`.
 3. Edit `settings.sh` as appropriate.    
   3.1 `INSTALL_DIR` this should point to the installation directory (but is not used)     
@@ -36,6 +36,6 @@ Point your browser to `http://<server>:8090` to check out the status of the Job-
 
 The Job-Server does currently not support user credentials. This means that anybody who has access to the server where the Job-Server is running can start and stop contexts and jobs. 
 
-It might be advisable to re-start the Job-Server every once in a while and to clean-up the `rootdir`. Either remove the entire directory or only the jar files under `rootdir`/filedao/data
+It might be advisable to re-start the Job-Server every once in a while and to clean-up the `rootdir`. Either remove the entire directory or only the jar files under `rootdir`. At times, the Job-Server cannot be restarted when large tables were serialized from KNIME to Spark. It fails with a message similar to "java.io.UTFDataFormatException: encoded string too long: 6653559 bytes". In that case it is advisable to clear the entire `rootdir`.
 
 

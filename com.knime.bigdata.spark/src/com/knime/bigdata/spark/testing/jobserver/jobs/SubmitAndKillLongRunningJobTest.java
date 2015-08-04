@@ -9,6 +9,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.testing.SparkSpec;
 
 /**
  *
@@ -16,7 +17,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  *
  */
 @SuppressWarnings("javadoc")
-public class SubmitAndKillLongRunningJobTest {
+public class SubmitAndKillLongRunningJobTest extends SparkSpec {
 
     @Test
 	public void jobControlerShouldCreateAndKillLongRunningJob()

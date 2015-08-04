@@ -86,8 +86,11 @@ public abstract class SGDJob extends KnimeSparkJob {
         SupervisedLearnerUtils.validateInput(aConfig, this, getLogger());
         getLogger().log(Level.INFO, "starting "+getAlgName()+" job...");
 
+        //note that the column in the input RDD should be normalized into 0-1 ranges
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
+
 
         final Serializable model = execute(sc, aConfig, inputRdd);
 

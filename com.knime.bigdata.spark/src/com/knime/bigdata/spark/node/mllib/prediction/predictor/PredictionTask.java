@@ -48,7 +48,7 @@ public class PredictionTask implements Serializable {
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString(aModel),
                 ParameterConstants.PARAM_TABLE_1, aInputTableName,
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(colIdxs)}, ParameterConstants.PARAM_OUTPUT,
+                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
             new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
     }
     /**

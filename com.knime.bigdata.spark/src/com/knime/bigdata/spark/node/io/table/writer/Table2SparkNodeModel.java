@@ -86,11 +86,11 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         final int rowCount = table.getRowCount();
         final DataTableSpec spec = table.getSpec();
         final SparkTypeConverter<?, ?>[] converter = SparkTypeRegistry.getConverter(spec);
-        //extract primitive Java Types
-        final Class<?>[] primitiveTypes = new Class<?>[converter.length];
-        for (int colIx = 0; colIx < converter.length; colIx++) {
-            primitiveTypes[colIx] = converter[colIx].getPrimitiveType();
-        }
+        //        //extract primitive Java Types
+        //        final Class<?>[] primitiveTypes = new Class<?>[converter.length];
+        //        for (int colIx = 0; colIx < converter.length; colIx++) {
+        //            primitiveTypes[colIx] = converter[colIx].getPrimitiveType();
+        //        }
         final Object[][] data = new Object[rowCount][converter.length];
         int rowIdx = 0;
         for (final DataRow row : table) {
@@ -106,7 +106,7 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
 
         exec.setMessage("Sending data to Spark...");
         final SparkDataTable resultTable = new SparkDataTable(getContext(), table.getDataTableSpec());
-        executeSparkJob(exec, data, primitiveTypes, resultTable);
+        executeSparkJob(exec, data, resultTable);
         exec.setProgress(1, "Spark data object created");
         return new PortObject[]{new SparkDataPortObject(resultTable)};
     }
@@ -125,9 +125,9 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
      * @param exec
      * @throws Exception
      */
-    private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final Class<?>[] aPrimitiveTypes,
-        final SparkDataTable resultTable) throws Exception {
-        final String params = paramDef(data, aPrimitiveTypes, resultTable.getID());
+    private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final SparkDataTable resultTable)
+        throws Exception {
+        final String params = paramDef(data, resultTable.getID());
         final String jobId =
             JobControler.startJob(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(), params);
 
@@ -137,16 +137,13 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
     /**
      *
      * @param data
-     * @param aPrimitiveTypes
      * @param aResultTableName
      * @return JSon string with job parameters
      */
-    public static String paramDef(final Object[][] data, final Class<?>[] aPrimitiveTypes, final String aResultTableName) {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_TABLE_1, ModelUtils.toString(data),
-                ParameterConstants.PARAM_SCHEMA, JsonUtils.toJsonArray((Object[])aPrimitiveTypes)},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
+    public static String paramDef(final Object[][] data, final String aResultTableName) {
+        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
+            new Object[]{ParameterConstants.PARAM_TABLE_1, ModelUtils.toString(data)}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
     }
 
     /**
