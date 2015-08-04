@@ -3,7 +3,6 @@ package com.knime.bigdata.spark.testing.jobserver.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.json.JsonArray;
@@ -116,20 +115,19 @@ public class JsonUtilsTest {
         final String jsonStr =
             JsonUtils.asJson(new Object[]{
                 "data",
-                ModelUtils.toString(inputData)}); //JsonUtils.toJson2DimArray(inputData)});
-        //ConfigList config = ConfigFactory.parseString(jsonStr).getList("data");
+                ModelUtils.toString(inputData)});
         String configValue = ConfigFactory.parseString(jsonStr).getString("data");
-        List<Class<?>> types = new ArrayList<>();
-        types.add(Integer.class);
-        types.add(Boolean.class);
-        types.add(String.class);
-        types.add(String.class);
-        types.add(Double.class);
-        List<Row> data = ImportKNIMETableJob.getInputData(types, configValue);
+
+        List<Row> data = ImportKNIMETableJob.getInputData(configValue);
         assertEquals("unexpected number of rows", inputData.length, data.size());
         for (int ix = 0; ix < inputData.length; ix++) {
             Object[] inputRow = inputData[ix];
             Row outputRow = data.get(ix);
+            assertTrue("column type must not change (Col 0)", outputRow.get(0) instanceof Integer);
+            assertTrue("column type must not change (Col 1)", outputRow.get(1) instanceof Boolean);
+            assertTrue("column type must not change (Col 2)", outputRow.get(2) instanceof String);
+            assertTrue("column type must not change (Col 3)", outputRow.get(3) instanceof String);
+            assertTrue("column type must not change (Col 4): "+outputRow.get(4), (outputRow.get(4) == null) || (outputRow.get(4) instanceof Double));
             for (int colIx = 0; colIx < inputRow.length; colIx++) {
                 assertEquals("unexpected cell value", inputRow[colIx], outputRow.get(colIx));
             }
@@ -141,22 +139,21 @@ public class JsonUtilsTest {
         final String jsonStr =
             JsonUtils.asJson(new Object[]{
                 "data",
-                ModelUtils.toString(largeData)}); //JsonUtils.toJson2DimArray(largeData)
-        //ConfigList config = ConfigFactory.parseString(jsonStr).getString("data");
+                ModelUtils.toString(largeData)});
         String configValue = ConfigFactory.parseString(jsonStr).getString("data");
-        List<Class<?>> types = new ArrayList<>();
-        types.add(String.class);
-        types.add(Integer.class);
-        types.add(Double.class);
-        types.add(Double.class);
-        types.add(String.class);
-        types.add(Boolean.class);
-        types.add(String.class);
-        List<Row> data = ImportKNIMETableJob.getInputData(types, configValue);
+
+        List<Row> data = ImportKNIMETableJob.getInputData(configValue);
         assertEquals("unexpected number of rows", largeData.length, data.size());
         for (int ix = 0; ix < largeData.length; ix++) {
             Object[] inputRow = largeData[ix];
             Row outputRow = data.get(ix);
+            assertTrue("column type must not change (Col 0)", outputRow.get(0) instanceof String);
+            assertTrue("column type must not change (Col 1)", outputRow.get(1) instanceof Integer);
+            assertTrue("column type must not change (Col 2)", outputRow.get(2) instanceof Double);
+            assertTrue("column type must not change (Col 3)", outputRow.get(3) instanceof Double);
+            assertTrue("column type must not change (Col 4)", outputRow.get(4) instanceof String);
+            assertTrue("column type must not change (Col 5)", outputRow.get(5) instanceof Boolean);
+            assertTrue("column type must not change (Col 6)", outputRow.get(6) instanceof String);
             for (int colIx = 0; colIx < inputRow.length; colIx++) {
                 assertEquals("unexpected cell value for row ["+ix+"]", inputRow[colIx], outputRow.get(colIx));
             }

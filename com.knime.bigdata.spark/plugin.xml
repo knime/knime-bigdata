@@ -137,6 +137,18 @@
             id="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory">
       </node>
       <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLApplyNodeFactory">
+      </node>
+      <node
             category-path="/labs/spark/mining"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory"

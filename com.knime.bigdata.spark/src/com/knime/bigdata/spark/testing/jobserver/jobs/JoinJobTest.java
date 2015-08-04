@@ -94,15 +94,12 @@ public class JoinJobTest extends SparkSpec {
         return params.toString();
     }
 
-
     @Test
     public void innerJoinOfIdenticalTableWithOneMatchingColumn() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
-            Integer.class, Boolean.class, Double.class, String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
-            Integer.class, Boolean.class, Double.class, String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -128,10 +125,8 @@ public class JoinJobTest extends SparkSpec {
     public void innerJoinOfTwoTablesWithTwoMatchingColumns() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, new Class<?>[]{
-            Integer.class, Boolean.class, Double.class, String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, ImportKNIMETableJobTest.TEST_TABLE, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -162,10 +157,8 @@ public class JoinJobTest extends SparkSpec {
     public void innerJoinOfTwoTablesWithMultipleMatches() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -207,10 +200,8 @@ public class JoinJobTest extends SparkSpec {
     public void leftOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -253,10 +244,8 @@ public class JoinJobTest extends SparkSpec {
     public void rightOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -299,10 +288,8 @@ public class JoinJobTest extends SparkSpec {
     public void fullOuterJoinOfTwoTablesWithMultipleMatches() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -333,14 +320,12 @@ public class JoinJobTest extends SparkSpec {
         checkResult(contextName, resTableName, expected);
     }
 
-
     @Test
     public void fullOuterJoinOfTwoTablesWithNoMatches() throws Throwable {
         KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, new Class<?>[]{Integer.class, String.class,
-            String.class}, "tab1");
-        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_4, new Class<?>[]{Integer.class}, "tab2");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_3, "tab1");
+        ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_4, "tab2");
 
         final String resTableName = "OutTab";
 
@@ -356,10 +341,8 @@ public class JoinJobTest extends SparkSpec {
 
         Object[][] expected = new Object[6][];
 
-        expected[0] =
-            new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], null};
-        expected[1] =
-            new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], null};
+        expected[0] = new Object[]{TEST_TABLE_3[0][0], TEST_TABLE_3[0][1], TEST_TABLE_3[0][2], null};
+        expected[1] = new Object[]{TEST_TABLE_3[1][0], TEST_TABLE_3[1][1], TEST_TABLE_3[1][2], null};
         expected[2] = new Object[]{TEST_TABLE_3[2][0], TEST_TABLE_3[2][1], TEST_TABLE_3[2][2], null};
         expected[3] = new Object[]{TEST_TABLE_3[3][0], TEST_TABLE_3[3][1], TEST_TABLE_3[3][2], null};
         expected[4] = new Object[]{null, null, null, TEST_TABLE_4[0][0]};
@@ -368,6 +351,7 @@ public class JoinJobTest extends SparkSpec {
         JobControler.waitForJobAndFetchResult(contextName, jobId, null);
         checkResult(contextName, resTableName, expected);
     }
+
     private void
         checkResult(final KNIMESparkContext aContextName, final String resTableName, final Object[][] aExpected)
             throws Exception {

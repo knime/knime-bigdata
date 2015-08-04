@@ -8,6 +8,7 @@ import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -24,32 +25,25 @@ import com.typesafe.config.ConfigFactory;
 @SuppressWarnings("javadoc")
 public class ImportKNIMETableJobParametersTest {
 
-    @Test
+    @Test(expected = GenericKnimeSparkException.class)
     public void jobValidationShouldCheckMissingInputDataParameter() throws Throwable {
         String params =
-                Table2SparkNodeModel.paramDef(null, new Class<?>[]{Integer.class, Boolean.class, Double.class, String.class}, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1, "Input");
-    }
-
-    @Test
-    public void jobValidationShouldCheckMissingColumnClassParameter() throws Throwable {
-        String params = Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}}, null, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SCHEMA, "Input");
+                Table2SparkNodeModel.paramDef(null, "OutTab");
+        Config config = ConfigFactory.parseString(params);
+        ImportKNIMETableJob.getInputData(config);
     }
 
     @Test
     public void jobValidationShouldCheckMissingOuputParameter() throws Throwable {
         String params =
-                Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}}, new Class<?>[]{Integer.class,
-                Boolean.class, Double.class, String.class}, null);
+                Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}},  null);
         myCheck(params, ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1, "Output");
     }
 
     @Test
     public void jobValidationShouldCheckAllValidParams() throws Throwable {
         String params =
-                Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}}, new Class<?>[]{Integer.class,
-                Boolean.class, Double.class, String.class}, "outtab");
+                Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}},  "outtab");
         KnimeSparkJob testObj = new ImportKNIMETableJob();
         Config config = ConfigFactory.parseString(params);
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
@@ -71,8 +65,7 @@ public class ImportKNIMETableJobParametersTest {
     public void gernerateListOfRowFromConfigObject() throws Throwable {
         String params =
                 Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"},
-                new Object[]{2, false, 6.2d, "my other string"}}, new Class<?>[]{Integer.class, Boolean.class,
-                Double.class, String.class}, "outtab");
+                new Object[]{2, false, 6.2d, "my other string"}},  "outtab");
         Config config = ConfigFactory.parseString(params);
         List<Row> rows = ImportKNIMETableJob.getInputData(config);
         assertEquals("conversion of data table failed for Row 0",
