@@ -7,18 +7,20 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.ApplyNominalValueMappingJob;
+import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.preproc.convert.stringmapper.ValueConverterTask;
 import com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.typesafe.config.Config;
+import com.knime.bigdata.spark.testing.SparkSpec;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -27,54 +29,46 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class SparkStringMapperApplyJobTest {
+public class SparkStringMapperApplyJobTest extends SparkSpec {
 
-
-    private static String getParams(final String aInputDataPath, final String aMappingTableName,final Integer[] aColIdxes,
-        final String[] aColNames, final String aOutputDataPath) {
-        return SparkStringMapperApplyTask.paramDef(aInputDataPath, aMappingTableName, aColIdxes, aColNames, aOutputDataPath);
+    private static String getParams(final String aInputDataPath, final String aMappingTableName,
+        final Integer[] aColIdxes, final String[] aColNames, final String aOutputDataPath) {
+        return SparkStringMapperApplyTask.paramDef(aInputDataPath, aMappingTableName, aColIdxes, aColNames,
+            aOutputDataPath);
     }
 
     @Test
     public void jobValidationShouldCheckMissingInputDataParameter() throws Throwable {
-        String params =
-            getParams(null, "mapTab", new Integer[]{1, 5, 2, 7}, new String[]{"a", "b", "c", "d"},
-                "tab1");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1, "Input");
+        String params = getParams(null, "mapTab", new Integer[]{1, 5, 2, 7}, new String[]{"a", "b", "c", "d"}, "tab1");
+        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingMappingTableParameter() throws Throwable {
         String params = getParams("xx", null, new Integer[]{9}, new String[]{"a", "b", "c", "d"}, "tab1");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_2, "Input");
+        myCheck(params, ParameterConstants.PARAM_TABLE_2, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingColSelectionParameter() throws Throwable {
-        String params =
-            getParams("tab1", "mapTab", null, new String[]{"a", "b", "c", "d"}, "tab1");
-        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+        String params = getParams("tab1", "mapTab", null, new String[]{"a", "b", "c", "d"}, "tab1");
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_COL_IDXS
             + "' is not of expected type 'integer list'.");
     }
 
-    @Test
+    //not sure whether we really want to disallow empty column selection...
+    //@Test
     public void jobValidationShouldCheckIncorrectColSelectionParameter() throws Throwable {
-        String params =
-            getParams("tab1","mapTab",  new Integer[]{}, new String[]{"a", "b", "c", "d"},
-                "tab2");
-        String msg =
-            "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
-                + "' is empty.";
+        String params = getParams("tab1", "mapTab", new Integer[]{}, new String[]{"a", "b", "c", "d"}, "tab2");
+        String msg = "Input parameter '" + ParameterConstants.PARAM_COL_IDXS + "' is empty.";
         myCheck(params, msg);
 
     }
 
     @Test
     public void jobValidationShouldCheckMissingOuputParameter1() throws Throwable {
-        String params =
-            getParams("tab1", "mapTab", new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"},
-                null);
-        myCheck(params, ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1, "Output");
+        String params = getParams("tab1", "mapTab", new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"}, null);
+        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Output");
 
     }
 
@@ -84,55 +78,49 @@ public class SparkStringMapperApplyJobTest {
 
     private void myCheck(final String params, final String aMsg) {
         KnimeSparkJob testObj = new ApplyNominalValueMappingJob();
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as invalid", ValidationResultConverter.invalid(aMsg),
             testObj.validate(config));
     }
 
-    //@Test
+    @Test
     public void runningConverterJobDirectlyShouldProduceResult() throws Throwable {
-        KNIMESparkContext contextName = KnimeContext.getSparkContext();
-        try {
+        ImportKNIMETableJobTest.importTestTable(CONTEXT_ID, ImportKNIMETableJobTest.TEST_TABLE, "tabUnnorm");
 
-            String params =
-                getParams("tab1","mapTab", new Integer[]{1, 5, 2}, new String[]{"a", "b", "c"},
-                    "tab1");
+        //need to run normalize job first to create mapping...
+        final String normParams = ValueConverterTask.paramDef(new Integer[] {1, 3}, new String[] {"a", "c"}, MappingType.COLUMN.toString(), "tabUnnorm", "tabNorm", "mapTab");
+        String jobId0 = JobControler.startJob(CONTEXT_ID, ConvertNominalValuesJob.class.getCanonicalName(), normParams);
+        JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId0, null);
 
-            String jobId =
-                JobControler.startJob(contextName, SparkStringMapperApplyTask.class.getCanonicalName(), params.toString());
+        String params = getParams("tabNorm", "mapTab", new Integer[]{1, 3}, new String[]{"a", "c"}, "normalizedData");
 
-            assertFalse("job should have finished properly",
-                JobControler.waitForJob(contextName, jobId, null).equals(JobStatus.UNKNOWN));
+        String jobId = JobControler.startJob(CONTEXT_ID, ApplyNominalValueMappingJob.class.getCanonicalName(), params);
 
-            // result is serialized as a string
-            assertFalse("job should not be running anymore",
-                JobStatus.OK.equals(JobControler.getJobStatus(contextName, jobId)));
+        JobResult res = JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId, null);
+        assertFalse("job should have finished properly", res.isError());
 
-            checkResult(contextName);
-
-        } finally {
-            KnimeContext.destroySparkContext(contextName);
-        }
+        checkResult(CONTEXT_ID, "normalizedData");
 
     }
 
-    private void checkResult(final KNIMESparkContext aContextName) throws Exception {
+    private void checkResult(final KNIMESparkContext aContextName, final String aTableName) throws Exception {
 
         // now check result:
         String takeJobId =
-            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(),
-                rowFetcherDef(10, "/home/spark/..."));
-        assertFalse("job should have finished properly",
-            JobControler.waitForJob(aContextName, takeJobId, null).equals(JobStatus.UNKNOWN));
-        JobResult res = JobControler.fetchJobResult(aContextName, takeJobId);
+            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(), rowFetcherDef(10, aTableName));
+
+        JobResult res = JobControler.waitForJobAndFetchResult(aContextName, takeJobId, null);
         assertNotNull("row fetcher must return a result", res);
-        assertEquals("fetcher should return OK as result status", "OK", res.getMessage());
         Object[][] arrayRes = (Object[][])res.getObjectResult();
-        assertEquals("fetcher should return correct number of rows", 10, arrayRes.length);
+        assertEquals("fetcher should return correct number of rows", ImportKNIMETableJobTest.TEST_TABLE.length,
+            arrayRes.length);
         for (int i = 0; i < arrayRes.length; i++) {
             Object[] o = arrayRes[i];
-            System.out.println("row[" + i + "]: " + o);
+            assertEquals("2x normalize should add 4 columns", ImportKNIMETableJobTest.TEST_TABLE[i].length + 4, o.length);
+            assertEquals("normalize and apply normalize should yield same result (Col 1)", (double)o[4], (double)o[6], 0.00000001d);
+            assertEquals("normalize and apply normalize should yield same result (Col 3)", (double)o[5], (double)o[7], 0.00000001d);
         }
+
     }
 
     private String rowFetcherDef(final int aNumRows, final String aTableName) {

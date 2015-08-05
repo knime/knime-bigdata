@@ -51,6 +51,7 @@ public class KMeansTask {
 
     /**
      * constructor - simply stores parameters
+     *
      * @param inputRDD input RDD
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param noOfCluster - number of clusters (aka "k")
@@ -85,7 +86,7 @@ public class KMeansTask {
     public KMeansModel execute(final ExecutionContext exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
         final String jobId =
-                JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+            JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
@@ -93,12 +94,26 @@ public class KMeansTask {
     }
 
     private String kmeansLearnerDef() {
+        return kmeansLearnerDef(m_inputTableName, m_includeColIdxs, m_noOfIteration, m_noOfCluster, m_outputTableName);
+    }
+
+    /**
+     * (unit testing only)
+     * @param aInputTableName
+     * @param aIncludeColIdxs
+     * @param aNoOfIteration
+     * @param aNoOfCluster
+     * @param aOutputTableName
+     * @return
+     */
+    public static String kmeansLearnerDef(final String aInputTableName, final Integer[] aIncludeColIdxs,
+        final Integer aNoOfIteration, final Integer aNoOfCluster, final String aOutputTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_includeColIdxs),
-                ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
-                "" + m_noOfIteration, ParameterConstants.PARAM_TABLE_1, m_inputTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
+            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aIncludeColIdxs),
+                ParameterConstants.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
+                aNoOfIteration, ParameterConstants.PARAM_TABLE_1, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
     }
 
 }

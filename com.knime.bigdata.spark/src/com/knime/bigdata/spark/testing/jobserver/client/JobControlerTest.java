@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.testing.jobserver.client;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -9,8 +10,11 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.testing.SparkSpec;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -44,8 +48,10 @@ public class JobControlerTest extends SparkSpec {
     @Test
     public void jobControlerShouldCreateJobWithProperName() throws Throwable {
         final String params = JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "9", ParameterConstants.PARAM_TABLE_1, "someRDD"}});
+            new Object[]{ParameterConstants.PARAM_NUMBER_ROWS, 9, ParameterConstants.PARAM_TABLE_1, "someRDD"}});
 
+        JobConfig conf = new JobConfig(ConfigFactory.parseString(params));
+        assertEquals("configuration should be valid",ValidationResultConverter.valid(), new FetchRowsJob().validate(conf));
         String jobId = JobControler.startJob(CONTEXT_ID, FetchRowsJob.class.getCanonicalName(), params);
         assertNotNull("JobId should not be null", jobId);
         assertTrue("JobId should be some lengthy string", jobId.length() > 25);

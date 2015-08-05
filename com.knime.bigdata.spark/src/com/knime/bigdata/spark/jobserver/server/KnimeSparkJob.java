@@ -7,18 +7,17 @@ import spark.jobserver.SparkJobValidation;
 import com.typesafe.config.Config;
 
 /**
- * handles translation of Scala interface to Java
+ * handles translation of Scala interface to Java, wraps generic config with JobConfig
  *
  * @author dwk
  *
  */
 public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
 
-    //TODO - wrap Config so that we can provide some utilities and encode String arguments
     @Override
     public Object runJob(final Object aSparkContext, final Config aConfig) {
         try {
-            return runJobWithContext((SparkContext)aSparkContext, aConfig);
+            return runJobWithContext((SparkContext)aSparkContext, new JobConfig(aConfig));
         } catch (Throwable t) {
             t.printStackTrace();
             return JobResult.emptyJobResult().withMessage(t.getMessage()).withException(t);
@@ -27,7 +26,7 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
 
     @Override
     public final SparkJobValidation validate(final Object aSparkContext, final Config aConfig) {
-        return validate(aConfig);
+        return validate(new JobConfig(aConfig));
     }
 
     /**
@@ -39,7 +38,7 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
      * @param aConfig
      * @return SparkJobValidation
      */
-    public abstract SparkJobValidation validate(Config aConfig);
+    public abstract SparkJobValidation validate(JobConfig aConfig);
 
     /**
      * run the actual job
@@ -49,6 +48,6 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
      * @return JobResult - a container for results as they are supported by KNIME
      * @throws GenericKnimeSparkException
      */
-    protected abstract JobResult runJobWithContext(SparkContext aSparkContext, Config aConfig)
+    protected abstract JobResult runJobWithContext(SparkContext aSparkContext, JobConfig aConfig)
         throws GenericKnimeSparkException;
 }

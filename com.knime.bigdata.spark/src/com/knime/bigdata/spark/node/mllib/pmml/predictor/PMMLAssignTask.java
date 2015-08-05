@@ -32,7 +32,7 @@ import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.PMMLAssign;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -50,12 +50,12 @@ public class PMMLAssignTask implements Serializable {
     }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
-        final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) {
+        final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{
                     ParameterConstants.PARAM_TABLE_1, inputID,
-                    ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString((Serializable)bytecode),
+                    ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64((Serializable)bytecode),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
                     ParameterConstants.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
                     //we have to replace the . with / since the key in the map uses / instead of .

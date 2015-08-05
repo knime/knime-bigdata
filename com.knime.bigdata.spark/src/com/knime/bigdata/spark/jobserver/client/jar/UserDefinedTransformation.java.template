@@ -41,7 +41,7 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation;
-import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
@@ -60,91 +60,88 @@ $additionalImports
  */
 public class $className extends KnimeSparkJob {
 	   
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+        /**
+         *
+         */
+        private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
+        private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_INPUT
-            + "." + ParameterConstants.PARAM_TABLE_2;
+        private static final String PARAM_INPUT_TABLE_KEY2 =  ParameterConstants.PARAM_TABLE_2;
 
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT
-            + "." + ParameterConstants.PARAM_TABLE_1;
+        private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
-    private final static Logger LOGGER = Logger.getLogger(KnimeSparkJob.class
-            .getName());
+        private final static Logger LOGGER = Logger.getLogger(KnimeSparkJob.class
+                .getName());
 
-    /**
-     * parse parameters - there are no default values, but two required values:
-     * - the key of the first input JavaRDD (the second input RDD is optional)
-     * - the key of the output JavaRDD
-     */
-    @Override
-    public SparkJobValidation validate(final Config aConfig) {
-        String msg = null;
-        if (!aConfig.hasPath(PARAM_INPUT_TABLE_KEY)) {
-            msg = "Input parameter '" + PARAM_INPUT_TABLE_KEY + "' missing.";
+        /**
+         * parse parameters - there are no default values, but two required values:
+         * - the key of the first input JavaRDD (the second input RDD is optional)
+         * - the key of the output JavaRDD
+         */
+        @Override
+        public SparkJobValidation validate(final JobConfig aConfig) {
+            String msg = null;
+            if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY)) {
+                msg = "Input parameter '" + PARAM_INPUT_TABLE_KEY + "' missing.";
+            }
+            if (msg == null && !aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
+                msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
+            }
+            if (msg != null) {
+                return ValidationResultConverter.invalid(msg);
+            }
+            return ValidationResultConverter.valid();
         }
-        if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
-        }
-        if (msg != null) {
-            return ValidationResultConverter.invalid(msg);
-        }
-        return ValidationResultConverter.valid();
-    }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
-        String msg = null;
-        if (!validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY))) {
-            msg = "(First) Input data table missing for key: "+aConfig.getString(PARAM_INPUT_TABLE_KEY);
+        private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
+            String msg = null;
+            if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY))) {
+                msg = "(First) Input data table missing for key: "+aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY);
+            }
+            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2))) {
+                msg = "Second input data table missing for key: "+aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2);
+            }
+
+            if (msg != null) {
+                LOGGER.severe(msg);
+                throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
+            }
         }
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY2))) {
-            msg = "Second input data table missing for key: "+aConfig.getString(PARAM_INPUT_TABLE_KEY2);
-        }
-        
-        if (msg != null) {
-            LOGGER.severe(msg);
-            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
-        }
-    }
 
 
-    /**
-     * run the actual job, the result is serialized back to the client
-     * the primary result of this job should be a side effect - new new RDD in the
-     * map of named RDDs
-     * @return JobResult with table information
-     */
-    @Override
-    protected JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig) throws GenericKnimeSparkException {
-        validateInput(aConfig);
+        /**
+         * run the actual job, the result is serialized back to the client
+         * the primary result of this job should be a side effect - new new RDD in the
+         * map of named RDDs
+         * @return JobResult with table information
+         */
+        @Override
+        protected JobResult runJobWithContext(final SparkContext aSparkContext, final JobConfig aConfig) throws GenericKnimeSparkException {
+            validateInput(aConfig);
 
-        LOGGER.log(Level.INFO, "starting transformation job...");
-        final JavaRDD<Row> rowRDD1 = getFromNamedRdds(aConfig
-                .getString(PARAM_INPUT_TABLE_KEY));
-		final JavaRDD<Row> rowRDD2;
-		if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2)) {
-		  rowRDD2 = getFromNamedRdds(aConfig
-                .getString(PARAM_INPUT_TABLE_KEY2));
-        } else {
-          rowRDD2 = null;
-        }
-        
-        final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD1, rowRDD2);
+            LOGGER.log(Level.INFO, "starting transformation job...");
+            final JavaRDD<Row> rowRDD1 = getFromNamedRdds(aConfig
+                    .getInputParameter(PARAM_INPUT_TABLE_KEY));
+            final JavaRDD<Row> rowRDD2;
+            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2)) {
+              rowRDD2 = getFromNamedRdds(aConfig
+                    .getInputParameter(PARAM_INPUT_TABLE_KEY2));
+            } else {
+              rowRDD2 = null;
+            }
 
-        LOGGER.log(Level.INFO, "transformation completed");
-        addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
-        try {
-            final StructType schema = StructTypeBuilder.fromRows(transformed.take(10)).build();
-            return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
-        } catch (InvalidSchemaException e) {
-            throw new GenericKnimeSparkException(e);
+            final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD1, rowRDD2);
+
+            LOGGER.log(Level.INFO, "transformation completed");
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), transformed);
+            try {
+                final StructType schema = StructTypeBuilder.fromRows(transformed.take(10)).build();
+                return JobResult.emptyJobResult().withMessage("OK").withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), schema);
+            } catch (InvalidSchemaException e) {
+                throw new GenericKnimeSparkException(e);
+            }
         }
-    }
 
     /**
      *

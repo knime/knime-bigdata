@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
@@ -15,13 +16,13 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.JoinMode;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.testing.SparkSpec;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -32,66 +33,11 @@ import com.typesafe.config.ConfigFactory;
 @SuppressWarnings("javadoc")
 public class JoinJobTest extends SparkSpec {
 
-    static String getInputOutputParamPair(final String aLeftTab, final String aRightTab, final String aJoinMode,
+    private static String getParams(final String aLeftTab, final String aRightTab, final JoinMode aJoinMode,
         final Integer[] aJoinColIdxesLeft, final Integer[] aJoinColIdxesRight, final Integer[] aSelectColIdxesLeft,
         final Integer[] aSelectColIdxesRight, final String aOutputDataPath1) {
-        StringBuilder params = new StringBuilder("");
-        params.append("   \"").append(ParameterConstants.PARAM_INPUT).append("\" {\n");
-
-        if (aLeftTab != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": \"").append(aLeftTab)
-                .append("\",\n");
-        }
-        if (aRightTab != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_2).append("\": \"").append(aRightTab)
-                .append("\",\n");
-        }
-
-        if (aJoinMode != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_STRING).append("\": \"")
-                .append(aJoinMode.toString()).append("\",\n");
-        }
-
-        if (aJoinColIdxesLeft != null) {
-            params.append("         \"")
-                .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0)).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesLeft)).append(",\n");
-        }
-        if (aJoinColIdxesRight != null) {
-            params.append("         \"")
-                .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1)).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aJoinColIdxesRight)).append(",\n");
-        }
-        if (aSelectColIdxesLeft != null) {
-            params.append("         \"")
-                .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2)).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesLeft)).append(",\n");
-        }
-        if (aSelectColIdxesRight != null) {
-            params.append("         \"")
-                .append(ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3)).append("\": ")
-                .append(JsonUtils.toJsonArray((Object[])aSelectColIdxesRight)).append(",\n");
-        }
-
-        params.append("    }\n");
-        params.append("    \"").append(ParameterConstants.PARAM_OUTPUT).append("\" {\n");
-        if (aOutputDataPath1 != null) {
-            params.append("         \"").append(ParameterConstants.PARAM_TABLE_1).append("\": \"")
-                .append(aOutputDataPath1).append("\"\n");
-        }
-        params.append("    }\n");
-        params.append("    \n");
-        return params.toString();
-    }
-
-    private static String getParams(final String aLeftTab, final String aRightTab, final String aJoinMode,
-        final Integer[] aJoinColIdxesLeft, final Integer[] aJoinColIdxesRight, final Integer[] aSelectColIdxesLeft,
-        final Integer[] aSelectColIdxesRight, final String aOutputDataPath1) {
-        StringBuilder params = new StringBuilder("{\n");
-        params.append(getInputOutputParamPair(aLeftTab, aRightTab, aJoinMode, aJoinColIdxesLeft, aJoinColIdxesRight,
-            aSelectColIdxesLeft, aSelectColIdxesRight, aOutputDataPath1));
-        params.append("}");
-        return params.toString();
+        return SparkJoinerTask.joinParams(aLeftTab, aRightTab, aJoinMode, aJoinColIdxesLeft, aJoinColIdxesRight,
+            aSelectColIdxesLeft, aSelectColIdxesRight, aOutputDataPath1);
     }
 
     @Test
@@ -104,8 +50,8 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{1, 3}, new Integer[]{1, 3},
-                new Integer[]{0, 1, 2, 3}, new Integer[]{0, 1, 2, 3}, resTableName);
+            getParams("tab1", "tab2", JoinMode.InnerJoin, new Integer[]{1, 3}, new Integer[]{1, 3}, new Integer[]{0, 1,
+                2, 3}, new Integer[]{0, 1, 2, 3}, resTableName);
 
         String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
 
@@ -131,10 +77,10 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{0, 3}, new Integer[]{0, 2},
-                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+            getParams("tab1", "tab2", JoinMode.InnerJoin, new Integer[]{0, 3}, new Integer[]{0, 2}, new Integer[]{0, 1,
+                2}, new Integer[]{2, 1}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 
@@ -163,10 +109,10 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.InnerJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
-                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+            getParams("tab1", "tab2", JoinMode.InnerJoin, new Integer[]{0, 2}, new Integer[]{0, 2}, new Integer[]{0, 1,
+                2}, new Integer[]{2, 1}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 
@@ -206,10 +152,10 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.LeftOuterJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
-                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+            getParams("tab1", "tab2", JoinMode.LeftOuterJoin, new Integer[]{0, 2}, new Integer[]{0, 2}, new Integer[]{
+                0, 1, 2}, new Integer[]{2, 1}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 
@@ -250,10 +196,10 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.RightOuterJoin.toString(), new Integer[]{0, 2}, new Integer[]{0, 2},
-                new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
+            getParams("tab1", "tab2", JoinMode.RightOuterJoin, new Integer[]{0, 2}, new Integer[]{0, 2}, new Integer[]{
+                0, 1, 2}, new Integer[]{2, 1}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 
@@ -294,14 +240,14 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.FullOuterJoin.toString(), new Integer[]{1}, new Integer[]{1},
+            getParams("tab1", "tab2", JoinMode.FullOuterJoin, new Integer[]{1}, new Integer[]{1},
                 new Integer[]{0, 1, 2}, new Integer[]{2, 1}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 
-        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params.toString());
+        String jobId = JobControler.startJob(contextName, JoinJob.class.getCanonicalName(), params);
 
         Object[][] expected = new Object[6][];
 
@@ -330,10 +276,10 @@ public class JoinJobTest extends SparkSpec {
         final String resTableName = "OutTab";
 
         String params =
-            getParams("tab1", "tab2", JoinMode.FullOuterJoin.toString(), new Integer[]{0}, new Integer[]{0},
+            getParams("tab1", "tab2", JoinMode.FullOuterJoin, new Integer[]{0}, new Integer[]{0},
                 new Integer[]{0, 1, 2}, new Integer[]{0}, resTableName);
 
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             new JoinJob().validate(config));
 

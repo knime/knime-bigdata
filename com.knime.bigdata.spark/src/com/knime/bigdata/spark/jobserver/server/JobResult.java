@@ -30,6 +30,7 @@ import java.util.Set;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
@@ -136,7 +137,7 @@ public class JobResult implements Serializable {
      * @param aTableSchema table schema
      * @return copy of this with additional table schema
      */
-    public JobResult withTable(@Nonnull final String aKey, @Nonnull final StructType aTableSchema) {
+    public JobResult withTable(@Nonnull final String aKey, @Nullable final StructType aTableSchema) {
         final Map<String, StructType> tables = new HashMap<>(m_tables);
         tables.put(aKey, aTableSchema);
         return new JobResult(m_msg, Collections.unmodifiableMap(tables), m_object);
@@ -212,13 +213,17 @@ public class JobResult implements Serializable {
                 m.put(stripQuotes(entry.getKey()), null);
             }
         }
-        if (isError) {
-            return new JobResult(msg, Collections.unmodifiableMap(m), null, (String)ModelUtils.fromString(config
-                .getString(OBJECT_IDENTIFIER)));
-        }
-        if (config.hasPath(OBJECT_IDENTIFIER)) {
-            return new JobResult(msg, Collections.unmodifiableMap(m), (Serializable)ModelUtils.fromString(config
-                .getString(OBJECT_IDENTIFIER)));
+        try {
+            if (isError) {
+                return new JobResult(msg, Collections.unmodifiableMap(m), null,
+                    (String)(new JobConfig(config).decodeFromParameter(OBJECT_IDENTIFIER)));
+            }
+            if (config.hasPath(OBJECT_IDENTIFIER)) {
+                return new JobResult(msg, Collections.unmodifiableMap(m),
+                    (Serializable)(new JobConfig(config).decodeFromParameter(OBJECT_IDENTIFIER)));
+            }
+        } catch (GenericKnimeSparkException e) {
+            return JobResult.emptyJobResult().withMessage(msg).withException(e);
         }
         return new JobResult(msg, Collections.unmodifiableMap(m), null);
     }
@@ -253,7 +258,12 @@ public class JobResult implements Serializable {
         config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
         config = config.withValue(STATUS_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_isError));
         if (m_object != null) {
-            config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(ModelUtils.toString(m_object)));
+            try {
+                config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_object)));
+            } catch (GenericKnimeSparkException e) {
+                e.printStackTrace();
+                System.err.println("Unable to convert reselt object to base 64 string. Object will be dropped.");
+            }
         }
         return config.root().render(ConfigRenderOptions.concise());
 

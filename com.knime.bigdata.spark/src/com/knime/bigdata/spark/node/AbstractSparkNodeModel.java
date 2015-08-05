@@ -135,7 +135,6 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
-        Set<String> listNamedRDDs = null;
         KNIMESparkContext context = null;
         for (final PortObject portObject : inData) {
             if (portObject instanceof  SparkDataPortObject) {
@@ -147,10 +146,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                         throw new IllegalStateException(
                             "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
                     }
-                    listNamedRDDs = KnimeContext.listNamedRDDs(context);
                 }
+                Set<String> listNamedRDDs = KnimeContext.listNamedRDDs(context);
                 if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
-                    //wait a bit and try again
+
+                    //JobServer comment in 'NamedRDDSupport.scala': "The caller should always expect
+                    // that the data returned from the method 'getNames()' may be stale and incorrect.
+                    //hence: wait a bit and try again
                     Thread.sleep(1000);
                     listNamedRDDs = KnimeContext.listNamedRDDs(context);
                     if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {

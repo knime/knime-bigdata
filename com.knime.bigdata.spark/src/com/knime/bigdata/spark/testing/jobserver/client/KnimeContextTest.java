@@ -1,6 +1,5 @@
 package com.knime.bigdata.spark.testing.jobserver.client;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +28,7 @@ public class KnimeContextTest extends SparkSpec {
 			throws Throwable {
 
 		String prefix = KNIMEConfigContainer.m_config
-				.getString("spark.contextNamePrefix");
+				.getString("spark.contextName");
 		assertNotNull("context name must never be null", CONTEXT_ID);
 		assertTrue("context names must start with proper prefix",
 		    CONTEXT_ID.getContextName().startsWith(prefix));
@@ -39,12 +38,12 @@ public class KnimeContextTest extends SparkSpec {
 		assertTrue("context names must start with proper prefix",
 				context2.getContextName().startsWith(prefix));
 		assertTrue("contexts should be re-used",
-		    CONTEXT_ID.equals(context2.getContextName()));
+		    CONTEXT_ID.getContextName().equals(context2.getContextName()));
 		KnimeContext.destroySparkContext(context2);
 
         Thread.sleep(1000);
 		KNIMESparkContext contextName3 = KnimeContext.getSparkContext();
-		assertFalse("destroyed contexts should NOT be re-used",
+		assertTrue("destroyed contexts should also be re-used",
 		    CONTEXT_ID.equals(contextName3));
 		CONTEXT_ID = contextName3;
 	}

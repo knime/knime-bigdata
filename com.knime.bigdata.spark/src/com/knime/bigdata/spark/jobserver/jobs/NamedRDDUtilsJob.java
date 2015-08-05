@@ -28,12 +28,12 @@ import org.apache.spark.SparkContext;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.typesafe.config.Config;
 
 /**
  * helper job to manage named RDDs on the server side
@@ -54,9 +54,9 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_OP = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_STRING;
+    private static final String PARAM_OP = ParameterConstants.PARAM_STRING;
 
     private final static Logger LOGGER = Logger.getLogger(NamedRDDUtilsJob.class.getName());
 
@@ -65,17 +65,17 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config config) {
+    public SparkJobValidation validate(final JobConfig config) {
         String msg = null;
 
-        if (!config.hasPath(PARAM_OP)) {
+        if (!config.hasInputParameter(PARAM_OP)) {
             msg = "Input parameter '" + PARAM_OP + "' missing.";
         }
 
-        if (msg != null && !config.hasPath(PARAM_TABLE_KEY) && config.getString(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
+        if (msg == null && !config.hasInputParameter(PARAM_TABLE_KEY)
+            && OP_DELETE.equalsIgnoreCase(config.getInputParameter(PARAM_OP).toString())) {
             msg = "Input parameter '" + PARAM_TABLE_KEY + "' missing.";
         }
-
 
         if (msg != null) {
             return ValidationResultConverter.invalid(msg);
@@ -84,32 +84,30 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
     }
 
     /**
-     * executes operations on named RDDs, currently one of:
-     * - remove the given named RDD from the map of named RDDs
-     * - return list of known named RDDs
+     * executes operations on named RDDs, currently one of: - remove the given named RDD from the map of named RDDs -
+     * return list of known named RDDs
      *
-     * @return "OK" result if named rdd does not exist anymore after execution (deletion),
-     * names of known named RDDS (info), "ERROR" result otherwise
+     * @return "OK" result if named rdd does not exist anymore after execution (deletion), names of known named RDDS
+     *         (info), "ERROR" result otherwise
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig)  {
-        if (aConfig.getString(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) {
+        if (aConfig.getInputParameter(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
             return deleteNamedRDD(aConfig);
         }
-        JobResult res = JobResult.emptyJobResult();
+        JobResult res = JobResult.emptyJobResult().withMessage("OK");
         for (String name : RDDUtils.activeNamedRDDs(this)) {
             res = res.withTable(name, null);
         }
-        return res.withMessage("OK");
-
+        return res;
     }
 
     /**
      * @param aConfig
      * @return
      */
-    private JobResult deleteNamedRDD(final Config aConfig) {
-        final String rddName = aConfig.getString(PARAM_TABLE_KEY);
+    private JobResult deleteNamedRDD(final JobConfig aConfig) {
+        final String rddName = aConfig.getInputParameter(PARAM_TABLE_KEY);
         LOGGER.log(Level.INFO, "deleting reference to named RDD " + rddName);
         deleteNamedRdd(rddName);
         if (validateNamedRdd(rddName)) {

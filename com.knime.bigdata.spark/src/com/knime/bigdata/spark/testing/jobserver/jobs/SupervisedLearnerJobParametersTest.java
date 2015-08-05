@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -27,20 +27,20 @@ public class SupervisedLearnerJobParametersTest {
     @Test
     public void jobValidationShouldCheckMissingInputDataParameter() throws Throwable {
         String params = getParams(null, "mapping", new Integer[]{0, 1}, new String[]{"a", "b", "c"}, 2, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1, "Input");
+        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingColumnSelectionParameter() throws Throwable {
         String params = getParams("data", "mapping", null, new String[]{"a", "b", "c"}, 2, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_COL_IDXS
             + "' is not of expected type 'integer list'.");
     }
 
     @Test
     public void jobValidationShouldCheckMissingColumnNamesParameter() throws Throwable {
         String params = getParams("data", "mapping", new Integer[]{0, 1}, null, 2, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_COL_IDXS
+        myCheck(params, "Input parameter '" + ParameterConstants.PARAM_COL_IDXS
             + ParameterConstants.PARAM_STRING + "' is not of expected type 'string list'.");
     }
 
@@ -49,10 +49,7 @@ public class SupervisedLearnerJobParametersTest {
         String params = getParams("data", "mapping", new Integer[]{0, 1}, new String[]{"a", "b"}, 2, "OutTab");
         myCheck(
             params,
-            "Input parameter '"
-                + ParameterConstants.PARAM_INPUT
-                + "."
-                + ParameterConstants.PARAM_COL_IDXS
+            "Input parameter '"+ParameterConstants.PARAM_COL_IDXS
                 + ParameterConstants.PARAM_STRING
                 + "' is of unexpected length. It must have one entry for each select input column and 1 for the label column.");
     }
@@ -60,7 +57,7 @@ public class SupervisedLearnerJobParametersTest {
     @Test
     public void jobValidationShouldCheckMissingLabelIdxParameter() throws Throwable {
         String params = getParams("data", "mapping", new Integer[]{0, 1}, new String[]{"a", "b", "c"}, null, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_LABEL_INDEX, "Input");
+        myCheck(params, ParameterConstants.PARAM_LABEL_INDEX, "Input");
     }
 
     @Test
@@ -83,7 +80,7 @@ public class SupervisedLearnerJobParametersTest {
     @Test
     public void jobValidationShouldCheckAllValidParams() throws Throwable {
         String params = allValidParams();
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as valid", null, SupervisedLearnerUtils.checkConfig(config));
     }
 
@@ -92,7 +89,7 @@ public class SupervisedLearnerJobParametersTest {
     }
 
     private void myCheck(final String params, final String aMsg) {
-        Config config = ConfigFactory.parseString(params);
+        JobConfig config = new JobConfig( ConfigFactory.parseString(params));
         assertEquals("Configuration should be recognized as invalid", aMsg, SupervisedLearnerUtils.checkConfig(config));
     }
 

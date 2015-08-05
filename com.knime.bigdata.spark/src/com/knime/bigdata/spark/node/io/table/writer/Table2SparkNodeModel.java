@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -139,10 +139,11 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
      * @param data
      * @param aResultTableName
      * @return JSon string with job parameters
+     * @throws GenericKnimeSparkException
      */
-    public static String paramDef(final Object[][] data, final String aResultTableName) {
+    public static String paramDef(final Object[][] data, final String aResultTableName) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_TABLE_1, ModelUtils.toString(data)}, ParameterConstants.PARAM_OUTPUT,
+            new Object[]{ParameterConstants.PARAM_TABLE_1, JobConfig.encodeToBase64(data)}, ParameterConstants.PARAM_OUTPUT,
             new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
     }
 

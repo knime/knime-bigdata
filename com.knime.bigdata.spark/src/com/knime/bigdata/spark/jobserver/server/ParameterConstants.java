@@ -69,6 +69,7 @@ public class ParameterConstants {
      * column indices starting with 0
      */
     public static final String PARAM_COL_IDXS = "colIndices";
+
     /**
      * Classification column index starting with 0
      */

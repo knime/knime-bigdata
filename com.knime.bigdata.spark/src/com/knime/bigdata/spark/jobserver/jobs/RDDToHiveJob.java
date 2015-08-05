@@ -39,6 +39,7 @@ import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -58,14 +59,11 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_DATA_FILE_NAME =  ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_DATA_SCHEMA = ParameterConstants.PARAM_INPUT + "."
-            + ParameterConstants.PARAM_SCHEMA;
+    private static final String PARAM_DATA_SCHEMA =ParameterConstants.PARAM_SCHEMA;
 
-    private static final String PARAM_RESULT_TABLE_NAME = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_RESULT_TABLE_NAME = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(RDDToHiveJob.class.getName());
 
@@ -74,15 +72,15 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config config) {
+    public SparkJobValidation validate(final JobConfig config) {
         String msg = null;
-        if (!config.hasPath(PARAM_DATA_FILE_NAME)) {
+        if (!config.hasInputParameter(PARAM_DATA_FILE_NAME)) {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
-        if (msg == null && !config.hasPath(PARAM_DATA_SCHEMA)) {
+        if (msg == null && !config.hasInputParameter(PARAM_DATA_SCHEMA)) {
             msg = "Input parameter '" + PARAM_DATA_SCHEMA + "' missing.";
         }
-        if (msg == null && !config.hasPath(PARAM_RESULT_TABLE_NAME)) {
+        if (msg == null && !config.hasOutputParameter(PARAM_RESULT_TABLE_NAME)) {
             msg = "Output parameter '" + PARAM_RESULT_TABLE_NAME + "' missing.";
         }
         if (msg != null) {
@@ -98,10 +96,10 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
      * @return the JobResult
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "writing hive table...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME));
-        String schemaString = aConfig.getString(PARAM_DATA_SCHEMA);
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_DATA_FILE_NAME));
+        String schemaString = aConfig.getInputParameter(PARAM_DATA_SCHEMA);
         Config schemaConfig = ConfigFactory.parseString(schemaString);
         ConfigList types = schemaConfig.getList(ParameterConstants.PARAM_SCHEMA);
         StructField[] fields = new StructField[types.size()];
@@ -117,7 +115,7 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
                 throw new RuntimeException(e);
             }
         }
-        final String hiveTableName = aConfig.getString(PARAM_RESULT_TABLE_NAME);
+        final String hiveTableName = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE_NAME);
         try {
             StructType resultSchema = DataType.createStructType(fields);
             final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));

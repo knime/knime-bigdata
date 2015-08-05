@@ -34,14 +34,12 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 
 /**
  *
@@ -51,9 +49,9 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_DATA_ARRAY = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    static final String PARAM_DATA_ARRAY = ParameterConstants.PARAM_TABLE_1;
 
-    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(ImportKNIMETableJob.class.getName());
 
@@ -62,14 +60,14 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasPath(PARAM_DATA_ARRAY)) {
+        if (!aConfig.hasInputParameter(PARAM_DATA_ARRAY)) {
             msg = "Input parameter '" + PARAM_DATA_ARRAY + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_TABLE_KEY)) {
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
         }
 
@@ -86,25 +84,9 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      * @return data as list of Row objects
      * @throws GenericKnimeSparkException
      */
-    public static List<Row> getInputData(final Config aConfig) throws GenericKnimeSparkException {
-        try {
-            final String data = aConfig.getString(PARAM_DATA_ARRAY);
-
-            return getInputData(data);
-        } catch (ConfigException e) {
-            throw new GenericKnimeSparkException("Input parameter '" + PARAM_DATA_ARRAY
-                + "' is not of expected type 'Object[][]': " + e.getMessage());
-        }
-    }
-
-    /**
-     * @param aData
-     * @return data as list of Row objects
-     * @throws GenericKnimeSparkException
-     */
-    public static List<Row> getInputData(final String aData) throws GenericKnimeSparkException {
+    public static List<Row> getInputData(final JobConfig aConfig) throws GenericKnimeSparkException {
         final List<Row> rows = new ArrayList<>();
-        Object[][] data = ModelUtils.fromString(aData);
+        final Object[][] data = aConfig.decodeFromInputParameter(PARAM_DATA_ARRAY);
         if (data == null) {
             throw new GenericKnimeSparkException("Input parameter '" + PARAM_DATA_ARRAY + "' is empty' ");
         }
@@ -131,10 +113,11 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "inserting KNIME data table into RDD...");
         final List<Row> rowData = getInputData(aConfig);
-        storeInRdd(sc, rowData, aConfig.getString(PARAM_TABLE_KEY));
+        storeInRdd(sc, rowData, aConfig.getOutputStringParameter(PARAM_TABLE_KEY));
         return JobResult.emptyJobResult().withMessage("OK");
     }
 
