@@ -35,11 +35,11 @@ import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.typesafe.config.Config;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD
@@ -50,11 +50,9 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_SQL = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_SQL_STATEMENT;
+    private static final String PARAM_SQL = ParameterConstants.PARAM_SQL_STATEMENT;
 
-    private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(HiveToRDDJob.class.getName());
 
@@ -63,14 +61,14 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config config) {
+    public SparkJobValidation validate(final JobConfig config) {
         String msg = null;
 
-        if (!config.hasPath(PARAM_SQL)) {
+        if (!config.hasInputParameter(PARAM_SQL)) {
             msg = "Input parameter '" + PARAM_SQL + "' missing.";
         }
 
-        if (!config.hasPath(PARAM_RESULT_TABLE_KEY)) {
+        if (!config.hasOutputParameter(PARAM_RESULT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_RESULT_TABLE_KEY + "' missing.";
         }
 
@@ -87,13 +85,13 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
      * @return rdd key
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) {
         LOGGER.log(Level.INFO, "reading hive table...");
 
         LOGGER.log(Level.INFO, "context: "+sc.conf().toDebugString());
 
         final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
-        final String sqlStatement = aConfig.getString(PARAM_SQL);
+        final String sqlStatement = aConfig.getInputParameter(PARAM_SQL);
         LOGGER.log(Level.INFO, "sql statement: ..."+sqlStatement);
 
         final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
@@ -106,7 +104,7 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        final String key = aConfig.getString(PARAM_RESULT_TABLE_KEY);
+        final String key = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE_KEY);
         LOGGER.log(Level.INFO, "Storing Hive query result under key: " + key);
         addToNamedRdds(key, new JavaRDD<>(rdd, rdd.elementClassTag()));
         return JobResult.emptyJobResult().withMessage("OK").withTable(key, schemaInputRDD.schema());

@@ -22,6 +22,8 @@ package com.knime.bigdata.spark.node.preproc.joiner;
 
 import java.io.Serializable;
 
+import javax.annotation.Nonnull;
+
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -32,6 +34,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -64,15 +67,16 @@ public class SparkJoinerTask implements Serializable {
     private String m_ResultTableName;
 
     SparkJoinerTask(final SparkRDD aLeftRDD, final SparkRDD aRightRDD, final JoinMode aJoinMode,
-        final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
-        final Integer[] aSelectColIdxesLeft, final Integer[] aSelectColIdxesRight, final String aResultRDD) {
-        this(aLeftRDD.getContext(), aLeftRDD.getID(), aRightRDD.getID(), aJoinMode, aJoinColIdxesLeft, aJoinColIdxesRight, aSelectColIdxesLeft, aSelectColIdxesRight, aResultRDD);
+        final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight, final Integer[] aSelectColIdxesLeft,
+        final Integer[] aSelectColIdxesRight, final String aResultRDD) {
+        this(aLeftRDD.getContext(), aLeftRDD.getID(), aRightRDD.getID(), aJoinMode, aJoinColIdxesLeft,
+            aJoinColIdxesRight, aSelectColIdxesLeft, aSelectColIdxesRight, aResultRDD);
         aLeftRDD.compatible(aRightRDD);
     }
 
     /**
-     * (public for unit testing)
-     * stores references to given parameters
+     * (public for unit testing) stores references to given parameters
+     *
      * @param aContext
      * @param aLeftRDD
      * @param aRightRDD
@@ -83,8 +87,8 @@ public class SparkJoinerTask implements Serializable {
      * @param aSelectColIdxesRight
      * @param aResultRDD
      */
-    public SparkJoinerTask(final KNIMESparkContext aContext, final String aLeftRDD, final String aRightRDD, final JoinMode aJoinMode,
-        final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
+    public SparkJoinerTask(final KNIMESparkContext aContext, final String aLeftRDD, final String aRightRDD,
+        final JoinMode aJoinMode, final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
         final Integer[] aSelectColIdxesLeft, final Integer[] aSelectColIdxesRight, final String aResultRDD) {
 
         m_context = aContext;
@@ -117,33 +121,52 @@ public class SparkJoinerTask implements Serializable {
         JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
     }
 
-
     private String joinParams() {
-
-        final Object[] inputParamas =
-            {ParameterConstants.PARAM_TABLE_1, m_LeftTableName, ParameterConstants.PARAM_TABLE_2, m_RightTableName,
-                ParameterConstants.PARAM_STRING, m_JoinMode.toString(),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0),
-                JsonUtils.toJsonArray((Object[])m_JoinColIdxesLeft),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1),
-                JsonUtils.toJsonArray((Object[])m_JoinColIdxesRight),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2),
-                JsonUtils.toJsonArray((Object[])m_SelectColIdxesLeft),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3),
-                JsonUtils.toJsonArray((Object[])m_SelectColIdxesRight)};
-
-        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_ResultTableName}});
+        return joinParams(m_LeftTableName, m_RightTableName, m_JoinMode, m_JoinColIdxesLeft, m_JoinColIdxesRight,
+            m_SelectColIdxesLeft, m_SelectColIdxesRight, m_ResultTableName);
     }
 
     /**
-     * (unit testing only)
-     * check that all required parameters are properly set and can be verified (this does not
-     * make any calls to the server)
+     * (unit testing)
+     *
+     * @param aLeftTableName
+     * @param aRightTableName
+     * @param aJoinMode
+     * @param aJoinColIdxesLeft
+     * @param aJoinColIdxesRight
+     * @param aSelectColIdxesLeft
+     * @param aSelectColIdxesRight
+     * @param aResultTableName
+     * @return Json representation of parameters
+     */
+    public static String joinParams(@Nonnull final String aLeftTableName, @Nonnull final String aRightTableName,
+        @Nonnull final JoinMode aJoinMode, @Nonnull final Integer[] aJoinColIdxesLeft,
+        @Nonnull final Integer[] aJoinColIdxesRight, @Nonnull final Integer[] aSelectColIdxesLeft,
+        @Nonnull final Integer[] aSelectColIdxesRight, @Nonnull final String aResultTableName) {
+        final Object[] inputParamas =
+            {ParameterConstants.PARAM_TABLE_1, aLeftTableName, ParameterConstants.PARAM_TABLE_2, aRightTableName,
+                ParameterConstants.PARAM_STRING, aJoinMode.toString(),
+                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0),
+                JsonUtils.toJsonArray((Object[])aJoinColIdxesLeft),
+                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1),
+                JsonUtils.toJsonArray((Object[])aJoinColIdxesRight),
+                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2),
+                JsonUtils.toJsonArray((Object[])aSelectColIdxesLeft),
+                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3),
+                JsonUtils.toJsonArray((Object[])aSelectColIdxesRight)};
+
+        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
+            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
+    }
+
+    /**
+     * (unit testing only) check that all required parameters are properly set and can be verified (this does not make
+     * any calls to the server)
+     *
      * @return validation result
      */
     public SparkJobValidation validate() {
-        return new JoinJob().validate(ConfigFactory.parseString(joinParams()));
+        return new JoinJob().validate(new JobConfig(ConfigFactory.parseString(joinParams())));
     }
 
 }

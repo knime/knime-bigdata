@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -89,7 +90,7 @@ class DummyRestClient implements IRestClient {
 
     @Override
     public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
-        String val = "{\"result\":\"OK\"}";
+        String val = JobResult.emptyJobResult().withMessage("OK").toString();
         if (KNIMEConfigContainer.m_config.hasPath(aType)) {
             val = KNIMEConfigContainer.m_config.getString(aType);
         }

@@ -3,7 +3,7 @@ $packageName
 import org.apache.spark.SparkContext;
 import spark.jobserver.SparkJobValidation;
 
-import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
@@ -15,13 +15,13 @@ public class $className
 	   extends com.knime.bigdata.spark.jobserver.server.KnimeSparkJob {
 	   
 	@Override
-	public SparkJobValidation validate(final Config aConfig) {
+	public SparkJobValidation validate(final JobConfig aConfig) {
 		$validationCode
 		return ValidationResultConverter.valid();
 	}
 
 	@Override
-	protected JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig) { 
+	protected JobResult runJobWithContext(final SparkContext aSparkContext, final JobConfig aConfig) { 
 		$executionCode
 	}
 

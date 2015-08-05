@@ -32,6 +32,7 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
@@ -39,7 +40,6 @@ import com.knime.bigdata.spark.jobserver.server.NominalValueMappingFactory;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.typesafe.config.Config;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns
@@ -50,8 +50,7 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_MAPPING_TABLE = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
+    private static final String PARAM_MAPPING_TABLE = ParameterConstants.PARAM_TABLE_2;
 
     private final static Logger LOGGER = Logger.getLogger(ApplyNominalValueMappingJob.class.getName());
 
@@ -60,10 +59,10 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = super.validateParam(aConfig);
 
-        if (msg == null && !aConfig.hasPath(PARAM_MAPPING_TABLE)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_MAPPING_TABLE)) {
             msg = "Input parameter '" + PARAM_MAPPING_TABLE + "' missing.";
         }
 
@@ -74,10 +73,10 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
     }
 
     @Override
-    void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         super.validateInput(aConfig);
         String msg = null;
-        final String key = aConfig.getString(PARAM_MAPPING_TABLE);
+        final String key = aConfig.getInputParameter(PARAM_MAPPING_TABLE);
         if (key == null) {
             msg = "Input parameter at port 2 is missing!";
         } else if (!validateNamedRdd(key)) {
@@ -85,7 +84,7 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
         }
         if (msg != null) {
             LOGGER.severe(msg);
-            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
+            throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ": " + msg);
         }
     }
 
@@ -93,18 +92,18 @@ public class ApplyNominalValueMappingJob extends AbstractStringMapperJob {
      * {@inheritDoc}
      */
     @Override
-    JobResult execute(final SparkContext aContext, final Config aConfig, final JavaRDD<Row> aInputRdd,
+    JobResult execute(final SparkContext aContext, final JobConfig aConfig, final JavaRDD<Row> aInputRdd,
         final int[] aColIds, final Map<Integer, String> aColNameForIndex) throws GenericKnimeSparkException {
         // construct NominalValueMapping from mapping RDD
-        final List<Row> mappingsTable = getFromNamedRdds(aConfig.getString(PARAM_MAPPING_TABLE)).collect();
+        final List<Row> mappingsTable = getFromNamedRdds(aConfig.getInputParameter(PARAM_MAPPING_TABLE)).collect();
         NominalValueMapping mappings = NominalValueMappingFactory.fromTable(mappingsTable);
 
         // apply mapping
         JavaRDD<Row> mappedData = RDDUtilsInJava.applyLabelMapping(aInputRdd, aColIds, mappings);
 
         // store result in named RDD
-        LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getString(PARAM_RESULT_TABLE));
-        addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData);
+        LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), mappedData);
 
         final MappedRDDContainer mappedDataContainer = new MappedRDDContainer(mappedData, mappings);
         //number of all (!)  columns in input data table

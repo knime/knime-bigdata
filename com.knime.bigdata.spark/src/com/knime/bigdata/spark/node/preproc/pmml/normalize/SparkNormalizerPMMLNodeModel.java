@@ -49,8 +49,9 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.Normalizer;
@@ -298,12 +299,13 @@ public class SparkNormalizerPMMLNodeModel extends NodeModel {
      * @param aNormalization
      * @param aOutputTableName
      * @return Json representation of parameters
+     * @throws GenericKnimeSparkException
      */
     public static String paramsToJson(final String aInputTableName, final Integer[] aNumericColIdx,
-        final NormalizationSettings aNormalization, final String aOutputTableName) {
+        final NormalizationSettings aNormalization, final String aOutputTableName) throws GenericKnimeSparkException {
 
         final Object[] inputParamas =
-            new Object[]{ParameterConstants.PARAM_STRING, ModelUtils.toString(aNormalization),
+            new Object[]{ParameterConstants.PARAM_STRING, JobConfig.encodeToBase64(aNormalization),
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
                 ParameterConstants.PARAM_TABLE_1, aInputTableName};
 

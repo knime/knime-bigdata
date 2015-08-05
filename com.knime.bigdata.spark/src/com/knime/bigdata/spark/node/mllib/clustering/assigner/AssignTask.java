@@ -31,7 +31,7 @@ import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.Predictor;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 
@@ -44,10 +44,10 @@ public class AssignTask implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String kmeansPredictorDef(final KMeansModel aModel, final String aInputTableName,
-        final Integer[] colIdxs, final String aOutputTableName) {
+        final Integer[] colIdxs, final String aOutputTableName) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString(aModel),
+            new Object[]{ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aModel),
                 ParameterConstants.PARAM_TABLE_1, aInputTableName,
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
             new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});

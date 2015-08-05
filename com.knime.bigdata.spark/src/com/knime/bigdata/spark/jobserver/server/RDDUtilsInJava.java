@@ -74,18 +74,23 @@ public class RDDUtilsInJava {
                 for (int ix : aColumnIds) {
                     //ignore columns that have no mapping
                     if (aMappings.hasMappingForColumn(ix)) {
-                        Integer labelOrIndex = aMappings.getNumberForValue(ix, row.getString(ix));
-                        if (aMappings.getType() == MappingType.BINARY) {
-                            int numValues = aMappings.getNumberOfValues(ix);
-                            for (int i = 0; i < numValues; i++) {
-                                if (labelOrIndex == i) {
-                                    builder.add(1.0d);
-                                } else {
-                                    builder.add(0.0d);
-                                }
-                            }
+                        Object val = row.get(ix);
+                        if (val == null) {
+                            builder.add(null);
                         } else {
-                            builder.add(labelOrIndex.doubleValue());
+                            Integer labelOrIndex = aMappings.getNumberForValue(ix, val.toString());
+                            if (aMappings.getType() == MappingType.BINARY) {
+                                int numValues = aMappings.getNumberOfValues(ix);
+                                for (int i = 0; i < numValues; i++) {
+                                    if (labelOrIndex == i) {
+                                        builder.add(1.0d);
+                                    } else {
+                                        builder.add(0.0d);
+                                    }
+                                }
+                            } else {
+                                builder.add(labelOrIndex.doubleValue());
+                            }
                         }
                     }
                 }
@@ -191,8 +196,11 @@ public class RDDUtilsInJava {
                 public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues, final Row row)
                     throws Exception {
                     for (int ix : aNominalColumnIndices) {
-                        //no need to add modified set as the modification is done implicitly
-                        aAggregatedValues.get(ix).add(row.getString(ix));
+                        Object val = row.get(ix);
+                        if (val != null) {
+                            //no need to add modified set as the modification is done implicitly
+                            aAggregatedValues.get(ix).add(val.toString());
+                        }
                     }
                     return aAggregatedValues;
                 }
@@ -213,11 +221,13 @@ public class RDDUtilsInJava {
 
     /**
      * convert given RDD to an RDD<Vector> with selected columns and compute statistics for these columns
+     *
      * @param aInputRdd
      * @param aColumnIndices
      * @return MultivariateStatisticalSummary
      */
-    public static MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd, final Collection<Integer> aColumnIndices) {
+    public static MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices) {
 
         List<Integer> columnIndices = new ArrayList<Integer>();
         columnIndices.addAll(aColumnIndices);
@@ -225,43 +235,47 @@ public class RDDUtilsInJava {
 
         JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
 
-         // Compute column summary statistics.
-         MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
-         return summary;
+        // Compute column summary statistics.
+        MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
+        return summary;
     }
 
     /**
-     * computes the scale and translation parameters from the given data and according to the given normalization settings,
-     * then applies these parameters to the input RDD
+     * computes the scale and translation parameters from the given data and according to the given normalization
+     * settings, then applies these parameters to the input RDD
+     *
      * @param aInputRdd
      * @param aColumnIndices indices of numeric columns to be normalized
      * @param aNormalization
-     * @return container with normalization parameters for each of the given columns, other columns are just copied
-     *         over
+     * @return container with normalization parameters for each of the given columns, other columns are just copied over
      */
     public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
         final Collection<Integer> aColumnIndices, final NormalizationSettings aNormalization) {
 
-       MultivariateStatisticalSummary stats = findColumnStats(aInputRdd, aColumnIndices);
-       final NormalizedRDDContainer rddNormalizer = NormalizedRDDContainerFactory.getNormalizedRDDContainer(stats, aNormalization);
+        MultivariateStatisticalSummary stats = findColumnStats(aInputRdd, aColumnIndices);
+        final NormalizedRDDContainer rddNormalizer =
+            NormalizedRDDContainerFactory.getNormalizedRDDContainer(stats, aNormalization);
 
-       rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
         return rddNormalizer;
     }
 
     /**
      * applies the given the scale and translation parameters to the given data to the input RDD
+     *
      * @param aInputRdd
      * @param aColumnIndices indices of numeric columns to be normalized
-     * @return container with normalization parameters for each of the given columns, other columns are just copied
-     *         over
+     * @param aScalesAndTranslations normalization parameters
+     * @return container with normalization parameters for each of the given columns, other columns are just copied over
      */
     public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
         final Collection<Integer> aColumnIndices, final Double[][] aScalesAndTranslations) {
 
-       final NormalizedRDDContainer rddNormalizer = NormalizedRDDContainerFactory.getNormalizedRDDContainer(aScalesAndTranslations[0],aScalesAndTranslations[1]);
+        final NormalizedRDDContainer rddNormalizer =
+            NormalizedRDDContainerFactory.getNormalizedRDDContainer(aScalesAndTranslations[0],
+                aScalesAndTranslations[1]);
 
-       rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
         return rddNormalizer;
     }
 
@@ -308,7 +322,8 @@ public class RDDUtilsInJava {
                 final double label;
                 if (labelMapping != null) {
                     label =
-                        labelMapping.getNumberForValue(labelColumnIndex, row.getString(labelColumnIndex)).doubleValue();
+                        labelMapping.getNumberForValue(labelColumnIndex, row.get(labelColumnIndex).toString())
+                            .doubleValue();
                 } else {
                     //no mapping given - label must already be numeric
                     label = row.getDouble(labelColumnIndex);

@@ -16,13 +16,13 @@ import org.junit.Test;
 import org.junit.rules.ExternalResource;
 
 import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLApplyNodeModel;
 import com.knime.bigdata.spark.testing.jobserver.server.RDDUtilsInJavaTest;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -82,11 +82,11 @@ public class SparkNormalizerPMMLApplyNodeModelTest {
         final String json =
             SparkNormalizerPMMLApplyNodeModel.paramsToJson("tab1", new Integer[]{1, 5, 2, 7}, null, "out");
 
-        Config config = ConfigFactory.parseString(json);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(json));
         final KnimeSparkJob testObj = new NormalizeColumnsJob();
         assertEquals(
             "Configuration should be recognized as invalid",
-            ValidationResultConverter.invalid("Input parameter '" + ParameterConstants.PARAM_INPUT + "."
+            ValidationResultConverter.invalid("Input parameter '"
                 + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1) + "' missing."),
             testObj.validate(config));
 
@@ -99,7 +99,7 @@ public class SparkNormalizerPMMLApplyNodeModelTest {
             SparkNormalizerPMMLApplyNodeModel.paramsToJson("tab1", new Integer[]{1, 5, 2, 7}, new Double[][]{
                 new Double[]{0.0001d}, new Double[]{67889.7654d}}, "out");
 
-        Config config = ConfigFactory.parseString(json);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(json));
         final KnimeSparkJob testObj = new NormalizeColumnsJob();
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
             testObj.validate(config));
@@ -124,7 +124,7 @@ public class SparkNormalizerPMMLApplyNodeModelTest {
         data.add(new Double[]{1d});
 
         CreateRDD rddData = new CreateRDD(sparkContextResource.sparkContext, data);
-        Config config = ConfigFactory.parseString(json);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(json));
         List<Row> normalizedData = NormalizeColumnsJob.execute(config, rddData.rowData).getRdd().collect();
         assertEquals("number rows must not change", data.size(), normalizedData.size());
         for (int i = 0; i < data.size(); i++) {
@@ -141,7 +141,7 @@ public class SparkNormalizerPMMLApplyNodeModelTest {
         final Double[] translation = new Double[]{0d, 33d, 0d};
 
         final String json =
-            SparkNormalizerPMMLApplyNodeModel.paramsToJson("tab1", new Integer[]{0, 1,2}, new Double[][]{scale,
+            SparkNormalizerPMMLApplyNodeModel.paramsToJson("tab1", new Integer[]{0, 1, 2}, new Double[][]{scale,
                 translation}, "out");
 
         final List<Double[]> data = new ArrayList<Double[]>(4);
@@ -151,13 +151,13 @@ public class SparkNormalizerPMMLApplyNodeModelTest {
         data.add(new Double[]{1d, -1d, 3d});
 
         CreateRDD rddData = new CreateRDD(sparkContextResource.sparkContext, data);
-        Config config = ConfigFactory.parseString(json);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(json));
         List<Row> normalizedData = NormalizeColumnsJob.execute(config, rddData.rowData).getRdd().collect();
         assertEquals("number rows must not change", data.size(), normalizedData.size());
         for (int i = 0; i < data.size(); i++) {
             for (int j = 0; j < scale.length; j++) {
-                assertEquals("normalized value[" + i + ","+j+"]", data.get(i)[j] * scale[j] + translation[j], normalizedData
-                    .get(i).getDouble(j), 0.00000001);
+                assertEquals("normalized value[" + i + "," + j + "]", data.get(i)[j] * scale[j] + translation[j],
+                    normalizedData.get(i).getDouble(j), 0.00000001);
             }
         }
 

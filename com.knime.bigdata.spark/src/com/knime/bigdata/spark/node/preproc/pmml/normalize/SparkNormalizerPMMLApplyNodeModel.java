@@ -44,8 +44,9 @@ import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.Normalizer;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -187,7 +188,7 @@ public class SparkNormalizerPMMLApplyNodeModel extends NodeModel {
     }
 
     private static String paramsToJson(final String aInputTableName, final Integer[] aNumericColIdx,
-        final AffineTransConfiguration config, final String aOutputTableName) {
+        final AffineTransConfiguration config, final String aOutputTableName) throws GenericKnimeSparkException {
         final Double[][] normalizationParameters = new Double[2][];
 
         final double[] scales = config.getScales();
@@ -209,13 +210,14 @@ public class SparkNormalizerPMMLApplyNodeModel extends NodeModel {
      * @param aNormalizationParameters
      * @param aOutputTableName
      * @return Json representation of parameters
+     * @throws GenericKnimeSparkException
      */
     public static String paramsToJson(final String aInputTableName, final Integer[] aNumericColIdx,
-        final Double[][] aNormalizationParameters, final String aOutputTableName) {
+        final Double[][] aNormalizationParameters, final String aOutputTableName) throws GenericKnimeSparkException {
 
         final Object[] inputParamas =
             new Object[]{ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1),
-                ModelUtils.toString(aNormalizationParameters), ParameterConstants.PARAM_COL_IDXS,
+            JobConfig.encodeToBase64(aNormalizationParameters), ParameterConstants.PARAM_COL_IDXS,
                 JsonUtils.toJsonArray((Object[])aNumericColIdx), ParameterConstants.PARAM_TABLE_1, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,

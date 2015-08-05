@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -26,8 +27,8 @@ public class SparkNormalizerPMMLNodeModelTest {
         final String json = SparkNormalizerPMMLNodeModel.paramsToJson("tab1", new Integer[]{1, 5, 2, 7}, null, "out");
 
         final KnimeSparkJob testObj = new NormalizeColumnsJob();
-        assertEquals("Configuration should be recognized as invalid", ValidationResultConverter.invalid("Input parameter '" + ParameterConstants.PARAM_INPUT+"."+ParameterConstants.PARAM_STRING + "' missing."),
-            testObj.validate(ConfigFactory.parseString(json)));
+        assertEquals("Configuration should be recognized as invalid", ValidationResultConverter.invalid("Input parameter '" + ParameterConstants.PARAM_STRING + "' missing."),
+            testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
     }
 
     @Test
@@ -37,6 +38,6 @@ public class SparkNormalizerPMMLNodeModelTest {
 
         final KnimeSparkJob testObj = new NormalizeColumnsJob();
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
-            testObj.validate(ConfigFactory.parseString(json)));
+            testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
     }
 }

@@ -15,7 +15,7 @@ import org.apache.spark.mllib.regression.LinearRegressionWithSGD;
 
 import scala.Tuple2;
 
-import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 
 /**
  * @author dwk
@@ -31,8 +31,8 @@ public class LinearRegressionWithSGDJob extends SGDJob {
      * @return
      */
     @Override
-    Serializable execute(final SparkContext sc, final Config aConfig, final JavaRDD<LabeledPoint> inputRdd) {
-        return execute(inputRdd, aConfig.getInt(PARAM_NUM_ITERATIONS), aConfig.getDouble(PARAM_REGULARIZATION));
+    Serializable execute(final SparkContext sc, final JobConfig aConfig, final JavaRDD<LabeledPoint> inputRdd) {
+        return execute(inputRdd, getNumIterations(aConfig), getRegularization(aConfig));
     }
 
     /**

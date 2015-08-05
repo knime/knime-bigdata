@@ -36,6 +36,7 @@ import org.apache.spark.sql.api.java.StructType;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -43,7 +44,6 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
-import com.typesafe.config.Config;
 
 /**
  * converts a text file that is read from disk to a JavaRDD
@@ -54,11 +54,11 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
 
-    static final String PARAM_CSV_SEPARATOR = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SEPARATOR;
+    static final String PARAM_CSV_SEPARATOR = ParameterConstants.PARAM_SEPARATOR;
 
-    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1;
+    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(JavaRDDFromFile.class.getName());
 
@@ -67,14 +67,14 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config config) {
+    public SparkJobValidation validate(final JobConfig config) {
         String msg = null;
 
-        if (!config.hasPath(PARAM_DATA_FILE_NAME)) {
+        if (!config.hasInputParameter(PARAM_DATA_FILE_NAME)) {
             msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
         }
 
-        if (msg == null && !config.hasPath(PARAM_TABLE_KEY)) {
+        if (msg == null && !config.hasOutputParameter(PARAM_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
         }
 
@@ -84,13 +84,14 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
         // further checks - in this case we check whether the input data file
         // exists
-        if (!new File(aConfig.getString(PARAM_DATA_FILE_NAME)).exists()) {
+        final String fName = aConfig.getInputParameter(PARAM_DATA_FILE_NAME);
+        if (!new File(fName).exists()) {
             msg =
-                "Input data file " + new File(aConfig.getString(PARAM_DATA_FILE_NAME)).getAbsolutePath()
+                "Input data file " + new File(fName).getAbsolutePath()
                     + " does not exist!";
         }
         if (msg != null) {
@@ -99,9 +100,9 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
         }
     }
 
-    private static String getSeparator(final Config aConfig) {
-        if (aConfig.hasPath(PARAM_CSV_SEPARATOR)) {
-            return aConfig.getString(PARAM_CSV_SEPARATOR);
+    private static String getSeparator(final JobConfig aConfig) {
+        if (aConfig.hasInputParameter(PARAM_CSV_SEPARATOR)) {
+            return aConfig.getInputParameter(PARAM_CSV_SEPARATOR);
         }
         return " ";
     }
@@ -114,28 +115,28 @@ public class JavaRDDFromFile extends KnimeSparkJob implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "reading and converting text file...");
         final JavaRDD<Row> parsedData = javaRDDFromFile(sc, aConfig, getSeparator(aConfig));
         LOGGER.log(Level.INFO, "done");
 
-        LOGGER.log(Level.INFO, "Storing predicted data unter key: " + aConfig.getString(PARAM_TABLE_KEY));
+        LOGGER.log(Level.INFO, "Storing parsed data unter key: " + aConfig.getOutputStringParameter(PARAM_TABLE_KEY));
         LOGGER.log(Level.INFO, "Cashing data of size: " + parsedData.count());
-        addToNamedRdds(aConfig.getString(PARAM_TABLE_KEY), parsedData);
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_TABLE_KEY), parsedData);
         try {
             final StructType schema = StructTypeBuilder.fromRows(parsedData.take(10)).build();
             return JobResult.emptyJobResult().withMessage("OK")
-                .withTable(aConfig.getString(PARAM_TABLE_KEY), schema);
+                .withTable(aConfig.getOutputStringParameter(PARAM_TABLE_KEY), schema);
         } catch (InvalidSchemaException e) {
             throw new GenericKnimeSparkException(e);
         }
     }
 
-    static JavaRDD<Row> javaRDDFromFile(final SparkContext sc, final Config config, final String aSeparator) {
+    static JavaRDD<Row> javaRDDFromFile(final SparkContext sc, final JobConfig config, final String aSeparator) {
         @SuppressWarnings("resource")
         JavaSparkContext ctx = new JavaSparkContext(sc);
-        String fName = config.getString(PARAM_DATA_FILE_NAME);
+        String fName = config.getInputParameter(PARAM_DATA_FILE_NAME);
 
         final Function<String, Row> rowFunction = new Function<String, Row>() {
             private static final long serialVersionUID = 1L;

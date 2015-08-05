@@ -41,6 +41,7 @@ import scala.Tuple2;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -49,7 +50,6 @@ import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaExce
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.jobserver.server.transformation.UserDefinedTransformation;
-import com.typesafe.config.Config;
 
 /**
  *
@@ -57,11 +57,9 @@ import com.typesafe.config.Config;
  */
 public class TransformationTestJob extends KnimeSparkJob {
 
-    private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_INPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(TransformationTestJob.class.getName());
 
@@ -70,12 +68,12 @@ public class TransformationTestJob extends KnimeSparkJob {
      * of the output JavaRDD
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasPath(PARAM_INPUT_TABLE_KEY)) {
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY)) {
             msg = "Input parameter '" + PARAM_INPUT_TABLE_KEY + "' missing.";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
         }
         if (msg != null) {
@@ -84,10 +82,10 @@ public class TransformationTestJob extends KnimeSparkJob {
         return ValidationResultConverter.valid();
     }
 
-    private SparkJobValidation validateInput(final Config aConfig) {
+    private SparkJobValidation validateInput(final JobConfig aConfig) {
         String msg = null;
-        if (!validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY))) {
-            msg = "Input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY);
+        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY))) {
+            msg = "Input data table missing for key: " + PARAM_INPUT_TABLE_KEY;
         }
         if (msg != null) {
             LOGGER.severe(msg);
@@ -104,23 +102,23 @@ public class TransformationTestJob extends KnimeSparkJob {
      * @return JobResult with table information
      */
     @Override
-    protected JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig) {
+    protected JobResult runJobWithContext(final SparkContext aSparkContext, final JobConfig aConfig) {
         SparkJobValidation validation = validateInput(aConfig);
         if (!ValidationResultConverter.isValid(validation)) {
             return JobResult.emptyJobResult().withMessage(validation.toString());
         }
 
         LOGGER.log(Level.INFO, "starting transformation job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY));
 
         final JavaRDD<Row> transformed = new MyTransformer().apply(rowRDD, rowRDD);
 
         LOGGER.log(Level.INFO, "transformation completed");
-        addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), transformed);
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), transformed);
         try {
             final StructType schema = StructTypeBuilder.fromRows(transformed.take(10)).build();
             return JobResult.emptyJobResult().withMessage("OK")
-                .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
+                .withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), schema);
         } catch (InvalidSchemaException e) {
             return JobResult.emptyJobResult().withMessage("ERROR: " + e.getMessage());
         }
@@ -205,27 +203,6 @@ public class TransformationTestJob extends KnimeSparkJob {
                     return res;
                 }
             });
-
-            //        final Function<Row, Row> rowFunction = new Function<Row, Row>() {
-            //            private static final long serialVersionUID = 1L;
-            //
-            //            @Override
-            //            public Row call(final Row aRow) {
-            //                String[] terms = aLine.split(" ");
-            //                final ArrayList<Double> vals = new ArrayList<Double>();
-            //                for (int i = 0; i < terms.length; i++) {
-            //                    vals.add(Double.parseDouble(terms[i]));
-            //                }
-            //                return RowBuilder.emptyRow().addAll(vals).build();
-            //            }
-            //        };
-            //
-            //
-            //        aInput1.reduceByKey(new Function2<Integer, Integer>() {
-            //            public Integer call(final Integer a, final Integer b) { return a + b; }
-            //          });
-            //
-            //        return aInput1.map(rowFunction);
         }
     }
 }

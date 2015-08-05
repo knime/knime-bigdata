@@ -52,7 +52,7 @@ public class SparkJobCompilerTest extends SparkSpec {
     public void compilePrimitiveJobThatOnlyChecksParams() throws Throwable {
 
         final String validationCode =
-            "try {\n" + "	int t = aConfig.getInt(\"input.timeout\");\n" + "	timeout = TimeUnit.SECONDS.toMillis(t);\n"
+            "try {\n" + "	int t = aConfig.getInputParameter(\"timeout\", Integer.class);\n" + "	timeout = TimeUnit.SECONDS.toMillis(t);\n"
                 + "} catch (Exception e) {\n" + "	// OK, ignore\n" + "}";
 
         final String mainStr = "public static void main(String[] args) {" + "System.out.println(\"Hello World\");}";
@@ -81,7 +81,7 @@ public class SparkJobCompilerTest extends SparkSpec {
         final String configText = "{\"input\":{\"message\":\"" + RES_STR + "\"}}";
 
         final String validationCode =
-            "try {\n" + "String s = aConfig.getString(\"input.message\");\n" + "} catch (Exception e) {\n"
+            "try {\n" + "String s = aConfig.getInputParameter(\"message\");\n" + "} catch (Exception e) {\n"
                 + "	// OK, ignore\n" + "}";
 
         final String additionalImports = "import java.util.concurrent.TimeUnit;";
@@ -95,7 +95,7 @@ public class SparkJobCompilerTest extends SparkSpec {
                 .newKnimeSparkJob(
                     additionalImports,
                     validationCode,
-                    "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                    "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                     "");
 
         Config config = ConfigFactory.parseString(configText);
@@ -108,7 +108,7 @@ public class SparkJobCompilerTest extends SparkSpec {
                     aJarPath,
                     additionalImports,
                     validationCode,
-                    "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                    "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                     "");
 
             //upload jar to job-server
@@ -140,7 +140,7 @@ public class SparkJobCompilerTest extends SparkSpec {
        final String configText = "{\"input\":{\"message\":\"" + RES_STR + "\"}}";
 
        final String validationCode =
-           "try {\n" + "String s = aConfig.getString(\"input.message\");\n" + "} catch (Exception e) {\n"
+           "try {\n" + "String s = aConfig.getInputParameter(\"message\");\n" + "} catch (Exception e) {\n"
                + " // OK, ignore\n" + "}";
 
        final String additionalImports = "import java.util.concurrent.TimeUnit;";
@@ -154,7 +154,7 @@ public class SparkJobCompilerTest extends SparkSpec {
                .newKnimeSparkJob(
                    additionalImports,
                    validationCode,
-                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                    "");
 
        Config config = ConfigFactory.parseString(configText);
@@ -167,7 +167,7 @@ public class SparkJobCompilerTest extends SparkSpec {
                    aJarPath,
                    additionalImports,
                    validationCode,
-                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getString(\"input.message\"));",
+                   "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                    "");
 
            //upload jar to job-server

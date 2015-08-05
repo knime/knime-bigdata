@@ -21,13 +21,13 @@ import org.knime.core.node.ExecutionMonitor;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkIDs;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -138,7 +138,7 @@ public class JobControler {
         startJob(final KNIMESparkContext aContextContainer, final KnimeSparkJob aJobInstance, final String aJsonParams)
             throws GenericKnimeSparkException {
 
-        Config config = ConfigFactory.parseString(aJsonParams);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(aJsonParams));
         SparkJobValidation validation = aJobInstance.validate(config);
         if (!ValidationResultConverter.isValid(validation)) {
             throw new GenericKnimeSparkException(validation.toString());

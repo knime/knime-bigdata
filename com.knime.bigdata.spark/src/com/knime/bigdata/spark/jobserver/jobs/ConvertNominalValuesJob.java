@@ -35,13 +35,13 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.typesafe.config.Config;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns
@@ -52,11 +52,9 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_MAPPING_TYPE = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_STRING;
+    private static final String PARAM_MAPPING_TYPE = ParameterConstants.PARAM_STRING;
 
-    private static final String PARAM_RESULT_MAPPING = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
+    private static final String PARAM_RESULT_MAPPING =ParameterConstants.PARAM_TABLE_2;
 
     private final static Logger LOGGER = Logger.getLogger(ConvertNominalValuesJob.class.getName());
 
@@ -65,15 +63,15 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = super.validateParam(aConfig);
 
         if (msg == null) {
-            if (!aConfig.hasPath(PARAM_MAPPING_TYPE)) {
+            if (!aConfig.hasInputParameter(PARAM_MAPPING_TYPE)) {
                 msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' missing.";
             } else {
                 try {
-                    MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
+                    MappingType.valueOf(aConfig.getInputParameter(PARAM_MAPPING_TYPE));
                 } catch (Exception e) {
                     msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' has an invalid value.";
                 }
@@ -81,7 +79,7 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
         }
 
         if (msg == null) {
-            if (!aConfig.hasPath(PARAM_RESULT_MAPPING)) {
+            if (!aConfig.hasOutputParameter(PARAM_RESULT_MAPPING)) {
                 msg = "Output parameter '" + PARAM_RESULT_MAPPING + "' missing.";
             }
         }
@@ -102,23 +100,24 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
      * @return
      */
     @Override
-    JobResult execute(final SparkContext aContext, final Config aConfig, final JavaRDD<Row> aRowRDD,
+    JobResult execute(final SparkContext aContext, final JobConfig aConfig, final JavaRDD<Row> aRowRDD,
         final int[] aColIds, final Map<Integer, String> aColNameForIndex)
         throws GenericKnimeSparkException {
-        final MappingType mappingType = MappingType.valueOf(aConfig.getString(PARAM_MAPPING_TYPE));
+        final MappingType mappingType = MappingType.valueOf(aConfig.getInputParameter(PARAM_MAPPING_TYPE));
 
         //use only the column indices when converting
         final MappedRDDContainer mappedData =
             RDDUtilsInJava.convertNominalValuesForSelectedIndices(aRowRDD, aColIds, mappingType);
 
-        LOGGER.log(Level.INFO, "Storing mapped data under key: " + aConfig.getString(PARAM_RESULT_TABLE));
+        LOGGER
+            .log(Level.INFO, "Storing mapped data under key: " + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
 
-        addToNamedRdds(aConfig.getString(PARAM_RESULT_TABLE), mappedData.m_RddWithConvertedValues);
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), mappedData.m_RddWithConvertedValues);
 
         //number of all (!)  columns in input data table
         int offset = aRowRDD.take(1).get(0).length();
 
-        storeMappingsInRdd(aContext, mappedData, aColNameForIndex, aConfig.getString(PARAM_RESULT_MAPPING), offset);
+        storeMappingsInRdd(aContext, mappedData, aColNameForIndex, aConfig.getOutputStringParameter(PARAM_RESULT_MAPPING), offset);
         return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
     }
 

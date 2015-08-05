@@ -11,15 +11,16 @@ import org.knime.core.node.CanceledExecutionException;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.testing.SparkSpec;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -36,17 +37,16 @@ public class ImportKNIMETableJobTest extends SparkSpec {
 
     @Test
     public void runningImportJobDirectlyShouldProduceResult() throws Throwable {
-        KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
         final String resTableName = "knimeTab1";
-        String jobId = importTestTable(contextName, TEST_TABLE, resTableName);
+        String jobId = importTestTable(CONTEXT_ID, TEST_TABLE, resTableName);
 
 
         // result is serialized as a string
         assertFalse("job should not be running anymore",
-            JobStatus.OK.equals(JobControler.getJobStatus(contextName, jobId)));
+            JobStatus.OK.equals(JobControler.getJobStatus(CONTEXT_ID, jobId)));
 
-        checkResult(contextName, resTableName);
+        checkResult(CONTEXT_ID, resTableName);
     }
 
     /**
@@ -68,9 +68,12 @@ public class ImportKNIMETableJobTest extends SparkSpec {
 
     private void checkResult(final KNIMESparkContext aContextName, final String resTableName) throws Exception {
 
+        final String jsonParams = rowFetcherDef(10, resTableName);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(jsonParams));
+        new FetchRowsJob().validate(config);
         // now check result:
         String takeJobId =
-            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(), rowFetcherDef(10, resTableName));
+            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(), jsonParams);
         assertFalse("job should have finished properly",
             JobControler.waitForJob(aContextName, takeJobId, null).equals(JobStatus.UNKNOWN));
         JobResult res = JobControler.fetchJobResult(aContextName, takeJobId);

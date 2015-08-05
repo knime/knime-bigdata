@@ -61,13 +61,12 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
-import com.typesafe.config.Config;
 
 /**
  *
@@ -79,34 +78,29 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
     private final static Logger LOGGER = Logger.getLogger("KNIME Spark Java Snippet");
 
-    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
+    private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_TABLE_2;
 
-    private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_MODEL_NAME;
+    private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
 
-    private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_MAIN_CLASS;
+    private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_MAIN_CLASS;
 
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     /**
      * parse parameters
      */
     @Override
-    public final SparkJobValidation validate(final Config aConfig) {
+    public final SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
+        if (!aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_MODEL)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
             msg = "Compiled snippet class missing!";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_MAIN_CLASS)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_MAIN_CLASS)) {
             msg = "Main class name missing!";
         }
         if (msg != null) {
@@ -115,13 +109,14 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1) && !validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY1))) {
-            msg = "(First) Input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY1);
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1)
+            && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1))) {
+            msg = "(First) Input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1);
         }
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY2))) {
-            msg = "Second input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY2);
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2))) {
+            msg = "Second input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2);
         }
 
         if (msg != null) {
@@ -137,25 +132,25 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
      * @return JobResult with table information
      */
     @Override
-    protected final JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig)
+    protected final JobResult runJobWithContext(final SparkContext aSparkContext, final JobConfig aConfig)
         throws GenericKnimeSparkException {
         validateInput(aConfig);
         try {
             final JavaRDD<Row> rowRDD1;
-            if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1)) {
-                rowRDD1 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY1));
+            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1)) {
+                rowRDD1 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1));
             } else {
                 rowRDD1 = null;
             }
             final JavaRDD<Row> rowRDD2;
-            if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2)) {
-                rowRDD2 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY2));
+            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2)) {
+                rowRDD2 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2));
             } else {
                 rowRDD2 = null;
             }
-            final String mainClass = aConfig.getString(PARAM_MAIN_CLASS);
+            final String mainClass = aConfig.getInputParameter(PARAM_MAIN_CLASS);
             System.out.println("Main class: " + mainClass);
-            final Map<String, byte[]> bytecode = ModelUtils.fromString(aConfig.getString(PARAM_MODEL));
+            final Map<String, byte[]> bytecode = aConfig.decodeFromInputParameter(PARAM_MODEL);
             final ClassLoader cl = new ClassLoader(Thread.currentThread().getContextClassLoader()) {
                 /** {@inheritDoc} */
                 @Override
@@ -182,7 +177,7 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
             try {
                 if (resultRDD != null) {
                     System.out.println("Getting schema for result");
-                    addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), resultRDD);
+                    addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), resultRDD);
 //                    Method schemaMethod = modelClass.getMethod("getSchema", JavaRDD.class);
 //                    System.out.println("Schema method loaded");
 //                    System.out.println("Call schema method");
@@ -190,7 +185,7 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 ////                    final StructType schema = getSchema(resultRDD);
 //                    System.out.println("Schema: " + schema);
                     return JobResult.emptyJobResult().withMessage("OK")
-                        .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), StructTypeBuilder.fromRows(resultRDD.take(10)).build());
+                        .withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), StructTypeBuilder.fromRows(resultRDD.take(10)).build());
                 }
                 return JobResult.emptyJobResult().withMessage("OK");
             } catch (Exception e) {

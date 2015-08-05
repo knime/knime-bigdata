@@ -60,13 +60,13 @@ import org.apache.spark.sql.api.java.StructType;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
-import com.typesafe.config.Config;
 
 /**
  *
@@ -78,22 +78,19 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
 
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
 
-    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
+    private static final String PARAM_INPUT_TABLE_KEY2 =  ParameterConstants.PARAM_TABLE_2;
 
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_OUTPUT_TABLE_KEY =  ParameterConstants.PARAM_TABLE_1;
 
     /**
      * parse parameters
      */
     @Override
-    public final SparkJobValidation validate(final Config aConfig) {
+    public final SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasPath(PARAM_OUTPUT_TABLE_KEY)) {
+        if (!aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
             msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
         }
         if (msg != null) {
@@ -102,13 +99,13 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1) && !validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY1))) {
-            msg = "(First) Input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY1);
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1) && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1))) {
+            msg = "(First) Input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1);
         }
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getString(PARAM_INPUT_TABLE_KEY2))) {
-            msg = "Second input data table missing for key: " + aConfig.getString(PARAM_INPUT_TABLE_KEY2);
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2))) {
+            msg = "Second input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2);
         }
 
         if (msg != null) {
@@ -124,19 +121,19 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
      * @return JobResult with table information
      */
     @Override
-    protected final JobResult runJobWithContext(final SparkContext aSparkContext, final Config aConfig)
+    protected final JobResult runJobWithContext(final SparkContext aSparkContext, final JobConfig aConfig)
         throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.FINE, "starting transformation job...");
         final JavaRDD<Row> rowRDD1;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY1)) {
-            rowRDD1 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY1));
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1)) {
+            rowRDD1 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1));
         } else {
             rowRDD1 = null;
         }
         final JavaRDD<Row> rowRDD2;
-        if (aConfig.hasPath(PARAM_INPUT_TABLE_KEY2)) {
-            rowRDD2 = getFromNamedRdds(aConfig.getString(PARAM_INPUT_TABLE_KEY2));
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2)) {
+            rowRDD2 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2));
         } else {
             rowRDD2 = null;
         }
@@ -148,10 +145,10 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
             }
             try {
                 LOGGER.log(Level.FINE, "result found");
-                addToNamedRdds(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), resultRDD);
+                addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), resultRDD);
                 final StructType schema = getSchema(resultRDD);
                 return JobResult.emptyJobResult().withMessage("OK")
-                        .withTable(aConfig.getString(PARAM_OUTPUT_TABLE_KEY), schema);
+                        .withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), schema);
             } catch (InvalidSchemaException e) {
                 throw new GenericKnimeSparkException("Could not determine result schema. Error: " + e, e);
             }
