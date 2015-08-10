@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testing
+Bundle-SymbolicName: com.knime.bigdata.spark.testing
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: KNIME
+Fragment-Host: com.knime.bigdata.spark;bundle-version="0.5.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
