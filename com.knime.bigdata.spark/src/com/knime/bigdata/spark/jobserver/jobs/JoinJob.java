@@ -188,11 +188,11 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "computing " + mode.toString() + " of two RDDs...");
 
         final List<Integer> joinIdxLeft = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_LEFT, Integer.class);
-        JavaPairRDD<String, Row> leftRdd =
+        JavaPairRDD<String[], Row> leftRdd =
             RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_LEFT_RDD)),
                 joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
         final List<Integer> joinIdxRight = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_RIGHT, Integer.class);
-        JavaPairRDD<String, Row> rightRdd =
+        JavaPairRDD<String[], Row> rightRdd =
             RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_RIGHT_RDD)),
                 joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
 
@@ -204,23 +204,23 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
         final JavaRDD<Row> resultRdd;
         switch (mode) {
             case InnerJoin: {
-                JavaPairRDD<String, Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case LeftOuterJoin: {
-                JavaPairRDD<String, Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case RightOuterJoin: {
-                JavaPairRDD<String, Tuple2<Optional<Row>, Row>> joinedRdd = leftRdd.rightOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Optional<Row>, Row>> joinedRdd = leftRdd.rightOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case FullOuterJoin: {
-                JavaPairRDD<String, Tuple2<Optional<Row>, Optional<Row>>> joinedRdd = leftRdd.fullOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Optional<Row>, Optional<Row>>> joinedRdd = leftRdd.fullOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             default: {
