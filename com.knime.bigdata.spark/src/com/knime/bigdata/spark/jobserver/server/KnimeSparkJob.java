@@ -14,6 +14,11 @@ import com.typesafe.config.Config;
  */
 public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
 
+    /**
+     * parameter name of single output result table (most jobs, but not all, produce exactly one RDD)
+     */
+    public static final String PARAM_RESULT_TABLE = ParameterConstants.PARAM_TABLE_1;
+
     @Override
     public Object runJob(final Object aSparkContext, final Config aConfig) {
         try {

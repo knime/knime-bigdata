@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.jobserver.client;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import javax.ws.rs.core.Response.Status;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.NodeLogger;
 
+import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -63,8 +65,7 @@ public class KnimeContext {
             }
             return createSparkContext();
         } catch (ProcessingException e) {
-            final String msg = "Could not establish connection to Spark Jobserver. Exception: "
-                    + e.getMessage();
+            final String msg = "Could not establish connection to Spark Jobserver. Exception: " + e.getMessage();
             LOGGER.error(msg, e);
             throw new GenericKnimeSparkException(msg);
         }
@@ -104,7 +105,7 @@ public class KnimeContext {
         KNIMESparkContext contextContainer = new KNIMESparkContext();
 
         //upload jar with our extensions
-        final String jobJarPath = SparkUtil.getJobJarPath();
+        final String jobJarPath = getJobJarPath();
         //TODO: Upload the static jobs jar only if not exists
         JobControler.uploadJobJar(contextContainer, jobJarPath);
 
@@ -127,6 +128,14 @@ public class KnimeContext {
         RestClient.checkStatus(response, "Error: failed to create context!", Status.OK);
 
         return contextContainer;
+    }
+
+    private static String getJobJarPath() {
+        if (KNIMEConfigContainer.m_config.hasPath("unitTestMode")) {
+            return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + ".." + File.separatorChar
+                + "com.knime.bigdata.spark" + File.separator + "resources" + File.separatorChar + "knimeJobs.jar";
+        }
+        return SparkUtil.getJobJarPath();
     }
 
     // "WARN yarn.YarnAllocationHandler: Container killed by YARN for exceeding memory limits. 2.1 GB of 2.1 GB virtual memory used. Consider boosting spark.yarn.executor.memoryOverhead.
@@ -178,18 +187,20 @@ public class KnimeContext {
      */
     public static void deleteNamedRDD(final KNIMESparkContext aContextContainer, final String aNamedRdd) {
         String jsonArgs =
-            JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_DELETE, ParameterConstants.PARAM_TABLE_1, aNamedRdd}});
+            JsonUtils.asJson(new Object[]{
+                ParameterConstants.PARAM_INPUT,
+                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_DELETE,
+                    ParameterConstants.PARAM_TABLE_1, aNamedRdd}});
         try {
             String jobId =
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
             JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
             //just for testing:
-//            Set<String> names = listNamedRDDs(aContextContainer);
-//            int ix = 1;
-//            for (String name : names){
-//                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
-//            }
+            //            Set<String> names = listNamedRDDs(aContextContainer);
+            //            int ix = 1;
+            //            for (String name : names){
+            //                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
+            //            }
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
         } catch (GenericKnimeSparkException e) {
@@ -205,7 +216,8 @@ public class KnimeContext {
      */
     public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
         String jsonArgs =
-            JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_INFO}});
+            JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
+                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_INFO}});
         try {
             String jobId =
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
