@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.data.DataTableSpec;
@@ -46,6 +48,9 @@ import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
+import com.knime.bigdata.spark.jobserver.client.JsonUtils;
+import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 
 /**
  *
@@ -54,15 +59,16 @@ import com.knime.bigdata.hive.utility.HiveUtility;
 public class MLlibSamplingNodeModel extends NodeModel {
 
     private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
+
     private final SamplingNodeSettings m_settings = new SamplingNodeSettings();
+
     private final SettingsModelString m_tableName = createTableNameModel();
 
     /**
      *
      */
     public MLlibSamplingNodeModel() {
-        super(new PortType[]{DatabasePortObject.TYPE},
-            new PortType[]{DatabasePortObject.TYPE});
+        super(new PortType[]{DatabasePortObject.TYPE}, new PortType[]{DatabasePortObject.TYPE});
     }
 
     /**
@@ -77,31 +83,29 @@ public class MLlibSamplingNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec) inSpecs[0];
+        DatabasePortObjectSpec spec = (DatabasePortObjectSpec)inSpecs[0];
         if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Only Hive connections are supported");
         }
         checkSettings(spec.getDataTableSpec());
-        return new PortObjectSpec[] {createSQLSpec(spec)};
+        return new PortObjectSpec[]{createSQLSpec(spec)};
     }
 
     /**
-     * Checks if the node settings are valid, i.e. a method has been set and the
-     * class column exists if stratified sampling has been chosen.
+     * Checks if the node settings are valid, i.e. a method has been set and the class column exists if stratified
+     * sampling has been chosen.
      *
      * @param inSpec the input table's spec
      * @throws InvalidSettingsException if the settings are invalid
      */
-    protected void checkSettings(final DataTableSpec inSpec)
-            throws InvalidSettingsException {
+    protected void checkSettings(final DataTableSpec inSpec) throws InvalidSettingsException {
         if (m_settings.countMethod() == null) {
             throw new InvalidSettingsException("No sampling method selected");
         }
         if (m_settings.samplingMethod().equals(SamplingMethods.Stratified)
-                && !inSpec.containsName(m_settings.classColumn())) {
-            throw new InvalidSettingsException("Column '"
-                    + m_settings.classColumn() + "' for stratified sampling "
-                    + "does not exist");
+            && !inSpec.containsName(m_settings.classColumn())) {
+            throw new InvalidSettingsException("Column '" + m_settings.classColumn() + "' for stratified sampling "
+                + "does not exist");
         }
     }
 
@@ -120,7 +124,7 @@ public class MLlibSamplingNodeModel extends NodeModel {
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final DatabasePortObject db = (DatabasePortObject)inObjects[0];
-        return new PortObject[] {db};
+        return new PortObject[]{db};
     }
 
     /**
@@ -148,20 +152,17 @@ public class MLlibSamplingNodeModel extends NodeModel {
             }
         } else if (temp.countMethod() == SamplingNodeSettings.CountMethods.Absolute) {
             if (temp.count() < 0) {
-                throw new InvalidSettingsException("Invalid count: "
-                        + temp.count());
+                throw new InvalidSettingsException("Invalid count: " + temp.count());
             }
         } else {
-            throw new InvalidSettingsException("Unknown method: "
-                    + temp.countMethod());
+            throw new InvalidSettingsException("Unknown method: " + temp.countMethod());
         }
 
-        if (temp.samplingMethod().equals(SamplingMethods.Stratified)
-                && (temp.classColumn() == null)) {
-            throw new InvalidSettingsException(
-                    "No class column for stratified sampling selected");
+        if (temp.samplingMethod().equals(SamplingMethods.Stratified) && (temp.classColumn() == null)) {
+            throw new InvalidSettingsException("No class column for stratified sampling selected");
         }
-        final String tableName = ((SettingsModelString)m_tableName.createCloneWithValidatedValue(settings)).getStringValue();
+        final String tableName =
+            ((SettingsModelString)m_tableName.createCloneWithValidatedValue(settings)).getStringValue();
         if (tableName == null || tableName.isEmpty()) {
             throw new InvalidSettingsException("Please specify the table name");
         }
@@ -181,8 +182,42 @@ public class MLlibSamplingNodeModel extends NodeModel {
      */
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
+        CanceledExecutionException {
         // nothing to do
+    }
+
+    /**
+     * (for better unit testing)
+     * @param aTableToSample
+     * @param aSettings
+     * @param aClassColIx - index of class column label (for stratified sampling)
+     * @param aIsWithReplacement - sampling with replacement
+     * @param aSeed  random seed
+     * @param aExact - currently only supported for stratified sampling - exact means that the sample is > 99.% true to the class distribution
+     * @param aOutputTable1
+     * @param aOutputTable2 - optional, if provided, then data is split into 2 RDDs
+     *
+     * @return Json String with parameter settings
+     */
+    public static String paramDef(final String aTableToSample, final SamplingNodeSettings aSettings, final int aClassColIx,
+        final boolean aIsWithReplacement, final long aSeed, final boolean aExact, final String aOutputTable1, @Nullable final String aOutputTable2) {
+        final Object[] outputParams;
+        if (aOutputTable2 == null) {
+            outputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1};
+        } else {
+            outputParams =
+                new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1, ParameterConstants.PARAM_TABLE_2,
+                    aOutputTable2};
+        }
+        return JsonUtils.asJson(new Object[]{
+            ParameterConstants.PARAM_INPUT,
+            new Object[]{ParameterConstants.PARAM_TABLE_1, aTableToSample, SamplingJob.PARAM_COUNT_METHOD,
+                aSettings.countMethod().toString(),  SamplingJob.PARAM_COUNT, aSettings.count(), SamplingJob.PARAM_SAMPLING_METHOD,
+                aSettings.samplingMethod().toString(),
+                SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
+                SamplingJob.PARAM_EXACT, aExact, SamplingJob.PARAM_SEED, aSeed,
+                SamplingJob.PARAM_FRACTION, aSettings.fraction(),  SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
+            ParameterConstants.PARAM_OUTPUT, outputParams});
     }
 
     /**
@@ -190,7 +225,7 @@ public class MLlibSamplingNodeModel extends NodeModel {
      */
     @Override
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-    CanceledExecutionException {
+        CanceledExecutionException {
         // nothing to do
     }
 

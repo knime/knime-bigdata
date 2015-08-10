@@ -51,8 +51,6 @@ public abstract class AbstractStringMapperJob extends KnimeSparkJob implements S
 
     static final String PARAM_COL_NAMES = ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING;
 
-    static final String PARAM_RESULT_TABLE = ParameterConstants.PARAM_TABLE_1;
-
     private final static Logger LOGGER = Logger.getLogger(AbstractStringMapperJob.class.getName());
 
     /**
