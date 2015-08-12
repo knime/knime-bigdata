@@ -355,42 +355,19 @@ public class RDDUtilsInJava {
      * @param aKeys keys to be extracted
      * @return pair rdd with keys and original rows as values (no columns are filtered out)
      */
-    public static JavaPairRDD<String[], Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
-        return aRdd.mapToPair(new PairFunction<Row, String[], Row>() {
+    public static JavaPairRDD<MyJoinKey, Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
+        return aRdd.mapToPair(new PairFunction<Row, MyJoinKey, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Tuple2<String[], Row> call(final Row aRow) throws Exception {
-                final String[] keyValues = new String[aKeys.length];
-                // (Object[] did not work)
+            public Tuple2<MyJoinKey, Row> call(final Row aRow) throws Exception {
+                final Object[] keyValues = new Object[aKeys.length];
                 int ix = 0;
                 for (int keyIx : aKeys) {
-                    Object o = aRow.get(keyIx);
-                    if (o != null) {
-                        keyValues[ix++] = o.toString();
-                    } else {
-                        keyValues[ix++] = null;
-                    }
+                    keyValues[ix++] = aRow.get(keyIx);
                 }
-                return new Tuple2<String[], Row>(keyValues, aRow);
+                return new Tuple2<MyJoinKey, Row>(new MyJoinKey(keyValues), aRow);
             }
-
-//            @Override
-//            public Tuple2<String, Row> call(final Row aRow) throws Exception {
-//                final StringBuilder keyValues = new StringBuilder();
-//                //TODO - do we really need to merge the keys into a single String?
-//                // (Object[] did not work)
-//                int ix = 0;
-//                boolean first = true;
-//                for (int keyIx : aKeys) {
-//                    if (!first) {
-//                        keyValues.append("|");
-//                        first = false;
-//                    }
-//                    keyValues.append(aRow.get(keyIx));
-//                }
-//                return new Tuple2<String, Row>(keyValues.toString(), aRow);
-//            }
         });
     }
 
