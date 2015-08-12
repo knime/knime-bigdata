@@ -88,25 +88,30 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
     public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) {
         LOGGER.log(Level.INFO, "reading hive table...");
 
-        LOGGER.log(Level.INFO, "context: "+sc.conf().toDebugString());
+        LOGGER.log(Level.FINE, "context: "+sc.conf().toDebugString());
 
         final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
         final String sqlStatement = aConfig.getInputParameter(PARAM_SQL);
-        LOGGER.log(Level.INFO, "sql statement: ..."+sqlStatement);
+        LOGGER.log(Level.INFO, "sql statement: "+sqlStatement);
 
         final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
 
         for (final StructField field : schemaInputRDD.schema().getFields()) {
-            LOGGER.log(Level.INFO, "Field '" + field.getName() + "' of type '" + field.getDataType() + "'");
+            LOGGER.log(Level.FINE, "Field '" + field.getName() + "' of type '" + field.getDataType() + "'");
         }
 
         final RDD<Row> rdd = schemaInputRDD.rdd();
+        final JavaRDD<Row> javaRDD = new JavaRDD<>(rdd, rdd.elementClassTag());
 
-        LOGGER.log(Level.INFO, "done");
+//        List<Row> d = javaRDD.take(10);
+//        for (Row r : d) {
+//            LOGGER.log(Level.INFO, "Row: " + r.toString());
+//        }
 
         final String key = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE_KEY);
         LOGGER.log(Level.INFO, "Storing Hive query result under key: " + key);
-        addToNamedRdds(key, new JavaRDD<>(rdd, rdd.elementClassTag()));
-        return JobResult.emptyJobResult().withMessage("OK").withTable(key, schemaInputRDD.schema());
+        addToNamedRdds(key, javaRDD);
+        LOGGER.log(Level.INFO, "done");
+        return JobResult.emptyJobResult().withMessage("OK");
     }
 }

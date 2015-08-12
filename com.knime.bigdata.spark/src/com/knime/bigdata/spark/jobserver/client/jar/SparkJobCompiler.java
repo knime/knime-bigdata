@@ -10,7 +10,9 @@ package com.knime.bigdata.spark.jobserver.client.jar;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -40,7 +42,7 @@ final public class SparkJobCompiler {
     private static int classNameSuffix = 0;
 
     // package name; a random number is appended
-   // private static final String PACKAGE_NAME = "com.knime.bigdata.spark.jobserver.jobs";
+    // private static final String PACKAGE_NAME = "com.knime.bigdata.spark.jobserver.jobs";
 
     // for secure package name
     private static final Random random = new Random();
@@ -110,8 +112,7 @@ final public class SparkJobCompiler {
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
-            fillTransformationTemplate(className, aAdditionalImports, aTransformationCode,
-                aHelperMethodsCode);
+            fillTransformationTemplate(className, aAdditionalImports, aTransformationCode, aHelperMethodsCode);
         SourceCompiler compiledJob = compileAndCreateInstance(className, source);
         add2Jar(aSourceJarPath, aTargetJarPath, "", compiledJob.getBytecode());
         return compiledJob.getInstance();
@@ -127,9 +128,8 @@ final public class SparkJobCompiler {
      * @return canonical name of compiled class
      * @throws GenericKnimeSparkException in case of some error
      */
-    public KnimeSparkJob addSparkJob2Jar(@Nonnull final String aSourceJarPath,
-        @Nonnull final String aTargetJarPath, @Nonnull final String aCode, @Nonnull final String className)
-                throws GenericKnimeSparkException {
+    public KnimeSparkJob addSparkJob2Jar(@Nonnull final String aSourceJarPath, @Nonnull final String aTargetJarPath,
+        @Nonnull final String aCode, @Nonnull final String className) throws GenericKnimeSparkException {
         // generate semi-secure unique package and class names
         // compile the generated Java source
         SourceCompiler compiledJob = compileAndCreateInstance(className, aCode);
@@ -200,8 +200,7 @@ final public class SparkJobCompiler {
         // generate semi-secure unique package and class names
         // compile the generated Java source
         final String source =
-            fillJobTemplate(className, aAdditionalImports, validationCode, aExecutionCode,
-                aHelperMethodsCode);
+            fillJobTemplate(className, aAdditionalImports, validationCode, aExecutionCode, aHelperMethodsCode);
         return compileAndCreateInstance(className, source);
     }
 
@@ -261,9 +260,8 @@ final public class SparkJobCompiler {
 
     }
 
-    private String fillTransformationTemplate(final String className,
-        final String aAdditionalImports, final String aTransformationCode, final String aHelperMethods)
-        throws GenericKnimeSparkException {
+    private String fillTransformationTemplate(final String className, final String aAdditionalImports,
+        final String aTransformationCode, final String aHelperMethods) throws GenericKnimeSparkException {
         try {
             if (transformationTemplate == null) {
                 transformationTemplate = readTemplate("UserDefinedTransformation.java.template");
@@ -356,21 +354,13 @@ final public class SparkJobCompiler {
         private void compileCode(final String aClassName) throws CompilationFailedException, ClassNotFoundException {
             final JavaCodeCompiler compiler = new JavaCodeCompiler();
 
-            final InMemorySourceJavaFileObject sourceContainer = new InMemorySourceJavaFileObject(aClassName, m_javaCode);
+            final InMemorySourceJavaFileObject sourceContainer =
+                new InMemorySourceJavaFileObject(aClassName, m_javaCode);
 
-            String[] orig = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
-            File[] classPathFiles = new File[orig.length + 3];
-            for (int i=0; i<orig.length; i++) {
-                classPathFiles[i] = new File(orig[i]);
-            }
-            final String root = SparkPlugin.getDefault().getPluginRootPath();
-            classPathFiles[orig.length] = new File(root+"/lib/jobServerUtilsApi.jar");
-            classPathFiles[orig.length+1] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
-            classPathFiles[orig.length+2] = new File(root+"/resources/knimeJobs.jar");
+            File[] classPathFiles = getClassPathFiles();
             compiler.setClasspaths(classPathFiles);
 
             compiler.setSources(sourceContainer);
-
 
             compiler.compile();
 
@@ -378,7 +368,7 @@ final public class SparkJobCompiler {
 
             //final String className = (PACKAGE_NAME+ "/" + aClassName).replaceAll("\\.", "/");
             final Class<KnimeSparkJob> jobClass = (Class<KnimeSparkJob>)cl.loadClass(aClassName);
-            m_bytecode =  compiler.getClassByteCode();
+            m_bytecode = compiler.getClassByteCode();
             try {
                 m_jobInstance = jobClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
@@ -387,9 +377,35 @@ final public class SparkJobCompiler {
         }
 
         /**
+         * @return
+         */
+        private File[] getClassPathFiles() {
+            final String[] orig = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
+            List<File> classPathFiles = new ArrayList<>(orig.length + 3);
+            for (int i = 0; i < orig.length; i++) {
+                classPathFiles.add(new File(orig[i]));
+            }
+            String root = SparkPlugin.getDefault().getPluginRootPath();
+            classPathFiles.add(new File(root + "/resources/knimeJobs.jar"));
+            root = root + File.separator + "lib" + File.separator;
+            File d = new File(root);
+            final File[] files = d.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile()) {
+                        classPathFiles.add(f);
+                    }
+                }
+            }
+            //            classPathFiles[orig.length] = new File(root+"/lib/jobServerUtilsApi.jar");
+            //            classPathFiles[orig.length+1] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
+            return classPathFiles.toArray(new File[classPathFiles.size()]);
+        }
+
+        /**
          * @return the compiled class.
          */
-         public KnimeSparkJob getInstance() {
+        public KnimeSparkJob getInstance() {
             return m_jobInstance;
         }
 

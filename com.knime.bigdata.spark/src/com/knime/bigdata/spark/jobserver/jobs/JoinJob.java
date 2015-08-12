@@ -39,6 +39,7 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.MyJoinKey;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -188,11 +189,11 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "computing " + mode.toString() + " of two RDDs...");
 
         final List<Integer> joinIdxLeft = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_LEFT, Integer.class);
-        JavaPairRDD<String[], Row> leftRdd =
+        JavaPairRDD<MyJoinKey, Row> leftRdd =
             RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_LEFT_RDD)),
                 joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
         final List<Integer> joinIdxRight = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_RIGHT, Integer.class);
-        JavaPairRDD<String[], Row> rightRdd =
+        JavaPairRDD<MyJoinKey, Row> rightRdd =
             RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_RIGHT_RDD)),
                 joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
 

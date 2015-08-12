@@ -12,6 +12,7 @@ import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.node.CanceledExecutionException;
 
+import com.knime.bigdata.spark.SparkSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
@@ -22,8 +23,6 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.testing.SparkSpec;
-import com.knime.bigdata.spark.testing.jobserver.jobs.ImportKNIMETableJobTest;
 
 /**
  *

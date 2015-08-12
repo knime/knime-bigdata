@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -59,9 +58,9 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_DATA_FILE_NAME =  ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
 
-    private static final String PARAM_DATA_SCHEMA =ParameterConstants.PARAM_SCHEMA;
+    private static final String PARAM_DATA_SCHEMA = ParameterConstants.PARAM_SCHEMA;
 
     private static final String PARAM_RESULT_TABLE_NAME = ParameterConstants.PARAM_TABLE_1;
 
@@ -96,7 +95,8 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
      * @return the JobResult
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "writing hive table...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_DATA_FILE_NAME));
         String schemaString = aConfig.getInputParameter(PARAM_DATA_SCHEMA);
@@ -120,12 +120,13 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
             StructType resultSchema = DataType.createStructType(fields);
             final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
             final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, resultSchema);
-                schemaPredictedData.saveAsTable(hiveTableName);
+            schemaPredictedData.saveAsTable(hiveTableName);
         } catch (Exception e) {
             String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";
-            if (e instanceof AlreadyExistsException) {
-                throw new GenericKnimeSparkException(msg + "Table already exists");
-            }
+            //requires import of hadoop stuff
+            //            if (e instanceof AlreadyExistsException) {
+            //                throw new GenericKnimeSparkException(msg + "Table already exists");
+            //            }
             throw new GenericKnimeSparkException(msg + e.getMessage());
         }
         return JobResult.emptyJobResult().withMessage("OK");

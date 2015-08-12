@@ -22,6 +22,7 @@ public class JarPacker {
 
     /**
      * add the given byte code to the given jar and put it into a new jar
+     *
      * @param aSourceJarPath
      * @param aTargetJarPath
      * @param aPackagePath
@@ -65,23 +66,6 @@ public class JarPacker {
     public static void add2Jar(final String aSourceJarPath, final String aTargetJarPath, final String aClassPath)
         throws IOException, ClassNotFoundException {
 
-        final String path = aClassPath.replaceAll("\\.", "/");
-        //TODO - is there a better way to determine inner classes?
-        final List<String> classPath = new ArrayList<>();
-        classPath.add(path + ".class");
-        classPath.add(path + "$1.class");
-        classPath.add(path + "$2.class");
-        classPath.add(path + "$3.class");
-        classPath.add(path + "$4.class");
-        final Class<?> c = Class.forName(aClassPath);
-        Class<?>[] c2 = c.getDeclaredClasses();
-        for (Class<?> innerClass : c2) {
-            classPath.add(path+"$"+innerClass.getSimpleName()+".class");
-            classPath.add(path+"$"+innerClass.getSimpleName()+"$1.class");
-            classPath.add(path+"$"+innerClass.getSimpleName()+"$2.class");
-            classPath.add(path+"$"+innerClass.getSimpleName()+"$3.class");
-            classPath.add(path+"$"+innerClass.getSimpleName()+"$4.class");
-        }
         final File f = new File(aSourceJarPath);
         if (!f.exists()) {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
@@ -90,12 +74,37 @@ public class JarPacker {
         try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
             copyJarFile(source, target);
 
+            final String path = aClassPath.replaceAll("\\.", "/");
+            final List<String> classPath = new ArrayList<>();
+            classPath.add(path);
+            final Class<?> c = Class.forName(aClassPath);
+
+            Class<?>[] c2 = c.getDeclaredClasses();
+            for (Class<?> innerClass : c2) {
+                classPath.add(path + "$" + innerClass.getSimpleName());
+            }
+
             for (String cp : classPath) {
-                final InputStream is = c.getResourceAsStream("/" + cp);
-                if (is != null) {
-                    copyEntry(cp, is, target);
-                    is.close();
+                final String prefix = "/" + cp;
+                {
+                    final InputStream is = c.getResourceAsStream(prefix + ".class");
+                    if (is != null) {
+                        copyEntry(cp + ".class", is, target);
+                        is.close();
+                    }
                 }
+                int ix = 1;
+                do {
+                    //now try anonymous inner classes with '$ix.class'
+                    final String name = "$" + ix + ".class";
+                    final InputStream is = c.getResourceAsStream(prefix + name);
+                    if (is == null) {
+                        break;
+                    }
+                    copyEntry(cp + name, is, target);
+                    is.close();
+                    ix++;
+                } while (true);
             }
         }
         source.close();
@@ -124,13 +133,12 @@ public class JarPacker {
     }
 
     private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream)
-            throws IOException {
-        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<String>emptySet());
+        throws IOException {
+        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<String> emptySet());
     }
 
     private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream,
-        final Set<String> entryNames2Filter)
-        throws IOException {
+        final Set<String> entryNames2Filter) throws IOException {
         Enumeration<JarEntry> entries = aSourceJarFile.entries();
 
         while (entries.hasMoreElements()) {
@@ -147,8 +155,9 @@ public class JarPacker {
     }
 
     /**
-     * This method copies all entries except the filter entries from the given jar file into a new temp file
-     * which in the end replaces the input file.
+     * This method copies all entries except the filter entries from the given jar file into a new temp file which in
+     * the end replaces the input file.
+     *
      * @param jarFile the jar file to remove the given classes from
      * @param entryNames the names of the jar entries to remove
      * @throws IOException if a new file could not be created
@@ -156,7 +165,7 @@ public class JarPacker {
     public static void removeFromJar(final File jarFile, final Set<String> entryNames) throws IOException {
         final File tempFile = File.createTempFile("snippet", ".jar", jarFile.getParentFile());
         final String jarFilePath = jarFile.getPath();
-        try (   final JarFile source = new JarFile(jarFilePath);
+        try (final JarFile source = new JarFile(jarFilePath);
                 final JarOutputStream target = new JarOutputStream(new FileOutputStream(tempFile));) {
             copyJarFile(source, target, entryNames);
         }
