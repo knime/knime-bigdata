@@ -49,16 +49,7 @@ public class SVDTaskTest extends SparkWithJobServerSpec {
         double[] v = testObj.execute(null);
         
         assertEquals("expected one value per column", 4, v.length);
-        
-        Object[][] expected = new Object[4][];
-        for (int i = 0; i < expected.length; i++) {
-            expected[i] =
-                new Object[]{ImportKNIMETableJobTest.TEST_TABLE[i][0], ImportKNIMETableJobTest.TEST_TABLE[i][1],
-                    ImportKNIMETableJobTest.TEST_TABLE[i][2], ImportKNIMETableJobTest.TEST_TABLE[i][3],
-                    ImportKNIMETableJobTest.TEST_TABLE[i][0], ImportKNIMETableJobTest.TEST_TABLE[i][1],
-                    ImportKNIMETableJobTest.TEST_TABLE[i][2], ImportKNIMETableJobTest.TEST_TABLE[i][3]};
-        }
-        
+               
         //not sure what else to check here....
         Object[][] arrayResV = fetchResultTable(context, "v",4);
         Object[][] arrayResU = fetchResultTable(context, "u",4);
