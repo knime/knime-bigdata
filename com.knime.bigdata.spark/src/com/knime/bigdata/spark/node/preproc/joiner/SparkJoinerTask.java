@@ -67,10 +67,10 @@ public class SparkJoinerTask implements Serializable {
     private String m_ResultTableName;
 
     SparkJoinerTask(final SparkRDD aLeftRDD, final SparkRDD aRightRDD, final JoinMode aJoinMode,
-        final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight, final Integer[] aSelectColIdxesLeft,
+        final Integer[] leftJoinColumns, final Integer[] rightJoinColumns, final Integer[] aSelectColIdxesLeft,
         final Integer[] aSelectColIdxesRight, final String aResultRDD) {
-        this(aLeftRDD.getContext(), aLeftRDD.getID(), aRightRDD.getID(), aJoinMode, aJoinColIdxesLeft,
-            aJoinColIdxesRight, aSelectColIdxesLeft, aSelectColIdxesRight, aResultRDD);
+        this(aLeftRDD.getContext(), aLeftRDD.getID(), aRightRDD.getID(), aJoinMode, leftJoinColumns,
+            rightJoinColumns, aSelectColIdxesLeft, aSelectColIdxesRight, aResultRDD);
         aLeftRDD.compatible(aRightRDD);
     }
 
@@ -81,14 +81,14 @@ public class SparkJoinerTask implements Serializable {
      * @param aLeftRDD
      * @param aRightRDD
      * @param aJoinMode
-     * @param aJoinColIdxesLeft
-     * @param aJoinColIdxesRight
+     * @param leftJoinColumns
+     * @param rightJoinColumns
      * @param aSelectColIdxesLeft
      * @param aSelectColIdxesRight
      * @param aResultRDD
      */
     public SparkJoinerTask(final KNIMESparkContext aContext, final String aLeftRDD, final String aRightRDD,
-        final JoinMode aJoinMode, final int[] aJoinColIdxesLeft, final int[] aJoinColIdxesRight,
+        final JoinMode aJoinMode, final Integer[] leftJoinColumns, final Integer[] rightJoinColumns,
         final Integer[] aSelectColIdxesLeft, final Integer[] aSelectColIdxesRight, final String aResultRDD) {
 
         m_context = aContext;
@@ -97,21 +97,10 @@ public class SparkJoinerTask implements Serializable {
         m_ResultTableName = aResultRDD;
         m_JoinMode = aJoinMode;
 
-        m_JoinColIdxesLeft = copyIntoIntegerArray(aJoinColIdxesLeft);
-        m_JoinColIdxesRight = copyIntoIntegerArray(aJoinColIdxesRight);
+        m_JoinColIdxesLeft = leftJoinColumns;
+        m_JoinColIdxesRight = rightJoinColumns;
         m_SelectColIdxesLeft = aSelectColIdxesLeft;
         m_SelectColIdxesRight = aSelectColIdxesRight;
-    }
-
-    /**
-     * @param aJoinColIdxesLeft
-     */
-    private static Integer[] copyIntoIntegerArray(final int[] aJoinColIdxesLeft) {
-        Integer[] copy = new Integer[aJoinColIdxesLeft.length];
-        for (int ix = 0; ix < aJoinColIdxesLeft.length; ix++) {
-            copy[ix] = aJoinColIdxesLeft[ix];
-        }
-        return copy;
     }
 
     void execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {

@@ -54,7 +54,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 /**
  *
  * @author dwk
- * @note this is an identical copy of org.knime.base.node.preproc.normalize3.SparkNormalizerPMMLNodeDialog (hopefully), we had to
+ * @note this is an identical copy of org.knime.base.node.preproc.normalize3.Normalizer3NodeDialog (hopefully), we had to
  *       copy it as it is package protected TODO - make Normalizer3Config public and check what to do with this class
 
  */

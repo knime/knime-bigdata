@@ -46,7 +46,7 @@ public class PMMLAssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    PMMLAssignTask() throws InvalidSettingsException {
+    public PMMLAssignTask() throws InvalidSettingsException {
     }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
@@ -64,7 +64,7 @@ public class PMMLAssignTask implements Serializable {
                     new String[]{ParameterConstants.PARAM_TABLE_1, outputID}});
     }
 
-    void execute(final ExecutionContext exec, final SparkDataTable inputRDD,
+    public void execute(final ExecutionContext exec, final SparkDataTable inputRDD,
         final CompiledModelPortObject pmml, final Integer[] colIdxs,
         final boolean appendProbabilities, final SparkDataTable resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {

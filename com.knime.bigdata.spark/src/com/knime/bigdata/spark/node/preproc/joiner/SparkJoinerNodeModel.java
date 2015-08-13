@@ -94,14 +94,15 @@ public class SparkJoinerNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec leftSpec = left.getTableSpec();
         final DataTableSpec rightSpec = right.getTableSpec();
         final Joiner joiner = new Joiner(leftSpec, rightSpec, m_settings);
-        final int[] leftJoinColumns = SparkUtil.getColumnIndices(leftSpec, m_settings.getLeftJoinColumns());
-        final int[] rightJoinColumns = SparkUtil.getColumnIndices(rightSpec, m_settings.getRightJoinColumns());
+        final Integer[] leftJoinColumns = SparkUtil.getColumnIndices(leftSpec, m_settings.getLeftJoinColumns());
+        final Integer[] rightJoinColumns = SparkUtil.getColumnIndices(rightSpec, m_settings.getRightJoinColumns());
         final Integer[] leftIncludCols = SparkUtil.getColumnIndices(leftSpec, joiner.getLeftIncluded(leftSpec));
         final Integer[] rightIncludCols = SparkUtil.getColumnIndices(rightSpec, joiner.getRightIncluded(leftSpec));
         final JoinMode joinMode = m_settings.getJoinMode();
         final DataTableSpec outputSpec = joiner.getOutputSpec();
         final SparkDataTable result = new SparkDataTable(context, outputSpec);
-        SparkJoinerTask task = new SparkJoinerTask(left.getData(), right.getData(), joinMode, leftJoinColumns, rightJoinColumns, leftIncludCols, rightIncludCols, result.getID());
+        SparkJoinerTask task = new SparkJoinerTask(left.getData(), right.getData(), joinMode, leftJoinColumns,
+            rightJoinColumns, leftIncludCols, rightIncludCols, result.getID());
         task.execute(exec);
         return new PortObject[] {new SparkDataPortObject(result)};
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
 <knimeNode icon="./normalize.png" type="Manipulator">
-    <name>Spark Normalizer (PMML)</name>
+    <name>Spark Normalizer</name>
     <shortDescription>Normalizes the attributes of a Spark RDD.</shortDescription>
     <fullDescription>
         <intro>
@@ -26,10 +26,10 @@
 		</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Table to normalize">Table requiring normalization of some or all columns.</inPort>
-        <outPort index="0" name="Normalized table">Table with normalized columns.</outPort>
+        <inPort index="0" name="Spark RDD">Spark RDD requiring normalization of some or all columns.</inPort>
+        <outPort index="0" name="Normalized Spark RDD">Spark RDD with normalized columns.</outPort>
          <outPort index="1" name="PMML Model">PMML document containing normalization parameters, 
-            which can be used in a "(Spark) PMML normalize apply" node to normalize test data the same way 
+            which can be used in the "Spark Compiled Transformations Applier" node to normalize test data the same way 
             as the training data has been normalized.</outPort>
 	</ports>
 </knimeNode>

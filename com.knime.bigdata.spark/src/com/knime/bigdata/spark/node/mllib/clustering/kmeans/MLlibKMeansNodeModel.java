@@ -119,7 +119,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         final DataTableSpec tableSpec = data.getTableSpec();
         final FilterResult result = m_cols.applyTo(tableSpec);
         final String[] includedCols = result.getIncludes();
-        final int[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
+        final Integer[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);

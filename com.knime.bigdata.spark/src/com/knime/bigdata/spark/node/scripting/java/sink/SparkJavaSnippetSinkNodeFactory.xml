@@ -12,6 +12,6 @@
 
 	<ports>
 		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
-		<inPort index="0" name="Spark input">Spark input.</inPort>
+		<inPort index="0" name="Spark RDD">Spark RDD.</inPort>
 	</ports>
 </knimeNode>
