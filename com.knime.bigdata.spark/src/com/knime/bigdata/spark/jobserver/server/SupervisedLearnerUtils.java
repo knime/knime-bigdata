@@ -205,12 +205,7 @@ public class SupervisedLearnerUtils {
                 "Storing predicted data under key: " + aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH));
             //TODO - revert the label to int mapping ????
             JavaRDD<Row> predictedData = ModelUtils.predict(sc, aFeatures, aInputRdd, aModel);
-            try {
-                aJob.addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictedData);
-            } catch (Exception e) {
-                aLogger.severe("ERROR: failed to predict and store results for training data.");
-                aLogger.severe(e.getMessage());
-            }
+            aJob.addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictedData);
         }
     }
 

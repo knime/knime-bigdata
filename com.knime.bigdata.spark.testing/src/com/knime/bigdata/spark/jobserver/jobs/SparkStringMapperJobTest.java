@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
@@ -19,7 +19,7 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class SparkStringMapperJobTest extends SparkSpec {
+public class SparkStringMapperJobTest extends SparkWithJobServerSpec {
 
     private static String getParams(final String aInputDataPath, final String aType, final Integer[] aColIdxes,
         final String[] aColNames, final String aOutputDataPath1, final String aOutputDataPath2) {

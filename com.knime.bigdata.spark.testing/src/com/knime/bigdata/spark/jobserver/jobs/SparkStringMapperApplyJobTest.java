@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.ApplyNominalValueMappingJob;
@@ -29,7 +29,7 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class SparkStringMapperApplyJobTest extends SparkSpec {
+public class SparkStringMapperApplyJobTest extends SparkWithJobServerSpec {
 
     private static String getParams(final String aInputDataPath, final String aMappingTableName,
         final Integer[] aColIdxes, final String[] aColNames, final String aOutputDataPath) {

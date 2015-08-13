@@ -12,7 +12,7 @@ import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.node.CanceledExecutionException;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
@@ -32,7 +32,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  *
  */
 @SuppressWarnings("javadoc")
-public class SamplingJobTest extends SparkSpec {
+public class SamplingJobTest extends SparkWithJobServerSpec {
 
 	private static String getParams(final String aTableToSample,
 			final SamplingMethods aMethod, final int aClassColIx, final CountMethods aCountMethod,
@@ -484,67 +484,6 @@ public class SamplingJobTest extends SparkSpec {
 		// start job
 		String jobId = JobControler.startJob(CONTEXT_ID, job, "");
 		JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId, null);
-	}
-
-	private void checkResult(final KNIMESparkContext aContextName,
-			final String resTableName, final Object[][] aExpected)
-			throws Exception {
-
-		Object[][] arrayRes = fetchResultTable(aContextName, resTableName,
-				aExpected.length);
-
-		for (int i = 0; i < arrayRes.length; i++) {
-			boolean found = false;
-			for (int j = 0; j < aExpected.length; j++) {
-				found = found || Arrays.equals(arrayRes[i], aExpected[j]);
-			}
-			assertTrue("result row[" + i + "]: " + Arrays.toString(arrayRes[i])
-					+ " - not found.", found);
-		}
-	}
-
-	/**
-	 * @param aContextName
-	 * @param aResTableName
-	 * @param aExpected
-	 * @return
-	 * @throws GenericKnimeSparkException
-	 * @throws CanceledExecutionException
-	 */
-	private Object[][] fetchResultTable(final KNIMESparkContext aContextName,
-			final String aResTableName, final int aExpectedLength)
-			throws GenericKnimeSparkException, CanceledExecutionException {
-		return fetchResultTable(aContextName, aResTableName, aExpectedLength, 0);
-	}
-
-	private Object[][] fetchResultTable(final KNIMESparkContext aContextName,
-			final String aResTableName, final int aExpectedLength,
-			final double aAllowedPercentageOff) throws GenericKnimeSparkException,
-			CanceledExecutionException {
-		// now check result:
-		String takeJobId = JobControler.startJob(aContextName,
-				FetchRowsJob.class.getCanonicalName(),
-				rowFetcherDef(aExpectedLength, aResTableName));
-		JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
-				takeJobId, null);
-		assertNotNull("row fetcher must return a result", res);
-
-		Object[][] arrayRes = (Object[][]) res.getObjectResult();
-		if (aAllowedPercentageOff == 0) {
-			assertEquals("fetcher should return correct number of rows",
-					aExpectedLength, arrayRes.length);
-		} else {
-			assertTrue("fetcher should return correct number of rows, got "
-					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * ((double) (100 - aAllowedPercentageOff))
-							/ 100 <= arrayRes.length);
-			assertTrue("fetcher should return correct number of rows, got "
-					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * ((double) (100 + aAllowedPercentageOff))
-							/ 100 >= arrayRes.length);
-
-		}
-		return arrayRes;
 	}
 
 	private static final Object[][] TEST_TABLE_1 = new Object[][] {

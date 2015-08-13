@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import spark.jobserver.SparkJobValidation;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
@@ -29,7 +29,7 @@ import com.typesafe.config.ConfigValueFactory;
  * @author dwk
  *
  */
-public class SparkJobCompilerTest extends SparkSpec {
+public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
     /**
      *
