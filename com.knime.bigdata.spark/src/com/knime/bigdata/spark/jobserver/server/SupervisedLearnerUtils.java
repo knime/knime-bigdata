@@ -106,20 +106,11 @@ public class SupervisedLearnerUtils {
             return "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
         }
 
-        if (!aConfig.hasInputParameter(PARAM_LABEL_INDEX)) {
-            return "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
-        } else {
-            try {
-                final int ix = aConfig.getInputParameter(PARAM_LABEL_INDEX, Integer.class);
-                if (ix < 0) {
-                    return "Input parameter '" + PARAM_LABEL_INDEX + "' must be positive, got "+ix+".";
-                }
-            } catch (Exception e) {
-                return "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
-            }
-        }
+        String msg = checkLableColumnParameter(aConfig);
 
-        final String msg = checkSelectedColumnIdsParameter(aConfig);
+        if (msg == null) {
+            msg = checkSelectedColumnIdsParameter(aConfig);
+        }
         if (msg == null) {
             if (!aConfig.hasInputParameter(PARAM_COL_NAMES)) {
                 return "Input parameter '" + PARAM_COL_NAMES + "' missing.";
@@ -137,6 +128,25 @@ public class SupervisedLearnerUtils {
             }
         }
         return msg;
+    }
+
+    /**
+     * @param aConfig
+     */
+    public static String checkLableColumnParameter(final JobConfig aConfig) {
+        if (!aConfig.hasInputParameter(PARAM_LABEL_INDEX)) {
+            return "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
+        } else {
+            try {
+                final int ix = aConfig.getInputParameter(PARAM_LABEL_INDEX, Integer.class);
+                if (ix < 0) {
+                    return "Input parameter '" + PARAM_LABEL_INDEX + "' must be positive, got " + ix + ".";
+                }
+            } catch (Exception e) {
+                return "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
+            }
+        }
+        return null;
     }
 
     /**
@@ -222,10 +232,10 @@ public class SupervisedLearnerUtils {
         final Long numClasses;
         if (aConfig.hasInputParameter(PARAM_MAPPING_TABLE)) {
             //final int labelColIx = aConfig.getInt(PARAM_LABEL_INDEX);
-            final List<String> names = aConfig.getInputListParameter(SupervisedLearnerUtils.PARAM_COL_NAMES, String.class);
+            final List<String> names =
+                aConfig.getInputListParameter(SupervisedLearnerUtils.PARAM_COL_NAMES, String.class);
             final String classColName = names.remove(names.size() - 1);
-            final JavaRDD<Row> mappingRDD =
-                aJob.getFromNamedRdds(aConfig.getInputParameter(PARAM_MAPPING_TABLE));
+            final JavaRDD<Row> mappingRDD = aJob.getFromNamedRdds(aConfig.getInputParameter(PARAM_MAPPING_TABLE));
             numClasses = ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, classColName);
             nominalFeatureInfo.putAll(ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD));
         } else {
