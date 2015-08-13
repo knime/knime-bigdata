@@ -9,7 +9,7 @@ import javax.json.JsonObject;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.jobs.TransformationTestJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -21,7 +21,7 @@ import com.typesafe.config.ConfigValueFactory;
  * @author dwk
  *
  */
-public class CompiledTransformationJobTest extends SparkSpec {
+public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
 
     private final String params2Json(final String aInputKey, final String aOutputKey) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,

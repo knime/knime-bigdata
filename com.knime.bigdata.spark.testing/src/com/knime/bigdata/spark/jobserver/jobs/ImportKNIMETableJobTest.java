@@ -8,7 +8,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.knime.core.node.CanceledExecutionException;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -28,7 +28,7 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class ImportKNIMETableJobTest extends SparkSpec {
+public class ImportKNIMETableJobTest extends SparkWithJobServerSpec {
 
     @Test
     public void runningImportJobDirectlyShouldProduceResult() throws Throwable {

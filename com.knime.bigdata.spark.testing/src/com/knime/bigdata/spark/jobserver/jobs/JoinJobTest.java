@@ -10,7 +10,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -31,7 +31,7 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class JoinJobTest extends SparkSpec {
+public class JoinJobTest extends SparkWithJobServerSpec {
 
     private static String getParams(final String aLeftTab, final String aRightTab, final JoinMode aJoinMode,
         final Integer[] aJoinColIdxesLeft, final Integer[] aJoinColIdxesRight, final Integer[] aSelectColIdxesLeft,
@@ -298,28 +298,6 @@ public class JoinJobTest extends SparkSpec {
         checkResult(contextName, resTableName, expected);
     }
 
-    private void
-        checkResult(final KNIMESparkContext aContextName, final String resTableName, final Object[][] aExpected)
-            throws Exception {
-
-        // now check result:
-        String takeJobId =
-            JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(), rowFetcherDef(10, resTableName));
-        assertFalse("job should have finished properly",
-            JobControler.waitForJob(aContextName, takeJobId, null).equals(JobStatus.UNKNOWN));
-        JobResult res = JobControler.fetchJobResult(aContextName, takeJobId);
-        assertNotNull("row fetcher must return a result", res);
-
-        Object[][] arrayRes = (Object[][])res.getObjectResult();
-        assertEquals("fetcher should return correct number of rows", aExpected.length, arrayRes.length);
-        for (int i = 0; i < arrayRes.length; i++) {
-            boolean found = false;
-            for (int j = 0; j < aExpected.length; j++) {
-                found = found || Arrays.equals(arrayRes[i], aExpected[j]);
-            }
-            assertTrue("result row[" + i + "]: " + Arrays.toString(arrayRes[i]) + " - not found.", found);
-        }
-    }
 
     static final Object[][] TEST_TABLE_2 = new Object[][]{new Object[]{1, "Ping", "my string"},
         new Object[]{1, "Pong", "my string"}, new Object[]{1, "Ping2", "my other string"},
@@ -331,11 +309,5 @@ public class JoinJobTest extends SparkSpec {
 
     static final Object[][] TEST_TABLE_4 = new Object[][]{new Object[]{88}, new Object[]{99}};
 
-    private String rowFetcherDef(final int aNumRows, final String aTableName) {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_TABLE_1,
-                aTableName}});
-    }
 
 }

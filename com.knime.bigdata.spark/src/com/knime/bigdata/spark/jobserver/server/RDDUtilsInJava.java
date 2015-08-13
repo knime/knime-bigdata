@@ -13,14 +13,18 @@ import javax.annotation.Nullable;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
@@ -333,6 +337,44 @@ public class RDDUtilsInJava {
         });
     }
 
+    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices) {
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length());
+
+        return inputRdd.map(new Function<Row, Vector>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Vector call(final Row row) {
+                int insertionIndex = 0;
+                final double[] convertedValues = new double[numFeatures];
+                for (int idx : aColumnIndices) {
+                    if (idx < row.length()) {
+                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
+                        insertionIndex += 1;
+                    }
+                }
+
+                return Vectors.dense(convertedValues);
+            }
+        });
+    }
+
+    private static JavaRDD<Row> fromVectorRdd(final JavaRDD<Vector> aInputRdd) {
+        return aInputRdd.map(new Function<Vector, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Vector row) {
+                final double[] values = row.toArray();
+                RowBuilder builder = RowBuilder.emptyRow();
+                for (int i = 0; i < values.length; i++) {
+                    builder.add(values[i]);
+                }
+                return builder.build();
+            }
+        });
+    }
+
     /**
      *
      * convert a RDD of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric
@@ -412,6 +454,52 @@ public class RDDUtilsInJava {
                 builder.add(null);
             }
         }
+    }
+
+    /**
+     * convert the given JavaRDD of Row to a RowMatrix
+     *
+     * @param aRowRDD
+     * @param aColumnIds - indices of columns to select
+     * @return converted RowMatrix
+     */
+    public static RowMatrix toRowMatrix(final JavaRDD<Row> aRowRDD, final List<Integer> aColumnIds) {
+        final JavaRDD<Vector> vectorRDD = toVectorRdd(aRowRDD, aColumnIds);
+        return new RowMatrix(vectorRDD.rdd());
+    }
+
+    /**
+     * convert the given RowMatrix to a JavaRDD of Row
+     *
+     * @param aRowMatrix
+     * @return converted JavaRDD
+     */
+    public static JavaRDD<Row> fromRowMatrix(final RowMatrix aRowMatrix) {
+        final RDD<Vector> rows = aRowMatrix.rows();
+        final JavaRDD<Vector> vectorRows = new JavaRDD<>(rows, rows.elementClassTag());
+        return fromVectorRdd(vectorRows);
+    }
+
+    /**
+     * convert the given Matrix to a JavaRDD of Row
+     *
+     * @param aContext java context, required for RDD construction
+     *
+     * @param aMatrix
+     * @return converted JavaRDD
+     */
+    public static JavaRDD<Row> fromMatrix(final JavaSparkContext aContext, final Matrix aMatrix) {
+        final int nRows = aMatrix.numRows();
+        final int nCols = aMatrix.numCols();
+        final List<Row> rows = new ArrayList<>(nRows);
+        for (int i = 0; i < nRows; i++) {
+            RowBuilder builder = RowBuilder.emptyRow();
+            for (int j = 0; j < nCols; j++) {
+                builder.add(aMatrix.apply(i, j));
+            }
+            rows.add(builder.build());
+        }
+        return aContext.parallelize(rows);
     }
 
 }

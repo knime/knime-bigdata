@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
@@ -17,7 +17,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  * @author dwk
  *
  */
-public class KnimeContextTest extends SparkSpec {
+public class KnimeContextTest extends SparkWithJobServerSpec {
 
     /**
      *

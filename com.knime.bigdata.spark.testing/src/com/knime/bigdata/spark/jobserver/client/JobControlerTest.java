@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.SparkSpec;
+import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
@@ -21,7 +21,7 @@ import com.typesafe.config.ConfigFactory;
  * @author dwk
  *
  */
-public class JobControlerTest extends SparkSpec {
+public class JobControlerTest extends SparkWithJobServerSpec {
 
     /**
      *
