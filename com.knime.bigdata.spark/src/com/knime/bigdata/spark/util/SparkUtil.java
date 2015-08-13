@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
+import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -76,12 +77,12 @@ public final class SparkUtil {
      * @return the indices of the columns in the same order as in the input list
      * @throws InvalidSettingsException if the input list is empty or a column name could not be found in the input spec
      */
-    public static int[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
+    public static Integer[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
         throws InvalidSettingsException {
         if (featureColNames == null || featureColNames.length < 1) {
             throw new InvalidSettingsException("No columns selected");
         }
-        int[] colIdxs = new int[featureColNames.length];
+        final Integer[] colIdxs = new Integer[featureColNames.length];
         for (int i = 0, length = featureColNames.length; i < length; i++) {
             final String colName = featureColNames[i];
             final int colIdx = tableSpec.findColumnIndex(colName);
@@ -115,5 +116,25 @@ public final class SparkUtil {
     public static String getJobJarPath() {
         return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
             + "knimeJobs.jar";
+    }
+
+    /**
+     * @param inputSpec {@link DataTableSpec}
+     * @param model PMML {@link CompiledModel}
+     * @return the indices of the columns required by the compiled PMML model
+     * @throws InvalidSettingsException if a required column is not present in the input table
+     */
+    public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model)
+            throws InvalidSettingsException {
+        final String[] inputFields = model.getInputFields();
+        final Integer[] colIdxs = new Integer[inputFields.length];
+        for (String fieldName : inputFields) {
+            final int colIdx = inputSpec.findColumnIndex(fieldName);
+            if (colIdx < 0) {
+                throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
+            }
+            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
+        }
+        return colIdxs;
     }
 }

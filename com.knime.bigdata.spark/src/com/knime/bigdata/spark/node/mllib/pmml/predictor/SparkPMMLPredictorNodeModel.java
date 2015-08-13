@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 
 import org.knime.base.node.mine.util.PredictorHelper;
-import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -39,6 +38,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
@@ -81,7 +81,8 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
-        return new PortObjectSpec[] {createResultSpec(sparkSpec.getTableSpec(), pmmlSpec)};
+        final DataTableSpec resultSpec = createResultSpec(sparkSpec.getTableSpec(), pmmlSpec);
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), resultSpec)};
     }
 
     private DataTableSpec createResultSpec(final DataTableSpec inSpec,
@@ -104,24 +105,10 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final Integer[] colIdxs = getColumnIndices(data.getTableSpec(), pmml.getModel());
+        final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
         final PMMLAssignTask assignTask = new PMMLAssignTask();
         assignTask.execute(exec, data.getData(), pmml, colIdxs, m_outputProbabilities.getBooleanValue(), resultRDD);
         return new PortObject[] {new SparkDataPortObject(resultRDD)};
-    }
-
-    private Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model)
-            throws InvalidSettingsException {
-        final String[] inputFields = model.getInputFields();
-        final Integer[] colIdxs = new Integer[inputFields.length];
-        for (String fieldName : inputFields) {
-            final int colIdx = inputSpec.findColumnIndex(fieldName);
-            if (colIdx < 0) {
-                throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
-            }
-            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
-        }
-        return colIdxs;
     }
 
     /**

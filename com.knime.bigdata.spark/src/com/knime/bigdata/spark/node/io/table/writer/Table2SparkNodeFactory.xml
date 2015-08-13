@@ -12,6 +12,6 @@
 
 	<ports>
 		<inPort index="0" name="KNIME table">KNIME table</inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark RDD">Spark RDD</outPort>
 	</ports>
 </knimeNode>

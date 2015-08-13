@@ -150,7 +150,7 @@ public class JobControler {
         Response response =
             RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", appName, "context", aContextContainer.getContextName(), "classPath",
                 aJobInstance.getClass().getCanonicalName()}, Entity.text(aJsonParams));
-
+        //TODO: Check for service not available exception
         RestClient.checkStatus(response, "Error: failed to start job: " + aJobInstance.getClass().getCanonicalName()
             + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
             + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
@@ -188,7 +188,7 @@ public class JobControler {
             multiPart.close();
 
             //			Response response = builder.post(Entity.text(aJsonParams));
-
+            //TODO: Check for service not available exception
             RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
                 + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
                 + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{

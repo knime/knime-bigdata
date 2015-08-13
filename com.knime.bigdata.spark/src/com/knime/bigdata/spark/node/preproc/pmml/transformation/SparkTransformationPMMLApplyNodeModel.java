@@ -18,99 +18,87 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.normalize;
-
-import java.io.File;
-import java.io.IOException;
+package com.knime.bigdata.spark.node.preproc.pmml.transformation;
 
 import org.knime.base.data.normalize.AffineTransConfiguration;
-import org.knime.base.data.normalize.PMMLNormalizeTranslator;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.pmml.PMMLPortObject;
-import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
-import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
 
-import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
-import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.Normalizer;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.mllib.pmml.predictor.PMMLAssignTask;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
+import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
 /**
- * The NormalizeNodeModel normalizes the input RDD in Spark.
+ * The PMML transformation node model.
  *
- * @author dwk
+ * @author koetter
  */
-public class SparkNormalizerPMMLApplyNodeModel extends NodeModel {
+public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeModel {
     /**
     *
     */
-    public SparkNormalizerPMMLApplyNodeModel() {
-        super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE}, new PortType[]{PMMLPortObject.TYPE,
-            SparkDataPortObject.TYPE});
+    public SparkTransformationPMMLApplyNodeModel() {
+        super(new PortType[]{CompiledModelPortObject.TYPE, SparkDataPortObject.TYPE},
+            new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        /* So far we can only get all preprocessing fields from the PMML port
-         * object spec. There is no way to determine from the spec which
-         * of those fields contain normalize operations. Hence we cannot
-         * determine the data table output spec at this point.
-         * Bug 2985
-         *
-         */
-        return new PortObjectSpec[]{inSpecs[0], null};
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
+        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
+        DataTableSpec resultSpec = createResultSpec(sparkSpec.getTableSpec(), pmmlSpec);
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), resultSpec)};
+    }
+
+    private DataTableSpec createResultSpec(final DataTableSpec inSpec,
+                                                          final CompiledModelPortObjectSpec cms) {
+        final DataColumnSpec[] specs = cms.getTransformationsResultColSpecs(inSpec);
+        return new DataTableSpec(inSpec, new DataTableSpec(specs));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
+    protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+        final CompiledModelPortObject pmml = (CompiledModelPortObject)inObjects[0];
+        final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
+        final String aOutputTableName = SparkIDs.createRDDID();
+        final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
+        final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
+        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+        final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
+        final PMMLAssignTask assignTask = new PMMLAssignTask();
+        assignTask.execute(exec, data.getData(), pmml, colIdxs, true, resultRDD);
+        return new PortObject[] {new SparkDataPortObject(resultRDD)};
     }
+
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
     }
 
     /**
@@ -125,56 +113,6 @@ public class SparkNormalizerPMMLApplyNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        PMMLPortObject model = (PMMLPortObject)inData[0];
-
-        PMMLNormalizeTranslator translator = new PMMLNormalizeTranslator();
-        translator.initializeFrom(model.getDerivedFields());
-        AffineTransConfiguration config = getAffineTrans(translator.getAffineTransConfig());
-        if (config.getNames().length == 0) {
-            throw new IllegalArgumentException("No normalization configuration " + "found.");
-        }
-
-        final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
-        final KNIMESparkContext context = rdd.getContext();
-        final DataTableSpec spec = rdd.getTableSpec();
-
-        exec.checkCanceled();
-        final String[] includedCols = config.getNames();
-        Integer[] includeColIdxs = new Integer[includedCols.length];
-
-        for (int i = 0, length = includedCols.length; i < length; i++) {
-            includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
-        }
-
-        final String outputTableName = SparkIDs.createRDDID();
-
-        final String paramInJson = paramsToJson(rdd.getTableName(), includeColIdxs, config, outputTableName);
-
-        final String jobId = JobControler.startJob(context, NormalizeColumnsJob.class.getCanonicalName(), paramInJson);
-
-        final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
-
-        Normalizer res = (Normalizer)result.getObjectResult();
-
-        //TODO - fix me...
-        final DataColumnSpec[] mappingSpecs = null;
-        final DataTableSpec firstSpec = new DataTableSpec(spec, new DataTableSpec(mappingSpecs));
-        SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
-
-        PMMLNormalizeTranslator trans = new PMMLNormalizeTranslator(config, new DerivedFieldMapper(model));
-
-        PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
-        PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
-        //outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-
-        return new PortObject[]{new SparkDataPortObject(firstRDD), outPMMLPort};
     }
 
     /**

@@ -20,29 +20,21 @@
  */
 package com.knime.bigdata.spark.node.preproc.pmml.normalize;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.knime.base.data.normalize.AffineTransConfiguration;
-import org.knime.core.data.DataColumnSpec;
+import org.knime.base.data.normalize.PMMLNormalizeTranslator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
-import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
+import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
 import org.knime.core.node.util.ConvenienceMethods;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
@@ -56,18 +48,20 @@ import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.Normalizer;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  * The NormalizeNodeModel normalizes the input RDD in Spark.
  *
  * @author dwk
  */
-public class SparkNormalizerPMMLNodeModel extends NodeModel {
+public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
 
     private static final int MAX_UNKNOWN_COLS = 3;
 
@@ -96,54 +90,33 @@ public class SparkNormalizerPMMLNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-
-        SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec dataSpec = spec.getTableSpec();
-        //TK_TODO - we have no incoming PMMLPort, need to create a new object
-        PMMLPortObjectSpec pmmlSpec = null; //(PMMLPortObjectSpec)inSpecs[1];
-
-        //TK_TODO - please check this
-        PMMLPortObjectSpecCreator pmmlSpecCreator
-                = new PMMLPortObjectSpecCreator(pmmlSpec);
-        return new PortObjectSpec[]{
-                dataSpec, //Normalizer2.generateNewSpec(spec, getIncludedComlumns(dataSpec)),
-                pmmlSpecCreator.createSpec()};
-    }
-
-    /**
-     * Finds all numeric columns in spec.
-     *
-     * @param spec input table spec
-     * @return array of numeric column names
-     */
-    static final String[] findAllNumericColumns(final DataTableSpec spec) {
-        int nrcols = spec.getNumColumns();
-        List<String> poscolumns = new ArrayList<String>();
-        for (int i = 0; i < nrcols; i++) {
-            if (spec.getColumnSpec(i).getType().isCompatible(DoubleValue.class)) {
-                poscolumns.add(spec.getColumnSpec(i).getName());
-            }
+        boolean hasGuessedDefaults = false;
+        if (m_config == null) {
+            SparkNormalizerPMMLConfig config = new SparkNormalizerPMMLConfig();
+            config.guessDefaults(dataSpec);
+            hasGuessedDefaults = true;
+            m_config = config;
         }
-        return poscolumns.toArray(new String[poscolumns.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // empty
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // empty
+        FilterResult filterResult = m_config.getDataColumnFilterConfig().applyTo(dataSpec);
+        String[] includes = filterResult.getIncludes();
+        if (includes.length == 0) {
+            StringBuilder warnings = new StringBuilder("No columns included - input stays unchanged.");
+            if (filterResult.getRemovedFromIncludes().length > 0) {
+                warnings.append("\nThe following columns were included before but no longer exist:\n");
+                warnings.append(ConvenienceMethods.getShortStringFrom(
+                    Arrays.asList(filterResult.getRemovedFromIncludes()), MAX_UNKNOWN_COLS));
+            }
+            setWarningMessage(warnings.toString());
+        } else if (hasGuessedDefaults) {
+            setWarningMessage("Auto-configure: [0, 1] normalization on all numeric columns: "
+                + ConvenienceMethods.getShortStringFrom(Arrays.asList(includes), MAX_UNKNOWN_COLS));
+        }
+        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(dataSpec);
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), dataSpec),
+            pmmlSpecCreator.createSpec()};
     }
 
     /**
@@ -153,15 +126,6 @@ public class SparkNormalizerPMMLNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_config = new SparkNormalizerPMMLConfig();
         m_config.loadConfigurationInModel(settings);
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // empty
     }
 
     /**
@@ -184,91 +148,41 @@ public class SparkNormalizerPMMLNodeModel extends NodeModel {
     }
 
     /**
-     * @param spec the data table spec
-     * @throws InvalidSettingsException if no normalization mode is set
-     * @return the included columns
-     */
-    private String[] getIncludedComlumns(final DataTableSpec spec) throws InvalidSettingsException {
-        boolean hasGuessedDefaults = false;
-        if (m_config == null) {
-            SparkNormalizerPMMLConfig config = new SparkNormalizerPMMLConfig();
-            config.guessDefaults(spec);
-            hasGuessedDefaults = true;
-            m_config = config;
-        }
-
-        FilterResult filterResult = m_config.getDataColumnFilterConfig().applyTo(spec);
-        String[] includes = filterResult.getIncludes();
-
-        if (includes.length == 0) {
-            StringBuilder warnings = new StringBuilder("No columns included - input stays unchanged.");
-            if (filterResult.getRemovedFromIncludes().length > 0) {
-                warnings.append("\nThe following columns were included before but no longer exist:\n");
-                warnings.append(ConvenienceMethods.getShortStringFrom(
-                    Arrays.asList(filterResult.getRemovedFromIncludes()), MAX_UNKNOWN_COLS));
-            }
-            setWarningMessage(warnings.toString());
-        } else if (hasGuessedDefaults) {
-            setWarningMessage("Auto-configure: [0, 1] normalization on all numeric columns: "
-                + ConvenienceMethods.getShortStringFrom(Arrays.asList(includes), MAX_UNKNOWN_COLS));
-        }
-
-        return includes;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-
+    protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
         final KNIMESparkContext context = rdd.getContext();
         final DataTableSpec spec = rdd.getTableSpec();
-
         exec.checkCanceled();
-        final String[] includedCols = getIncludedComlumns(spec);
-        Integer[] includeColIdxs = new Integer[includedCols.length];
-
+        final FilterResult filterResult = m_config.getDataColumnFilterConfig().applyTo(spec);
+        final String[] includes = filterResult.getIncludes();
+        final String[] includedCols = filterResult.getIncludes();
+        final Integer[] includeColIdxs = SparkUtil.getColumnIndices(spec, includes);
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
         }
-
         final String outputTableName = SparkIDs.createRDDID();
-
         final String paramInJson =
             paramsToJson(rdd.getTableName(), includeColIdxs, convertToSettings(), outputTableName);
-
         final String jobId = JobControler.startJob(context, NormalizeColumnsJob.class.getCanonicalName(), paramInJson);
-
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
-
-        Normalizer res = (Normalizer)result.getObjectResult();
-
+        final Normalizer res = (Normalizer)result.getObjectResult();
         //create from result
         final double[] min = new double[includedCols.length];
         Arrays.fill(min, m_config.getMin());
         final double[] max = new double[includedCols.length];
         Arrays.fill(max, m_config.getMax());
         AffineTransConfiguration normConfig =
-            new AffineTransConfiguration(includedCols, res.getScales(), res.getTranslations(), min, max,
-                "PORT SUMMARY...");
-
-        //TODO - fix me...
-        final DataColumnSpec[] mappingSpecs = null;
-        final DataTableSpec firstSpec = new DataTableSpec(spec, new DataTableSpec(mappingSpecs));
-        SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
-
-        // TODO - what would the incoming PMML be good for?
-        // the optional PMML in port (can be null)
-        //PMMLPortObject inPMMLPort = (PMMLPortObject)inData[1];
-        //PMMLNormalizeTranslator trans = new PMMLNormalizeTranslator(normConfig, new DerivedFieldMapper(inPMMLPort));
-
-        PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
-        PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
-        //outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-
-        return new PortObject[]{new SparkDataPortObject(firstRDD), outPMMLPort};
+            new AffineTransConfiguration(includedCols, res.getScales(), res.getTranslations(), min, max, null);
+        final SparkDataTable resultRDD = new SparkDataTable(context, outputTableName, spec);
+        final PMMLNormalizeTranslator trans =
+                new PMMLNormalizeTranslator(normConfig, new DerivedFieldMapper((PMMLPortObject)null));
+        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
+        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
+        outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
+        return new PortObject[]{new SparkDataPortObject(resultRDD), outPMMLPort};
     }
 
     /**

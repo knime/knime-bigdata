@@ -58,18 +58,14 @@ public class KMeansTask {
      * @param noOfIteration - maximal number of iterations
      * @param outputRDD - table identifier (classified output data)
      */
-    public KMeansTask(final SparkRDD inputRDD, final int[] includeColIdxs, final int noOfCluster,
+    public KMeansTask(final SparkRDD inputRDD, final Integer[] includeColIdxs, final int noOfCluster,
         final int noOfIteration, final SparkRDD outputRDD) {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_includeColIdxs = new Integer[includeColIdxs.length];
-        int i = 0;
-        for (int value : includeColIdxs) {
-            m_includeColIdxs[i++] = Integer.valueOf(value);
-        }
+        m_includeColIdxs = includeColIdxs;
         m_outputTableName = outputRDD.getID();
         m_noOfCluster = noOfCluster;
         m_noOfIteration = noOfIteration;
