@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
@@ -46,6 +47,9 @@ public class ModelUtils {
         } else if (aModel instanceof LinearRegressionModel) {
             LOGGER.fine("LinearRegressionModel found for prediction");
             predictions = ((LinearRegressionModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof NaiveBayesModel) {
+            LOGGER.fine("NaiveBayesModel found for prediction");
+            predictions = ((NaiveBayesModel)aModel).predict(aNumericData);
         } else {
             throw new GenericKnimeSparkException("ERROR: unknown model type: "+aModel.getClass());
         }
