@@ -9,7 +9,6 @@
             id="com.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"/>
       <node
             category-path="/database/database-io"
-            expert-flag="false"
             factory-class="com.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory"
             id="com.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory">
       </node>
