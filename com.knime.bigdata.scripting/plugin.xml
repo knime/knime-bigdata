@@ -5,7 +5,6 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/labs/python"
-            expert-flag="false"
             factory-class="com.knime.bigdata.scripting.nodes.python.hive.PythonScriptHiveNodeFactory"
             id="com.knime.bigdata.scripting.nodes.python.hive.PythonScriptHiveNodeFactory">
       </node>

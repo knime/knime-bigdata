@@ -9,7 +9,6 @@
             id="com.knime.bigdata.impala.node.connector.ImpalaConnectorNodeFactory"/>
       <node
             category-path="/database/database-io"
-            expert-flag="false"
             factory-class="com.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory"
             id="com.knime.bigdata.impala.node.loader.ImpalaLoaderNodeFactory">
       </node>
