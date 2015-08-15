@@ -38,7 +38,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
@@ -58,8 +57,6 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
     private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
 
     private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
-
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(KMeansLearner.class.getName());
 
@@ -145,16 +142,8 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(PARAM_OUTPUT_DATA_PATH)) {
-            LOGGER.log(Level.INFO, "Storing predicted data unter key: " + aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH));
-            JavaRDD<Row> predictedData = ModelUtils.predict(sc, inputRDD, rowRDD, model);
-            try {
-                addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictedData);
-            } catch (Exception e) {
-                LOGGER.severe("ERROR: failed to predict and store results for training data.");
-                LOGGER.severe(e.getMessage());
-            }
-        }
+        SupervisedLearnerUtils.storePredictions(sc, aConfig, this, rowRDD, inputRDD, model, LOGGER);
+
         LOGGER.log(Level.INFO, "kMeans done");
         // note that with Spark 1.4 we can use PMML instead
         return res;

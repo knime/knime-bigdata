@@ -111,6 +111,13 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			{ 4.7, 3.2, 1.3, 0.2, "Iris-versicolor" },
 			{ 4.6, 3.1, 1.5, 0.2, "Iris-virginica" } };
 
+	protected static final Object[][] MINI_RATING_TABLE = new Object[][] {
+			// user, product, rating
+			{ 1, 1, 5.0 }, { 1, 2, 1.0 }, { 1, 3, 5.0 }, { 1, 4, 1.0 },
+			{ 2, 1, 5.0 }, { 2, 2, 1.0 }, { 2, 3, 5.0 }, { 2, 4, 1.0 },
+			{ 3, 1, 1.0 }, { 3, 2, 5.0 }, { 3, 3, 1.0 }, { 3, 4, 5.0 },
+			{ 4, 1, 1.0 }, { 4, 2, 5.0 }, { 4, 3, 1.0 }, { 4, 4, 5.0 } };
+
 	/**
 	 * @param contextName
 	 * @param resTableName

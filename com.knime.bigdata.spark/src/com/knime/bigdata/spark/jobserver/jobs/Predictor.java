@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
@@ -38,7 +37,6 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
@@ -114,12 +112,9 @@ public class Predictor extends KnimeSparkJob implements Serializable {
 
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
-        //use only the column indices when converting to vector
-        final JavaRDD<Vector> inputRDD = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
-
         final Serializable model = aConfig.decodeFromInputParameter(PARAM_MODEL);
 
-        final JavaRDD<Row> predictions = ModelUtils.predict(sc, inputRDD, rowRDD, model);
+        final JavaRDD<Row> predictions = ModelUtils.predict(aConfig, rowRDD, colIdxs, model);
 
         LOGGER.log(Level.INFO, "Prediction done");
         addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictions);
