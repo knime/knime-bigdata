@@ -21,6 +21,7 @@ import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
+import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
@@ -500,6 +501,28 @@ public class RDDUtilsInJava {
             rows.add(builder.build());
         }
         return aContext.parallelize(rows);
+    }
+
+
+    /**
+     *
+     * @param aUserIx
+     * @param aProductIx
+     * @param aRatingIx
+     * @param aInputRdd
+     * @return ratings rdd
+     */
+    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx, final int aRatingIx,
+        final JavaRDD<Row> aInputRdd) {
+        JavaRDD<Rating> ratings = aInputRdd.map(new Function<Row, Rating>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Rating call(final Row aRow) {
+                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), aRow.getDouble(aRatingIx));
+            }
+        });
+        return ratings;
     }
 
 }

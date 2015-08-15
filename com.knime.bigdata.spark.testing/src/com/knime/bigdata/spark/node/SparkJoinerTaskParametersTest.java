@@ -19,7 +19,7 @@ public class SparkJoinerTaskParametersTest {
     @Test
     public void ensureThatAllRequiredParametersAreSet() throws Throwable {
         SparkJoinerTask testObj =
-            new SparkJoinerTask(null, "tab1", "tab2", JoinMode.InnerJoin, new int[]{1, 5, 2, 7}, new int[]{1, 5, 2, 7},
+            new SparkJoinerTask(null, "tab1", "tab2", JoinMode.InnerJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
 
         assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),

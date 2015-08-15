@@ -214,7 +214,7 @@ public class SupervisedLearnerUtils {
             aLogger.log(Level.INFO,
                 "Storing predicted data under key: " + aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH));
             //TODO - revert the label to int mapping ????
-            JavaRDD<Row> predictedData = ModelUtils.predict(sc, aFeatures, aInputRdd, aModel);
+            JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
             aJob.addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictedData);
         }
     }
