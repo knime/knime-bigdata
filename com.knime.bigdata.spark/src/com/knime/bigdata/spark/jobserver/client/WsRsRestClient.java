@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.json.Json;
@@ -22,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -33,7 +33,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  *
  */
 class WsRsRestClient implements IRestClient {
-    private final static Logger LOGGER = Logger.getLogger(WsRsRestClient.class.getName());
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(WsRsRestClient.class.getName());
 
     private static final Client client = ClientBuilder.newClient();
 
@@ -48,10 +48,64 @@ class WsRsRestClient implements IRestClient {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
+            throws GenericKnimeSparkException {
+        final Status s = Status.fromStatusCode(response.getStatus());
+        if (s == Status.ACCEPTED || s == Status.OK) {
+            return;
+        }
+        final StringBuilder logmsg = new StringBuilder();
+        logmsg.append("Spark job execution failed.");
+        logmsg.append("\tJob class: ").append(jobClassName);
+        logmsg.append("\tJob config: ").append(aJsonParams);
+        logmsg.append("\tStatus code: ").append(s.getStatusCode());
+        logmsg.append("\tStatus family: ").append(s.getFamily().toString());
+        logmsg.append("\tReason: ").append(s.getReasonPhrase());
+        logmsg.append("\t Response:").append(response.toString());
+        LOGGER.error(logmsg.toString());
+        final String className;
+        if (jobClassName != null) {
+            final int lastIndexOf = jobClassName.lastIndexOf('.');
+            if (lastIndexOf >= 0) {
+                className = jobClassName.substring(lastIndexOf + 1);
+            } else {
+                className = jobClassName;
+            }
+        } else {
+            className = "<unknown>";
+        }
+        switch (s.getStatusCode()) {
+            case 400:
+                throw new GenericKnimeSparkException(
+                    "Executing Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
+                    + ". This might be caused by missing or incorrect job parameters."
+                    + " For more details see the KNIME log file.");
+            case 500:
+                throw new GenericKnimeSparkException(
+                    "Executing Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
+                    + ". Possibly because the class file with job info was not uploaded to the server."
+                    + " For more details see the KNIME log file.");
+            case 503:
+                LOGGER.info("Possibly to many parallel jobs. To allow more parallel jobs increase the "
+                        + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
+                throw new GenericKnimeSparkException(
+                    "Execution Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
+                    + ". Possibly because of too many parallel Spark jobs. For more details see the KNIME log file.");
+            default:
+                throw new GenericKnimeSparkException("Executing Spark job '" + className
+                    + "' failed. Reason: " + s.getReasonPhrase() + ". Error code: " + s.getStatusCode()
+                    + ". For more details see the KNIME log file.");
+        }
+    }
+
+    /**
      * check the status of the given response
      *
      * @param response response to check
-     * @param aErrorMsg error message prefix in case the response is not in one of the expected stati
+     * @param aErrorMsg error message postfix in case the response is not in one of the expected stati
      * @param aStatus array of expected stati that are OK, all other response stati will cause an exception
      * @throws GenericKnimeSparkException
      */
@@ -64,12 +118,35 @@ class WsRsRestClient implements IRestClient {
                 return;
             }
         }
-        final StringBuilder msg = new StringBuilder(aErrorMsg);
-        msg.append("\n").append("Status is: ").append(s).append("\nIndication: ").append(response.toString());
-        LOGGER.severe(aErrorMsg);
-        LOGGER.severe("Status is: " + s);
-        LOGGER.severe("Indication: " + response.toString());
-        throw new GenericKnimeSparkException(msg.toString());
+        final StringBuilder logmsg = new StringBuilder();
+        logmsg.append("Spark request failed.").append("\t").append(aErrorMsg);
+        logmsg.append("\tStatus code: ").append(s.getStatusCode());
+        logmsg.append("\tStatus family: ").append(s.getFamily().toString());
+        logmsg.append("\tReason: ").append(s.getReasonPhrase());
+        logmsg.append("\t Response:").append(response.toString());
+        LOGGER.error(logmsg.toString());
+        switch (s.getStatusCode()) {
+            case 400:
+                throw new GenericKnimeSparkException(
+                    "Executing Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                    + ". This might be caused by missing or incorrect job parameters."
+                    + ". For more details see the KNIME log file.");
+            case 500:
+                throw new GenericKnimeSparkException(
+                    "Executing Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                    + ". Possibly because the class file with job info was not uploaded to the server."
+                    + " For more details see the KNIME log file.");
+            case 503:
+                LOGGER.info("Possibly to many parallel jobs. To allow more parallel jobs increase the "
+                        + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
+                throw new GenericKnimeSparkException(
+                    "Execution Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                    + ". Possibly because of too many parallel Spark jobs. For more details see the KNIME log file.");
+            default:
+                throw new GenericKnimeSparkException("Executing Spark request failed. Error: " + aErrorMsg
+                    + ". Reason: " + s.getReasonPhrase() + ". Error code: " + s.getStatusCode()
+                    + ". For more details see the KNIME log file.");
+        }
     }
 
     /**
@@ -85,7 +162,7 @@ class WsRsRestClient implements IRestClient {
         try {
             target = getTarget(aContextContainer, aPath, null, null);
         } catch (URISyntaxException e) {
-            LOGGER.severe(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
         if (aParams != null) {
@@ -148,7 +225,7 @@ class WsRsRestClient implements IRestClient {
             }
             return responseStrBuilder.toString();
         } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
     }
