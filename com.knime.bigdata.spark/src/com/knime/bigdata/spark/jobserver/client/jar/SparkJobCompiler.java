@@ -15,10 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
+import org.knime.core.node.NodeLogger;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.InMemorySourceJavaFileObject;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
@@ -36,7 +36,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
  */
 final public class SparkJobCompiler {
 
-    private final static Logger LOGGER = Logger.getLogger(SparkJobCompiler.class.getName());
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(SparkJobCompiler.class.getName());
 
     // for unique class names
     private static int classNameSuffix = 0;
@@ -88,7 +88,7 @@ final public class SparkJobCompiler {
         try {
             JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, aCanonicalClassPath);
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.severe(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
     }
@@ -159,7 +159,7 @@ final public class SparkJobCompiler {
         try {
             JarPacker.add2Jar(aSourceJarPath, aTargetJarPath, aPackageName, map);
         } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
     }
@@ -177,7 +177,7 @@ final public class SparkJobCompiler {
         try {
             return new SourceCompiler(aClassName, aSource);
         } catch (ClassNotFoundException | CompilationFailedException e) {
-            LOGGER.severe(e.getMessage());
+            LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }
     }
@@ -367,6 +367,7 @@ final public class SparkJobCompiler {
             final ClassLoader cl = compiler.createClassLoader(this.getClass().getClassLoader());
 
             //final String className = (PACKAGE_NAME+ "/" + aClassName).replaceAll("\\.", "/");
+            @SuppressWarnings("unchecked")
             final Class<KnimeSparkJob> jobClass = (Class<KnimeSparkJob>)cl.loadClass(aClassName);
             m_bytecode = compiler.getClassByteCode();
             try {

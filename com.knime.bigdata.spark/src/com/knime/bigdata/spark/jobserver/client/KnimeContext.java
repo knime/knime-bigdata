@@ -125,7 +125,7 @@ public class KnimeContext {
         // MediaType.APPLICATION_JSON),
         // String.class);
         // we don't care about the response as long as it is "OK"
-        RestClient.checkStatus(response, "Error: failed to create context!", Status.OK);
+        RestClient.checkStatus(response, "Failed to create context!", Status.OK);
 
         return contextContainer;
     }
@@ -176,7 +176,7 @@ public class KnimeContext {
             RestClient.delete(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName());
         // we don't care about the response as long as it is "OK"
         RestClient.checkStatus(response,
-            "Error: failed to destroy context " + aContextContainer.getContextName() + "!", Status.OK);
+            "Failed to destroy context " + aContextContainer.getContextName() + "!", Status.OK);
     }
 
     /**

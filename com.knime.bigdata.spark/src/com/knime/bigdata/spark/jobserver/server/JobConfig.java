@@ -196,4 +196,12 @@ public class JobConfig {
             throw new GenericKnimeSparkException(e);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return m_config.toString();
+    }
 }
