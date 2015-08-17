@@ -76,6 +76,7 @@ public final class SparkDataTableCreator {
         final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
 
         final KNIMESparkContext context = data.getContext();
+        exec.checkCanceled();
         String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
 
         JobControler.waitForJob(context, jobId, exec);

@@ -23,7 +23,7 @@ package com.knime.bigdata.spark.node.mllib;
 import java.io.Serializable;
 
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -65,8 +65,9 @@ public class PCATask implements Serializable {
         m_MatrixName = aMatrix;
     }
 
-    double[][] execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    double[][] execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = paramsAsJason();
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(m_context, PCAJob.class.getCanonicalName(), learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 

@@ -191,6 +191,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         final String tableName = SparkIDs.createRDDID();
         final KnimeSparkJob job = addJob2Jar(context, m_snippet);
         final String config = params2Json(table1Name, table2Name, tableName);
+        //TODO: Provide the input table spec as StructType within the JavaSnippet node
         final String jobId = JobControler.startJob(context, job, config);
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final StructType tableStructure = result.getTableStructType(tableName);

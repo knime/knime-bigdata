@@ -18,9 +18,8 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.transformation;
+package com.knime.bigdata.spark.node.preproc.transformation.compiled;
 
-import org.knime.base.data.normalize.AffineTransConfiguration;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -31,10 +30,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.JobConfig;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.pmml.predictor.PMMLAssignTask;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -50,11 +45,11 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
  *
  * @author koetter
  */
-public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeModel {
+public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSparkNodeModel {
     /**
     *
     */
-    public SparkTransformationPMMLApplyNodeModel() {
+    public SparkCompiledTransformationPMMLApplyNodeModel() {
         super(new PortType[]{CompiledModelPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
     }
@@ -85,10 +80,13 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeMode
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         final String aOutputTableName = SparkIDs.createRDDID();
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
+        exec.setMessage("Create table specification");
         final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
         final PMMLAssignTask assignTask = new PMMLAssignTask();
+        exec.setMessage("Execute Spark job");
+        exec.checkCanceled();
         assignTask.execute(exec, data.getData(), pmml, colIdxs, true, resultRDD);
         return new PortObject[] {new SparkDataPortObject(resultRDD)};
     }
@@ -113,52 +111,5 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeMode
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    }
-
-    /**
-     * Return the configuration with possible additional transformations made.
-     *
-     * @param affineTransConfig the original affine transformation configuration.
-     * @return the (possible modified) configuration.
-     */
-    protected AffineTransConfiguration getAffineTrans(final AffineTransConfiguration affineTransConfig) {
-        return affineTransConfig;
-    }
-
-    private static String paramsToJson(final String aInputTableName, final Integer[] aNumericColIdx,
-        final AffineTransConfiguration config, final String aOutputTableName) throws GenericKnimeSparkException {
-        final Double[][] normalizationParameters = new Double[2][];
-
-        final double[] scales = config.getScales();
-        final double[] translations = config.getTranslations();
-        normalizationParameters[0] = new Double[scales.length];
-        normalizationParameters[1] = new Double[translations.length];
-        for (int i = 0; i < translations.length; i++) {
-            normalizationParameters[0][i] = scales[i];
-            normalizationParameters[1][i] = translations[i];
-        }
-        return paramsToJson(aInputTableName, aNumericColIdx, normalizationParameters, aOutputTableName);
-    }
-
-    /**
-     * (public for unit testing)
-     *
-     * @param aInputTableName
-     * @param aNumericColIdx
-     * @param aNormalizationParameters
-     * @param aOutputTableName
-     * @return Json representation of parameters
-     * @throws GenericKnimeSparkException
-     */
-    public static String paramsToJson(final String aInputTableName, final Integer[] aNumericColIdx,
-        final Double[][] aNormalizationParameters, final String aOutputTableName) throws GenericKnimeSparkException {
-
-        final Object[] inputParamas =
-            new Object[]{ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1),
-            JobConfig.encodeToBase64(aNormalizationParameters), ParameterConstants.PARAM_COL_IDXS,
-                JsonUtils.toJsonArray((Object[])aNumericColIdx), ParameterConstants.PARAM_TABLE_1, aInputTableName};
-
-        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
     }
 }

@@ -21,7 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -79,8 +79,9 @@ public class KMeansTask {
      * @return KMeansModel
      * @throws Exception
      */
-    public KMeansModel execute(final ExecutionContext exec) throws Exception {
+    public KMeansModel execute(final ExecutionMonitor exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
+        exec.checkCanceled();
         final String jobId =
             JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 

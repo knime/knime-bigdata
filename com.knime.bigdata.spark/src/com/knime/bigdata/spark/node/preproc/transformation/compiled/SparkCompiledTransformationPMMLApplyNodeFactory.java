@@ -18,7 +18,7 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.transformation;
+package com.knime.bigdata.spark.node.preproc.transformation.compiled;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,8 +28,8 @@ import org.knime.core.node.NodeView;
  *
  * @author dwk
  */
-public class SparkTransformationPMMLApplyNodeFactory
-extends NodeFactory<SparkTransformationPMMLApplyNodeModel> {
+public class SparkCompiledTransformationPMMLApplyNodeFactory
+extends NodeFactory<SparkCompiledTransformationPMMLApplyNodeModel> {
 
     /**
      * {@inheritDoc}
@@ -43,16 +43,16 @@ extends NodeFactory<SparkTransformationPMMLApplyNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public SparkTransformationPMMLApplyNodeModel createNodeModel() {
-        return new SparkTransformationPMMLApplyNodeModel();
+    public SparkCompiledTransformationPMMLApplyNodeModel createNodeModel() {
+        return new SparkCompiledTransformationPMMLApplyNodeModel();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkTransformationPMMLApplyNodeModel> createNodeView(
-            final int viewIndex, final SparkTransformationPMMLApplyNodeModel nodeModel) {
+    public NodeView<SparkCompiledTransformationPMMLApplyNodeModel> createNodeView(
+            final int viewIndex, final SparkCompiledTransformationPMMLApplyNodeModel nodeModel) {
         return null;
     }
 

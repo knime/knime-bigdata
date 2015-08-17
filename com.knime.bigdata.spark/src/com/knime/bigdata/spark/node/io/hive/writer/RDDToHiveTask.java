@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -68,9 +68,10 @@ public class RDDToHiveTask {
      * @param exec execution context
      * @throws Exception if anything goes wrong
      */
-    public void execute(final ExecutionContext exec) throws Exception {
+    public void execute(final ExecutionMonitor exec) throws Exception {
         final String jsonArgs = params2Json();
         final KNIMESparkContext context = m_rdd.getContext();
+        exec.checkCanceled();
         String jobId = JobControler.startJob(context, RDDToHiveJob.class.getCanonicalName(), jsonArgs);
         JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));

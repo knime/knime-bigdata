@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
@@ -64,13 +64,14 @@ public class PMMLAssignTask implements Serializable {
                     new String[]{ParameterConstants.PARAM_TABLE_1, outputID}});
     }
 
-    public void execute(final ExecutionContext exec, final SparkDataTable inputRDD,
+    public void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD,
         final CompiledModelPortObject pmml, final Integer[] colIdxs,
         final boolean appendProbabilities, final SparkDataTable resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, pmml.getBytecode(), appendProbabilities,
             pmml.getModelClassName(), resultRDD.getID());
         KNIMESparkContext context = inputRDD.getContext();
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(context, PMMLAssign.class.getCanonicalName(),
             predictorParams);
         assert (JobControler.waitForJob(context, jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");

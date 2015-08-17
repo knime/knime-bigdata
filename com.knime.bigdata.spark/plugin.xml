@@ -139,8 +139,8 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -167,12 +167,6 @@
             id="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.convert.stringmapperapply.SparkStringMapperApplyNodeFactory">
-      </node>
-      <node
             category-path="/labs/spark/mining"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory"
@@ -187,8 +181,14 @@
       <node
             category-path="/labs/spark/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.preproc.pmml.transformation.SparkTransformationPMMLApplyNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.pmml.transformation.SparkTransformationPMMLApplyNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.transformation.compiling.SparkTransformationPMMLApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.transformation.compiling.SparkTransformationPMMLApplyNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
       </node>
     </extension>
    <extension

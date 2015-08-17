@@ -20,10 +20,25 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dmg.pmml.DATATYPE;
+import org.dmg.pmml.DerivedFieldDocument.DerivedField;
+import org.dmg.pmml.NormDiscreteDocument.NormDiscrete;
+import org.dmg.pmml.OPTYPE;
+import org.dmg.pmml.OPTYPE.Enum;
+import org.dmg.pmml.TransformationDictionaryDocument.TransformationDictionary;
+import org.knime.base.node.preproc.colconvert.categorytonumber.MapValuesConfiguration;
+import org.knime.base.node.preproc.colconvert.categorytonumber.PMMLMapValuesTranslator;
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -41,10 +56,17 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
+import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
+import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
+import org.knime.core.node.port.pmml.preproc.PMMLPreprocTranslator;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
+import org.knime.core.util.Pair;
 
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
+import com.knime.bigdata.spark.jobserver.server.MyRecord;
+import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -70,11 +92,8 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
     public static final DataTableSpec MAP_SPEC = createMapSpec();
 
     SparkStringMapperNodeModel() {
-        //TODO: Also implement the PMML mapping
         super(new PortType[] {SparkDataPortObject.TYPE},
-//                , new PortType(PMMLPortObject.class, true)},
-            new PortType[] {SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
-//        , PMMLPortObject.TYPE});
+            new PortType[] {SparkDataPortObject.TYPE, PMMLPortObject.TYPE});
     }
 
     /**
@@ -104,13 +123,10 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
         if (includedCols == null || includedCols.length < 1) {
             throw new InvalidSettingsException("No nominal columns selected");
         }
-        return new PortObjectSpec[] {null, new SparkDataPortObjectSpec(sparkSpec.getContext(), MAP_SPEC)};
-//        //PMML section
-//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[2];
-//        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(pmmlSpec, spec);
-//        pmmlSpecCreator.addPreprocColNames(Arrays.asList(includedCols));
-//        return new PortObjectSpec[] {null, new SparkDataPortObjectSpec(sparkSpec.getContext(), MAP_SPEC),
-//            pmmlSpecCreator.createSpec()};
+        //PMML section
+        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(spec);
+        pmmlSpecCreator.addPreprocColNames(Arrays.asList(includedCols));
+        return new PortObjectSpec[] {null, pmmlSpecCreator.createSpec()};
     }
 
     /**
@@ -120,27 +136,20 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
         final KNIMESparkContext context = rdd.getContext();
-        final DataTableSpec spec = rdd.getTableSpec();
+        final DataTableSpec inputTableSpec = rdd.getTableSpec();
         final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
-
-        exec.checkCanceled();
-        final FilterResult result = m_cols.applyTo(spec);
+        final FilterResult result = m_cols.applyTo(inputTableSpec);
         final String[] includedCols = result.getIncludes();
         int[] includeColIdxs = new int[includedCols.length];
-
         for (int i = 0, length = includedCols.length; i < length; i++) {
-            includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
+            includeColIdxs[i] = inputTableSpec.findColumnIndex(includedCols[i]);
         }
-
         final String outputTableName = SparkIDs.createRDDID();
         final String outputMappingTableName = SparkIDs.createRDDID();
-
         final ValueConverterTask task = new ValueConverterTask(rdd.getData(), includeColIdxs, includedCols,
             mappingType, outputTableName, outputMappingTableName);
         //create port object from mapping
         final MappedRDDContainer mapping = task.execute(exec);
-        //TODO: Use the MappedRDDContainer to also ouput a PMML of the mapping
-
         //these are all the column names of the original (selected) and the mapped columns
         // (original columns that were not selected are not included, but the index of the new
         //  columns is still correct)
@@ -148,42 +157,123 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
 
         //we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
-        final DataColumnSpec[] mappingSpecs = createMappingSpecs(spec, names);
-        final DataTableSpec firstSpec = new DataTableSpec(spec, new DataTableSpec(mappingSpecs));
-        SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
-        SparkDataTable secondRDD = new SparkDataTable(context, outputMappingTableName, MAP_SPEC);
+        final DataColumnSpec[] mappingSpecs = createMappingSpecs(inputTableSpec, names);
+        final DataTableSpec firstSpec = new DataTableSpec(inputTableSpec, new DataTableSpec(mappingSpecs));
+        final SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
 
-     // the optional PMML in port (can be null)
-//        final PMMLPortObject inPMMLPort = (PMMLPortObject)inData[2];
-//        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(inPMMLPort, firstSpec);
-//
-//        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec(), inPMMLPort);
+        // the optional PMML in port (can be null)
+        exec.setMessage("Create PMML model");
+        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(firstSpec);
+        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
+        final Collection<TransformationDictionary> dicts = getTransformations(inputTableSpec, mapping);
+        for (final TransformationDictionary dict : dicts) {
+            outPMMLPort.addGlobalTransformations(dict);
+        }
+        return new PortObject[]{new SparkDataPortObject(firstRDD), outPMMLPort};
+    }
 
-//        int colIdx = spec.getNumColumns();
-//        for (DataColumnSpec col : mappingSpecs) {
-//            PMMLMapValuesTranslator trans = new PMMLMapValuesTranslator(
-//                    factory.getConfig(), new DerivedFieldMapper(inPMMLPort));
-//            outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-//        }
+    private Collection<TransformationDictionary> getTransformations(final DataTableSpec inputTableSpec,
+        final MappedRDDContainer mapping) {
+        final Collection<TransformationDictionary> dicts = new LinkedList<>();
+        final NominalValueMapping mappings = mapping.m_Mappings;
+        final Iterator<MyRecord> records = mappings.iterator();
+        if (MappingType.BINARY.equals(mappings.getType())) {
+            final Map<String, List<Pair<String, String>>> columnMapping = new LinkedHashMap<>();
+            while (records.hasNext()) {
+                MyRecord record = records.next();
+                int colIdx = record.m_nominalColumnIndex;
+                String origVal = record.m_nominalValue;
+//                int mappedVal = record.m_numberValue;
+                final String colName= inputTableSpec.getColumnSpec(colIdx).getName();
+                List<Pair<String, String>> valMap = columnMapping.get(colName);
+                if (valMap == null) {
+                    valMap = new LinkedList<>();
+                    columnMapping.put(colName, valMap);
+                }
+                final String newColumnName = colName;
+                valMap.add(new Pair<>(newColumnName, origVal));
+            }
+            final DerivedFieldMapper mapper = new DerivedFieldMapper((PMMLPortObject)null);
+            final List<DerivedField> derivedFields = new ArrayList<DerivedField>();
+            for (Map.Entry<String, List<Pair<String, String>>> entry : columnMapping.entrySet()) {
+                final String columnName = entry.getKey();
+                final String derivedName = mapper.getDerivedFieldName(columnName);
+                for (Pair<String, String> nameValue : entry.getValue()) {
+                    final DerivedField derivedField = DerivedField.Factory.newInstance();
+                    derivedField.setName(nameValue.getFirst());
+                    derivedField.setOptype(OPTYPE.ORDINAL);
+                    derivedField.setDataType(DATATYPE.DOUBLE);
+                    final NormDiscrete normDiscrete = derivedField.addNewNormDiscrete();
+                    normDiscrete.setField(derivedName);
+                    normDiscrete.setValue(nameValue.getSecond());
+                    normDiscrete.setMapMissingTo(0);
+                    derivedFields.add(derivedField);
+                }
+            }
+            final TransformationDictionary dictionary = TransformationDictionary.Factory.newInstance();
+            dictionary.setDerivedFieldArray(derivedFields.toArray(new DerivedField[0]));
+            dicts.add(dictionary);
+        } else {
+            final Map<String, Map<DataCell, DoubleCell>> colValMap = new LinkedHashMap<>();
+            while (records.hasNext()) {
+                MyRecord record = records.next();
+                int colIdx = record.m_nominalColumnIndex;
+                String origVal = record.m_nominalValue;
+                int mappedVal = record.m_numberValue;
+                final String colName= inputTableSpec.getColumnSpec(colIdx).getName();
+                Map<DataCell, DoubleCell> valMap = colValMap.get(colName);
+                if (valMap == null) {
+                    valMap = new LinkedHashMap<>();
+                    colValMap.put(colName, valMap);
+                }
+                valMap.put(new StringCell(origVal), new DoubleCell(mappedVal));
+            }
+            for (Entry<String, Map<DataCell, DoubleCell>> col : colValMap.entrySet()) {
+                final String origColName = col.getKey();
+                final String mapColName = DataTableSpec.getUniqueColumnName(inputTableSpec,
+                    origColName + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX);
+                final MapValuesConfiguration config =
+                        new MapValuesConfiguration(origColName, mapColName, col.getValue()) {
+                    /**{@inheritDoc}*/
+                    @Override
+                    public String getSummary() {
+                        return "Generated by KNIME - Spark Category to Number node";
+                    }
 
-        return new PortObject[]{new SparkDataPortObject(firstRDD), new SparkDataPortObject(secondRDD)};
+                    /**{@inheritDoc}*/
+                    @Override
+                    public DATATYPE.Enum getOutDataType() {
+                        return DATATYPE.DOUBLE;
+                    }
+
+                    /**{@inheritDoc}*/
+                    @Override
+                    public Enum getOpType() {
+                        return OPTYPE.CONTINUOUS;
+                    }
+                };
+                final PMMLPreprocTranslator trans =
+                        new PMMLMapValuesTranslator(config, new DerivedFieldMapper((PMMLPortObject)null));
+                dicts.add(trans.exportToTransDict());
+            }
+        }
+        return dicts;
     }
 
     /**
-     * @param spec input table spec
+     * @param inputTableSpec input table spec
      * @param names mapping column names from the MappedRDDContainer
      * @return the appended mapped value columns
      */
-    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec spec, final Map<Integer, String> names) {
-        System.out.println(names);
+    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec inputTableSpec, final Map<Integer, String> names) {
         final DataColumnSpec[] specList = new DataColumnSpec[names.size()];
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Dummy", MAP_TYPE);
         int count = 0;
         for (final Entry<Integer, String> entry : names.entrySet()) {
             final String colName = entry.getValue();
-            if (!spec.containsName(colName)) {
-                final int mapColIdx = entry.getKey().intValue() - spec.getNumColumns();
-                specCreator.setName(DataTableSpec.getUniqueColumnName(spec, colName));
+            if (!inputTableSpec.containsName(colName)) {
+                final int mapColIdx = entry.getKey().intValue() - inputTableSpec.getNumColumns();
+                specCreator.setName(DataTableSpec.getUniqueColumnName(inputTableSpec, colName));
                 specList[mapColIdx] = specCreator.createSpec();
                 count++;
             }

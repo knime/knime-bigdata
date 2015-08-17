@@ -18,7 +18,7 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.normalize;
+package com.knime.bigdata.spark.node.preproc.transformation.compiling;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,28 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author dwk
  */
-public class SparkNormalizerPMMLNodeFactory extends NodeFactory<SparkNormalizerPMMLNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeDialogPane createNodeDialogPane() {
-        return new SparkNormalizerPMMLNodeDialog();
-    }
+public class SparkTransformationPMMLApplyNodeFactory
+extends NodeFactory<SparkTransformationPMMLApplyNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkNormalizerPMMLNodeModel createNodeModel() {
-        return new SparkNormalizerPMMLNodeModel();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<SparkNormalizerPMMLNodeModel> createNodeView(final int viewIndex, final SparkNormalizerPMMLNodeModel nodeModel) {
+    protected NodeDialogPane createNodeDialogPane() {
         return null;
     }
 
@@ -57,7 +43,24 @@ public class SparkNormalizerPMMLNodeFactory extends NodeFactory<SparkNormalizerP
      * {@inheritDoc}
      */
     @Override
-    public int getNrNodeViews() {
+    public SparkTransformationPMMLApplyNodeModel createNodeModel() {
+        return new SparkTransformationPMMLApplyNodeModel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<SparkTransformationPMMLApplyNodeModel> createNodeView(
+            final int viewIndex, final SparkTransformationPMMLApplyNodeModel nodeModel) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getNrNodeViews() {
         return 0;
     }
 
@@ -65,8 +68,9 @@ public class SparkNormalizerPMMLNodeFactory extends NodeFactory<SparkNormalizerP
      * {@inheritDoc}
      */
     @Override
-    public boolean hasDialog() {
-        return true;
+    protected boolean hasDialog() {
+        return false;
     }
+
 
 }

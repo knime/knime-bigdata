@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -78,8 +78,9 @@ public class SGDLearnerTask implements Serializable {
         m_jobClassPath = jobClass.getCanonicalName();
     }
 
-    Serializable execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(m_context, m_jobClassPath, learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
         return (Serializable)result.getObjectResult();

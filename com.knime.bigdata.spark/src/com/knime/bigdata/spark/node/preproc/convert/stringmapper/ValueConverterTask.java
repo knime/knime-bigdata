@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
 
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -85,8 +85,9 @@ public class ValueConverterTask {
      * @return NominalValueMapping the mapping
      * @throws Exception
      */
-    public MappedRDDContainer execute(final ExecutionContext exec) throws Exception {
+    public MappedRDDContainer execute(final ExecutionMonitor exec) throws Exception {
         final String params = paramDef();
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);

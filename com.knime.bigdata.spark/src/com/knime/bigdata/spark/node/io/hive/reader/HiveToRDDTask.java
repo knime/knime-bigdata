@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.spark.node.io.hive.reader;
 
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -54,9 +54,9 @@ public class HiveToRDDTask {
      * @param exec execution context
      * @throws Exception if anything goes wrong
      */
-    public void execute(final ExecutionContext exec) throws Exception {
+    public void execute(final ExecutionMonitor exec) throws Exception {
         final String jsonArgs = params2Json();
-
+        exec.checkCanceled();
         String jobId = JobControler.startJob(m_rdd.getContext(), HiveToRDDJob.class.getCanonicalName(), jsonArgs);
         JobControler.waitForJobAndFetchResult(m_rdd.getContext(), jobId, exec);
     }

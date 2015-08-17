@@ -18,7 +18,7 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.normalize;
+package com.knime.bigdata.spark.node.preproc.normalize;
 
 import java.util.Arrays;
 
@@ -166,6 +166,7 @@ public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
         final String outputTableName = SparkIDs.createRDDID();
         final String paramInJson =
             paramsToJson(rdd.getTableName(), includeColIdxs, convertToSettings(), outputTableName);
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(context, NormalizeColumnsJob.class.getCanonicalName(), paramInJson);
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final Normalizer res = (Normalizer)result.getObjectResult();

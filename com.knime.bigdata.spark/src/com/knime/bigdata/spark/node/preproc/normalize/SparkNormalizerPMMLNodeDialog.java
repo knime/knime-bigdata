@@ -18,7 +18,7 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.normalize;
+package com.knime.bigdata.spark.node.preproc.normalize;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -48,7 +48,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 
-import com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLConfig.NormalizerMode;
+import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLConfig.NormalizerMode;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**

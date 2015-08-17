@@ -74,6 +74,8 @@ import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder
  */
 public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
+    //TODO: Provide a method to access the input structtype
+
     private static final long serialVersionUID = 1L;
 
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
