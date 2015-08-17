@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -82,9 +82,10 @@ public class DecisionTreeTask implements Serializable {
         m_mappingTableName = mappingRDD == null ? null : mappingRDD.getID();
     }
 
-    DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
+    DecisionTreeModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,
         CanceledExecutionException {
         final String learnerParams = learnerDef();
+        exec.checkCanceled();
         final String jobId =
             JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
 

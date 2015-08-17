@@ -23,7 +23,7 @@ package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 import java.io.Serializable;
 
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
@@ -58,9 +58,10 @@ public class PredictionTask implements Serializable {
      * @param integers
      * @param resultRDD
      */
-    void execute(final ExecutionContext exec, final SparkDataTable inputRDD, final Serializable model,
+    void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final Serializable model,
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(inputRDD.getContext(), Predictor.class.getCanonicalName(),
             predictorKMeansParams);
 

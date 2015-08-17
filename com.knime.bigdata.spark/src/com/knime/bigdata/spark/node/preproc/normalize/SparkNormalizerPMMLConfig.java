@@ -18,7 +18,7 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.pmml.normalize;
+package com.knime.bigdata.spark.node.preproc.normalize;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;

@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 06.07.2015 by koetter
+ *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.convert.stringmapperapply;
+package com.knime.bigdata.spark.node.preproc.normalize;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -26,31 +26,30 @@ import org.knime.core.node.NodeView;
 
 /**
  *
- * @author koetter
+ * @author dwk
  */
-public class SparkStringMapperApplyNodeFactory extends NodeFactory<SparkStringMapperApplyNodeModel> {
-
+public class SparkNormalizerPMMLNodeFactory extends NodeFactory<SparkNormalizerPMMLNodeModel> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkStringMapperApplyNodeModel createNodeModel() {
-        return new SparkStringMapperApplyNodeModel();
+    public NodeDialogPane createNodeDialogPane() {
+        return new SparkNormalizerPMMLNodeDialog();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected int getNrNodeViews() {
-        return 0;
+    public SparkNormalizerPMMLNodeModel createNodeModel() {
+        return new SparkNormalizerPMMLNodeModel();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkStringMapperApplyNodeModel> createNodeView(final int viewIndex, final SparkStringMapperApplyNodeModel nodeModel) {
+    public NodeView<SparkNormalizerPMMLNodeModel> createNodeView(final int viewIndex, final SparkNormalizerPMMLNodeModel nodeModel) {
         return null;
     }
 
@@ -58,16 +57,16 @@ public class SparkStringMapperApplyNodeFactory extends NodeFactory<SparkStringMa
      * {@inheritDoc}
      */
     @Override
-    protected boolean hasDialog() {
-        return false;
+    public int getNrNodeViews() {
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return null;//new SparkStringMapperApplyNodeDialog();
+    public boolean hasDialog() {
+        return true;
     }
 
 }
