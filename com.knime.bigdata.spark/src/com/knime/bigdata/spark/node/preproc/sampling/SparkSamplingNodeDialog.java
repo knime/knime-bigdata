@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.sampling;
+package com.knime.bigdata.spark.node.preproc.sampling;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -33,12 +33,12 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
  *
  * @author koetter
  */
-public class MLlibSamplingNodeDialog extends NodeDialogPane {
+public class SparkSamplingNodeDialog extends NodeDialogPane {
     private final SparkSamplingNodeDialogPanel m_panel;
     /**
      * Creates the dialog.
      */
-    public MLlibSamplingNodeDialog() {
+    public SparkSamplingNodeDialog() {
         super();
         m_panel = new SparkSamplingNodeDialogPanel();
         super.addTab("Sampling Method", m_panel);

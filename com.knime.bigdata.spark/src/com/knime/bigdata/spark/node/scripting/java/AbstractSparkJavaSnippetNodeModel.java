@@ -191,7 +191,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         final String tableName = SparkIDs.createRDDID();
         final KnimeSparkJob job = addJob2Jar(context, m_snippet);
         final String config = params2Json(table1Name, table2Name, tableName);
-        //TODO: Provide the input table spec as StructType within the JavaSnippet node
+        //TODO: Provide the input table spec as StructType within the JavaSnippet node see StructTypeBuilder as
+        //reference and use the SparkTypeConverter interface for the conversion from spec to struct
         final String jobId = JobControler.startJob(context, job, config);
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final StructType tableStructure = result.getTableStructType(tableName);
@@ -231,7 +232,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         m_classNames = classMap.keySet().toArray(new String[0]);
         synchronized (SNIPPET_FILE) {
             //TODO: We always also use the potentially out dated standard job classes if the snippet jar file exists
-            //I would be better if we would keep the snippet jars and job jar separately and always merge the two jars
+            //It would be better if we would keep the snippet jars and job jar separately and always merge the two jars
             //instead of reusing (copying) the same mixed jar over and over
             try {
                 if (!SNIPPET_FILE.exists()) {

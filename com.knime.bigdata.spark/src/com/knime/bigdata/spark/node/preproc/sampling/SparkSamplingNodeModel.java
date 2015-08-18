@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.sampling;
+package com.knime.bigdata.spark.node.preproc.sampling;
 
 import javax.annotation.Nullable;
 
@@ -49,15 +49,23 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
+public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
 
     private final SparkSamplingNodeSettings m_settings = new SparkSamplingNodeSettings();
 
     /**
      * Constructor.
      */
-    public MLlibSamplingNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
+    public SparkSamplingNodeModel() {
+        this(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
+    }
+
+    /**
+     * @param inPortTypes the input port types
+     * @param outPortTypes the output port types
+     */
+    protected SparkSamplingNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
+        super(inPortTypes, outPortTypes);
     }
 
     /**
@@ -80,7 +88,7 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
         final String outputTableName = SparkIDs.createRDDID();
-        final String paramInJson = paramDef(rdd, m_settings, outputTableName, null);
+        final String paramInJson = paramDef(rdd, getSettings(), outputTableName, null);
         final KNIMESparkContext context = rdd.getContext();
         exec.checkCanceled();
         exec.setMessage("Start Spark sampling job...");
@@ -88,6 +96,13 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
         JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
         return new PortObject[] {new SparkDataPortObject(result)};
+    }
+
+    /**
+     * @return the {@link SparkSamplingNodeSettings}
+     */
+    protected SparkSamplingNodeSettings getSettings() {
+        return m_settings;
     }
 
 

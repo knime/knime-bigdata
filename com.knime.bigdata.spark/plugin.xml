@@ -20,12 +20,11 @@
             path="/labs/spark">
       </category>
       <category
-            after="io"
             icon="icons/missing.gif"
             level-id="convert"
             locked="true"
             name="Convert &amp; Replace"
-            path="/labs/spark">
+            path="/labs/spark/column">
       </category>
       <category
             icon="icons/category_learner.gif"
@@ -39,7 +38,7 @@
             level-id="split"
             locked="true"
             name="Split &amp; Combine"
-            path="/labs/spark">
+            path="/labs/spark/column">
       </category>
       <category
             icon="icons/category_misc.png"
@@ -54,6 +53,28 @@
             locked="true"
             name="Java Snippet"
             path="/labs/spark/misc">
+      </category>
+      <category
+            icon="icons/missing.gif"
+            level-id="transform"
+            locked="true"
+            name="Transform"
+            path="/labs/spark/row">
+      </category>
+      <category
+            icon="icons/row.png"
+            level-id="row"
+            locked="true"
+            name="Row"
+            path="/labs/spark">
+      </category>
+      <category
+            after="io"
+            icon="icons/column.png"
+            level-id="column"
+            locked="true"
+            name="Column"
+            path="/labs/spark">
       </category>
    </extension>
    <extension
@@ -101,7 +122,7 @@
             id="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io"
+            category-path="/labs/spark/io/"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory">
@@ -119,25 +140,25 @@
             id="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory">
@@ -149,7 +170,7 @@
             id="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/split"
+            category-path="/labs/spark/column/split"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory">
@@ -179,22 +200,28 @@
             id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.transformation.compiling.SparkTransformationPMMLApplyNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.transformation.compiling.SparkTransformationPMMLApplyNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/column/convert"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/convert"
+            category-path="/labs/spark/row/transform"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/row/transform"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory">
       </node>
     </extension>
    <extension
