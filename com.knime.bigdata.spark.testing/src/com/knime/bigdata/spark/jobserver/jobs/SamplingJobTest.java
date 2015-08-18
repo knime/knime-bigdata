@@ -1,10 +1,12 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import org.junit.Test;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
@@ -18,7 +20,6 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeModel;
@@ -27,7 +28,7 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 /**
  *
  * @author dwk
- * 
+ *
  *         (these tests require a running job-server)
  *
  */
@@ -36,9 +37,9 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 
 	private static String getParams(final String aTableToSample,
 			final SamplingMethods aMethod, final int aClassColIx, final CountMethods aCountMethod,
-			boolean aIsWithReplacement, boolean aExact, final Long aSeed, double aCount,
-			String aOut1, String aOut2) {
-		SamplingNodeSettings settings = new SamplingNodeSettings();
+			final boolean aIsWithReplacement, final boolean aExact, final Long aSeed, final double aCount,
+			final String aOut1, final String aOut2) {
+		final SamplingNodeSettings settings = new SamplingNodeSettings();
 		settings.samplingMethod(aMethod);
 		settings.countMethod(aCountMethod);
 		settings.count((int) aCount);
@@ -50,15 +51,15 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void absoluteSamplingFromTopEntireTable() throws Throwable {
 		final String resTableName = "OutTab";
-		String params = getParams("inTab", SamplingMethods.First,-1,
+		final String params = getParams("inTab", SamplingMethods.First,-1,
 				CountMethods.Absolute, false, false,99l, 42, resTableName, null);
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_1,
 				"inTab");
 
-		String jobId = JobControler.startJob(contextName,
+		final String jobId = JobControler.startJob(contextName,
 				SamplingJob.class.getCanonicalName(), params);
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
@@ -68,15 +69,15 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void absoluteSamplingFromTopPartOfTable() throws Throwable {
 		final String resTableName = "OutTab";
-		String params = getParams("inTab", SamplingMethods.First,-1,
+		final String params = getParams("inTab", SamplingMethods.First,-1,
 				CountMethods.Absolute, false, false,99l, 2, resTableName, null);
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_1,
 				"inTab");
 
-		String jobId = JobControler.startJob(contextName,
+		final String jobId = JobControler.startJob(contextName,
 				SamplingJob.class.getCanonicalName(), params);
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
@@ -87,7 +88,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void absoluteSamplingFromTopPartOfSortedTable() throws Throwable {
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2,
 				"inTab");
@@ -95,7 +96,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		sortTable("inTab", 1, "inTabSorted");
 
 		final String resTableName = "OutTab";
-		String params = getParams("inTabSorted", SamplingMethods.First,-1,
+		final String params = getParams("inTabSorted", SamplingMethods.First,-1,
 				CountMethods.Absolute, false, false,99l, 2, resTableName, null);
 
 		String jobId = JobControler.startJob(contextName,
@@ -124,7 +125,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void relativeSamplingFromTopPartOfSortedTable() throws Throwable {
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		ImportKNIMETableJobTest.importTestTable(contextName, TEST_TABLE_2,
 				"inTab");
@@ -163,10 +164,10 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void absoluteRandomSamplingFromSortedTable() throws Throwable {
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		final Object[][] inTab = getTable3(1000);
-		final int numToSample = (int) inTab.length / 3;
+		final int numToSample = inTab.length / 3;
 
 		ImportKNIMETableJobTest.importTestTable(contextName, inTab, "inTab");
 
@@ -180,7 +181,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	@Test
 	public void relativeRandomSamplingFromSortedTable() throws Throwable {
 
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		final Object[][] inTab = getTable3(1000);
 
@@ -195,7 +196,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 
 	@Test
 	public void relativeInexactStratifiedSamplingFromSortedTable() throws Throwable {
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		// classes are Ping (1/10) and Pong (9/10)
 		final Object[][] inTab = getTable3(900);
@@ -207,10 +208,10 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		sortAndTestStratifiedSampling(contextName, inTab, 0.50, 450, 2,
 				CountMethods.Relative, false, null);
 	}
-	
+
 	@Test
 	public void relativeStratifiedSamplingFromSortedTable() throws Throwable {
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		// classes are Ping (1/10) and Pong (9/10)
 		final Object[][] inTab = getTable3(900);
@@ -225,7 +226,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 
 	@Test
 	public void absoluteStratifiedSamplingFromTable() throws Throwable {
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		// classes are Ping (1/10) and Pong (9/10)
 		final Object[][] inTab = getTable3(900);
@@ -237,10 +238,10 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		sortAndTestStratifiedSampling(contextName, inTab, 450, 450, 2,
 				CountMethods.Absolute, true, null);
 	}
-	
+
 	@Test
 	public void absoluteStratifiedSplit() throws Throwable {
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		// classes are Ping (1/10) and Pong (9/10)
 		final Object[][] inTab = getTable3(900);
@@ -252,12 +253,12 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		sortAndTestStratifiedSampling(contextName, inTab, 450, 450, 2,
 				CountMethods.Absolute, true, "tab2");
 	}
-	
+
 	//discussed with TK - we will implement this later iff customers ask for it
 	//@Test
 	public void relativeLinearSamplingFromTable() throws Throwable {
 		// must sample first, last and every n-th row inbetween
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 
 		// classes are Ping (1/10) and Pong (9/10)
 		final Object[][] inTab = getTable3(100);
@@ -276,22 +277,22 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 
 	}
 
-	private void testLinearSampling(KNIMESparkContext contextName,
-			Object[][] inTab, double numToSample, int aNumExpected,
-			final int aIndex, CountMethods method)
+	private void testLinearSampling(final KNIMESparkContext contextName,
+			final Object[][] inTab, final double numToSample, final int aNumExpected,
+			final int aIndex, final CountMethods method)
 			throws GenericKnimeSparkException, IOException,
 			CanceledExecutionException {
 
 		final String resTableName = "OutTab";
-		String params = getParams("inTab", SamplingMethods.Linear, -1,method,
+		final String params = getParams("inTab", SamplingMethods.Linear, -1,method,
 				false, false,99l, numToSample, resTableName, null);
 
-		String jobId = JobControler.startJob(contextName,
+		final String jobId = JobControler.startJob(contextName,
 				SamplingJob.class.getCanonicalName(), params);
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
 
-		Object[][] table = fetchResultTable(contextName, resTableName,
+		final Object[][] table = fetchResultTable(contextName, resTableName,
 				aNumExpected, 5);
 		// must sample first, last and every n-th row inbetween
 		assertArrayEquals("first row must be in sample", inTab[0], table[0]);
@@ -353,23 +354,23 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 //
 //	}
 
-	private void sortAndTestRandomSampling(KNIMESparkContext contextName,
-			Object[][] inTab, double numToSample, int aNumExpected,
-			final int aIndex, CountMethods method)
+	private void sortAndTestRandomSampling(final KNIMESparkContext contextName,
+			final Object[][] inTab, final double numToSample, final int aNumExpected,
+			final int aIndex, final CountMethods method)
 			throws GenericKnimeSparkException, IOException,
 			CanceledExecutionException {
 		sortTable("inTab", aIndex, "inTabSorted");
 
 		final String resTableName = "OutTab";
-		String params = getParams("inTabSorted", SamplingMethods.Random,-1,
+		final String params = getParams("inTabSorted", SamplingMethods.Random,-1,
 				method, false, false,99l, numToSample, resTableName, null);
 
-		String jobId = JobControler.startJob(contextName,
+		final String jobId = JobControler.startJob(contextName,
 				SamplingJob.class.getCanonicalName(), params);
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
 
-		Object[][] table = fetchResultTable(contextName, resTableName,
+		final Object[][] table = fetchResultTable(contextName, resTableName,
 				aNumExpected, 3);
 		// when sorted by key 0, then sort order is 0,1,2,3,4....
 		int last = -1;
@@ -385,26 +386,26 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		}
 	}
 
-	private void sortAndTestStratifiedSampling(KNIMESparkContext contextName,
-			Object[][] inTab, double numToSample, int aNumExpected,
-			final int aIndex, CountMethods method, final boolean aExact, final String aSplitTable)
+	private void sortAndTestStratifiedSampling(final KNIMESparkContext contextName,
+			final Object[][] inTab, final double numToSample, final int aNumExpected,
+			final int aIndex, final CountMethods method, final boolean aExact, final String aSplitTable)
 			throws GenericKnimeSparkException, IOException,
 			CanceledExecutionException {
 		sortTable("inTab", aIndex, "inTabSorted");
 
-		int expectedPingCtr = findClassDistribution(inTab);
-		double expectedPing = ((double) expectedPingCtr) / inTab.length;
+		final int expectedPingCtr = findClassDistribution(inTab);
+		final double expectedPing = (double) expectedPingCtr / inTab.length;
 
 		final String resTableName = "OutTab";
-		String params = getParams("inTabSorted", SamplingMethods.Stratified,1,
+		final String params = getParams("inTabSorted", SamplingMethods.Stratified,1,
 				method, false, aExact,99l, numToSample, resTableName, aSplitTable);
 
-		String jobId = JobControler.startJob(contextName,
+		final String jobId = JobControler.startJob(contextName,
 				SamplingJob.class.getCanonicalName(), params);
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
 
-		Object[][] table = fetchResultTable(contextName, resTableName,
+		final Object[][] table = fetchResultTable(contextName, resTableName,
 				aNumExpected, aExact ? 0 : 7);
 		// when sorted by key 0, then sort order is 0,1,2,3,4....
 		int last = -1;
@@ -420,15 +421,15 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 			last = val;
 		}
 
-		assertEquals("class distribution", expectedPing, ((double) pingCtr)
+		assertEquals("class distribution", expectedPing, (double) pingCtr
 				/ table.length, aExact ? 0.001 : 0.02);
-		
+
 		if (aSplitTable != null) {
 			//all other records must be in this table!
-			Object[][] table2 = fetchResultTable(contextName, aSplitTable,
+			final Object[][] table2 = fetchResultTable(contextName, aSplitTable,
 					inTab.length - table.length, 0);
 			final int pingCtr2 = findClassDistribution(table2);
-			assertEquals("class distribution should be same in both splits", expectedPing, ((double) pingCtr2)
+			assertEquals("class distribution should be same in both splits", expectedPing, (double) pingCtr2
 					/ table2.length, aExact ? 0.001 : 0.02);
 		}
 	}
@@ -437,10 +438,10 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 	 * @param aTab
 	 * @return
 	 */
-	private int findClassDistribution(Object[][] aTab) {
+	private int findClassDistribution(final Object[][] aTab) {
 		int expectedPingCtr = 0;
-		for (int i = 0; i < aTab.length; i++) {
-			if (aTab[i][1].equals("Ping")) {
+		for (final Object[] element : aTab) {
+			if (element[1].equals("Ping")) {
 				expectedPingCtr++;
 			}
 		}
@@ -455,7 +456,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 
 		final SparkJobCompiler testObj = new SparkJobCompiler();
 
-		KnimeSparkJob job = testObj
+		final KnimeSparkJob job = testObj
 				.addKnimeSparkJob2Jar(
 						getJobJarPath(),
 						aJarPath,
@@ -482,7 +483,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		// upload jar to job-server
 		JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
 		// start job
-		String jobId = JobControler.startJob(CONTEXT_ID, job, "");
+		final String jobId = JobControler.startJob(CONTEXT_ID, job, "");
 		JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId, null);
 	}
 
@@ -497,9 +498,9 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 			new Object[] { 1, "Ping2", "x" }, new Object[] { 1, "Pong2", "w" } };
 
 	private static final Object[][] getTable3(final int aNRows) {
-		Object[][] table3 = new Object[aNRows][];
+		final Object[][] table3 = new Object[aNRows][];
 		for (int i = 0; i < aNRows; i++) {
-			table3[i] = new Object[] { i, (i % 10 == 0) ? "Ping" : "Pong",
+			table3[i] = new Object[] { i, i % 10 == 0 ? "Ping" : "Pong",
 					(char) Math.abs(102 - i) };
 		}
 		return table3;
