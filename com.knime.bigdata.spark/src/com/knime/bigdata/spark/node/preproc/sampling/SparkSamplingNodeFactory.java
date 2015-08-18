@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.sampling;
+package com.knime.bigdata.spark.node.preproc.sampling;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author koetter
  */
-public class MLlibSamplingNodeFactory extends NodeFactory<MLlibSamplingNodeModel> {
+public class SparkSamplingNodeFactory extends NodeFactory<SparkSamplingNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibSamplingNodeModel createNodeModel() {
-        return new MLlibSamplingNodeModel();
+    public SparkSamplingNodeModel createNodeModel() {
+        return new SparkSamplingNodeModel();
     }
 
     /**
@@ -50,8 +50,8 @@ public class MLlibSamplingNodeFactory extends NodeFactory<MLlibSamplingNodeModel
      * {@inheritDoc}
      */
     @Override
-    public NodeView<MLlibSamplingNodeModel>
-        createNodeView(final int viewIndex, final MLlibSamplingNodeModel nodeModel) {
+    public NodeView<SparkSamplingNodeModel>
+        createNodeView(final int viewIndex, final SparkSamplingNodeModel nodeModel) {
         return null;
     }
 
@@ -68,7 +68,7 @@ public class MLlibSamplingNodeFactory extends NodeFactory<MLlibSamplingNodeModel
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new MLlibSamplingNodeDialog();
+        return new SparkSamplingNodeDialog();
     }
 
 }

@@ -43,7 +43,7 @@
  * -------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node.mllib.sampling;
+package com.knime.bigdata.spark.node.preproc.sampling;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

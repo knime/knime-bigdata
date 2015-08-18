@@ -74,7 +74,8 @@ import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder
  */
 public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
-    //TODO: Provide a method to access the input structtype
+    //TODO: Provide a method to access the input structtype we could simply save the job configuration if
+    //StructType is not serializable
 
     private static final long serialVersionUID = 1L;
 
