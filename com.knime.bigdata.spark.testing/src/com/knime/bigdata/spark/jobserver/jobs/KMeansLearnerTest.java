@@ -15,6 +15,7 @@ import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansTask;
@@ -38,19 +39,19 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
     @Test
     public void jobValidationShouldCheckMissingInputDataParameter() throws Throwable {
         String params = getParams(null, 6, 99, "~spark/data/spark");
-        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+        myCheck(params,KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingNumClustersParameter() throws Throwable {
         String params = getParams("xx", null, 99, "~spark/data/spark");
-        myCheck(params, ParameterConstants.PARAM_NUM_CLUSTERS, "Input");
+        myCheck(params, KMeansLearner.PARAM_NUM_CLUSTERS, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckIncorrectNumClustersParameter() throws Throwable {
         String params = getParams("xx", -1, 99, "~spark/data/spark");
-        String msg = "Input parameter '" + ParameterConstants.PARAM_NUM_CLUSTERS + "' must be a positive number.";
+        String msg = "Input parameter '" + KMeansLearner.PARAM_NUM_CLUSTERS + "' must be a positive number.";
         myCheck(params, msg);
 
     }
@@ -126,7 +127,7 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
     private static String rowFetcherDef(final int aNumRows, final String aTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, ParameterConstants.PARAM_TABLE_1,
+            new String[]{ParameterConstants.PARAM_NUMBER_ROWS, "" + aNumRows, KnimeSparkJob.PARAM_INPUT_TABLE,
                 aTableName}});
     }
 

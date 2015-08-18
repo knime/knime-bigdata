@@ -1,25 +1,14 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
 
 import org.junit.Test;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
-import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
-import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;

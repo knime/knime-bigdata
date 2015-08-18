@@ -36,7 +36,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -52,13 +51,12 @@ public class PCAJob extends KnimeSparkJob {
     /**
      * number of top principal components.
      */
-    public static final String PARAM_K = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 2);
+    public static final String PARAM_K = "K";
 
     /**
      * named RDD with principal components
      */
-    public static final String PARAM_RESULT_MATRIX = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 1);
+    public static final String PARAM_RESULT_MATRIX = "PCAComponents";
 
     /**
      * parse parameters
@@ -68,8 +66,8 @@ public class PCAJob extends KnimeSparkJob {
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
         {
-            if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-                msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+            if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+                msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
             }
         }
 
@@ -111,7 +109,7 @@ public class PCAJob extends KnimeSparkJob {
         LOGGER.log(Level.INFO, "starting PCA job...");
 
         final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         Matrix pca = compute(aConfig, rowRDD);
 

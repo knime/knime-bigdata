@@ -43,34 +43,9 @@ import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
 public class SupervisedLearnerUtils {
 
     /**
-     * name of parameter with training data
-     */
-    public static final String PARAM_TRAINING_RDD = ParameterConstants.PARAM_TABLE_1;
-
-    /**
-     * selector for columns to be used for learning
-     */
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_COL_IDXS;
-
-    /**
-     * names of the columns (must include label column), required for value mapping info
-     */
-    public static final String PARAM_COL_NAMES = ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING;
-
-    /**
-     * index of label column
-     */
-    public static final String PARAM_LABEL_INDEX = ParameterConstants.PARAM_LABEL_INDEX;
-
-    /**
      * table with feature and label mappings
      */
-    public static final String PARAM_MAPPING_TABLE = ParameterConstants.PARAM_TABLE_2;
-
-    /**
-     * parameter name for table with model predictions
-     */
-    public static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_TABLE_1;
+    public static final String PARAM_MAPPING_TABLE = "MappingInputTable";
 
     /**
      * @param aConfig
@@ -81,7 +56,7 @@ public class SupervisedLearnerUtils {
         final List<Integer> colIdxs = getSelectedColumnIds(aConfig);
 
         //note: requires that all features (including the label) are numeric !!!
-        final int labelIndex = aConfig.getInputParameter(PARAM_LABEL_INDEX, Integer.class);
+        final int labelIndex = aConfig.getInputParameter(ParameterConstants.PARAM_LABEL_INDEX, Integer.class);
         final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(aRowRDD, colIdxs, labelIndex);
         return inputRdd;
     }
@@ -92,7 +67,7 @@ public class SupervisedLearnerUtils {
      * @return List of selected column ids
      */
     public static List<Integer> getSelectedColumnIds(final JobConfig aConfig) {
-        return aConfig.getInputListParameter(PARAM_COL_IDXS, Integer.class);
+        return aConfig.getInputListParameter(ParameterConstants.PARAM_COL_IDXS, Integer.class);
     }
 
     /**
@@ -102,8 +77,8 @@ public class SupervisedLearnerUtils {
     @CheckForNull
     public static String checkConfig(final JobConfig aConfig) {
 
-        if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-            return "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+        if (!aConfig.hasInputParameter(KnimeSparkJob.PARAM_INPUT_TABLE)) {
+            return "Input parameter '" + KnimeSparkJob.PARAM_INPUT_TABLE + "' missing.";
         }
 
         String msg = checkLableColumnParameter(aConfig);
@@ -112,18 +87,18 @@ public class SupervisedLearnerUtils {
             msg = checkSelectedColumnIdsParameter(aConfig);
         }
         if (msg == null) {
-            if (!aConfig.hasInputParameter(PARAM_COL_NAMES)) {
-                return "Input parameter '" + PARAM_COL_NAMES + "' missing.";
+            if (!aConfig.hasInputParameter(ParameterConstants.PARAM_COL_NAMES)) {
+                return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' missing.";
             } else {
                 try {
-                    List<String> names = aConfig.getInputListParameter(PARAM_COL_NAMES, String.class);
+                    List<String> names = aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
                     if (names.size() != getSelectedColumnIds(aConfig).size() + 1) {
                         return "Input parameter '"
-                            + PARAM_COL_NAMES
+                            + ParameterConstants.PARAM_COL_NAMES
                             + "' is of unexpected length. It must have one entry for each select input column and 1 for the label column.";
                     }
                 } catch (Exception e) {
-                    return "Input parameter '" + PARAM_COL_NAMES + "' is not of expected type 'string list'.";
+                    return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' is not of expected type 'string list'.";
                 }
             }
         }
@@ -132,18 +107,19 @@ public class SupervisedLearnerUtils {
 
     /**
      * @param aConfig
+     * @return message if anything is wrong, null otherwise
      */
     public static String checkLableColumnParameter(final JobConfig aConfig) {
-        if (!aConfig.hasInputParameter(PARAM_LABEL_INDEX)) {
-            return "Input parameter '" + PARAM_LABEL_INDEX + "' missing.";
+        if (!aConfig.hasInputParameter(ParameterConstants.PARAM_LABEL_INDEX)) {
+            return "Input parameter '" + ParameterConstants.PARAM_LABEL_INDEX + "' missing.";
         } else {
             try {
-                final int ix = aConfig.getInputParameter(PARAM_LABEL_INDEX, Integer.class);
+                final int ix = aConfig.getInputParameter(ParameterConstants.PARAM_LABEL_INDEX, Integer.class);
                 if (ix < 0) {
-                    return "Input parameter '" + PARAM_LABEL_INDEX + "' must be positive, got " + ix + ".";
+                    return "Input parameter '" + ParameterConstants.PARAM_LABEL_INDEX + "' must be positive, got " + ix + ".";
                 }
             } catch (Exception e) {
-                return "Input parameter '" + PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
+                return "Input parameter '" + ParameterConstants.PARAM_LABEL_INDEX + "' is not of expected type 'integer'.";
             }
         }
         return null;
@@ -154,14 +130,14 @@ public class SupervisedLearnerUtils {
      * @return error message if column ids parameter is not set or incorrect
      */
     public static String checkSelectedColumnIdsParameter(final JobConfig aConfig) {
-        if (!aConfig.hasInputParameter(PARAM_COL_IDXS)) {
-            return "Input parameter '" + PARAM_COL_IDXS + "' missing.";
+        if (!aConfig.hasInputParameter(ParameterConstants.PARAM_COL_IDXS)) {
+            return "Input parameter '" + ParameterConstants.PARAM_COL_IDXS + "' missing.";
         } else {
             try {
                 getSelectedColumnIds(aConfig);
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
+                return "Input parameter '" + ParameterConstants.PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
             }
         }
         return null;
@@ -178,7 +154,7 @@ public class SupervisedLearnerUtils {
     public static void validateInput(final JobConfig aConfig, final KnimeSparkJob aJob, final Logger aLogger)
         throws GenericKnimeSparkException {
         String msg = null;
-        final String key = aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD);
+        final String key = aConfig.getInputParameter(KnimeSparkJob.PARAM_INPUT_TABLE);
         if (key == null) {
             msg = "Input parameter at port 1 is missing!";
         } else if (!aJob.validateNamedRdd(key)) {
@@ -210,12 +186,12 @@ public class SupervisedLearnerUtils {
     public static void storePredictions(final SparkContext sc, final JobConfig aConfig, final KnimeSparkJob aJob,
         final JavaRDD<Row> aInputRdd, final JavaRDD<Vector> aFeatures, final Serializable aModel, final Logger aLogger)
         throws GenericKnimeSparkException {
-        if (aConfig.hasOutputParameter(PARAM_OUTPUT_DATA_PATH)) {
+        if (aConfig.hasOutputParameter(KnimeSparkJob.PARAM_RESULT_TABLE)) {
             aLogger.log(Level.INFO,
-                "Storing predicted data under key: " + aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH));
+                "Storing predicted data under key: " + aConfig.getOutputStringParameter(KnimeSparkJob.PARAM_RESULT_TABLE));
             //TODO - revert the label to int mapping ????
             JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
-            aJob.addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictedData);
+            aJob.addToNamedRdds(aConfig.getOutputStringParameter(KnimeSparkJob.PARAM_RESULT_TABLE), predictedData);
         }
     }
 
@@ -233,7 +209,7 @@ public class SupervisedLearnerUtils {
         if (aConfig.hasInputParameter(PARAM_MAPPING_TABLE)) {
             //final int labelColIx = aConfig.getInt(PARAM_LABEL_INDEX);
             final List<String> names =
-                aConfig.getInputListParameter(SupervisedLearnerUtils.PARAM_COL_NAMES, String.class);
+                aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
             final String classColName = names.remove(names.size() - 1);
             final JavaRDD<Row> mappingRDD = aJob.getFromNamedRdds(aConfig.getInputParameter(PARAM_MAPPING_TABLE));
             numClasses = ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, classColName);

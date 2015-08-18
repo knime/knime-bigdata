@@ -27,6 +27,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -101,16 +102,16 @@ public class KMeansTask {
      * @param aNoOfIteration
      * @param aNoOfCluster
      * @param aOutputTableName
-     * @return
+     * @return json representation of parameters
      */
     public static String kmeansLearnerDef(final String aInputTableName, final Integer[] aIncludeColIdxs,
         final Integer aNoOfIteration, final Integer aNoOfCluster, final String aOutputTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aIncludeColIdxs),
-                ParameterConstants.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
-                aNoOfIteration, ParameterConstants.PARAM_TABLE_1, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
+                KMeansLearner.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
+                aNoOfIteration, KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
 
 }

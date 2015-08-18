@@ -36,6 +36,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -165,15 +166,15 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         final String aOutputTable1, @Nullable final String aOutputTable2) {
         final Object[] outputParams;
         if (aOutputTable2 == null) {
-            outputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1};
+            outputParams = new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable1};
         } else {
             outputParams =
-                new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1, ParameterConstants.PARAM_TABLE_2,
+                new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable1, SamplingJob.PARAM_SPLIT_TABLE_2,
                     aOutputTable2};
         }
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_TABLE_1, aTableToSample, SamplingJob.PARAM_COUNT_METHOD,
+            new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, aTableToSample, SamplingJob.PARAM_COUNT_METHOD,
                 aSettings.countMethod().toString(),  SamplingJob.PARAM_COUNT, aSettings.count(),
                 SamplingJob.PARAM_SAMPLING_METHOD, aSettings.samplingMethod().toString(),
                 SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
@@ -188,15 +189,15 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         final String aOutputTable1, @Nullable final String aOutputTable2) {
         final Object[] outputParams;
         if (aOutputTable2 == null) {
-            outputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1};
+            outputParams = new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable1};
         } else {
             outputParams =
-                new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1, ParameterConstants.PARAM_TABLE_2,
+                new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable1, SamplingJob.PARAM_SPLIT_TABLE_2,
                     aOutputTable2};
         }
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_TABLE_1, aTableToSample,
+            new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, aTableToSample,
                 SamplingJob.PARAM_COUNT_METHOD, countMethod.toString(),
                 SamplingJob.PARAM_COUNT, count,
                 SamplingJob.PARAM_SAMPLING_METHOD, samplingMethod.toString(),

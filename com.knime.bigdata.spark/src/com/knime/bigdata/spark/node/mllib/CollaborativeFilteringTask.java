@@ -35,8 +35,8 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
@@ -105,6 +105,9 @@ public class CollaborativeFilteringTask implements Serializable {
     MatrixFactorizationModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
         CanceledExecutionException {
         final String learnerParams = paramsAsJason();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
         final String jobId =
             JobControler.startJob(m_context, CollaborativeFilteringJob.class.getCanonicalName(), learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
@@ -140,7 +143,7 @@ public class CollaborativeFilteringTask implements Serializable {
         final Integer aNumProductBlocks, final Boolean aIsImplicitPrefs, final Long aSeed, final String aResultRdd) {
 
         final List<Object> inputParams = new ArrayList<>();
-        inputParams.add(ParameterConstants.PARAM_TABLE_1);
+        inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
         inputParams.add(aInputTableName);
         if (aUserIndex != null) {
             inputParams.add(CollaborativeFilteringJob.PARAM_USER_INDEX);
@@ -202,7 +205,7 @@ public class CollaborativeFilteringTask implements Serializable {
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             inputParams.toArray(new Object[inputParams.size()]), ParameterConstants.PARAM_OUTPUT,
-            new String[]{SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH, aResultRdd}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd}});
     }
 
     /**

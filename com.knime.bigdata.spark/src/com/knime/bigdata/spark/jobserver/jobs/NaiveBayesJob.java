@@ -37,7 +37,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -54,7 +53,7 @@ public class NaiveBayesJob extends KnimeSparkJob implements Serializable {
     /**
      * The smoothing parameter
      */
-    public static final String PARAM_LAMBDA = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1);
+    public static final String PARAM_LAMBDA = "Lambda";
 
     private final static Logger LOGGER = Logger.getLogger(NaiveBayesJob.class.getName());
 
@@ -66,8 +65,8 @@ public class NaiveBayesJob extends KnimeSparkJob implements Serializable {
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-            msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg == null) {
@@ -106,14 +105,14 @@ public class NaiveBayesJob extends KnimeSparkJob implements Serializable {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Naive Bayes learner job...");
         final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
 
         final Serializable model = execute(sc, aConfig, inputRdd);
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
+        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             SupervisedLearnerUtils.storePredictions(sc, aConfig, this, rowRDD,
                 RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model, LOGGER);
         }

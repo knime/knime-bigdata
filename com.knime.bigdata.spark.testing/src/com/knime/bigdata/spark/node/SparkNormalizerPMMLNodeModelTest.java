@@ -8,9 +8,8 @@ import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.preproc.pmml.normalize.SparkNormalizerPMMLNodeModel;
+import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeModel;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -21,23 +20,35 @@ import com.typesafe.config.ConfigFactory;
 @SuppressWarnings("javadoc")
 public class SparkNormalizerPMMLNodeModelTest {
 
-    @Test
-    public void missingNormalizationModeShouldYieldInvalidConfig() throws Throwable {
+	@Test
+	public void missingNormalizationModeShouldYieldInvalidConfig()
+			throws Throwable {
 
-        final String json = SparkNormalizerPMMLNodeModel.paramsToJson("tab1", new Integer[]{1, 5, 2, 7}, null, "out");
+		final String json = SparkNormalizerPMMLNodeModel.paramsToJson("tab1",
+				new Integer[] { 1, 5, 2, 7 }, null, "out");
 
-        final KnimeSparkJob testObj = new NormalizeColumnsJob();
-        assertEquals("Configuration should be recognized as invalid", ValidationResultConverter.invalid("Input parameter '" + ParameterConstants.PARAM_STRING + "' missing."),
-            testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
-    }
+		final KnimeSparkJob testObj = new NormalizeColumnsJob();
+		assertEquals(
+				"Configuration should be recognized as invalid",
+				ValidationResultConverter
+						.invalid("Input parameter '"
+								+ NormalizeColumnsJob.PARAM_NORMALIZATION_COMPUTE_SETTINGS
+								+ "' missing."),
+				testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
+	}
 
-    @Test
-    public void ensureThatAllRequiredParametersAreSet() throws Throwable {
+	@Test
+	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 
-        final String json = SparkNormalizerPMMLNodeModel.paramsToJson("tab1", new Integer[]{1, 5, 2, 7}, NormalizationSettingsFactory.createNormalizationSettingsForMinMaxScaling(0, 1), "out");
+		final String json = SparkNormalizerPMMLNodeModel.paramsToJson("tab1",
+				new Integer[] { 1, 5, 2, 7 }, NormalizationSettingsFactory
+						.createNormalizationSettingsForMinMaxScaling(0, 1),
+				"out");
 
-        final KnimeSparkJob testObj = new NormalizeColumnsJob();
-        assertEquals("Configuration should be recognized as valid", ValidationResultConverter.valid(),
-            testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
-    }
+		final KnimeSparkJob testObj = new NormalizeColumnsJob();
+		assertEquals(
+				"Configuration should be recognized as valid",
+				ValidationResultConverter.valid(),
+				testObj.validate(new JobConfig(ConfigFactory.parseString(json))));
+	}
 }

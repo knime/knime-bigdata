@@ -35,6 +35,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -134,19 +135,19 @@ public class SparkJoinerTask implements Serializable {
         @Nonnull final Integer[] aJoinColIdxesRight, @Nonnull final Integer[] aSelectColIdxesLeft,
         @Nonnull final Integer[] aSelectColIdxesRight, @Nonnull final String aResultTableName) {
         final Object[] inputParamas =
-            {ParameterConstants.PARAM_TABLE_1, aLeftTableName, ParameterConstants.PARAM_TABLE_2, aRightTableName,
-                ParameterConstants.PARAM_STRING, aJoinMode.toString(),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0),
+            {JoinJob.PARAM_LEFT_RDD, aLeftTableName, JoinJob.PARAM_RIGHT_RDD, aRightTableName,
+                JoinJob.PARAM_JOIN_MODE, aJoinMode.toString(),
+                JoinJob.PARAM_JOIN_INDEXES_LEFT,
                 JsonUtils.toJsonArray((Object[])aJoinColIdxesLeft),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1),
+                JoinJob.PARAM_JOIN_INDEXES_RIGHT,
                 JsonUtils.toJsonArray((Object[])aJoinColIdxesRight),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2),
+                JoinJob.PARAM_SELECT_INDEXES_LEFT,
                 JsonUtils.toJsonArray((Object[])aSelectColIdxesLeft),
-                ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3),
+                JoinJob.PARAM_SELECT_INDEXES_RIGHT,
                 JsonUtils.toJsonArray((Object[])aSelectColIdxesRight)};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aResultTableName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultTableName}});
     }
 
     /**

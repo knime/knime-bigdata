@@ -12,6 +12,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.typesafe.config.ConfigFactory;
@@ -48,7 +49,7 @@ public class JobControlerTest extends SparkWithJobServerSpec {
     @Test
     public void jobControlerShouldCreateJobWithProperName() throws Throwable {
         final String params = JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_NUMBER_ROWS, 9, ParameterConstants.PARAM_TABLE_1, "someRDD"}});
+            new Object[]{ParameterConstants.PARAM_NUMBER_ROWS, 9, KnimeSparkJob.PARAM_INPUT_TABLE, "someRDD"}});
 
         JobConfig conf = new JobConfig(ConfigFactory.parseString(params));
         assertEquals("configuration should be valid",ValidationResultConverter.valid(), new FetchRowsJob().validate(conf));

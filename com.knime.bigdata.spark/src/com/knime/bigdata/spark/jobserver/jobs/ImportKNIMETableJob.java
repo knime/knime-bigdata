@@ -37,7 +37,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -49,10 +48,6 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_DATA_ARRAY = ParameterConstants.PARAM_TABLE_1;
-
-    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
-
     private final static Logger LOGGER = Logger.getLogger(ImportKNIMETableJob.class.getName());
 
     /**
@@ -63,12 +58,12 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasInputParameter(PARAM_DATA_ARRAY)) {
-            msg = "Input parameter '" + PARAM_DATA_ARRAY + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasOutputParameter(PARAM_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -86,9 +81,9 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      */
     public static List<Row> getInputData(final JobConfig aConfig) throws GenericKnimeSparkException {
         final List<Row> rows = new ArrayList<>();
-        final Object[][] data = aConfig.decodeFromInputParameter(PARAM_DATA_ARRAY);
+        final Object[][] data = aConfig.decodeFromInputParameter(PARAM_INPUT_TABLE);
         if (data == null) {
-            throw new GenericKnimeSparkException("Input parameter '" + PARAM_DATA_ARRAY + "' is empty' ");
+            throw new GenericKnimeSparkException("Input parameter '" + PARAM_INPUT_TABLE + "' is empty' ");
         }
         for (Object[] rowData : data) {
             RowBuilder row = RowBuilder.emptyRow();
@@ -117,7 +112,7 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "inserting KNIME data table into RDD...");
         final List<Row> rowData = getInputData(aConfig);
-        storeInRdd(sc, rowData, aConfig.getOutputStringParameter(PARAM_TABLE_KEY));
+        storeInRdd(sc, rowData, aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
         return JobResult.emptyJobResult().withMessage("OK");
     }
 

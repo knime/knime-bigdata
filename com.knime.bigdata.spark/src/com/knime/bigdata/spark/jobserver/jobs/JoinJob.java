@@ -40,7 +40,6 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.MyJoinKey;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
@@ -53,25 +52,40 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_LEFT_RDD = ParameterConstants.PARAM_TABLE_1;
+    /**
+     * left join RDD
+     */
+    public static final String PARAM_LEFT_RDD = "LeftRDD";
 
-    private static final String PARAM_RIGHT_RDD = ParameterConstants.PARAM_TABLE_2;
+    /**
+     * right joing RDD
+     */
+    public static final String PARAM_RIGHT_RDD = "RightRDD";
 
-    private static final String PARAM_JOIN_MODE = ParameterConstants.PARAM_STRING;
+    /**
+     * join mode
+     */
+    public static final String PARAM_JOIN_MODE = "JoinMode";
 
-    private static final String PARAM_JOIN_INDEXES_LEFT = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_COL_IDXS, 0);
+    /**
+     * join indices of left join RDD
+     */
+    public static final String PARAM_JOIN_INDEXES_LEFT = "JoinIndicesLeft";
 
-    private static final String PARAM_JOIN_INDEXES_RIGHT = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_COL_IDXS, 1);
+    /**
+     * join indices of right join RDD
+     */
+    public static final String PARAM_JOIN_INDEXES_RIGHT = "JoinIndicesRight";
 
-    private static final String PARAM_SELECT_INDEXES_LEFT = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_COL_IDXS, 2);
+    /**
+     * selected indices of left join rdd
+     */
+    public static final String PARAM_SELECT_INDEXES_LEFT = "SelectIndicesLeft";
 
-    private static final String PARAM_SELECT_INDEXES_RIGHT = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_COL_IDXS, 3);
-
-    private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
+    /**
+     * selected indices of right join rdd
+     */
+    public static final String PARAM_SELECT_INDEXES_RIGHT = "SelectIndicesRight";
 
     private final static Logger LOGGER = Logger.getLogger(JoinJob.class.getName());
 
@@ -116,8 +130,8 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
             }
         }
 
-        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_RESULT_TABLE_KEY + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -235,7 +249,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        final String key = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE_KEY);
+        final String key = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE);
         LOGGER.log(Level.INFO, "Storing join result under key: " + key);
         addToNamedRdds(key, resultRdd);
         return JobResult.emptyJobResult().withMessage("OK");

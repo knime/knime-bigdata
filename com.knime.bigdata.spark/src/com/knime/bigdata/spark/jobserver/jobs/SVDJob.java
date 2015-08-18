@@ -37,7 +37,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -54,31 +53,29 @@ public class SVDJob extends KnimeSparkJob {
      * the reciprocal condition number. All singular values smaller than rCond * sigma(0) are treated as zero, where
      * sigma(0) is the largest singular value.
      */
-    public static final String PARAM_RCOND = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1);
+    public static final String PARAM_RCOND = "RCond";
 
     /**
      * number of leading singular values to keep (0 < k <= n). It might return less than k if there are numerically zero
      * singular values or there are not enough Ritz values converged before the maximum number of Arnoldi update
      * iterations is reached (in case that matrix A is ill-conditioned).
      */
-    public static final String PARAM_K = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 2);
+    public static final String PARAM_K = "K";
 
     /**
      * whether to compute U
      */
-    public static final String PARAM_COMPUTE_U = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 3);
+    public static final String PARAM_COMPUTE_U = "ComputeU";
 
     /**
      * named RDD with V matrix
      */
-    public static final String PARAM_RESULT_MATRIX_V = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 1);
+    public static final String PARAM_RESULT_MATRIX_V = "VMatrix";
 
     /**
      * named RDD with U matrix (iff computeU == true)
      */
-    public static final String PARAM_RESULT_MATRIX_U = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 2);
+    public static final String PARAM_RESULT_MATRIX_U = "UMatrix";
 
     /**
      * parse parameters
@@ -88,8 +85,8 @@ public class SVDJob extends KnimeSparkJob {
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
         {
-            if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-                msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+            if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+                msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
             }
         }
 
@@ -166,7 +163,7 @@ public class SVDJob extends KnimeSparkJob {
         LOGGER.log(Level.INFO, "starting SVD job...");
 
         final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         SingularValueDecomposition<RowMatrix, Matrix> svd = decomposeRowRdd(aConfig, rowRDD);
 

@@ -5,15 +5,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.knime.base.node.preproc.sample.SamplingNodeModel;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeModel;
+import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -41,7 +41,7 @@ public class SamplingJobParametersTest {
 		settings.countMethod(aCountMethod);
 		settings.count(aAbsoluteCount);
 		settings.fraction(aFraction);
-		return MLlibSamplingNodeModel.paramDef(aTableToSample, settings, -1,
+		return SparkSamplingNodeModel.paramDef(aTableToSample, settings, -1,
 				aIsWithReplacement, aSeed, aExact, aOut1, aOut2);
 	}
 
@@ -50,15 +50,15 @@ public class SamplingJobParametersTest {
 			throws Throwable {
 		final String params = getParams(null, SamplingMethods.First,
 				CountMethods.Absolute, false, null, null);
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void jobValidationShouldFailForMissingSettingsParameter()
 			throws Throwable {
-		final String params = MLlibSamplingNodeModel.paramDef("tab", null, -1, false, 789,true,
+		final String params = SparkSamplingNodeModel.paramDef("tab", null, -1, false, 789,true,
 				null, null);
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test(expected = NullPointerException.class)

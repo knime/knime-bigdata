@@ -44,6 +44,7 @@ import com.knime.bigdata.spark.jobserver.jobs.NormalizeColumnsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.Normalizer;
@@ -220,11 +221,11 @@ public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
         final NormalizationSettings aNormalization, final String aOutputTableName) throws GenericKnimeSparkException {
 
         final Object[] inputParamas =
-            new Object[]{ParameterConstants.PARAM_STRING, JobConfig.encodeToBase64(aNormalization),
+            new Object[]{NormalizeColumnsJob.PARAM_NORMALIZATION_COMPUTE_SETTINGS, JobConfig.encodeToBase64(aNormalization),
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
-                ParameterConstants.PARAM_TABLE_1, aInputTableName};
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
 }

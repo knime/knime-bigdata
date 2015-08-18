@@ -32,7 +32,7 @@ public class SGDJobParametersTest {
     public void jobValidationShouldCheckMissingRegularizationParameter() throws Throwable {
         String params =
                 SGDLearnerTask.learnerDef("tab1", "map1", new String[] {"a", "b"}, new Integer[] {0, 1}, 1, 10, null);
-        myCheck(params, ParameterConstants.PARAM_STRING, "Input");
+        myCheck(params, LinearRegressionWithSGDJob.PARAM_REGULARIZATION, "Input");
     }
 
     @Test

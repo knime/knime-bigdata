@@ -8,7 +8,6 @@ import java.io.Serializable;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.linalg.Matrices;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import org.junit.Test;
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.mllib.PCATaskTest;
 import com.typesafe.config.Config;
@@ -35,7 +33,7 @@ public class PCAJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = PCATaskTest.paramsAsJason(null, new Integer[] { 0, 1 },
 				8, "U");
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test

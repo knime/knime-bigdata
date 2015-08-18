@@ -34,19 +34,19 @@ public class NaiveBayesJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = NaiveBayesTaskTest.paramsAsJason(null, 1, new Integer[] { 0, 1 },
 				8, "U");
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test
-	public void jobValidationShouldCheckMissingLabelIndexParameter()
+	public void jobValidationShouldCheckIncorrectLabelIndexParameter()
 			throws Throwable {
-		String params = NaiveBayesTaskTest.paramsAsJason("tab", 1, new Integer[] { 0, 1 },
+		String params = NaiveBayesTaskTest.paramsAsJason("tab", -1, new Integer[] { 0, 1 },
 				8, "U");
-		myCheck(params, ParameterConstants.PARAM_LABEL_INDEX, "Input");
+		myCheck(params, "Input parameter '"+ParameterConstants.PARAM_LABEL_INDEX+"' must be positive, got -1.");
 	}
 	
 	@Test
-	public void jobValidationShouldCheckKParameter() throws Throwable {
+	public void jobValidationShouldCheckLamdaParameter() throws Throwable {
 		for (Double lambda : new double[] { -1.1, 0.0d, 1.5d, 3d }) {
 			String params = NaiveBayesTaskTest.paramsAsJason("tab1", 1, new Integer[] {
 					0, 1 }, lambda, "U");

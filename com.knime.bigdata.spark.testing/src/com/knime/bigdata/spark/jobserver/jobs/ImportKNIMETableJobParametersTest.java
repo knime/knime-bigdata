@@ -7,11 +7,9 @@ import java.util.List;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
-import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 import com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeModel;
@@ -37,7 +35,7 @@ public class ImportKNIMETableJobParametersTest {
     public void jobValidationShouldCheckMissingOuputParameter() throws Throwable {
         String params =
                 Table2SparkNodeModel.paramDef(new Object[][]{new Object[]{1, true, 3.2d, "my string"}},  null);
-        myCheck(params,  ParameterConstants.PARAM_TABLE_1, "Output");
+        myCheck(params, KnimeSparkJob.PARAM_RESULT_TABLE, "Output");
     }
 
     @Test

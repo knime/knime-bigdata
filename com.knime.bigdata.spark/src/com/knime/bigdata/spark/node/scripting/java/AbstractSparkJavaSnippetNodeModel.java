@@ -69,6 +69,7 @@ import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.JarPacker;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler.SourceCompiler;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -210,15 +211,15 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         @Nonnull final String aOutputTable) {
         final List<String> inputParams = new LinkedList<>();
         if (aInputTable1 != null) {
-            inputParams.add(ParameterConstants.PARAM_TABLE_1);
+            inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
             inputParams.add(aInputTable1);
         }
         if (aInputTable2 != null) {
-            inputParams.add(ParameterConstants.PARAM_TABLE_2);
+            inputParams.add(AbstractSparkJavaSnippet.PARAM_INPUT_TABLE_KEY2);
             inputParams.add(aInputTable2);
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParams.toArray(new String[0]),
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable}});
     }
 
     private KnimeSparkJob addJob2Jar(final KNIMESparkContext context, final SparkJavaSnippet snippet)

@@ -31,8 +31,8 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.NaiveBayesJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
@@ -73,7 +73,9 @@ public class NaiveBayesTask implements Serializable {
 
     NaiveBayesModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = paramsAsJason();
-        exec.checkCanceled();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
         final String jobId = JobControler.startJob(m_context, NaiveBayesJob.class.getCanonicalName(), learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
@@ -100,9 +102,9 @@ public class NaiveBayesTask implements Serializable {
         final Object[] inputParamas =
             new Object[]{NaiveBayesJob.PARAM_LAMBDA, aLambda, ParameterConstants.PARAM_LABEL_INDEX, aLabelColIndex,
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
-                ParameterConstants.PARAM_TABLE_1, aInputTableName};
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH, aResultRdd}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd}});
     }
 }

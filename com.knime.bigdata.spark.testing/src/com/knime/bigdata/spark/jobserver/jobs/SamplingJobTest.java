@@ -16,13 +16,11 @@ import org.knime.core.node.CanceledExecutionException;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeModel;
+import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
@@ -44,7 +42,7 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		settings.countMethod(aCountMethod);
 		settings.count((int) aCount);
 		settings.fraction(aCount);
-		return MLlibSamplingNodeModel.paramDef(aTableToSample, settings, aClassColIx,
+		return SparkSamplingNodeModel.paramDef(aTableToSample, settings, aClassColIx,
 				aIsWithReplacement, aSeed, aExact, aOut1, aOut2);
 	}
 
@@ -506,12 +504,5 @@ public class SamplingJobTest extends SparkWithJobServerSpec {
 		return table3;
 	}
 
-	private String rowFetcherDef(final int aNumRows, final String aTableName) {
-		return JsonUtils.asJson(new Object[] {
-				ParameterConstants.PARAM_INPUT,
-				new String[] { ParameterConstants.PARAM_NUMBER_ROWS,
-						"" + aNumRows, ParameterConstants.PARAM_TABLE_1,
-						aTableName } });
-	}
 
 }

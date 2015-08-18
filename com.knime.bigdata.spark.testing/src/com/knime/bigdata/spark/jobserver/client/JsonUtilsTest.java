@@ -12,7 +12,9 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
+import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -84,10 +86,10 @@ public class JsonUtilsTest {
         String jsonStr =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
-                new String[]{ParameterConstants.PARAM_TABLE_1, "dataPath", ParameterConstants.PARAM_NUM_CLUSTERS, "9",
+                new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, "dataPath", KMeansLearner.PARAM_NUM_CLUSTERS, "9",
                     ParameterConstants.PARAM_NUM_ITERATIONS, "63"},
                 ParameterConstants.PARAM_OUTPUT,
-                new String[]{ParameterConstants.PARAM_MODEL_NAME, "modelFile", ParameterConstants.PARAM_TABLE_1,
+                new String[]{ParameterConstants.PARAM_MODEL_NAME, "modelFile", KnimeSparkJob.PARAM_RESULT_TABLE,
                     "outputDataPath"}
 
             });
@@ -96,14 +98,14 @@ public class JsonUtilsTest {
         assertTrue("output should be stored as path", config.hasPath(ParameterConstants.PARAM_OUTPUT));
         Config inputConfig = config.getConfig(ParameterConstants.PARAM_INPUT);
         assertEquals("value should be accessible for key", "dataPath",
-            inputConfig.getString(ParameterConstants.PARAM_TABLE_1));
-        assertEquals("value should be accessible for key", 9, inputConfig.getInt(ParameterConstants.PARAM_NUM_CLUSTERS));
+            inputConfig.getString(KnimeSparkJob.PARAM_INPUT_TABLE));
+        assertEquals("value should be accessible for key", 9, inputConfig.getInt(KMeansLearner.PARAM_NUM_CLUSTERS));
         assertEquals("value should be accessible for key", 63,
             inputConfig.getInt(ParameterConstants.PARAM_NUM_ITERATIONS));
 
         Config outputConfig = config.getConfig(ParameterConstants.PARAM_OUTPUT);
         assertEquals("value should be accessible for key", "outputDataPath",
-            outputConfig.getString(ParameterConstants.PARAM_TABLE_1));
+            outputConfig.getString(KnimeSparkJob.PARAM_RESULT_TABLE));
         assertEquals("value should be accessible for key", "modelFile",
             outputConfig.getString(ParameterConstants.PARAM_MODEL_NAME));
     }
@@ -115,7 +117,7 @@ public class JsonUtilsTest {
                 new Object[]{2, false, "a\n\r", " b   \"^´`' +*", 5.678d}};
         final String jsonStr =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-                new Object[]{ParameterConstants.PARAM_TABLE_1, JobConfig.encodeToBase64(inputData)}});
+                new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(inputData)}});
         JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
 
         List<Row> data = ImportKNIMETableJob.getInputData(configValue);
@@ -139,7 +141,7 @@ public class JsonUtilsTest {
     public void testWithAllSortsOfSpecialValuesWhenConverting2JSon() throws Throwable {
         final String jsonStr =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-                new Object[]{ParameterConstants.PARAM_TABLE_1, JobConfig.encodeToBase64(largeData)}});
+                new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(largeData)}});
         JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
 
         List<Row> data = ImportKNIMETableJob.getInputData(configValue);

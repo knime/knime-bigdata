@@ -47,10 +47,6 @@ public abstract class AbstractStringMapperJob extends KnimeSparkJob implements S
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_INPUT_TABLE = ParameterConstants.PARAM_TABLE_1;
-
-    static final String PARAM_COL_NAMES = ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING;
-
     private final static Logger LOGGER = Logger.getLogger(AbstractStringMapperJob.class.getName());
 
     /**
@@ -66,16 +62,16 @@ public abstract class AbstractStringMapperJob extends KnimeSparkJob implements S
         final String msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
 
         if (msg == null) {
-            if (!aConfig.hasInputParameter(PARAM_COL_NAMES)) {
-                return "Input parameter '" + PARAM_COL_NAMES + "' missing.";
+            if (!aConfig.hasInputParameter(ParameterConstants.PARAM_COL_NAMES)) {
+                return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' missing.";
             } else {
                 try {
-                    List<String> vals = aConfig.getInputListParameter(PARAM_COL_NAMES, String.class);
+                    List<String> vals = aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
                     if (vals.size() < 1) {
-                        return "Input parameter '" + PARAM_COL_NAMES + "' is empty.";
+                        return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' is empty.";
                     }
                 } catch (Exception e) {
-                    return "Input parameter '" + PARAM_COL_NAMES + "' is not of expected type 'string list'.";
+                    return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' is not of expected type 'string list'.";
                 }
             }
 
@@ -111,7 +107,7 @@ public abstract class AbstractStringMapperJob extends KnimeSparkJob implements S
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "starting job to convert nominal values...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
-        final List<String> colNames = aConfig.getInputListParameter(PARAM_COL_NAMES, String.class);
+        final List<String> colNames = aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
         final int[] colIds = new int[colIdxs.size()];
         final Map<Integer, String> colNameForIndex = new HashMap<>();

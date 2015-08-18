@@ -33,8 +33,6 @@ public class FetchRowsJob extends KnimeSparkJob {
 
 	private static final String PARAM_NUM_ROWS =ParameterConstants.PARAM_NUMBER_ROWS;
 
-	private static final String PARAM_TABLE_NAME = ParameterConstants.PARAM_TABLE_1;
-
 	/**
 	 * parse command line parameters
 	 */
@@ -52,8 +50,8 @@ public class FetchRowsJob extends KnimeSparkJob {
 			}
 		}
 
-		if (msg == null && !aConfig.hasInputParameter(PARAM_TABLE_NAME)) {
-			msg = "Input parameter '" + PARAM_TABLE_NAME + "' missing.";
+		if (msg == null && !aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+			msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
 		}
 
 		if (msg != null) {
@@ -66,12 +64,12 @@ public class FetchRowsJob extends KnimeSparkJob {
 	@Override
 	public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) throws GenericKnimeSparkException {
 
-	    if (!validateNamedRdd(aConfig.getInputParameter(PARAM_TABLE_NAME))) {
-            throw new GenericKnimeSparkException("Input data table missing for key: "+aConfig.getInputParameter(PARAM_TABLE_NAME));
+	    if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
+            throw new GenericKnimeSparkException("Input data table missing for key: "+aConfig.getInputParameter(PARAM_INPUT_TABLE));
         }
 		final int numRows = aConfig.getInputParameter(PARAM_NUM_ROWS, Integer.class);
 		FetchRowsJob.LOGGER.log(Level.INFO, "Fetching " + numRows + " rows from input RDD");
-		final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_TABLE_NAME));
+		final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 		final List<Row> res;
 		if (numRows > 0) {
 		    res = inputRDD.take(numRows);

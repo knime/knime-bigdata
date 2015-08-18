@@ -28,12 +28,12 @@ public abstract class SGDJob extends KnimeSparkJob {
     /**
      * number of optimization iterations
      */
-    private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
+    public static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
 
     /**
      * regularization parameter, should be some float between 0 and 1 (0.1)
      */
-    private static final String PARAM_REGULARIZATION = ParameterConstants.PARAM_STRING;
+    public static final String PARAM_REGULARIZATION = "Regularization";
 
     /**
      * parse parameters
@@ -97,7 +97,7 @@ public abstract class SGDJob extends KnimeSparkJob {
 
         //note that the column in the input RDD should be normalized into 0-1 ranges
         final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
 
@@ -105,7 +105,7 @@ public abstract class SGDJob extends KnimeSparkJob {
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
+        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             SupervisedLearnerUtils.storePredictions(sc, aConfig, this, rowRDD,
                 RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model, getLogger());
         }
