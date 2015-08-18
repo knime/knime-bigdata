@@ -31,7 +31,6 @@ import spark.jobserver.SparkJobValidation;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
@@ -54,9 +53,10 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
-
-    private static final String PARAM_OP = ParameterConstants.PARAM_STRING;
+    /**
+     * type of operation
+     */
+    public static final String PARAM_OP = "OpType";
 
     private final static Logger LOGGER = Logger.getLogger(NamedRDDUtilsJob.class.getName());
 
@@ -72,9 +72,9 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_OP + "' missing.";
         }
 
-        if (msg == null && !config.hasInputParameter(PARAM_TABLE_KEY)
+        if (msg == null && !config.hasInputParameter(PARAM_INPUT_TABLE)
             && OP_DELETE.equalsIgnoreCase(config.getInputParameter(PARAM_OP).toString())) {
-            msg = "Input parameter '" + PARAM_TABLE_KEY + "' missing.";
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -107,7 +107,7 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
      * @return
      */
     private JobResult deleteNamedRDD(final JobConfig aConfig) {
-        final String rddName = aConfig.getInputParameter(PARAM_TABLE_KEY);
+        final String rddName = aConfig.getInputParameter(PARAM_INPUT_TABLE);
         LOGGER.log(Level.INFO, "deleting reference to named RDD " + rddName);
         deleteNamedRdd(rddName);
         if (validateNamedRdd(rddName)) {

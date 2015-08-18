@@ -40,7 +40,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -74,7 +74,7 @@ public class MLlibNaiveBayesNodeModel extends AbstractSparkNodeModel {
      * @return the quality measure model
      */
     static SettingsModelString createQualityMeasureModel() {
-        return new SettingsModelString("qualityMeasure", ParameterConstants.VALUE_GINI);
+        return new SettingsModelString("qualityMeasure", DecisionTreeLearner.VALUE_GINI);
     }
 
     /**

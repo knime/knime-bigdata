@@ -180,7 +180,7 @@ public class JobControler {
 
         try (final MultiPart multiPart = new MultiPart()) {
             multiPart.bodyPart(aJsonParams, MediaType.APPLICATION_JSON_TYPE).bodyPart(
-                new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1,
+                new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + KnimeSparkJob.PARAM_INPUT_TABLE,
                     aDataFile));
 
             final Response response =

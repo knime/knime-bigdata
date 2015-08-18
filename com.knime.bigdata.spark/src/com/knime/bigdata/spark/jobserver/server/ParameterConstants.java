@@ -22,24 +22,11 @@ public class ParameterConstants {
 	 * specific parameters, may be used as input and/or output
 	 * parameters
 	 */
-	/**
-	 * number of clusters for cluster learners
-	 */
-	public static final String PARAM_NUM_CLUSTERS = "noOfClusters";
+
 	/**
 	 * number of iterations
 	 */
 	public static final String PARAM_NUM_ITERATIONS = "noOfIterations";
-
-	/**
-	 * path to first data table, may also be used as a key
-	 */
-	public static final String PARAM_TABLE_1 = "table1";
-
-    /**
-     * path to second data table, may also be used as a key
-     */
-    public static final String PARAM_TABLE_2 = "table2";
 
     /**
 	 * name of model or the model itself
@@ -51,41 +38,25 @@ public class ParameterConstants {
      */
     public static final String PARAM_MAIN_CLASS = "mainClass";
 
-    /**
-     * boolean that indicates if probabilities should be added
-     */
-    public static final String PARAM_APPEND_PROBABILITIES = "appendProbabilities";
-
 	/**
 	 * number of rows
 	 */
 	public static final String PARAM_NUMBER_ROWS = "numRows";
 
-	/**
-	 * sql statement parameter
-	 */
-    public static final String PARAM_SQL_STATEMENT = "sql";
     /**
      * column indices starting with 0
      */
     public static final String PARAM_COL_IDXS = "colIndices";
 
     /**
+     * names of selected columns
+     */
+    public static final String PARAM_COL_NAMES = "ColumnNames";
+
+    /**
      * Classification column index starting with 0
      */
     public static final String PARAM_CLASS_COL_IDX = "classColIndex";
-    /**
-     * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
-     */
-    public static final String PARAM_INFORMATION_GAIN = "impurity";
-    /**
-     * supported information gain criterion
-     */
-    public static final String VALUE_GINI = "gini";
-    /**
-     * supported information gain criterion
-     */
-    public static final String VALUE_ENTROPY = "entropy";
 
     /**
      * parameter for maximal (search, tree, ...) depth
@@ -112,19 +83,5 @@ public class ParameterConstants {
      */
     public static final String PARAM_SCHEMA = "tableSchema";
 
-    /**
-     * some string parameter
-     */
-    public static final String PARAM_STRING = "stringParam";
 
-    /**
-     * utility function to append a counter post fix to a parameter so that we
-     * do not have to have too many PARAM_X1, PARAM_X2... constants (such as PARAM_TABLE1 and PARAM_TABLE2)
-     * @param aParamConstant
-     * @param aParamIx
-     * @return a new parameter 'constant' that can be referenced by client and server
-     */
-    public static final String NUMBERED_PARAM(final String aParamConstant, final int aParamIx) {
-        return aParamConstant + "_" + aParamIx;
-    }
 }

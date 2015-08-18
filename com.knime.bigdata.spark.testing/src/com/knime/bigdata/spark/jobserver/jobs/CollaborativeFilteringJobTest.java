@@ -1,7 +1,6 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
@@ -9,7 +8,6 @@ import java.io.Serializable;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.recommendation.ALS;
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.junit.Test;
@@ -17,7 +15,6 @@ import org.junit.Test;
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.mllib.CollaborativeFilteringTaskTest;
 import com.typesafe.config.Config;
@@ -36,7 +33,7 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason(null, 1,
 				2, 3, 8d, "U");
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test

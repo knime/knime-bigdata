@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.mllib.SVDTaskTest;
 import com.typesafe.config.Config;
@@ -36,7 +35,7 @@ public class SVDJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = SVDTaskTest.paramsAsJason(null, new Integer[] { 0, 1 },
 				true, 8, 0.001, "V", "U");
-		myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test

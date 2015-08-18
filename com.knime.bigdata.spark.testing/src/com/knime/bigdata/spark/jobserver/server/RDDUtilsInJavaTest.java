@@ -1,6 +1,5 @@
 package com.knime.bigdata.spark.jobserver.server;
 
-import static org.apache.spark.mllib.random.RandomRDDs.normalJavaRDD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -8,13 +7,10 @@ import static org.junit.Assert.fail;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.apache.spark.SparkConf;
 import org.apache.spark.SparkException;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -29,22 +25,9 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExternalResource;
-
-import scala.Array;
 
 import com.knime.bigdata.spark.LocalSparkSpec;
-import com.knime.bigdata.spark.jobserver.server.LabeledDataInfo;
-import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
-import com.knime.bigdata.spark.jobserver.server.MappingType;
-import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
-import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
-import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
-import com.knime.bigdata.spark.jobserver.server.NormalizedRDDContainer;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
 /**

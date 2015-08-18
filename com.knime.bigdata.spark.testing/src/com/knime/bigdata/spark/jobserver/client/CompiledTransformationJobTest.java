@@ -5,14 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import javax.json.JsonObject;
-
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.jobs.TransformationTestJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -25,9 +24,9 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
 
     private final String params2Json(final String aInputKey, final String aOutputKey) {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aInputKey,
+            new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, aInputKey,
             ParameterConstants.PARAM_SEPARATOR, " "}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputKey}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputKey}});
     }
 
     /**
@@ -40,7 +39,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
 
         final String params =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_OUTPUT,
-                new String[]{ParameterConstants.PARAM_TABLE_1, "someRDD"}});
+                new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, "someRDD"}});
         File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();
 

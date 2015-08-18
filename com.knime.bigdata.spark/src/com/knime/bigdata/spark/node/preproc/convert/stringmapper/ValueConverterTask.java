@@ -26,6 +26,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -95,12 +96,13 @@ public class ValueConverterTask {
     }
 
     private String paramDef() {
-        return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName, m_outputTableName,
-            m_outputMappingTableName);
+        return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName,
+            m_outputTableName, m_outputMappingTableName);
     }
 
     /**
      * (for better unit testing)
+     *
      * @param includeColIdxs
      * @param includeColNames
      * @param mappingType
@@ -109,17 +111,18 @@ public class ValueConverterTask {
      * @param outputMappingTableName
      * @return Json String with parameter settings
      */
-    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames, final String mappingType,
-        final String inputTableName, final String outputTableName, final String outputMappingTableName) {
+    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
+        final String mappingType, final String inputTableName, final String outputTableName,
+        final String outputMappingTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),
-                ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
-                JsonUtils.toJsonArray((Object[])includeColNames), ParameterConstants.PARAM_STRING,
-                mappingType, ParameterConstants.PARAM_TABLE_1, inputTableName},
+                ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])includeColNames),
+                ConvertNominalValuesJob.PARAM_MAPPING_TYPE, mappingType, KnimeSparkJob.PARAM_INPUT_TABLE,
+                inputTableName},
             ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, outputTableName, ParameterConstants.PARAM_TABLE_2,
-                outputMappingTableName}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName,
+                ConvertNominalValuesJob.PARAM_RESULT_MAPPING, outputMappingTableName}});
     }
 
 }

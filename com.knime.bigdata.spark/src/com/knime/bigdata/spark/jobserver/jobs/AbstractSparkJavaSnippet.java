@@ -63,7 +63,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.InvalidSchemaException;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
@@ -81,11 +80,14 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
 
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
 
-    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_INPUT_TABLE_KEY1 = PARAM_INPUT_TABLE;
 
-    private static final String PARAM_INPUT_TABLE_KEY2 =  ParameterConstants.PARAM_TABLE_2;
+    /**
+     * second input table
+     */
+    public static final String PARAM_INPUT_TABLE_KEY2 =  "InputTable2";
 
-    private static final String PARAM_OUTPUT_TABLE_KEY =  ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_OUTPUT_TABLE_KEY =  PARAM_RESULT_TABLE;
 
     /**
      * parse parameters

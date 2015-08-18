@@ -5,10 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 
-import com.knime.bigdata.spark.jobserver.jobs.JoinJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerTask;
 import com.typesafe.config.ConfigFactory;
@@ -35,7 +33,7 @@ public class JoinJobParametersTest {
         String params =
             getParams(null, "tab2", JoinMode.InnerJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+        myCheck(params, JoinJob.PARAM_LEFT_RDD, "Input");
     }
 
     @Test
@@ -43,7 +41,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", null, JoinMode.InnerJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
-        myCheck(params, ParameterConstants.PARAM_TABLE_2, "Input");
+        myCheck(params, JoinJob.PARAM_RIGHT_RDD, "Input");
     }
 
     @Test(expected=NullPointerException.class)
@@ -58,7 +56,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", "tab2", JoinMode.InnerJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, null,
                 new Integer[]{1, 5, 2, 7}, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2)
+        myCheck(params, "Input parameter '" + JoinJob.PARAM_SELECT_INDEXES_LEFT
             + "' is not of expected type 'integer list'.");
     }
 
@@ -67,7 +65,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", "tab2", JoinMode.FullOuterJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, null, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3)
+        myCheck(params, "Input parameter '" +  JoinJob.PARAM_SELECT_INDEXES_RIGHT
             + "' is not of expected type 'integer list'.");
     }
 
@@ -76,7 +74,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", "tab2", JoinMode.LeftOuterJoin, null, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0)
+        myCheck(params, "Input parameter '" +  JoinJob.PARAM_JOIN_INDEXES_LEFT
             + "' is not of expected type 'integer list'.");
     }
 
@@ -85,7 +83,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", "tab2", JoinMode.RightOuterJoin, new Integer[]{1, 5, 2, 7}, null, new Integer[]{1, 5, 2,
                 7}, new Integer[]{1, 5, 2, 7}, "OutTab");
-        myCheck(params, "Input parameter '" + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1)
+        myCheck(params, "Input parameter '" +  JoinJob.PARAM_JOIN_INDEXES_RIGHT
             + "' is not of expected type 'integer list'.");
     }
 
@@ -95,7 +93,7 @@ public class JoinJobParametersTest {
             getParams("tab1", "tab2", JoinMode.InnerJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{}, new Integer[]{1, 5, 2, 7}, "OutTab");
         String msg =
-            "Input parameter '" + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2)
+            "Input parameter '" +  JoinJob.PARAM_SELECT_INDEXES_LEFT
                 + "' is empty.";
         myCheck(params, msg);
 
@@ -106,7 +104,7 @@ public class JoinJobParametersTest {
         String params =
             getParams("tab1", "tab2", JoinMode.LeftOuterJoin, new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7},
                 new Integer[]{1, 5, 2, 7}, new Integer[]{1, 5, 2, 7}, null);
-        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Output");
+        myCheck(params, KnimeSparkJob.PARAM_RESULT_TABLE, "Output");
 
     }
 

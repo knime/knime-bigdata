@@ -32,20 +32,20 @@ public class SparkStringMapperJobTest extends SparkWithJobServerSpec {
         String params =
             getParams(null, MappingType.COLUMN.toString(), new Integer[]{1, 5, 2, 7}, new String[]{"a", "b", "c", "d"},
                 "tab1", "tab2");
-        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Input");
+        myCheck(params, ConvertNominalValuesJob.PARAM_INPUT_TABLE, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingMappingTypeParameter() throws Throwable {
         String params = getParams("xx", null, new Integer[]{9}, new String[]{"a", "b", "c", "d"}, "tab1", "tab2");
-        myCheck(params, ParameterConstants.PARAM_STRING, "Input");
+        myCheck(params, ConvertNominalValuesJob.PARAM_MAPPING_TYPE, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckIncorrectMappingTypeParameter() throws Throwable {
         String params =
             getParams("xx", "notproper", new Integer[]{99}, new String[]{"a", "b", "c", "d"}, "tab1", "tab2");
-        String msg = "Input parameter '" + ParameterConstants.PARAM_STRING + "' has an invalid value.";
+        String msg = "Input parameter '" + ConvertNominalValuesJob.PARAM_MAPPING_TYPE + "' has an invalid value.";
         myCheck(params, msg);
     }
 
@@ -73,7 +73,7 @@ public class SparkStringMapperJobTest extends SparkWithJobServerSpec {
         String params =
             getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"},
                 null, "tab2");
-        myCheck(params, ParameterConstants.PARAM_TABLE_1, "Output");
+        myCheck(params, ConvertNominalValuesJob.PARAM_RESULT_TABLE, "Output");
 
     }
 
@@ -82,7 +82,7 @@ public class SparkStringMapperJobTest extends SparkWithJobServerSpec {
         String params =
             getParams("tab1", MappingType.COLUMN.toString(), new Integer[]{1, 5, 2}, new String[]{"a", "b", "c", "d"},
                 "tab1", null);
-        myCheck(params, ParameterConstants.PARAM_TABLE_2, "Output");
+        myCheck(params, ConvertNominalValuesJob.PARAM_RESULT_MAPPING, "Output");
 
     }
 

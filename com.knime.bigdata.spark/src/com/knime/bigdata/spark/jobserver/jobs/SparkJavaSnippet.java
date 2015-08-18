@@ -78,15 +78,14 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
     private final static Logger LOGGER = Logger.getLogger("KNIME Spark Java Snippet");
 
-    private static final String PARAM_INPUT_TABLE_KEY1 = ParameterConstants.PARAM_TABLE_1;
-
-    private static final String PARAM_INPUT_TABLE_KEY2 = ParameterConstants.PARAM_TABLE_2;
+    /**
+     * second input table name
+     */
+    public static final String PARAM_INPUT_TABLE_KEY2 = "SecondInputTable";
 
     private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
 
     private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_MAIN_CLASS;
-
-    private static final String PARAM_OUTPUT_TABLE_KEY = ParameterConstants.PARAM_TABLE_1;
 
     /**
      * parse parameters
@@ -94,8 +93,8 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
     @Override
     public final SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
+        if (!aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
         if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
             msg = "Compiled snippet class missing!";
@@ -111,9 +110,9 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 
     private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1)
-            && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1))) {
-            msg = "(First) Input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1);
+        if (aConfig.hasInputParameter(PARAM_INPUT_TABLE)
+            && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
+            msg = "(First) Input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE);
         }
         if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2) && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2))) {
             msg = "Second input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2);
@@ -137,8 +136,8 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
         validateInput(aConfig);
         try {
             final JavaRDD<Row> rowRDD1;
-            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY1)) {
-                rowRDD1 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY1));
+            if (aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+                rowRDD1 = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
             } else {
                 rowRDD1 = null;
             }
@@ -177,7 +176,7 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
             try {
                 if (resultRDD != null) {
                     System.out.println("Getting schema for result");
-                    addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), resultRDD);
+                    addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), resultRDD);
 //                    Method schemaMethod = modelClass.getMethod("getSchema", JavaRDD.class);
 //                    System.out.println("Schema method loaded");
 //                    System.out.println("Call schema method");
@@ -185,7 +184,7 @@ public class SparkJavaSnippet extends KnimeSparkJob implements Serializable {
 ////                    final StructType schema = getSchema(resultRDD);
 //                    System.out.println("Schema: " + schema);
                     return JobResult.emptyJobResult().withMessage("OK")
-                        .withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_TABLE_KEY), StructTypeBuilder.fromRows(resultRDD.take(10)).build());
+                        .withTable(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), StructTypeBuilder.fromRows(resultRDD.take(10)).build());
                 }
                 return JobResult.emptyJobResult().withMessage("OK");
             } catch (Exception e) {

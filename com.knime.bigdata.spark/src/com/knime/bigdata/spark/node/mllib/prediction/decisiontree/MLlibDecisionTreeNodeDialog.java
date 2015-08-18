@@ -41,7 +41,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -59,7 +59,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
 
     private final DialogComponentStringSelection m_quality = new DialogComponentStringSelection(
         MLlibDecisionTreeNodeModel.createQualityMeasureModel(), "Quality measure: ",
-        new String[] {ParameterConstants.VALUE_GINI, ParameterConstants.VALUE_ENTROPY});
+        new String[] {DecisionTreeLearner.VALUE_GINI, DecisionTreeLearner.VALUE_ENTROPY});
 
     private final DialogComponentColumnFilter2 m_cols =
             new DialogComponentColumnFilter2(MLlibDecisionTreeNodeModel.createColumnsModel(), 0);

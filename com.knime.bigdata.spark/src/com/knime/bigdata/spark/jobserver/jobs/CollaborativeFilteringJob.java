@@ -55,78 +55,70 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
     /**
      * column index of the user
      */
-    public static final String PARAM_USER_INDEX = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 1);
+    public static final String PARAM_USER_INDEX = "UserIx";
 
     /**
      * column index of the product
      */
-    public static final String PARAM_PRODUCT_INDEX = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING,
-        2);
+    public static final String PARAM_PRODUCT_INDEX = "ProductIx";
 
     /**
      * column index of the rating
      */
-    public static final String PARAM_RATING_INDEX = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING,
-        3);
+    public static final String PARAM_RATING_INDEX = "RatingIx";
 
     /**
      * lambda parameter
      */
-    public static final String PARAM_LAMBDA = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 4);
+    public static final String PARAM_LAMBDA = "Lambda";
 
     /**
      * the constant used in computing confidence in implicit ALS. Default: 1.0.
      */
-    public static final String PARAM_ALPHA = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 5);
+    public static final String PARAM_ALPHA = "Alpha";
 
     /**
      * whether the least-squares problems solved at each iteration should have nonnegativity constraints.
      */
-    public static final String PARAM_IS_NON_NEGATIVE = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 6);
+    public static final String PARAM_IS_NON_NEGATIVE = "NonNegative";
 
     /**
      * the number of user blocks to parallelize the computation.
      */
-    public static final String PARAM_NUM_USER_BLOCKS = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 7);
+    public static final String PARAM_NUM_USER_BLOCKS = "NumUserBlocks";
 
     /**
      * a random seed to have deterministic results.
      */
-    public static final String PARAM_SEED = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 8);
+    public static final String PARAM_SEED = "Seed";
 
     /**
      * the number of product blocks to parallelize the computation.
      */
-    public static final String PARAM_NUM_PRODUCT_BLOCKS = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 9);
+    public static final String PARAM_NUM_PRODUCT_BLOCKS = "NumProductBlocks";
 
     //private static final String PARAM_STORAGE_LEVEL = null;
 
     /**
      * whether to use implicit preference.
      */
-    public static final String PARAM_IMPLICIT_PREFS = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 10);
+    public static final String PARAM_IMPLICIT_PREFS = "UseImplicitPrefs";
 
     /**
      * the number of blocks for both user blocks and product blocks to parallelize the computation into; pass -1 for an
      * auto-configured number of blocks. Default: -1
      */
-    public static final String PARAM_NUM_BLOCKS = ParameterConstants
-        .NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 11);
+    public static final String PARAM_NUM_BLOCKS = "NumBlocks";
 
     /**
      * the number of iterations to run.
      */
-    public static final String PARAM_NUM_ITERATIONS = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 12);
+    public static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
 
     /**
      * the rank of the feature matrices computed (number of features).
      */
-    public static final String PARAM_RANK = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 13);
+    public static final String PARAM_RANK = "Rank";
 
     private final static Logger LOGGER = Logger.getLogger(CollaborativeFilteringJob.class.getName());
 
@@ -138,8 +130,8 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-            msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         //the only required parameters are input rdd, user, product, rating
@@ -200,17 +192,16 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
         throws GenericKnimeSparkException {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Collaborative Filtering job...");
-        final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         final JavaRDD<Rating> ratings = convertRowRDD2RatingsRdd(aConfig, rowRDD);
         final MatrixFactorizationModel model = execute(sc, aConfig, ratings);
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
-           final JavaRDD<Row> predictions = ModelUtils.predict(rowRDD, ratings, model);
-           addToNamedRdds(aConfig.getOutputStringParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH), predictions);
+        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            final JavaRDD<Row> predictions = ModelUtils.predict(rowRDD, ratings, model);
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predictions);
         }
         LOGGER.log(Level.INFO, " Collaborative Filtering done");
         // note that with Spark 1.4 we can use PMML instead

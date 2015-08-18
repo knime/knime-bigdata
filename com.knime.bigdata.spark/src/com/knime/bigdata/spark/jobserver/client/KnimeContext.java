@@ -17,6 +17,7 @@ import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkUtil;
@@ -189,8 +190,8 @@ public class KnimeContext {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
-                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_DELETE,
-                    ParameterConstants.PARAM_TABLE_1, aNamedRdd}});
+                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE,
+                    KnimeSparkJob.PARAM_INPUT_TABLE, aNamedRdd}});
         try {
             String jobId =
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
@@ -217,7 +218,7 @@ public class KnimeContext {
     public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-                new String[]{ParameterConstants.PARAM_STRING, NamedRDDUtilsJob.OP_INFO}});
+                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_INFO}});
         try {
             String jobId =
                 JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);

@@ -50,11 +50,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
-
     private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
-
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(Predictor.class.getName());
 
@@ -64,16 +60,16 @@ public class Predictor extends KnimeSparkJob implements Serializable {
     @Override
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasInputParameter(PARAM_DATA_FILE_NAME)) {
-            msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg == null) {
             msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
         }
 
-        if (msg == null && !aConfig.hasOutputParameter(PARAM_OUTPUT_DATA_PATH)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_DATA_PATH + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
         if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
             msg = "Input model missing!";
@@ -87,7 +83,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
 
     private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_DATA_FILE_NAME))) {
+        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
             msg = "Input data table missing!";
         }
         if (msg != null) {
@@ -108,7 +104,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
         validateInput(aConfig);
 
         LOGGER.log(Level.INFO, "starting prediction job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_DATA_FILE_NAME));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
@@ -117,7 +113,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
         final JavaRDD<Row> predictions = ModelUtils.predict(aConfig, rowRDD, colIdxs, model);
 
         LOGGER.log(Level.INFO, "Prediction done");
-        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predictions);
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predictions);
         return JobResult.emptyJobResult().withMessage("OK");
 
     }

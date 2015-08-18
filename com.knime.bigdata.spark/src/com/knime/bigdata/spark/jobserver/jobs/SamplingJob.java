@@ -43,7 +43,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
 /**
@@ -95,6 +94,11 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
      */
     public static final String PARAM_CLASS_COLUMN = "classColumn";
 
+    /**
+     * in case of split - name of second table
+     */
+    public static final String PARAM_SPLIT_TABLE_2 = "SplitTable2";
+
     private final static Logger LOGGER = Logger.getLogger(SamplingJob.class.getName());
 
     private static final long DEFAULT_RANDOM_SEED = 99990;
@@ -106,8 +110,8 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
     @Override
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasInputParameter(ParameterConstants.PARAM_TABLE_1)) {
-            msg = "Input parameter '" + ParameterConstants.PARAM_TABLE_1 + "' missing.";
+        if (!aConfig.hasInputParameter(KnimeSparkJob.PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + KnimeSparkJob.PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg == null) {
@@ -141,7 +145,7 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
 
     void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        final String key = aConfig.getInputParameter(ParameterConstants.PARAM_TABLE_1);
+        final String key = aConfig.getInputParameter(KnimeSparkJob.PARAM_INPUT_TABLE);
         if (key == null) {
             msg = "Input parameter at port 1 is missing!";
         } else if (!validateNamedRdd(key)) {
@@ -163,7 +167,7 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "starting sampling / splitting job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(ParameterConstants.PARAM_TABLE_1));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         final JavaRDD<Row> samples = sampleRdd(sc, aConfig, rowRDD);
 
@@ -173,8 +177,8 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
                 Level.INFO,
                 "Storing sample / split result data under key(s): "
                     + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE) + ", "
-                    + aConfig.getOutputStringParameter(ParameterConstants.PARAM_TABLE_2));
-            addToNamedRdds(aConfig.getOutputStringParameter(ParameterConstants.PARAM_TABLE_2), remainder);
+                    + aConfig.getOutputStringParameter(PARAM_SPLIT_TABLE_2));
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_SPLIT_TABLE_2), remainder);
         } else {
             LOGGER.log(Level.INFO,
                 "Storing sample result data under key: " + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
@@ -340,7 +344,7 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
      * @return
      */
     static boolean isSplit(final JobConfig aConfig) {
-        return aConfig.hasOutputParameter(ParameterConstants.PARAM_TABLE_2);
+        return aConfig.hasOutputParameter(PARAM_SPLIT_TABLE_2);
     }
 
     /**

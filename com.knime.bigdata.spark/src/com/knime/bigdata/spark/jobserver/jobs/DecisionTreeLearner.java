@@ -55,9 +55,17 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * impurity - Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
+     * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
      */
-    private static final String PARAM_IMPURITY = ParameterConstants.PARAM_INFORMATION_GAIN;
+    public static final String PARAM_INFORMATION_GAIN = "impurity";
+    /**
+     * supported information gain criterion
+     */
+    public static final String VALUE_GINI = "gini";
+    /**
+     * supported information gain criterion
+     */
+    public static final String VALUE_ENTROPY = "entropy";
 
     /**
      * maxDepth - Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf
@@ -105,8 +113,8 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
             }
         }
 
-        if (msg == null && !aConfig.hasInputParameter(PARAM_IMPURITY)) {
-            msg = "Input parameter '" + PARAM_IMPURITY + "' missing.";
+        if (msg == null && !aConfig.hasInputParameter(PARAM_INFORMATION_GAIN)) {
+            msg = "Input parameter '" + PARAM_INFORMATION_GAIN + "' missing.";
         }
 
         if (msg == null) {
@@ -132,14 +140,14 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
         final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
 
         final DecisionTreeModel model = execute(sc, aConfig, inputRdd);
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
+        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             SupervisedLearnerUtils.storePredictions(sc, aConfig, this, rowRDD,
                 RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model, LOGGER);
         }
@@ -166,7 +174,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
 
         final int maxDepth = aConfig.getInputParameter(PARAM_MAX_DEPTH, Integer.class);
         final int maxBins = aConfig.getInputParameter(PARAM_MAX_BINS, Integer.class);
-        final String impurity = aConfig.getInputParameter(PARAM_IMPURITY);
+        final String impurity = aConfig.getInputParameter(PARAM_INFORMATION_GAIN);
 
         LOGGER.log(Level.FINE, "Training decision tree for " + numClasses + " classes.");
         LOGGER.log(Level.FINE, "Training decision tree with info for " + nominalFeatureInfo.size()

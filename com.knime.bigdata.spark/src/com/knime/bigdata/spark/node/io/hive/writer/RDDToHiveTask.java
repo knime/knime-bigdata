@@ -30,6 +30,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.RDDToHiveJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -91,9 +92,9 @@ public class RDDToHiveTask {
             ConfigValueFactory.fromIterable(fields));
         final String schema = config.root().render(ConfigRenderOptions.concise());
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, m_rdd.getID(),
+            new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, m_rdd.getID(),
             ParameterConstants.PARAM_SCHEMA, schema},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_tableName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, m_tableName}});
     }
 
 }

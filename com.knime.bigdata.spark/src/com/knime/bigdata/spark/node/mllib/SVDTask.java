@@ -32,6 +32,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.SVDJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -79,7 +80,9 @@ public class SVDTask implements Serializable {
 
     double[] execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = paramsAsJason();
-        exec.checkCanceled();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
         final String jobId = JobControler.startJob(m_context, SVDJob.class.getCanonicalName(), learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
@@ -108,7 +111,7 @@ public class SVDTask implements Serializable {
         final Object[] inputParamas =
             new Object[]{SVDJob.PARAM_COMPUTE_U, aComputeU, SVDJob.PARAM_K, aK, SVDJob.PARAM_RCOND, aRCond,
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
-                ParameterConstants.PARAM_TABLE_1, aInputTableName};
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT,

@@ -39,7 +39,6 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
@@ -52,9 +51,15 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_MAPPING_TYPE = ParameterConstants.PARAM_STRING;
+    /**
+     * type of mapping
+     */
+    public static final String PARAM_MAPPING_TYPE = "MappingType";
 
-    private static final String PARAM_RESULT_MAPPING =ParameterConstants.PARAM_TABLE_2;
+    /**
+     * name of result table with mapping info
+     */
+    public static final String PARAM_RESULT_MAPPING = "MappingResultTable";
 
     private final static Logger LOGGER = Logger.getLogger(ConvertNominalValuesJob.class.getName());
 

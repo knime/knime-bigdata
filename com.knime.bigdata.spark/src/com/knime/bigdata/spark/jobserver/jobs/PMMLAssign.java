@@ -53,15 +53,14 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
-
     private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
 
-    private static final String PARAM_PROBS = ParameterConstants.PARAM_APPEND_PROBABILITIES;
+    /**
+     * boolean that indicates if probabilities should be added
+     */
+    public static final String PARAM_APPEND_PROBABILITIES = "appendProbabilities";
 
     private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_MAIN_CLASS;
-
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(PMMLAssign.class.getName());
 
@@ -71,18 +70,18 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
     @Override
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasInputParameter(PARAM_DATA_FILE_NAME)) {
-            msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg == null) {
             msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
         }
 
-        if (msg == null && !aConfig.hasOutputParameter(PARAM_OUTPUT_DATA_PATH)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_DATA_PATH + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
-        if (msg == null && !aConfig.hasInputParameter(PARAM_PROBS)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_APPEND_PROBABILITIES)) {
             msg = "Append probabilities missing!";
         }
         if (msg == null && !aConfig.hasInputParameter(PARAM_MAIN_CLASS)) {
@@ -99,7 +98,7 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
 
     private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_DATA_FILE_NAME))) {
+        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
             msg = "Input data table missing!";
         }
         if (msg != null) {
@@ -120,9 +119,9 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.FINE, "starting pmml prediction job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_DATA_FILE_NAME));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
-        final boolean addProbabilites = aConfig.getInputParameter(PARAM_PROBS, Boolean.class);
+        final boolean addProbabilites = aConfig.getInputParameter(PARAM_APPEND_PROBABILITIES, Boolean.class);
         final String mainClass = aConfig.getInputParameter(PARAM_MAIN_CLASS);
         final Map<String, byte[]> bytecode = aConfig.decodeFromInputParameter(PARAM_MODEL);
         try {
@@ -161,10 +160,10 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
                 }
             };
             final JavaRDD<Row> predicted = rowRDD.map(predict);
-            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), predicted);
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predicted);
             LOGGER.log(Level.FINE, "pmml prediction done");
             return JobResult.emptyJobResult().withMessage("OK")
-                .withTable(aConfig.getOutputStringParameter(PARAM_OUTPUT_DATA_PATH), null);
+                .withTable(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), null);
         } catch (Exception e) {
             final String msg = "Exception in pmml prediction job: " + e.getMessage();
             LOGGER.log(Level.SEVERE, msg, e);

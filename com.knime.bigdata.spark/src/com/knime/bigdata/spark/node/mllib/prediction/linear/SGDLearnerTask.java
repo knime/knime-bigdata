@@ -32,7 +32,9 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
@@ -112,20 +114,20 @@ public class SGDLearnerTask implements Serializable {
         final Object[] inputParamas;
         if (aMappingTableName == null) {
             inputParamas =
-                new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations, ParameterConstants.PARAM_STRING,
+                new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations, SGDJob.PARAM_REGULARIZATION,
                     aRegularizationValue, ParameterConstants.PARAM_LABEL_INDEX, aClassColIdx,
-                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
+                    ParameterConstants.PARAM_COL_NAMES,
                     JsonUtils.toJsonArray((Object[])aColNames), ParameterConstants.PARAM_COL_IDXS,
-                    JsonUtils.toJsonArray((Object[])aNumericColIdx), ParameterConstants.PARAM_TABLE_1,
+                    JsonUtils.toJsonArray((Object[])aNumericColIdx), KnimeSparkJob.PARAM_INPUT_TABLE,
                     aInputTableName};
         } else {
             inputParamas =
-                new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations, ParameterConstants.PARAM_STRING,
+                new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations, SGDJob.PARAM_REGULARIZATION,
                     aRegularizationValue, ParameterConstants.PARAM_LABEL_INDEX, aClassColIdx,
-                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
+                    ParameterConstants.PARAM_COL_NAMES,
                     JsonUtils.toJsonArray((Object[])aColNames), ParameterConstants.PARAM_COL_IDXS,
-                    JsonUtils.toJsonArray((Object[])aNumericColIdx), ParameterConstants.PARAM_TABLE_1,
-                    aInputTableName, ParameterConstants.PARAM_TABLE_2, aMappingTableName};
+                    JsonUtils.toJsonArray((Object[])aNumericColIdx), KnimeSparkJob.PARAM_INPUT_TABLE,
+                    aInputTableName, SupervisedLearnerUtils.PARAM_MAPPING_TABLE, aMappingTableName};
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{}});

@@ -30,6 +30,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.PCAJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -67,7 +68,10 @@ public class PCATask implements Serializable {
 
     double[][] execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = paramsAsJason();
-        exec.checkCanceled();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
+
         final String jobId = JobControler.startJob(m_context, PCAJob.class.getCanonicalName(), learnerParams);
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
@@ -80,7 +84,7 @@ public class PCATask implements Serializable {
         for (int i = 0; i < nRows; i++) {
             res[i] = new double[aNCols];
             for (int j = 0; j < aNCols; j++) {
-                res[i][j] =  aValues[j * nRows + i];
+                res[i][j] = aValues[j * nRows + i];
             }
         }
         return res;
@@ -104,7 +108,7 @@ public class PCATask implements Serializable {
 
         final Object[] inputParamas =
             new Object[]{PCAJob.PARAM_K, aK, ParameterConstants.PARAM_COL_IDXS,
-                JsonUtils.toJsonArray((Object[])aNumericColIdx), ParameterConstants.PARAM_TABLE_1, aInputTableName};
+                JsonUtils.toJsonArray((Object[])aNumericColIdx), KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{PCAJob.PARAM_RESULT_MATRIX, aMatrix}});

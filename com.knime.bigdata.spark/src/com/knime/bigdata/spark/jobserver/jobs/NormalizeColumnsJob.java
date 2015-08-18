@@ -16,7 +16,6 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
 import com.knime.bigdata.spark.jobserver.server.NormalizedRDDContainer;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -28,10 +27,15 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
 
     private final static Logger LOGGER = Logger.getLogger(NormalizeColumnsJob.class.getName());
 
-    private static final String PARAM_NORMALIZATION_COMPUTE_SETTINGS = ParameterConstants.PARAM_STRING;
+    /**
+     * specifies that job is to compute normalization parameters
+     */
+    public static final String PARAM_NORMALIZATION_COMPUTE_SETTINGS = "NormalizeCompute";
 
-    private static final String PARAM_NORMALIZATION_APPLY_SETTINGS = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 1);
+    /**
+     * specifies that job is to apply normalization parameters
+     */
+    public static final String PARAM_NORMALIZATION_APPLY_SETTINGS = "NormalizeApply";
 
     /**
      * parse parameters
@@ -40,8 +44,8 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
     @Override
     public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD)) {
-            msg = "Input parameter '" + SupervisedLearnerUtils.PARAM_TRAINING_RDD + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
         if (msg == null) {
             if (!aConfig.hasInputParameter(PARAM_NORMALIZATION_COMPUTE_SETTINGS)
@@ -74,8 +78,8 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
             msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
         }
 
-        if (msg == null && !aConfig.hasOutputParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH)) {
-            msg = "Output parameter '" + SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -91,7 +95,8 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
      * @return NormalizationSettings as decoded from base64 encoding
      * @throws GenericKnimeSparkException
      */
-    public static NormalizationSettings getNormalizationComputeSettings(final JobConfig aConfig) throws GenericKnimeSparkException {
+    public static NormalizationSettings getNormalizationComputeSettings(final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         return aConfig.decodeFromInputParameter(PARAM_NORMALIZATION_COMPUTE_SETTINGS);
     }
 
@@ -117,11 +122,10 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting normalization job...");
 
-        final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_TRAINING_RDD));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final NormalizedRDDContainer normalizedRowRDD = execute(aConfig, rowRDD);
 
-        addToNamedRdds(aConfig.getOutputStringParameter(SupervisedLearnerUtils.PARAM_OUTPUT_DATA_PATH), normalizedRowRDD.getRdd());
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), normalizedRowRDD.getRdd());
 
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(normalizedRowRDD);
 
@@ -137,7 +141,8 @@ public class NormalizeColumnsJob extends KnimeSparkJob {
      * @return NormalizedRDDContainer normalization result
      * @throws GenericKnimeSparkException
      */
-    public static NormalizedRDDContainer execute(final JobConfig aConfig, final JavaRDD<Row> aInputRowRDD) throws GenericKnimeSparkException {
+    public static NormalizedRDDContainer execute(final JobConfig aConfig, final JavaRDD<Row> aInputRowRDD)
+        throws GenericKnimeSparkException {
         final List<Integer> cols = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
         final boolean isCompute = aConfig.hasInputParameter(PARAM_NORMALIZATION_COMPUTE_SETTINGS);

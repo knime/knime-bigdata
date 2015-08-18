@@ -52,11 +52,12 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_NUM_CLUSTERS = ParameterConstants.PARAM_NUM_CLUSTERS;
+    /**
+     * number of clusters for cluster learners
+     */
+    public static final String PARAM_NUM_CLUSTERS = "noOfClusters";
 
     private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
-
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_TABLE_1;
 
     private final static Logger LOGGER = Logger.getLogger(KMeansLearner.class.getName());
 
@@ -98,8 +99,8 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
             msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
         }
 
-        if (msg == null && !aConfig.hasInputParameter(PARAM_DATA_FILE_NAME)) {
-            msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
+        if (msg == null && !aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -110,7 +111,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 
     private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        final String key = aConfig.getInputParameter(PARAM_DATA_FILE_NAME);
+        final String key = aConfig.getInputParameter(PARAM_INPUT_TABLE);
         if (key == null) {
             msg = "Input parameter at port 1 is missing!";
         } else if (!validateNamedRdd(key)) {
@@ -132,7 +133,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.INFO, "starting kMeans job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_DATA_FILE_NAME));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
         //use only the column indices when converting to vector
