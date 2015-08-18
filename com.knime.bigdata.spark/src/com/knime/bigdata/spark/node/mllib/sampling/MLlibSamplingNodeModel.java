@@ -20,15 +20,11 @@
  */
 package com.knime.bigdata.spark.node.mllib.sampling;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
 import javax.annotation.Nullable;
 
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -55,7 +51,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  */
 public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
 
-    private final SamplingNodeSettings m_settings = new SamplingNodeSettings();
+    private final SparkSamplingNodeSettings m_settings = new SparkSamplingNodeSettings();
 
     /**
      * Constructor.
@@ -73,7 +69,7 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
             throw new InvalidSettingsException("No input found");
         }
         SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
-        checkSettings(sparkSpec.getTableSpec(), m_settings);
+        SparkSamplingNodeSettings.checkSettings(sparkSpec.getTableSpec(), m_settings);
         return new PortObjectSpec[] {sparkSpec};
     }
 
@@ -109,7 +105,7 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        validateSamplingSettings(settings);
+        SparkSamplingNodeSettings.validateSamplingSettings(settings);
     }
 
     /**
@@ -121,60 +117,6 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
     }
 
     /**
-     * @param settings
-     * @throws InvalidSettingsException
-     */
-    public static void validateSamplingSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        //TODO: Move this into the SamplingNodeSettings class.
-        SamplingNodeSettings temp = new SamplingNodeSettings();
-        temp.loadSettingsFrom(settings, false);
-
-        if (temp.countMethod() == SamplingNodeSettings.CountMethods.Relative) {
-            if (temp.fraction() < 0.0 || temp.fraction() > 1.0) {
-                NumberFormat f = NumberFormat.getPercentInstance(Locale.US);
-                String p = f.format(100.0 * temp.fraction());
-                throw new InvalidSettingsException("Invalid percentage: " + p);
-            }
-        } else if (temp.countMethod() == SamplingNodeSettings.CountMethods.Absolute) {
-            if (temp.count() < 0) {
-                throw new InvalidSettingsException("Invalid count: "
-                        + temp.count());
-            }
-        } else {
-            throw new InvalidSettingsException("Unknown method: "
-                    + temp.countMethod());
-        }
-
-        if (temp.samplingMethod().equals(SamplingMethods.Stratified)
-                && (temp.classColumn() == null)) {
-            throw new InvalidSettingsException(
-                    "No class column for stratified sampling selected");
-        }
-    }
-
-    /**
-     * Checks if the node settings are valid, i.e. a method has been set and the
-     * class column exists if stratified sampling has been chosen.
-     *
-     * @param inSpec the input table's spec
-     * @param settings the {@link SamplingNodeSettings} to check
-     * @throws InvalidSettingsException if the settings are invalid
-     */
-    public static void checkSettings(final DataTableSpec inSpec, final SamplingNodeSettings settings)
-            throws InvalidSettingsException {
-        //TODO: Move this into the SamplingNodeSettings class.
-        if (settings.countMethod() == null) {
-            throw new InvalidSettingsException("No sampling method selected");
-        }
-        if (settings.samplingMethod().equals(SamplingMethods.Stratified)
-                && !inSpec.containsName(settings.classColumn())) {
-            throw new InvalidSettingsException("Column '"
-                    + settings.classColumn() + "' for stratified sampling "
-                    + "does not exist");
-        }
-    }
-
-    /**
      * @param rdd Spark RDD to sample
      * @param settings the {@link SamplingNodeSettings}
      * @param outputTableName the name of the first partition of the sampled data
@@ -182,11 +124,12 @@ public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
      * @return the JSON settings string
      * @throws InvalidSettingsException if the class column is not present
      */
-    public static String paramDef(final SparkDataPortObject rdd, final SamplingNodeSettings settings,
+    public static String paramDef(final SparkDataPortObject rdd, final SparkSamplingNodeSettings settings,
         final String outputTableName, @Nullable final String outputTableName2) throws InvalidSettingsException {
         final Integer[] columnIndices = SparkUtil.getColumnIndices(rdd.getTableSpec(), settings.classColumn());
         return paramDef(rdd.getTableName(), settings.countMethod(), settings.count(), settings.samplingMethod(),
-            settings.fraction(), columnIndices[0], true, settings.seed(), true, outputTableName, outputTableName2);
+            settings.fraction(), columnIndices[0], settings.withReplacement(), settings.seed(),
+            settings.exactSampling(), outputTableName, outputTableName2);
     }
 
     /**
