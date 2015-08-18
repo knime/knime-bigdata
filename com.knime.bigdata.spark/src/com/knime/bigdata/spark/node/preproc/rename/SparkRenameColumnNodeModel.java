@@ -84,7 +84,7 @@ public class SparkRenameColumnNodeModel extends AbstractSparkNodeModel {
      */
     protected SparkRenameColumnNodeModel() {
 
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE}, false);
     }
 
     /**

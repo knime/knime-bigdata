@@ -20,112 +20,80 @@
  */
 package com.knime.bigdata.spark.node.mllib.sampling;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
 
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
+import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObject;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
-import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
-import org.knime.core.node.port.database.DatabaseUtility;
-import org.knime.core.node.port.database.StatementManipulator;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
+import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class MLlibSamplingNodeModel extends NodeModel {
-
-    private static final String DATABASE_IDENTIFIER = HiveUtility.DATABASE_IDENTIFIER;
+public class MLlibSamplingNodeModel extends AbstractSparkNodeModel {
 
     private final SamplingNodeSettings m_settings = new SamplingNodeSettings();
 
-    private final SettingsModelString m_tableName = createTableNameModel();
-
     /**
-     *
+     * Constructor.
      */
     public MLlibSamplingNodeModel() {
-        super(new PortType[]{DatabasePortObject.TYPE}, new PortType[]{DatabasePortObject.TYPE});
-    }
-
-    /**
-     * @return
-     */
-    static SettingsModelString createTableNameModel() {
-        return new SettingsModelString("tableName", "result");
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec)inSpecs[0];
-        if (!spec.getDatabaseIdentifier().equals(DATABASE_IDENTIFIER)) {
-            throw new InvalidSettingsException("Only Hive connections are supported");
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (inSpecs == null || inSpecs.length != 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
+            throw new InvalidSettingsException("No input found");
         }
-        checkSettings(spec.getDataTableSpec());
-        return new PortObjectSpec[]{createSQLSpec(spec)};
-    }
-
-    /**
-     * Checks if the node settings are valid, i.e. a method has been set and the class column exists if stratified
-     * sampling has been chosen.
-     *
-     * @param inSpec the input table's spec
-     * @throws InvalidSettingsException if the settings are invalid
-     */
-    protected void checkSettings(final DataTableSpec inSpec) throws InvalidSettingsException {
-        if (m_settings.countMethod() == null) {
-            throw new InvalidSettingsException("No sampling method selected");
-        }
-        if (m_settings.samplingMethod().equals(SamplingMethods.Stratified)
-            && !inSpec.containsName(m_settings.classColumn())) {
-            throw new InvalidSettingsException("Column '" + m_settings.classColumn() + "' for stratified sampling "
-                + "does not exist");
-        }
-    }
-
-    private DatabasePortObjectSpec createSQLSpec(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
-        final DataTableSpec tableSpec = spec.getDataTableSpec();
-        final DatabaseQueryConnectionSettings conn = spec.getConnectionSettings(getCredentialsProvider());
-        final DatabaseUtility utility = DatabaseUtility.getUtility(DATABASE_IDENTIFIER);
-        final StatementManipulator sm = utility.getStatementManipulator();
-        conn.setQuery("select * from " + sm.quoteIdentifier(m_tableName.getStringValue()));
-        return new DatabasePortObjectSpec(tableSpec, conn);
+        SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
+        checkSettings(sparkSpec.getTableSpec(), m_settings);
+        return new PortObjectSpec[] {sparkSpec};
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final DatabasePortObject db = (DatabasePortObject)inObjects[0];
-        return new PortObject[]{db};
+    protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
+        final String outputTableName = SparkIDs.createRDDID();
+        final String paramInJson = paramDef(rdd, m_settings, outputTableName, null);
+        final KNIMESparkContext context = rdd.getContext();
+        exec.checkCanceled();
+        exec.setMessage("Start Spark sampling job...");
+        final String jobId = JobControler.startJob(context, SamplingJob.class.getCanonicalName(), paramInJson);
+        JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
+        return new PortObject[] {new SparkDataPortObject(result)};
     }
+
 
     /**
      * {@inheritDoc}
@@ -133,14 +101,31 @@ public class MLlibSamplingNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
-        m_tableName.saveSettingsTo(settings);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateSettings(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+        validateSamplingSettings(settings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.loadSettingsFrom(settings, false);
+    }
+
+    /**
+     * @param settings
+     * @throws InvalidSettingsException
+     */
+    public static void validateSamplingSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        //TODO: Move this into the SamplingNodeSettings class.
         SamplingNodeSettings temp = new SamplingNodeSettings();
         temp.loadSettingsFrom(settings, false);
 
@@ -152,38 +137,56 @@ public class MLlibSamplingNodeModel extends NodeModel {
             }
         } else if (temp.countMethod() == SamplingNodeSettings.CountMethods.Absolute) {
             if (temp.count() < 0) {
-                throw new InvalidSettingsException("Invalid count: " + temp.count());
+                throw new InvalidSettingsException("Invalid count: "
+                        + temp.count());
             }
         } else {
-            throw new InvalidSettingsException("Unknown method: " + temp.countMethod());
+            throw new InvalidSettingsException("Unknown method: "
+                    + temp.countMethod());
         }
 
-        if (temp.samplingMethod().equals(SamplingMethods.Stratified) && (temp.classColumn() == null)) {
-            throw new InvalidSettingsException("No class column for stratified sampling selected");
-        }
-        final String tableName =
-            ((SettingsModelString)m_tableName.createCloneWithValidatedValue(settings)).getStringValue();
-        if (tableName == null || tableName.isEmpty()) {
-            throw new InvalidSettingsException("Please specify the table name");
+        if (temp.samplingMethod().equals(SamplingMethods.Stratified)
+                && (temp.classColumn() == null)) {
+            throw new InvalidSettingsException(
+                    "No class column for stratified sampling selected");
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if the node settings are valid, i.e. a method has been set and the
+     * class column exists if stratified sampling has been chosen.
+     *
+     * @param inSpec the input table's spec
+     * @param settings the {@link SamplingNodeSettings} to check
+     * @throws InvalidSettingsException if the settings are invalid
      */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings, false);
-        m_tableName.loadSettingsFrom(settings);
+    public static void checkSettings(final DataTableSpec inSpec, final SamplingNodeSettings settings)
+            throws InvalidSettingsException {
+        //TODO: Move this into the SamplingNodeSettings class.
+        if (settings.countMethod() == null) {
+            throw new InvalidSettingsException("No sampling method selected");
+        }
+        if (settings.samplingMethod().equals(SamplingMethods.Stratified)
+                && !inSpec.containsName(settings.classColumn())) {
+            throw new InvalidSettingsException("Column '"
+                    + settings.classColumn() + "' for stratified sampling "
+                    + "does not exist");
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * @param rdd Spark RDD to sample
+     * @param settings the {@link SamplingNodeSettings}
+     * @param outputTableName the name of the first partition of the sampled data
+     * @param outputTableName2 the name of the optional second partition of the sample data
+     * @return the JSON settings string
+     * @throws InvalidSettingsException if the class column is not present
      */
-    @Override
-    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // nothing to do
+    public static String paramDef(final SparkDataPortObject rdd, final SamplingNodeSettings settings,
+        final String outputTableName, @Nullable final String outputTableName2) throws InvalidSettingsException {
+        final Integer[] columnIndices = SparkUtil.getColumnIndices(rdd.getTableSpec(), settings.classColumn());
+        return paramDef(rdd.getTableName(), settings.countMethod(), settings.count(), settings.samplingMethod(),
+            settings.fraction(), columnIndices[0], true, settings.seed(), true, outputTableName, outputTableName2);
     }
 
     /**
@@ -199,8 +202,9 @@ public class MLlibSamplingNodeModel extends NodeModel {
      *
      * @return Json String with parameter settings
      */
-    public static String paramDef(final String aTableToSample, final SamplingNodeSettings aSettings, final int aClassColIx,
-        final boolean aIsWithReplacement, final long aSeed, final boolean aExact, final String aOutputTable1, @Nullable final String aOutputTable2) {
+    public static String paramDef(final String aTableToSample, final SamplingNodeSettings aSettings,
+        final int aClassColIx, final boolean aIsWithReplacement, final long aSeed, final boolean aExact,
+        final String aOutputTable1, @Nullable final String aOutputTable2) {
         final Object[] outputParams;
         if (aOutputTable2 == null) {
             outputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1};
@@ -212,28 +216,38 @@ public class MLlibSamplingNodeModel extends NodeModel {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_TABLE_1, aTableToSample, SamplingJob.PARAM_COUNT_METHOD,
-                aSettings.countMethod().toString(),  SamplingJob.PARAM_COUNT, aSettings.count(), SamplingJob.PARAM_SAMPLING_METHOD,
-                aSettings.samplingMethod().toString(),
+                aSettings.countMethod().toString(),  SamplingJob.PARAM_COUNT, aSettings.count(),
+                SamplingJob.PARAM_SAMPLING_METHOD, aSettings.samplingMethod().toString(),
                 SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
                 SamplingJob.PARAM_EXACT, aExact, SamplingJob.PARAM_SEED, aSeed,
                 SamplingJob.PARAM_FRACTION, aSettings.fraction(),  SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
             ParameterConstants.PARAM_OUTPUT, outputParams});
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec) throws IOException,
-        CanceledExecutionException {
-        // nothing to do
+    private static String paramDef(final String aTableToSample, final CountMethods countMethod, final int count,
+        final SamplingMethods samplingMethod, final double fraction, final Integer aClassColIx,
+        final boolean aIsWithReplacement, final Long aSeed, final boolean aExact,
+        final String aOutputTable1, @Nullable final String aOutputTable2) {
+        final Object[] outputParams;
+        if (aOutputTable2 == null) {
+            outputParams = new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1};
+        } else {
+            outputParams =
+                new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable1, ParameterConstants.PARAM_TABLE_2,
+                    aOutputTable2};
+        }
+        return JsonUtils.asJson(new Object[]{
+            ParameterConstants.PARAM_INPUT,
+            new Object[]{ParameterConstants.PARAM_TABLE_1, aTableToSample,
+                SamplingJob.PARAM_COUNT_METHOD, countMethod.toString(),
+                SamplingJob.PARAM_COUNT, count,
+                SamplingJob.PARAM_SAMPLING_METHOD, samplingMethod.toString(),
+                SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
+                SamplingJob.PARAM_EXACT, aExact,
+                SamplingJob.PARAM_SEED, aSeed,
+                SamplingJob.PARAM_FRACTION, fraction,
+                SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
+            ParameterConstants.PARAM_OUTPUT, outputParams});
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // nothing to do
-    }
 }

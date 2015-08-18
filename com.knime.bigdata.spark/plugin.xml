@@ -190,6 +190,12 @@
             factory-class="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.sampling.MLlibSamplingNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">
