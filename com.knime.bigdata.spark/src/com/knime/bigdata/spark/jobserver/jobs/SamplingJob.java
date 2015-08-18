@@ -58,46 +58,42 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
     /**
      * count parameter (relative or absolute)
      */
-    public static final String PARAM_COUNT_METHOD = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING,
-        1);
+    public static final String PARAM_COUNT_METHOD = "countMethod";
 
     /**
      * sampling with or without replacement?
      */
-    public static final String PARAM_WITH_REPLACEMENT = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 2);
+    public static final String PARAM_WITH_REPLACEMENT = "withReplacement";
 
     /**
      * sampling parameter (first, random, linear, or stratified)
      */
-    public static final String PARAM_SAMPLING_METHOD = ParameterConstants.NUMBERED_PARAM(
-        ParameterConstants.PARAM_STRING, 3);
+    public static final String PARAM_SAMPLING_METHOD = "samplingMethod";
 
     /**
      * sample fraction
      */
-    public static final String PARAM_FRACTION = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 4);
+    public static final String PARAM_FRACTION = "fraction";
 
     /**
      * random seed parameter
      */
-    public static final String PARAM_SEED = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 5);
+    public static final String PARAM_SEED = "seed";
 
     /**
      * absolute number of rows to sample (only relevant for sampling method 'absolute')
      */
-    public static final String PARAM_COUNT = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 6);
+    public static final String PARAM_COUNT = "count";
 
     /**
      * exact (stratified) sampling
      */
-    public static final String PARAM_EXACT = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING, 7);
+    public static final String PARAM_EXACT = "exact";
 
     /**
      * class column index for stratified sampling
      */
-    public static final String PARAM_CLASS_COLUMN = ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_STRING,
-        8);
+    public static final String PARAM_CLASS_COLUMN = "classColumn";
 
     private final static Logger LOGGER = Logger.getLogger(SamplingJob.class.getName());
 
@@ -315,7 +311,7 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
                 return getCount(aConfig);
             case Relative: {
                 double f = getFraction(aConfig);
-                return (long)Math.ceil((aTotalCount) / f);
+                return (long)Math.ceil((aTotalCount) * f);
             }
             default:
                 return 0;

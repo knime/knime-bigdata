@@ -20,49 +20,38 @@
  */
 package com.knime.bigdata.spark.node.mllib.sampling;
 
-import javax.swing.BorderFactory;
-
-import org.knime.base.node.preproc.sample.SamplingNodeDialogPanel;
+import org.knime.base.node.preproc.sample.SamplingNodeDialog;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.port.PortObjectSpec;
+
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
  *
  * @author koetter
  */
-public class MLlibSamplingNodeDialog extends NodeDialogPane {
-    private final SamplingNodeDialogPanel m_panel;
+public class MLlibSamplingNodeDialog extends SamplingNodeDialog {
 
     /**
      * Creates the dialog.
      */
     public MLlibSamplingNodeDialog() {
         super();
-        m_panel = new SamplingNodeDialogPanel();
-        m_panel.setBorder(BorderFactory
-                .createTitledBorder("Choose size of first partition"));
-        super.addTab("First partition", m_panel);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
-            final DataTableSpec[] specs) throws NotConfigurableException {
-        m_panel.loadSettingsFrom(settings, specs[0]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
-            throws InvalidSettingsException {
-        m_panel.saveSettingsTo(settings);
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] inSpecs)
+            throws NotConfigurableException {
+        if (inSpecs == null || inSpecs.length != 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
+            throw new NotConfigurableException("Not connected");
+        }
+        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
+        final DataTableSpec[] tableSpecs = new DataTableSpec[] {sparkSpec.getTableSpec()};
+        super.loadSettingsFrom(settings, tableSpecs);
     }
 }

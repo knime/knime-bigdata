@@ -1,35 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Manipulator" icon="icon.png">
-    <name>MLlib Sampling</name>
-    <shortDescription>k-Means</shortDescription>
+    <name>MLlib Row Sampling</name>
+    <shortDescription>Extracts a sample (a bunch of rows) from the input data.</shortDescription>
     <fullDescription>
         <intro>
-            Bla
+            This node extracts a sample (a bunch of rows) from the input data. The dialog enables you to specify the
+            sample size. The following options are available in the dialog:
         </intro>
-
-        <option name="Target folder">
-            A folder on the server where the temporary copy of the data is copied. The Impala server user
-            needs read and write access to this folder.
+        <option name="Absolute">
+            Specify the absolute number of rows in the sample. If there are less rows than specified here, all rows are
+            used.
         </option>
-        <option name="Table name">
-            The name of the new table in the database.
+        <option name="Relative">
+            The percentage of the number of rows in the sample. Must be between 0 and 100, inclusively.
         </option>
-        <option name="Drop existing table">
-            If this option is selected, an existing table will be dropped and re-created. Otherwise the
-            table is loaded into the existing table. Note that the import may fail in this case if the table structure
-            and partitioning information do not match.
+        <option name="Take from top">This mode selects the top most rows of the table.</option>
+        <option name="Linear sampling">
+            This mode always includes the first and the last row and selects the remaining rows linearly over the whole
+            table (e.g. every third row). This is useful to downsample a sorted column while maintaining minimum and
+            maximum value.
         </option>
-        <option name="Partition columns">
-            Here you can select one or more columns that should be used for partitioning the data in the
-            table. A partitioned table requires a two-step import via a temporary table and therefore is much slower 
-            than import into an unpartitioned table.
+        <option name="Draw randomly">
+            Random sampling of all rows, you may optionally specify a fixed seed (see below).
+        </option>
+        <option name="Stratified sampling">
+            Check this button if you want stratified sampling, i.e. the distribution of values in the selected column is
+            (approximately) retained in the output table. You may optionally specify a fixed seed (see below). 
+        </option>
+        <option name="Use random seed">
+            If either random or stratified sampling is selected, you may enter a fixed seed here
+            in order to get reproducible results upon re-execution. If you do not specify a seed,
+            a new random seed is taken for each execution. 
         </option>
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="MLlib Cluster Model">MLlib Cluster Model</inPort>
-        <inPort index="1" name="Hive query">Hive query</inPort>
-        <outPort index="0" name="Result">Result</outPort>
+        <inPort index="0" name="Spark RDD">Spark RDD to take the sample from.</inPort>
+        <outPort index="0" name="Sampled Spark RDD">Sample of the input Spark RDD.</outPort>
     </ports>
 </knimeNode>
