@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node.mllib;
+package com.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,6 +11,7 @@ import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.NaiveBayesJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 
