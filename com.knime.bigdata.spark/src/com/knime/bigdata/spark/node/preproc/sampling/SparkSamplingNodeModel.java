@@ -77,7 +77,7 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         if (inSpecs == null || inSpecs.length != 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
             throw new InvalidSettingsException("No input found");
         }
-        SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
+        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
         SparkSamplingNodeSettings.checkSettings(sparkSpec.getTableSpec(), m_settings);
         return new PortObjectSpec[] {sparkSpec};
     }
@@ -94,6 +94,7 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         exec.checkCanceled();
         exec.setMessage("Start Spark sampling job...");
         final String jobId = JobControler.startJob(context, SamplingJob.class.getCanonicalName(), paramInJson);
+        //TODO: Check that the result RDD is a new one. If not do not delete the result RDD on node reset!!!
         JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
         return new PortObject[] {new SparkDataPortObject(result)};
@@ -203,7 +204,7 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
                 SamplingJob.PARAM_SAMPLING_METHOD, samplingMethod.toString(),
                 SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
                 SamplingJob.PARAM_EXACT, aExact,
-                SamplingJob.PARAM_SEED, aSeed,
+                SamplingJob.PARAM_SEED, aSeed == null ? Long.valueOf(System.currentTimeMillis()) : aSeed,
                 SamplingJob.PARAM_FRACTION, fraction,
                 SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
             ParameterConstants.PARAM_OUTPUT, outputParams});

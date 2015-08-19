@@ -67,7 +67,7 @@ import javax.swing.border.Border;
 import org.knime.base.node.preproc.sample.SamplingNodeDialogPanel;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.NominalValue;
+import org.knime.core.data.DataValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -163,7 +163,7 @@ public class SparkSamplingNodeDialogPanel extends JPanel {
                 + "distribution in the class column.");
         m_stratifiedSampling.setHorizontalTextPosition(SwingConstants.RIGHT);
         m_classColumn =
-                new ColumnSelectionComboxBox((Border)null, NominalValue.class);
+                new ColumnSelectionComboxBox((Border)null, DataValue.class);
 
         m_stratifiedSampling.addItemListener(new ItemListener() {
             @Override

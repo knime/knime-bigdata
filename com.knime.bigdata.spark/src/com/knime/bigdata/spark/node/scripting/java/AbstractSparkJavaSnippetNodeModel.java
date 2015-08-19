@@ -259,6 +259,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
 
     private static String insertFieldValues(final SparkJavaSnippet snippet, final Map<String, FlowVariable> flowVars)
             throws BadLocationException {
+        //TODO: Provide the flow variables as key value map in the config and assign the values of the variable to
+        // their corresponding members in the Spark job class
         final GuardedDocument codeDoc = snippet.getDocument();
         // populate the system input flow variable fields with data
         final FlowVariableRepository flowVarRepo = new FlowVariableRepository(flowVars);

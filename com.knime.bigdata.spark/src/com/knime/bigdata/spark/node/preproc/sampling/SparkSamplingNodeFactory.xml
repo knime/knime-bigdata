@@ -6,7 +6,7 @@
     <fullDescription>
         <intro>
             This node extracts a sample (a bunch of rows) from the input data. The dialog enables you to specify the
-            sample size. The following options are available in the dialog:
+            sample size.
         </intro>
         <option name="Absolute">
             Specify the absolute number of rows in the sample. If there are less rows than specified here, all rows are
@@ -17,13 +17,13 @@
         </option>
         <option name="Take from top">This mode selects the top most rows of the input data.</option>
         <option name="Draw randomly">
-            Random sampling of all rows, you may optionally specify a fixed seed (see below).
+            Random sampling of all rows, you may optionally specify a fixed seed and adapt the sample with replacement setting (see below).
         </option>
         <option name="Stratified sampling">
             Check this button if you want 
             <a href="https://spark.apache.org/docs/1.2.0/mllib-statistics.html#stratified-sampling">stratified sampling</a>, 
             i.e. the distribution of values in the selected column is (approximately) retained in the output table. 
-            You may optionally specify a fixed seed (see below). 
+            You may optionally specify a fixed seed and adapt the exact sampling and sample with replacement setting (see below). 
         </option>
         <option name="Exact sampling">
             Exact sampling requires significant more resources than the per-stratum simple random sampling used in 
