@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -17,6 +18,14 @@ import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
+
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigRenderOptions;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Builder for Spark {@link StructType} objects.
@@ -361,6 +370,103 @@ public class StructTypeBuilder {
 
         return new StructTypeBuilder(fieldDescriptors);
     }
+    /**
+     * @param schema the {@link StructType} to convert
+     * @return the String representation of the {@link Config} object that contains the {@link StructType} info
+     * @see #fromConfigString(String)
+     */
+    public static String toConfigString(final StructType schema) {
+        return toConfigString(schema, ParameterConstants.PARAM_SCHEMA);
+    }
+    /**
+     * @param schema the {@link StructType} to convert
+     * @param parameterName the name of the config parameter
+     * @return the String representation of the {@link Config} object that contains the {@link StructType} info
+     * @see #fromConfigString(String, String)
+     */
+    public static String toConfigString(final StructType schema, final String parameterName) {
+        final Config config = StructTypeBuilder.toConfig(schema, parameterName);
+        final String configString = config.root().render(ConfigRenderOptions.concise());
+        return configString;
+    }
+
+    /**
+     * @param schemaString the config String that contains the {@link StructType} description
+     * @return the {@link StructType}
+     * @see #toConfigString(StructType)
+     */
+    public static StructType fromConfigString(final String schemaString) {
+        return fromConfigString(schemaString, ParameterConstants.PARAM_SCHEMA);
+    }
+    /**
+     * @param schemaString the config String that contains the {@link StructType} description
+     * @param parameterName the name of the schema parameter within the config string
+     * @return the {@link StructType}
+     * @see #toConfigString(StructType, String)
+     */
+    public static StructType fromConfigString(final String schemaString, final String parameterName) {
+        final Config schemaConfig = ConfigFactory.parseString(schemaString);
+        return fromConfig(schemaConfig);
+    }
+    /**
+     * @param conf the {@link Config} that contains the ConfigList that wraps the {@link StructField}s
+     * @return the {@link StructType}
+     * @see #toConfig(StructType)
+     */
+    public static StructType fromConfig(final Config conf) {
+        return fromConfig(conf, ParameterConstants.PARAM_SCHEMA);
+    }
+    /**
+     * @param conf the {@link Config} that contains the ConfigList that wraps the {@link StructField}s
+     * @param parameterName the name of the schema parameter within the {@link Config}
+     * @return the {@link StructType}
+     * @see #toConfig(StructType, String)
+     */
+    public static StructType fromConfig(final Config conf, final String parameterName) {
+        final ConfigList types = conf.getList(parameterName);
+        final StructField[] fields = new StructField[types.size()];
+        int f = 0;
+        for (ConfigValue v : types) {
+            final List<Object> dt = ((ConfigList)v).unwrapped();
+            DataType t;
+            try {
+                t = DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
+                fields[f++] =
+                    DataType.createStructField(dt.get(0).toString(), t, Boolean.parseBoolean(dt.get(2).toString()));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        final StructType resultSchema = DataType.createStructType(fields);
+        return resultSchema;
+    }
+    /**
+     * @param schema the {@link StructType} to convert
+     * @return {@link Config} representation of the input {@link StructType}
+     * @see #fromConfig(Config)
+     */
+    public static Config toConfig(final StructType schema) {
+        return toConfig(schema, ParameterConstants.PARAM_SCHEMA);
+    }
+    /**
+     * @param configName the name of the config
+     * @param schema the {@link StructType} to convert
+     * @return {@link Config} representation of the input {@link StructType}
+     * @see #fromConfig(Config, String)
+     */
+    public static Config toConfig(final StructType schema, final String configName) {
+        ArrayList<ArrayList<String>> fields = new ArrayList<>();
+        for (StructField field : schema.getFields()) {
+            ArrayList<String> f = new ArrayList<>();
+            f.add(field.getName());
+            f.add(StructTypeBuilder.getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
+            f.add("" + field.isNullable());
+            fields.add(f);
+        }
+        final Config config = ConfigFactory.empty().withValue(configName,
+            ConfigValueFactory.fromIterable(fields));
+        return config;
+    }
 
     @Nonnull
     private static List<DataTypeDescriptor> inferDataTypeDescriptors(@Nonnull final Row row)
@@ -426,5 +532,19 @@ public class StructTypeBuilder {
         }
 
         return DataType.createStructType(structFields);
+    }
+
+    /**
+     *
+     * @param aType
+     * @return Java primitive class of given data type
+     */
+    public static Class<?> getJavaTypeFromDataType(final DataType aType) {
+        for (Map.Entry<Class<?>, DataType> entry : DATA_TYPES_BY_CLASS.entrySet()) {
+            if (entry.getValue().getClass().equals(aType.getClass())) {
+                return entry.getKey();
+            }
+        }
+        return Object.class;
     }
 }

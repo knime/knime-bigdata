@@ -198,7 +198,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final StructType tableStructure = result.getTableStructType(tableName);
         if (tableStructure != null) {
-            final DataTableSpec resultSpec = SparkUtil.createTableSpec(tableStructure);
+            final DataTableSpec resultSpec = SparkUtil.toTableSpec(tableStructure);
             final SparkDataTable resultTable = new SparkDataTable(context, tableName, resultSpec);
             final SparkDataPortObject resultObject = new SparkDataPortObject(resultTable);
             return new PortObject[]{resultObject};
@@ -211,7 +211,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         @Nonnull final String aOutputTable) {
         final List<String> inputParams = new LinkedList<>();
         if (aInputTable1 != null) {
-            inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
+            inputParams.add(AbstractSparkJavaSnippet.PARAM_INPUT_TABLE_KEY1);
             inputParams.add(aInputTable1);
         }
         if (aInputTable2 != null) {
@@ -219,7 +219,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             inputParams.add(aInputTable2);
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParams.toArray(new String[0]),
-            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable}});
+            ParameterConstants.PARAM_OUTPUT,
+            new String[]{AbstractSparkJavaSnippet.PARAM_OUTPUT_TABLE_KEY, aOutputTable}});
     }
 
     private KnimeSparkJob addJob2Jar(final KNIMESparkContext context, final SparkJavaSnippet snippet)

@@ -21,10 +21,8 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,14 +30,11 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigRenderOptions;
 import com.typesafe.config.ConfigValue;
@@ -164,20 +159,6 @@ public class JobResult implements Serializable {
     }
 
     /**
-     *
-     * @param aType
-     * @return Java primitive class of given data type
-     */
-    public static Class<?> getJavaTypeFromDataType(final DataType aType) {
-        for (Map.Entry<Class<?>, DataType> entry : StructTypeBuilder.DATA_TYPES_BY_CLASS.entrySet()) {
-            if (entry.getValue().getClass().equals(aType.getClass())) {
-                return entry.getKey();
-            }
-        }
-        return Object.class;
-    }
-
-    /**
      * de-serialize a job result from a config / base-64 string
      *
      * @param aStringRepresentation
@@ -190,24 +171,9 @@ public class JobResult implements Serializable {
         final Map<String, StructType> m = new HashMap<>();
         ConfigObject c = config.getObject(TABLES_IDENTIFIER);
         for (Map.Entry<String, ConfigValue> entry : c.entrySet()) {
-            if (entry.getValue() instanceof ConfigList) {
-                ConfigList types = (ConfigList)entry.getValue();
-                StructField[] fields = new StructField[types.size()];
-                int f = 0;
-                for (ConfigValue v : types) {
-                    List<Object> dt = ((ConfigList)v).unwrapped();
-                    DataType t;
-                    try {
-                        t = StructTypeBuilder.DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
-                        fields[f++] =
-                            DataType.createStructField(dt.get(0).toString(), t,
-                                Boolean.parseBoolean(dt.get(2).toString()));
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                StructType structType = DataType.createStructType(fields);
-
+            final ConfigValue value = entry.getValue();
+            if (value != null && value.unwrapped() instanceof String) {
+                final StructType structType = StructTypeBuilder.fromConfigString((String)value.unwrapped());
                 m.put(stripQuotes(entry.getKey()), structType);
             } else {
                 m.put(stripQuotes(entry.getKey()), null);
@@ -237,20 +203,13 @@ public class JobResult implements Serializable {
         Config config =
             ConfigFactory.empty().withValue(MSG_IDENTIFIER, ConfigValueFactory.fromAnyRef(ensureQuotes(m_msg)));
 
-        Map<String, ArrayList<ArrayList<String>>> m = new HashMap<>();
+        final Map<String, String> m = new HashMap<>();
         for (Map.Entry<String, StructType> entry : m_tables.entrySet()) {
-            ArrayList<ArrayList<String>> fields = new ArrayList<>();
             final String key = ensureQuotes(entry.getKey());
             final StructType value = entry.getValue();
             if (value != null) {
-                for (StructField field : value.getFields()) {
-                    ArrayList<String> f = new ArrayList<>();
-                    f.add(field.getName());
-                    f.add(getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
-                    f.add("" + field.isNullable());
-                    fields.add(f);
-                }
-                m.put(key, fields);
+                final String structConfig = StructTypeBuilder.toConfigString(value);
+                m.put(key, structConfig);
             } else {
                 m.put(key, null);
             }

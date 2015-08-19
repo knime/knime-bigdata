@@ -21,17 +21,14 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.JavaSchemaRDD;
 import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 
@@ -44,10 +41,6 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigValue;
 
 /**
  * Converts the given named RDD into a Hive table.
@@ -95,25 +88,10 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "writing hive table...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
-        String schemaString = aConfig.getInputParameter(PARAM_DATA_SCHEMA);
-        Config schemaConfig = ConfigFactory.parseString(schemaString);
-        ConfigList types = schemaConfig.getList(ParameterConstants.PARAM_SCHEMA);
-        StructField[] fields = new StructField[types.size()];
-        int f = 0;
-        for (ConfigValue v : types) {
-            List<Object> dt = ((ConfigList)v).unwrapped();
-            DataType t;
-            try {
-                t = StructTypeBuilder.DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
-                fields[f++] =
-                    DataType.createStructField(dt.get(0).toString(), t, Boolean.parseBoolean(dt.get(2).toString()));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        final String schemaString = aConfig.getInputParameter(PARAM_DATA_SCHEMA);
+        final StructType resultSchema = StructTypeBuilder.fromConfigString(schemaString);
         final String hiveTableName = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE);
         try {
-            StructType resultSchema = DataType.createStructType(fields);
             final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
             final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, resultSchema);
             schemaPredictedData.saveAsTable(hiveTableName);
