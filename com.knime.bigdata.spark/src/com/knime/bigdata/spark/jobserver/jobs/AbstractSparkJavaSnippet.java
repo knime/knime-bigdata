@@ -80,14 +80,21 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
 
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
 
-    private static final String PARAM_INPUT_TABLE_KEY1 = PARAM_INPUT_TABLE;
+
+    /**
+     * first input table
+     */
+    public static final String PARAM_INPUT_TABLE_KEY1 = PARAM_INPUT_TABLE;
 
     /**
      * second input table
      */
     public static final String PARAM_INPUT_TABLE_KEY2 =  "InputTable2";
 
-    private static final String PARAM_OUTPUT_TABLE_KEY =  PARAM_RESULT_TABLE;
+    /**
+     * output table name
+     */
+    public static final String PARAM_OUTPUT_TABLE_KEY =  PARAM_RESULT_TABLE;
 
     /**
      * parse parameters
@@ -96,7 +103,7 @@ public abstract class AbstractSparkJavaSnippet extends KnimeSparkJob implements 
     public final SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
         if (!aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
+            msg = "Java Snippet output parameter '" + PARAM_OUTPUT_TABLE_KEY + "' missing.";
         }
         if (msg != null) {
             return ValidationResultConverter.invalid(msg);

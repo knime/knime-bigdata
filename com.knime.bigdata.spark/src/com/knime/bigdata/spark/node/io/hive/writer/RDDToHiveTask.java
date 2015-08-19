@@ -20,9 +20,6 @@
  */
 package com.knime.bigdata.spark.node.io.hive.writer;
 
-import java.util.ArrayList;
-
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.core.node.ExecutionMonitor;
 
@@ -32,12 +29,9 @@ import com.knime.bigdata.spark.jobserver.jobs.RDDToHiveJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigRenderOptions;
-import com.typesafe.config.ConfigValueFactory;
 
 
 /**
@@ -79,18 +73,7 @@ public class RDDToHiveTask {
     }
 
     private final String params2Json() {
-
-        ArrayList<ArrayList<String>> fields = new ArrayList<>();
-        for (StructField field : m_schema.getFields()) {
-            ArrayList<String> f = new ArrayList<>();
-            f.add(field.getName());
-            f.add(JobResult.getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
-            f.add("" + field.isNullable());
-            fields.add(f);
-        }
-        final Config config = ConfigFactory.empty().withValue(ParameterConstants.PARAM_SCHEMA,
-            ConfigValueFactory.fromIterable(fields));
-        final String schema = config.root().render(ConfigRenderOptions.concise());
+        final String schema = StructTypeBuilder.toConfigString(m_schema);
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, m_rdd.getID(),
             ParameterConstants.PARAM_SCHEMA, schema},

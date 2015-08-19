@@ -21,9 +21,11 @@
 package com.knime.bigdata.spark.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 import org.knime.base.pmml.translation.CompiledModel;
@@ -95,22 +97,6 @@ public final class SparkUtil {
     }
 
     /**
-     * @param tableStructure {@link StructType} that describes the columns
-     * @return the corresponding {@link DataTableSpec}
-     */
-    public static DataTableSpec createTableSpec(final StructType tableStructure) {
-        final List<DataColumnSpec> specs = new LinkedList<>();
-        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
-        for (final StructField field : tableStructure.getFields()) {
-            specCreator.setName(field.getName());
-            final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
-            specCreator.setType(typeConverter.getKNIMEType());
-            specs.add(specCreator.createSpec());
-        }
-        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
-    }
-
-    /**
      * @return the path to the standard KNIME job jar
      */
     public static String getJobJarPath() {
@@ -136,5 +122,36 @@ public final class SparkUtil {
             colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
         }
         return colIdxs;
+    }
+
+    /**
+     * @param spec {@link DataTableSpec} to convert
+     * @return the {@link StructType} representing the input {@link DataTableSpec}
+     */
+    public static StructType toStructType(final DataTableSpec spec) {
+        final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
+        for (final DataColumnSpec colSpec : spec) {
+            final SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
+            final StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
+            structFields.add(field);
+        }
+        final StructType schema = DataType.createStructType(structFields);
+        return schema;
+    }
+
+    /**
+     * @param schema {@link StructType} that describes the columns
+     * @return the corresponding {@link DataTableSpec}
+     */
+    public static DataTableSpec toTableSpec(final StructType schema) {
+        final List<DataColumnSpec> specs = new LinkedList<>();
+        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
+        for (final StructField field : schema.getFields()) {
+            specCreator.setName(field.getName());
+            final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
+            specCreator.setType(typeConverter.getKNIMEType());
+            specs.add(specCreator.createSpec());
+        }
+        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
     }
 }

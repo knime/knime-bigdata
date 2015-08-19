@@ -21,13 +21,8 @@
 package com.knime.bigdata.spark.node.io.hive.writer;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -50,8 +45,7 @@ import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
-import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
@@ -135,13 +129,7 @@ public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
         }
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
         final DataTableSpec spec = rdd.getTableSpec();
-        final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
-        for (final DataColumnSpec colSpec : spec) {
-            final SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
-            final StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
-            structFields.add(field);
-        }
-        final StructType schema = DataType.createStructType(structFields);
+        final StructType schema = SparkUtil.toStructType(spec);
         final RDDToHiveTask task = new RDDToHiveTask(rdd.getData(), tableName, schema);
         task.execute(exec);
         final DatabasePortObjectSpec resultSpec = createResultSpec(con.getSpec(), rdd.getTableSpec());
