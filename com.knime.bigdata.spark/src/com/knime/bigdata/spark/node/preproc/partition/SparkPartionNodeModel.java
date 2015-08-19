@@ -21,7 +21,9 @@
 package com.knime.bigdata.spark.node.preproc.partition;
 
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
@@ -45,6 +47,15 @@ public class SparkPartionNodeModel extends SparkSamplingNodeModel {
     public SparkPartionNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        PortObjectSpec[] result = super.configureInternal(inSpecs);
+        return new PortObjectSpec[] {result[0], result[0]};
     }
 
     /**
