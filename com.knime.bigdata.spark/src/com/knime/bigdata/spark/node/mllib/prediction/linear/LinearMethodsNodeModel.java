@@ -42,7 +42,7 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -122,7 +122,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
-        if (mapSpec != null && !SparkStringMapperNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
             throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
         }
         final DataTableSpec tableSpec = spec.getTableSpec();
