@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +63,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Type;
-import org.knime.core.util.FileUtil;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -173,6 +174,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             table1Name = table1.getID();
         } else {
             table1 = null;
+            //this is a source node that uses a new SparkContext
             context = KnimeContext.getSparkContext();
             table1Name = null;
         }
@@ -227,28 +229,30 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             throws Exception {
         final String code = insertFieldValues(m_snippet, getAvailableInputFlowVariables());
         final SparkJobCompiler compiler = new SparkJobCompiler();
-        String newClassName = compiler.generateUniqueClassName(CLASS_PREFIX);
+        final String newClassName = compiler.generateUniqueClassName(CLASS_PREFIX);
         final String newCode = code.replace("class " + m_snippet.getClassName() + " ", "class " + newClassName + " ");
         final SourceCompiler compiledJob = compiler.compileAndCreateInstance(newClassName, newCode);
         final Map<String, byte[]> classMap = compiledJob.getBytecode();
         m_classNames = classMap.keySet().toArray(new String[0]);
         synchronized (SNIPPET_FILE) {
-            //TODO: We always also use the potentially out dated standard job classes if the snippet jar file exists
-            //It would be better if we would keep the snippet jars and job jar separately and always merge the two jars
-            //instead of reusing (copying) the same mixed jar over and over
             try {
-                if (!SNIPPET_FILE.exists()) {
-                    //create the standard job jar for this user
-                    final File jobsJar = new File(SparkUtil.getJobJarPath());
-                    FileUtil.copy(jobsJar, SNIPPET_FILE);
-                }
-                //create a new file that will contain all previous classes plus the new snippet classes
                 final File tempFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
-                JarPacker.add2Jar(SNIPPET_FILE.getPath(), tempFile.getPath(), PACKAGE_PATH, classMap);
+                if (!SNIPPET_FILE.exists()) {
+                    //create a new jar with the new snippet classes
+                    JarPacker.createJar(tempFile, PACKAGE_PATH, classMap);
+                } else {
+                    //create a new file that will contain all previous classes plus the new snippet classes
+                    JarPacker.add2Jar(SNIPPET_FILE.getPath(), tempFile.getPath(), PACKAGE_PATH, classMap);
+                }
                 //replace the old java snippet jar with the new one
-                SNIPPET_FILE.delete();
-                tempFile.renameTo(SNIPPET_FILE);
-                JobControler.uploadJobJar(context, SNIPPET_FILE.getPath());
+                Files.move(tempFile.toPath(), SNIPPET_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                //merge the java snippet file and the regular KNIME job classes
+                final File mergedFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
+                mergedFile.deleteOnExit();
+                JarPacker.mergeJars(SNIPPET_FILE.getPath(), SparkUtil.getJobJarPath(), mergedFile);
+                //upload the new job jar to the server
+                JobControler.uploadJobJar(context, mergedFile.getPath());
+                mergedFile.delete();
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
                 throw new GenericKnimeSparkException(e);
