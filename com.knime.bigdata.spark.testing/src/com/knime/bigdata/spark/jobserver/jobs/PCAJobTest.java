@@ -16,7 +16,7 @@ import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.mllib.PCATaskTest;
+import com.knime.bigdata.spark.node.mllib.reduction.pca.PCATaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
