@@ -56,15 +56,12 @@ public class KnimeContext {
         //query server for existing context and re-use if there is one
         //and it is (one of) the current user's context(s)
         try {
-            final JsonArray contexts = RestClient.toJSONArray(defaultContext, CONTEXTS_PATH);
-            if (contexts.size() > 0) {
-                for (int i = 0; i < contexts.size(); i++) {
-                    if (contexts.getString(i).equals(KNIMEConfigContainer.CONTEXT_NAME)) {
-                        return defaultContext;
-                    }
+            synchronized (LOGGER) {
+                if (sparkContextExists(defaultContext)) {
+                    return defaultContext;
                 }
+                return createSparkContext(defaultContext);
             }
-            return createSparkContext();
         } catch (ProcessingException e) {
             final String msg = "Could not establish connection to Spark Jobserver. Exception: " + e.getMessage();
             LOGGER.error(msg, e);
@@ -97,18 +94,17 @@ public class KnimeContext {
     /**
      * create a new spark context (name prefix can be specified in the application.conf file), the postfix is number
      * between 0 and 10000
+     * @param aContextContainer the {@link KNIMESparkContext} to create
      *
      * @return context container
      * @throws GenericKnimeSparkException
      */
-    private static KNIMESparkContext createSparkContext() throws GenericKnimeSparkException {
-
-        KNIMESparkContext contextContainer = new KNIMESparkContext();
-
+    private static KNIMESparkContext createSparkContext(final KNIMESparkContext aContextContainer)
+            throws GenericKnimeSparkException {
         //upload jar with our extensions
         final String jobJarPath = getJobJarPath();
         //TODO: Upload the static jobs jar only if not exists
-        JobControler.uploadJobJar(contextContainer, jobJarPath);
+        JobControler.uploadJobJar(aContextContainer, jobJarPath);
 
         // curl command would be:
         // curl -d ""
@@ -116,9 +112,9 @@ public class KnimeContext {
         //use this to add specific extensions:
         //"dependent-jar-uris", "file:///path-on-server.jar"
         final Response response =
-            RestClient.post(contextContainer, CONTEXTS_PATH + "/" + contextContainer.getContextName(),
-                new String[]{"num-cpu-cores", "" + contextContainer.getNumCpuCores(), "memory-per-node",
-                    contextContainer.getMemPerNode(),
+            RestClient.post(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName(),
+                new String[]{"num-cpu-cores", "" + aContextContainer.getNumCpuCores(), "memory-per-node",
+                    aContextContainer.getMemPerNode(),
                     //TODO - make this configurable
                     "spark.yarn.executor.memoryOverhead", "1000"}, Entity.text(""));
 
@@ -128,7 +124,7 @@ public class KnimeContext {
         // we don't care about the response as long as it is "OK"
         RestClient.checkStatus(response, "Failed to create context!", Status.OK);
 
-        return contextContainer;
+        return aContextContainer;
     }
 
     private static String getJobJarPath() {
