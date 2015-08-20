@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author koetter
  */
-public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperNodeModel> {
+public class SparkCategory2NumberNodeFactory extends NodeFactory<SparkCategory2NumberNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkStringMapperNodeModel createNodeModel() {
-        return new SparkStringMapperNodeModel();
+    public SparkCategory2NumberNodeModel createNodeModel() {
+        return new SparkCategory2NumberNodeModel();
     }
 
     /**
@@ -50,7 +50,7 @@ public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperN
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkStringMapperNodeModel> createNodeView(final int viewIndex, final SparkStringMapperNodeModel nodeModel) {
+    public NodeView<SparkCategory2NumberNodeModel> createNodeView(final int viewIndex, final SparkCategory2NumberNodeModel nodeModel) {
         return null;
     }
 
@@ -67,7 +67,7 @@ public class SparkStringMapperNodeFactory extends NodeFactory<SparkStringMapperN
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkStringMapperNodeDialog();
+        return new SparkCategory2NumberNodeDialog();
     }
 
 }

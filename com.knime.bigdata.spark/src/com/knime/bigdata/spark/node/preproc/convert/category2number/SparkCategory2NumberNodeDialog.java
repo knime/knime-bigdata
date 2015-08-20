@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -43,17 +43,17 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkStringMapperNodeDialog extends NodeDialogPane {
+class SparkCategory2NumberNodeDialog extends NodeDialogPane {
 
     private final DialogComponentColumnFilter2 m_cols =
-    new DialogComponentColumnFilter2(SparkStringMapperNodeModel.createColumnsModel(), 0);
+    new DialogComponentColumnFilter2(SparkCategory2NumberNodeModel.createColumnsModel(), 0);
 
     private final String[] mappings = {MappingType.GLOBAL.toString(), MappingType.COLUMN.toString(), MappingType.BINARY.toString()};
 
     private final DialogComponentStringSelection m_mappingType = new DialogComponentStringSelection(
-        SparkStringMapperNodeModel.createMappingTypeModel(), "Mapping type: ", mappings);
+        SparkCategory2NumberNodeModel.createMappingTypeModel(), "Mapping type: ", mappings);
 
-    SparkStringMapperNodeDialog() {
+    SparkCategory2NumberNodeDialog() {
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints gc = new GridBagConstraints();
         gc.gridx = 0;

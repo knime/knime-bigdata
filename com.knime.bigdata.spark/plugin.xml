@@ -154,8 +154,8 @@
       <node
             category-path="/labs/spark/column/convert"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory">
       </node>
       <node
             category-path="/labs/spark/column/convert"

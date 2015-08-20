@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.stringmapper;
+package com.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +78,7 @@ import com.knime.bigdata.spark.util.SparkIDs;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
+public class SparkCategory2NumberNodeModel extends AbstractSparkNodeModel {
 
     private static final DataType MAP_TYPE = DoubleCell.TYPE;
 
@@ -91,7 +91,7 @@ public class SparkStringMapperNodeModel extends AbstractSparkNodeModel {
      */
     public static final DataTableSpec MAP_SPEC = createMapSpec();
 
-    SparkStringMapperNodeModel() {
+    SparkCategory2NumberNodeModel() {
         super(new PortType[] {SparkDataPortObject.TYPE},
             new PortType[] {SparkDataPortObject.TYPE, PMMLPortObject.TYPE});
     }
