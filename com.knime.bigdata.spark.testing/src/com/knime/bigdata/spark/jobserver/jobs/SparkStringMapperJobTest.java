@@ -10,7 +10,7 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.preproc.convert.stringmapper.ValueConverterTask;
+import com.knime.bigdata.spark.node.preproc.convert.category2number.ValueConverterTask;
 import com.typesafe.config.ConfigFactory;
 
 /**
