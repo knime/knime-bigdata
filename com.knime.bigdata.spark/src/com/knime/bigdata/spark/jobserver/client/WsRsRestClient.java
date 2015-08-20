@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.Authenticator;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -12,6 +13,7 @@ import javax.annotation.Nullable;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.net.ssl.HostnameVerifier;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -20,6 +22,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.knime.core.node.NodeLogger;
 
@@ -35,15 +38,34 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 class WsRsRestClient implements IRestClient {
     private final static NodeLogger LOGGER = NodeLogger.getLogger(WsRsRestClient.class.getName());
 
-    private static final Client client = ClientBuilder.newClient();
+    private static HostnameVerifier getHostnameVerifier() {
+        return new HostnameVerifier() {
+            @Override
+            public boolean verify(final String hostname, final javax.net.ssl.SSLSession sslSession) {
+                return true;
+            }
+        };
+    }
+
+    private static final Client client = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
+        .hostnameVerifier(getHostnameVerifier()).build();
 
     static {
+        //disable loop-backs that ask for user login
+        // TODO - verify that this does not conflict with other KNIME components...
+        java.net.Authenticator.setDefault(new Authenticator() {
+        });
         client.register(MultiPartFeature.class);
     }
 
-    private static WebTarget getTarget(final KNIMESparkContext aContextContainer, final String aPath, final String aQuery, final String aFragment)
-        throws URISyntaxException {
-        WebTarget target = client.target(new URI("http", null, aContextContainer.getHost(), aContextContainer.getPort(), aPath, aQuery, aFragment));
+    private static WebTarget getTarget(final KNIMESparkContext aContextContainer, final String aPath,
+        final String aQuery, final String aFragment) throws URISyntaxException {
+        WebTarget target =
+            client.register(
+                HttpAuthenticationFeature.basic(aContextContainer.getUser(),
+                    String.valueOf(aContextContainer.getPassword()))).target(
+                new URI("https", null, aContextContainer.getHost(), aContextContainer.getPort(), aPath, aQuery,
+                    aFragment));
         return target;
     }
 
@@ -52,7 +74,7 @@ class WsRsRestClient implements IRestClient {
      */
     @Override
     public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
-            throws GenericKnimeSparkException {
+        throws GenericKnimeSparkException {
         final Status s = Status.fromStatusCode(response.getStatus());
         if (s == Status.ACCEPTED || s == Status.OK) {
             return;
@@ -79,24 +101,23 @@ class WsRsRestClient implements IRestClient {
         }
         switch (s.getStatusCode()) {
             case 400:
-                throw new GenericKnimeSparkException(
-                    "Executing Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
-                    + ". This might be caused by missing or incorrect job parameters."
+                throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. Reason: "
+                    + s.getReasonPhrase() + ". This might be caused by missing or incorrect job parameters."
                     + " For more details see the KNIME log file.");
             case 500:
-                throw new GenericKnimeSparkException(
-                    "Executing Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
+                throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. Reason: "
+                    + s.getReasonPhrase()
                     + ". Possibly because the class file with job info was not uploaded to the server."
                     + " For more details see the KNIME log file.");
             case 503:
                 LOGGER.info("Possibly to many parallel jobs. To allow more parallel jobs increase the "
-                        + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
-                throw new GenericKnimeSparkException(
-                    "Execution Spark job '" + className + "' failed. Reason: " + s.getReasonPhrase()
+                    + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
+                throw new GenericKnimeSparkException("Execution Spark job '" + className + "' failed. Reason: "
+                    + s.getReasonPhrase()
                     + ". Possibly because of too many parallel Spark jobs. For more details see the KNIME log file.");
             default:
-                throw new GenericKnimeSparkException("Executing Spark job '" + className
-                    + "' failed. Reason: " + s.getReasonPhrase() + ". Error code: " + s.getStatusCode()
+                throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. Reason: "
+                    + s.getReasonPhrase() + ". Error code: " + s.getStatusCode()
                     + ". For more details see the KNIME log file.");
         }
     }
@@ -127,20 +148,20 @@ class WsRsRestClient implements IRestClient {
         LOGGER.error(logmsg.toString());
         switch (s.getStatusCode()) {
             case 400:
-                throw new GenericKnimeSparkException(
-                    "Executing Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                throw new GenericKnimeSparkException("Executing Spark request failed. Error: " + aErrorMsg
+                    + ". Reason: " + s.getReasonPhrase()
                     + ". This might be caused by missing or incorrect job parameters."
                     + ". For more details see the KNIME log file.");
             case 500:
-                throw new GenericKnimeSparkException(
-                    "Executing Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                throw new GenericKnimeSparkException("Executing Spark request failed. Error: " + aErrorMsg
+                    + ". Reason: " + s.getReasonPhrase()
                     + ". Possibly because the class file with job info was not uploaded to the server."
                     + " For more details see the KNIME log file.");
             case 503:
                 LOGGER.info("Possibly to many parallel jobs. To allow more parallel jobs increase the "
-                        + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
-                throw new GenericKnimeSparkException(
-                    "Execution Spark request failed. Error: " + aErrorMsg + ". Reason: " + s.getReasonPhrase()
+                    + "max-jobs-per-context parameter in the environment.conf file of your Spark jobserver.");
+                throw new GenericKnimeSparkException("Execution Spark request failed. Error: " + aErrorMsg
+                    + ". Reason: " + s.getReasonPhrase()
                     + ". Possibly because of too many parallel Spark jobs. For more details see the KNIME log file.");
             default:
                 throw new GenericKnimeSparkException("Executing Spark request failed. Error: " + aErrorMsg
@@ -151,13 +172,14 @@ class WsRsRestClient implements IRestClient {
 
     /**
      * create the invocation builder for this REST client
+     *
      * @param aPath invocation path
      * @param aParams optional parameters
      * @return builder
      * @throws GenericKnimeSparkException
      */
-    private Invocation.Builder getInvocationBuilder(final KNIMESparkContext aContextContainer, final String aPath, @Nullable final String[] aParams)
-        throws GenericKnimeSparkException {
+    private Invocation.Builder getInvocationBuilder(final KNIMESparkContext aContextContainer, final String aPath,
+        @Nullable final String[] aParams) throws GenericKnimeSparkException {
         WebTarget target;
         try {
             target = getTarget(aContextContainer, aPath, null, null);
@@ -175,41 +197,46 @@ class WsRsRestClient implements IRestClient {
     }
 
     @Override
-    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
+    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs,
+        final Entity<T> aEntity) throws GenericKnimeSparkException {
         Invocation.Builder builder = getInvocationBuilder(aContextContainer, aPath, aArgs);
         return builder.post(aEntity);
     }
 
     @Override
-    public Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
+    public Response delete(final KNIMESparkContext aContextContainer, final String aPath)
+        throws GenericKnimeSparkException {
         Invocation.Builder builder = getInvocationBuilder(aContextContainer, aPath, null);
         return builder.buildDelete().invoke();
     }
 
     /**
      * send the given type of command to the REST server and convert the result to a JSon array
+     *
      * @param aType
      * @return JSonArray with result
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
-        Response response = builder.get();
+    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
+        final Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
+        final Response response = builder.get();
         return JsonUtils.toJsonArray(responseToString(response));
     }
 
-
     /**
      * send the given type of command to the REST server and convert the result to a JSon object
+     *
      * @param aType
      * @return JsonObject with result
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
-        Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
-        Response response = builder.get();
+    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
+        final Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
+        final Response response = builder.get();
         return Json.createReader(new StringReader(responseToString(response))).readObject();
     }
 
@@ -232,6 +259,7 @@ class WsRsRestClient implements IRestClient {
 
     /**
      * return the string value of the given field / sub-field combination from the given response
+     *
      * @param response
      * @param aField
      * @param aSubField

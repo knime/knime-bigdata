@@ -43,6 +43,8 @@ public class ContextSettings {
 
     private final SettingsModelString m_user = createUserModel();
 
+    private final SettingsModelString m_password = createPasswordModel();
+
     private final SettingsModelString m_contextName = createIDModel();
 
     private final SettingsModelInteger m_noOfCores = createNoOfCoresModel();
@@ -66,10 +68,17 @@ public class ContextSettings {
     }
 
     /**
-     * @return the memory model
+     * @return the user model
      */
     static  SettingsModelString createUserModel() {
         return new SettingsModelString("user", KNIMEConfigContainer.m_config.getString("spark.userName"));
+    }
+
+    /**
+     * @return the user model
+     */
+    static  SettingsModelString createPasswordModel() {
+        return new SettingsModelString("password", KNIMEConfigContainer.m_config.getString("spark.password"));
     }
 
     /**
@@ -113,6 +122,13 @@ public class ContextSettings {
      */
     public String getUser() {
         return m_user.getStringValue();
+    }
+
+    /**
+     * @return the password
+     */
+    public char[] getPassword() {
+        return m_password.getStringValue().toCharArray();
     }
 
     /**
@@ -169,7 +185,7 @@ public class ContextSettings {
      * @return the KNIMESparkContext object with the specified settings
      */
     public KNIMESparkContext createContext() {
-        return new KNIMESparkContext(getHost(), getPort(), getUser(),getContextName(), getNoOfCores(), getMemory());
+        return new KNIMESparkContext(getHost(), getPort(), getUser(), getPassword(), getContextName(), getNoOfCores(), getMemory());
     }
 
     /**
