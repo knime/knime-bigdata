@@ -36,6 +36,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
@@ -95,7 +96,13 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         exec.setMessage("Start Spark sampling job...");
         final String jobId = JobControler.startJob(context, SamplingJob.class.getCanonicalName(), paramInJson);
         //TODO: Check that the result RDD is a new one. If not do not delete the result RDD on node reset!!!
-        JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final JobResult jobResult = JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final Boolean successful = (Boolean)jobResult.getObjectResult();
+        if (!successful.booleanValue()) {
+            //if the sampling failed the job returns the input RDD as output RDD so we shouldn't delete it on node reset
+            setWarningMessage("Sampling failed.");
+            setDeleteOnReset(false);
+        }
         final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
         return new PortObject[] {new SparkDataPortObject(result)};
     }

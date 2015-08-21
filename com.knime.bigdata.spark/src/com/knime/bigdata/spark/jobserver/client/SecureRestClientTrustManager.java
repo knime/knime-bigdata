@@ -30,6 +30,8 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.X509TrustManager;
 
 /**
+ * Accepts all servers independent of their certificates.
+ * This is ok since the server is defined by the user in the preferences.
  * @author <a href="http://bhaveshthaker.com/">Bhavesh Thaker</a>
  *
  */

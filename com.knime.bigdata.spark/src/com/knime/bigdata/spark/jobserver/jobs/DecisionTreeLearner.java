@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -71,12 +70,15 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * maxDepth - Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf
      * nodes. (suggested value: 5)
      */
-    private static final String PARAM_MAX_DEPTH = ParameterConstants.PARAM_MAX_DEPTH;
+    public static final String PARAM_MAX_DEPTH = ParameterConstants.PARAM_MAX_DEPTH;
 
     /**
      * maxBins - maximum number of bins used for splitting features (suggested value: 32)
      */
-    private static final String PARAM_MAX_BINS = ParameterConstants.PARAM_MAX_BINS;
+    public static final String PARAM_MAX_BINS = ParameterConstants.PARAM_MAX_BINS;
+
+    /**Number of classes.**/
+    public static final String PARAM_NO_OF_CLASSES = "NumberOfClasses";
 
     private final static Logger LOGGER = Logger.getLogger(DecisionTreeLearner.class.getName());
 
@@ -163,14 +165,21 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * @param aConfig
      * @param aInputData - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
      * @return DecisionTreeModel
+     * @throws GenericKnimeSparkException
      */
     private DecisionTreeModel execute(final SparkContext aContext, final JobConfig aConfig,
-        final JavaRDD<LabeledPoint> aInputData) {
+        final JavaRDD<LabeledPoint> aInputData) throws GenericKnimeSparkException {
         aInputData.cache();
 
+        final Map<Integer, Integer> nominalFeatureInfo =
+                SupervisedLearnerUtils.extractNominalFeatureInfo(aConfig).getMap();
         final Long numClasses;
-        final Map<Integer, Integer> nominalFeatureInfo = new HashMap<>();
-        numClasses = SupervisedLearnerUtils.extractFeatureInfo(aConfig, this, nominalFeatureInfo);
+        if (aConfig.hasInputParameter(PARAM_NO_OF_CLASSES)) {
+            numClasses = aConfig.getInputParameter(PARAM_NO_OF_CLASSES, Long.class);
+        } else {
+            //TODO: Get number of classes from the input data
+            numClasses = new Long(2);
+        }
 
         final int maxDepth = aConfig.getInputParameter(PARAM_MAX_DEPTH, Integer.class);
         final int maxBins = aConfig.getInputParameter(PARAM_MAX_BINS, Integer.class);
@@ -182,7 +191,6 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         for (Entry<Integer, Integer> entry : nominalFeatureInfo.entrySet()) {
             LOGGER.log(Level.FINE, "Feature[" + entry.getKey() + "] has " + entry.getValue() + " distinct values.");
         }
-        // Cluster the data into m_noOfCluster classes using KMeans
         return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo, impurity, maxDepth,
             maxBins);
     }

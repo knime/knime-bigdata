@@ -117,7 +117,7 @@ public class JsonUtils {
         try {
             return Json.createReader(new StringReader(aJsonArrayString)).readArray();
         } catch (JsonParsingException e) {
-            throw new GenericKnimeSparkException("Failed to parse server response: " + aJsonArrayString);
+            throw new GenericKnimeSparkException("Failed to parse server response: " + aJsonArrayString, e);
         }
     }
 }

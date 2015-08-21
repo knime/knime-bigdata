@@ -184,8 +184,12 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
                 "Storing sample result data under key: " + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
         }
         addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), samples);
-
-        return JobResult.emptyJobResult().withMessage("OK");
+        final boolean successfull = !samples.equals(rowRDD);
+        if (!successfull) {
+            LOGGER.log(Level.WARNING,
+                "Return input RDD as sample RDD.");
+        }
+        return JobResult.emptyJobResult().withObjectResult(Boolean.valueOf(successfull));
     }
 
     /**

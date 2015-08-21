@@ -8,6 +8,8 @@ import java.io.StringReader;
 import java.net.Authenticator;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.Nullable;
 import javax.json.Json;
@@ -47,25 +49,34 @@ class WsRsRestClient implements IRestClient {
         };
     }
 
-    private static final Client client = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
-        .hostnameVerifier(getHostnameVerifier()).build();
+    /**Access only via getClient() method!**/
+    private static Client CLIENT = null;
 
     static {
         //disable loop-backs that ask for user login
         // TODO - verify that this does not conflict with other KNIME components...
-        java.net.Authenticator.setDefault(new Authenticator() {
-        });
-        client.register(MultiPartFeature.class);
+        java.net.Authenticator.setDefault(new Authenticator() {});
+    }
+
+    private static Client getClient() throws KeyManagementException, NoSuchAlgorithmException {
+        if (CLIENT == null) {
+            CLIENT = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
+            .hostnameVerifier(getHostnameVerifier()).build();
+            CLIENT.register(MultiPartFeature.class);
+        }
+        return CLIENT;
     }
 
     private static WebTarget getTarget(final KNIMESparkContext aContextContainer, final String aPath,
-        final String aQuery, final String aFragment) throws URISyntaxException {
-        WebTarget target =
-            client.register(
-                HttpAuthenticationFeature.basic(aContextContainer.getUser(),
-                    String.valueOf(aContextContainer.getPassword()))).target(
-                new URI("https", null, aContextContainer.getHost(), aContextContainer.getPort(), aPath, aQuery,
-                    aFragment));
+        final String aQuery, final String aFragment)
+                throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException {
+        final Client client = getClient();
+        if (aContextContainer.getUser() != null && aContextContainer.getPassword() != null) {
+            client.register(HttpAuthenticationFeature.basic(aContextContainer.getUser(),
+                    String.valueOf(aContextContainer.getPassword())));
+        }
+        WebTarget target = client.target(new URI(aContextContainer.getProtocol(), null, aContextContainer.getHost(),
+                    aContextContainer.getPort(), aPath, aQuery, aFragment));
         return target;
     }
 
@@ -183,7 +194,7 @@ class WsRsRestClient implements IRestClient {
         WebTarget target;
         try {
             target = getTarget(aContextContainer, aPath, null, null);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw new GenericKnimeSparkException(e);
         }

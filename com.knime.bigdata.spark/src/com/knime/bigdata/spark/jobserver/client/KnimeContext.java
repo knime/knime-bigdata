@@ -1,6 +1,7 @@
 package com.knime.bigdata.spark.jobserver.client;
 
 import java.io.File;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -63,11 +64,16 @@ public class KnimeContext {
                 return createSparkContext(defaultContext);
             }
         } catch (ProcessingException e) {
-            final String msg = "Could not establish connection to Spark Jobserver. Exception: " + e.getMessage();
+            final StringBuilder buf = new StringBuilder("Could not establish connection to Spark Jobserver.");
+            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                buf.append(" Error: '" + e.getCause().getMessage() + "' possibly caused by incompatible ssl settings.");
+            } else {
+                buf.append(" Error: " + e.getMessage());
+            }
+            final String msg = buf.toString();
             LOGGER.error(msg, e);
             throw new GenericKnimeSparkException(msg);
         }
-
     }
 
     /**

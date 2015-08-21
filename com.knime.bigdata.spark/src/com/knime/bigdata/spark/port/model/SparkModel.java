@@ -50,6 +50,7 @@ public class SparkModel <M extends Serializable> {
 
     private static final String MODEL_ENTRY = "Model";
     private final M m_model;
+    /**DataTableSpec of the table used to learn the model including the class column name.*/
     private final DataTableSpec m_tableSpec;
     private final String m_classColumnName;
     private final SparkModelInterpreter<SparkModel<M>> m_interpreter;
@@ -60,7 +61,7 @@ public class SparkModel <M extends Serializable> {
      * @param interperter the {@link SparkModelInterpreter}
      * @param origSpec the {@link DataTableSpec} of the original input table
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
-     * @param featureColNames the names of the feature columns
+     * @param featureColNames the names of the feature columns in the order they where used when learning the model
      */
     public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec origSpec, final String classColName, final List<String> featureColNames) {
@@ -72,7 +73,7 @@ public class SparkModel <M extends Serializable> {
      * @param interperter the {@link SparkModelInterpreter}
      * @param origSpec the {@link DataTableSpec} of the original input table
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
-     * @param featureColNames the names of the feature columns
+     * @param featureColNames the names of the feature columns in the order they where used when learning the model
      */
     public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec origSpec, final String classColName, final String... featureColNames) {
