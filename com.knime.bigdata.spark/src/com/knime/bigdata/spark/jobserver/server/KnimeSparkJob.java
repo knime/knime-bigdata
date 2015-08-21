@@ -1,5 +1,15 @@
 package com.knime.bigdata.spark.jobserver.server;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Appender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.ErrorHandler;
+import org.apache.log4j.spi.Filter;
+import org.apache.log4j.spi.LoggingEvent;
 import org.apache.spark.SparkContext;
 
 import spark.jobserver.SparkJobValidation;
@@ -24,14 +34,92 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
      */
     public static final String PARAM_RESULT_TABLE = "ResultTable";
 
+    final List<String[]> m_severe = new ArrayList<>();
+
+    final List<String[]> m_warn = new ArrayList<>();
+
+    private final Appender appender = new Appender() {
+
+        @Override
+        public void setName(final String name) {
+        }
+
+        @Override
+        public void setLayout(final Layout layout) {
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler errorHandler) {
+        }
+
+        @Override
+        public boolean requiresLayout() {
+            return false;
+        }
+
+        @Override
+        public String getName() {
+            return "KnimeJobLogger";
+        }
+
+        @Override
+        public Layout getLayout() {
+            return null;
+        }
+
+        @Override
+        public Filter getFilter() {
+            return null;
+        }
+
+        @Override
+        public ErrorHandler getErrorHandler() {
+            return null;
+        }
+
+        @Override
+        public void doAppend(final LoggingEvent event) {
+            if (event != null) {
+                //System.err.println("logging request for: " + event.getLevel() + ": " + event.getMessage());
+
+                if (event.getLevel() == Level.ERROR || event.getLevel() == Level.FATAL) {
+                    m_severe.add(new String[] {event.getLoggerName() , event.getMessage().toString()});
+                }
+                if (event.getLevel() == Level.WARN) {
+                    m_warn.add(new String[] {event.getLoggerName() , event.getMessage().toString()});
+                }
+            }
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public void clearFilters() {
+        }
+
+        @Override
+        public void addFilter(final Filter newFilter) {
+        }
+    };
+
     @Override
     public Object runJob(final Object aSparkContext, final Config aConfig) {
+        final Logger ROOT_LOGGER = Logger.getRootLogger();
+        ROOT_LOGGER.addAppender(appender);
+        JobResult res;
         try {
-            return runJobWithContext((SparkContext)aSparkContext, new JobConfig(aConfig));
+            res = runJobWithContext((SparkContext)aSparkContext, new JobConfig(aConfig));
         } catch (Throwable t) {
             t.printStackTrace();
-            return JobResult.emptyJobResult().withMessage(t.getMessage()).withException(t);
+            res = JobResult.emptyJobResult().withMessage(t.getMessage()).withException(t);
         }
+        res.addWarnings(m_warn);
+        res.addErrors(m_severe);
+
+        ROOT_LOGGER.removeAppender(appender);
+        return res;
     }
 
     @Override
