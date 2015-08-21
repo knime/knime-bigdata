@@ -21,8 +21,10 @@
 package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,6 +69,10 @@ public class JobResult implements Serializable {
 
     private static final String STATUS_IDENTIFIER = "status";
 
+    private static final String WARNING_IDENTIFIER = "warn";
+
+    private static final String ERROR_IDENTIFIER = "error";
+
     /**
      *
      */
@@ -88,6 +94,10 @@ public class JobResult implements Serializable {
     private final Serializable m_object;
 
     private final boolean m_isError;
+
+    private final ArrayList<String[]> m_warn = new ArrayList<>();
+
+    private final ArrayList<String[]> m_error = new ArrayList<>();
 
     private JobResult(final String aMsg, final Map<String, StructType> aTables, final Serializable aObjectResult) {
         this(aMsg, aTables, aObjectResult, null);
@@ -164,6 +174,7 @@ public class JobResult implements Serializable {
      * @param aStringRepresentation
      * @return de-serialized job result from given base-64 string
      */
+    @SuppressWarnings("unchecked")
     public static JobResult fromBase64String(@Nonnull final String aStringRepresentation) {
         Config config = ConfigFactory.parseString(aStringRepresentation);
         final String msg = config.getString(MSG_IDENTIFIER);
@@ -179,19 +190,28 @@ public class JobResult implements Serializable {
                 m.put(stripQuotes(entry.getKey()), null);
             }
         }
+        final List<String[]> warn = new ArrayList<>();
+        final List<String[]> error = new ArrayList<>();
         try {
+            final JobConfig jobConfig = new JobConfig(config);
             if (isError) {
                 return new JobResult(msg, Collections.unmodifiableMap(m), null,
-                    (String)(new JobConfig(config).decodeFromParameter(OBJECT_IDENTIFIER)));
+                    (String)(jobConfig.decodeFromParameter(OBJECT_IDENTIFIER)));
             }
             if (config.hasPath(OBJECT_IDENTIFIER)) {
                 return new JobResult(msg, Collections.unmodifiableMap(m),
-                    (Serializable)(new JobConfig(config).decodeFromParameter(OBJECT_IDENTIFIER)));
+                    (Serializable)(jobConfig.decodeFromParameter(OBJECT_IDENTIFIER)));
             }
+            warn.addAll((List<String[]>)jobConfig.decodeFromParameter(WARNING_IDENTIFIER));
+            error.addAll((List<String[]>)jobConfig.decodeFromParameter(ERROR_IDENTIFIER));
+
         } catch (GenericKnimeSparkException e) {
             return JobResult.emptyJobResult().withMessage(msg).withException(e);
         }
-        return new JobResult(msg, Collections.unmodifiableMap(m), null);
+        JobResult res = new JobResult(msg, Collections.unmodifiableMap(m), null);
+        res.addErrors(error);
+        res.addWarnings(warn);
+        return res;
     }
 
     /**
@@ -218,11 +238,22 @@ public class JobResult implements Serializable {
         config = config.withValue(STATUS_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_isError));
         if (m_object != null) {
             try {
-                config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_object)));
+                config =
+                    config.withValue(OBJECT_IDENTIFIER,
+                        ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_object)));
             } catch (GenericKnimeSparkException e) {
                 e.printStackTrace();
-                System.err.println("Unable to convert reselt object to base 64 string. Object will be dropped.");
+                System.err.println("Unable to convert result object to base 64 string. Object will be dropped.");
             }
+        }
+        try {
+            config =
+                config.withValue(WARNING_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_warn)));
+            config =
+                config.withValue(ERROR_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_error)));
+        } catch (GenericKnimeSparkException e) {
+            e.printStackTrace();
+            System.err.println("Unable to convert error / warning messages to base 64 string. Messages will be dropped.");
         }
         return config.root().render(ConfigRenderOptions.concise());
 
@@ -311,6 +342,34 @@ public class JobResult implements Serializable {
             return key;
         }
         return null;
+    }
+
+    /**
+     * @return list of server warnings, empty if there were none
+     */
+    public List<String[]> getWarnings() {
+        return m_warn;
+    }
+
+    /**
+     * @return list of server error messages, empty if there were none
+     */
+    public List<String[]> getErrors() {
+        return m_error;
+    }
+
+    /**
+     * @param aWarningMessages
+     */
+    public void addWarnings(final List<String[]> aWarningMessages) {
+        m_warn.addAll(aWarningMessages);
+    }
+
+    /**
+     * @param aErrorMessages
+     */
+    public void addErrors(final List<String[]> aErrorMessages) {
+        m_error.addAll(aErrorMessages);
     }
 
 }
