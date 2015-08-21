@@ -22,20 +22,27 @@ package com.knime.bigdata.spark.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
+import org.dmg.pmml.DerivedFieldDocument.DerivedField;
+import org.dmg.pmml.InlineTableDocument.InlineTable;
+import org.dmg.pmml.MapValuesDocument.MapValues;
 import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
@@ -153,5 +160,66 @@ public final class SparkUtil {
             specs.add(specCreator.createSpec());
         }
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
+    }
+
+    /**
+     * @param featureColNames the names of the feature columns in the same order as in the Spark RDD
+     * @param mapValues the derived fields from the PMML
+     * @return the nominal column indices as first element and the number of unique values of the corresponding
+     * column as second argument
+     */
+    public static NominalFeatureInfo getNominalFeatureInfo(final List<String> featureColNames,
+        final Map<String, DerivedField> mapValues) {
+        final NominalFeatureInfo nominalFeatureInfo = new NominalFeatureInfo();
+        int idx = 0;
+        for (final String col : featureColNames) {
+            final DerivedField derivedField = mapValues.get(col);
+            if (derivedField != null) {
+                final MapValues map = derivedField.getMapValues();
+                final InlineTable table = map.getInlineTable();
+                final int noOfVals = table.sizeOfRowArray();
+                nominalFeatureInfo.add(Integer.valueOf(idx), noOfVals);
+            }
+            idx++;
+        }
+        return nominalFeatureInfo;
+    }
+
+    /**
+     * @param mapValues the {@link DerivedField}
+     * @param classColName the name of the class column
+     * @return the number of unique classes if the class column is one of the {@link DerivedField}s
+     */
+    public static Long getNoOfClassVals(final Map<String, DerivedField> mapValues, final String classColName) {
+        if (mapValues.containsKey(classColName)) {
+            final DerivedField derivedField = mapValues.get(classColName);
+            final MapValues map = derivedField.getMapValues();
+            final InlineTable table = map.getInlineTable();
+            final int noOfVals = table.sizeOfRowArray();
+            return Long.valueOf(noOfVals);
+        }
+        return null;
+    }
+
+    /**
+     * @param model the PMML model
+     * @return the field in the first FieldColumnPair of the MapValues mapped
+     * to the MapValues Model
+     */
+    public static Map<String, DerivedField> getMapValues(final PMMLPortObject model) {
+        final Map<String, DerivedField> mapValues = new LinkedHashMap<String, DerivedField>();
+        final DerivedField[] derivedFields = model.getDerivedFields();
+        for (final DerivedField derivedField : derivedFields) {
+            final MapValues map = derivedField.getMapValues();
+            if (null != map) {
+                // This is the field name the mapValues is based on
+                String name = derivedField.getDisplayName();
+                if (name == null) {
+                    name = derivedField.getName();
+                }
+                mapValues.put(name, derivedField);
+            }
+        }
+        return mapValues;
     }
 }

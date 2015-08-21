@@ -21,7 +21,9 @@
 package com.knime.bigdata.spark.port.context;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
@@ -38,11 +40,15 @@ public class KNIMESparkContext implements Serializable {
 
     private static final String CFG_HOST = "host";
     private static final String CFG_PORT = "port";
+    private static final String CFG_PROTOCOL = "protocol";
     private static final String CFG_USER = "user";
     private static final String CFG_PASSWORD = "password";
     private static final String CFG_ID = "id";
     private static final String CFG_CORES = "noOfCores";
     private static final String CFG_MEMORY = "memoryPerNode";
+
+    private static final char[] MY =
+            "3}acc80479[7b@05be9378K}168335832P§9276b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
 
     private static final long serialVersionUID = 1L;
 
@@ -60,6 +66,8 @@ public class KNIMESparkContext implements Serializable {
 
     private final String m_memPerNode;
 
+    private final String m_protocol;
+
 
     /**
      * create spark context container with default values
@@ -76,13 +84,17 @@ public class KNIMESparkContext implements Serializable {
      */
     public KNIMESparkContext(final String contextName, final int numCpuCores, final String memPerNode) {
         this(KNIMEConfigContainer.m_config.getString("spark.jobServer"),
+            KNIMEConfigContainer.m_config.getString("spark.jobServerProtocol"),
             KNIMEConfigContainer.m_config.getInt("spark.jobServerPort"),
             KNIMEConfigContainer.m_config.getString("spark.userName"),
-            KNIMEConfigContainer.m_config.getString("spark.password").toCharArray(),contextName, numCpuCores, memPerNode);
+            KNIMEConfigContainer.m_config.hasPath("spark.password") ?
+                KNIMEConfigContainer.m_config.getString("spark.password").toCharArray() : null, contextName,
+                numCpuCores, memPerNode);
     }
 
     /**
      * @param host the job server host
+     * @param protocol the connection protocol to use
      * @param port the job server port
      * @param user the name of the user
      * @param aPassphrase password
@@ -90,13 +102,16 @@ public class KNIMESparkContext implements Serializable {
      * @param memPerNode the memory settings per node
      * @param numCpuCores the number of cpu cores per node
      */
-    public KNIMESparkContext(final String host, final int port, final String user, final char[] aPassphrase, final String contextName,
-        final int numCpuCores, final String memPerNode) {
+    public KNIMESparkContext(final String host, final String protocol, final int port, final String user,
+        final char[] aPassphrase, final String contextName, final int numCpuCores, final String memPerNode) {
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("host must not be empty");
         }
         if (port < 0) {
             throw new IllegalArgumentException("Port must be positive");
+        }
+        if (protocol == null || protocol.trim().isEmpty()) {
+            throw new IllegalArgumentException("protocol must not be empty");
         }
         if (user == null || user.isEmpty()) {
             throw new IllegalArgumentException("user must not be empty");
@@ -111,6 +126,7 @@ public class KNIMESparkContext implements Serializable {
             throw new IllegalArgumentException("memPerNode must not be empty");
         }
         m_host = host;
+        m_protocol = protocol.trim();
         m_port = port;
         m_user = user;
         m_pass = aPassphrase;
@@ -124,8 +140,9 @@ public class KNIMESparkContext implements Serializable {
      * @throws InvalidSettingsException
      */
     public KNIMESparkContext(final ConfigRO conf) throws InvalidSettingsException {
-        this(conf.getString(CFG_HOST), conf.getInt(CFG_PORT), conf.getString(CFG_USER), conf.getString(CFG_PASSWORD).toCharArray(), conf.getString(CFG_ID),
-            conf.getInt(CFG_CORES), conf.getString(CFG_MEMORY));
+        this(conf.getString(CFG_HOST), conf.getString(CFG_PROTOCOL), conf.getInt(CFG_PORT), conf.getString(CFG_USER),
+            demix(conf.getPassword(CFG_PASSWORD, String.valueOf(MY))), conf.getString(CFG_ID), conf.getInt(CFG_CORES),
+            conf.getString(CFG_MEMORY));
     }
 
     /**
@@ -133,13 +150,39 @@ public class KNIMESparkContext implements Serializable {
      */
     public void save(final ConfigWO conf) {
         conf.addString(CFG_HOST, m_host);
+        conf.addString(CFG_PROTOCOL, m_protocol);
         conf.addInt(CFG_PORT, m_port);
         conf.addString(CFG_USER, m_user);
-        conf.addString(CFG_PASSWORD, String.valueOf(m_pass));
-
+        conf.addPassword(CFG_PASSWORD, String.valueOf(MY), mix(m_pass));
         conf.addString(CFG_ID, m_contextName);
         conf.addInt(CFG_CORES, m_numCpuCores);
         conf.addString(CFG_MEMORY, m_memPerNode);
+    }
+
+    /**
+     * @param password
+     * @return
+     */
+    private static char[] demix(final String p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] cs = p.toCharArray();
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return cs;
+    }
+
+    /**
+     * @param password
+     * @return
+     */
+    private static String mix(final char[] p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] cs = Arrays.copyOf(p, p.length);
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return String.valueOf(cs);
     }
 
     /**
@@ -157,6 +200,13 @@ public class KNIMESparkContext implements Serializable {
     }
 
     /**
+     * @return the connection protocol to use e.g. http or https
+     */
+    public String getProtocol() {
+        return m_protocol;
+    }
+
+    /**
      * @return the user
      */
     public String getUser() {
@@ -164,7 +214,7 @@ public class KNIMESparkContext implements Serializable {
     }
 
     /**
-     * @return the user
+     * @return the password (might be <code>null</code>)
      */
     public char[] getPassword() {
         return m_pass;
@@ -261,6 +311,7 @@ public class KNIMESparkContext implements Serializable {
         StringBuilder buf = new StringBuilder();
         buf.append("<strong>Job Server</strong><hr>");
         buf.append("<strong>Host:</strong>&nbsp;&nbsp;<tt>" + getHost() + "</tt><br>");
+        buf.append("<strong>Protocol:</strong>&nbsp;&nbsp;<tt>" + getProtocol() + "</tt><br>");
         buf.append("<strong>Port:</strong>&nbsp;&nbsp;<tt>" + getPort() + "</tt><br>");
         buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + getUser() + "</tt><br><br>");
         buf.append("<strong>Context</strong><hr>");

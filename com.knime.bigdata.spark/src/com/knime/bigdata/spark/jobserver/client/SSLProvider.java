@@ -31,17 +31,11 @@ import javax.net.ssl.SSLContext;
  */
 public class SSLProvider {
 
-    static SSLContext setupSSLContext() {
+    static SSLContext setupSSLContext() throws KeyManagementException, NoSuchAlgorithmException {
         SecureRestClientTrustManager secureRestClientTrustManager = new SecureRestClientTrustManager();
-        SSLContext sslContext;
-        try {
-            sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, new javax.net.ssl.TrustManager[]{secureRestClientTrustManager}, null);
-            return sslContext;
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            // TODO Auto-generated catch block
-            return null;
-        }
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, new javax.net.ssl.TrustManager[]{secureRestClientTrustManager}, null);
+        return sslContext;
     }
 
     //not needed

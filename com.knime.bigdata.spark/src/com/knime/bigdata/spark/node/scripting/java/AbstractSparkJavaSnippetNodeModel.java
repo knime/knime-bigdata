@@ -247,7 +247,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
                 //replace the old java snippet jar with the new one
                 Files.move(tempFile.toPath(), SNIPPET_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 //merge the java snippet file and the regular KNIME job classes
-                final File mergedFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
+                final File mergedFile = File.createTempFile("MSJS", ".jar", SNIPPET_FILE.getParentFile());
                 mergedFile.deleteOnExit();
                 JarPacker.mergeJars(SNIPPET_FILE.getPath(), SparkUtil.getJobJarPath(), mergedFile);
                 //upload the new job jar to the server

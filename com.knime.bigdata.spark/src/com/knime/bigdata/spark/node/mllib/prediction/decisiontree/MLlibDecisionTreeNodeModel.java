@@ -22,8 +22,10 @@ package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
+import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
@@ -37,11 +39,12 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
+import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -69,7 +72,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
      * Constructor.
      */
     MLlibDecisionTreeNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
+        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
             new PortType[]{SparkModelPortObject.TYPE});
     }
 
@@ -118,10 +121,10 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
-        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-        }
+//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+//        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+//            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+//        }
         final DataTableSpec tableSpec = spec.getTableSpec();
         final String classColName = m_classCol.getStringValue();
         if (classColName == null) {
@@ -147,7 +150,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final SparkDataPortObject mapping = (SparkDataPortObject)inObjects[1];
+        final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting Decision Tree (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
@@ -162,11 +165,14 @@ public class MLlibDecisionTreeNodeModel extends AbstractSparkNodeModel {
         if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
         }
+        final Map<String, DerivedField> mapValues = SparkUtil.getMapValues(mapping);
+        final Long numberOfClasses = SparkUtil.getNoOfClassVals(mapValues, classColName);
+        final NominalFeatureInfo result = SparkUtil.getNominalFeatureInfo(featureColNames, mapValues);
         final int maxDepth = m_maxDepth.getIntValue();
         final int maxNoOfBins = m_maxNumberOfBins.getIntValue();
         final String qualityMeasure = m_qualityMeasure.getStringValue();
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), featureColIdxs, featureColNames, classColName,
-            classColIdx, mapping == null ? null : mapping.getData(), maxDepth, maxNoOfBins, qualityMeasure);
+        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), featureColIdxs, featureColNames,
+            result, classColName, classColIdx, numberOfClasses, maxDepth, maxNoOfBins, qualityMeasure);
         final DecisionTreeModel treeModel = task.execute(exec);
         final MLlibDecisionTreeInterpreter interpreter = MLlibDecisionTreeInterpreter.getInstance();
         return new PortObject[]{new SparkModelPortObject<>(

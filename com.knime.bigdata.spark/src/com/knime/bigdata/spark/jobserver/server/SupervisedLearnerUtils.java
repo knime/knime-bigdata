@@ -22,7 +22,6 @@ package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,18 +33,17 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
-
 /**
  *
  * @author dwk
  */
 public class SupervisedLearnerUtils {
-
+    private final static Logger LOGGER = Logger.getLogger(SupervisedLearnerUtils.class.getName());
     /**
-     * table with feature and label mappings
+     * array with the indices of the nominal columns
      */
-    public static final String PARAM_MAPPING_TABLE = "MappingInputTable";
+    public static final String PARAM_NOMINAL_FEATURE_INFO = "NominalFeatureInfo";
+
 
     /**
      * @param aConfig
@@ -160,13 +158,10 @@ public class SupervisedLearnerUtils {
         } else if (!aJob.validateNamedRdd(key)) {
             msg = "Input data table missing!";
         }
-        if (aConfig.hasInputParameter(PARAM_MAPPING_TABLE)) {
-            final String mappingTable = aConfig.getInputParameter(PARAM_MAPPING_TABLE);
-            if (!aJob.validateNamedRdd(mappingTable)) {
-                msg = "Input table with value mappings is missing!";
-            }
-        }
-
+//        if (aConfig.hasInputParameter(PARAM_NOMINAL_COL_IDXS)) {
+//        }
+//        if (aConfig.hasInputParameter(PARAM_NOMINAL_COL_COUNTS)) {
+//        }
         if (msg != null) {
             aLogger.severe(msg);
             throw new GenericKnimeSparkException(GenericKnimeSparkException.ERROR + ":" + msg);
@@ -196,28 +191,22 @@ public class SupervisedLearnerUtils {
     }
 
     /**
-     * @param aConfig configuration with column names and mapping table name
-     * @param aJob
-     * @param nominalFeatureInfo - will be filled with feature information as a side effect ! TODO - refactor and write
-     *            tests for this method !!!
+     * @param aConfig configuration with column names and counts
      * @return number of classes
+     * @throws GenericKnimeSparkException if the {@link NominalFeatureInfo} object is invalid
      */
-    public static Long extractFeatureInfo(final JobConfig aConfig, final KnimeSparkJob aJob,
-        final Map<Integer, Integer> nominalFeatureInfo) {
-        nominalFeatureInfo.clear();
-        final Long numClasses;
-        if (aConfig.hasInputParameter(PARAM_MAPPING_TABLE)) {
-            //final int labelColIx = aConfig.getInt(PARAM_LABEL_INDEX);
-            final List<String> names =
-                aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
-            final String classColName = names.remove(names.size() - 1);
-            final JavaRDD<Row> mappingRDD = aJob.getFromNamedRdds(aConfig.getInputParameter(PARAM_MAPPING_TABLE));
-            numClasses = ConvertNominalValuesJob.getNumberValuesOfColumn(mappingRDD, classColName);
-            nominalFeatureInfo.putAll(ConvertNominalValuesJob.extractNominalFeatureInfo(names, mappingRDD));
+    public static NominalFeatureInfo extractNominalFeatureInfo(final JobConfig aConfig) throws GenericKnimeSparkException {
+        LOGGER.fine("Extract nominal feature info");
+        final NominalFeatureInfo info;
+        if (aConfig.hasInputParameter(PARAM_NOMINAL_FEATURE_INFO) && aConfig.hasInputParameter(PARAM_NOMINAL_FEATURE_INFO)) {
+            LOGGER.fine("Nominal feature info found");
+            info = aConfig.decodeFromInputParameter(PARAM_NOMINAL_FEATURE_INFO);
+            LOGGER.fine("Extracted Nominal feature info: " + info);
         } else {
+            LOGGER.fine("No nominal feature info found");
             //TK_TODO: Get the number of classes from the inputdata rdd
-            numClasses = new Long(2);
+            info = new NominalFeatureInfo();
         }
-        return numClasses;
+        return info;
     }
 }

@@ -23,7 +23,9 @@ package com.knime.bigdata.spark.node.mllib.prediction.linear;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
@@ -38,11 +40,12 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -53,7 +56,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  * @param <M> the MLlib model
  */
 public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSparkNodeModel {
@@ -77,7 +80,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
      */
     public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath,
         final SparkModelInterpreter<SparkModel<M>> interpreter) {
-        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
+        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
             new PortType[]{SparkModelPortObject.TYPE});
         m_jobClassPath = jobClassPath;
         m_interpreter = interpreter;
@@ -121,10 +124,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
-        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-        }
+//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+//      if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+//          throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+//      }
         final DataTableSpec tableSpec = spec.getTableSpec();
         final String classColName = m_classCol.getStringValue();
         if (classColName == null) {
@@ -150,7 +153,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final SparkDataPortObject mapping = (SparkDataPortObject)inObjects[1];
+        final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting " + m_interpreter.getModelName() + " learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
@@ -167,8 +170,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
         }
         final double regularization = m_regularization.getDoubleValue();
         final int noOfIterations = m_noOfIterations.getIntValue();
+        final Map<String, DerivedField> mapValues = SparkUtil.getMapValues(mapping);
+        final NominalFeatureInfo nominalFeatureInfo = SparkUtil.getNominalFeatureInfo(featureColNames, mapValues);
         final SGDLearnerTask task = new SGDLearnerTask(data.getData(), featureColIdxs, featureColNames, classColName,
-            classColIdx, mapping == null ? null : mapping.getData(), noOfIterations, regularization, m_jobClassPath);
+            classColIdx, nominalFeatureInfo, noOfIterations, regularization, m_jobClassPath);
         @SuppressWarnings("unchecked")
         final M linearModel = (M)task.execute(exec);
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel,

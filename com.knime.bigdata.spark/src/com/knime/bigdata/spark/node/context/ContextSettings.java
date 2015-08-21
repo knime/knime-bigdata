@@ -118,6 +118,13 @@ public class ContextSettings {
     }
 
     /**
+     * @return the protocol to use to connect to the server
+     */
+    public String getProtocol() {
+        return "https";
+    }
+
+    /**
      * @return the user
      */
     public String getUser() {
@@ -185,7 +192,7 @@ public class ContextSettings {
      * @return the KNIMESparkContext object with the specified settings
      */
     public KNIMESparkContext createContext() {
-        return new KNIMESparkContext(getHost(), getPort(), getUser(), getPassword(), getContextName(), getNoOfCores(), getMemory());
+        return new KNIMESparkContext(getHost(), getProtocol(), getPort(), getUser(), getPassword(), getContextName(), getNoOfCores(), getMemory());
     }
 
     /**
