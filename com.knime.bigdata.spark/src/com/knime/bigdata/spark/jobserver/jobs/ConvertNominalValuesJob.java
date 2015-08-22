@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 
@@ -56,11 +55,6 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
      */
     public static final String PARAM_MAPPING_TYPE = "MappingType";
 
-    /**
-     * name of result table with mapping info
-     */
-    public static final String PARAM_RESULT_MAPPING = "MappingResultTable";
-
     private final static Logger LOGGER = Logger.getLogger(ConvertNominalValuesJob.class.getName());
 
     /**
@@ -80,12 +74,6 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
                 } catch (Exception e) {
                     msg = "Input parameter '" + PARAM_MAPPING_TYPE + "' has an invalid value.";
                 }
-            }
-        }
-
-        if (msg == null) {
-            if (!aConfig.hasOutputParameter(PARAM_RESULT_MAPPING)) {
-                msg = "Output parameter '" + PARAM_RESULT_MAPPING + "' missing.";
             }
         }
 
@@ -121,34 +109,8 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
 
         //number of all (!)  columns in input data table
         int offset = aRowRDD.take(1).get(0).length();
-
-        storeMappingsInRdd(aContext, mappedData, aColNameForIndex, aConfig.getOutputStringParameter(PARAM_RESULT_MAPPING), offset);
+        mappedData.createMappingTable(aColNameForIndex, offset);
         return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
-    }
-
-    /**
-     * stores the mapping in a RDD
-     *
-     * note that we are adding two rows for each mapping - one with the original column name and one for the new numeric
-     * column name
-     *
-     * @param aSparkContext
-     * @param aMappedData
-     * @param aColNameForIndex
-     * @param aRddName
-     * @param aMappingType
-     * @param aOffset
-     */
-    private void storeMappingsInRdd(final SparkContext aSparkContext, final MappedRDDContainer aMappedData,
-        final Map<Integer, String> aColNameForIndex, final String aRddName, final int aOffset) {
-        @SuppressWarnings("resource")
-        JavaSparkContext javaContext = new JavaSparkContext(aSparkContext);
-
-        List<Row> rows = aMappedData.createMappingTable(aColNameForIndex, aOffset);
-
-        JavaRDD<Row> mappingRdd = javaContext.parallelize(rows);
-        LOGGER.log(Level.INFO, "Storing mapping under key: " + aRddName);
-        addToNamedRdds(aRddName, mappingRdd);
     }
 
     /**

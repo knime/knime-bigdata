@@ -37,13 +37,11 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class ValueConverterTask {
+public class Category2NumberConverterTask {
 
     private final String m_inputTableName;
 
     private final String m_outputTableName;
-
-    private final String m_outputMappingTableName;
 
     private final MappingType m_mappingType;
 
@@ -61,10 +59,9 @@ public class ValueConverterTask {
      * @param aIncludedColsNames
      * @param aMappingType - type of value mapping (global, per column or binary)
      * @param aOutputRDD - table identifier (output data)
-     * @param aOutputMappingRDD
      */
-    public ValueConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs, final String[] aIncludedColsNames,
-        final MappingType aMappingType, final String aOutputRDD, final String aOutputMappingRDD) {
+    public Category2NumberConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs,
+        final String[] aIncludedColsNames, final MappingType aMappingType, final String aOutputRDD) {
 
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
@@ -75,7 +72,6 @@ public class ValueConverterTask {
         }
         m_includeColNames = aIncludedColsNames;
         m_outputTableName = aOutputRDD;
-        m_outputMappingTableName = aOutputMappingRDD;
         m_mappingType = aMappingType;
     }
 
@@ -97,7 +93,7 @@ public class ValueConverterTask {
 
     private String paramDef() {
         return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName,
-            m_outputTableName, m_outputMappingTableName);
+            m_outputTableName);
     }
 
     /**
@@ -112,8 +108,7 @@ public class ValueConverterTask {
      * @return Json String with parameter settings
      */
     public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
-        final String mappingType, final String inputTableName, final String outputTableName,
-        final String outputMappingTableName) {
+        final String mappingType, final String inputTableName, final String outputTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),
@@ -121,8 +116,7 @@ public class ValueConverterTask {
                 ConvertNominalValuesJob.PARAM_MAPPING_TYPE, mappingType, KnimeSparkJob.PARAM_INPUT_TABLE,
                 inputTableName},
             ParameterConstants.PARAM_OUTPUT,
-            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName,
-                ConvertNominalValuesJob.PARAM_RESULT_MAPPING, outputMappingTableName}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
     }
 
 }
