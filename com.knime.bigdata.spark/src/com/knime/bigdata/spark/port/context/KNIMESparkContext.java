@@ -287,18 +287,22 @@ public class KNIMESparkContext implements Serializable {
      */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("KNIMESparkContext [m_host=");
+        final StringBuilder builder = new StringBuilder();
+        builder.append("KNIMESparkContext [protocol=");
+        builder.append(m_protocol);
+        builder.append(", host=");
         builder.append(m_host);
-        builder.append(", m_port=");
+        builder.append(", port=");
         builder.append(m_port);
-        builder.append(", m_user=");
+        builder.append(", user=");
         builder.append(m_user);
-        builder.append(", m_contextName=");
+        builder.append(", password set=");
+        builder.append(m_pass != null);
+        builder.append(", contextName=");
         builder.append(m_contextName);
-        builder.append(", m_numCpuCores=");
+        builder.append(", numCpuCores=");
         builder.append(m_numCpuCores);
-        builder.append(", m_memPerNode=");
+        builder.append(", memPerNode=");
         builder.append(m_memPerNode);
         builder.append("]");
         return builder.toString();
