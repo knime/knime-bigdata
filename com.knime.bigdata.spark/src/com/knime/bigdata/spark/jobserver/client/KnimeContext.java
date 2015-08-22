@@ -52,21 +52,34 @@ public class KnimeContext {
      * @throws GenericKnimeSparkException
      */
     public static KNIMESparkContext getSparkContext() throws GenericKnimeSparkException {
+        return openSparkContext(new KNIMESparkContext());
+    }
 
-        final KNIMESparkContext defaultContext = new KNIMESparkContext();
+    /**
+     * @param context the {@link KNIMESparkContext} to open
+     * @return the opened {@link KNIMESparkContext}
+     * @throws GenericKnimeSparkException if the context could not be created on the Spark Jobsever
+     */
+    public static KNIMESparkContext openSparkContext(final KNIMESparkContext context) throws GenericKnimeSparkException {
+        if (context == null) {
+            throw new NullPointerException("context must not be null");
+        }
         //query server for existing context and re-use if there is one
         //and it is (one of) the current user's context(s)
         try {
             synchronized (LOGGER) {
-                if (sparkContextExists(defaultContext)) {
-                    return defaultContext;
+                if (sparkContextExists(context)) {
+                    return context;
                 }
-                return createSparkContext(defaultContext);
+                return createSparkContext(context);
             }
         } catch (ProcessingException e) {
             final StringBuilder buf = new StringBuilder("Could not establish connection to Spark Jobserver.");
             if (e.getCause() != null && e.getCause() instanceof SocketException) {
-                buf.append(" Error: '" + e.getCause().getMessage() + "' possibly caused by incompatible ssl settings.");
+                buf.append(" Error: '" + e.getCause().getMessage()
+                    + "' possible reason jobserver down or incompatible connection settings. "
+                    + "For details see logfile View->Open KNIME log.");
+                LOGGER.error("Context information: " + context);
             } else {
                 buf.append(" Error: " + e.getMessage());
             }
