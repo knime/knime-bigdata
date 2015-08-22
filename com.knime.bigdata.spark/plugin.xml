@@ -223,6 +223,12 @@
             factory-class="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/column/convert"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">
