@@ -30,9 +30,11 @@ import java.util.Map;
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
+import org.apache.xmlbeans.XmlObject;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.InlineTableDocument.InlineTable;
 import org.dmg.pmml.MapValuesDocument.MapValues;
+import org.dmg.pmml.RowDocument.Row;
 import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -42,7 +44,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
@@ -221,5 +225,48 @@ public final class SparkUtil {
             }
         }
         return mapValues;
+    }
+
+    /**
+     * @param pmml
+     * @param rdd
+     * @return
+     */
+    public static ColumnBasedValueMapping getCategory2NumberMap(final PMMLPortObject pmml,
+        final SparkDataPortObject rdd) {
+        final DataTableSpec tableSpec = rdd.getTableSpec();
+        final ColumnBasedValueMapping map = new ColumnBasedValueMapping();
+        final DerivedField[] fields = pmml.getDerivedFields();
+        if (fields != null) {
+            for (final DerivedField field : fields) {
+                final MapValues mapValues = field.getMapValues();
+                if (mapValues != null) {
+                    final String in = mapValues.getFieldColumnPairList().get(0).getColumn();
+                    final String out = mapValues.getOutputColumn();
+                    int colIdx = tableSpec.findColumnIndex(field.getName());
+                    if (colIdx >= 0) {
+                        InlineTable table = mapValues.getInlineTable();
+                        for (Row row : table.getRowList()) {
+                            XmlObject[] inChilds = row.selectChildren(
+                                    "http://www.dmg.org/PMML-4_0", in);
+                            String inValue = inChilds.length > 0
+                                ? inChilds[0].newCursor().getTextValue()
+                                : null;
+                             XmlObject[] outChilds = row.selectChildren(
+                                     "http://www.dmg.org/PMML-4_0", out);
+                            String outValue = outChilds.length > 0
+                                    ? outChilds[0].newCursor().getTextValue()
+                                    : null;
+                            if (null == inValue || null == outValue) {
+                                throw new IllegalArgumentException("The PMML model"
+                                    + "is not complete. Missing element in InlineTable.");
+                            }
+                            map.add(colIdx, Double.parseDouble(outValue), inValue);
+                        }
+                    }
+                }
+            }
+        }
+        return map;
     }
 }
