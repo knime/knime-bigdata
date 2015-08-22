@@ -40,7 +40,9 @@ import com.typesafe.config.Config;
  *
  * @author dwk
  */
-public class JobConfig {
+public class JobConfig implements Serializable{
+
+    private static final long serialVersionUID = 1L;
 
     private final Config m_config;
 
@@ -168,10 +170,21 @@ public class JobConfig {
      * @return string representation of given object
      * @throws GenericKnimeSparkException if T cannot be found or the data is corrupted
      */
-    @SuppressWarnings("unchecked")
     public <T> T decodeFromParameter(final String aParamName) throws GenericKnimeSparkException {
         //JAva 1.8: byte[] data = Base64.getDecoder().decode(aString);
-        byte[] data = DatatypeConverter.parseBase64Binary(m_config.getString(aParamName));
+        final String objectString = m_config.getString(aParamName);
+        return decodeFromBase64(objectString);
+    }
+
+    /**
+     * Deserializes the given Base64 String  into an object.
+     * @param aObjectString the Base64 String to decode
+     * @return the decoded Object
+     * @throws GenericKnimeSparkException
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T decodeFromBase64(final String aObjectString) throws GenericKnimeSparkException {
+        byte[] data = DatatypeConverter.parseBase64Binary(aObjectString);
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return (T)ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
