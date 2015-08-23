@@ -18,7 +18,7 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark.port.model;
+package com.knime.bigdata.spark.port.model.interpreter;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -28,21 +28,23 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
+
 /**
- *
- * @author koetter
+ * HTML panel that describes the given {@link SparkModel}.
+ * @author Tobias Koetter, KNIME.com
  */
-public class SparkModelView extends JPanel {
+class HTMLModelView extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * @param model the serialised {@link SparkModelPortObjectSpec}
+     * @param htmlDescription the html description of the model
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public SparkModelView(final SparkModel model) {
+    HTMLModelView(final SparkModel<?> model, final String htmlDescription) {
         super(new GridBagLayout());
-        final SparkModelInterpreter interpreter = model.getInterpreter();
         super.setName("Model Details");
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<strong>Type:</strong>&nbsp;&nbsp;");
@@ -55,7 +57,7 @@ public class SparkModelView extends JPanel {
         }
         buf.append("<br/><hr>");
 //        buf.append("<strong>Details:</strong>&nbsp;&nbsp;<br><hr>");
-        buf.append(interpreter.getDescription(model));
+        buf.append(htmlDescription);
         buf.append("<br/>");
         buf.append("</body></html>");
         final JTextPane textArea = new JTextPane();

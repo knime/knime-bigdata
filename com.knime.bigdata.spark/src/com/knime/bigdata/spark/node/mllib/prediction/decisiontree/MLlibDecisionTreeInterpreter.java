@@ -25,13 +25,13 @@ import java.util.List;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<SparkModel<DecisionTreeModel>> {
+public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkModel<DecisionTreeModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,7 +77,7 @@ public class MLlibDecisionTreeInterpreter implements SparkModelInterpreter<Spark
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SparkModel<DecisionTreeModel> model) {
+    public String getHTMLDescription(final SparkModel<DecisionTreeModel> model) {
         final DecisionTreeModel treeModel = model.getModel();
         final StringBuilder buf = new StringBuilder();
         buf.append("Tree depth: " + treeModel.depth()

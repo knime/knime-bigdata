@@ -18,11 +18,17 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark.port.model;
+package com.knime.bigdata.spark.port.model.interpreter;
 
 import java.io.Serializable;
 
+import javax.swing.JComponent;
+
+import com.knime.bigdata.spark.port.model.SparkModel;
+
 /**
+ * Interface that describes a {@link SparkModel} interpreter.
+ *
  * @author Tobias Koetter, KNIME.com
  * @param <M> the model
  */
@@ -35,9 +41,9 @@ public interface SparkModelInterpreter <M extends SparkModel<? extends Serializa
 
     /**
      * @param model the model
-     * @return the string description of the model. Can contain html formatting information
+     * @return the {@link JComponent} views of the model
      */
-    public String getDescription(M model);
+    public JComponent[] getViews(M model);
 
     /**
      * @param model the model

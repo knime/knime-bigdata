@@ -26,7 +26,7 @@ import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.jobserver.jobs.SVMLearnerJob;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  *

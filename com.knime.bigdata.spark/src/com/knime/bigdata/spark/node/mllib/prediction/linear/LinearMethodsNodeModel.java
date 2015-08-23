@@ -42,9 +42,9 @@ import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  *

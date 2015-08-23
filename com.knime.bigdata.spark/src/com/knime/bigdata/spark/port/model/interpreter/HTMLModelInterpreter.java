@@ -16,38 +16,39 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 30.07.2015 by koetter
+ *   Created on 23.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.linear.regression;
+package com.knime.bigdata.spark.port.model.interpreter;
 
-import org.apache.spark.mllib.regression.LinearRegressionModel;
+import java.io.Serializable;
 
-import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
-import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
+import javax.swing.JComponent;
+
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
- *
- * @author koetter
+ * {@link SparkModelInterpreter} implementation that returns a single HTML panel with the
+ * description of the {@link SparkModel}.
+ * @author Tobias Koetter, KNIME.com
+ * @param <M> the {@link SparkModel}
  */
-public class MLlibLinearRegressionNodeFactory extends AbstractLinearMethodsNodeFactory<LinearRegressionModel> {
+public abstract class HTMLModelInterpreter<M extends SparkModel<? extends Serializable>>
+implements SparkModelInterpreter<M> {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SparkModelInterpreter<SparkModel<LinearRegressionModel>> getModelInterpreter() {
-        return MLlibLinearRegressionInterpreter.getInstance();
+    public JComponent[] getViews(final M model) {
+        final String htmlDesc = getHTMLDescription(model);
+        return new JComponent[] {new HTMLModelView(model, htmlDesc)};
     }
 
     /**
-     * {@inheritDoc}
+     * @param model the {@link SparkModel}
+     * @return the HTML description of the model
      */
-    @Override
-    protected Class<? extends SGDJob> getJobClassPath() {
-        return LinearRegressionWithSGDJob.class;
-    }
-
+    protected abstract String getHTMLDescription(M model);
 }
