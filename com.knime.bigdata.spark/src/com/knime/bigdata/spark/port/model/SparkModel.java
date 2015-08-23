@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
+import javax.swing.JComponent;
+
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -38,6 +40,7 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
+import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  * Spark model that encapsulates a learned Spark MLlib model.
@@ -57,11 +60,12 @@ public class SparkModel <M extends Serializable> {
     /**
      * @param model the model
      * @param interperter the {@link SparkModelInterpreter}
-     * @param r the {@link MLlibSettings}
+     * @param settings the {@link MLlibSettings}
      */
     public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
-        final MLlibSettings r) {
-        this(model, interperter, r.getLearningTableSpec(), r.getClassColName(), r.getFatureColNames());
+        final MLlibSettings settings) {
+        this(model, interperter, settings.getLearningTableSpec(), settings.getClassColName(),
+            settings.getFatureColNames());
     }
 
     /**
@@ -254,5 +258,12 @@ public class SparkModel <M extends Serializable> {
      */
     public String getSummary() {
         return m_interpreter.getSummary(this);
+    }
+
+    /**
+     * @return the model views
+     */
+    public JComponent[] getViews() {
+        return getInterpreter().getViews(this);
     }
 }

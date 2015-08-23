@@ -23,15 +23,13 @@ package com.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibNaiveBayesInterpreter implements SparkModelInterpreter<SparkModel<NaiveBayesModel>> {
-
-    private static final long serialVersionUID = 1L;
+public class MLlibNaiveBayesInterpreter extends HTMLModelInterpreter<SparkModel<NaiveBayesModel>> {
 
     private static volatile MLlibNaiveBayesInterpreter instance;
 
@@ -75,7 +73,7 @@ public class MLlibNaiveBayesInterpreter implements SparkModelInterpreter<SparkMo
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SparkModel<NaiveBayesModel> model) {
+    public String getHTMLDescription(final SparkModel<NaiveBayesModel> model) {
         final NaiveBayesModel naiveBayesModel = model.getModel();
         return naiveBayesModel.toString();
     }

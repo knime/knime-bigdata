@@ -26,13 +26,13 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author koetter
  */
-public class MLlibKMeansInterpreter implements SparkModelInterpreter<SparkModel<KMeansModel>> {
+public class MLlibKMeansInterpreter extends HTMLModelInterpreter<SparkModel<KMeansModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class MLlibKMeansInterpreter implements SparkModelInterpreter<SparkModel<
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SparkModel<KMeansModel> model) {
+    public String getHTMLDescription(final SparkModel<KMeansModel> model) {
         final Vector[] clusterCenters = model.getModel().clusterCenters();
         final StringBuilder buf = new StringBuilder();
 //        buf.append("<b>No of cluster centers: </b>").append(clusterCenters.length).append("<br>");

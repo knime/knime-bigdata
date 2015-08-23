@@ -26,13 +26,13 @@ import org.apache.spark.mllib.regression.LinearRegressionModel;
 
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearMethodsNodeModel;
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<SparkModel<LinearRegressionModel>> {
+public class MLlibLinearRegressionInterpreter extends HTMLModelInterpreter<SparkModel<LinearRegressionModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class MLlibLinearRegressionInterpreter implements SparkModelInterpreter<S
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SparkModel<LinearRegressionModel> model) {
+    public String getHTMLDescription(final SparkModel<LinearRegressionModel> model) {
         final LinearRegressionModel regressionModel = model.getModel();
         List<String> columnNames = model.getLearningColumnNames();
         final double[] weights = regressionModel.weights().toArray();
