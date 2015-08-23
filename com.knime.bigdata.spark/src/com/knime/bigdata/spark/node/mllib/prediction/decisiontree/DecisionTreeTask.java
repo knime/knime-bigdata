@@ -82,11 +82,11 @@ public class DecisionTreeTask implements Serializable {
         m_featureColIdxs = featureColIdxs;
         m_nomFeatureInfo = nominalFeatureInfo;
         m_classColName = classColName;
+        m_classColIdx = classColIdx;
         m_noOfClasses = noOfClasses;
         final List<String> allColNames = new LinkedList<>(afeatureColNames);
         allColNames.add(classColName);
         m_colNames = allColNames.toArray(new String[allColNames.size()]);
-        m_classColIdx = classColIdx;
     }
 
     DecisionTreeModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,

@@ -27,19 +27,16 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -47,20 +44,15 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
  * @author Tobias Koetter, KNIME.com
  */
 public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
-    private final SettingsModelDouble m_maxNumberBinsModel = MLlibNaiveBayesNodeModel.createLambdaModel();
-    private final DialogComponentNumber m_maxNoBins = new DialogComponentNumber(m_maxNumberBinsModel,
-        "Lambda: ", 0.05);
+    private final DialogComponentNumber m_lambda =
+            new DialogComponentNumber(MLlibNaiveBayesNodeModel.createLambdaModel(), "Lambda: ", 0.05);
 
-    private final DialogComponentColumnFilter2 m_cols =
-            new DialogComponentColumnFilter2(MLlibNaiveBayesNodeModel.createColumnsModel(), 0);
+    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
 
-    @SuppressWarnings("unchecked")
-    private final DialogComponentColumnNameSelection m_classColumn =
-            new DialogComponentColumnNameSelection(MLlibNaiveBayesNodeModel.createClassColModel(),
-            "Class column ", 0, DoubleValue.class);
+    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
 
     private final DialogComponent[] m_components =
-            new DialogComponent[] {m_maxNoBins, m_cols, m_classColumn};
+            new DialogComponent[] {m_lambda, m_cols, m_classColumn};
 
     /**
      *
@@ -72,7 +64,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_maxNoBins.getComponentPanel(), gbc);
+        panel.add(m_lambda.getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;

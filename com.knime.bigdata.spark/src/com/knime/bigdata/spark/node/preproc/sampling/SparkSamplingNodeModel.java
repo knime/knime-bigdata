@@ -101,8 +101,8 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         if (!successful.booleanValue()) {
             //if the sampling failed the job returns the input RDD as output RDD so we shouldn't delete it on node reset
             setWarningMessage("Sampling failed.");
-            setDeleteOnReset(false);
         }
+        setDeleteOnReset(successful.booleanValue());
         final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
         return new PortObject[] {new SparkDataPortObject(result)};
     }
