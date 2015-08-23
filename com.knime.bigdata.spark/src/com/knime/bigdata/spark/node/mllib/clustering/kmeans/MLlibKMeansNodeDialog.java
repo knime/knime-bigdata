@@ -31,12 +31,12 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
+import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
  *
@@ -48,8 +48,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         "Number of clusters: ", 1, createFlowVariableModel(m_noOfClusterModel));
     private final DialogComponentNumber m_noOfIterations =
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10);
-    private final DialogComponentColumnFilter2 m_cols =
-            new DialogComponentColumnFilter2(MLlibKMeansNodeModel.createColumnsModel(), 0);
+    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
     /**
      *
      */
@@ -90,11 +89,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
      */
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
-        if (specs == null || specs.length != 1 || specs[0] == null) {
-            throw new NotConfigurableException("No input connection available");
-        }
-        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)specs[0];
-        final DataTableSpec[] tableSpecs = new DataTableSpec[] {spec.getTableSpec()};
+        final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_noOfCluster.loadSettingsFrom(settings, tableSpecs);
         m_noOfIterations.loadSettingsFrom(settings, tableSpecs);
         m_cols.loadSettingsFrom(settings, tableSpecs);

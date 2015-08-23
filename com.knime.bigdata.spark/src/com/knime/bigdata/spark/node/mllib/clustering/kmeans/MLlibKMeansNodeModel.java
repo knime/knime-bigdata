@@ -22,19 +22,18 @@ package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
+import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -43,7 +42,6 @@ import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkIDs;
-import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
@@ -55,7 +53,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
 
     private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
 
-    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
 
     /**
      *
@@ -63,14 +61,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     public MLlibKMeansNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
-    }
-
-    /**
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    static SettingsModelColumnFilter2 createColumnsModel() {
-        return new SettingsModelColumnFilter2("columns", DoubleValue.class);
     }
 
     /**
@@ -92,18 +82,10 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (inSpecs == null || inSpecs.length != 1) {
-            throw new InvalidSettingsException("No Hive connection available");
-        }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        DataTableSpec tableSpec = spec.getTableSpec();
-        FilterResult result = m_cols.applyTo(tableSpec);
-        final String[] includedCols = result.getIncludes();
-        if (includedCols == null || includedCols.length < 1) {
-            throw new InvalidSettingsException("No input columns available");
-        }
-        final SparkDataPortObjectSpec asignedSpec =
-                new SparkDataPortObjectSpec(spec.getContext(),
+        final DataTableSpec tableSpec = spec.getTableSpec();
+        m_settings.check(tableSpec);
+        final SparkDataPortObjectSpec asignedSpec = new SparkDataPortObjectSpec(spec.getContext(),
                     MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster"));
         return new PortObjectSpec[]{asignedSpec, createMLSpec()};
     }
@@ -117,18 +99,16 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
         exec.setMessage("Starting KMeans (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
-        final FilterResult result = m_cols.applyTo(tableSpec);
-        final String[] includedCols = result.getIncludes();
-        final Integer[] includeColIdxs = SparkUtil.getColumnIndices(tableSpec, includedCols);
+        final MLlibSettings settings = m_settings.getSettings(tableSpec);
         final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final KMeansTask task = new KMeansTask(data.getData(), includeColIdxs, m_noOfCluster.getIntValue(),
+        final KMeansTask task = new KMeansTask(data.getData(), settings.getFeatueColIdxs(), m_noOfCluster.getIntValue(),
             m_noOfIteration.getIntValue(), resultRDD);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
-                 clusters, MLlibKMeansInterpreter.getInstance(), tableSpec, null, includedCols))};
+                 clusters, MLlibKMeansInterpreter.getInstance(), settings))};
     }
 
 
@@ -146,7 +126,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIteration.saveSettingsTo(settings);
-        m_cols.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -156,7 +136,7 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfCluster.validateSettings(settings);
         m_noOfIteration.validateSettings(settings);
-        m_cols.validateSettings(settings);
+        m_settings.validateSettings(settings);
     }
 
     /**
@@ -166,6 +146,6 @@ public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);
-        m_cols.loadSettingsFrom(settings);
+        m_settings.loadSettingsFrom(settings);
     }
 }

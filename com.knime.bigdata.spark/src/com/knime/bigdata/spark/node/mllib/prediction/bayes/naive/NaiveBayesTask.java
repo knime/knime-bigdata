@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class NaiveBayesTask implements Serializable {
 
@@ -56,16 +56,17 @@ public class NaiveBayesTask implements Serializable {
 
     private final int m_lableIx;
 
-    NaiveBayesTask(final SparkRDD inputRDD, final int aLableIx, final Integer[] featureColIdxs, final double aLambda,
-        final String aMatrix) {
+    NaiveBayesTask(final SparkRDD inputRDD, final int aLableIx,
+        final Integer[] featureColIdxs, final double aLambda, final String aMatrix) {
         this(inputRDD.getContext(), inputRDD.getID(), aLableIx, featureColIdxs, aLambda, aMatrix);
     }
 
-    NaiveBayesTask(final KNIMESparkContext aContext, final String aInputRDD, final int aLableIx,
+
+    NaiveBayesTask(final KNIMESparkContext context, final String inputTableName, final int aLableIx,
         final Integer[] featureColIdxs, final double aLambda, final String aMatrix) {
         m_lambda = aLambda;
-        m_context = aContext;
-        m_inputTableName = aInputRDD;
+        m_context = context;
+        m_inputTableName = inputTableName;
         m_numericColIdx = featureColIdxs;
         m_MatrixName = aMatrix;
         m_lableIx = aLableIx;
@@ -100,9 +101,10 @@ public class NaiveBayesTask implements Serializable {
         final double aLambda, final String aResultRdd) {
 
         final Object[] inputParamas =
-            new Object[]{NaiveBayesJob.PARAM_LAMBDA, aLambda, ParameterConstants.PARAM_LABEL_INDEX, aLabelColIndex,
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
-                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
+            new Object[]{NaiveBayesJob.PARAM_LAMBDA, aLambda,
+            ParameterConstants.PARAM_LABEL_INDEX, aLabelColIndex,
+            ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
+            KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd}});
