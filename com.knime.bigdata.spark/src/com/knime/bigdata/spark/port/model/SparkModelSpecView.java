@@ -28,8 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import org.knime.core.node.ModelContentRO;
-
 /**
  * Port view that shows the content of the Spark model port.
  *
@@ -40,11 +38,10 @@ public class SparkModelSpecView extends JPanel {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param model the serialised {@link SparkModelPortObjectSpec}
+     * @param spec the {@link SparkModelPortObjectSpec}
      */
-    public SparkModelSpecView(final ModelContentRO model) {
+    public SparkModelSpecView(final SparkModelPortObjectSpec spec) {
         super(new GridBagLayout());
-        final SparkModelPortObjectSpec spec = new SparkModelPortObjectSpec(model);
         super.setName("MLlib");
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<strong>Type:</strong>&nbsp;&nbsp;");
@@ -66,32 +63,6 @@ public class SparkModelSpecView extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
         super.add(jsp, c);
-//        c.anchor = GridBagConstraints.CENTER;
-//        c.fill = GridBagConstraints.BOTH;
-//        c.weightx = 1;
-//        c.weighty = 1;
-//        final JButton sqlButton = new JButton("Copy SQL to clipboard");
-//        sqlButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(final ActionEvent e) {
-//                try {
-//                    final StringSelection stringSelection = new StringSelection(sql);
-//                    final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-//                    clpbrd.setContents(stringSelection, null);
-//                } catch (Throwable ex) {
-//                    // catch any exception that might occur
-//                }
-//            }
-//        });
-//        c.gridy++;
-//        c.anchor = GridBagConstraints.LINE_END;
-//        c.fill = GridBagConstraints.NONE;
-//        c.weightx = 0;
-//        c.weighty = 0;
-//        c.insets = new Insets(5, 0, 5, 5);
-//        if (sql != null) {
-//            super.add(sqlButton, c);
-//        }
     }
 
 }

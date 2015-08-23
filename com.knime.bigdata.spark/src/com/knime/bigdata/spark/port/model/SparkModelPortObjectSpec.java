@@ -133,7 +133,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
      */
     @Override
     public JComponent[] getViews() {
-        return new JComponent[]{new SparkModelSpecView(m_model)};
+        return new JComponent[]{new SparkModelSpecView(this)};
     }
 
     /**
