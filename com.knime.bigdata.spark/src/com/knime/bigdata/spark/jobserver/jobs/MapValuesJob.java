@@ -61,6 +61,14 @@ public class MapValuesJob extends KnimeSparkJob {
             msg = "Input parameter '" + PARAM_MAPPING + "' missing.";
         }
 
+        if (msg == null && !aConfig.hasInputParameter(KnimeSparkJob.PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + KnimeSparkJob.PARAM_INPUT_TABLE + "' missing.";
+        }
+
+        if (msg == null && !aConfig.hasOutputParameter(KnimeSparkJob.PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + KnimeSparkJob.PARAM_RESULT_TABLE + "' missing.";
+        }
+
         if (msg != null) {
             return ValidationResultConverter.invalid(msg);
         }
@@ -77,32 +85,45 @@ public class MapValuesJob extends KnimeSparkJob {
         if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
             throw new GenericKnimeSparkException("Input data table missing for key: "+aConfig.getInputParameter(PARAM_INPUT_TABLE));
         }
-        LOGGER.log(Level.INFO, "In map values job");
         final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
-        final ColumnBasedValueMapping m_map = aConfig.decodeFromInputParameter(PARAM_MAPPING);
+        final ColumnBasedValueMapping map = getMapping(aConfig);
+        final JavaRDD<Row> mappedRDD = execute(inputRDD, map);
+        LOGGER.log(Level.INFO, "Mapping done");
+        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), mappedRDD);
+        return JobResult.emptyJobResult().withMessage("OK")
+                .withTable(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), null);
+    }
+
+    /**
+     * @param aConfig
+     * @return
+     * @throws GenericKnimeSparkException
+     */
+    private ColumnBasedValueMapping getMapping(final JobConfig aConfig) throws GenericKnimeSparkException {
+        return aConfig.decodeFromInputParameter(PARAM_MAPPING);
+    }
+
+    /**
+     * @param aInputRDD
+     * @param aMap
+     * @return
+     */
+    private static JavaRDD<Row> execute(final JavaRDD<Row> aInputRDD, final ColumnBasedValueMapping aMap) {
+        final List<Integer> idxs = aMap.getColumnIndices();
         final Function<Row, Row> function = new Function<Row, Row>(){
             private static final long serialVersionUID = 1L;
-//            private transient ColumnBasedValueMapping m_map = null;
             @Override
             public Row call(final Row r) throws Exception {
-//                if (m_map == null) {
-//                    m_map = aConfig.decodeFromInputParameter(PARAM_MAPPING);
-//                }
                 final RowBuilder rowBuilder = RowBuilder.fromRow(r);
-                final List<Integer> idxs = m_map.getColumnIndices();
                 for (final Integer idx : idxs) {
                     final Object object = r.get(idx);
-                    final Object mapVal = m_map.map(idx, object);
+                    final Object mapVal = aMap.map(idx, object);
                     rowBuilder.add(mapVal);
                 }
                 return rowBuilder.build();
             }
         };
-        final JavaRDD<Row> mappedRDD = inputRDD.map(function);
-        LOGGER.log(Level.INFO, "Mapping done");
-        addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), mappedRDD);
-        return JobResult.emptyJobResult().withMessage("OK")
-                .withTable(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), null);
+        return aInputRDD.map(function);
     }
 
 }

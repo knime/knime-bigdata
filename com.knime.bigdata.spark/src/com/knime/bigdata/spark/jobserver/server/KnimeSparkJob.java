@@ -82,10 +82,10 @@ public abstract class KnimeSparkJob extends KnimeSparkJobWithNamedRDD {
             if (event != null) {
                 //System.err.println("logging request for: " + event.getLevel() + ": " + event.getMessage());
 
-                if (event.getLevel() == Level.ERROR || event.getLevel() == Level.FATAL) {
+                if (m_severe.size() < 100 && event.getLevel() == Level.ERROR || event.getLevel() == Level.FATAL) {
                     m_severe.add(new String[] {event.getLoggerName() , event.getMessage().toString()});
                 }
-                if (event.getLevel() == Level.WARN) {
+                if (m_warn.size() < 100 && event.getLevel() == Level.WARN) {
                     m_warn.add(new String[] {event.getLoggerName() , event.getMessage().toString()});
                 }
             }
