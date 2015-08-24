@@ -26,14 +26,18 @@ import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
 
@@ -45,15 +49,13 @@ public class DecisionTreeTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer[] m_numericColIdx;
+    private Integer[] m_featureColIdxs;
 
     private final int m_classColIdx;
 
     private final String m_classColName;
 
     private final KNIMESparkContext m_context;
-
-    private String m_mappingTableName;
 
     private String m_inputTableName;
 
@@ -65,26 +67,32 @@ public class DecisionTreeTask implements Serializable {
 
     private String m_qualityMeasure;
 
-    DecisionTreeTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> aNumericColNames,
-        final String classColName, final int classColIdx, final SparkRDD mappingRDD, final int maxDepth,
-        final int maxNoOfBins, final String qualityMeasure) {
+    private Long m_noOfClasses;
+
+    private NominalFeatureInfo m_nomFeatureInfo;
+
+    DecisionTreeTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> afeatureColNames,
+        final NominalFeatureInfo nominalFeatureInfo, final String classColName, final int classColIdx,
+        final Long noOfClasses, final int maxDepth, final int maxNoOfBins, final String qualityMeasure) {
         m_maxDepth = maxDepth;
         m_maxNoOfBins = maxNoOfBins;
         m_qualityMeasure = qualityMeasure;
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_numericColIdx = featureColIdxs;
+        m_featureColIdxs = featureColIdxs;
+        m_nomFeatureInfo = nominalFeatureInfo;
         m_classColName = classColName;
-        final List<String> allColNames = new LinkedList<>(aNumericColNames);
+        m_classColIdx = classColIdx;
+        m_noOfClasses = noOfClasses;
+        final List<String> allColNames = new LinkedList<>(afeatureColNames);
         allColNames.add(classColName);
         m_colNames = allColNames.toArray(new String[allColNames.size()]);
-        m_classColIdx = classColIdx;
-        m_mappingTableName = mappingRDD == null ? null : mappingRDD.getID();
     }
 
-    DecisionTreeModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
+    DecisionTreeModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,
         CanceledExecutionException {
         final String learnerParams = learnerDef();
+        exec.checkCanceled();
         final String jobId =
             JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
 
@@ -95,28 +103,32 @@ public class DecisionTreeTask implements Serializable {
 
     /**
      * names of the columns (must include label column), required for value mapping info
+     * @throws GenericKnimeSparkException
      */
 
-    private String learnerDef() {
+    private String learnerDef() throws GenericKnimeSparkException {
         final Object[] inputParamas;
-        if (m_mappingTableName == null) {
+        if (m_nomFeatureInfo == null) {
             inputParamas =
-                new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                    ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins, ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth,
-                    ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
-                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
-                    JsonUtils.toJsonArray((Object[])m_colNames), ParameterConstants.PARAM_COL_IDXS,
-                    JsonUtils.toJsonArray((Object[])m_numericColIdx), ParameterConstants.PARAM_TABLE_1,
-                    m_inputTableName};
+                    new Object[]{DecisionTreeLearner.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                        DecisionTreeLearner.PARAM_MAX_BINS, m_maxNoOfBins,
+                        DecisionTreeLearner.PARAM_MAX_DEPTH, m_maxDepth,
+                        ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
+                        DecisionTreeLearner.PARAM_NO_OF_CLASSES, m_noOfClasses,
+                        ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])m_colNames),
+                        ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_featureColIdxs),
+                        KnimeSparkJob.PARAM_INPUT_TABLE, m_inputTableName};
         } else {
-            inputParamas =
-                new Object[]{ParameterConstants.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                    ParameterConstants.PARAM_MAX_BINS, m_maxNoOfBins, ParameterConstants.PARAM_MAX_DEPTH, m_maxDepth,
-                    ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
-                    ParameterConstants.PARAM_COL_IDXS + ParameterConstants.PARAM_STRING,
-                    JsonUtils.toJsonArray((Object[])m_colNames), ParameterConstants.PARAM_COL_IDXS,
-                    JsonUtils.toJsonArray((Object[])m_numericColIdx), ParameterConstants.PARAM_TABLE_1, m_inputTableName,
-                    ParameterConstants.PARAM_TABLE_2, m_mappingTableName};
+        inputParamas =
+            new Object[]{DecisionTreeLearner.PARAM_INFORMATION_GAIN, m_qualityMeasure,
+                DecisionTreeLearner.PARAM_MAX_BINS, m_maxNoOfBins,
+                DecisionTreeLearner.PARAM_MAX_DEPTH, m_maxDepth,
+                ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
+                DecisionTreeLearner.PARAM_NO_OF_CLASSES, m_noOfClasses,
+                ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])m_colNames),
+                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_featureColIdxs),
+                KnimeSparkJob.PARAM_INPUT_TABLE, m_inputTableName,
+                SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO, JobConfig.encodeToBase64(m_nomFeatureInfo)};
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{}});

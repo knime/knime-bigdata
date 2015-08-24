@@ -1,5 +1,8 @@
 package com.knime.bigdata.spark.jobserver.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,11 +13,19 @@ import javax.annotation.Nullable;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.mllib.linalg.Matrix;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.mllib.linalg.distributed.RowMatrix;
+import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
+import org.apache.spark.mllib.stat.Statistics;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
@@ -40,7 +51,7 @@ public class RDDUtilsInJava {
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
     public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType)  {
+        final int[] aColumnIds, final MappingType aMappingType) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
         final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
@@ -68,18 +79,23 @@ public class RDDUtilsInJava {
                 for (int ix : aColumnIds) {
                     //ignore columns that have no mapping
                     if (aMappings.hasMappingForColumn(ix)) {
-                        Integer labelOrIndex = aMappings.getNumberForValue(ix, row.getString(ix));
-                        if (aMappings.getType() == MappingType.BINARY) {
-                            int numValues = aMappings.getNumberOfValues(ix);
-                            for (int i = 0; i < numValues; i++) {
-                                if (labelOrIndex == i) {
-                                    builder.add(1.0d);
-                                } else {
-                                    builder.add(0.0d);
-                                }
-                            }
+                        Object val = row.get(ix);
+                        if (val == null) {
+                            builder.add(null);
                         } else {
-                            builder.add(labelOrIndex.doubleValue());
+                            Integer labelOrIndex = aMappings.getNumberForValue(ix, val.toString());
+                            if (aMappings.getType() == MappingType.BINARY) {
+                                int numValues = aMappings.getNumberOfValues(ix);
+                                for (int i = 0; i < numValues; i++) {
+                                    if (labelOrIndex == i) {
+                                        builder.add(1.0d);
+                                    } else {
+                                        builder.add(0.0d);
+                                    }
+                                }
+                            } else {
+                                builder.add(labelOrIndex.doubleValue());
+                            }
                         }
                     }
                 }
@@ -185,8 +201,11 @@ public class RDDUtilsInJava {
                 public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues, final Row row)
                     throws Exception {
                     for (int ix : aNominalColumnIndices) {
-                        //no need to add modified set as the modification is done implicitly
-                        aAggregatedValues.get(ix).add(row.getString(ix));
+                        Object val = row.get(ix);
+                        if (val != null) {
+                            //no need to add modified set as the modification is done implicitly
+                            aAggregatedValues.get(ix).add(val.toString());
+                        }
                     }
                     return aAggregatedValues;
                 }
@@ -203,6 +222,66 @@ public class RDDUtilsInJava {
                 }
             });
         return labels;
+    }
+
+    /**
+     * convert given RDD to an RDD<Vector> with selected columns and compute statistics for these columns
+     *
+     * @param aInputRdd
+     * @param aColumnIndices
+     * @return MultivariateStatisticalSummary
+     */
+    public static MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices) {
+
+        List<Integer> columnIndices = new ArrayList<Integer>();
+        columnIndices.addAll(aColumnIndices);
+        Collections.sort(columnIndices);
+
+        JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
+
+        // Compute column summary statistics.
+        MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
+        return summary;
+    }
+
+    /**
+     * computes the scale and translation parameters from the given data and according to the given normalization
+     * settings, then applies these parameters to the input RDD
+     *
+     * @param aInputRdd
+     * @param aColumnIndices indices of numeric columns to be normalized
+     * @param aNormalization
+     * @return container with normalization parameters for each of the given columns, other columns are just copied over
+     */
+    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices, final NormalizationSettings aNormalization) {
+
+        MultivariateStatisticalSummary stats = findColumnStats(aInputRdd, aColumnIndices);
+        final NormalizedRDDContainer rddNormalizer =
+            NormalizedRDDContainerFactory.getNormalizedRDDContainer(stats, aNormalization);
+
+        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        return rddNormalizer;
+    }
+
+    /**
+     * applies the given the scale and translation parameters to the given data to the input RDD
+     *
+     * @param aInputRdd
+     * @param aColumnIndices indices of numeric columns to be normalized
+     * @param aScalesAndTranslations normalization parameters
+     * @return container with normalization parameters for each of the given columns, other columns are just copied over
+     */
+    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
+        final Collection<Integer> aColumnIndices, final Double[][] aScalesAndTranslations) {
+
+        final NormalizedRDDContainer rddNormalizer =
+            NormalizedRDDContainerFactory.getNormalizedRDDContainer(aScalesAndTranslations[0],
+                aScalesAndTranslations[1]);
+
+        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
+        return rddNormalizer;
     }
 
     /**
@@ -230,7 +309,7 @@ public class RDDUtilsInJava {
     private static JavaRDD<LabeledPoint>
         toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex,
             @Nullable final NominalValueMapping labelMapping) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length()-1);
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length() - 1);
 
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
@@ -248,12 +327,51 @@ public class RDDUtilsInJava {
                 final double label;
                 if (labelMapping != null) {
                     label =
-                        labelMapping.getNumberForValue(labelColumnIndex, row.getString(labelColumnIndex)).doubleValue();
+                        labelMapping.getNumberForValue(labelColumnIndex, row.get(labelColumnIndex).toString())
+                            .doubleValue();
                 } else {
                     //no mapping given - label must already be numeric
                     label = row.getDouble(labelColumnIndex);
                 }
                 return new LabeledPoint(label, Vectors.dense(convertedValues));
+            }
+        });
+    }
+
+    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices) {
+        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length());
+
+        return inputRdd.map(new Function<Row, Vector>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Vector call(final Row row) {
+                int insertionIndex = 0;
+                final double[] convertedValues = new double[numFeatures];
+                for (int idx : aColumnIndices) {
+                    if (idx < row.length()) {
+                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
+                        insertionIndex += 1;
+                    }
+                }
+
+                return Vectors.dense(convertedValues);
+            }
+        });
+    }
+
+    private static JavaRDD<Row> fromVectorRdd(final JavaRDD<Vector> aInputRdd) {
+        return aInputRdd.map(new Function<Vector, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Vector row) {
+                final double[] values = row.toArray();
+                RowBuilder builder = RowBuilder.emptyRow();
+                for (int i = 0; i < values.length; i++) {
+                    builder.add(values[i]);
+                }
+                return builder.build();
             }
         });
     }
@@ -280,25 +398,18 @@ public class RDDUtilsInJava {
      * @param aKeys keys to be extracted
      * @return pair rdd with keys and original rows as values (no columns are filtered out)
      */
-    public static JavaPairRDD<String, Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
-        return aRdd.mapToPair(new PairFunction<Row, String, Row>() {
+    public static JavaPairRDD<MyJoinKey, Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
+        return aRdd.mapToPair(new PairFunction<Row, MyJoinKey, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Tuple2<String, Row> call(final Row aRow) throws Exception {
-                final StringBuilder keyValues = new StringBuilder();
-                //TODO - do we really need to merge the keys into a single String?
-                // (Object[] did not work)
+            public Tuple2<MyJoinKey, Row> call(final Row aRow) throws Exception {
+                final Object[] keyValues = new Object[aKeys.length];
                 int ix = 0;
-                boolean first = true;
                 for (int keyIx : aKeys) {
-                    if (!first) {
-                        keyValues.append("|");
-                        first = false;
-                    }
-                    keyValues.append(aRow.get(keyIx));
+                    keyValues[ix++] = aRow.get(keyIx);
                 }
-                return new Tuple2<String, Row>(keyValues.toString(), aRow);
+                return new Tuple2<MyJoinKey, Row>(new MyJoinKey(keyValues), aRow);
             }
         });
     }
@@ -344,6 +455,74 @@ public class RDDUtilsInJava {
                 builder.add(null);
             }
         }
+    }
+
+    /**
+     * convert the given JavaRDD of Row to a RowMatrix
+     *
+     * @param aRowRDD
+     * @param aColumnIds - indices of columns to select
+     * @return converted RowMatrix
+     */
+    public static RowMatrix toRowMatrix(final JavaRDD<Row> aRowRDD, final List<Integer> aColumnIds) {
+        final JavaRDD<Vector> vectorRDD = toVectorRdd(aRowRDD, aColumnIds);
+        return new RowMatrix(vectorRDD.rdd());
+    }
+
+    /**
+     * convert the given RowMatrix to a JavaRDD of Row
+     *
+     * @param aRowMatrix
+     * @return converted JavaRDD
+     */
+    public static JavaRDD<Row> fromRowMatrix(final RowMatrix aRowMatrix) {
+        final RDD<Vector> rows = aRowMatrix.rows();
+        final JavaRDD<Vector> vectorRows = new JavaRDD<>(rows, rows.elementClassTag());
+        return fromVectorRdd(vectorRows);
+    }
+
+    /**
+     * convert the given Matrix to a JavaRDD of Row
+     *
+     * @param aContext java context, required for RDD construction
+     *
+     * @param aMatrix
+     * @return converted JavaRDD
+     */
+    public static JavaRDD<Row> fromMatrix(final JavaSparkContext aContext, final Matrix aMatrix) {
+        final int nRows = aMatrix.numRows();
+        final int nCols = aMatrix.numCols();
+        final List<Row> rows = new ArrayList<>(nRows);
+        for (int i = 0; i < nRows; i++) {
+            RowBuilder builder = RowBuilder.emptyRow();
+            for (int j = 0; j < nCols; j++) {
+                builder.add(aMatrix.apply(i, j));
+            }
+            rows.add(builder.build());
+        }
+        return aContext.parallelize(rows);
+    }
+
+
+    /**
+     *
+     * @param aUserIx
+     * @param aProductIx
+     * @param aRatingIx
+     * @param aInputRdd
+     * @return ratings rdd
+     */
+    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx, final int aRatingIx,
+        final JavaRDD<Row> aInputRdd) {
+        JavaRDD<Rating> ratings = aInputRdd.map(new Function<Row, Rating>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Rating call(final Row aRow) {
+                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), aRow.getDouble(aRatingIx));
+            }
+        });
+        return ratings;
     }
 
 }

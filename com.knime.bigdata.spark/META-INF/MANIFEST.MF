@@ -8,7 +8,6 @@ Bundle-ClassPath: knime-spark.jar,
  lib/hk2-api-2.4.0-b10.jar,
  lib/hk2-locator-2.4.0-b10.jar,
  lib/hk2-utils-2.4.0-b10.jar,
- lib/javax.annotation-api-1.2.jar,
  lib/javax.inject-2.4.0-b10.jar,
  lib/javax.ws.rs-api-2.0.1.jar,
  lib/jersey-client-2.17.jar,
@@ -18,8 +17,17 @@ Bundle-ClassPath: knime-spark.jar,
  lib/mimepull-1.9.3.jar,
  lib/osgi-resource-locator-1.0.1.jar,
  lib/jobServerUtilsApi.jar,
- lib/spark-assembly-1.2.1-hadoop2.4.0.jar,
- conf/
+ conf/,
+ lib/typesafe-config.jar,
+ lib/spark-core_2.10-1.2.2.jar,
+ lib/spark-sql_2.10-1.2.2.jar,
+ lib/scala-library.jar,
+ lib/spark-mllib_2.10-1.2.2.jar,
+ lib/jsr305-1.3.2.jar,
+ lib/scala-reflect.jar,
+ lib/javax.annotation-api-1.2.jar,
+ lib/spark-sql-api.jar
+Bundle-Activator: com.knime.bigdata.spark.SparkPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
@@ -35,8 +43,11 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  com.fifesoft.languagesupport;bundle-version="[2.5.7,3.0.0)",
  com.fifesoft.rstaui;bundle-version="[2.5.7,3.0.0)",
  com.fifesoft.rsyntaxtextarea;bundle-version="[2.5.7,3.0.0)",
- com.fifesoft.spellchecker;bundle-version="[2.5.7,3.0.0)"
+ com.fifesoft.spellchecker;bundle-version="[2.5.7,3.0.0)",
+ net.sf.saxon;bundle-version="[9.5.18,9.6.0)",
+ org.apache.log4j;bundle-version="[1.2.15,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.knime.base.pmml.translation
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.knime.bigdata.spark.SparkPlugin
-Import-Package: org.knime.base.pmml.translation
+Import-Package: org.apache.commons.lang3;version="3.2.1"

@@ -35,14 +35,13 @@ import spark.jobserver.SparkJobValidation;
 
 import com.google.common.base.Optional;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.JoinMode;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.MyJoinKey;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 
 /**
  * executes join of two JavaRDD<Row> and puts result into a JavaRDD<Row>
@@ -53,29 +52,40 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_LEFT_RDD = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    /**
+     * left join RDD
+     */
+    public static final String PARAM_LEFT_RDD = "LeftRDD";
 
-    private static final String PARAM_RIGHT_RDD = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_2;
+    /**
+     * right joing RDD
+     */
+    public static final String PARAM_RIGHT_RDD = "RightRDD";
 
-    private static final String PARAM_JOIN_MODE = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_STRING;
+    /**
+     * join mode
+     */
+    public static final String PARAM_JOIN_MODE = "JoinMode";
 
-    private static final String PARAM_JOIN_INDEXES_LEFT = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 0);
+    /**
+     * join indices of left join RDD
+     */
+    public static final String PARAM_JOIN_INDEXES_LEFT = "JoinIndicesLeft";
 
-    private static final String PARAM_JOIN_INDEXES_RIGHT = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 1);
+    /**
+     * join indices of right join RDD
+     */
+    public static final String PARAM_JOIN_INDEXES_RIGHT = "JoinIndicesRight";
 
-    private static final String PARAM_SELECT_INDEXES_LEFT = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 2);
+    /**
+     * selected indices of left join rdd
+     */
+    public static final String PARAM_SELECT_INDEXES_LEFT = "SelectIndicesLeft";
 
-    private static final String PARAM_SELECT_INDEXES_RIGHT = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.NUMBERED_PARAM(ParameterConstants.PARAM_COL_IDXS, 3);
-
-    private static final String PARAM_RESULT_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    /**
+     * selected indices of right join rdd
+     */
+    public static final String PARAM_SELECT_INDEXES_RIGHT = "SelectIndicesRight";
 
     private final static Logger LOGGER = Logger.getLogger(JoinJob.class.getName());
 
@@ -84,14 +94,14 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasPath(PARAM_LEFT_RDD)) {
+        if (!aConfig.hasInputParameter(PARAM_LEFT_RDD)) {
             msg = "Input parameter '" + PARAM_LEFT_RDD + "' missing.";
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_RIGHT_RDD)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_RIGHT_RDD)) {
             msg = "Input parameter '" + PARAM_RIGHT_RDD + "' missing.";
         }
 
@@ -108,18 +118,20 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
             msg = checkIntegerListParam(aConfig, PARAM_SELECT_INDEXES_RIGHT);
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_JOIN_MODE)) {
-            msg = "Input parameter '" + PARAM_JOIN_MODE + "' missing.";
-        } else {
-            try {
-                JoinMode.fromKnimeJoinMode(aConfig.getString(PARAM_JOIN_MODE));
-            } catch (Exception e) {
-                msg = "Input parameter '" + PARAM_JOIN_MODE + "' has an invalid value.";
+        if (msg == null) {
+            if (!aConfig.hasInputParameter(PARAM_JOIN_MODE)) {
+                msg = "Input parameter '" + PARAM_JOIN_MODE + "' missing.";
+            } else {
+                try {
+                    JoinMode.fromKnimeJoinMode(aConfig.getInputParameter(PARAM_JOIN_MODE));
+                } catch (Exception e) {
+                    msg = "Input parameter '" + PARAM_JOIN_MODE + "' has an invalid value.";
+                }
             }
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_RESULT_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_RESULT_TABLE_KEY + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -135,26 +147,26 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      * @param aParamName
      * @return null if NO error is encountered, error message otherwise
      */
-    private static String checkIntegerListParam(final Config aConfig, final String aParamName) {
-        if (!aConfig.hasPath(aParamName)) {
+    private static String checkIntegerListParam(final JobConfig aConfig, final String aParamName) {
+        if (!aConfig.hasInputParameter(aParamName)) {
             return "Input parameter '" + aParamName + "' missing.";
         } else {
             try {
-                List<Integer> vals = aConfig.getIntList(aParamName);
+                List<Integer> vals = aConfig.getInputListParameter(aParamName, Integer.class);
                 if (vals.size() < 1) {
                     return "Input parameter '" + aParamName + "' is empty.";
                 }
-            } catch (ConfigException e) {
+            } catch (Exception e) {
                 return "Input parameter '" + aParamName + "' is not of expected type 'integer list'.";
             }
         }
         return null;
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
         {
-            final String key = aConfig.getString(PARAM_LEFT_RDD);
+            final String key = aConfig.getInputParameter(PARAM_LEFT_RDD);
             if (key == null) {
                 msg = "Input parameter at port 1 is missing!";
             } else if (!validateNamedRdd(key)) {
@@ -162,7 +174,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
             }
         }
         {
-            final String key = aConfig.getString(PARAM_RIGHT_RDD);
+            final String key = aConfig.getInputParameter(PARAM_RIGHT_RDD);
             if (key == null) {
                 msg = "Input parameter at port 2 is missing!";
             } else if (!validateNamedRdd(key)) {
@@ -184,49 +196,50 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         validateInput(aConfig);
-        final JoinMode mode = JoinMode.fromKnimeJoinMode(aConfig.getString(PARAM_JOIN_MODE));
+        final JoinMode mode = JoinMode.fromKnimeJoinMode(aConfig.getInputParameter(PARAM_JOIN_MODE));
         LOGGER.log(Level.INFO, "computing " + mode.toString() + " of two RDDs...");
 
-        final List<Integer> joinIdxLeft = aConfig.getIntList(PARAM_JOIN_INDEXES_LEFT);
-        JavaPairRDD<String, Row> leftRdd =
-            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_LEFT_RDD)),
+        final List<Integer> joinIdxLeft = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_LEFT, Integer.class);
+        JavaPairRDD<MyJoinKey, Row> leftRdd =
+            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_LEFT_RDD)),
                 joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
-        final List<Integer> joinIdxRight = aConfig.getIntList(PARAM_JOIN_INDEXES_RIGHT);
-        JavaPairRDD<String, Row> rightRdd =
-            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getString(PARAM_RIGHT_RDD)),
+        final List<Integer> joinIdxRight = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_RIGHT, Integer.class);
+        JavaPairRDD<MyJoinKey, Row> rightRdd =
+            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_RIGHT_RDD)),
                 joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
 
-        final List<Integer> colIdxLeft = aConfig.getIntList(PARAM_SELECT_INDEXES_LEFT);
-        final List<Integer> colIdxRight = aConfig.getIntList(PARAM_SELECT_INDEXES_RIGHT);
+        final List<Integer> colIdxLeft = aConfig.getInputListParameter(PARAM_SELECT_INDEXES_LEFT, Integer.class);
+        final List<Integer> colIdxRight = aConfig.getInputListParameter(PARAM_SELECT_INDEXES_RIGHT, Integer.class);
 
         //printRDD(leftRdd.collect(), "Left table:");
         //printRDD(rightRdd.collect(), "Right table:");
         final JavaRDD<Row> resultRdd;
         switch (mode) {
             case InnerJoin: {
-                JavaPairRDD<String, Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Row, Row>> joinedRdd = leftRdd.join(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case LeftOuterJoin: {
-                JavaPairRDD<String, Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case RightOuterJoin: {
-                JavaPairRDD<String, Tuple2<Optional<Row>, Row>> joinedRdd = leftRdd.rightOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Optional<Row>, Row>> joinedRdd = leftRdd.rightOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             case FullOuterJoin: {
-                JavaPairRDD<String, Tuple2<Optional<Row>, Optional<Row>>> joinedRdd = leftRdd.fullOuterJoin(rightRdd);
-                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd.values(), colIdxLeft, colIdxRight);
+                JavaRDD<Tuple2<Optional<Row>, Optional<Row>>> joinedRdd = leftRdd.fullOuterJoin(rightRdd).values();
+                resultRdd = RDDUtilsInJava.mergeRows(joinedRdd, colIdxLeft, colIdxRight);
                 break;
             }
             default: {
-                throw new GenericKnimeSparkException("ERROR: unsupported join mode: "+mode);
+                throw new GenericKnimeSparkException("ERROR: unsupported join mode: " + mode);
             }
         }
 
@@ -236,7 +249,7 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.INFO, "done");
 
-        final String key = aConfig.getString(PARAM_RESULT_TABLE_KEY);
+        final String key = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE);
         LOGGER.log(Level.INFO, "Storing join result under key: " + key);
         addToNamedRdds(key, resultRdd);
         return JobResult.emptyJobResult().withMessage("OK");

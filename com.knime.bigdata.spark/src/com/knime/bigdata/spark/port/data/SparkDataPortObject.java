@@ -35,6 +35,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
@@ -48,7 +49,6 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
-import org.knime.core.util.SwingWorkerWithContext;
 
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
@@ -190,15 +190,15 @@ public class SparkDataPortObject implements PortObject {
                 panels[0].repaint();
                 panels[0].revalidate();
                 //TK_TODO: Add job cancel button to the dialog to allow users to stop the fetching job
-                final SwingWorkerWithContext<DataTable, Void> worker  = new SwingWorkerWithContext<DataTable, Void>() {
+                final SwingWorker<DataTable, Void> worker  = new SwingWorker<DataTable, Void>() {
                     /** {@inheritDoc} */
                     @Override
-                    protected DataTable doInBackgroundWithContext() throws Exception {
+                    protected DataTable doInBackground() throws Exception {
                         return SparkDataTableCreator.getDataTable(null, getData(), value.get());
                     }
                     /** {@inheritDoc} */
                     @Override
-                    protected void doneWithContext() {
+                    protected void done() {
                         DataTable dt = null;
                         try {
                             dt = super.get();

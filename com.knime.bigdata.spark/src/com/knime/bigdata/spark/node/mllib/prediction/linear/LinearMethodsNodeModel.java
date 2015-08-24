@@ -21,46 +21,39 @@
 package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
-import com.knime.bigdata.spark.node.preproc.convert.stringmapper.SparkStringMapperNodeModel;
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
+import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.util.SparkUtil;
+import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  * @param <M> the MLlib model
  */
 public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSparkNodeModel {
 
-    private final SettingsModelString m_classCol = createClassColModel();
-
-    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+    private final MLlibNodeSettings m_classCol = new MLlibNodeSettings(true);
 
     private final SettingsModelInteger m_noOfIterations = createNumberOfIterationsModel();
 
@@ -77,25 +70,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
      */
     public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath,
         final SparkModelInterpreter<SparkModel<M>> interpreter) {
-        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
+        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
             new PortType[]{SparkModelPortObject.TYPE});
         m_jobClassPath = jobClassPath;
         m_interpreter = interpreter;
-    }
-
-    /**
-     * @return the class column model
-     */
-    static SettingsModelString createClassColModel() {
-        return new SettingsModelString("classColumn", null);
-    }
-
-    /**
-     * @return the feature column model
-     */
-    @SuppressWarnings("unchecked")
-    static SettingsModelColumnFilter2 createColumnsModel() {
-        return new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
     }
 
     /**
@@ -121,25 +99,11 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
-        if (mapSpec != null && !SparkStringMapperNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-        }
-        final DataTableSpec tableSpec = spec.getTableSpec();
-        final String classColName = m_classCol.getStringValue();
-        if (classColName == null) {
-            throw new InvalidSettingsException("No class column selected");
-        }
-        int classColIdx = tableSpec.findColumnIndex(classColName);
-        if (classColIdx < 0) {
-            throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
-        }
-        final FilterResult result = m_cols.applyTo(tableSpec);
-        final List<String> featureColNames =  Arrays.asList(result.getIncludes());
-        Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
-        if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
-            throw new InvalidSettingsException("Class column also selected as feature column");
-        }
+//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+//      if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+//          throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+//      }
+        m_classCol.check(spec.getTableSpec());
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
     }
@@ -150,29 +114,18 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final SparkDataPortObject mapping = (SparkDataPortObject)inObjects[1];
+        final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting " + m_interpreter.getModelName() + " learner");
         exec.checkCanceled();
-        final DataTableSpec tableSpec = data.getTableSpec();
-        final String classColName = m_classCol.getStringValue();
-        int classColIdx = tableSpec.findColumnIndex(classColName);
-        if (classColIdx < 0) {
-            throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
-        }
-        final FilterResult filterResult = m_cols.applyTo(tableSpec);
-        final List<String> featureColNames = Arrays.asList(filterResult.getIncludes());
-        final Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
-        if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
-            throw new InvalidSettingsException("Class column also selected as feature column");
-        }
+        final MLlibSettings s = m_classCol.getSettings(data, mapping);
         final double regularization = m_regularization.getDoubleValue();
         final int noOfIterations = m_noOfIterations.getIntValue();
-        final SGDLearnerTask task = new SGDLearnerTask(data.getData(), featureColIdxs, featureColNames, classColName,
-            classColIdx, mapping == null ? null : mapping.getData(), noOfIterations, regularization, m_jobClassPath);
+        final SGDLearnerTask task = new SGDLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getFatureColNames(),
+            s.getClassColName(), s.getClassColIdx(), s.getNominalFeatureInfo(), noOfIterations, regularization,
+            m_jobClassPath);
         @SuppressWarnings("unchecked")
         final M linearModel = (M)task.execute(exec);
-        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel,
-                m_interpreter, tableSpec, classColName, featureColNames))};
+        return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel, m_interpreter, s))};
 
     }
 
@@ -189,7 +142,6 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_classCol.saveSettingsTo(settings);
-        m_cols.saveSettingsTo(settings);
         m_noOfIterations.saveSettingsTo(settings);
         m_regularization.saveSettingsTo(settings);
     }
@@ -200,7 +152,6 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.validateSettings(settings);
-        m_cols.validateSettings(settings);
         m_noOfIterations.validateSettings(settings);
         m_regularization.validateSettings(settings);
     }
@@ -211,7 +162,6 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_classCol.loadSettingsFrom(settings);
-        m_cols.loadSettingsFrom(settings);
         m_noOfIterations.loadSettingsFrom(settings);
         m_regularization.loadSettingsFrom(settings);
     }

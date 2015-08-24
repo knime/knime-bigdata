@@ -27,6 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
@@ -34,6 +36,17 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  * @author dwk
  */
 interface IRestClient {
+
+    /**
+     * check the status of the given response
+     *
+     * @param response response to check
+     * @param jobClassName the {@link KnimeSparkJob} that belongs to the response
+     * @param aJsonParams the {@link JobConfig} of the job
+     * @throws GenericKnimeSparkException if the status is not ok
+     */
+    void checkJobStatus(Response response, String jobClassName, String aJsonParams)
+            throws GenericKnimeSparkException;
 
     /**
      * check the status of the given response

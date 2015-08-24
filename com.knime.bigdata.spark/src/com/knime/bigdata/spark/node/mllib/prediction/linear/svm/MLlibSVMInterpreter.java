@@ -26,13 +26,13 @@ import org.apache.spark.mllib.classification.SVMModel;
 
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearMethodsNodeModel;
 import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.SparkModelInterpreter;
+import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibSVMInterpreter implements SparkModelInterpreter<SparkModel<SVMModel>> {
+public class MLlibSVMInterpreter extends HTMLModelInterpreter<SparkModel<SVMModel>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class MLlibSVMInterpreter implements SparkModelInterpreter<SparkModel<SVM
      * {@inheritDoc}
      */
     @Override
-    public String getDescription(final SparkModel<SVMModel> model) {
+    public String getHTMLDescription(final SparkModel<SVMModel> model) {
         final SVMModel svmModel = model.getModel();
         final List<String> columnNames = model.getLearningColumnNames();
         final double[] weights = svmModel.weights().toArray();

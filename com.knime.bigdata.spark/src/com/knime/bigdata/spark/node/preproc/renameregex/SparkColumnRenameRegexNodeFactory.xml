@@ -71,8 +71,8 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Input RDD">Arbitrary input Spark RDD.</inPort>
-        <outPort index="0" name="Input RDD with renamed columns">
+        <inPort index="0" name="Spark RDD">Arbitrary input Spark RDD.</inPort>
+        <outPort index="0" name="Spark RDD with renamed columns">
             Input Spark RDD with renamed columns according to configuration
             parameters.
         </outPort>

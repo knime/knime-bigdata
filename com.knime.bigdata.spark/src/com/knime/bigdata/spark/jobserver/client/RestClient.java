@@ -7,6 +7,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
@@ -34,6 +36,18 @@ public class RestClient {
 
     private static final IRestClient client = RestClientFactory.getClient();
 
+    /**
+     * check the status of the given response
+     *
+     * @param response response to check
+     * @param jobClassName the name of the {@link KnimeSparkJob} that belongs to the response
+     * @param aJsonParams the {@link JobConfig} of the job
+     * @throws GenericKnimeSparkException if the status is not ok
+     */
+    public static void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
+            throws GenericKnimeSparkException {
+        client.checkJobStatus(response, jobClassName, aJsonParams);
+    }
     /**
      * check the status of the given response
      *

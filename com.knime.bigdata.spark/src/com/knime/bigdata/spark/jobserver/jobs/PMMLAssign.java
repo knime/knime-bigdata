@@ -36,14 +36,13 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 
 /**
  * applies a compiled pmml model to the input data
@@ -54,23 +53,14 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_DATA_FILE_NAME = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
 
-    private static final String PARAM_MODEL = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_MODEL_NAME;
+    /**
+     * boolean that indicates if probabilities should be added
+     */
+    public static final String PARAM_APPEND_PROBABILITIES = "appendProbabilities";
 
-    private static final String PARAM_COL_IDXS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_COL_IDXS;
-
-    private static final String PARAM_PROBS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_APPEND_PROBABILITIES;
-
-    private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_INPUT + "."
-        + ParameterConstants.PARAM_MAIN_CLASS;
-
-    private static final String PARAM_OUTPUT_DATA_PATH = ParameterConstants.PARAM_OUTPUT + "."
-        + ParameterConstants.PARAM_TABLE_1;
+    private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_MAIN_CLASS;
 
     private final static Logger LOGGER = Logger.getLogger(PMMLAssign.class.getName());
 
@@ -78,34 +68,26 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
      * parse parameters
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
-        if (!aConfig.hasPath(PARAM_DATA_FILE_NAME)) {
-            msg = "Input parameter '" + PARAM_DATA_FILE_NAME + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
         if (msg == null) {
-            if (!aConfig.hasPath(PARAM_COL_IDXS)) {
-                msg = "Input parameter '" + PARAM_COL_IDXS + "' missing.";
-            } else {
-                try {
-                    aConfig.getIntList(PARAM_COL_IDXS);
-                } catch (ConfigException e) {
-                    msg = "Input parameter '" + PARAM_COL_IDXS + "' is not of expected type 'integer list'.";
-                }
-            }
+            msg = SupervisedLearnerUtils.checkSelectedColumnIdsParameter(aConfig);
         }
 
-        if (msg == null && !aConfig.hasPath(PARAM_OUTPUT_DATA_PATH)) {
-            msg = "Output parameter '" + PARAM_OUTPUT_DATA_PATH + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_PROBS)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_APPEND_PROBABILITIES)) {
             msg = "Append probabilities missing!";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_MAIN_CLASS)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_MAIN_CLASS)) {
             msg = "Main class name missing!";
         }
-        if (msg == null && !aConfig.hasPath(PARAM_MODEL)) {
+        if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
             msg = "Compiled PMML model missing!";
         }
         if (msg != null) {
@@ -114,9 +96,9 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         return ValidationResultConverter.valid();
     }
 
-    private void validateInput(final Config aConfig) throws GenericKnimeSparkException {
+    private void validateInput(final JobConfig aConfig) throws GenericKnimeSparkException {
         String msg = null;
-        if (!validateNamedRdd(aConfig.getString(PARAM_DATA_FILE_NAME))) {
+        if (!validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE))) {
             msg = "Input data table missing!";
         }
         if (msg != null) {
@@ -133,14 +115,15 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         validateInput(aConfig);
         LOGGER.log(Level.FINE, "starting pmml prediction job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getString(PARAM_DATA_FILE_NAME));
-        final List<Integer> colIdxs = aConfig.getIntList(PARAM_COL_IDXS);
-        final boolean addProbabilites = aConfig.getBoolean(PARAM_PROBS);
-        final String mainClass = aConfig.getString(PARAM_MAIN_CLASS);
-        final Map<String, byte[]> bytecode = ModelUtils.fromString(aConfig.getString(PARAM_MODEL));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
+        final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
+        final boolean addProbabilites = aConfig.getInputParameter(PARAM_APPEND_PROBABILITIES, Boolean.class);
+        final String mainClass = aConfig.getInputParameter(PARAM_MAIN_CLASS);
+        final Map<String, byte[]> bytecode = aConfig.decodeFromInputParameter(PARAM_MODEL);
         try {
             final Function<Row, Row> predict = new Function<Row, Row>() {
                 private static final long serialVersionUID = 1L;
@@ -177,10 +160,10 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
                 }
             };
             final JavaRDD<Row> predicted = rowRDD.map(predict);
-            addToNamedRdds(aConfig.getString(PARAM_OUTPUT_DATA_PATH), predicted);
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predicted);
             LOGGER.log(Level.FINE, "pmml prediction done");
             return JobResult.emptyJobResult().withMessage("OK")
-                .withTable(aConfig.getString(PARAM_OUTPUT_DATA_PATH), null);
+                .withTable(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), null);
         } catch (Exception e) {
             final String msg = "Exception in pmml prediction job: " + e.getMessage();
             LOGGER.log(Level.SEVERE, msg, e);
