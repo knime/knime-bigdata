@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.scripting.java.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -201,7 +202,23 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
             final String root = SparkPlugin.getDefault().getPluginRootPath();
 //            jarFiles.add(new File(root+"/bin/"));
             jarFiles.add(new File(root+"/lib/jobServerUtilsApi.jar"));
-            jarFiles.add(new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar"));
+//            jarFiles.add(new File(root+"/lib/scala-library.jar"));
+//            jarFiles.add(new File(root+"/lib/scala-reflect.jar"));
+//            jarFiles.add(new File(root+"/lib/spark-core_2.10-1.2.2.jar"));
+//            jarFiles.add(new File(root+"/lib/spark-mllib_2.10-1.2.2.jar"));
+//            jarFiles.add(new File(root+"/lib/spark-sql_2.10-1.2.2.jar"));
+//            jarFiles.add(new File(root+"/lib/spark-sql-api.jar"));
+//            jarFiles.add(new File(root+"/lib/typesafe-config.jar"));
+            final File libDir = new File(root+"/lib");
+            final String[] libJarNames = libDir.list(new FilenameFilter() {
+                @Override
+                public boolean accept(final File dir, final String name) {
+                    return name.endsWith(".jar");
+                }
+            });
+            for (String jarName : libJarNames) {
+                jarFiles.add(new File(root+"/lib/"+jarName));
+            }
             jarFiles.add(new File(root+"/resources/knimeJobs.jar"));
             jarFiles.add(jSnippetJar);
             if (null != m_jarFiles && m_jarFiles.length > 0) {

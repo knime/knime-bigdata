@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -22,6 +23,7 @@ import com.typesafe.config.ConfigValueFactory;
  */
 class DummyRestClient implements IRestClient {
     private final static Logger LOGGER = Logger.getLogger(DummyRestClient.class.getName());
+
 
     /**
      * check the status of the given response
@@ -46,6 +48,16 @@ class DummyRestClient implements IRestClient {
         LOGGER.severe("Status is: " + s);
         LOGGER.severe("Indication: " + response.toString());
         throw new GenericKnimeSparkException(msg.toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
+        throws GenericKnimeSparkException {
+        checkStatus(response, "Executiong Spark job " + jobClassName + " with parameters: " + aJsonParams + " faield.",
+            new Status[]{Status.ACCEPTED, Status.OK});
     }
 
     @Override
@@ -89,7 +101,7 @@ class DummyRestClient implements IRestClient {
 
     @Override
     public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
-        String val = "{\"result\":\"OK\"}";
+        String val = JobResult.emptyJobResult().withMessage("OK").toString();
         if (KNIMEConfigContainer.m_config.hasPath(aType)) {
             val = KNIMEConfigContainer.m_config.getString(aType);
         }
@@ -118,4 +130,5 @@ class DummyRestClient implements IRestClient {
 
         return myResponse.getString(aSubField);
     }
+
 }

@@ -66,14 +66,6 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getSummary() {
-        return m_model.getSummary();
-    }
-
-    /**
      * Creates a new database port object.
      * @param model
      */
@@ -124,8 +116,16 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
      * {@inheritDoc}
      */
     @Override
+    public String getSummary() {
+        return m_model.getSummary();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JComponent[] getViews() {
-        return new JComponent[]{new SparkModelView(m_model)};
+        return m_model.getViews();
     }
 
     /**

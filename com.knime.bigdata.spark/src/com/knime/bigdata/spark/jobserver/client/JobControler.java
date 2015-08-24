@@ -2,8 +2,7 @@ package com.knime.bigdata.spark.jobserver.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
 
 import javax.annotation.Nullable;
 import javax.json.JsonArray;
@@ -17,17 +16,18 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.NodeLogger;
 
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkIDs;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -43,10 +43,10 @@ public class JobControler {
      */
     public static final String JOBS_PATH = "/jobs/";
 
-    private final static Logger LOGGER = Logger.getLogger(JobControler.class.getName());
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(JobControler.class.getName());
 
     /**We use the Spark application ID which is based on the KNIME id which is unique per workspace.*/
-    final static String appName = SparkIDs.getSparkApplicationID();
+    final static String APP_NAME = SparkIDs.getSparkApplicationID();
 
     /**
      * upload a jar file to the server TODO - need to dynamically create jar file
@@ -58,26 +58,27 @@ public class JobControler {
      */
     public static void uploadJobJar(final KNIMESparkContext aContextContainer, final String aJarPath)
             throws GenericKnimeSparkException {
-        uploadJar(aContextContainer, aJarPath, appName);
+        uploadJar(aContextContainer, aJarPath, APP_NAME);
     }
 
     /**
-     * upload a jar file to the server
+     * Upload a jar file to the server.
+     * NOTICE: The classes within this jar are only visible to jobs with the same application name!
      *
      * @param aContextContainer context configuration container
      * @param aJarPath
-     * @param name the application name for the jar
+     * @param appName the application name for the jar
      *
      * @throws GenericKnimeSparkException
      */
-    public static void uploadJar(final KNIMESparkContext aContextContainer, final String aJarPath, final String name)
+    public static void uploadJar(final KNIMESparkContext aContextContainer, final String aJarPath, final String appName)
         throws GenericKnimeSparkException {
         final File jarFile = new File(aJarPath);
         if (!jarFile.exists()) {
             final String msg =
                 "ERROR: job jar file '" + jarFile.getAbsolutePath()
                     + "' does not exist. Make sure to set the proper (relative) path in the application.conf file.";
-            LOGGER.severe(msg);
+            LOGGER.error(msg);
             throw new GenericKnimeSparkException(msg);
         }
 
@@ -85,10 +86,10 @@ public class JobControler {
         // curl command:
         // curl --data-binary @job-server-tests/target/job-server-tests-$VER.jar
         // localhost:8090/jars/test
-        Response response =
-            RestClient.post(aContextContainer, "/jars/" + name, null, Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
+        Response response = RestClient.post(aContextContainer, "/jars/" + appName, null,
+            Entity.entity(jarFile, MediaType.APPLICATION_OCTET_STREAM));
 
-        RestClient.checkStatus(response, "Error: failed to upload jar to server", Status.OK);
+        RestClient.checkStatus(response, "Failed to upload jar to server. Jar path: " + aJarPath, Status.OK);
     }
 
     /**
@@ -100,7 +101,8 @@ public class JobControler {
      * @return job id
      * @throws GenericKnimeSparkException
      */
-    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath) throws GenericKnimeSparkException {
+    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath)
+            throws GenericKnimeSparkException {
         return startJob(aContextContainer, aClassPath, "");
     }
 
@@ -114,8 +116,8 @@ public class JobControler {
      * @return job id
      * @throws GenericKnimeSparkException
      */
-    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath, final String aJsonParams)
-        throws GenericKnimeSparkException {
+    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath,
+        final String aJsonParams) throws GenericKnimeSparkException {
         try {
             KnimeSparkJob job = (KnimeSparkJob)Class.forName(aClassPath).newInstance();
             return startJob(aContextContainer, job, aJsonParams);
@@ -138,7 +140,7 @@ public class JobControler {
         startJob(final KNIMESparkContext aContextContainer, final KnimeSparkJob aJobInstance, final String aJsonParams)
             throws GenericKnimeSparkException {
 
-        Config config = ConfigFactory.parseString(aJsonParams);
+        JobConfig config = new JobConfig(ConfigFactory.parseString(aJsonParams));
         SparkJobValidation validation = aJobInstance.validate(config);
         if (!ValidationResultConverter.isValid(validation)) {
             throw new GenericKnimeSparkException(validation.toString());
@@ -147,14 +149,15 @@ public class JobControler {
         // curl command would be:
         // curl --data-binary @classification-config.json
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
+        final String jobClassName = aJobInstance.getClass().getCanonicalName();
         Response response =
-            RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", appName, "context", aContextContainer.getContextName(), "classPath",
-                aJobInstance.getClass().getCanonicalName()}, Entity.text(aJsonParams));
-
-        RestClient.checkStatus(response, "Error: failed to start job: " + aJobInstance.getClass().getCanonicalName()
-            + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
-            + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
-            Status.ACCEPTED, Status.OK});
+            RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
+                aContextContainer.getContextName(), "classPath", jobClassName}, Entity.text(aJsonParams));
+        RestClient.checkJobStatus(response, jobClassName, aJsonParams);
+//        RestClient.checkStatus(response, "Error: failed to start job: " + aJobInstance.getClass().getCanonicalName()
+//            + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
+//            + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
+//            Status.ACCEPTED, Status.OK});
         return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
     }
 
@@ -169,8 +172,8 @@ public class JobControler {
      * @return job id
      * @throws GenericKnimeSparkException
      */
-    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath, final String aJsonParams,
-        final File aDataFile) throws GenericKnimeSparkException {
+    public static String startJob(final KNIMESparkContext aContextContainer, final String aClassPath,
+        final String aJsonParams, final File aDataFile) throws GenericKnimeSparkException {
 
         // start actual job
         // curl command would be:
@@ -179,20 +182,17 @@ public class JobControler {
 
         try (final MultiPart multiPart = new MultiPart()) {
             multiPart.bodyPart(aJsonParams, MediaType.APPLICATION_JSON_TYPE).bodyPart(
-                new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1,
+                new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + KnimeSparkJob.PARAM_INPUT_TABLE,
                     aDataFile));
 
             final Response response =
-                RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", appName, "context", aContextContainer.getContextName(), "classPath",
-                    aClassPath}, Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+                RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
+                    aContextContainer.getContextName(), "classPath", aClassPath},
+                    Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
             multiPart.close();
 
             //			Response response = builder.post(Entity.text(aJsonParams));
-
-            RestClient.checkStatus(response, "Error: failed to start job: " + aClassPath
-                + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
-                + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
-                Status.ACCEPTED, Status.OK});
+            RestClient.checkJobStatus(response, aClassPath, aJsonParams);
             return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
         } catch (final IOException e) {
             throw new GenericKnimeSparkException("Error closing multi part entity", e);
@@ -207,7 +207,8 @@ public class JobControler {
      * @return the status
      * @throws GenericKnimeSparkException
      */
-    public static JobStatus getJobStatus(final KNIMESparkContext aContextContainer, final String aJobId) throws GenericKnimeSparkException {
+    public static JobStatus getJobStatus(final KNIMESparkContext aContextContainer, final String aJobId)
+            throws GenericKnimeSparkException {
 
         JsonArray jobs = RestClient.toJSONArray(aContextContainer, "/jobs");
 
@@ -229,10 +230,11 @@ public class JobControler {
      * @param aContextContainer
      * @throws GenericKnimeSparkException
      */
-    public static void killJob(final KNIMESparkContext aContextContainer, final String aJobId) throws GenericKnimeSparkException {
+    public static void killJob(final KNIMESparkContext aContextContainer, final String aJobId)
+            throws GenericKnimeSparkException {
         Response response = RestClient.delete(aContextContainer, JOBS_PATH + aJobId);
         // we don't care about the response as long as it is "OK"
-        RestClient.checkStatus(response, "Error: failed to kill job " + aJobId + "!", Status.OK);
+        RestClient.checkStatus(response, "Failed to kill job " + aJobId + "!", Status.OK);
 
     }
 
@@ -245,8 +247,8 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionMonitor aExecutionContext)
-        throws CanceledExecutionException {
+    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
+        @Nullable final ExecutionMonitor aExecutionContext) throws CanceledExecutionException {
         return waitForJob(aContextContainer, aJobId, aExecutionContext, 1000, 1);
     }
 
@@ -262,8 +264,9 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId, @Nullable final ExecutionMonitor aExecutionContext,
-        final int aTimeoutInSeconds, final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
+    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
+        @Nullable final ExecutionMonitor aExecutionContext, final int aTimeoutInSeconds,
+        final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
         if (aExecutionContext != null) {
             aExecutionContext.setMessage("Waiting for Spark job to finish...");
         }
@@ -283,13 +286,13 @@ public class JobControler {
                 } catch (GenericKnimeSparkException e) {
                     // Log and continue to wait... we might want to exit if
                     // this persists...
-                    LOGGER.log(Level.SEVERE, e.getMessage());
+                    LOGGER.error(e.getMessage());
                 } catch (CanceledExecutionException c) {
                     try {
-                        LOGGER.log(Level.WARNING, "Cancelling job on server side: " + aJobId);
+                        LOGGER.warn("Cancelling job on server side: " + aJobId);
                         killJob(aContextContainer, aJobId);
                     } catch (GenericKnimeSparkException e) {
-                        LOGGER.log(Level.SEVERE, "Failed to cancel job " + aJobId + "\nMessage: " + e.getMessage());
+                        LOGGER.error("Failed to cancel job " + aJobId + "\nMessage: " + e.getMessage());
                     }
                     throw c;
                 }
@@ -309,7 +312,8 @@ public class JobControler {
      * @return JSONObject with job status and result
      * @throws GenericKnimeSparkException
      */
-    public static JobResult fetchJobResult(final KNIMESparkContext aContextContainer, final String aJobId) throws GenericKnimeSparkException {
+    public static JobResult fetchJobResult(final KNIMESparkContext aContextContainer, final String aJobId)
+            throws GenericKnimeSparkException {
         // GET /jobs/<jobId> - Gets the result or status of a specific job
         JsonObject json = RestClient.toJSONObject(aContextContainer, JOBS_PATH + aJobId);
         if (json.containsKey("result")) {
@@ -328,13 +332,19 @@ public class JobControler {
      * @throws GenericKnimeSparkException
      * @throws AssertionError if job failed
      */
-    public static JobResult waitForJobAndFetchResult(final KNIMESparkContext aContextContainer, final String jobId, final ExecutionMonitor exec)
-        throws CanceledExecutionException, GenericKnimeSparkException {
+    public static JobResult waitForJobAndFetchResult(final KNIMESparkContext aContextContainer, final String jobId,
+        final ExecutionMonitor exec) throws CanceledExecutionException, GenericKnimeSparkException {
         JobStatus status = waitForJob(aContextContainer, jobId, exec);
         JobResult result = fetchJobResult(aContextContainer, jobId);
-        if (JobStatus.isErrorStatus(status) || result.isError()) {
-            //Object o = result.getObjectResult();
+                if (JobStatus.isErrorStatus(status) || result.isError()) {
             throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
+        }
+        //format of msg: [Source, Actual Message]
+        for (String[] msg : result.getWarnings()) {
+            LOGGER.warn(Arrays.toString(msg));
+        }
+        for (String[] msg : result.getErrors()) {
+            LOGGER.error(Arrays.toString(msg));
         }
         return result;
     }

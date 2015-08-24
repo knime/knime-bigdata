@@ -4,6 +4,9 @@ import java.io.StringReader;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.stream.JsonParsingException;
+
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 
 /**
  *
@@ -94,35 +97,13 @@ public class JsonUtils {
      *
      * @note String are URLEncoded (UTF-8) and must be decoded again!
      * @param aElems
-     * @return json string representing an array
-    public static String toJson2DimArray(final Object[][] aElems) {
-        final StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < aElems.length; i++) {
-            if (i > 0) {
-                sb.append(",");
-            }
-            sb.append("[");
-            for (int j = 0; j < aElems[i].length; j++) {
-                if (j > 0) {
-                    sb.append(",");
-                }
-                if (aElems[i][j] == null) {
-                    sb.append("null");
-                } else if (aElems[i][j] instanceof String) {
-                    try {
-                        sb.append("\"" + URLEncoder.encode(aElems[i][j].toString(), "UTF-8") + "\"");
-                    } catch (UnsupportedEncodingException e) {
-                        sb.append("null");
-                    }
-                } else {
-                    sb.append("\"" + aElems[i][j].toString() + "\"");
-                }
-            }
-            sb.append("]");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
+     * @return json string representing an array public static String toJson2DimArray(final Object[][] aElems) { final
+     *         StringBuilder sb = new StringBuilder("["); for (int i = 0; i < aElems.length; i++) { if (i > 0) {
+     *         sb.append(","); } sb.append("["); for (int j = 0; j < aElems[i].length; j++) { if (j > 0) {
+     *         sb.append(","); } if (aElems[i][j] == null) { sb.append("null"); } else if (aElems[i][j] instanceof
+     *         String) { try { sb.append("\"" + URLEncoder.encode(aElems[i][j].toString(), "UTF-8") + "\""); } catch
+     *         (UnsupportedEncodingException e) { sb.append("null"); } } else { sb.append("\"" + aElems[i][j].toString()
+     *         + "\""); } } sb.append("]"); } sb.append("]"); return sb.toString(); }
      */
 
     /**
@@ -130,8 +111,13 @@ public class JsonUtils {
      *
      * @param aJsonArrayString
      * @return the parse JsonArray
+     * @throws GenericKnimeSparkException
      */
-    public static JsonArray toJsonArray(final String aJsonArrayString) {
-        return Json.createReader(new StringReader(aJsonArrayString)).readArray();
+    public static JsonArray toJsonArray(final String aJsonArrayString) throws GenericKnimeSparkException {
+        try {
+            return Json.createReader(new StringReader(aJsonArrayString)).readArray();
+        } catch (JsonParsingException e) {
+            throw new GenericKnimeSparkException("Failed to parse server response: " + aJsonArrayString, e);
+        }
     }
 }

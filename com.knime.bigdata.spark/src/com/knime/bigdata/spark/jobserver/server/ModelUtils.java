@@ -1,27 +1,23 @@
 package com.knime.bigdata.spark.jobserver.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-//with parseBase64Binary() and printBase64Binary().
+import java.util.List;
 import java.util.logging.Logger;
 
-//Java 8:
-//import java.util.Base64;
-//Java 7:
-import javax.xml.bind.DatatypeConverter;
-
-import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
+import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.sql.api.java.Row;
+
+import scala.Tuple2;
+
+import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
 
 /**
  *
@@ -29,20 +25,42 @@ import org.apache.spark.sql.api.java.Row;
  */
 public class ModelUtils {
 
-	private final static Logger LOGGER = Logger.getLogger(ModelUtils.class
-			.getName());
+    private final static Logger LOGGER = Logger.getLogger(ModelUtils.class.getName());
 
-	/**
-	 * apply a model to the given data
-	 * @param aContext
-	 * @param aNumericData - data to be used for prediction (must be compatible to the model)
-	 * @param rowRDD - original data
-	 * @param aModel - model to be applied
-	 * @return original data with appended column containing predictions
-	 * @throws GenericKnimeSparkException thrown when model type cannot be handled
-	 */
-    public static <T> JavaRDD<Row> predict(final SparkContext aContext, final JavaRDD<Vector> aNumericData,
+    /**
+     * apply a model to the given data
+     *
+     * @param aConfig
+     * @param aRowRDD - original data
+     * @param aColIdxs - indices of columns to be used for prediction
+     * @param aModel - model to be applied
+     * @return original data with appended column containing predictions
+     * @throws GenericKnimeSparkException thrown when model type cannot be handled
+     */
+    public static <T> JavaRDD<Row> predict(final JobConfig aConfig, final JavaRDD<Row> aRowRDD,
+        final List<Integer> aColIdxs, final T aModel) throws GenericKnimeSparkException {
+        if (aModel instanceof MatrixFactorizationModel) {
+
+            LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
+            JavaRDD<Rating> ratings = CollaborativeFilteringJob.convertRowRDD2RatingsRdd(aConfig, aRowRDD);
+            return predict(aRowRDD, ratings, (MatrixFactorizationModel)aModel);
+        } else {
+            return predict(RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aRowRDD, aColIdxs), aRowRDD, aModel);
+        }
+    }
+
+    /**
+     * apply a model to the given data
+     *
+     * @param aNumericData - data to be used for prediction (must be compatible to the model)
+     * @param rowRDD - original data
+     * @param aModel - model to be applied
+     * @return original data with appended column containing predictions
+     * @throws GenericKnimeSparkException thrown when model type cannot be handled
+     */
+    public static <T> JavaRDD<Row> predict(final JavaRDD<Vector> aNumericData,
         final JavaRDD<Row> rowRDD, final T aModel) throws GenericKnimeSparkException {
+        //use only the column indices when converting to vector
         aNumericData.cache();
 
         final JavaRDD<? extends Object> predictions;
@@ -58,45 +76,56 @@ public class ModelUtils {
         } else if (aModel instanceof LinearRegressionModel) {
             LOGGER.fine("LinearRegressionModel found for prediction");
             predictions = ((LinearRegressionModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof NaiveBayesModel) {
+            LOGGER.fine("NaiveBayesModel found for prediction");
+            predictions = ((NaiveBayesModel)aModel).predict(aNumericData);
         } else {
-            throw new GenericKnimeSparkException("ERROR: unknown model type: "+aModel.getClass());
+            throw new GenericKnimeSparkException("ERROR: unknown model type: " + aModel.getClass());
         }
 
         return RDDUtils.addColumn(rowRDD.zip(predictions));
     }
 
-	/**
-	 * de-serialize an object from the given Base64 string and cast it to the given type
-     * @param aString object to be de-serialized
-     * @return string representation of given object
-	 */
-	public static <T> T fromString(final String aString) {
-		//JAva 1.8: byte[] data = Base64.getDecoder().decode(aString);
-        byte[] data =  DatatypeConverter.parseBase64Binary(aString);
-		try (final ObjectInputStream ois = new ObjectInputStream(
-				new ByteArrayInputStream(data))) {
-			return (T) ois.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			LOGGER.severe(e.getMessage());
-			LOGGER.severe( "ERROR - de-serialization failed: "+e.getMessage());
-			return null;
-		}
-	}
+    /**
+     *
+     * @param aRowRdd
+     * @param aRatings
+     * @param aModel
+     * @return original data plus one new column with predicted ratings
+     */
+    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aRatings, final MatrixFactorizationModel aModel) {
 
-	/**
-	 * serializes the given object to a Base64 string
-	 * @param aObject object to be serialized
-	 * @return string representation of given object
-	 */
-	public static String toString(final Serializable aObject)  {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try(final ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-			oos.writeObject(aObject);
-			//Java 1.8: return Base64.getEncoder().encodeToString(baos.toByteArray());
-            return DatatypeConverter.printBase64Binary(baos.toByteArray());
-		} catch (IOException e) {
-			LOGGER.severe(e.getMessage());
-			return "ERROR - serialization failed!"+e.getMessage();
-		}
-	}
+        // Evaluate the model on rating data
+        final JavaRDD<Tuple2<Object, Object>> userProducts =
+            aRatings.map(new Function<Rating, Tuple2<Object, Object>>() {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public Tuple2<Object, Object> call(final Rating r) {
+                    return new Tuple2<Object, Object>(r.user(), r.product());
+                }
+            });
+        JavaRDD<Double> predictions = aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Double>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Double call(final Rating r) {
+                return r.rating();
+            }
+        });
+        return RDDUtils.addColumn(aRowRdd.zip(predictions));
+
+        //        return aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Row>() {
+        //            private static final long serialVersionUID = 1L;
+        //
+        //            @Override
+        //            public Row call(final Rating r) {
+        //                RowBuilder b = RowBuilder.emptyRow();
+        //                b.add(r.user());
+        //                b.add(r.product());
+        //                b.add(r.rating());
+        //                return b.build();
+        //            }
+        //        });
+    }
 }

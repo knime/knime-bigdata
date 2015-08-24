@@ -21,12 +21,13 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
@@ -51,24 +52,21 @@ public class KMeansTask {
 
     /**
      * constructor - simply stores parameters
+     *
      * @param inputRDD input RDD
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param noOfCluster - number of clusters (aka "k")
      * @param noOfIteration - maximal number of iterations
      * @param outputRDD - table identifier (classified output data)
      */
-    public KMeansTask(final SparkRDD inputRDD, final int[] includeColIdxs, final int noOfCluster,
+    public KMeansTask(final SparkRDD inputRDD, final Integer[] includeColIdxs, final int noOfCluster,
         final int noOfIteration, final SparkRDD outputRDD) {
         if (!inputRDD.compatible(outputRDD)) {
             throw new IllegalArgumentException("Incompatible rdds");
         }
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_includeColIdxs = new Integer[includeColIdxs.length];
-        int i = 0;
-        for (int value : includeColIdxs) {
-            m_includeColIdxs[i++] = Integer.valueOf(value);
-        }
+        m_includeColIdxs = includeColIdxs;
         m_outputTableName = outputRDD.getID();
         m_noOfCluster = noOfCluster;
         m_noOfIteration = noOfIteration;
@@ -82,10 +80,11 @@ public class KMeansTask {
      * @return KMeansModel
      * @throws Exception
      */
-    public KMeansModel execute(final ExecutionContext exec) throws Exception {
+    public KMeansModel execute(final ExecutionMonitor exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
+        exec.checkCanceled();
         final String jobId =
-                JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
+            JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
 
         final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
 
@@ -93,12 +92,26 @@ public class KMeansTask {
     }
 
     private String kmeansLearnerDef() {
+        return kmeansLearnerDef(m_inputTableName, m_includeColIdxs, m_noOfIteration, m_noOfCluster, m_outputTableName);
+    }
+
+    /**
+     * (unit testing only)
+     * @param aInputTableName
+     * @param aIncludeColIdxs
+     * @param aNoOfIteration
+     * @param aNoOfCluster
+     * @param aOutputTableName
+     * @return json representation of parameters
+     */
+    public static String kmeansLearnerDef(final String aInputTableName, final Integer[] aIncludeColIdxs,
+        final Integer aNoOfIteration, final Integer aNoOfCluster, final String aOutputTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_includeColIdxs),
-                ParameterConstants.PARAM_NUM_CLUSTERS, "" + m_noOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
-                "" + m_noOfIteration, ParameterConstants.PARAM_TABLE_1, m_inputTableName},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_outputTableName}});
+            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aIncludeColIdxs),
+                KMeansLearner.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
+                aNoOfIteration, KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
 
 }

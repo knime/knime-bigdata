@@ -100,12 +100,41 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
 
     private final List<Pair<KNIMESparkContext, String>> m_namedRDDs = new LinkedList<>();
 
+    private boolean m_deleteOnReset = true;
+
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
      * @param outPortTypes the output port types
      */
     protected AbstractSparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
+        this(inPortTypes, outPortTypes, true);
+    }
+
+
+    /**Constructor for class AbstractGraphNodeModel.
+     * @param inPortTypes the input port types
+     * @param outPortTypes the output port types
+     * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
+     * Always set this flag to <code>false</code> when you return the input RDD also as output RDD!
+     */
+    protected AbstractSparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
+        final boolean deleteOnReset) {
         super(inPortTypes, outPortTypes);
+        m_deleteOnReset = deleteOnReset;
+    }
+
+    /**
+     * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
+     */
+    protected void setDeleteOnReset(final boolean deleteOnReset) {
+        m_deleteOnReset = deleteOnReset;
+    }
+
+    /**
+     * @return <code>true</code> if the output RDDs are deleted when the node is reseted
+     */
+    protected boolean isDeleteOnReset() {
+        return m_deleteOnReset;
     }
 
     /**
@@ -135,7 +164,6 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
-        Set<String> listNamedRDDs = null;
         KNIMESparkContext context = null;
         for (final PortObject portObject : inData) {
             if (portObject instanceof  SparkDataPortObject) {
@@ -147,10 +175,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
                         throw new IllegalStateException(
                             "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
                     }
-                    listNamedRDDs = KnimeContext.listNamedRDDs(context);
                 }
+                Set<String> listNamedRDDs = KnimeContext.listNamedRDDs(context);
                 if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
-                    //wait a bit and try again
+
+                    //JobServer comment in 'NamedRDDSupport.scala': "The caller should always expect
+                    // that the data returned from the method 'getNames()' may be stale and incorrect.
+                    //hence: wait a bit and try again
                     Thread.sleep(1000);
                     listNamedRDDs = KnimeContext.listNamedRDDs(context);
                     if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
@@ -182,10 +213,8 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      */
     @Override
     protected final void reset() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Entering reset() of class AbstractSparkNodeModel.");
-        }
-        if (m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
+        if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
+            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
             KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
                 @Override
                 public void run() {

@@ -30,6 +30,6 @@
 	</fullDescription>
 
 	<ports>
-		<outPort index="0" name="Result">Spark data object</outPort>
+		<outPort index="0" name="Spark RDD">Spark RDD.</outPort>
 	</ports>
 </knimeNode>

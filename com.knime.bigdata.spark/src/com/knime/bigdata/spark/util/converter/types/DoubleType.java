@@ -104,8 +104,8 @@ public class DoubleType implements SparkTypeConverter<DoubleCell, Double> {
      */
     @Override
     public DataCell convert(final Object sparkObject) {
-        if (sparkObject instanceof Double) {
-            Double val = (Double) sparkObject;
+        if (sparkObject instanceof Number) {
+            double val = ((Number) sparkObject).doubleValue();
             return new DoubleCell(val);
         }
         return DataType.getMissingCell();

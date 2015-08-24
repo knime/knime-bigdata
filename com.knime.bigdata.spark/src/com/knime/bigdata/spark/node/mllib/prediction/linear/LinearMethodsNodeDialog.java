@@ -27,19 +27,17 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -55,13 +53,9 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
     private final DialogComponentNumber m_regularization =
             new DialogComponentNumber(LinearMethodsNodeModel.createRegularizationModel(), "Regularizer: ", 25);
 
-    private final DialogComponentColumnFilter2 m_cols =
-            new DialogComponentColumnFilter2(LinearMethodsNodeModel.createColumnsModel(), 0);
+    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
 
-    @SuppressWarnings("unchecked")
-    private final DialogComponentColumnNameSelection m_classColumn =
-            new DialogComponentColumnNameSelection(LinearMethodsNodeModel.createClassColModel(),
-            "Class column ", 0, DoubleValue.class);
+    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
 
     private final DialogComponent[] m_components =
             new DialogComponent[] {m_maxNoBins, m_regularization, m_cols, m_classColumn};

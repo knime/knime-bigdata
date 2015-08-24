@@ -9,7 +9,7 @@ import org.apache.spark.mllib.classification.SVMWithSGD;
 import org.apache.spark.mllib.optimization.L1Updater;
 import org.apache.spark.mllib.regression.LabeledPoint;
 
-import com.typesafe.config.Config;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -25,10 +25,10 @@ public class SVMLearnerJob extends SGDJob {
      * @return
      */
     @Override
-    Serializable execute(final SparkContext sc, final Config aConfig, final JavaRDD<LabeledPoint> inputRdd) {
-        final int noOfIteration = aConfig.getInt(PARAM_NUM_ITERATIONS);
+    Serializable execute(final SparkContext sc, final JobConfig aConfig, final JavaRDD<LabeledPoint> inputRdd) {
+        final int noOfIteration = getNumIterations(aConfig);
         final SVMWithSGD svmAlg = new SVMWithSGD();
-        svmAlg.optimizer().setNumIterations(noOfIteration).setRegParam(aConfig.getDouble(PARAM_REGULARIZATION))
+        svmAlg.optimizer().setNumIterations(noOfIteration).setRegParam(getRegularization(aConfig))
             .setUpdater(new L1Updater());
         return svmAlg.run(inputRdd.rdd().cache());
     }

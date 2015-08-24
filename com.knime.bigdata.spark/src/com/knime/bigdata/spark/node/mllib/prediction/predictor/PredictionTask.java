@@ -23,14 +23,15 @@ package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 import java.io.Serializable;
 
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.Predictor;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 
@@ -43,13 +44,13 @@ public class PredictionTask implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String kmeansPredictorDef(final Serializable aModel, final String aInputTableName,
-        final Integer[] colIdxs, final String aOutputTableName) {
+        final Integer[] colIdxs, final String aOutputTableName) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_MODEL_NAME, ModelUtils.toString(aModel),
-                ParameterConstants.PARAM_TABLE_1, aInputTableName,
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray(colIdxs)}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTableName}});
+            new Object[]{ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aModel),
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName,
+                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
     /**
      * @param exec
@@ -58,9 +59,10 @@ public class PredictionTask implements Serializable {
      * @param integers
      * @param resultRDD
      */
-    void execute(final ExecutionContext exec, final SparkDataTable inputRDD, final Serializable model,
+    void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final Serializable model,
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
+        exec.checkCanceled();
         final String jobId = JobControler.startJob(inputRDD.getContext(), Predictor.class.getCanonicalName(),
             predictorKMeansParams);
 

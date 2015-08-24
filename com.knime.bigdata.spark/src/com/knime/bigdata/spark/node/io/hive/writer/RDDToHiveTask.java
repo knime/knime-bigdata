@@ -20,23 +20,18 @@
  */
 package com.knime.bigdata.spark.node.io.hive.writer;
 
-import java.util.ArrayList;
-
-import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
-import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.RDDToHiveJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
+import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigRenderOptions;
-import com.typesafe.config.ConfigValueFactory;
 
 
 /**
@@ -68,31 +63,21 @@ public class RDDToHiveTask {
      * @param exec execution context
      * @throws Exception if anything goes wrong
      */
-    public void execute(final ExecutionContext exec) throws Exception {
+    public void execute(final ExecutionMonitor exec) throws Exception {
         final String jsonArgs = params2Json();
         final KNIMESparkContext context = m_rdd.getContext();
+        exec.checkCanceled();
         String jobId = JobControler.startJob(context, RDDToHiveJob.class.getCanonicalName(), jsonArgs);
         JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));
     }
 
     private final String params2Json() {
-
-        ArrayList<ArrayList<String>> fields = new ArrayList<>();
-        for (StructField field : m_schema.getFields()) {
-            ArrayList<String> f = new ArrayList<>();
-            f.add(field.getName());
-            f.add(JobResult.getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
-            f.add("" + field.isNullable());
-            fields.add(f);
-        }
-        final Config config = ConfigFactory.empty().withValue(ParameterConstants.PARAM_SCHEMA,
-            ConfigValueFactory.fromIterable(fields));
-        final String schema = config.root().render(ConfigRenderOptions.concise());
+        final String schema = StructTypeBuilder.toConfigString(m_schema);
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{ParameterConstants.PARAM_TABLE_1, m_rdd.getID(),
+            new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, m_rdd.getID(),
             ParameterConstants.PARAM_SCHEMA, schema},
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, m_tableName}});
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, m_tableName}});
     }
 
 }

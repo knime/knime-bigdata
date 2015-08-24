@@ -21,18 +21,29 @@
 package com.knime.bigdata.spark.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
+import org.apache.xmlbeans.XmlObject;
+import org.dmg.pmml.DerivedFieldDocument.DerivedField;
+import org.dmg.pmml.InlineTableDocument.InlineTable;
+import org.dmg.pmml.MapValuesDocument.MapValues;
+import org.dmg.pmml.RowDocument.Row;
+import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
 
@@ -76,12 +87,12 @@ public final class SparkUtil {
      * @return the indices of the columns in the same order as in the input list
      * @throws InvalidSettingsException if the input list is empty or a column name could not be found in the input spec
      */
-    public static int[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
+    public static Integer[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
         throws InvalidSettingsException {
         if (featureColNames == null || featureColNames.length < 1) {
             throw new InvalidSettingsException("No columns selected");
         }
-        int[] colIdxs = new int[featureColNames.length];
+        final Integer[] colIdxs = new Integer[featureColNames.length];
         for (int i = 0, length = featureColNames.length; i < length; i++) {
             final String colName = featureColNames[i];
             final int colIdx = tableSpec.findColumnIndex(colName);
@@ -94,13 +105,56 @@ public final class SparkUtil {
     }
 
     /**
-     * @param tableStructure {@link StructType} that describes the columns
+     * @return the path to the standard KNIME job jar
+     */
+    public static String getJobJarPath() {
+        return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
+            + "knimeJobs.jar";
+    }
+
+    /**
+     * @param inputSpec {@link DataTableSpec}
+     * @param model PMML {@link CompiledModel}
+     * @return the indices of the columns required by the compiled PMML model
+     * @throws InvalidSettingsException if a required column is not present in the input table
+     */
+    public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model)
+            throws InvalidSettingsException {
+        final String[] inputFields = model.getInputFields();
+        final Integer[] colIdxs = new Integer[inputFields.length];
+        for (String fieldName : inputFields) {
+            final int colIdx = inputSpec.findColumnIndex(fieldName);
+            if (colIdx < 0) {
+                throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
+            }
+            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
+        }
+        return colIdxs;
+    }
+
+    /**
+     * @param spec {@link DataTableSpec} to convert
+     * @return the {@link StructType} representing the input {@link DataTableSpec}
+     */
+    public static StructType toStructType(final DataTableSpec spec) {
+        final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
+        for (final DataColumnSpec colSpec : spec) {
+            final SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
+            final StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
+            structFields.add(field);
+        }
+        final StructType schema = DataType.createStructType(structFields);
+        return schema;
+    }
+
+    /**
+     * @param schema {@link StructType} that describes the columns
      * @return the corresponding {@link DataTableSpec}
      */
-    public static DataTableSpec createTableSpec(final StructType tableStructure) {
+    public static DataTableSpec toTableSpec(final StructType schema) {
         final List<DataColumnSpec> specs = new LinkedList<>();
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
-        for (final StructField field : tableStructure.getFields()) {
+        for (final StructField field : schema.getFields()) {
             specCreator.setName(field.getName());
             final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
             specCreator.setType(typeConverter.getKNIMEType());
@@ -110,10 +164,45 @@ public final class SparkUtil {
     }
 
     /**
-     * @return the path to the standard KNIME job jar
+     * @param pmml {@link PMMLPortObject} that contains the category to number mapping
+     * @param rdd the {@link SparkDataPortObject} to map
+     * @return the {@link ColumnBasedValueMapping} class with the mapping
      */
-    public static String getJobJarPath() {
-        return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + "resources" + File.separatorChar
-            + "knimeJobs.jar";
+    public static ColumnBasedValueMapping getCategory2NumberMap(final PMMLPortObject pmml,
+        final SparkDataPortObject rdd) {
+        final DataTableSpec tableSpec = rdd.getTableSpec();
+        final ColumnBasedValueMapping map = new ColumnBasedValueMapping();
+        final DerivedField[] fields = pmml.getDerivedFields();
+        if (fields != null) {
+            for (final DerivedField field : fields) {
+                final MapValues mapValues = field.getMapValues();
+                if (mapValues != null) {
+                    final String in = mapValues.getFieldColumnPairList().get(0).getColumn();
+                    final String out = mapValues.getOutputColumn();
+                    int colIdx = tableSpec.findColumnIndex(field.getName());
+                    if (colIdx >= 0) {
+                        InlineTable table = mapValues.getInlineTable();
+                        for (Row row : table.getRowList()) {
+                            XmlObject[] inChilds = row.selectChildren(
+                                    "http://www.dmg.org/PMML-4_0", in);
+                            String inValue = inChilds.length > 0
+                                ? inChilds[0].newCursor().getTextValue()
+                                : null;
+                             XmlObject[] outChilds = row.selectChildren(
+                                     "http://www.dmg.org/PMML-4_0", out);
+                            String outValue = outChilds.length > 0
+                                    ? outChilds[0].newCursor().getTextValue()
+                                    : null;
+                            if (null == inValue || null == outValue) {
+                                throw new IllegalArgumentException("The PMML model"
+                                    + "is not complete. Missing element in InlineTable.");
+                            }
+                            map.add(colIdx, Double.parseDouble(outValue), inValue);
+                        }
+                    }
+                }
+            }
+        }
+        return map;
     }
 }

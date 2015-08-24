@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +63,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Type;
-import org.knime.core.util.FileUtil;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -69,6 +70,7 @@ import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.JarPacker;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler.SourceCompiler;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -172,6 +174,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
             table1Name = table1.getID();
         } else {
             table1 = null;
+            //this is a source node that uses a new SparkContext
             context = KnimeContext.getSparkContext();
             table1Name = null;
         }
@@ -191,11 +194,13 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         final String tableName = SparkIDs.createRDDID();
         final KnimeSparkJob job = addJob2Jar(context, m_snippet);
         final String config = params2Json(table1Name, table2Name, tableName);
+        //TODO: Provide the input table spec as StructType within the JavaSnippet node see StructTypeBuilder as
+        //reference and use the SparkTypeConverter interface for the conversion from spec to struct
         final String jobId = JobControler.startJob(context, job, config);
         final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
         final StructType tableStructure = result.getTableStructType(tableName);
         if (tableStructure != null) {
-            final DataTableSpec resultSpec = SparkUtil.createTableSpec(tableStructure);
+            final DataTableSpec resultSpec = SparkUtil.toTableSpec(tableStructure);
             final SparkDataTable resultTable = new SparkDataTable(context, tableName, resultSpec);
             final SparkDataPortObject resultObject = new SparkDataPortObject(resultTable);
             return new PortObject[]{resultObject};
@@ -208,43 +213,46 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
         @Nonnull final String aOutputTable) {
         final List<String> inputParams = new LinkedList<>();
         if (aInputTable1 != null) {
-            inputParams.add(ParameterConstants.PARAM_TABLE_1);
+            inputParams.add(AbstractSparkJavaSnippet.PARAM_INPUT_TABLE_KEY1);
             inputParams.add(aInputTable1);
         }
         if (aInputTable2 != null) {
-            inputParams.add(ParameterConstants.PARAM_TABLE_2);
+            inputParams.add(AbstractSparkJavaSnippet.PARAM_INPUT_TABLE_KEY2);
             inputParams.add(aInputTable2);
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParams.toArray(new String[0]),
-            ParameterConstants.PARAM_OUTPUT, new String[]{ParameterConstants.PARAM_TABLE_1, aOutputTable}});
+            ParameterConstants.PARAM_OUTPUT,
+            new String[]{AbstractSparkJavaSnippet.PARAM_OUTPUT_TABLE_KEY, aOutputTable}});
     }
 
     private KnimeSparkJob addJob2Jar(final KNIMESparkContext context, final SparkJavaSnippet snippet)
             throws Exception {
         final String code = insertFieldValues(m_snippet, getAvailableInputFlowVariables());
         final SparkJobCompiler compiler = new SparkJobCompiler();
-        String newClassName = compiler.generateUniqueClassName(CLASS_PREFIX);
+        final String newClassName = compiler.generateUniqueClassName(CLASS_PREFIX);
         final String newCode = code.replace("class " + m_snippet.getClassName() + " ", "class " + newClassName + " ");
         final SourceCompiler compiledJob = compiler.compileAndCreateInstance(newClassName, newCode);
         final Map<String, byte[]> classMap = compiledJob.getBytecode();
         m_classNames = classMap.keySet().toArray(new String[0]);
         synchronized (SNIPPET_FILE) {
-            //TODO: We always also use the potentially out dated standard job classes if the snippet jar file exists
-            //I would be better if we would keep the snippet jars and job jar separately and always merge the two jars
-            //instead of reusing (copying) the same mixed jar over and over
             try {
-                if (!SNIPPET_FILE.exists()) {
-                    //create the standard job jar for this user
-                    final File jobsJar = new File(SparkUtil.getJobJarPath());
-                    FileUtil.copy(jobsJar, SNIPPET_FILE);
-                }
-                //create a new file that will contain all previous classes plus the new snippet classes
                 final File tempFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
-                JarPacker.add2Jar(SNIPPET_FILE.getPath(), tempFile.getPath(), PACKAGE_PATH, classMap);
+                if (!SNIPPET_FILE.exists()) {
+                    //create a new jar with the new snippet classes
+                    JarPacker.createJar(tempFile, PACKAGE_PATH, classMap);
+                } else {
+                    //create a new file that will contain all previous classes plus the new snippet classes
+                    JarPacker.add2Jar(SNIPPET_FILE.getPath(), tempFile.getPath(), PACKAGE_PATH, classMap);
+                }
                 //replace the old java snippet jar with the new one
-                SNIPPET_FILE.delete();
-                tempFile.renameTo(SNIPPET_FILE);
-                JobControler.uploadJobJar(context, SNIPPET_FILE.getPath());
+                Files.move(tempFile.toPath(), SNIPPET_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                //merge the java snippet file and the regular KNIME job classes
+                final File mergedFile = File.createTempFile("MSJS", ".jar", SNIPPET_FILE.getParentFile());
+                mergedFile.deleteOnExit();
+                JarPacker.mergeJars(SNIPPET_FILE.getPath(), SparkUtil.getJobJarPath(), mergedFile);
+                //upload the new job jar to the server
+                JobControler.uploadJobJar(context, mergedFile.getPath());
+                mergedFile.delete();
             } catch (IOException e) {
                 LOGGER.error(e.getMessage());
                 throw new GenericKnimeSparkException(e);
@@ -256,6 +264,8 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkNod
 
     private static String insertFieldValues(final SparkJavaSnippet snippet, final Map<String, FlowVariable> flowVars)
             throws BadLocationException {
+        //TODO: Provide the flow variables as key value map in the config and assign the values of the variable to
+        // their corresponding members in the Spark job class
         final GuardedDocument codeDoc = snippet.getDocument();
         // populate the system input flow variable fields with data
         final FlowVariableRepository flowVarRepo = new FlowVariableRepository(flowVars);

@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,16 +34,11 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.ModelUtils;
-import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
-import com.typesafe.config.ConfigList;
-import com.typesafe.config.ConfigValue;
 
 /**
  *
@@ -54,12 +48,6 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final String PARAM_DATA_ARRAY = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_TABLE_1;
-
-    static final String PARAM_JAVA_TYPES = ParameterConstants.PARAM_INPUT + "." + ParameterConstants.PARAM_SCHEMA;
-
-    static final String PARAM_TABLE_KEY = ParameterConstants.PARAM_OUTPUT + "." + ParameterConstants.PARAM_TABLE_1;
-
     private final static Logger LOGGER = Logger.getLogger(ImportKNIMETableJob.class.getName());
 
     /**
@@ -67,27 +55,15 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      *
      */
     @Override
-    public SparkJobValidation validate(final Config aConfig) {
+    public SparkJobValidation validate(final JobConfig aConfig) {
         String msg = null;
 
-        if (!aConfig.hasPath(PARAM_DATA_ARRAY)) {
-            msg = "Input parameter '" + PARAM_DATA_ARRAY + "' missing.";
+        if (!aConfig.hasInputParameter(PARAM_INPUT_TABLE)) {
+            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
         }
 
-        if (msg == null) {
-            if (!aConfig.hasPath(PARAM_JAVA_TYPES)) {
-                msg = "Input parameter '" + PARAM_JAVA_TYPES + "' missing.";
-            } else {
-                try {
-                    getColumnTypes(aConfig);
-                } catch (GenericKnimeSparkException e) {
-                    msg = e.getMessage();
-                }
-            }
-        }
-
-        if (msg == null && !aConfig.hasPath(PARAM_TABLE_KEY)) {
-            msg = "Output parameter '" + PARAM_TABLE_KEY + "' missing.";
+        if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+            msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
 
         if (msg != null) {
@@ -103,28 +79,12 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      * @return data as list of Row objects
      * @throws GenericKnimeSparkException
      */
-    public static List<Row> getInputData(final Config aConfig) throws GenericKnimeSparkException {
-        final List<Class<?>> types = getColumnTypes(aConfig);
-
-        try {
-            //final ConfigList data = aConfig.getList(PARAM_DATA_ARRAY);
-            final String data = aConfig.getString(PARAM_DATA_ARRAY);
-            return getInputData(types, data);
-        } catch (ConfigException e) {
-            throw new GenericKnimeSparkException("Input parameter '" + PARAM_DATA_ARRAY
-                + "' is not of expected type 'Object[][]': " + e.getMessage());
-        }
-    }
-
-    /**
-     * @param aTypes
-     * @param aData
-     * @return data as list of Row objects
-     */
-    public static List<Row> getInputData(final List<Class<?>> aTypes, final String aData) {
+    public static List<Row> getInputData(final JobConfig aConfig) throws GenericKnimeSparkException {
         final List<Row> rows = new ArrayList<>();
-        Object[][] data = ModelUtils.fromString(aData);
-        int r =0;
+        final Object[][] data = aConfig.decodeFromInputParameter(PARAM_INPUT_TABLE);
+        if (data == null) {
+            throw new GenericKnimeSparkException("Input parameter '" + PARAM_INPUT_TABLE + "' is empty' ");
+        }
         for (Object[] rowData : data) {
             RowBuilder row = RowBuilder.emptyRow();
 
@@ -132,105 +92,12 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
                 if (rowData[ix] == null) {
                     row.add(null);
                 } else {
-                    try {
-                    if (aTypes.get(ix).equals(Integer.class)) {
-                        row.add((Integer)rowData[ix]);
-                    } else if (aTypes.get(ix).equals(Long.class)) {
-                        row.add((Long)rowData[ix]);
-                    } else if (aTypes.get(ix).equals(Double.class)) {
-                        row.add((Double)rowData[ix]);
-                    } else if (aTypes.get(ix).equals(Boolean.class)) {
-                        row.add((Boolean)rowData[ix]);
-                    } else if (aTypes.get(ix).equals(Date.class)) {
-                        row.add((Date)rowData[ix]);
-                    } else if (aTypes.get(ix).equals(String.class)) {
-                        row.add((String)rowData[ix]);
-                    }
-                    } catch (ClassCastException cce) {
-                        LOGGER.log(Level.SEVERE, "Invalid cell content at: ["+r+","+ix+"]: "+rowData[ix]);
-                        throw cce;
-                    }
+                    row.add(rowData[ix]);
                 }
-            }
-            rows.add(row.build());
-            r++;
-        }
-        return rows;
-    }
-
-
-    /**
-     * @param aTypes
-     * @param aData
-     * @return data as list of Row objects
-    public static List<Row> _getInputData(final List<Class<?>> aTypes, final ConfigList aData) {
-        final List<Row> rows = new ArrayList<>();
-        for (ConfigValue rowData : aData) {
-            RowBuilder row = RowBuilder.emptyRow();
-            Object
-            ConfigList s = (ConfigList)rowData;
-            int ix = 0;
-            for (ConfigValue cell : s) {
-                if (cell.valueType() == ConfigValueType.NULL) {
-                    row.add(null);
-                } else {
-                    final String v = cell.unwrapped().toString();
-                    if (aTypes.get(ix).equals(Integer.class)) {
-                        row.add(Integer.valueOf(v));
-                    } else if (aTypes.get(ix).equals(Double.class)) {
-                        row.add(Double.valueOf(v));
-                    } else if (aTypes.get(ix).equals(Boolean.class)) {
-                        row.add(Boolean.valueOf(v));
-                    } else if (aTypes.get(ix).equals(Date.class)) {
-                        row.add(Date..valueOf(v));
-                    } else if (aTypes.get(ix).equals(String.class)) {
-                        try {
-                            row.add(URLDecoder.decode(v, "UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            row.add(null);
-                        }
-                    }
-                }
-                ix++;
             }
             rows.add(row.build());
         }
         return rows;
-    }
-     */
-
-    /**
-     * @param aConfig
-     * @return
-     * @throws GenericKnimeSparkException
-     */
-    private static List<Class<?>> getColumnTypes(final Config aConfig) throws GenericKnimeSparkException {
-        try {
-            ConfigList types = aConfig.getList(PARAM_JAVA_TYPES);
-            List<Class<?>> columnTypes = new ArrayList<>();
-            for (ConfigValue type : types) {
-                final Object o = type.unwrapped();
-                if (o.equals("class java.lang.Integer")) {
-                    columnTypes.add(Integer.class);
-                } else if (o.equals("class java.lang.Long")) {
-                    columnTypes.add(Long.class);
-                } else if (o.equals("class java.lang.Double") || o.equals("class java.lang.Float")) {
-                    columnTypes.add(Double.class);
-                } else if (o.equals("class java.lang.Boolean")) {
-                    columnTypes.add(Boolean.class);
-                } else if (o.equals("class java.sql.Date")) {
-                    columnTypes.add(Date.class);
-                } else if (o.equals("class java.lang.String")) {
-                    columnTypes.add(String.class);
-                } else {
-                   throw new GenericKnimeSparkException("Input parameter '" + PARAM_JAVA_TYPES + "' has unexpected entry: " + type.toString());
-                }
-            }
-            return columnTypes;
-        } catch (ConfigException e) {
-            throw new GenericKnimeSparkException("Input parameter '" + PARAM_JAVA_TYPES
-                + "' is not of expected type 'Object[]'.");
-        }
     }
 
     /**
@@ -241,10 +108,11 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @Override
-    public JobResult runJobWithContext(final SparkContext sc, final Config aConfig) throws GenericKnimeSparkException {
+    public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig)
+        throws GenericKnimeSparkException {
         LOGGER.log(Level.INFO, "inserting KNIME data table into RDD...");
         final List<Row> rowData = getInputData(aConfig);
-        storeInRdd(sc, rowData, aConfig.getString(PARAM_TABLE_KEY));
+        storeInRdd(sc, rowData, aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));
         return JobResult.emptyJobResult().withMessage("OK");
     }
 
