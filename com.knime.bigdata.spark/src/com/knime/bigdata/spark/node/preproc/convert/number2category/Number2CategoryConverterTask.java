@@ -54,8 +54,13 @@ public class Number2CategoryConverterTask {
      */
     public Number2CategoryConverterTask(final SparkDataTable inputRDD, final ColumnBasedValueMapping map,
         final String aOutputRDD) {
-        m_context = inputRDD.getContext();
-        m_inputTableName = inputRDD.getID();
+        this(inputRDD.getContext(), inputRDD.getID(), map, aOutputRDD);
+    }
+
+    Number2CategoryConverterTask(final KNIMESparkContext aContext, final String inputRDD,
+        final ColumnBasedValueMapping map, final String aOutputRDD) {
+        m_context = aContext;
+        m_inputTableName = inputRDD;
         m_map = map;
         m_outputTableName = aOutputRDD;
     }
@@ -68,13 +73,14 @@ public class Number2CategoryConverterTask {
      */
     public void execute(final ExecutionMonitor exec) throws Exception {
         final String params = paramDef();
-        exec.checkCanceled();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
         final String jobId = JobControler.startJob(m_context, MapValuesJob.class.getCanonicalName(), params);
-        JobControler.waitForJob(m_context, jobId, exec);
-        return;
+        JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
     }
 
-    private String paramDef() throws GenericKnimeSparkException {
+    String paramDef() throws GenericKnimeSparkException {
         return paramDef(m_inputTableName, m_map, m_outputTableName);
     }
 
@@ -87,13 +93,16 @@ public class Number2CategoryConverterTask {
      * @return Json String with parameter settings
      * @throws GenericKnimeSparkException
      */
-    public static String paramDef(final String inputTableName, final ColumnBasedValueMapping map,
-        final String outputTableName) throws GenericKnimeSparkException {
+    static String
+        paramDef(final String inputTableName, final ColumnBasedValueMapping map, final String outputTableName)
+            throws GenericKnimeSparkException {
+        if (map == null) {
+            throw new NullPointerException("Column Value Mapping must not be null!");
+        }
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{MapValuesJob.PARAM_MAPPING, JobConfig.encodeToBase64(map),
-                KnimeSparkJob.PARAM_INPUT_TABLE, inputTableName},
-            ParameterConstants.PARAM_OUTPUT,
+            new Object[]{MapValuesJob.PARAM_MAPPING, JobConfig.encodeToBase64(map), KnimeSparkJob.PARAM_INPUT_TABLE,
+                inputTableName}, ParameterConstants.PARAM_OUTPUT,
             new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
     }
 
