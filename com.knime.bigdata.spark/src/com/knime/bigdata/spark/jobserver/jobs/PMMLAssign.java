@@ -148,7 +148,12 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
                     }
                     final Object[] in = new Object[colIdxs.size()];
                     for (int i = 0; i < colIdxs.size(); i++) {
-                        in[i] = r.get(colIdxs.get(i));
+                        final Integer colIdx = colIdxs.get(i);
+                        if (colIdx == null || colIdx < 0) {
+                            in[i] = null;
+                        } else {
+                            in[i] = r.get(colIdx);
+                        }
                     }
                     final Object[] result = (Object[])m_evalMethod.invoke(null, (Object)in);
 

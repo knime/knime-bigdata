@@ -60,16 +60,12 @@ public class Category2NumberConverterTask {
      * @param aMappingType - type of value mapping (global, per column or binary)
      * @param aOutputRDD - table identifier (output data)
      */
-    public Category2NumberConverterTask(final SparkRDD inputRDD, final int[] includeColIdxs,
+    public Category2NumberConverterTask(final SparkRDD inputRDD, final Integer[] includeColIdxs,
         final String[] aIncludedColsNames, final MappingType aMappingType, final String aOutputRDD) {
 
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
-        m_includeColIdxs = new Integer[includeColIdxs.length];
-        int i = 0;
-        for (int value : includeColIdxs) {
-            m_includeColIdxs[i++] = Integer.valueOf(value);
-        }
+        m_includeColIdxs = includeColIdxs;
         m_includeColNames = aIncludedColsNames;
         m_outputTableName = aOutputRDD;
         m_mappingType = aMappingType;
@@ -85,9 +81,8 @@ public class Category2NumberConverterTask {
     public MappedRDDContainer execute(final ExecutionMonitor exec) throws Exception {
         final String params = paramDef();
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params);
-
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
+            ConvertNominalValuesJob.class.getCanonicalName(), params, exec);
         return (MappedRDDContainer)result.getObjectResult();
     }
 

@@ -82,7 +82,7 @@ public class MLlibLinearRegressionInterpreter extends HTMLModelInterpreter<Spark
         final LinearRegressionModel regressionModel = model.getModel();
         List<String> columnNames = model.getLearningColumnNames();
         final double[] weights = regressionModel.weights().toArray();
-        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight", columnNames, weights);
+        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight", columnNames, NF, weights);
     }
 
 }

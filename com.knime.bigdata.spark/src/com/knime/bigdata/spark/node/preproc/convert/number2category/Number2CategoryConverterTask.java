@@ -76,8 +76,8 @@ public class Number2CategoryConverterTask {
         if (exec != null) {
             exec.checkCanceled();
         }
-        final String jobId = JobControler.startJob(m_context, MapValuesJob.class.getCanonicalName(), params);
-        JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        JobControler.startJobAndWaitForResult(m_context, MapValuesJob.class.getCanonicalName(), params, exec);
+        return;
     }
 
     String paramDef() throws GenericKnimeSparkException {

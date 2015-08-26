@@ -208,9 +208,8 @@ public class KnimeContext {
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE,
                     KnimeSparkJob.PARAM_INPUT_TABLE, aNamedRdd}});
         try {
-            String jobId =
-                JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
-            JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
+            JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
+                jsonArgs, null);
             //just for testing:
             //            Set<String> names = listNamedRDDs(aContextContainer);
             //            int ix = 1;
@@ -235,9 +234,8 @@ public class KnimeContext {
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_INFO}});
         try {
-            String jobId =
-                JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
-            JobResult res = JobControler.waitForJobAndFetchResult(aContextContainer, jobId, null);
+            final JobResult res = JobControler.startJobAndWaitForResult(aContextContainer,
+                NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs, null);
             return res.getTableNames();
         } catch (CanceledExecutionException e) {
             // impossible with null execution context

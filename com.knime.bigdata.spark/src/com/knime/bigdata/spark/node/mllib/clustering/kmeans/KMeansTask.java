@@ -83,10 +83,8 @@ public class KMeansTask {
     public KMeansModel execute(final ExecutionMonitor exec) throws Exception {
         final String learnerKMeansParams = kmeansLearnerDef();
         exec.checkCanceled();
-        final String jobId =
-            JobControler.startJob(m_context, KMeansLearner.class.getCanonicalName(), learnerKMeansParams);
-
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
+            KMeansLearner.class.getCanonicalName(), learnerKMeansParams, exec);
 
         return (KMeansModel)result.getObjectResult();
     }

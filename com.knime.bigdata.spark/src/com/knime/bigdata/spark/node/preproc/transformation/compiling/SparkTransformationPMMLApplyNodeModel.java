@@ -21,6 +21,8 @@
 package com.knime.bigdata.spark.node.preproc.transformation.compiling;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.xml.transform.SourceLocator;
 
@@ -64,10 +66,9 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeMode
     /**The name of the java class.*/
     private static final String MODEL_NAME = "MainModel";
 
-    /**
-     * Constructor.
-     */
-    public SparkTransformationPMMLApplyNodeModel() {
+    //TODO: add an option to replace processed columns
+
+    SparkTransformationPMMLApplyNodeModel() {
         super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
     }
@@ -102,7 +103,11 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkNodeMode
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)cpmml.getSpec();
         final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), cpmml.getModel());
+        final Collection<String> missingFieldNames  = new LinkedList<String>();
+        final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), cpmml.getModel(), missingFieldNames);
+        if (!missingFieldNames.isEmpty()) {
+            setWarningMessage("Ignored input fields: " + missingFieldNames);
+        }
         final PMMLAssignTask assignTask = new PMMLAssignTask();
         exec.setMessage("Execute Spark job");
         exec.checkCanceled();
