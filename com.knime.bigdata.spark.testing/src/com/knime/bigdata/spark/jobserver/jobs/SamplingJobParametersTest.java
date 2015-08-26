@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.knime.base.node.preproc.sample.SamplingNodeModel;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
 import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
