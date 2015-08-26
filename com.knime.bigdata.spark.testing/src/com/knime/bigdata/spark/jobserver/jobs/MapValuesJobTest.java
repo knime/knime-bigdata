@@ -1,21 +1,14 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.knime.base.node.preproc.sample.SamplingNodeModel;
-import org.knime.base.node.preproc.sample.SamplingNodeSettings;
-import org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods;
-import org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods;
 
 import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.node.preproc.convert.number2category.Number2CategoryConverterTaskTest;
-import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 import com.typesafe.config.ConfigFactory;
 
 /**
