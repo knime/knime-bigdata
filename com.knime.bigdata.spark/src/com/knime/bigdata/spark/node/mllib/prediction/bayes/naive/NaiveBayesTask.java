@@ -77,8 +77,8 @@ public class NaiveBayesTask implements Serializable {
         if (exec != null) {
             exec.checkCanceled();
         }
-        final String jobId = JobControler.startJob(m_context, NaiveBayesJob.class.getCanonicalName(), learnerParams);
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
+            NaiveBayesJob.class.getCanonicalName(), learnerParams, exec);
 
         return (NaiveBayesModel)result.getObjectResult();
     }
@@ -94,7 +94,7 @@ public class NaiveBayesTask implements Serializable {
      * @param aLabelColIndex
      * @param aNumericColIdx
      * @param aLambda
-     * @param aMatrix
+     * @param aResultRdd optional can be <code>null</code>
      * @return Json representation of parameters
      */
     static String paramsAsJason(final String aInputTableName, final int aLabelColIndex, final Integer[] aNumericColIdx,
@@ -105,8 +105,13 @@ public class NaiveBayesTask implements Serializable {
             ParameterConstants.PARAM_LABEL_INDEX, aLabelColIndex,
             ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
             KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
-
+        final String[] outputParam;
+        if (aResultRdd != null) {
+           outputParam = new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd};
+        } else {
+            outputParam = new String[0];
+        }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd}});
+            ParameterConstants.PARAM_OUTPUT, outputParam});
     }
 }

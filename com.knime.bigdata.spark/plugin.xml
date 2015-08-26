@@ -229,6 +229,12 @@
             factory-class="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">

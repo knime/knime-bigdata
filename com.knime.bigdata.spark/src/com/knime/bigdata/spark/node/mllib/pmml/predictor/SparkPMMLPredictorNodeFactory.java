@@ -88,9 +88,12 @@ public class SparkPMMLPredictorNodeFactory extends NodeFactory<SparkPMMLPredicto
 
             @Override
             protected void extractTargetColumn(final PortObjectSpec[] specs) {
-                CompiledModelPortObjectSpec cmpos = ((CompiledModelPortObjectSpec)specs[0]);
-                String outName = cmpos.getOutputFields()[0];
-                DataType cellType = cmpos.getMiningFunction() == MiningFunction.REGRESSION
+                final CompiledModelPortObjectSpec cmpos = ((CompiledModelPortObjectSpec)specs[0]);
+                if (cmpos == null) {
+                    return;
+                }
+                final String outName = cmpos.getOutputFields()[0];
+                final DataType cellType = cmpos.getMiningFunction() == MiningFunction.REGRESSION
                         ? DoubleCell.TYPE : StringCell.TYPE;
                 setLastTargetColumn(new DataColumnSpecCreator(outName, cellType).createSpec());
             }

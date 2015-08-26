@@ -71,9 +71,8 @@ public class PCATask implements Serializable {
         if (exec != null) {
             exec.checkCanceled();
         }
-
-        final String jobId = JobControler.startJob(m_context, PCAJob.class.getCanonicalName(), learnerParams);
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context, PCAJob.class.getCanonicalName(),
+            learnerParams, exec);
 
         return convertColumMajorArrayTo2Dim((double[])result.getObjectResult(), m_k);
     }

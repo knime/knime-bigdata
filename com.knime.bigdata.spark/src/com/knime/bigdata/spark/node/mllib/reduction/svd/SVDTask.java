@@ -83,8 +83,8 @@ public class SVDTask implements Serializable {
         if (exec != null) {
             exec.checkCanceled();
         }
-        final String jobId = JobControler.startJob(m_context, SVDJob.class.getCanonicalName(), learnerParams);
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context, SVDJob.class.getCanonicalName(),
+            learnerParams, exec);
 
         return (double[])result.getObjectResult();
     }

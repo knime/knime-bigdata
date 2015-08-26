@@ -73,13 +73,14 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
+import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkCategory2NumberNodeModel extends AbstractSparkNodeModel {
-
+    //TODO: add an option to replace processed columns
     private static final DataType MAP_TYPE = DoubleCell.TYPE;
 
     private final SettingsModelString m_mappingType = createMappingTypeModel();
@@ -140,10 +141,7 @@ public class SparkCategory2NumberNodeModel extends AbstractSparkNodeModel {
         final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
         final FilterResult result = m_cols.applyTo(inputTableSpec);
         final String[] includedCols = result.getIncludes();
-        int[] includeColIdxs = new int[includedCols.length];
-        for (int i = 0, length = includedCols.length; i < length; i++) {
-            includeColIdxs[i] = inputTableSpec.findColumnIndex(includedCols[i]);
-        }
+        final Integer[] includeColIdxs = SparkUtil.getColumnIndices(inputTableSpec, includedCols);
         final String outputTableName = SparkIDs.createRDDID();
         final Category2NumberConverterTask task =  new Category2NumberConverterTask(rdd.getData(), includeColIdxs,
             includedCols, mappingType, outputTableName);
@@ -182,14 +180,14 @@ public class SparkCategory2NumberNodeModel extends AbstractSparkNodeModel {
                 MyRecord record = records.next();
                 int colIdx = record.m_nominalColumnIndex;
                 String origVal = record.m_nominalValue;
-//                int mappedVal = record.m_numberValue;
                 final String colName= inputTableSpec.getColumnSpec(colIdx).getName();
                 List<Pair<String, String>> valMap = columnMapping.get(colName);
                 if (valMap == null) {
                     valMap = new LinkedList<>();
                     columnMapping.put(colName, valMap);
                 }
-                final String newColumnName = colName;
+                //this is the new column name of the mapped value
+                final String newColumnName = colName + "_" + origVal;
                 valMap.add(new Pair<>(newColumnName, origVal));
             }
             final DerivedFieldMapper mapper = new DerivedFieldMapper((PMMLPortObject)null);

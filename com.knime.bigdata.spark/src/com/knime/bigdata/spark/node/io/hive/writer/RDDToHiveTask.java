@@ -67,8 +67,8 @@ public class RDDToHiveTask {
         final String jsonArgs = params2Json();
         final KNIMESparkContext context = m_rdd.getContext();
         exec.checkCanceled();
-        String jobId = JobControler.startJob(context, RDDToHiveJob.class.getCanonicalName(), jsonArgs);
-        JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final JobResult result =
+                JobControler.startJobAndWaitForResult(context, RDDToHiveJob.class.getCanonicalName(), jsonArgs, exec);
         assert(m_rdd.getID().equals(result.getFirstTableKey()));
     }
 

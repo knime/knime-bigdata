@@ -82,7 +82,7 @@ public class MLlibSVMInterpreter extends HTMLModelInterpreter<SparkModel<SVMMode
         final SVMModel svmModel = model.getModel();
         final List<String> columnNames = model.getLearningColumnNames();
         final double[] weights = svmModel.weights().toArray();
-        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight:", columnNames, weights);
+        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight:", columnNames, NF, weights);
     }
 
 }

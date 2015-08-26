@@ -108,9 +108,8 @@ public class CollaborativeFilteringTask implements Serializable {
         if (exec != null) {
             exec.checkCanceled();
         }
-        final String jobId =
-            JobControler.startJob(m_context, CollaborativeFilteringJob.class.getCanonicalName(), learnerParams);
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
+            CollaborativeFilteringJob.class.getCanonicalName(), learnerParams, exec);
 
         return (MatrixFactorizationModel)result.getObjectResult();
     }

@@ -25,10 +25,8 @@ import java.util.Map;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.InvalidSettingsException;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.PMMLAssign;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -47,9 +45,6 @@ public class PMMLAssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public PMMLAssignTask() throws InvalidSettingsException {
-    }
-
     private String predictorDef(final String inputID, final Integer[] colIdxs,
         final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
@@ -65,6 +60,16 @@ public class PMMLAssignTask implements Serializable {
                     new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputID}});
     }
 
+    /**
+     * @param exec
+     * @param inputRDD
+     * @param pmml
+     * @param colIdxs
+     * @param appendProbabilities
+     * @param resultRDD
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
     public void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD,
         final CompiledModelPortObject pmml, final Integer[] colIdxs,
         final boolean appendProbabilities, final SparkDataTable resultRDD)
@@ -73,12 +78,6 @@ public class PMMLAssignTask implements Serializable {
             pmml.getModelClassName(), resultRDD.getID());
         KNIMESparkContext context = inputRDD.getContext();
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(context, PMMLAssign.class.getCanonicalName(),
-            predictorParams);
-        assert (JobControler.waitForJob(context, jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
-        assert (JobStatus.OK != JobControler.getJobStatus(context, jobId)); //"job should not be running anymore",
-
+        JobControler.startJobAndWaitForResult(context, PMMLAssign.class.getCanonicalName(), predictorParams, exec);
     }
-
-
 }

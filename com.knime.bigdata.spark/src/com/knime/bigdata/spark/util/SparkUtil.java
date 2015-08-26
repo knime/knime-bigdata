@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -83,18 +84,18 @@ public final class SparkUtil {
 
     /**
      * @param tableSpec the {@link DataTableSpec}
-     * @param featureColNames the column names to get the indices for
+     * @param colNames the column names to get the indices for
      * @return the indices of the columns in the same order as in the input list
      * @throws InvalidSettingsException if the input list is empty or a column name could not be found in the input spec
      */
-    public static Integer[] getColumnIndices(final DataTableSpec tableSpec, final String... featureColNames)
+    public static Integer[] getColumnIndices(final DataTableSpec tableSpec, final String... colNames)
         throws InvalidSettingsException {
-        if (featureColNames == null || featureColNames.length < 1) {
+        if (colNames == null || colNames.length < 1) {
             throw new InvalidSettingsException("No columns selected");
         }
-        final Integer[] colIdxs = new Integer[featureColNames.length];
-        for (int i = 0, length = featureColNames.length; i < length; i++) {
-            final String colName = featureColNames[i];
+        final Integer[] colIdxs = new Integer[colNames.length];
+        for (int i = 0, length = colNames.length; i < length; i++) {
+            final String colName = colNames[i];
             final int colIdx = tableSpec.findColumnIndex(colName);
             if (colIdx < 0) {
                 throw new InvalidSettingsException("Column: " + colName + " not found in input data");
@@ -120,12 +121,29 @@ public final class SparkUtil {
      */
     public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model)
             throws InvalidSettingsException {
+        return getColumnIndices(inputSpec, model, null);
+    }
+    /**
+     * @param inputSpec {@link DataTableSpec}
+     * @param model PMML {@link CompiledModel}
+     * @param missingFieldNames <code>null</code> if missing indices should raise an exception. If not <code>null</code>
+     * the list will contain all missing fields
+     * @return the indices of the columns required by the compiled PMML model
+     * @throws InvalidSettingsException if a required column is not present in the input table
+     */
+    public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model,
+        final Collection<String> missingFieldNames)
+            throws InvalidSettingsException {
         final String[] inputFields = model.getInputFields();
         final Integer[] colIdxs = new Integer[inputFields.length];
         for (String fieldName : inputFields) {
             final int colIdx = inputSpec.findColumnIndex(fieldName);
             if (colIdx < 0) {
-                throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
+                if (missingFieldNames == null) {
+                    throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
+                } else {
+                    missingFieldNames.add(fieldName);
+                }
             }
             colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
         }
@@ -179,25 +197,19 @@ public final class SparkUtil {
                 if (mapValues != null) {
                     final String in = mapValues.getFieldColumnPairList().get(0).getColumn();
                     final String out = mapValues.getOutputColumn();
-                    int colIdx = tableSpec.findColumnIndex(field.getName());
+                    final int colIdx = tableSpec.findColumnIndex(field.getName());
                     if (colIdx >= 0) {
-                        InlineTable table = mapValues.getInlineTable();
+                        final InlineTable table = mapValues.getInlineTable();
                         for (Row row : table.getRowList()) {
-                            XmlObject[] inChilds = row.selectChildren(
-                                    "http://www.dmg.org/PMML-4_0", in);
-                            String inValue = inChilds.length > 0
-                                ? inChilds[0].newCursor().getTextValue()
-                                : null;
-                             XmlObject[] outChilds = row.selectChildren(
-                                     "http://www.dmg.org/PMML-4_0", out);
-                            String outValue = outChilds.length > 0
-                                    ? outChilds[0].newCursor().getTextValue()
-                                    : null;
-                            if (null == inValue || null == outValue) {
+                            final XmlObject[] inChilds = row.selectChildren("http://www.dmg.org/PMML-4_0", in);
+                            final String inVal = inChilds.length > 0 ? inChilds[0].newCursor().getTextValue() : null;
+                            final XmlObject[] outChilds = row.selectChildren("http://www.dmg.org/PMML-4_0", out);
+                            final String outVal = outChilds.length > 0 ? outChilds[0].newCursor().getTextValue() : null;
+                            if (null == inVal || null == outVal) {
                                 throw new IllegalArgumentException("The PMML model"
                                     + "is not complete. Missing element in InlineTable.");
                             }
-                            map.add(colIdx, Double.parseDouble(outValue), inValue);
+                            map.add(colIdx, Double.parseDouble(outVal), inVal);
                         }
                     }
                 }

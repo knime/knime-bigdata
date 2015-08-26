@@ -26,7 +26,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.Predictor;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -63,13 +62,8 @@ public class PredictionTask implements Serializable {
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(inputRDD.getContext(), Predictor.class.getCanonicalName(),
-            predictorKMeansParams);
-
-        assert (JobControler.waitForJob(inputRDD.getContext(), jobId, exec) != JobStatus.UNKNOWN); //, "job should have finished properly");
-
-        assert (JobStatus.OK != JobControler.getJobStatus(inputRDD.getContext(), jobId)); //"job should not be running anymore",
-
+        JobControler.startJobAndWaitForResult(inputRDD.getContext(), Predictor.class.getCanonicalName(),
+            predictorKMeansParams, exec);
     }
 
 

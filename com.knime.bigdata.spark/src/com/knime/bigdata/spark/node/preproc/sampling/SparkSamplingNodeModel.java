@@ -94,9 +94,9 @@ public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
         final KNIMESparkContext context = rdd.getContext();
         exec.checkCanceled();
         exec.setMessage("Start Spark sampling job...");
-        final String jobId = JobControler.startJob(context, SamplingJob.class.getCanonicalName(), paramInJson);
         //TODO: Check that the result RDD is a new one. If not do not delete the result RDD on node reset!!!
-        final JobResult jobResult = JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final JobResult jobResult = JobControler.startJobAndWaitForResult(context,
+            SamplingJob.class.getCanonicalName(), paramInJson, exec);
         final Boolean successful = (Boolean)jobResult.getObjectResult();
         if (!successful.booleanValue()) {
             //if the sampling failed the job returns the input RDD as output RDD so we shouldn't delete it on node reset
