@@ -70,8 +70,7 @@ public class SparkPartionNodeModel extends SparkSamplingNodeModel {
         final KNIMESparkContext context = rdd.getContext();
         exec.checkCanceled();
         exec.setMessage("Start Spark sampling job...");
-        final String jobId = JobControler.startJob(context, SamplingJob.class.getCanonicalName(), paramInJson);
-        JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        JobControler.startJobAndWaitForResult(context, SamplingJob.class.getCanonicalName(), paramInJson, exec);
         final SparkDataTable result1 = new SparkDataTable(context, partition1, rdd.getTableSpec());
         final SparkDataTable result2 = new SparkDataTable(context, partition2, rdd.getTableSpec());
         return new PortObject[] {new SparkDataPortObject(result1), new SparkDataPortObject(result2)};

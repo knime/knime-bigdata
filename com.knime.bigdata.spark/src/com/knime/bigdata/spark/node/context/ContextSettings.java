@@ -51,7 +51,12 @@ public class ContextSettings {
 
     private final SettingsModelString m_memory = createMemoryModel();
 
-    private final SettingsModel[] m_models = new SettingsModel[] {m_host, m_port, m_user, m_contextName, m_noOfCores, m_memory};
+    private final SettingsModelInteger m_jobCheckFrequency = createJobCheckFrequencyModel();
+
+    private final SettingsModelInteger m_jobTimeout = createJobTimeoutModel();
+
+    private final SettingsModel[] m_models = new SettingsModel[] {m_host, m_port, m_user, m_contextName, m_noOfCores,
+        m_memory, m_jobCheckFrequency, m_jobTimeout};
     /**
      * @return the context id model
      */
@@ -100,7 +105,23 @@ public class ContextSettings {
      */
     static SettingsModelInteger createNoOfCoresModel() {
         return new SettingsModelIntegerBounded("numCPUCores", KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"),
-            0, Integer.MAX_VALUE);
+            1, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @return the job check frequency model
+     */
+    static SettingsModelInteger createJobTimeoutModel() {
+        return new SettingsModelIntegerBounded("sparkJobTimeout",
+            KNIMEConfigContainer.m_config.getInt("spark.jobTimeout"), 1, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @return the job check frequency model
+     */
+    static SettingsModelInteger createJobCheckFrequencyModel() {
+        return new SettingsModelIntegerBounded("sparkJobCheckFrequency",
+            KNIMEConfigContainer.m_config.getInt("spark.jobCheckFrequency"), 1, Integer.MAX_VALUE);
     }
 
     /**
@@ -160,6 +181,20 @@ public class ContextSettings {
     }
 
     /**
+     * @return the Spark job timeout in seconds
+     */
+    public int getJobTimeout() {
+        return m_jobTimeout.getIntValue();
+    }
+
+    /**
+     * @return the Spark job timeout check frequency in seconds
+     */
+    public int getJobCheckFrequency() {
+        return m_jobCheckFrequency.getIntValue();
+    }
+
+    /**
      * @param settings the NodeSettingsWO to write to
      */
     public void saveSettingsTo(final NodeSettingsWO settings) {
@@ -192,7 +227,8 @@ public class ContextSettings {
      * @return the KNIMESparkContext object with the specified settings
      */
     public KNIMESparkContext createContext() {
-        return new KNIMESparkContext(getHost(), getProtocol(), getPort(), getUser(), getPassword(), getContextName(), getNoOfCores(), getMemory());
+        return new KNIMESparkContext(getHost(), getProtocol(), getPort(), getUser(), getPassword(), getContextName(),
+            getNoOfCores(), getMemory(), getJobCheckFrequency(), getJobTimeout());
     }
 
     /**
@@ -213,6 +249,10 @@ public class ContextSettings {
         builder.append(getNoOfCores());
         builder.append(", memory=");
         builder.append(getMemory());
+        builder.append(", jobTimeout=");
+        builder.append(getJobTimeout());
+        builder.append(", jobCheckFrequency=");
+        builder.append(getJobCheckFrequency());
         builder.append("]");
         return builder.toString();
     }

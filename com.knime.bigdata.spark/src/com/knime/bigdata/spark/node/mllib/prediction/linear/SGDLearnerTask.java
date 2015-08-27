@@ -85,8 +85,7 @@ public class SGDLearnerTask implements Serializable {
     Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(m_context, m_jobClassPath, learnerParams);
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context, m_jobClassPath, learnerParams, exec);
         return (Serializable)result.getObjectResult();
     }
 

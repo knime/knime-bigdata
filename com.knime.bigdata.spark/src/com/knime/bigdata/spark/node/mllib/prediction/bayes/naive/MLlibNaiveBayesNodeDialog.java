@@ -37,7 +37,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
-import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
  *
@@ -90,15 +89,9 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
-        SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) ports[0];
-        final DataTableSpec[] specs;
-        if (sparkSpec == null) {
-            specs = new DataTableSpec[]{null};
-        } else {
-            specs = new DataTableSpec[]{sparkSpec.getTableSpec()};
-        }
+        final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
         for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, specs);
+            c.loadSettingsFrom(settings, tableSpecs);
         }
     }
 

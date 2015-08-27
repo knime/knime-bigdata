@@ -100,7 +100,7 @@ public class MLlibKMeansInterpreter extends HTMLModelInterpreter<SparkModel<KMea
             buf.append("<th>").append(idx++).append("</th>");
             double[] dims = center.toArray();
             for (double dim : dims) {
-                buf.append("<td>").append(dim).append("</td>");
+                buf.append("<td>").append(NF.format(dim)).append("</td>");
             }
             buf.append("</tr>");
         }

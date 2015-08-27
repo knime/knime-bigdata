@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 
+import java.util.List;
+
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -30,6 +32,8 @@ import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
  * @author Tobias Koetter, KNIME.com
  */
 public class MLlibNaiveBayesInterpreter extends HTMLModelInterpreter<SparkModel<NaiveBayesModel>> {
+
+    private static final long serialVersionUID = 1L;
 
     private static volatile MLlibNaiveBayesInterpreter instance;
 
@@ -75,7 +79,31 @@ public class MLlibNaiveBayesInterpreter extends HTMLModelInterpreter<SparkModel<
     @Override
     public String getHTMLDescription(final SparkModel<NaiveBayesModel> model) {
         final NaiveBayesModel naiveBayesModel = model.getModel();
-        return naiveBayesModel.toString();
+        double[][] theta = naiveBayesModel.theta();
+        List<String> featureColumnNames = model.getLearningColumnNames();
+        double[] classLabels = naiveBayesModel.labels();
+        double[] pi = naiveBayesModel.pi();
+        StringBuilder buf = new StringBuilder();
+        final String tdTag = "<td align='center' bgcolor='#F0F0F0'>";
+        buf.append("<table width='100%'>");
+        buf.append("<tr>");
+        buf.append("<th>").append("Class").append("</th>");
+        buf.append("<th>").append("Pi").append("</th>");
+        for (final String featureCol : featureColumnNames) {
+            buf.append("<th>").append(featureCol).append("</th>");
+        }
+        buf.append("</tr>");
+        for (int i = 0; i < classLabels.length; i++) {
+            buf.append("<tr>");
+            buf.append("<th>").append(classLabels[i]).append("</th>");
+            buf.append("<td>").append(NF.format(pi[i])).append("</td>");
+            for (int j = 0; j < featureColumnNames.size(); j++) {
+                buf.append(tdTag).append(NF.format(theta[i][j])).append("</td>");
+            }
+            buf.append("</tr>");
+        }
+        buf.append("</table>");
+        return buf.toString();
     }
 
 }

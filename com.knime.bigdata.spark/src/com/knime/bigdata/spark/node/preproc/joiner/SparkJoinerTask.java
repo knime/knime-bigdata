@@ -107,9 +107,7 @@ public class SparkJoinerTask implements Serializable {
     void execute(final ExecutionContext exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String joinParams = joinParams();
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(m_context, JoinJob.class.getCanonicalName(), joinParams);
-
-        JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        JobControler.startJobAndWaitForResult(m_context, JoinJob.class.getCanonicalName(), joinParams, exec);
     }
 
     private String joinParams() {

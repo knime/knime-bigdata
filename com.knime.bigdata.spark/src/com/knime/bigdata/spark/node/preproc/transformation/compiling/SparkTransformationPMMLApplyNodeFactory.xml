@@ -17,6 +17,6 @@
     <ports>
         <inPort index="0" name="PMML Model">The PMML transformation model</inPort>
         <inPort index="1" name="Spark RDD">Spark RDD requiring transformation of some or all columns.</inPort>
-        <outPort index="1" name="Transformed Spark RDD">The input data transformed according to the input model.</outPort>
+        <outPort index="0" name="Transformed Spark RDD">The input data transformed according to the input model.</outPort>
 	</ports>
 </knimeNode>

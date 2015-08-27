@@ -23,8 +23,8 @@ package com.knime.bigdata.spark.jobserver.server;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +92,7 @@ public class MappedRDDContainer implements Serializable {
      * @return list of rows with mapping values
      */
     public List<Row> createMappingTable(final Map<Integer, String> aColNameForIndex, int aOffset) {
-        final Map<Integer, String> colNames = new HashMap<>(aColNameForIndex);
+        final Map<Integer, String> colNames = new LinkedHashMap<>(aColNameForIndex);
         final Iterator<MyRecord> iter = m_Mappings.iterator();
         final List<Row> rows = new ArrayList<Row>();
         String lastSeenName = null;

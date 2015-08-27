@@ -21,6 +21,8 @@
 package com.knime.bigdata.spark.port.model.interpreter;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.swing.JComponent;
 
@@ -36,6 +38,9 @@ public abstract class HTMLModelInterpreter<M extends SparkModel<? extends Serial
 implements SparkModelInterpreter<M> {
 
     private static final long serialVersionUID = 1L;
+
+    /**Standard number formatter.*/
+    public static final NumberFormat NF = NumberFormat.getNumberInstance(Locale.US);
 
     /**
      * {@inheritDoc}

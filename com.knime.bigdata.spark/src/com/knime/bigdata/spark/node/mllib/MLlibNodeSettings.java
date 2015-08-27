@@ -101,7 +101,7 @@ public class MLlibNodeSettings {
         final List<String> featureColNames =  Arrays.asList(result.getIncludes());
         Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
         if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
-            throw new InvalidSettingsException("Class column also selected as feature column");
+            throw new InvalidSettingsException("Class column '" + classColName + "' also selected as feature column");
         }
     }
 

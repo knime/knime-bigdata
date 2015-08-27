@@ -130,10 +130,8 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
         throws Exception {
         final String params = paramDef(data, resultTable.getID());
         exec.checkCanceled();
-        final String jobId =
-            JobControler.startJob(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(), params);
-
-        JobControler.waitForJobAndFetchResult(resultTable.getContext(), jobId, exec);
+        JobControler.startJobAndWaitForResult(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(),
+            params, exec);
     }
 
     /**

@@ -93,10 +93,8 @@ public class DecisionTreeTask implements Serializable {
         CanceledExecutionException {
         final String learnerParams = learnerDef();
         exec.checkCanceled();
-        final String jobId =
-            JobControler.startJob(m_context, DecisionTreeLearner.class.getCanonicalName(), learnerParams);
-
-        final JobResult result = JobControler.waitForJobAndFetchResult(m_context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
+            DecisionTreeLearner.class.getCanonicalName(), learnerParams, exec);
 
         return (DecisionTreeModel)result.getObjectResult();
     }

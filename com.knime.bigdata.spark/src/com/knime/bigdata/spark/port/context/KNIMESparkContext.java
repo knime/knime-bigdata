@@ -46,6 +46,8 @@ public class KNIMESparkContext implements Serializable {
     private static final String CFG_ID = "id";
     private static final String CFG_CORES = "noOfCores";
     private static final String CFG_MEMORY = "memoryPerNode";
+    private static final String CFG_SPARK_JOB_TIMEOUT = "sparkJobTimeout";
+    private static final String CFG_SPARK_JOB_CHECK_FREQUENCY = "sparkJobCheckFrequency";
 
     private static final char[] MY =
             "3}acc80479[7b@05be9378K}168335832P§9276b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
@@ -68,6 +70,10 @@ public class KNIMESparkContext implements Serializable {
 
     private final String m_protocol;
 
+    private int m_jobTimeout;
+
+    private int m_jobCheckFrequency;
+
 
     /**
      * create spark context container with default values
@@ -88,8 +94,9 @@ public class KNIMESparkContext implements Serializable {
             KNIMEConfigContainer.m_config.getInt("spark.jobServerPort"),
             KNIMEConfigContainer.m_config.getString("spark.userName"),
             KNIMEConfigContainer.m_config.hasPath("spark.password") ?
-                KNIMEConfigContainer.m_config.getString("spark.password").toCharArray() : null, contextName,
-                numCpuCores, memPerNode);
+                KNIMEConfigContainer.m_config.getString("spark.password").toCharArray() : null,
+            contextName, numCpuCores, memPerNode, KNIMEConfigContainer.m_config.getInt("spark.jobCheckFrequency"),
+            KNIMEConfigContainer.m_config.getInt("spark.jobTimeout"));
     }
 
     /**
@@ -101,9 +108,12 @@ public class KNIMESparkContext implements Serializable {
      * @param contextName the id of the Spark context
      * @param memPerNode the memory settings per node
      * @param numCpuCores the number of cpu cores per node
+     * @param jobCheckFrequency the Spark job check frequency in seconds
+     * @param jobTimeout the Spark job timeout in seconds
      */
     public KNIMESparkContext(final String host, final String protocol, final int port, final String user,
-        final char[] aPassphrase, final String contextName, final int numCpuCores, final String memPerNode) {
+        final char[] aPassphrase, final String contextName, final int numCpuCores, final String memPerNode,
+        final int jobCheckFrequency, final int jobTimeout) {
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("host must not be empty");
         }
@@ -125,6 +135,12 @@ public class KNIMESparkContext implements Serializable {
         if (memPerNode == null || memPerNode.isEmpty()) {
             throw new IllegalArgumentException("memPerNode must not be empty");
         }
+        if (jobCheckFrequency < 0) {
+            throw new IllegalArgumentException("Spark job check frequency must be positive");
+        }
+        if (jobTimeout < 0) {
+            throw new IllegalArgumentException("Spark job timeout must be positive");
+        }
         m_host = host;
         m_protocol = protocol.trim();
         m_port = port;
@@ -133,6 +149,8 @@ public class KNIMESparkContext implements Serializable {
         m_contextName = contextName;
         m_numCpuCores = numCpuCores;
         m_memPerNode = memPerNode;
+        m_jobCheckFrequency = jobCheckFrequency;
+        m_jobTimeout = jobTimeout;
     }
 
     /**
@@ -142,7 +160,7 @@ public class KNIMESparkContext implements Serializable {
     public KNIMESparkContext(final ConfigRO conf) throws InvalidSettingsException {
         this(conf.getString(CFG_HOST), conf.getString(CFG_PROTOCOL), conf.getInt(CFG_PORT), conf.getString(CFG_USER),
             demix(conf.getPassword(CFG_PASSWORD, String.valueOf(MY))), conf.getString(CFG_ID), conf.getInt(CFG_CORES),
-            conf.getString(CFG_MEMORY));
+            conf.getString(CFG_MEMORY), conf.getInt(CFG_SPARK_JOB_CHECK_FREQUENCY), conf.getInt(CFG_SPARK_JOB_TIMEOUT));
     }
 
     /**
@@ -157,6 +175,8 @@ public class KNIMESparkContext implements Serializable {
         conf.addString(CFG_ID, m_contextName);
         conf.addInt(CFG_CORES, m_numCpuCores);
         conf.addString(CFG_MEMORY, m_memPerNode);
+        conf.addInt(CFG_SPARK_JOB_CHECK_FREQUENCY, m_jobCheckFrequency);
+        conf.addInt(CFG_SPARK_JOB_TIMEOUT, m_jobTimeout);
     }
 
     /**
@@ -243,6 +263,20 @@ public class KNIMESparkContext implements Serializable {
     }
 
     /**
+     * @return the Spark job timeout in seconds
+     */
+    public int getJobTimeout() {
+        return m_jobTimeout;
+    }
+
+    /**
+     * @return the Spark job timeout check frequency in seconds
+     */
+    public int getJobCheckFrequency() {
+        return m_jobCheckFrequency;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -304,6 +338,10 @@ public class KNIMESparkContext implements Serializable {
         builder.append(m_numCpuCores);
         builder.append(", memPerNode=");
         builder.append(m_memPerNode);
+        builder.append(", jobCheckFrequency=");
+        builder.append(m_jobCheckFrequency);
+        builder.append(", jobTimeout=");
+        builder.append(m_jobTimeout);
         builder.append("]");
         return builder.toString();
     }

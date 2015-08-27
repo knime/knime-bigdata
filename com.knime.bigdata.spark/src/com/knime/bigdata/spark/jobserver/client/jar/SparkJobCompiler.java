@@ -386,21 +386,26 @@ final public class SparkJobCompiler {
             for (int i = 0; i < orig.length; i++) {
                 classPathFiles.add(new File(orig[i]));
             }
-            String root = SparkPlugin.getDefault().getPluginRootPath();
-            classPathFiles.add(new File(root + "/resources/knimeJobs.jar"));
-            root = root + File.separator + "lib" + File.separator;
-            File d = new File(root);
+            String root = SparkPlugin.getDefault().getPluginRootPath() + File.separator;
+            addJars(classPathFiles, root + "resources");
+            addJars(classPathFiles, root + "lib");
+            return classPathFiles.toArray(new File[classPathFiles.size()]);
+        }
+
+        /**
+         * @param aClassPathFiles
+         * @param aRoot
+         */
+        private void addJars(final List<File> aClassPathFiles, final String aRoot) {
+            File d = new File(aRoot + File.separator);
             final File[] files = d.listFiles();
             if (files != null) {
                 for (File f : files) {
-                    if (f.isFile()) {
-                        classPathFiles.add(f);
+                    if (f.isFile() && f.getAbsolutePath().endsWith(".jar")) {
+                        aClassPathFiles.add(f);
                     }
                 }
             }
-            //            classPathFiles[orig.length] = new File(root+"/lib/jobServerUtilsApi.jar");
-            //            classPathFiles[orig.length+1] = new File(root+"/lib/spark-assembly-1.2.1-hadoop2.4.0.jar");
-            return classPathFiles.toArray(new File[classPathFiles.size()]);
         }
 
         /**

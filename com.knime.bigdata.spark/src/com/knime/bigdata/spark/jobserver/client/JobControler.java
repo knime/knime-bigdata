@@ -107,6 +107,22 @@ public class JobControler {
     }
 
     /**
+     * @param aContextContainer context configuration container
+     * @param aClassPath full class path of the job to run (class must be in a jar that was previously uploaded to the
+     *            server)
+     * @param exec {@link ExecutionMonitor} to provide progress
+     * @return the {@link JobResult}
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
+    public static JobResult startJobAndWaitForResult(final KNIMESparkContext aContextContainer, final String aClassPath,
+        final ExecutionMonitor exec)
+                throws GenericKnimeSparkException, CanceledExecutionException {
+        final String jobId = startJob(aContextContainer, aClassPath);
+        return JobControler.waitForJobAndFetchResult(aContextContainer, jobId, exec);
+    }
+
+    /**
      * start a new job within the given context
      *
      * @param aContextContainer context configuration container
@@ -124,6 +140,23 @@ public class JobControler {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new GenericKnimeSparkException(e);
         }
+    }
+
+    /**
+     * @param aContextContainer context configuration container
+     * @param aClassPath full class path of the job to run (class must be in a jar that was previously uploaded to the
+     *            server)
+     * @param aJsonParams json formated string with job parameters
+     * @param exec {@link ExecutionMonitor} to provide progress
+     * @return the {@link JobResult}
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
+    public static JobResult startJobAndWaitForResult(final KNIMESparkContext aContextContainer, final String aClassPath,
+        final String aJsonParams, final ExecutionMonitor exec)
+                throws GenericKnimeSparkException, CanceledExecutionException {
+        final String jobId = startJob(aContextContainer, aClassPath, aJsonParams);
+        return JobControler.waitForJobAndFetchResult(aContextContainer, jobId, exec);
     }
 
     /**
@@ -247,9 +280,10 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
+    static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
         @Nullable final ExecutionMonitor aExecutionContext) throws CanceledExecutionException {
-        return waitForJob(aContextContainer, aJobId, aExecutionContext, 1000, 1);
+        return waitForJob(aContextContainer, aJobId, aExecutionContext, aContextContainer.getJobTimeout(),
+            aContextContainer.getJobCheckFrequency());
     }
 
     /**
@@ -264,7 +298,7 @@ public class JobControler {
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
      */
-    public static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
+    static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
         @Nullable final ExecutionMonitor aExecutionContext, final int aTimeoutInSeconds,
         final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
         if (aExecutionContext != null) {
@@ -282,6 +316,8 @@ public class JobControler {
                     }
                     if (aExecutionContext != null) {
                         aExecutionContext.checkCanceled();
+                        aExecutionContext.setMessage(
+                            "Waiting for Spark job to finish (Execution time: " + (i + 1) + " seconds)");
                     }
                 } catch (GenericKnimeSparkException e) {
                     // Log and continue to wait... we might want to exit if
@@ -335,8 +371,11 @@ public class JobControler {
     public static JobResult waitForJobAndFetchResult(final KNIMESparkContext aContextContainer, final String jobId,
         final ExecutionMonitor exec) throws CanceledExecutionException, GenericKnimeSparkException {
         JobStatus status = waitForJob(aContextContainer, jobId, exec);
+        if (JobStatus.isErrorStatus(status)) {
+            throw new GenericKnimeSparkException("Job failure: " + status);
+        }
         JobResult result = fetchJobResult(aContextContainer, jobId);
-                if (JobStatus.isErrorStatus(status) || result.isError()) {
+        if (result.isError()) {
             throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
         }
         //format of msg: [Source, Actual Message]
