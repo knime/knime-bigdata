@@ -35,13 +35,11 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  *
@@ -73,17 +71,12 @@ public class MLlibNaiveBayesNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (inSpecs == null || inSpecs.length != 2) {
-            throw new InvalidSettingsException("");
+        if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
+            throw new InvalidSettingsException("No input found");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        final SparkDataPortObjectSpec mapSpec = (SparkDataPortObjectSpec)inSpecs[1];
-        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-        }
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
-        //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
     }
 
@@ -93,14 +86,13 @@ public class MLlibNaiveBayesNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        exec.setMessage("Starting Decision Tree (SPARK) Learner");
+        exec.setMessage("Starting Naive Bayes (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final MLlibSettings settings = m_settings.getSettings(tableSpec);
         final double lambda = m_lambda.getDoubleValue();
-        final String aOutputTableName = SparkIDs.createRDDID();
         final NaiveBayesTask task = new NaiveBayesTask(data.getData(), settings.getClassColIdx(),
-            settings.getFeatueColIdxs(), lambda, aOutputTableName);
+            settings.getFeatueColIdxs(), lambda, null);
         final NaiveBayesModel model = task.execute(exec);
         final MLlibNaiveBayesInterpreter interpreter = MLlibNaiveBayesInterpreter.getInstance();
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(model, interpreter, settings))};

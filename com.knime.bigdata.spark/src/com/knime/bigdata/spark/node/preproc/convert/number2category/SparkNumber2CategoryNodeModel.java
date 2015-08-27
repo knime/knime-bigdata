@@ -45,7 +45,6 @@ import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
-import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -54,19 +53,19 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkNumber2CategoryNodeModel extends AbstractSparkNodeModel {
-
+    //TODO: add an option to replace processed columns
     private final SettingsModelString m_colSuffix = createColSuffixModel();
 
     SparkNumber2CategoryNodeModel() {
         super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE},
-            new PortType[]{SparkModelPortObject.TYPE});
+            new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**
      * @return the column name suffix model
      */
     static SettingsModelString createColSuffixModel() {
-        return new SettingsModelString("columnSuffix", "_nom");
+        return new SettingsModelString("columnSuffix", " (to category)");
     }
 
     /**
@@ -104,12 +103,20 @@ public class SparkNumber2CategoryNodeModel extends AbstractSparkNodeModel {
         final PMMLPortObject pmml = (PMMLPortObject)inData[0];
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
         final ColumnBasedValueMapping map = SparkUtil.getCategory2NumberMap(pmml, rdd);
-        final String outputTableName = SparkIDs.createRDDID();
-        final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, outputTableName);
-        exec.checkCanceled();
-        task.execute(exec);
-        final SparkDataTable resultTable = new SparkDataTable(rdd.getContext(), outputTableName,
-            createResultSpec(rdd.getTableSpec(), pmml.getSpec(), outputTableName));
+        final SparkDataTable resultTable;
+        if (map.getColumnIndices().isEmpty()) {
+            setWarningMessage("No mapping found return input RDD");
+            setDeleteOnReset(false);
+            resultTable = rdd.getData();
+        } else {
+            final String outputTableName = SparkIDs.createRDDID();
+            final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, outputTableName);
+            exec.checkCanceled();
+            task.execute(exec);
+            setDeleteOnReset(true);
+            resultTable = new SparkDataTable(rdd.getContext(), outputTableName,
+                createResultSpec(rdd.getTableSpec(), pmml.getSpec(), m_colSuffix.getStringValue()));
+        }
         return new PortObject[] {new SparkDataPortObject(resultTable)};
     }
 

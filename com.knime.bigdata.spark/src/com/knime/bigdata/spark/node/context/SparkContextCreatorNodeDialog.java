@@ -42,5 +42,9 @@ class SparkContextCreatorNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentString(ContextSettings.createIDModel(), "Context name: "));
         addDialogComponent(new DialogComponentString(ContextSettings.createMemoryModel(), "Memory: "));
         addDialogComponent(new DialogComponentNumber(ContextSettings.createNoOfCoresModel(), "Number of cores: ", 1));
+        addDialogComponent(new DialogComponentNumber(ContextSettings.createJobTimeoutModel(),
+            "Spark job timeout (seconds): ", 1));
+        addDialogComponent(new DialogComponentNumber(ContextSettings.createJobCheckFrequencyModel(),
+            "Spark job check frequency (Seconds): ", 1));
     }
 }

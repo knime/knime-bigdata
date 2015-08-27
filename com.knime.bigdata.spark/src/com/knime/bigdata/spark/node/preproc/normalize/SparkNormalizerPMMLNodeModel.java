@@ -63,7 +63,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author dwk
  */
 public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
-
+    //TODO: add an option to replace processed columns
     private static final int MAX_UNKNOWN_COLS = 3;
 
     /** Configuration. */
@@ -168,8 +168,8 @@ public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
         final String paramInJson =
             paramsToJson(rdd.getTableName(), includeColIdxs, convertToSettings(), outputTableName);
         exec.checkCanceled();
-        final String jobId = JobControler.startJob(context, NormalizeColumnsJob.class.getCanonicalName(), paramInJson);
-        final JobResult result = JobControler.waitForJobAndFetchResult(context, jobId, exec);
+        final JobResult result = JobControler.startJobAndWaitForResult(context,
+            NormalizeColumnsJob.class.getCanonicalName(), paramInJson, exec);
         final Normalizer res = (Normalizer)result.getObjectResult();
         //create from result
         final double[] min = new double[includedCols.length];

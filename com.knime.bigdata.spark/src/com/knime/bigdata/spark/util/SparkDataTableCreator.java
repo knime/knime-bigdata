@@ -32,7 +32,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -82,13 +81,9 @@ public final class SparkDataTableCreator {
         if (exec != null) {
             exec.checkCanceled();
         }
-        String jobId = JobControler.startJob(context, FetchRowsJob.class.getCanonicalName(), fetchParams);
-
-        JobControler.waitForJob(context, jobId, exec);
-
-        assert (JobStatus.OK != JobControler.getJobStatus(context, jobId));
-
-        return convertResultToDataTable(context, jobId, data.getTableSpec());
+        final JobResult result = JobControler.startJobAndWaitForResult(context, FetchRowsJob.class.getCanonicalName(),
+            fetchParams, exec);
+        return convertResultToDataTable(context, result, data.getTableSpec());
     }
 
     private static String rowFetcherDef(final int aNumRows, final String aTableName) {
@@ -98,10 +93,9 @@ public final class SparkDataTableCreator {
                 aTableName}});
     }
 
-    private static DataTable convertResultToDataTable(final KNIMESparkContext context, final String aJobId,
+    private static DataTable convertResultToDataTable(final KNIMESparkContext context, final JobResult statusWithResult,
         final DataTableSpec spec) throws GenericKnimeSparkException {
         // now check result:
-        final JobResult statusWithResult = JobControler.fetchJobResult(context, aJobId);
         final String message = statusWithResult.getMessage();
         //TODO:  Returned message is "OK" and not OK
         if (!"\"OK\"".equals(message)) {

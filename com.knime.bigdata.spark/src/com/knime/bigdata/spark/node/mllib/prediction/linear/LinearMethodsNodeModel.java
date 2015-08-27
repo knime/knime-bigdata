@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.knime.core.node.ExecutionContext;
@@ -169,11 +170,12 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
     /**
      * @param numericColName the title of the numeric column
      * @param columnNames the column names
+     * @param nf
      * @param weights the weight of each column
      * @return a string of an HTML list with the columns and their weight
      */
     public static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
-        final double[] weights) {
+        final NumberFormat nf, final double[] weights) {
         final StringBuilder buf = new StringBuilder();
 //        for (String string : columnNames) {
 //            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
@@ -192,7 +194,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSpar
               buf.append("<tr bgcolor='#EEEEEE'>");
           }
           buf.append("<th align='left'>").append(colName).append("</th>");
-          buf.append("<td align='right'>&nbsp;&nbsp;").append(weights[idx++]).append("</td>");
+          buf.append("<td align='right'>&nbsp;&nbsp;").append(nf.format(weights[idx++])).append("</td>");
           buf.append("</tr>");
       }
       buf.append("</table>");
