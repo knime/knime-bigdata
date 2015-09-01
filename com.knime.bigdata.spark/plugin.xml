@@ -27,7 +27,7 @@
             path="/labs/spark/column">
       </category>
       <category
-            icon="icons/category_learner.gif"
+            icon="icons/category_mining.png"
             level-id="mining"
             locked="true"
             name="Mining"
