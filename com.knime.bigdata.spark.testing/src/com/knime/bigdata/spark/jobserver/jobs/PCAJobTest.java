@@ -9,8 +9,11 @@ import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.linalg.Matrix;
+import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
+
+import scala.Tuple2;
 
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -32,7 +35,7 @@ public class PCAJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissingInputDataParameter()
 			throws Throwable {
 		String params = PCATaskTest.paramsAsJason(null, new Integer[] { 0, 1 },
-				8, "U");
+				8, "U", "P");
 		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
@@ -40,7 +43,7 @@ public class PCAJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckKParameter() throws Throwable {
 		for (Integer k : new int[] { -1, 0, 1, 3 }) {
 			String params = PCATaskTest.paramsAsJason("tab1", new Integer[] {
-					0, 1 }, k, "U");
+					0, 1 }, k, "U", "P");
 			Config config = ConfigFactory.parseString(params);
 			JobConfig config2 = new JobConfig(config);
 			assertEquals("'k' parameter not set", k, PCAJob.getK(config2));
@@ -50,7 +53,7 @@ public class PCAJobTest extends LocalSparkSpec {
 	@Test
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = PCATaskTest.paramsAsJason("tab1",
-				new Integer[] { 0, 1 }, 5, "U");
+				new Integer[] { 0, 1 }, 5, "U", "P");
 		KnimeSparkJob testObj = new PCAJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
@@ -80,14 +83,15 @@ public class PCAJobTest extends LocalSparkSpec {
 		JavaDoubleRDD o = getRandomDoubleRDD(100, 2);
 		final int k = 2;
 		String params = PCATaskTest.paramsAsJason("tab1",
-				new Integer[] { 0, 1 }, k, "U");
+				new Integer[] { 0, 1 }, k, "U", "P");
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
-		Matrix pca = PCAJob.compute(config2, new MyMapper().getTestRdd(o));
+		Tuple2<RowMatrix, Matrix> pca = PCAJob.compute(config2, new MyMapper().getTestRdd(o));
 
 		assertTrue("principal components should be computed", pca != null);
+		assertTrue("principal component matrix should be computed", pca._2 != null);
 		assertEquals("there should be 'k' principal components ", k,
-				pca.numRows());
+				pca._2.numRows());
 	}
 
 

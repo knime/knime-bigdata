@@ -30,6 +30,7 @@ import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.sql.api.java.Row;
 
+import scala.Tuple2;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -57,6 +58,11 @@ public class PCAJob extends KnimeSparkJob {
      * named RDD with principal components
      */
     public static final String PARAM_RESULT_MATRIX = "PCAComponents";
+
+    /**
+     * named RDD with projection of input data onto principal components
+     */
+    public static final String PARAM_RESULT_PROJECTION = "PCAProjection";
 
     /**
      * parse parameters
@@ -111,19 +117,23 @@ public class PCAJob extends KnimeSparkJob {
         final JavaRDD<Row> rowRDD =
             getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
-        Matrix pca = compute(aConfig, rowRDD);
+        final Tuple2<RowMatrix, Matrix> pcaRes = compute(aConfig, rowRDD);
 
-        JobResult res =
-            JobResult.emptyJobResult().withMessage("OK").withObjectResult(pca.toArray());
 
         if (aConfig.hasOutputParameter(PARAM_RESULT_MATRIX)) {
             final JavaSparkContext js = JavaSparkContext.fromSparkContext(sc);
-            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_MATRIX), RDDUtilsInJava.fromMatrix(js, pca));
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_MATRIX), RDDUtilsInJava.fromMatrix(js, pcaRes._2));
+        }
+
+        if (aConfig.hasOutputParameter(PARAM_RESULT_PROJECTION)) {
+            // Project the rows to the linear space spanned by the top N principal components.
+            final RowMatrix projected = pcaRes._1.multiply(pcaRes._2);
+            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_PROJECTION), RDDUtilsInJava.fromRowMatrix(projected));
         }
 
         LOGGER.log(Level.INFO, "PCA done");
 
-        return res;
+        return JobResult.emptyJobResult().withMessage("OK");
     }
 
     /**
@@ -131,7 +141,7 @@ public class PCAJob extends KnimeSparkJob {
      * @param aRowRDD
      * @return
      */
-    static Matrix compute(final JobConfig aConfig,
+    static Tuple2<RowMatrix, Matrix> compute(final JobConfig aConfig,
         final JavaRDD<Row> aRowRDD) {
         // Create a RowMatrix from JavaRDD<Row>.
         RowMatrix mat = RDDUtilsInJava.toRowMatrix(aRowRDD, SupervisedLearnerUtils.getSelectedColumnIds(aConfig));
@@ -139,7 +149,7 @@ public class PCAJob extends KnimeSparkJob {
         final int k = getK(aConfig);
 
         // Compute the top k singular values and corresponding singular vectors.
-        return mat.computePrincipalComponents(k);
+        return new Tuple2<RowMatrix, Matrix>(mat, mat.computePrincipalComponents(k));
     }
 
 }
