@@ -57,10 +57,12 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
      */
     public static final String PARAM_INFORMATION_GAIN = "impurity";
+
     /**
      * supported information gain criterion
      */
     public static final String VALUE_GINI = "gini";
+
     /**
      * supported information gain criterion
      */
@@ -77,7 +79,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
      */
     public static final String PARAM_MAX_BINS = ParameterConstants.PARAM_MAX_BINS;
 
-    /**Number of classes.**/
+    /** Number of classes. **/
     public static final String PARAM_NO_OF_CLASSES = "NumberOfClasses";
 
     private final static Logger LOGGER = Logger.getLogger(DecisionTreeLearner.class.getName());
@@ -141,8 +143,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         throws GenericKnimeSparkException {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
-        final JavaRDD<Row> rowRDD =
-            getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(aConfig, rowRDD);
 
         final DecisionTreeModel model = execute(sc, aConfig, inputRdd);
@@ -172,13 +173,16 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         aInputData.cache();
 
         final Map<Integer, Integer> nominalFeatureInfo =
-                SupervisedLearnerUtils.extractNominalFeatureInfo(aConfig).getMap();
+            SupervisedLearnerUtils.extractNominalFeatureInfo(aConfig).getMap();
+        final Integer labelIndex = aConfig.getInputParameter(ParameterConstants.PARAM_LABEL_INDEX, Integer.class);
         final Long numClasses;
         if (aConfig.hasInputParameter(PARAM_NO_OF_CLASSES)) {
             numClasses = aConfig.getInputParameter(PARAM_NO_OF_CLASSES, Long.class);
+        } else if (nominalFeatureInfo.containsKey(labelIndex)) {
+            numClasses = nominalFeatureInfo.get(labelIndex).longValue();
         } else {
-            //TODO: Get number of classes from the input data
-            numClasses = new Long(2);
+            //Get number of classes from the input data
+            numClasses = SupervisedLearnerUtils.getNumberOfLabels(aInputData);
         }
 
         final int maxDepth = aConfig.getInputParameter(PARAM_MAX_DEPTH, Integer.class);
