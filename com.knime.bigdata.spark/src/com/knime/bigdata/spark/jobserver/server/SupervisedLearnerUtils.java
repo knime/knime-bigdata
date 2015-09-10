@@ -29,6 +29,7 @@ import javax.annotation.CheckForNull;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
@@ -84,22 +85,22 @@ public class SupervisedLearnerUtils {
         if (msg == null) {
             msg = checkSelectedColumnIdsParameter(aConfig);
         }
-        if (msg == null) {
-            if (!aConfig.hasInputParameter(ParameterConstants.PARAM_COL_NAMES)) {
-                return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' missing.";
-            } else {
-                try {
-                    List<String> names = aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
-                    if (names.size() != getSelectedColumnIds(aConfig).size() + 1) {
-                        return "Input parameter '"
-                            + ParameterConstants.PARAM_COL_NAMES
-                            + "' is of unexpected length. It must have one entry for each select input column and 1 for the label column.";
-                    }
-                } catch (Exception e) {
-                    return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' is not of expected type 'string list'.";
-                }
-            }
-        }
+//        if (msg == null) {
+//            if (!aConfig.hasInputParameter(ParameterConstants.PARAM_COL_NAMES)) {
+//                return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' missing.";
+//            } else {
+//                try {
+//                    List<String> names = aConfig.getInputListParameter(ParameterConstants.PARAM_COL_NAMES, String.class);
+//                    if (names.size() != getSelectedColumnIds(aConfig).size() + 1) {
+//                        return "Input parameter '"
+//                            + ParameterConstants.PARAM_COL_NAMES
+//                            + "' is of unexpected length. It must have one entry for each select input column and 1 for the label column.";
+//                    }
+//                } catch (Exception e) {
+//                    return "Input parameter '" + ParameterConstants.PARAM_COL_NAMES + "' is not of expected type 'string list'.";
+//                }
+//            }
+//        }
         return msg;
     }
 
@@ -204,9 +205,42 @@ public class SupervisedLearnerUtils {
             LOGGER.fine("Extracted Nominal feature info: " + info);
         } else {
             LOGGER.fine("No nominal feature info found");
-            //TK_TODO: Get the number of classes from the inputdata rdd
+            //we assume that there are no nominal (input) features
             info = new NominalFeatureInfo();
         }
         return info;
+    }
+
+    /**
+     * compute the number of classes (or distinct values of a feature)
+     * @param aRDD
+     * @param aColumn
+     * @return the number of distinct values for the given column index
+     */
+    public static long getNumberValuesOfColumn(final JavaRDD<Row> aRDD, final int aColumn) {
+        return aRDD.map(new Function<Row, Object>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Object call(final Row aRow) throws Exception {
+                return aRow.get(aColumn);
+            }
+        }).distinct().count();
+    }
+
+    /**
+     * compute the number of classes
+     * @param aRDD
+     * @return the number of distinct labels
+     */
+    public static long getNumberOfLabels(final JavaRDD<LabeledPoint> aRDD) {
+        return aRDD.map(new Function<LabeledPoint, Double>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Double call(final LabeledPoint aPoint) throws Exception {
+                return aPoint.label();
+            }
+        }).distinct().count();
     }
 }

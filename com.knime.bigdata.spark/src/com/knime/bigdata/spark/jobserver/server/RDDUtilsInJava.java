@@ -331,7 +331,7 @@ public class RDDUtilsInJava {
                             .doubleValue();
                 } else {
                     //no mapping given - label must already be numeric
-                    label = row.getDouble(labelColumnIndex);
+                    label = RDDUtils.getDouble(row, labelColumnIndex);
                 }
                 return new LabeledPoint(label, Vectors.dense(convertedValues));
             }
@@ -544,7 +544,7 @@ public class RDDUtilsInJava {
 
             @Override
             public Rating call(final Row aRow) {
-                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), aRow.getDouble(aRatingIx));
+                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils.getDouble(aRow, aRatingIx));
             }
         });
         return ratings;

@@ -20,15 +20,12 @@
  */
 package com.knime.bigdata.spark.jobserver.jobs;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
@@ -112,54 +109,4 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
         mappedData.createMappingTable(aColNameForIndex, offset);
         return JobResult.emptyJobResult().withMessage("OK").withObjectResult(mappedData);
     }
-
-    /**
-     * @param aMappingRDD
-     * @param aColumnName
-     * @return the number of distinct values for the given column index (as computed by the nominal to number value
-     *         mapping above)
-     */
-    public static long getNumberValuesOfColumn(final JavaRDD<Row> aMappingRDD, final String aColumnName) {
-        final long count = aMappingRDD.filter(new Function<Row, Boolean>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Boolean call(final Row aRow) throws Exception {
-                return aRow.getString(0).equals(aColumnName);
-            }
-        }).count();
-
-        if (count == 1) {
-            //binary mapping, we store only one mapping, but there are 2 values
-            return 2;
-        }
-        return count;
-    }
-
-    /**
-     * extract Map storing arity of categorical features from the mapping RDD
-     *
-     * @param aColNames list of columns to be used
-     * @param aMappingRDD
-     * @return Map storing arity of categorical features. E.g., an entry (n -> k) indicates that feature n is
-     *         categorical with k categories indexed from 0: {0, 1, ..., k-1}.
-     */
-    public static Map<Integer, Integer> extractNominalFeatureInfo(final List<String> aColNames,
-        final JavaRDD<Row> aMappingRDD) {
-        final Map<Integer, Integer> categoricalFeaturesInfo = new HashMap<>();
-        int ix = 0;
-        for (String colNames : aColNames) {
-            //note that 'colIx' is the index of the numeric column, but getNumberValuesOfColumn requires
-            // the index of the original nominal column
-            final Long numValues = ConvertNominalValuesJob.getNumberValuesOfColumn(aMappingRDD, colNames);
-            //note that 'colIx' is the index of the numeric column, but the DT learner requires the index in the vector
-            if (numValues > 0) {
-                //if there is no entry then we assume that it is a true numeric feature
-                categoricalFeaturesInfo.put(ix, numValues.intValue());
-            }
-            ix++;
-        }
-        return categoricalFeaturesInfo;
-    }
-
 }
