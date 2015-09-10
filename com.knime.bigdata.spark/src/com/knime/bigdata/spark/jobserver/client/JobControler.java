@@ -58,7 +58,7 @@ public class JobControler {
      */
     public static void uploadJobJar(final KNIMESparkContext aContextContainer, final String aJarPath)
             throws GenericKnimeSparkException {
-        uploadJar(aContextContainer, aJarPath, APP_NAME);
+        DataUploader.uploadFile(aContextContainer, aJarPath, "/jars/" + APP_NAME);
     }
 
     /**
@@ -70,8 +70,7 @@ public class JobControler {
      * @param appName the application name for the jar
      *
      * @throws GenericKnimeSparkException
-     */
-    public static void uploadJar(final KNIMESparkContext aContextContainer, final String aJarPath, final String appName)
+    private static void uploadJar(final KNIMESparkContext aContextContainer, final String aJarPath, final String appName)
         throws GenericKnimeSparkException {
         final File jarFile = new File(aJarPath);
         if (!jarFile.exists()) {
@@ -91,6 +90,7 @@ public class JobControler {
 
         RestClient.checkStatus(response, "Failed to upload jar to server. Jar path: " + aJarPath, Status.OK);
     }
+     */
 
     /**
      * start a new job within the given context

@@ -2,7 +2,7 @@ package com.knime.bigdata.spark;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.Serializable;
@@ -12,10 +12,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.knime.core.node.CanceledExecutionException;
 
+import com.knime.bigdata.spark.jobserver.client.DataUploader;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.client.UploadUtil;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -127,13 +129,32 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 	public static String importTestTable(final KNIMESparkContext contextName,
 			final Object[][] aTable, final String resTableName)
 			throws GenericKnimeSparkException, CanceledExecutionException {
-		String params = Table2SparkNodeModel.paramDef(aTable, resTableName);
+		final String fName = System.currentTimeMillis()+"unittest";
+		final UploadUtil util = new UploadUtil(contextName, aTable, fName);
+        util.upload();
+        
+		String params = Table2SparkNodeModel.paramDef(util.getServerFileName(), resTableName);
 		String jobId = JobControler
 				.startJob(contextName,
 						ImportKNIMETableJob.class.getCanonicalName(),
 						params.toString());
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
+		
+		String[] files = DataUploader.listFiles(contextName);
+		boolean found = false;
+		for (String f : files) {
+			found = found || f.contains(fName);
+		}
+		assertTrue("temp file must be known on server", found);
+		util.cleanup();
+		
+		files = DataUploader.listFiles(contextName);
+		found = false;
+		for (String f : files) {
+			found = found || f.contains(fName);
+		}
+		assertFalse("temp file must have been removed from server", found);
 		return jobId;
 	}
 

@@ -26,10 +26,14 @@ package com.knime.bigdata.spark.jobserver.server;
 //Java 7:
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
@@ -40,7 +44,7 @@ import com.typesafe.config.Config;
  *
  * @author dwk
  */
-public class JobConfig implements Serializable{
+public class JobConfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -158,10 +162,52 @@ public class JobConfig implements Serializable{
      * @param aParamName input parameter name
      * @return string representation of given object
      * @throws GenericKnimeSparkException if T cannot be found or the data is corrupted
+     * @note do not use this for larger objects, use a combination of encodeToBase64AndStoreAsFile (client) and
+     *       readInputFromFileAndDecode (server) instead
      */
     public <T> T decodeFromInputParameter(final String aParamName) throws GenericKnimeSparkException {
         return decodeFromParameter(INPUT_PREFIX + aParamName);
     }
+
+    /**
+     * de-serialize an object from the Base64 string parameter value and cast it to the given type (use
+     * encodeToBase64AndStoreAsFile and the UploadUtil to store the file on the server)
+     *
+     * @param aParamName input parameter name
+     * @return string representation of given object
+     * @throws GenericKnimeSparkException if T cannot be found or the data is corrupted
+     */
+    public <T> T readInputFromFileAndDecode(final String aParamName) throws GenericKnimeSparkException {
+        return readFromFileAndDecode(INPUT_PREFIX + aParamName);
+    }
+
+    /**
+     * de-serialize an object from the Base64 string parameter value and cast it to the given type (use
+     * encodeToBase64AndStoreAsFile and the UploadUtil to store the file on the server)
+     *
+     * @param aParamName parameter name
+     * @return string representation of given object
+     * @throws GenericKnimeSparkException if T cannot be found or the data is corrupted
+     */
+    public <T> T readFromFileAndDecode(final String aParamName) throws GenericKnimeSparkException {
+        //parameter value is base-64 encoded file name, not the actual data
+        final String fileName = decodeFromBase64(m_config.getString(aParamName));
+        try {
+            return decodeFromBase64(readFile(fileName));
+        } catch (IOException e) {
+            throw new GenericKnimeSparkException(e);
+        }
+    }
+
+    private static String readFile(final String aPath) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(aPath));
+        return new String(encoded, StandardCharsets.UTF_8);
+    }
+
+    private static void writeFile(final String aPath, final String aStringToWrite) throws IOException {
+        Files.write(Paths.get(aPath), aStringToWrite.getBytes(StandardCharsets.UTF_8));
+    }
+
 
     /**
      * de-serialize an object from the Base64 string parameter value and cast it to the given type
@@ -177,13 +223,14 @@ public class JobConfig implements Serializable{
     }
 
     /**
-     * Deserializes the given Base64 String  into an object.
+     * Deserializes the given Base64 String into an object.
+     *
      * @param aObjectString the Base64 String to decode
      * @return the decoded Object
      * @throws GenericKnimeSparkException
      */
     @SuppressWarnings("unchecked")
-    public static <T> T decodeFromBase64(final String aObjectString) throws GenericKnimeSparkException {
+    private static <T> T decodeFromBase64(final String aObjectString) throws GenericKnimeSparkException {
         byte[] data = DatatypeConverter.parseBase64Binary(aObjectString);
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return (T)ois.readObject();
@@ -194,7 +241,7 @@ public class JobConfig implements Serializable{
 
     /**
      * serializes the given object to a Base64 string
-     *
+     * @note do not use this for larger objects, use encodeToBase64AndStoreAsFile instead
      * @param aObject object to be serialized
      * @return string representation of given object
      * @throws GenericKnimeSparkException if data is corrupted
@@ -205,6 +252,23 @@ public class JobConfig implements Serializable{
             oos.writeObject(aObject);
             //Java 1.8: return Base64.getEncoder().encodeToString(baos.toByteArray());
             return DatatypeConverter.printBase64Binary(baos.toByteArray());
+        } catch (IOException e) {
+            throw new GenericKnimeSparkException(e);
+        }
+    }
+
+    /**
+     * serializes the given object to a Base64 string and writes it into a temp file
+     * @param aObject object to be serialized
+     * @return File references to temporary file
+     * @throws GenericKnimeSparkException if data is corrupted
+     */
+    public static File encodeToBase64AndStoreAsFile(final Serializable aObject) throws GenericKnimeSparkException {
+        final String encoded = encodeToBase64(aObject);
+        try {
+            File temp = File.createTempFile("job-server", ".tmp");
+            writeFile(temp.getAbsolutePath(), encoded);
+            return temp;
         } catch (IOException e) {
             throw new GenericKnimeSparkException(e);
         }

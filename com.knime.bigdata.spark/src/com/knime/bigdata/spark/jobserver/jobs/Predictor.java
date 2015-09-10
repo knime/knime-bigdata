@@ -50,8 +50,6 @@ public class Predictor extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
-
     private final static Logger LOGGER = Logger.getLogger(Predictor.class.getName());
 
     /**
@@ -71,7 +69,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
         if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             msg = "Output parameter '" + PARAM_RESULT_TABLE + "' missing.";
         }
-        if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
+        if (msg == null && !aConfig.hasInputParameter(ParameterConstants.PARAM_MODEL_NAME)) {
             msg = "Input model missing!";
         }
         if (msg != null) {
@@ -108,7 +106,7 @@ public class Predictor extends KnimeSparkJob implements Serializable {
 
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
-        final Serializable model = aConfig.decodeFromInputParameter(PARAM_MODEL);
+        final Serializable model = aConfig.readInputFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
 
         final JavaRDD<Row> predictions = ModelUtils.predict(aConfig, rowRDD, colIdxs, model);
 

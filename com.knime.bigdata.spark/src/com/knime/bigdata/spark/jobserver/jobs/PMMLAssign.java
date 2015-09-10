@@ -53,8 +53,6 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAM_MODEL = ParameterConstants.PARAM_MODEL_NAME;
-
     /**
      * boolean that indicates if probabilities should be added
      */
@@ -87,7 +85,7 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         if (msg == null && !aConfig.hasInputParameter(PARAM_MAIN_CLASS)) {
             msg = "Main class name missing!";
         }
-        if (msg == null && !aConfig.hasInputParameter(PARAM_MODEL)) {
+        if (msg == null && !aConfig.hasInputParameter(ParameterConstants.PARAM_MODEL_NAME)) {
             msg = "Compiled PMML model missing!";
         }
         if (msg != null) {
@@ -123,7 +121,7 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
         final boolean addProbabilites = aConfig.getInputParameter(PARAM_APPEND_PROBABILITIES, Boolean.class);
         final String mainClass = aConfig.getInputParameter(PARAM_MAIN_CLASS);
-        final Map<String, byte[]> bytecode = aConfig.decodeFromInputParameter(PARAM_MODEL);
+        final Map<String, byte[]> bytecode = aConfig.readFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
         try {
             final Function<Row, Row> predict = new Function<Row, Row>() {
                 private static final long serialVersionUID = 1L;
