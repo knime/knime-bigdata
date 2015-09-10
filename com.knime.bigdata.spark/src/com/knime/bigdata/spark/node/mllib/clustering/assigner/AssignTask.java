@@ -28,6 +28,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
+import com.knime.bigdata.spark.jobserver.client.UploadUtil;
 import com.knime.bigdata.spark.jobserver.jobs.Predictor;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -43,15 +44,16 @@ public class AssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String kmeansPredictorDef(final KMeansModel aModel, final String aInputTableName,
+    private String kmeansPredictorDef(final String aTempFileName, final String aInputTableName,
         final Integer[] colIdxs, final String aOutputTableName) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
-            new Object[]{ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aModel),
-                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName,
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
+            new Object[]{ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aTempFileName),
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName, ParameterConstants.PARAM_COL_IDXS,
+                JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
             new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
+
     /**
      * @param exec
      * @param data
@@ -60,11 +62,19 @@ public class AssignTask implements Serializable {
      * @param resultRDD
      */
     void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final KMeansModel model,
-        final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
-        final String predictorKMeansParams = kmeansPredictorDef(model, inputRDD.getID(), colIdxs, resultRDD.getID());
-        exec.checkCanceled();
-        JobControler.startJobAndWaitForResult(inputRDD.getContext(), Predictor.class.getCanonicalName(),
-            predictorKMeansParams, exec);
-    }
+        final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException,
+        CanceledExecutionException {
 
+        final UploadUtil util = new UploadUtil(inputRDD.getContext(), model, "model");
+        util.upload();
+        try {
+            final String predictorParams =
+                kmeansPredictorDef(util.getServerFileName(), inputRDD.getID(), colIdxs, resultRDD.getID());
+            exec.checkCanceled();
+            JobControler.startJobAndWaitForResult(inputRDD.getContext(), Predictor.class.getCanonicalName(),
+                predictorParams, exec);
+        } finally {
+            util.cleanup();
+        }
+    }
 }
