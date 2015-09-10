@@ -36,6 +36,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.jobserver.client.UploadUtil;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -128,23 +129,35 @@ public class Table2SparkNodeModel extends AbstractSparkNodeModel {
      */
     private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final SparkDataTable resultTable)
         throws Exception {
-        final String params = paramDef(data, resultTable.getID());
-        exec.checkCanceled();
-        JobControler.startJobAndWaitForResult(resultTable.getContext(), ImportKNIMETableJob.class.getCanonicalName(),
-            params, exec);
+
+        final UploadUtil util = new UploadUtil(resultTable.getContext(), data, "data-table");
+        util.upload();
+        try {
+            final String params = paramDef(util.getServerFileName(), resultTable.getID());
+            exec.checkCanceled();
+            JobControler.startJobAndWaitForResult(resultTable.getContext(),
+                ImportKNIMETableJob.class.getCanonicalName(), params, exec);
+        } finally {
+            util.cleanup();
+        }
     }
 
     /**
      *
-     * @param data
+     * @param aDataFileName - absolute path on server to file with data (upload the data before calling this)
      * @param aResultTableName
      * @return JSon string with job parameters
      * @throws GenericKnimeSparkException
      */
-    public static String paramDef(final Object[][] data, final String aResultTableName) throws GenericKnimeSparkException {
+    public static String paramDef(final String aDataFileName, final String aResultTableName)
+        throws GenericKnimeSparkException {
+
+        if (aDataFileName == null) {
+            throw new NullPointerException("Data file name must not be null!");
+        }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(data)}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultTableName}});
+            new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(aDataFileName)},
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultTableName}});
     }
 
     /**

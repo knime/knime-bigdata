@@ -48,9 +48,7 @@ public class ImportKNIMETableJobTest extends SparkWithJobServerSpec {
         // now check result:
         String takeJobId =
             JobControler.startJob(aContextName, FetchRowsJob.class.getCanonicalName(), jsonParams);
-        assertFalse("job should have finished properly",
-            JobControler.waitForJob(aContextName, takeJobId, null).equals(JobStatus.UNKNOWN));
-        JobResult res = JobControler.fetchJobResult(aContextName, takeJobId);
+        JobResult res = JobControler.waitForJobAndFetchResult(aContextName, takeJobId, null);
         assertNotNull("row fetcher must return a result", res);
 
         Object[][] arrayRes = (Object[][])res.getObjectResult();
