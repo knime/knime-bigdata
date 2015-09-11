@@ -28,14 +28,14 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkContextCreatorNodeModel extends AbstractSparkNodeModel {
+class SparkContextCreatorNodeModel extends SparkNodeModel {
 
     private final ContextSettings m_settings = new ContextSettings();
 

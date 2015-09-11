@@ -32,7 +32,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
@@ -41,7 +41,7 @@ import com.knime.bigdata.spark.util.SparkDataTableCreator;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark2TableNodeModel extends AbstractSparkNodeModel {
+public class Spark2TableNodeModel extends SparkNodeModel {
 
     private final SettingsModelIntegerBounded m_fetchSize = createFetchSizeModel();
 

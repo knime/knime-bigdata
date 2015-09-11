@@ -37,7 +37,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -52,7 +52,7 @@ import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
  * @author Tobias Koetter, KNIME.com
  * @param <M> the MLlib model
  */
-public class LinearMethodsNodeModel<M extends Serializable> extends AbstractSparkNodeModel {
+public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeModel {
 
     private final MLlibNodeSettings m_classCol = new MLlibNodeSettings(true);
 

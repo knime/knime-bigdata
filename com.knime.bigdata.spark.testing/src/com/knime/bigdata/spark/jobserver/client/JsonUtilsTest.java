@@ -10,9 +10,8 @@ import javax.json.JsonArray;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
-import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
-import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
+import com.knime.bigdata.spark.jobserver.jobs.KMeansLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -35,8 +34,8 @@ public class JsonUtilsTest {
      */
     @Test
     public void utilShouldConvertSimplePropertyValueString2JSon() throws Throwable {
-        String jsonStr = JsonUtils.asJson(new String[]{"key", "value"});
-        Config config = ConfigFactory.parseString(jsonStr);
+        final String jsonStr = JsonUtils.asJson(new String[]{"key", "value"});
+        final Config config = ConfigFactory.parseString(jsonStr);
         assertTrue("key should be stored as path", config.hasPath("key"));
         assertEquals("value should be accessible for key", config.getString("key"), "value");
     }
@@ -47,15 +46,15 @@ public class JsonUtilsTest {
      */
     @Test
     public void utilShouldConvertArrayOfPropertyValueArrays2JSon() throws Throwable {
-        String jsonStr =
+        final String jsonStr =
             JsonUtils.asJson(new Object[]{
                 "key",
                 JsonUtils.toJsonArray(new Object[]{new String[]{"k1", "v1", "k2", "v2"},
                     new String[]{"k21", "v21", "k22", "v22"},
                     new String[]{"k31", "v31", "k32", "v32", "kk33", "val456"}})});
-        Config config = ConfigFactory.parseString(jsonStr);
+        final Config config = ConfigFactory.parseString(jsonStr);
         assertTrue("key should be stored as path", config.hasPath("key"));
-        ConfigList subConfig = config.getList("key");
+        final ConfigList subConfig = config.getList("key");
         assertEquals("unexpected number of sub-tasks", 3, subConfig.size());
 
         assertEquals("value v2 should be accessible for key k2", "v2", ((ConfigObject)subConfig.get(0)).toConfig()
@@ -70,9 +69,9 @@ public class JsonUtilsTest {
      */
     @Test
     public void utilShouldConvertArray2JSon() throws Throwable {
-        String jsonStr = JsonUtils.toJsonArray(new Object[]{"a", 1, 5, "bkx", false});
+        final String jsonStr = JsonUtils.toJsonArray(new Object[]{"a", 1, 5, "bkx", false});
 
-        JsonArray jsonArray = JsonUtils.toJsonArray(jsonStr);
+        final JsonArray jsonArray = JsonUtils.toJsonArray(jsonStr);
 
         assertEquals("json array should have 5 element", 5, jsonArray.size());
     }
@@ -83,27 +82,27 @@ public class JsonUtilsTest {
      */
     @Test
     public void utilShouldConvertInputOutputGroups2JSon() throws Throwable {
-        String jsonStr =
+        final String jsonStr =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
-                new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, "dataPath", KMeansLearner.PARAM_NUM_CLUSTERS, "9",
+                new String[]{KnimeSparkJob.PARAM_INPUT_TABLE, "dataPath", KMeansLearnerJob.PARAM_NUM_CLUSTERS, "9",
                     ParameterConstants.PARAM_NUM_ITERATIONS, "63"},
                 ParameterConstants.PARAM_OUTPUT,
                 new String[]{ParameterConstants.PARAM_MODEL_NAME, "modelFile", KnimeSparkJob.PARAM_RESULT_TABLE,
                     "outputDataPath"}
 
             });
-        Config config = ConfigFactory.parseString(jsonStr);
+        final Config config = ConfigFactory.parseString(jsonStr);
         assertTrue("input should be stored as path", config.hasPath(ParameterConstants.PARAM_INPUT));
         assertTrue("output should be stored as path", config.hasPath(ParameterConstants.PARAM_OUTPUT));
-        Config inputConfig = config.getConfig(ParameterConstants.PARAM_INPUT);
+        final Config inputConfig = config.getConfig(ParameterConstants.PARAM_INPUT);
         assertEquals("value should be accessible for key", "dataPath",
             inputConfig.getString(KnimeSparkJob.PARAM_INPUT_TABLE));
-        assertEquals("value should be accessible for key", 9, inputConfig.getInt(KMeansLearner.PARAM_NUM_CLUSTERS));
+        assertEquals("value should be accessible for key", 9, inputConfig.getInt(KMeansLearnerJob.PARAM_NUM_CLUSTERS));
         assertEquals("value should be accessible for key", 63,
             inputConfig.getInt(ParameterConstants.PARAM_NUM_ITERATIONS));
 
-        Config outputConfig = config.getConfig(ParameterConstants.PARAM_OUTPUT);
+        final Config outputConfig = config.getConfig(ParameterConstants.PARAM_OUTPUT);
         assertEquals("value should be accessible for key", "outputDataPath",
             outputConfig.getString(KnimeSparkJob.PARAM_RESULT_TABLE));
         assertEquals("value should be accessible for key", "modelFile",
@@ -118,19 +117,19 @@ public class JsonUtilsTest {
         final String jsonStr =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(inputData)}});
-        JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
+        final JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
 
-        List<Row> data = ImportKNIMETableJob.getInputData(configValue);
+        final List<Row> data = ImportKNIMETableJob.getInputData(configValue);
         assertEquals("unexpected number of rows", inputData.length, data.size());
         for (int ix = 0; ix < inputData.length; ix++) {
-            Object[] inputRow = inputData[ix];
-            Row outputRow = data.get(ix);
+            final Object[] inputRow = inputData[ix];
+            final Row outputRow = data.get(ix);
             assertTrue("column type must not change (Col 0)", outputRow.get(0) instanceof Integer);
             assertTrue("column type must not change (Col 1)", outputRow.get(1) instanceof Boolean);
             assertTrue("column type must not change (Col 2)", outputRow.get(2) instanceof String);
             assertTrue("column type must not change (Col 3)", outputRow.get(3) instanceof String);
-            assertTrue("column type must not change (Col 4): " + outputRow.get(4), (outputRow.get(4) == null)
-                || (outputRow.get(4) instanceof Double));
+            assertTrue("column type must not change (Col 4): " + outputRow.get(4), outputRow.get(4) == null
+                || outputRow.get(4) instanceof Double);
             for (int colIx = 0; colIx < inputRow.length; colIx++) {
                 assertEquals("unexpected cell value", inputRow[colIx], outputRow.get(colIx));
             }
@@ -142,13 +141,13 @@ public class JsonUtilsTest {
         final String jsonStr =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JobConfig.encodeToBase64(largeData)}});
-        JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
+        final JobConfig configValue = new JobConfig(ConfigFactory.parseString(jsonStr));
 
-        List<Row> data = ImportKNIMETableJob.getInputData(configValue);
+        final List<Row> data = ImportKNIMETableJob.getInputData(configValue);
         assertEquals("unexpected number of rows", largeData.length, data.size());
         for (int ix = 0; ix < largeData.length; ix++) {
-            Object[] inputRow = largeData[ix];
-            Row outputRow = data.get(ix);
+            final Object[] inputRow = largeData[ix];
+            final Row outputRow = data.get(ix);
             assertTrue("column type must not change (Col 0)", outputRow.get(0) instanceof String);
             assertTrue("column type must not change (Col 1)", outputRow.get(1) instanceof Integer);
             assertTrue("column type must not change (Col 2)", outputRow.get(2) instanceof Double);

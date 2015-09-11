@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Learner" icon="icon.png">
     <name>Spark Naive Bayes</name>
-	<shortDescription>Creates a naive Bayes model from the given classified data.</shortDescription>
+	<shortDescription>Naive Bayes model learning performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 

@@ -42,7 +42,7 @@ import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkUtil;
@@ -51,7 +51,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark2HiveNodeModel extends AbstractSparkNodeModel {
+public class Spark2HiveNodeModel extends SparkNodeModel {
 
     private final SettingsModelString m_tableName = createTableNameModel();
 

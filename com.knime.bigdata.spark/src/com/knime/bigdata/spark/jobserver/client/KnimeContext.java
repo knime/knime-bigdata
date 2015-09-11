@@ -21,6 +21,7 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -68,6 +69,7 @@ public class KnimeContext {
         //and it is (one of) the current user's context(s)
         try {
             synchronized (LOGGER) {
+                //TODO: Check that only one context exists or multi contexts is enabled in the application config
                 if (sparkContextExists(context)) {
                     return context;
                 }
@@ -147,7 +149,7 @@ public class KnimeContext {
     }
 
     private static String getJobJarPath() {
-        if (KNIMEConfigContainer.m_config.hasPath("unitTestMode")) {
+        if (KNIMEConfigContainer.hasPath("unitTestMode")) {
             return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + ".." + File.separatorChar
                 + "com.knime.bigdata.spark" + File.separator + "resources" + File.separatorChar + "knimeJobs.jar";
         }
@@ -199,14 +201,14 @@ public class KnimeContext {
      * remove reference to named RDD from context
      *
      * @param aContextContainer context configuration container
-     * @param aNamedRdd RDD name reference
+     * @param rddName RDD name reference
      */
-    public static void deleteNamedRDD(final KNIMESparkContext aContextContainer, final String aNamedRdd) {
+    public static void deleteNamedRDDs(final KNIMESparkContext aContextContainer, final String... rddName) {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE,
-                    KnimeSparkJob.PARAM_INPUT_TABLE, aNamedRdd}});
+                    KnimeSparkJob.PARAM_INPUT_TABLE, JsonUtils.toJsonArray((Object[])rddName)}});
         try {
             JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
                 jsonArgs, null);

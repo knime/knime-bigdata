@@ -1,8 +1,9 @@
 package com.knime.bigdata.spark;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.Serializable;
@@ -15,7 +16,6 @@ import org.knime.core.node.CanceledExecutionException;
 import com.knime.bigdata.spark.jobserver.client.DataUploader;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.UploadUtil;
 import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
@@ -26,6 +26,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValueFactory;
 
@@ -132,26 +133,26 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 		final String fName = System.currentTimeMillis()+"unittest";
 		final UploadUtil util = new UploadUtil(contextName, aTable, fName);
         util.upload();
-        
-		String params = Table2SparkNodeModel.paramDef(util.getServerFileName(), resTableName);
-		String jobId = JobControler
+
+		final String params = Table2SparkNodeModel.paramDef(util.getServerFileName(), resTableName);
+		final String jobId = JobControler
 				.startJob(contextName,
 						ImportKNIMETableJob.class.getCanonicalName(),
 						params.toString());
 
 		JobControler.waitForJobAndFetchResult(contextName, jobId, null);
-		
+
 		String[] files = DataUploader.listFiles(contextName);
 		boolean found = false;
-		for (String f : files) {
+		for (final String f : files) {
 			found = found || f.contains(fName);
 		}
 		assertTrue("temp file must be known on server", found);
 		util.cleanup();
-		
+
 		files = DataUploader.listFiles(contextName);
 		found = false;
-		for (String f : files) {
+		for (final String f : files) {
 			found = found || f.contains(fName);
 		}
 		assertFalse("temp file must have been removed from server", found);
@@ -162,13 +163,13 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			final String resTableName, final Object[][] aExpected)
 			throws Exception {
 
-		Object[][] arrayRes = fetchResultTable(aContextName, resTableName,
+		final Object[][] arrayRes = fetchResultTable(aContextName, resTableName,
 				aExpected.length);
 
 		for (int i = 0; i < arrayRes.length; i++) {
 			boolean found = false;
-			for (int j = 0; j < aExpected.length; j++) {
-				found = found || Arrays.equals(arrayRes[i], aExpected[j]);
+			for (final Object[] element : aExpected) {
+				found = found || Arrays.equals(arrayRes[i], element);
 			}
 			assertTrue("result row[" + i + "]: " + Arrays.toString(arrayRes[i])
 					+ " - not found.", found);
@@ -202,25 +203,25 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			final double aAllowedPercentageOff)
 			throws GenericKnimeSparkException, CanceledExecutionException {
 		// now check result:
-		String takeJobId = JobControler.startJob(aContextName,
+		final String takeJobId = JobControler.startJob(aContextName,
 				FetchRowsJob.class.getCanonicalName(),
 				rowFetcherDef(aExpectedLength, aResTableName));
-		JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
+		final JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
 				takeJobId, null);
 		assertNotNull("row fetcher must return a result", res);
 
-		Object[][] arrayRes = (Object[][]) res.getObjectResult();
+		final Object[][] arrayRes = (Object[][]) res.getObjectResult();
 		if (aAllowedPercentageOff == 0) {
 			assertEquals("fetcher should return correct number of rows",
 					aExpectedLength, arrayRes.length);
 		} else {
 			assertTrue("fetcher should return correct number of rows, got "
 					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * ((double) (100 - aAllowedPercentageOff))
+					aExpectedLength * (100 - aAllowedPercentageOff)
 							/ 100 <= arrayRes.length);
 			assertTrue("fetcher should return correct number of rows, got "
 					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * ((double) (100 + aAllowedPercentageOff))
+					aExpectedLength * (100 + aAllowedPercentageOff)
 							/ 100 >= arrayRes.length);
 
 		}

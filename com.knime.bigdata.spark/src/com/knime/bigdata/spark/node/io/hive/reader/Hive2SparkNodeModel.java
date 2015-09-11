@@ -38,7 +38,7 @@ import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -48,7 +48,7 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
  *
  * @author koetter
  */
-public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
+public class Hive2SparkNodeModel extends SparkNodeModel {
 
     /**
      * Constructor.

@@ -48,7 +48,7 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
-public class KMeansLearner extends KnimeSparkJob implements Serializable {
+public class KMeansLearnerJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -59,7 +59,7 @@ public class KMeansLearner extends KnimeSparkJob implements Serializable {
 
     private static final String PARAM_NUM_ITERATIONS = ParameterConstants.PARAM_NUM_ITERATIONS;
 
-    private final static Logger LOGGER = Logger.getLogger(KMeansLearner.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(KMeansLearnerJob.class.getName());
 
     /**
      * parse parameters - there are no default values, all values are required

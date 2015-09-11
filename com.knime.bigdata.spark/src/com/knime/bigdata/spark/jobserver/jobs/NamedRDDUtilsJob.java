@@ -21,6 +21,8 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +42,9 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
  * @author dwk
  */
 public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
+
+    /**The parameter for the input tables to process*/
+    public static final String PARAM_INPUT_TABLES = "InputTables";
 
     /**
      * delete operation
@@ -84,16 +89,16 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
     }
 
     /**
-     * executes operations on named RDDs, currently one of: - remove the given named RDD from the map of named RDDs -
+     * executes operations on named RDDs, currently one of: - remove the given named RDDs from the map of named RDDs -
      * return list of known named RDDs
      *
-     * @return "OK" result if named rdd does not exist anymore after execution (deletion), names of known named RDDS
+     * @return "OK" result if named rdds do not exist anymore after execution (deletion), names of known named RDDS
      *         (info), "ERROR" result otherwise
      */
     @Override
     public JobResult runJobWithContext(final SparkContext sc, final JobConfig aConfig) {
         if (aConfig.getInputParameter(PARAM_OP).equalsIgnoreCase(OP_DELETE)) {
-            return deleteNamedRDD(aConfig);
+            return deleteNamedRDDs(aConfig);
         }
         JobResult res = JobResult.emptyJobResult().withMessage("OK");
         for (String name : RDDUtils.activeNamedRDDs(this)) {
@@ -106,16 +111,23 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
      * @param aConfig
      * @return
      */
-    private JobResult deleteNamedRDD(final JobConfig aConfig) {
-        final String rddName = aConfig.getInputParameter(PARAM_INPUT_TABLE);
-        LOGGER.log(Level.INFO, "deleting reference to named RDD " + rddName);
-        deleteNamedRdd(rddName);
-        if (validateNamedRdd(rddName)) {
-            LOGGER.log(Level.INFO, "failed");
-            return JobResult.emptyJobResult().withMessage("ERROR");
-        } else {
-            LOGGER.log(Level.INFO, "done");
-            return JobResult.emptyJobResult().withMessage("OK");
+    private JobResult deleteNamedRDDs(final JobConfig aConfig) {
+        final List<String> rddNames = aConfig.getInputListParameter(PARAM_INPUT_TABLES, String.class);
+        final List<String> failedDeletes = new LinkedList<String>();
+        for (String rddName : rddNames) {
+            LOGGER.log(Level.INFO, "deleting reference to named RDD " + rddName);
+            deleteNamedRdd(rddName);
+            if (validateNamedRdd(rddName)) {
+                LOGGER.log(Level.INFO, "failed to delete named RDD " + rddName);
+                failedDeletes.add(rddName);
+            } else {
+                LOGGER.log(Level.INFO, "done deleting named RDD " + rddName);
+            }
         }
+        if (!failedDeletes.isEmpty()) {
+            //TODO: Send the failed rdd names back to the caller
+            return JobResult.emptyJobResult().withMessage("ERROR");
+        }
+        return JobResult.emptyJobResult().withMessage("OK");
     }
 }

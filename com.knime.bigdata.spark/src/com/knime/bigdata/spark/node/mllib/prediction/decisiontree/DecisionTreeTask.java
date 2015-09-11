@@ -30,7 +30,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -100,7 +100,7 @@ public class DecisionTreeTask implements Serializable {
             exec.checkCanceled();
         }
         final JobResult result =
-            JobControler.startJobAndWaitForResult(m_context, DecisionTreeLearner.class.getCanonicalName(),
+            JobControler.startJobAndWaitForResult(m_context, DecisionTreeLearnerJob.class.getCanonicalName(),
                 learnerParams, exec);
 
         return (DecisionTreeModel)result.getObjectResult();
@@ -126,16 +126,16 @@ public class DecisionTreeTask implements Serializable {
             inputParams.add(SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO);
             inputParams.add(JobConfig.encodeToBase64(nominalFeatureInfo));
         }
-        inputParams.add(DecisionTreeLearner.PARAM_INFORMATION_GAIN);
+        inputParams.add(DecisionTreeLearnerJob.PARAM_INFORMATION_GAIN);
         inputParams.add(qualityMeasure);
-        inputParams.add(DecisionTreeLearner.PARAM_MAX_BINS);
+        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_BINS);
         inputParams.add(maxNoOfBins);
-        inputParams.add(DecisionTreeLearner.PARAM_MAX_DEPTH);
+        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_DEPTH);
         inputParams.add(maxDepth);
         inputParams.add(ParameterConstants.PARAM_LABEL_INDEX);
         inputParams.add(classColIdx);
         if (noOfClasses != null) {
-            inputParams.add(DecisionTreeLearner.PARAM_NO_OF_CLASSES);
+            inputParams.add(DecisionTreeLearnerJob.PARAM_NO_OF_CLASSES);
             inputParams.add(noOfClasses);
         }
         //        inputParams.add(ParameterConstants.PARAM_COL_NAMES);

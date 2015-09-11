@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Manipulator" icon="icon.png">
+    <name>Spark (Un)persist</name>
+    <shortDescription>(Un)persists the incoming RDD using the specified storage level.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node (un)persists (caches) the incoming RDD using the specified persistence level. The different storage levels
+            are described in detail in the 
+            <a href="http://spark.apache.org/docs/1.2.0/programming-guide.html#rdd-persistence">Spark documentation</a>.
+            <p>
+            Caching RDD might speed up operations that need to access the same RDD several times e.g. when reading an
+            RDD within a loop body in a KNIME workflow.
+            </p> 
+        </intro>
+        <option name="Storage Level">
+            Specify the absolute number of rows in the sample. If there are less rows than specified here, all rows are
+            used.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark RDD">Spark RDD to (un)persist.</inPort>
+        <outPort index="0" name="(Un)persisted Spark RDD">The (un)persisted Spark RDD.</outPort>
+    </ports>
+</knimeNode>

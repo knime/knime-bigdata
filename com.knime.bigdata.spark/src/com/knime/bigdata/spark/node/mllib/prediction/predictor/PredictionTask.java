@@ -28,7 +28,7 @@ import org.knime.core.node.ExecutionMonitor;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.UploadUtil;
-import com.knime.bigdata.spark.jobserver.jobs.Predictor;
+import com.knime.bigdata.spark.jobserver.jobs.MLlibPredictorJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -61,13 +61,12 @@ public class PredictionTask implements Serializable {
      */
     void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final Serializable model,
         final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
-
         final UploadUtil util = new UploadUtil(inputRDD.getContext(), model, "model");
         util.upload();
         try {
             final String predictorParams = getPredictorDef(util.getServerFileName(), inputRDD.getID(), colIdxs, resultRDD.getID());
             exec.checkCanceled();
-            JobControler.startJobAndWaitForResult(inputRDD.getContext(), Predictor.class.getCanonicalName(),
+            JobControler.startJobAndWaitForResult(inputRDD.getContext(), MLlibPredictorJob.class.getCanonicalName(),
                 predictorParams, exec);
         } finally {
             util.cleanup();

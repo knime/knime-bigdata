@@ -1,6 +1,7 @@
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 
@@ -9,7 +10,7 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
@@ -31,40 +32,40 @@ public class DecisionTreeTaskTest extends SparkWithJobServerSpec {
 //				aResult);
 //	}
 
-	        
+
 	@Test
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
-		DecisionTreeTask testObj = new DecisionTreeTask(null, "inputRDD", new Integer[] { 0, 1 }, new NominalFeatureInfo(), 1, 2l, 1, 2, "qa");
+		final DecisionTreeTask testObj = new DecisionTreeTask(null, "inputRDD", new Integer[] { 0, 1 }, new NominalFeatureInfo(), 1, 2l, 1, 2, "qa");
 		final String params = testObj.learnerDef();
-		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
+		final JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 
 		assertEquals("Configuration should be recognized as valid",
 				ValidationResultConverter.valid(),
-				new DecisionTreeLearner().validate(config));
+				new DecisionTreeLearnerJob().validate(config));
 	}
 
 	@Test
 	public void createDecisionTreeFromEntirelyNumericDataWithoutNominalFeatureInfo()
 			throws Throwable {
-		
+
 		final Serializable[][] MINI_IRIS_TABLE = new Serializable[][] {
 				{ 5.1, 3.5, 1.4, 1},
 				{ 4.9, 3.0, 1.4, 0 },
 				{ 4.7, 3.2, 1.3, 2},
 				{ 4.6, 3.1, 1.5, 1 } };
-		
-		KNIMESparkContext context = KnimeContext.getSparkContext();
+
+		final KNIMESparkContext context = KnimeContext.getSparkContext();
 		ImportKNIMETableJobTest.importTestTable(context, MINI_IRIS_TABLE,
 				"tab1");
 
 		//data must be entirely numeric!
 		final Integer[] cols = new Integer[] { 0, 2, 1 };
-		DecisionTreeTask testObj = new DecisionTreeTask(context, "tab1",  cols, new NominalFeatureInfo(), 3, 3l, 11, 12, DecisionTreeLearner.VALUE_GINI);
+		final DecisionTreeTask testObj = new DecisionTreeTask(context, "tab1",  cols, new NominalFeatureInfo(), 3, 3l, 11, 12, DecisionTreeLearnerJob.VALUE_GINI);
 
-		DecisionTreeModel model = testObj.execute(null);
+		final DecisionTreeModel model = testObj.execute(null);
 		assertTrue(model != null);
 		// not sure what else to check here....
-		
 
-	}	
+
+	}
 }

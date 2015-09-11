@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Learner" icon="icon.png">
     <name>Spark Linear Regression</name>
-	<shortDescription>Linear regression induction performed in Spark.</shortDescription>
+	<shortDescription>Linear regressionmodel learning performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
