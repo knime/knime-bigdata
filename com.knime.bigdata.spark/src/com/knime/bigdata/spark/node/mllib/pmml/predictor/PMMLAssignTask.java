@@ -21,14 +21,14 @@
 package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.UploadUtil;
-import com.knime.bigdata.spark.jobserver.jobs.PMMLAssign;
+import com.knime.bigdata.spark.jobserver.jobs.PMMLAssignJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -44,16 +44,32 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 public class PMMLAssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private boolean m_transformation;
+
+    /**
+     * Constructor.
+     */
+    public PMMLAssignTask() {
+        this(false);
+    }
+
+    /**
+     * @param isTransformation <code>true</code> if the assignment is based on a PMML transformation
+     */
+    public PMMLAssignTask(final boolean isTransformation) {
+        m_transformation = isTransformation;
+    }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
-        final String aTmpFileName, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
+        final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{
                 KnimeSparkJob.PARAM_INPUT_TABLE, inputID,
-                    ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aTmpFileName),
+                    ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64((Serializable)bytecode),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
-                    PMMLAssign.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
+                    PMMLAssignJob.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
+                    PMMLAssignJob.PARAM_IS_TRANSFORMATION, Boolean.toString(m_transformation),
                     //we have to replace the . with / since the key in the map uses / instead of .
                     ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')},
                 ParameterConstants.PARAM_OUTPUT,
@@ -74,17 +90,10 @@ public class PMMLAssignTask implements Serializable {
         final CompiledModelPortObject pmml, final Integer[] colIdxs,
         final boolean appendProbabilities, final SparkDataTable resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
+        final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, pmml.getBytecode(), appendProbabilities,
+            pmml.getModelClassName(), resultRDD.getID());
         KNIMESparkContext context = inputRDD.getContext();
-
-        final UploadUtil util = new UploadUtil(context, (Serializable)pmml.getBytecode(), "bytecode");
-        util.upload();
-        try {
-            final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, util.getServerFileName(), appendProbabilities,
-                pmml.getModelClassName(), resultRDD.getID());
-            exec.checkCanceled();
-            JobControler.startJobAndWaitForResult(context, PMMLAssign.class.getCanonicalName(), predictorParams, exec);
-        } finally {
-            util.cleanup();
-        }
+        exec.checkCanceled();
+        JobControler.startJobAndWaitForResult(context, PMMLAssignJob.class.getCanonicalName(), predictorParams, exec);
     }
 }

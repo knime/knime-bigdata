@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10"
 	type="Learner" icon="icon.png">
 	<name>Spark k-Means</name>
-	<shortDescription>k-Means</shortDescription>
+	<shortDescription>K-means model learning performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
 			This node utilizes the Apache Spark implementation of the K-means

@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.node.mllib.pmml.predictor;
 
 import org.knime.base.node.mine.util.PredictorHelper;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -33,12 +32,11 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
-import com.knime.bigdata.spark.util.SparkUtil;
+import com.knime.bigdata.spark.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
@@ -46,7 +44,7 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
  *
  * @author koetter
  */
-public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
+public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
 
     private static final String CFG_KEY_OUTPROP = "outProp";
 
@@ -79,19 +77,11 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
-        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
-        final DataTableSpec resultSpec = createResultSpec(sparkSpec.getTableSpec(), pmmlSpec);
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), resultSpec)};
-    }
-
-    private DataTableSpec createResultSpec(final DataTableSpec inSpec,
-                                                          final CompiledModelPortObjectSpec cms) {
-        final String predColName =
-                m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
-        final DataColumnSpec[] specs = cms.getResultColSpecs(inSpec, predColName,
-            m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
-        return new DataTableSpec(inSpec, new DataTableSpec(specs));
+//        final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
+//        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
+//        final DataTableSpec resultSpec = createResultSpec(sparkSpec.getTableSpec(), pmmlSpec);
+//        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), resultSpec)};
+        return new PortObjectSpec[] {null};
     }
 
     /**
@@ -103,10 +93,10 @@ public class SparkPMMLPredictorNodeModel extends AbstractSparkNodeModel {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         final String aOutputTableName = SparkIDs.createRDDID();
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
-        final DataTableSpec resultSpec = createResultSpec(data.getTableSpec(), cms);
+        final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
+        final DataTableSpec resultSpec = SparkPMMLUtil.createResultSpec(data.getTableSpec(), cms, colIdxs);
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final Integer[] colIdxs = SparkUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
-        final PMMLAssignTask assignTask = new PMMLAssignTask();
+        final PMMLPredictionTask assignTask = new PMMLPredictionTask();
         assignTask.execute(exec, data.getData(), pmml, colIdxs, m_outputProbabilities.getBooleanValue(), resultRDD);
         return new PortObject[] {new SparkDataPortObject(resultRDD)};
     }

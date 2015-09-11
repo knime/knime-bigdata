@@ -24,7 +24,7 @@ import java.util.UUID;
 
 import org.knime.core.node.KNIMEConstants;
 
-import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
  *
@@ -43,7 +43,7 @@ public final class SparkIDs {
      * @return the unique Spark id for this user used as the application id
      */
     public static String getSparkApplicationID() {
-        if (KNIMEConfigContainer.m_config.hasPath("unitTestMode")) {
+        if (KNIMEConfigContainer.hasPath("unitTestMode")) {
             return "unitTest";
         }
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();

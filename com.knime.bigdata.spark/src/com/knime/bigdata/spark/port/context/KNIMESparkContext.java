@@ -28,7 +28,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 
-import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
  * Class that holds all information about a SparkContext that is used in KNIME e.g. the id
@@ -48,6 +48,7 @@ public class KNIMESparkContext implements Serializable {
     private static final String CFG_MEMORY = "memoryPerNode";
     private static final String CFG_SPARK_JOB_TIMEOUT = "sparkJobTimeout";
     private static final String CFG_SPARK_JOB_CHECK_FREQUENCY = "sparkJobCheckFrequency";
+    private static final String CFG_DELETE_RDDS_ON_DISPOSE = "deleteRDDsOnDispose";
 
     private static final char[] MY =
             "3}acc80479[7b@05be9378K}168335832P§9276b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
@@ -70,17 +71,19 @@ public class KNIMESparkContext implements Serializable {
 
     private final String m_protocol;
 
-    private int m_jobTimeout;
+    private final int m_jobTimeout;
 
-    private int m_jobCheckFrequency;
+    private final int m_jobCheckFrequency;
+
+    private final boolean m_deleteRDDsOnDispose;
 
 
     /**
      * create spark context container with default values
      */
     public KNIMESparkContext() {
-        this(KNIMEConfigContainer.CONTEXT_NAME, KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"),
-            KNIMEConfigContainer.m_config.getString("spark.memPerNode"));
+        this(KNIMEConfigContainer.getSparkContext(), KNIMEConfigContainer.getNumOfCPUCores(),
+            KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
@@ -89,14 +92,11 @@ public class KNIMESparkContext implements Serializable {
      * @param memPerNode
      */
     public KNIMESparkContext(final String contextName, final int numCpuCores, final String memPerNode) {
-        this(KNIMEConfigContainer.m_config.getString("spark.jobServer"),
-            KNIMEConfigContainer.m_config.getString("spark.jobServerProtocol"),
-            KNIMEConfigContainer.m_config.getInt("spark.jobServerPort"),
-            KNIMEConfigContainer.m_config.getString("spark.userName"),
-            KNIMEConfigContainer.m_config.hasPath("spark.password") ?
-                KNIMEConfigContainer.m_config.getString("spark.password").toCharArray() : null,
-            contextName, numCpuCores, memPerNode, KNIMEConfigContainer.m_config.getInt("spark.jobCheckFrequency"),
-            KNIMEConfigContainer.m_config.getInt("spark.jobTimeout"));
+        this(KNIMEConfigContainer.getJobServer(), KNIMEConfigContainer.getJobServerProtocol(),
+            KNIMEConfigContainer.getJobServerPort(), KNIMEConfigContainer.getUserName(),
+            KNIMEConfigContainer.getPassword(), contextName, numCpuCores, memPerNode,
+            KNIMEConfigContainer.getJobCheckFrequency(), KNIMEConfigContainer.getJobTimeout(),
+            KNIMEConfigContainer.deleteRDDsOnDispose());
     }
 
     /**
@@ -110,15 +110,17 @@ public class KNIMESparkContext implements Serializable {
      * @param numCpuCores the number of cpu cores per node
      * @param jobCheckFrequency the Spark job check frequency in seconds
      * @param jobTimeout the Spark job timeout in seconds
+     * @param deleteRDDsOnExit <code>true</code> if RDDs created within this context should be deleted when
+     * KNIME exits or the workflow is closed
      */
     public KNIMESparkContext(final String host, final String protocol, final int port, final String user,
         final char[] aPassphrase, final String contextName, final int numCpuCores, final String memPerNode,
-        final int jobCheckFrequency, final int jobTimeout) {
+        final int jobCheckFrequency, final int jobTimeout, final boolean deleteRDDsOnExit) {
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("host must not be empty");
         }
         if (port < 0) {
-            throw new IllegalArgumentException("Port must be positive");
+            throw new IllegalArgumentException("port must be positive");
         }
         if (protocol == null || protocol.trim().isEmpty()) {
             throw new IllegalArgumentException("protocol must not be empty");
@@ -151,6 +153,7 @@ public class KNIMESparkContext implements Serializable {
         m_memPerNode = memPerNode;
         m_jobCheckFrequency = jobCheckFrequency;
         m_jobTimeout = jobTimeout;
+        m_deleteRDDsOnDispose = deleteRDDsOnExit;
     }
 
     /**
@@ -160,7 +163,8 @@ public class KNIMESparkContext implements Serializable {
     public KNIMESparkContext(final ConfigRO conf) throws InvalidSettingsException {
         this(conf.getString(CFG_HOST), conf.getString(CFG_PROTOCOL), conf.getInt(CFG_PORT), conf.getString(CFG_USER),
             demix(conf.getPassword(CFG_PASSWORD, String.valueOf(MY))), conf.getString(CFG_ID), conf.getInt(CFG_CORES),
-            conf.getString(CFG_MEMORY), conf.getInt(CFG_SPARK_JOB_CHECK_FREQUENCY), conf.getInt(CFG_SPARK_JOB_TIMEOUT));
+            conf.getString(CFG_MEMORY), conf.getInt(CFG_SPARK_JOB_CHECK_FREQUENCY), conf.getInt(CFG_SPARK_JOB_TIMEOUT),
+            conf.getBoolean(CFG_DELETE_RDDS_ON_DISPOSE));
     }
 
     /**
@@ -177,6 +181,7 @@ public class KNIMESparkContext implements Serializable {
         conf.addString(CFG_MEMORY, m_memPerNode);
         conf.addInt(CFG_SPARK_JOB_CHECK_FREQUENCY, m_jobCheckFrequency);
         conf.addInt(CFG_SPARK_JOB_TIMEOUT, m_jobTimeout);
+        conf.addBoolean(CFG_DELETE_RDDS_ON_DISPOSE, m_deleteRDDsOnDispose);
     }
 
     /**
@@ -277,13 +282,33 @@ public class KNIMESparkContext implements Serializable {
     }
 
     /**
+     * @return <code>true</code> if all RDDs that have been created within this context should be
+     * deleted when KNIME exits or the workflow is closed
+     */
+    public boolean deleteRDDsOnDispose() {
+        return m_deleteRDDsOnDispose;
+    }
+
+
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + m_contextName.hashCode();
+        result = prime * result + ((m_contextName == null) ? 0 : m_contextName.hashCode());
+        result = prime * result + (m_deleteRDDsOnDispose ? 1231 : 1237);
+        result = prime * result + ((m_host == null) ? 0 : m_host.hashCode());
+        result = prime * result + m_jobCheckFrequency;
+        result = prime * result + m_jobTimeout;
+        result = prime * result + ((m_memPerNode == null) ? 0 : m_memPerNode.hashCode());
+        result = prime * result + m_numCpuCores;
+        result = prime * result + Arrays.hashCode(m_pass);
+        result = prime * result + m_port;
+        result = prime * result + ((m_protocol == null) ? 0 : m_protocol.hashCode());
+        result = prime * result + ((m_user == null) ? 0 : m_user.hashCode());
         return result;
     }
 
@@ -302,7 +327,41 @@ public class KNIMESparkContext implements Serializable {
             return false;
         }
         final KNIMESparkContext other = (KNIMESparkContext)obj;
+        if (!m_host.equals(other.m_host)) {
+            return false;
+        }
+        if (m_port != other.m_port) {
+            return false;
+        }
+        if (!m_protocol.equals(other.m_protocol)) {
+            return false;
+        }
         if (!m_contextName.equals(other.m_contextName)) {
+            return false;
+        }
+        if (m_user == null) {
+            if (other.m_user != null) {
+                return false;
+            }
+        } else if (!m_user.equals(other.m_user)) {
+            return false;
+        }
+        if (!Arrays.equals(m_pass, other.m_pass)) {
+            return false;
+        }
+        if (!m_memPerNode.equals(other.m_memPerNode)) {
+            return false;
+        }
+        if (m_numCpuCores != other.m_numCpuCores) {
+            return false;
+        }
+        if (m_jobTimeout != other.m_jobTimeout) {
+            return false;
+        }
+        if (m_jobCheckFrequency != other.m_jobCheckFrequency) {
+            return false;
+        }
+        if (m_deleteRDDsOnDispose != other.m_deleteRDDsOnDispose) {
             return false;
         }
         return true;
@@ -313,7 +372,41 @@ public class KNIMESparkContext implements Serializable {
      * @return <code>true</code> if the contexts are compatible and can talk to each other
      */
     public boolean compatible(final KNIMESparkContext context) {
-        return this.equals(context);
+        if (this == context) {
+            return true;
+        }
+        if (context == null) {
+            return false;
+        }
+        if (!m_host.equals(context.m_host)) {
+            return false;
+        }
+        if (m_port != context.m_port) {
+            return false;
+        }
+        if (!m_protocol.equals(context.m_protocol)) {
+            return false;
+        }
+        if (!m_contextName.equals(context.m_contextName)) {
+            return false;
+        }
+        if (m_user == null) {
+            if (context.m_user != null) {
+                return false;
+            }
+        } else if (!m_user.equals(context.m_user)) {
+            return false;
+        }
+        if (!Arrays.equals(m_pass, context.m_pass)) {
+            return false;
+        }
+        if (!m_memPerNode.equals(context.m_memPerNode)) {
+            return false;
+        }
+        if (m_numCpuCores != context.m_numCpuCores) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -342,6 +435,8 @@ public class KNIMESparkContext implements Serializable {
         builder.append(m_jobCheckFrequency);
         builder.append(", jobTimeout=");
         builder.append(m_jobTimeout);
+        builder.append(", deleteRDDsOnDispose=");
+        builder.append(m_deleteRDDsOnDispose);
         builder.append("]");
         return builder.toString();
     }
@@ -358,6 +453,7 @@ public class KNIMESparkContext implements Serializable {
         buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + getUser() + "</tt><br><br>");
         buf.append("<strong>Context</strong><hr>");
         buf.append("<strong>ID:</strong>&nbsp;&nbsp;<tt>" + getContextName() + "</tt><br>");
+        //TODO: We might want to hide this information since we only support one context
         buf.append("<strong>Number of cores:</strong>&nbsp;&nbsp;<tt>");
         final int numCpuCores = getNumCpuCores();
         buf.append(numCpuCores < 0 ? "unknown" : numCpuCores);

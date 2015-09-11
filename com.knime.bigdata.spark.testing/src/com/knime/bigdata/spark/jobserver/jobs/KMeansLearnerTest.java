@@ -11,8 +11,6 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JobStatus;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.FetchRowsJob;
-import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -40,22 +38,22 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
 	@Test
 	public void jobValidationShouldCheckMissingInputDataParameter()
 			throws Throwable {
-		String params = getParams(null, 6, 99, "~spark/data/spark");
+		final String params = getParams(null, 6, 99, "~spark/data/spark");
 		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
 	@Test
 	public void jobValidationShouldCheckMissingNumClustersParameter()
 			throws Throwable {
-		String params = getParams("xx", null, 99, "~spark/data/spark");
-		myCheck(params, KMeansLearner.PARAM_NUM_CLUSTERS, "Input");
+		final String params = getParams("xx", null, 99, "~spark/data/spark");
+		myCheck(params, KMeansLearnerJob.PARAM_NUM_CLUSTERS, "Input");
 	}
 
 	@Test
 	public void jobValidationShouldCheckIncorrectNumClustersParameter()
 			throws Throwable {
-		String params = getParams("xx", -1, 99, "~spark/data/spark");
-		String msg = "Input parameter '" + KMeansLearner.PARAM_NUM_CLUSTERS
+		final String params = getParams("xx", -1, 99, "~spark/data/spark");
+		final String msg = "Input parameter '" + KMeansLearnerJob.PARAM_NUM_CLUSTERS
 				+ "' must be a positive number.";
 		myCheck(params, msg);
 
@@ -64,15 +62,15 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
 	@Test
 	public void jobValidationShouldCheckMissingNumIterationsParameter()
 			throws Throwable {
-		String params = getParams("xx", 99, null, "~spark/data/spark");
+		final String params = getParams("xx", 99, null, "~spark/data/spark");
 		myCheck(params, ParameterConstants.PARAM_NUM_ITERATIONS, "Input");
 	}
 
 	@Test
 	public void jobValidationShouldCheckIncorrectNumIterationsParameter()
 			throws Throwable {
-		String params = getParams("xx", 99, -1, "~spark/data/spark");
-		String msg = "Input parameter '"
+		final String params = getParams("xx", 99, -1, "~spark/data/spark");
+		final String msg = "Input parameter '"
 				+ ParameterConstants.PARAM_NUM_ITERATIONS
 				+ "' must be a positive number.";
 		myCheck(params, msg);
@@ -85,8 +83,8 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
 	}
 
 	private void myCheck(final String params, final String aMsg) {
-		KMeansLearner testObj = new KMeansLearner();
-		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
+		final KMeansLearnerJob testObj = new KMeansLearnerJob();
+		final JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 		assertEquals("Configuration should be recognized as invalid",
 				ValidationResultConverter.invalid(aMsg),
 				testObj.validate(config));
@@ -94,15 +92,15 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
 
 	@Test
 	public void runningKMeansDirectlyShouldProduceResult() throws Throwable {
-		KNIMESparkContext contextName = KnimeContext.getSparkContext();
+		final KNIMESparkContext contextName = KnimeContext.getSparkContext();
 		try {
 			importTestTable(contextName, TEST_TABLE, "tabKmeans");
 
-			String params = KMeansTask.kmeansLearnerDef("tabKmeans",
+			final String params = KMeansTask.kmeansLearnerDef("tabKmeans",
 					new Integer[] { 0, 2 }, 3, 2, "tabKmeansOut");
 
-			String jobId = JobControler.startJob(contextName,
-					KMeansLearner.class.getCanonicalName(), params.toString());
+			final String jobId = JobControler.startJob(contextName,
+					KMeansLearnerJob.class.getCanonicalName(), params.toString());
 
 			JobControler.waitForJobAndFetchResult(contextName, jobId, null);
 
@@ -123,18 +121,18 @@ public class KMeansLearnerTest extends SparkWithJobServerSpec {
 			final String aResTable) throws Exception {
 
 		// now check result:
-		String takeJobId = JobControler.startJob(aContextName,
+		final String takeJobId = JobControler.startJob(aContextName,
 				FetchRowsJob.class.getCanonicalName(),
 				rowFetcherDef(10, aResTable));
 
-		JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
+		final JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
 				takeJobId, null);
 		assertNotNull("row fetcher must return a result", res);
-		Object[][] arrayRes = (Object[][]) res.getObjectResult();
+		final Object[][] arrayRes = (Object[][]) res.getObjectResult();
 		assertEquals("fetcher should return correct number of rows",
 				ImportKNIMETableJobTest.TEST_TABLE.length, arrayRes.length);
 		for (int i = 0; i < arrayRes.length; i++) {
-			Object[] o = arrayRes[i];
+			final Object[] o = arrayRes[i];
 			System.out.println("row[" + i + "]: " + o);
 		}
 	}

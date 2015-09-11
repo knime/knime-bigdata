@@ -46,11 +46,11 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
-public class Predictor extends KnimeSparkJob implements Serializable {
+public class MLlibPredictorJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(Predictor.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(MLlibPredictorJob.class.getName());
 
     /**
      * parse parameters - there are no default values, but two required values: - the kmeans model - the input JavaRDD

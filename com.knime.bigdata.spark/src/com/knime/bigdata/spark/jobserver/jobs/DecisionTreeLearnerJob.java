@@ -49,7 +49,7 @@ import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
  *
  * @author koetter, dwk
  */
-public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
+public class DecisionTreeLearnerJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -82,7 +82,7 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
     /** Number of classes. **/
     public static final String PARAM_NO_OF_CLASSES = "NumberOfClasses";
 
-    private final static Logger LOGGER = Logger.getLogger(DecisionTreeLearner.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(DecisionTreeLearnerJob.class.getName());
 
     /**
      * parse parameters - there are no default values, all values are required
@@ -124,9 +124,9 @@ public class DecisionTreeLearner extends KnimeSparkJob implements Serializable {
         if (msg == null) {
             msg = SupervisedLearnerUtils.checkConfig(aConfig);
         }
-        //	    input - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
-        //	    numClasses - number of classes for classification.
-        //	    categoricalFeaturesInfo - Map storing arity of categorical features.
+        //      input - Training dataset: RDD of LabeledPoint. Labels should take values {0, 1, ..., numClasses-1}.
+        //      numClasses - number of classes for classification.
+        //      categoricalFeaturesInfo - Map storing arity of categorical features.
         //       E.g., an entry (n -> k) indicates that feature n is categorical with k categories indexed from 0: {0, 1, ..., k-1}.
 
         if (msg != null) {

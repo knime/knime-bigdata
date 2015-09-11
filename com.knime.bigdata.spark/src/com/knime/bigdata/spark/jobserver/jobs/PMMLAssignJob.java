@@ -49,7 +49,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class PMMLAssign extends KnimeSparkJob implements Serializable {
+public class PMMLAssignJob extends KnimeSparkJob implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,9 +58,14 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
      */
     public static final String PARAM_APPEND_PROBABILITIES = "appendProbabilities";
 
+    /**
+     * boolean that indicates if probabilities should be added
+     */
+    public static final String PARAM_IS_TRANSFORMATION = "isTransformation";
+    
     private static final String PARAM_MAIN_CLASS = ParameterConstants.PARAM_MAIN_CLASS;
 
-    private final static Logger LOGGER = Logger.getLogger(PMMLAssign.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(PMMLAssignJob.class.getName());
 
     /**
      * parse parameters
@@ -81,6 +86,9 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         }
         if (msg == null && !aConfig.hasInputParameter(PARAM_APPEND_PROBABILITIES)) {
             msg = "Append probabilities missing!";
+        }
+        if (msg == null && !aConfig.hasInputParameter(PARAM_IS_TRANSFORMATION)) {
+            msg = "Assign type missing!";
         }
         if (msg == null && !aConfig.hasInputParameter(PARAM_MAIN_CLASS)) {
             msg = "Main class name missing!";
@@ -118,8 +126,9 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
         validateInput(aConfig);
         LOGGER.log(Level.FINE, "starting pmml prediction job...");
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
-        final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
+        final List<Integer> inputColIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
         final boolean addProbabilites = aConfig.getInputParameter(PARAM_APPEND_PROBABILITIES, Boolean.class);
+        final boolean isTransformation = aConfig.getInputParameter(PARAM_IS_TRANSFORMATION, Boolean.class);
         final String mainClass = aConfig.getInputParameter(PARAM_MAIN_CLASS);
         final Map<String, byte[]> bytecode = aConfig.readFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
         try {
@@ -144,9 +153,9 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
                         final Class<?> modelClass = cl.loadClass(mainClass);
                         m_evalMethod = modelClass.getMethod("evaluate", Object[].class);
                     }
-                    final Object[] in = new Object[colIdxs.size()];
-                    for (int i = 0; i < colIdxs.size(); i++) {
-                        final Integer colIdx = colIdxs.get(i);
+                    final Object[] in = new Object[inputColIdxs.size()];
+                    for (int i = 0; i < inputColIdxs.size(); i++) {
+                        final Integer colIdx = inputColIdxs.get(i);
                         if (colIdx == null || colIdx < 0) {
                             in[i] = null;
                         } else {
@@ -156,10 +165,24 @@ public class PMMLAssign extends KnimeSparkJob implements Serializable {
                     final Object[] result = (Object[])m_evalMethod.invoke(null, (Object)in);
 
                     final RowBuilder rowBuilder = RowBuilder.fromRow(r);
-                    if (addProbabilites) {
-                        return rowBuilder.addAll(Arrays.asList(result)).build();
+                    if (isTransformation) {
+                        //this is a PMML transformation task
+                        for (int i = 0; i < inputColIdxs.size(); i++) {
+                            final Integer colIdx = inputColIdxs.get(i);
+                            if (colIdx != null && colIdx >= 0) {
+                                //add only the result values to the row that belong to columns that where available in
+                                //the input RDD
+                                rowBuilder.add(result[i]);
+                            }
+                        }
+                        return rowBuilder.build();
+                    } else {
+                        //this is a PMML prediction task
+                        if (addProbabilites) {
+                            return rowBuilder.addAll(Arrays.asList(result)).build();
+                        }
+                        return rowBuilder.add(result[0]).build();
                     }
-                    return rowBuilder.add(result[0]).build();
                 }
             };
             final JavaRDD<Row> predicted = rowRDD.map(predict);

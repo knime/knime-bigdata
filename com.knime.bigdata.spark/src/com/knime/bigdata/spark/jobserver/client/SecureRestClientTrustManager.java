@@ -20,10 +20,6 @@
  */
 package com.knime.bigdata.spark.jobserver.client;
 
-/**
- * Copyright (c) 2008 - 2011 Bhaveshkumar Thaker [http://bhaveshthaker.com].  All rights reserved.
- */
-
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -32,7 +28,6 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Accepts all servers independent of their certificates.
  * This is ok since the server is defined by the user in the preferences.
- * @author <a href="http://bhaveshthaker.com/">Bhavesh Thaker</a>
  *
  */
 public class SecureRestClientTrustManager implements X509TrustManager {
@@ -51,6 +46,4 @@ public class SecureRestClientTrustManager implements X509TrustManager {
     public X509Certificate[] getAcceptedIssuers() {
         return new X509Certificate[0];
     }
-
-
 }

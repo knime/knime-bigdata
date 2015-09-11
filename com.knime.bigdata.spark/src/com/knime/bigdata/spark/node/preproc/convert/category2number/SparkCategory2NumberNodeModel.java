@@ -67,7 +67,7 @@ import com.knime.bigdata.spark.jobserver.server.MappedRDDContainer;
 import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.MyRecord;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -79,7 +79,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkCategory2NumberNodeModel extends AbstractSparkNodeModel {
+public class SparkCategory2NumberNodeModel extends SparkNodeModel {
     //TODO: add an option to replace processed columns
     private static final DataType MAP_TYPE = DoubleCell.TYPE;
 

@@ -53,9 +53,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -73,7 +81,6 @@ import org.knime.core.node.config.ConfigWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.util.Pair;
 
 import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
@@ -82,31 +89,41 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 
 
 /**
- *
+ * Basic class that all NodeModel classes need to extend if they work with Spark data/model/etc objects.
  * @author Tobias Koetter, University of Konstanz
  */
-public abstract class AbstractSparkNodeModel extends NodeModel {
+public abstract class SparkNodeModel extends NodeModel {
 
     private static final NodeLogger LOGGER =
-            NodeLogger.getLogger(AbstractSparkNodeModel.class);
+            NodeLogger.getLogger(SparkNodeModel.class);
 
     private static final String CFG_FILE = "settingsFile.xml";
 
     private static final String CFG_SETTING = "saveInternalsSettings";
 
+    private static final String CF_RDD_SETTINGS = "RDDs";
+
     private static final String CFG_CONTEXT = "context";
 
     private static final String CFG_NAMED_RDD_UUIDS = "namedRDDs";
 
-    private final List<Pair<KNIMESparkContext, String>> m_namedRDDs = new LinkedList<>();
+    private static final String CFG_DELETE_ON_RESET = "deleteRDDsOnReset";
+    private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
-    private boolean m_deleteOnReset = true;
+    private static final String CFG_DELETE_ON_DISPOSE = "deleteRDDsOnDispose";
+    private static final boolean DEFAULT_DELETE_ON_DISPOSE = true;
+
+    private final Map<KNIMESparkContext, List<String>> m_namedRDDs = new LinkedHashMap<>();
+
+    private boolean m_deleteOnReset = DEFAULT_DELETE_ON_RESET;
+
+    private boolean m_deleteOnDispose = DEFAULT_DELETE_ON_DISPOSE;
 
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
      * @param outPortTypes the output port types
      */
-    protected AbstractSparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
+    protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
         this(inPortTypes, outPortTypes, true);
     }
 
@@ -117,7 +134,7 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
      * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
      * Always set this flag to <code>false</code> when you return the input RDD also as output RDD!
      */
-    protected AbstractSparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
+    protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final boolean deleteOnReset) {
         super(inPortTypes, outPortTypes);
         m_deleteOnReset = deleteOnReset;
@@ -203,41 +220,13 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     }
 
     private void addSparkObject(final SparkDataPortObject sparkObject) {
-        m_namedRDDs.add(new Pair<>(sparkObject.getContext(), sparkObject.getTableName()));
-
-    }
-
-    /**
-     * {@inheritDoc}
-     * Gets called when the node is reseted or deleted.
-     */
-    @Override
-    protected final void reset() {
-        if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
-            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
-            KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
-                @Override
-                public void run() {
-                    final long startTime = System.currentTimeMillis();
-                    final NodeLogger logger = NodeLogger.getLogger(AbstractSparkNodeModel.class);
-                    for (Pair<KNIMESparkContext, String> rdd : m_namedRDDs) {
-                        try {
-                            KnimeContext.deleteNamedRDD(rdd.getFirst(), rdd.getSecond());
-                        } catch (final Throwable e) {
-                           logger.error("Exception while deleting named RDD: "
-                                   + rdd.getSecond() + " Exception: " + e.getMessage(), e);
-                        }
-                    }
-                    if (logger.isDebugEnabled()) {
-                        final long endTime = System.currentTimeMillis();
-                            final long durationTime = endTime - startTime;
-                        logger.debug("Time deleting " + m_namedRDDs.size() + "namedRDDs: " + durationTime + " ms");
-                    }
-                    m_namedRDDs.clear();
-                }
-            });
+        final KNIMESparkContext context = sparkObject.getContext();
+        List<String> rdds = m_namedRDDs.get(context);
+        if (rdds == null) {
+            rdds = new LinkedList<String>();
+            m_namedRDDs.put(context, rdds);
         }
-        resetInternal();
+        rdds.add(sparkObject.getTableName());
     }
 
     /**
@@ -250,11 +239,32 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     protected abstract PortObject[] executeInternal(PortObject[] inData, ExecutionContext exec) throws Exception;
 
     /**
-     * Called when the node is reseted.
+     * {@inheritDoc}
      */
-    protected void resetInternal() {
-        //override if you need to reset anything
+    @Override
+    protected final void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
+    throws IOException, CanceledExecutionException {
+        final File settingFile = new File(nodeInternDir, CFG_FILE);
+        try (final FileOutputStream dataOS = new FileOutputStream(settingFile)){
+            final Config config = new NodeSettings(CFG_SETTING);
+            config.addBoolean(CFG_DELETE_ON_RESET, m_deleteOnReset);
+            config.addBoolean(CFG_DELETE_ON_DISPOSE, m_deleteOnDispose);
+            final Config rddConfig = config.addConfig(CF_RDD_SETTINGS);
+            int idx = 0;
+            for (Entry<KNIMESparkContext, List<String>> e : m_namedRDDs.entrySet()) {
+                final ConfigWO contextConfig = rddConfig.addConfig(CFG_CONTEXT + idx++);
+                final Config contextSettingsConfig = contextConfig.addConfig(CFG_CONTEXT);
+                e.getKey().save(contextSettingsConfig);
+                exec.checkCanceled();
+                contextConfig.addStringArray(CFG_NAMED_RDD_UUIDS, e.getValue().toArray(new String[0]));
+            }
+            config.saveToXML(dataOS);
+        } catch (final Exception e) {
+            throw new IOException(e.getMessage(), e.getCause());
+        }
+        saveAdditionalInternals(nodeInternDir, exec);
     }
+
 
     /**
      * {@inheritDoc}
@@ -265,42 +275,21 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
         final File settingFile = new File(nodeInternDir, CFG_FILE);
         try(final FileInputStream inData = new FileInputStream(settingFile)){
             final ConfigRO config = NodeSettings.loadFromXML(inData);
-            final String[] namedRDDUUIDs = config.getStringArray(CFG_NAMED_RDD_UUIDS);
-            final int noOfContexts = namedRDDUUIDs.length;
+            m_deleteOnReset = config.getBoolean(CFG_DELETE_ON_RESET, DEFAULT_DELETE_ON_RESET);
+            m_deleteOnDispose = config.getBoolean(CFG_DELETE_ON_DISPOSE, DEFAULT_DELETE_ON_DISPOSE);
+            final Config rddConfig = config.getConfig(CF_RDD_SETTINGS);
+            final int noOfContexts = rddConfig.getChildCount();
             for (int i = 0; i < noOfContexts; i++) {
-                final ConfigRO contextConfig = config.getConfig(CFG_CONTEXT + i);
-                final KNIMESparkContext context = new KNIMESparkContext(contextConfig);
-                m_namedRDDs.add(new Pair<>(context, namedRDDUUIDs[i]));
+                final ConfigRO contextConfig = rddConfig.getConfig(CFG_CONTEXT + i);
+                final Config contextSettingsConfig = contextConfig.getConfig(CFG_CONTEXT);
+                final KNIMESparkContext context = new KNIMESparkContext(contextSettingsConfig);
+                final String[] namedRDDUUIDs = contextConfig.getStringArray(CFG_NAMED_RDD_UUIDS);
+                m_namedRDDs.put(context, Arrays.asList(namedRDDUUIDs));
             }
             loadAdditionalInternals(nodeInternDir, exec);
         } catch (final InvalidSettingsException | RuntimeException e) {
             throw new IOException("Failed to load named rdd", e.getCause());
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected final void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
-    throws IOException, CanceledExecutionException {
-        final File settingFile = new File(nodeInternDir, CFG_FILE);
-        try (final FileOutputStream dataOS = new FileOutputStream(settingFile)){
-            final Config config = new NodeSettings(CFG_SETTING);
-            final String[] rdds = new String[m_namedRDDs.size()];
-            int idx = 0;
-            for (Pair<KNIMESparkContext, String> p : m_namedRDDs) {
-                rdds[idx] = p.getSecond();
-                final ConfigWO contextConfig = config.addConfig(CFG_CONTEXT + idx++);
-                p.getFirst().save(contextConfig);
-                exec.checkCanceled();
-            }
-            config.addStringArray(CFG_NAMED_RDD_UUIDS, rdds);
-            config.saveToXML(dataOS);
-        } catch (final Exception e) {
-            throw new IOException(e.getMessage(), e.getCause());
-        }
-        saveAdditionalInternals(nodeInternDir, exec);
     }
 
     /**
@@ -338,5 +327,81 @@ public abstract class AbstractSparkNodeModel extends NodeModel {
     protected void saveAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
             throws IOException, CanceledExecutionException {
         // override if you need to save some internal data
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final void onDispose() {
+        if (m_deleteOnDispose) {
+            LOGGER.debug("In onDispose() of SparkNodeModel. Calling deleteRDDs.");
+            deleteRDDs(true);
+        }
+        onDisposeInternal();
+    }
+
+    /**
+     * Called when the node is reseted.
+     */
+    protected void onDisposeInternal() {
+        //override if you need to dispose anything when the node is deleted or the workflow closed
+    }
+
+    /**
+     * {@inheritDoc}
+     * Gets called when the node is reseted or deleted.
+     */
+    @Override
+    protected final void reset() {
+        if (m_deleteOnReset) {
+            deleteRDDs(false);
+        }
+        resetInternal();
+    }
+
+    /**
+     * Called when the node is reseted.
+     */
+    protected void resetInternal() {
+        //override if you need to reset anything
+    }
+
+
+    private void deleteRDDs(final boolean onDispose) {
+        if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
+            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
+            Future<?> future = KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
+                @Override
+                public void run() {
+                    final long startTime = System.currentTimeMillis();
+                    for (Entry<KNIMESparkContext, List<String>> e : m_namedRDDs.entrySet()) {
+                        try {
+                            final KNIMESparkContext context = e.getKey();
+                            if (!onDispose || context.deleteRDDsOnDispose()) {
+                                KnimeContext.deleteNamedRDDs(context, e.getValue().toArray(new String[0]));
+                            }
+                        } catch (final Throwable ex) {
+                            LOGGER.error("Exception while deleting named RDDs for context: "
+                                   + e.getKey() + " Exception: " + ex.getMessage(), ex);
+                        }
+                    }
+                    final long endTime = System.currentTimeMillis();
+                        final long durationTime = endTime - startTime;
+                    LOGGER.debug("Time deleting " + m_namedRDDs.size() + "namedRDDs: " + durationTime + " ms");
+                    m_namedRDDs.clear();
+                }
+            });
+            try {
+                //give the thread at least 5 seconds to delete the rdds
+                future.get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+                    + " was interrupted prior completion.");
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+                    + " failed. Error: " + e.getMessage(), e);
+            }
+        }
     }
 }

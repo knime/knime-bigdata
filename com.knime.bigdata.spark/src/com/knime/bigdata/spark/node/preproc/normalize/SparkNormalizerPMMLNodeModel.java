@@ -49,7 +49,7 @@ import com.knime.bigdata.spark.jobserver.server.NormalizationSettings;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.Normalizer;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -62,7 +62,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author dwk
  */
-public class SparkNormalizerPMMLNodeModel extends AbstractSparkNodeModel {
+public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
     //TODO: add an option to replace processed columns
     private static final int MAX_UNKNOWN_COLS = 3;
 
