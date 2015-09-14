@@ -13,13 +13,10 @@ import org.junit.Test;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
-import com.knime.bigdata.spark.jobserver.client.JobControler;
-import com.knime.bigdata.spark.jobserver.client.JobStatus;
-import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
-import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
@@ -38,9 +35,9 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
     @Test
     public void compilePrimitiveJobThatDoesNothing() throws Throwable {
 
-        SparkJobCompiler testObj = new SparkJobCompiler();
-        KnimeSparkJob job = testObj.newKnimeSparkJob("", "", "return null;", "");
-        SparkJobValidation valRes = job.validate(null, null);
+        final SparkJobCompiler testObj = new SparkJobCompiler();
+        final KnimeSparkJob job = testObj.newKnimeSparkJob("", "", "return null;", "");
+        final SparkJobValidation valRes = job.validate(null, null);
         assertEquals("empty validate should return valid ", ValidationResultConverter.valid(), valRes);
     }
 
@@ -59,13 +56,13 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
         final String additionalImports = "import java.util.concurrent.TimeUnit;";
 
-        SparkJobCompiler testObj = new SparkJobCompiler();
-        KnimeSparkJob job =
+        final SparkJobCompiler testObj = new SparkJobCompiler();
+        final KnimeSparkJob job =
             testObj.newKnimeSparkJob(additionalImports, validationCode, "return null;",
                 "long timeout = TimeUnit.HOURS.toMillis(1L); \n" + mainStr);
 
-        Config config = ConfigFactory.parseString("{\"input\":{\"timeout\":\"67\"}}");
-        SparkJobValidation valRes = job.validate(null, config);
+        final Config config = ConfigFactory.parseString("{\"input\":{\"timeout\":\"67\"}}");
+        final SparkJobValidation valRes = job.validate(null, config);
         assertEquals("correct validate should return valid for correct params", ValidationResultConverter.valid(),
             valRes);
     }
@@ -90,7 +87,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
         final SparkJobCompiler testObj = new SparkJobCompiler();
 
-        KnimeSparkJob job =
+        final KnimeSparkJob job =
             testObj
                 .newKnimeSparkJob(
                     additionalImports,
@@ -98,7 +95,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
                     "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                     "");
 
-        Config config = ConfigFactory.parseString(configText);
+        final Config config = ConfigFactory.parseString(configText);
         assertEquals("config should be valid", ValidationResultConverter.valid(), job.validate(null, config));
 
         final KnimeSparkJob jobInstance =
@@ -114,7 +111,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
             //upload jar to job-server
             JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
             //start job
-            String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
+            final String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
             KNIMEConfigContainer.m_config =
                 KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
@@ -124,7 +121,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
             assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-            JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+            final JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
             assertTrue("job result", res.getString("result").contains(RES_STR));
 
     }
@@ -149,7 +146,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
        final SparkJobCompiler testObj = new SparkJobCompiler();
 
-       KnimeSparkJob job =
+       final KnimeSparkJob job =
            testObj
                .newKnimeSparkJob(
                    additionalImports,
@@ -157,7 +154,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
                    "System.out.println(\"Hello World\"); return JobResult.emptyJobResult().withMessage(aConfig.getInputParameter(\"message\"));",
                    "");
 
-       Config config = ConfigFactory.parseString(configText);
+       final Config config = ConfigFactory.parseString(configText);
        assertEquals("config should be valid", ValidationResultConverter.valid(), job.validate(null, config));
 
        final KnimeSparkJob jobInstance =
@@ -173,7 +170,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
            //upload jar to job-server
            JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
            //start job
-           String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
+           final String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
            KNIMEConfigContainer.m_config =
                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
@@ -183,7 +180,7 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
 
            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-           JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+           final JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
            assertTrue("job result", res.getString("result").contains(RES_STR));
 
 
