@@ -13,7 +13,7 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeModel;
+import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 import com.typesafe.config.ConfigFactory;
 
 /**

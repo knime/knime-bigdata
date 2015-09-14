@@ -60,7 +60,7 @@ public class SparkJavaSnippetSinkNodeModel extends AbstractSparkJavaSnippetNodeM
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
         //call configure to check that the parameters are alright
-        super.configureInternal(inSpecs);
+        getResultSpec(inSpecs);
         return new PortObjectSpec[0];
     }
 

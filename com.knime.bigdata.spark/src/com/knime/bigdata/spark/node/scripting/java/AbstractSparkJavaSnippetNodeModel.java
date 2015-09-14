@@ -66,7 +66,6 @@ import org.knime.core.node.workflow.FlowVariable.Type;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.jar.JarPacker;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler.SourceCompiler;
@@ -77,6 +76,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.AbstractSparkRDD;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -117,10 +117,11 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
     }
 
     /**
-     * {@inheritDoc}
+     * @param inSpecs the input {@link PortObjectSpec} array
+     * @return the result {@link DataTableSpec}
+     * @throws InvalidSettingsException
      */
-    @Override
-    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    protected DataTableSpec getResultSpec(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         m_snippet.setSettings(m_settings);
         FlowVariableRepository flowVarRepository =
             new FlowVariableRepository(getAvailableInputFlowVariables());
@@ -144,7 +145,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
                         flowVar.getStringValue());
             }
         }
-        return new DataTableSpec[] {outSpec};
+        return outSpec;
     }
 
     /**
@@ -165,17 +166,14 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
             data1 = (SparkDataPortObject)inData[0];
             data2 = (SparkDataPortObject)inData[1];
         }
-        final KNIMESparkContext context;
+        final KNIMESparkContext context = getContext(inData);
         final String table1Name;
         final AbstractSparkRDD table1;
         if (data1 != null) {
             table1 = data1.getData();
-            context = table1.getContext();
             table1Name = table1.getID();
         } else {
             table1 = null;
-            //this is a source node that uses a new SparkContext
-            context = KnimeContext.getSparkContext();
             table1Name = null;
         }
         final String table2Name;
@@ -207,6 +205,18 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
         } else {
             return new PortObject[] {};
         }
+    }
+
+    /**
+     * @param inData either the {@link PortObject} array in execute or the {@link PortObjectSpec} array in configure
+     * @return the {@link KNIMESparkContext} to use
+     * @throws InvalidSettingsException
+     */
+    protected KNIMESparkContext getContext(final Object[] inData) throws InvalidSettingsException {
+        if (inData != null && inData.length >= 1 && (inData[0] instanceof SparkContextProvider)) {
+            return ((SparkContextProvider)inData[0]).getContext();
+        }
+        throw new InvalidSettingsException("No input RDD available");
     }
 
     private final String params2Json(@Nonnull final String aInputTable1, final String aInputTable2,

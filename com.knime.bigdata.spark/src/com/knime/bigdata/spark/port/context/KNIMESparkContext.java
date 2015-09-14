@@ -55,6 +55,8 @@ public class KNIMESparkContext implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final String m_protocol;
+
     private final String m_host;
 
     private final int m_port;
@@ -68,8 +70,6 @@ public class KNIMESparkContext implements Serializable {
     private final int m_numCpuCores;
 
     private final String m_memPerNode;
-
-    private final String m_protocol;
 
     private final int m_jobTimeout;
 

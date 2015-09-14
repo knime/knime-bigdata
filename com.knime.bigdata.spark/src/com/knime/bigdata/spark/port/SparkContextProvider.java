@@ -16,23 +16,21 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 28.08.2015 by koetter
+ *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.cache;
+package com.knime.bigdata.spark.port;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
+ * All classes that use and store a {@link KNIMESparkContext}.
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkPersistNodeDialog extends DefaultNodeSettingsPane {
+public interface SparkContextProvider {
 
-    SparkPersistNodeDialog() {
-        String[] levels = new String[] {};
-        addDialogComponent(new DialogComponentButtonGroup(SparkPersistNodeModel.createStorageLevelModel(), true,
-            "Storage Level: ", levels));
-    }
-
+    /**
+     * @return the {@link KNIMESparkContext}
+     */
+    public KNIMESparkContext getContext();
 }

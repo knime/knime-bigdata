@@ -21,7 +21,10 @@
 package com.knime.bigdata.spark.node.context;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
 /**
@@ -31,20 +34,28 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 class SparkContextCreatorNodeDialog extends DefaultNodeSettingsPane {
 
     /**
-     *
+     * Constructor.
      */
     SparkContextCreatorNodeDialog() {
-        createNewGroup("Job Server");
-        addDialogComponent(new DialogComponentString(ContextSettings.createHostModel(), "Host: "));
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createPortModel(), "Port: ", 1));
-        addDialogComponent(new DialogComponentString(ContextSettings.createUserModel(), "User: "));
-        createNewGroup("Spark Context");
-        addDialogComponent(new DialogComponentString(ContextSettings.createIDModel(), "Context name: "));
-        addDialogComponent(new DialogComponentString(ContextSettings.createMemoryModel(), "Memory: "));
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createNoOfCoresModel(), "Number of cores: ", 1));
+        createNewGroup(" KNIME ");
         addDialogComponent(new DialogComponentNumber(ContextSettings.createJobTimeoutModel(),
             "Spark job timeout (seconds): ", 1));
         addDialogComponent(new DialogComponentNumber(ContextSettings.createJobCheckFrequencyModel(),
-            "Spark job check frequency (Seconds): ", 1));
+            "Spark job check frequency (seconds): ", 1));
+        addDialogComponent(new DialogComponentBoolean(ContextSettings.createDeleteRDDsOnDisposeModel(),
+                "Delete RDDs on dispose"));
+
+        createNewGroup(" Spark Context ");
+        addDialogComponent(new DialogComponentString(ContextSettings.createIDModel(), "Context name: "));
+        addDialogComponent(new DialogComponentString(ContextSettings.createMemoryModel(), "Memory: "));
+        addDialogComponent(new DialogComponentNumber(ContextSettings.createNoOfCoresModel(), "Number of cores: ", 1));
+
+        createNewGroup(" Job Server ");
+        addDialogComponent(new DialogComponentButtonGroup(ContextSettings.createProtocolModel(), false, " Protocol ",
+            new String[] {"http", "https"}));
+        addDialogComponent(new DialogComponentString(ContextSettings.createHostModel(), "Host: "));
+        addDialogComponent(new DialogComponentNumber(ContextSettings.createPortModel(), "Port: ", 1));
+        addDialogComponent(new DialogComponentString(ContextSettings.createUserModel(), "User: "));
+        addDialogComponent(new DialogComponentPasswordField(ContextSettings.createPasswordModel(), "Password: "));
     }
 }

@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 26.06.2015 by koetter
+ *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package com.knime.bigdata.spark.node.util.unpersist;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -26,16 +26,16 @@ import org.knime.core.node.NodeView;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
+public class SparkUnpersistNodeFactory extends NodeFactory<SparkUnpersistNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Spark2TableNodeModel createNodeModel() {
-        return new Spark2TableNodeModel();
+    public SparkUnpersistNodeModel createNodeModel() {
+        return new SparkUnpersistNodeModel();
     }
 
     /**
@@ -50,7 +50,7 @@ public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public NodeView<Spark2TableNodeModel> createNodeView(final int viewIndex, final Spark2TableNodeModel nodeModel) {
+    public NodeView<SparkUnpersistNodeModel> createNodeView(final int viewIndex, final SparkUnpersistNodeModel nodeModel) {
         return null;
     }
 
@@ -59,7 +59,7 @@ public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
      */
     @Override
     protected boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -67,7 +67,7 @@ public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new Spark2TableNodeDialog();
+        return null;
     }
 
 }

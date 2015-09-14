@@ -12,6 +12,7 @@ import com.knime.bigdata.spark.jobserver.jobs.ConcatenateRDDsJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.preproc.concatenate.ConcatenateRDDsTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 

@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.preproc.concatenate;
 
 import java.io.Serializable;
 
@@ -27,7 +27,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.ColumnSelectionJob;
+import com.knime.bigdata.spark.jobserver.jobs.ConcatenateRDDsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -38,27 +38,30 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
  *
  * @author dwk
  */
-public class ColumnSelectionTask implements Serializable {
+public class ConcatenateRDDsTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final KNIMESparkContext m_context;
 
-    private final Integer[] m_colIdx;
-
-    private final String m_inputTableName;
+    private final String[] m_inputTableNames;
 
     private final String m_outputTableName;
 
-    ColumnSelectionTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final String aOutputTable) {
-        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, aOutputTable);
+    ConcatenateRDDsTask(final SparkRDD[] inputRDD, final String aOutputTable) {
+        m_inputTableNames = new String[inputRDD.length];
+        int i=0;
+        for (SparkRDD rdd : inputRDD) {
+            m_inputTableNames[i++] = rdd.getID();
+        }
+        m_context = inputRDD[0].getContext();
+        m_outputTableName = aOutputTable;
     }
 
-    ColumnSelectionTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
+    ConcatenateRDDsTask(final KNIMESparkContext aContext, final String[] aInputRDDs,
         final String aOutputTable) {
         m_context = aContext;
-        m_inputTableName = aInputRDD;
-        m_colIdx = featureColIdxs;
+        m_inputTableNames = aInputRDDs;
         m_outputTableName = aOutputTable;
     }
 
@@ -68,11 +71,11 @@ public class ColumnSelectionTask implements Serializable {
             exec.checkCanceled();
         }
         JobControler
-            .startJobAndWaitForResult(m_context, ColumnSelectionJob.class.getCanonicalName(), jasonParams, exec);
+            .startJobAndWaitForResult(m_context, ConcatenateRDDsJob.class.getCanonicalName(), jasonParams, exec);
     }
 
     String paramsAsJason() {
-        return paramsAsJason(m_inputTableName, m_colIdx, m_outputTableName);
+        return paramsAsJason(m_inputTableNames, m_outputTableName);
     }
 
     /**
@@ -80,11 +83,10 @@ public class ColumnSelectionTask implements Serializable {
      *
      * @return Json representation of parameters
      */
-    static String paramsAsJason(final String aInputTableName, final Integer[] aColIdxs, final String aOutputTable) {
+    static String paramsAsJason(final String[] aInputTableNames, final String aOutputTable) {
 
         final Object[] inputParamas =
-            new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aColIdxs),
-                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
+            new Object[]{KnimeSparkJob.PARAM_INPUT_TABLE, JsonUtils.toJsonArray((Object[])aInputTableNames)};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
             ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTable}});
