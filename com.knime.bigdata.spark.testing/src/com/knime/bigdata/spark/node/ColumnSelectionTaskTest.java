@@ -6,10 +6,11 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.ColumnSelectionJob;
+import com.knime.bigdata.spark.jobserver.jobs.ColumnFilterJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.preproc.filter.column.ColumnFilterTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 
@@ -23,20 +24,20 @@ public class ColumnSelectionTaskTest extends SparkWithJobServerSpec {
 
 	public static String paramsAsJason(final String aInputTableName,
 			final Integer[] aNumericColIdx, final String aResTable) {
-		return ColumnSelectionTask.paramsAsJason(aInputTableName,
+		return ColumnFilterTask.paramsAsJason(aInputTableName,
 				aNumericColIdx, aResTable);
 	}
 
 	@Test
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
-		ColumnSelectionTask testObj = new ColumnSelectionTask(null, "inputRDD",
+		ColumnFilterTask testObj = new ColumnFilterTask(null, "inputRDD",
 				new Integer[] { 0, 1 }, "u");
 		final String params = testObj.paramsAsJason();
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 
 		assertEquals("Configuration should be recognized as valid",
 				ValidationResultConverter.valid(),
-				new ColumnSelectionJob().validate(config));
+				new ColumnFilterJob().validate(config));
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class ColumnSelectionTaskTest extends SparkWithJobServerSpec {
 		ImportKNIMETableJobTest.importTestTable(context, MINI_IRIS_TABLE,
 				"tab1");
 
-		ColumnSelectionTask testObj = new ColumnSelectionTask(context, "tab1",
+		ColumnFilterTask testObj = new ColumnFilterTask(context, "tab1",
 				new Integer[] { 4, 0, 3, 1 }, "out");
 
 		testObj.execute(null);

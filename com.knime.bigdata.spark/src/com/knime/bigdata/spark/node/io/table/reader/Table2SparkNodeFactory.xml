@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark Table Writer</name>
+	<shortDescription>Creates a Spark RDD from the KNIME data table.</shortDescription>
+	<fullDescription>
+		<intro>
+			Creates a Spark RDD from the KNIME data table.
+		</intro>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="KNIME table">KNIME data table</inPort>
+	    <inPort index="1" name="Spark context">Optional Spark context</inPort>
+		<outPort index="0" name="Spark RDD">Spark RDD</outPort>
+	</ports>
+</knimeNode>

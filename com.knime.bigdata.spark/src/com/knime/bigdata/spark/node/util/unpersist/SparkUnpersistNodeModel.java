@@ -18,18 +18,16 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.cache;
+package com.knime.bigdata.spark.node.util.unpersist;
 
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.jobserver.server.PersistenceType;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 
@@ -37,19 +35,10 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkPersistNodeModel extends SparkNodeModel {
+public class SparkUnpersistNodeModel extends SparkNodeModel {
 
-    private final SettingsModelString m_storageLevel = createStorageLevelModel();
-
-    SparkPersistNodeModel() {
+    SparkUnpersistNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE}, false);
-    }
-
-    /**
-     * @return the Spark persistence level model
-     */
-    static SettingsModelString createStorageLevelModel() {
-        return new SettingsModelString("storageLevel", null);
     }
 
     /**
@@ -66,9 +55,8 @@ public class SparkPersistNodeModel extends SparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
-        String level = m_storageLevel.getStringValue();
-        final PersistenceType persistenceType = PersistenceType.valueOf(level);
-        //TODO: Cache the rdd
+        final UnpersistTask task = new UnpersistTask();
+        task.execute(exec, rdd.getData());
         return inData;
     }
 
@@ -77,7 +65,7 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_storageLevel.saveSettingsTo(settings);
+        //nothing to do
     }
 
     /**
@@ -85,10 +73,7 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        String level = ((SettingsModelString)m_storageLevel.createCloneWithValidatedValue(settings)).getStringValue();
-        if (level == null || level.isEmpty()) {
-            throw new InvalidSettingsException("storage level must not be empty");
-        }
+        //nothing to do
     }
 
     /**
@@ -96,7 +81,6 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_storageLevel.loadSettingsFrom(settings);
+        //nothing to do
     }
-
 }

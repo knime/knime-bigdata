@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.scripting.java.snippet;
 
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
@@ -60,7 +61,8 @@ public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel
         if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
-        return super.configureInternal(inSpecs);
+        final DataTableSpec resultSpec = getResultSpec(inSpecs);
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(getContext(inSpecs), resultSpec)};
     }
 
     /**

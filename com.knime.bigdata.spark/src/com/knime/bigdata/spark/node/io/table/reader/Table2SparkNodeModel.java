@@ -18,7 +18,7 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.writer;
+package com.knime.bigdata.spark.node.io.table.reader;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
@@ -42,7 +42,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.node.SparkNodeModel;
+import com.knime.bigdata.spark.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -54,7 +54,7 @@ import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Table2SparkNodeModel extends SparkNodeModel {
+public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
     /** Constructor. */
     Table2SparkNodeModel() {
@@ -66,11 +66,11 @@ public class Table2SparkNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
         DataTableSpec spec = (DataTableSpec)inSpecs[0];
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(), spec);
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs), spec);
         return new PortObjectSpec[]{resultSpec};
     }
 
@@ -79,7 +79,7 @@ public class Table2SparkNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        if (inData == null || inData.length != 1 || inData[0] == null) {
+        if (inData == null || inData.length < 1 || inData[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
         exec.setMessage("Converting data table...");
@@ -88,11 +88,6 @@ public class Table2SparkNodeModel extends SparkNodeModel {
         final int rowCount = table.getRowCount();
         final DataTableSpec spec = table.getSpec();
         final SparkTypeConverter<?, ?>[] converter = SparkTypeRegistry.getConverter(spec);
-        //        //extract primitive Java Types
-        //        final Class<?>[] primitiveTypes = new Class<?>[converter.length];
-        //        for (int colIx = 0; colIx < converter.length; colIx++) {
-        //            primitiveTypes[colIx] = converter[colIx].getPrimitiveType();
-        //        }
         final Object[][] data = new Object[rowCount][converter.length];
         int rowIdx = 0;
         for (final DataRow row : table) {
@@ -107,7 +102,7 @@ public class Table2SparkNodeModel extends SparkNodeModel {
         }
 
         exec.setMessage("Sending data to Spark...");
-        final SparkDataTable resultTable = new SparkDataTable(getContext(), table.getDataTableSpec());
+        final SparkDataTable resultTable = new SparkDataTable(getContext(inData), table.getDataTableSpec());
         executeSparkJob(exec, data, resultTable);
         exec.setProgress(1, "Spark data object created");
         return new PortObject[]{new SparkDataPortObject(resultTable)};

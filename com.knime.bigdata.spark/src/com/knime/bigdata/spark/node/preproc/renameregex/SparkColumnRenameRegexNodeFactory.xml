@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
-<knimeNode icon="column_rename_regex.png" type="Manipulator">
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd"
+    icon="column_rename_regex.png" type="Manipulator">
     <name>Spark Column Rename (Regex)</name>
 
     <shortDescription>Renames all columns based on regular expression search 
@@ -22,8 +23,7 @@
 			 output would be "Bar 1", "Bar 2", "Bar 3".
             </p>
             <p>
-              More complicated cases contain <a href=
-              "http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html#cg">
+              More complicated cases contain <a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html#cg">
               capturing groups</a>, i.e. expressions in parentheses that, if 
               matched in a column name, are saved. The groups can be referenced
               in the replacement string using <tt>$g</tt>, whereby <tt>g</tt>

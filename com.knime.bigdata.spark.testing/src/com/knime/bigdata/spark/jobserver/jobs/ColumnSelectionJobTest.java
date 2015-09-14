@@ -49,7 +49,7 @@ public class ColumnSelectionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = ColumnSelectionTaskTest.paramsAsJason("tab1",
 				new Integer[] { 0, 1 }, "out");
-		KnimeSparkJob testObj = new ColumnSelectionJob();
+		KnimeSparkJob testObj = new ColumnFilterJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
 		assertEquals("Configuration should be recognized as valid",
@@ -62,7 +62,7 @@ public class ColumnSelectionJobTest extends LocalSparkSpec {
 	}
 
 	private void myCheck(final String params, final String aMsg) {
-		KnimeSparkJob testObj = new ColumnSelectionJob();
+		KnimeSparkJob testObj = new ColumnFilterJob();
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 		assertEquals("Configuration should be recognized as invalid",
 				ValidationResultConverter.invalid(aMsg),

@@ -50,6 +50,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
 
+import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
@@ -58,7 +59,7 @@ import com.knime.bigdata.spark.util.SparkDataTableCreator;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDataPortObject implements PortObject {
+public class SparkDataPortObject implements PortObject, SparkContextProvider {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkDataPortObject.class);
 
@@ -275,8 +276,9 @@ public class SparkDataPortObject implements PortObject {
     }
 
     /**
-     * @return the context
+     * {@inheritDoc}
      */
+    @Override
     public KNIMESparkContext getContext() {
         return m_data.getContext();
     }

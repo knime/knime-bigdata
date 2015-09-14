@@ -22,6 +22,8 @@ package com.knime.bigdata.spark.port.context;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.JComponent;
 
@@ -34,19 +36,19 @@ import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortObjectSpecZipInputStream;
+import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.spark.port.SparkContextProvider;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
- * The SparkContextPortObject should not be used as of yet since we do not support different job servers and the
- * job server does not support multiple contexts. We will remove the deprecated from this class as soon as both
- * is supported.
  */
-@Deprecated
-public class SparkContextPortObject implements PortObject, PortObjectSpec {
+public class SparkContextPortObject implements PortObject, PortObjectSpec, SparkContextProvider {
 
     /**
      * Spark context port type.
@@ -76,7 +78,9 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec {
     @Override
     public String getSummary() {
         StringBuilder buf = new StringBuilder();
-        buf.append("Context: ").append(m_context.getContextName());
+        buf.append("Name: ").append(m_context.getContextName());
+        buf.append(" Memory: ").append(m_context.getMemPerNode());
+        buf.append(" CPU cores: ").append(m_context.getNumCpuCores());
         return buf.toString();
     }
 
@@ -89,10 +93,30 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec {
     }
 
     /**
-     * @return the model
+     * {@inheritDoc}
      */
+    @Override
     public KNIMESparkContext getContext() {
         return m_context;
+    }
+
+    /**
+     * Serializer used to save {@link SparkContextPortObject}s.
+     * @return a new serializer
+     */
+    public static PortObjectSpecSerializer<SparkContextPortObject> getPortObjectSpecSerializer() {
+        return new PortObjectSpecSerializer<SparkContextPortObject>() {
+            @Override
+            public void savePortObjectSpec(final SparkContextPortObject portObjectSpec,
+                final PortObjectSpecZipOutputStream out)
+                throws IOException {
+                save(portObjectSpec, out);
+            }
+            @Override
+            public SparkContextPortObject loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
+                return load(in);
+            }
+        };
     }
 
     /**
@@ -105,39 +129,45 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec {
             /**
              * {@inheritDoc}
              */
-            @SuppressWarnings("resource")
             @Override
             public void savePortObject(final SparkContextPortObject portObject,
                 final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
                 CanceledExecutionException {
-                final ModelContent specModel = new ModelContent(CONTEXT);
-                KNIMESparkContext model = portObject.getContext();
-                model.save(specModel);
-                out.putNextEntry(new ZipEntry(CONTEXT));
-                specModel.saveToXML(new NonClosableOutputStream.Zip(out));
+                save(portObject, out);
             }
-
             /**
              * {@inheritDoc}
              */
-            @SuppressWarnings("resource")
             @Override
             public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
                 final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                try {
-                    ZipEntry ze = in.getNextEntry();
-                    if (!ze.getName().equals(CONTEXT)) {
-                        throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
-                            + CONTEXT + "\".");
-                    }
-                    final ModelContentRO model = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-                    final KNIMESparkContext context = new KNIMESparkContext(model);
-                    return new SparkContextPortObject(context);
-                } catch (InvalidSettingsException ise) {
-                    throw new IOException(ise);
-                }
+                return load(in);
             }
         };
+    }
+
+    private static SparkContextPortObject load(final ZipInputStream in) throws IOException {
+        try {
+            final ZipEntry ze = in.getNextEntry();
+            if (!ze.getName().equals(CONTEXT)) {
+                throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
+                        + CONTEXT + "\".");
+            }
+            final ModelContentRO model = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
+            final KNIMESparkContext context = new KNIMESparkContext(model);
+            return new SparkContextPortObject(context);
+        } catch (InvalidSettingsException ise) {
+            throw new IOException(ise);
+        }
+    }
+
+    private static void save(final SparkContextPortObject portObject, final ZipOutputStream out)
+        throws IOException {
+        final ModelContent specModel = new ModelContent(CONTEXT);
+        final KNIMESparkContext model = portObject.getContext();
+        model.save(specModel);
+        out.putNextEntry(new ZipEntry(CONTEXT));
+        specModel.saveToXML(new NonClosableOutputStream.Zip(out));
     }
 
     /**

@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author koetter
  */
-public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
+public class Spark2TableNodeFactory extends NodeFactory<Spark2TableNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Table2SparkNodeModel createNodeModel() {
-        return new Table2SparkNodeModel();
+    public Spark2TableNodeModel createNodeModel() {
+        return new Spark2TableNodeModel();
     }
 
     /**
@@ -50,7 +50,7 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      * {@inheritDoc}
      */
     @Override
-    public NodeView<Table2SparkNodeModel> createNodeView(final int viewIndex, final Table2SparkNodeModel nodeModel) {
+    public NodeView<Spark2TableNodeModel> createNodeView(final int viewIndex, final Spark2TableNodeModel nodeModel) {
         return null;
     }
 
@@ -59,7 +59,7 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -67,7 +67,7 @@ public class Table2SparkNodeFactory extends NodeFactory<Table2SparkNodeModel> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new Spark2TableNodeDialog();
     }
 
 }

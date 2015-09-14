@@ -20,6 +20,9 @@
  */
 package com.knime.bigdata.spark.node.context;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -38,13 +41,15 @@ import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
  */
 public class ContextSettings {
 
+    private final SettingsModelString m_protocol = createProtocolModel();
+
     private final SettingsModelString m_host = createHostModel();
 
     private final SettingsModelInteger m_port = createPortModel();
 
     private final SettingsModelString m_user = createUserModel();
 
-    private final SettingsModelString m_password = createPasswordModel();
+    private final SettingsModelString m_pwd = createPasswordModel();
 
     private final SettingsModelString m_contextName = createIDModel();
 
@@ -52,14 +57,17 @@ public class ContextSettings {
 
     private final SettingsModelString m_memory = createMemoryModel();
 
-    private final SettingsModelInteger m_jobCheckFrequency = createJobCheckFrequencyModel();
-
     private final SettingsModelInteger m_jobTimeout = createJobTimeoutModel();
+
+    private final SettingsModelInteger m_jobCheckFrequency = createJobCheckFrequencyModel();
 
     private final SettingsModelBoolean m_deleteRDDsOnDispose = createDeleteRDDsOnDisposeModel();
 
-    private final SettingsModel[] m_models = new SettingsModel[] {m_host, m_port, m_user, m_contextName, m_noOfCores,
-        m_memory, m_jobCheckFrequency, m_jobTimeout, m_deleteRDDsOnDispose};
+    private static final char[] MY =
+            "3O}accA80479[7b@05b9378K}18358QLG32P§92JZW76b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
+
+    private final SettingsModel[] m_models = new SettingsModel[] {m_protocol, m_host, m_port, m_user, m_contextName, m_noOfCores,
+        m_memory, m_jobTimeout, m_jobCheckFrequency, m_deleteRDDsOnDispose};
     /**
      * @return the context id model
      */
@@ -87,7 +95,7 @@ public class ContextSettings {
      */
     static  SettingsModelString createPasswordModel() {
         final char[] pwd = KNIMEConfigContainer.getPassword();
-        return new SettingsModelString("password", pwd != null ? pwd.toString() : null);
+        return new SettingsModelString("password", pwd == null ? null : pwd.toString());
     }
 
     /**
@@ -95,6 +103,13 @@ public class ContextSettings {
      */
     static SettingsModelString createIDModel() {
         return new SettingsModelString("contextName", KNIMEConfigContainer.getSparkContext());
+    }
+
+    /**
+     * @return the protocol model
+     */
+    static  SettingsModelString createProtocolModel() {
+        return new SettingsModelString("protocol", KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
@@ -164,7 +179,8 @@ public class ContextSettings {
      * @return the password
      */
     public char[] getPassword() {
-        return m_password.getStringValue().toCharArray();
+        final String pwd = m_pwd.getStringValue();
+        return pwd == null ? null : pwd.toCharArray();
     }
 
     /**
@@ -209,6 +225,34 @@ public class ContextSettings {
         return m_deleteRDDsOnDispose.getBooleanValue();
     }
 
+
+    /**
+     * @param password
+     * @return
+     */
+    private static String demix(final String p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] cs = p.toCharArray();
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return cs.toString();
+    }
+
+    /**
+     * @param password
+     * @return
+     */
+    private static String mix(final String p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] c = p.toCharArray();
+        final char[] cs = Arrays.copyOf(c, c.length);
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return String.valueOf(cs);
+    }
+
     /**
      * @param settings the NodeSettingsWO to write to
      */
@@ -216,6 +260,7 @@ public class ContextSettings {
         for (SettingsModel m : m_models) {
             m.saveSettingsTo(settings);
         }
+        settings.addPassword(m_pwd.getKey(), String.valueOf(MY), mix(m_pwd.getStringValue()));
     }
 
     /**
@@ -236,6 +281,7 @@ public class ContextSettings {
         for (SettingsModel m : m_models) {
             m.loadSettingsFrom(settings);
         }
+        m_pwd.setStringValue(demix(settings.getPassword(m_pwd.getKey(), String.valueOf(MY), null)));
     }
 
     /**

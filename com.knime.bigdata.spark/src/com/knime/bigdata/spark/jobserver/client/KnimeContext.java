@@ -79,7 +79,7 @@ public class KnimeContext {
             final StringBuilder buf = new StringBuilder("Could not establish connection to Spark Jobserver.");
             if (e.getCause() != null && e.getCause() instanceof SocketException) {
                 buf.append(" Error: '" + e.getCause().getMessage()
-                    + "' possible reason jobserver down or incompatible connection settings. "
+                    + "' possible reason job server down or incompatible connection settings. "
                     + "For details see logfile View->Open KNIME log.");
                 LOGGER.error("Context information: " + context);
             } else {

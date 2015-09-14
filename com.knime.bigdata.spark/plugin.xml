@@ -214,14 +214,14 @@
       <node
             category-path="/labs/spark/io/read"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
       </node>
       <node
             category-path="/labs/spark/io/write"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -274,8 +274,32 @@
       <node
             category-path="/labs/spark/io"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.util.cache.SparkPersistNodeFactory"
+            factory-class="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory"
             id="com.knime.bigdata.spark.node.util.cache.SparkPersistNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/io"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory"
+            id="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/column"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
+            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/row"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory">
       </node>
     </extension>
    <extension

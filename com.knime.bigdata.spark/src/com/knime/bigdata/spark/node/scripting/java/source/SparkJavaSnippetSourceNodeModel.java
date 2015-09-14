@@ -20,15 +20,20 @@
  */
 package com.knime.bigdata.spark.node.scripting.java.source;
 
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippetSource;
+import com.knime.bigdata.spark.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
  *
@@ -45,8 +50,25 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
 
     /** Constructor.*/
     public SparkJavaSnippetSourceNodeModel() {
-        super(new PortType[]{}, new PortType[]{SparkDataPortObject.TYPE}, createSnippet(),
+        super(SparkSourceNodeModel.addContextPort(null), new PortType[]{SparkDataPortObject.TYPE}, createSnippet(),
             "return sc.<Row>emptyRDD();");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final DataTableSpec resultSpec = getResultSpec(inSpecs);
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(getContext(inSpecs), resultSpec)};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected KNIMESparkContext getContext(final Object[] inData) throws InvalidSettingsException {
+        return SparkSourceNodeModel.getContext(inData);
     }
 
     /**

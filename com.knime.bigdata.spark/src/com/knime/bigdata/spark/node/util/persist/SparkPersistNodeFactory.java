@@ -18,7 +18,7 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.cache;
+package com.knime.bigdata.spark.node.util.persist;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
