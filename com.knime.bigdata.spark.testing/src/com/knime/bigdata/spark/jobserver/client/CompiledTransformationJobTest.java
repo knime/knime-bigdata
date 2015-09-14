@@ -13,6 +13,7 @@ import com.knime.bigdata.spark.jobserver.jobs.TransformationTestJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.typesafe.config.ConfigValueFactory;
 
 /**
@@ -40,7 +41,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
         final String params =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_OUTPUT,
                 new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, "someRDD"}});
-        File f = File.createTempFile("knimeJobUtils", ".jar");
+        final File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();
 
         final String jarPath = f.toString();
@@ -56,7 +57,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
         boolean exceptionThrown = false;
         try {
             JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params);
-        } catch (GenericKnimeSparkException ge) {
+        } catch (final GenericKnimeSparkException ge) {
             //this is what should happen
             //check that exception makes sense...
         	assertTrue("exception message should contain some text about an invalid job, got: "+ge.getMessage(), ge.getMessage().toLowerCase().contains("jobinvalid"));
@@ -73,8 +74,8 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
     public void addTransformationJob2JarAndExecuteOnServer() throws Throwable {
 
     	importTestTable(CONTEXT_ID, MINI_IRIS_TABLE, "unitTestRDD1");
-    	
-        File f = File.createTempFile("knimeJobUtils", ".jar");
+
+        final File f = File.createTempFile("knimeJobUtils", ".jar");
         f.deleteOnExit();
 
         final String jarPath = f.toString();
@@ -87,7 +88,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
             //upload jar to job-server
             JobControler.uploadJobJar(CONTEXT_ID, jarPath);
             //start job
-            String jobId =
+            final String jobId =
                 JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
 
             KNIMEConfigContainer.m_config =
@@ -96,7 +97,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
 
             //throws exception if job did not finish properly
             JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId, null);
-            
+
             assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
     }
 
