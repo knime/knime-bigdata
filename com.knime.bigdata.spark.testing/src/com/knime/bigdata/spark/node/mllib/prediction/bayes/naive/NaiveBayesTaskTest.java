@@ -1,6 +1,6 @@
 package com.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.junit.Test;
@@ -54,7 +54,7 @@ public class NaiveBayesTaskTest extends SparkWithJobServerSpec {
 		NaiveBayesTask testObj = new NaiveBayesTask(context, "tab1", 2, cols, l, "u");
 
 		NaiveBayesModel model = testObj.execute(null);
-		
+		assertTrue(model != null);
 		// not sure what else to check here....
 		fetchResultTable(context, "u", 4);
 

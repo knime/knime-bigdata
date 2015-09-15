@@ -45,6 +45,8 @@ public class SupervisedLearnerUtils {
      */
     public static final String PARAM_NOMINAL_FEATURE_INFO = "NominalFeatureInfo";
 
+    /** Number of classes. **/
+    public static final String PARAM_NO_OF_CLASSES = "NumberOfClasses";
 
     /**
      * @param aConfig

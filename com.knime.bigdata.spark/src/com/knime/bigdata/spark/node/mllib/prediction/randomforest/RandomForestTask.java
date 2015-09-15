@@ -179,7 +179,7 @@ public class RandomForestTask implements Serializable {
             inputParams.add(classColIdx);
         }
         if (noOfClasses != null) {
-            inputParams.add(AbstractTreeLearnerJob.PARAM_NO_OF_CLASSES);
+            inputParams.add(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES);
             inputParams.add(noOfClasses);
         }
         if (featureColIdxs != null && featureColIdxs.length > 0) {

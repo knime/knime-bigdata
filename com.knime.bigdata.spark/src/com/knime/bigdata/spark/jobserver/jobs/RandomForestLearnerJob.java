@@ -163,8 +163,8 @@ public class RandomForestLearnerJob extends AbstractTreeLearnerJob {
             SupervisedLearnerUtils.extractNominalFeatureInfo(aConfig).getMap();
         final Integer labelIndex = aConfig.getInputParameter(ParameterConstants.PARAM_LABEL_INDEX, Integer.class);
         final Long numClasses;
-        if (aConfig.hasInputParameter(PARAM_NO_OF_CLASSES)) {
-            numClasses = aConfig.getInputParameter(PARAM_NO_OF_CLASSES, Long.class);
+        if (aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES)) {
+            numClasses = aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES, Long.class);
         } else if (nominalFeatureInfo.containsKey(labelIndex)) {
             numClasses = nominalFeatureInfo.get(labelIndex).longValue();
         } else {

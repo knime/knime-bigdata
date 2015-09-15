@@ -136,7 +136,7 @@ public class DecisionTreeTask implements Serializable {
         inputParams.add(ParameterConstants.PARAM_LABEL_INDEX);
         inputParams.add(classColIdx);
         if (noOfClasses != null) {
-            inputParams.add(AbstractTreeLearnerJob.PARAM_NO_OF_CLASSES);
+            inputParams.add(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES);
             inputParams.add(noOfClasses);
         }
         //        inputParams.add(ParameterConstants.PARAM_COL_NAMES);

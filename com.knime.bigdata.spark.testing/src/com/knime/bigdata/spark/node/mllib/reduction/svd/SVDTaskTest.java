@@ -52,8 +52,8 @@ public class SVDTaskTest extends SparkWithJobServerSpec {
         assertEquals("expected one value per column", 4, v.length);
                
         //not sure what else to check here....
-        Object[][] arrayResV = fetchResultTable(context, "v",4);
-        Object[][] arrayResU = fetchResultTable(context, "u",4);
+        fetchResultTable(context, "v",4);
+        fetchResultTable(context, "u",4);
 
     }
 
