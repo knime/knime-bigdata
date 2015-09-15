@@ -26,9 +26,8 @@ package com.knime.bigdata.spark.jobserver.server;
  */
 public class EnumContainer {
     /**
-     * (should be identical to org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods)
-     * Enum for the two methods for setting the number of rows in the output
-     * table.
+     * (should be identical to org.knime.base.node.preproc.sample.SamplingNodeSettings.CountMethods) Enum for the two
+     * methods for setting the number of rows in the output table.
      */
     public enum CountMethods {
         /** Relative fraction. */
@@ -38,6 +37,7 @@ public class EnumContainer {
 
         /**
          * convert string representation of KNIME count method to this count method
+         *
          * @param aString
          * @return Enum value corresponding to given string
          */
@@ -52,10 +52,9 @@ public class EnumContainer {
         }
     }
 
-
     /**
-     * Enum for the four different sampling methods.
-     * (should be identical to org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods)
+     * Enum for the four different sampling methods. (should be identical to
+     * org.knime.base.node.preproc.sample.SamplingNodeSettings.SamplingMethods)
      */
     public enum SamplingMethods {
         /** Selects the first <em>x</em> rows. */
@@ -69,6 +68,7 @@ public class EnumContainer {
 
         /**
          * convert string representation of KNIME sampling method to this sampling method
+         *
          * @param aString
          * @return Enum value corresponding to given string
          */
@@ -96,6 +96,7 @@ public class EnumContainer {
 
         /**
          * convert string representation of KNIME correlation method to this correlation method
+         *
          * @param aString
          * @return Enum value corresponding to given string
          */
@@ -110,5 +111,36 @@ public class EnumContainer {
         }
     }
 
+    /**
+     * see RandomForestJob Number of features to consider for splits at each node. Supported: "auto", "all", "sqrt",
+     * "log2", "onethird". If "auto" is set, parameter is set based on numTrees: if numTrees == 1, set to "all"; if
+     * numTrees > 1 (forest) set to "sqrt".
+     */
+    public enum FeatureSubsetStrategies {
+        /**  */
+        auto,
+        /**  */
+        all,
+        /**  */
+        sqrt,
+        /**  */
+        log2,
+        /**  */
+        onethird;
 
+        /**
+         * convert string representation of KNIME to this
+         *
+         * @param aString
+         * @return Enum value corresponding to given string
+         */
+        public static FeatureSubsetStrategies fromKnimeEnum(final String aString) {
+            for (FeatureSubsetStrategies s : values()) {
+                if (s.toString().equals(aString)) {
+                    return s;
+                }
+            }
+            return valueOf(aString);
+        }
+    }
 }

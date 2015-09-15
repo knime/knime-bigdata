@@ -186,7 +186,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
                 aSettings.countMethod().toString(),  SamplingJob.PARAM_COUNT, aSettings.count(),
                 SamplingJob.PARAM_SAMPLING_METHOD, aSettings.samplingMethod().toString(),
                 SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
-                SamplingJob.PARAM_EXACT, aExact, SamplingJob.PARAM_SEED, aSeed,
+                SamplingJob.PARAM_EXACT, aExact, ParameterConstants.PARAM_SEED, aSeed,
                 SamplingJob.PARAM_FRACTION, aSettings.fraction(),  SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
             ParameterConstants.PARAM_OUTPUT, outputParams});
     }
@@ -211,7 +211,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
                 SamplingJob.PARAM_SAMPLING_METHOD, samplingMethod.toString(),
                 SamplingJob.PARAM_WITH_REPLACEMENT, aIsWithReplacement,
                 SamplingJob.PARAM_EXACT, aExact,
-                SamplingJob.PARAM_SEED, aSeed == null ? Long.valueOf(System.currentTimeMillis()) : aSeed,
+                ParameterConstants.PARAM_SEED, aSeed == null ? Long.valueOf(System.currentTimeMillis()) : aSeed,
                 SamplingJob.PARAM_FRACTION, fraction,
                 SamplingJob.PARAM_CLASS_COLUMN, aClassColIx},
             ParameterConstants.PARAM_OUTPUT, outputParams});

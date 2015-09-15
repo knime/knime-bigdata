@@ -88,11 +88,6 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
     public static final String PARAM_NUM_USER_BLOCKS = "NumUserBlocks";
 
     /**
-     * a random seed to have deterministic results.
-     */
-    public static final String PARAM_SEED = "Seed";
-
-    /**
      * the number of product blocks to parallelize the computation.
      */
     public static final String PARAM_NUM_PRODUCT_BLOCKS = "NumProductBlocks";
@@ -259,8 +254,8 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
      * @return
      */
     static ALS setSeed(final ALS aSolver, final JobConfig aConfig) {
-        if (aConfig.hasInputParameter(PARAM_SEED)) {
-            return aSolver.setSeed((Long)aConfig.getInputParameter(PARAM_SEED, Long.class));
+        if (aConfig.hasInputParameter(ParameterConstants.PARAM_SEED)) {
+            return aSolver.setSeed((Long)aConfig.getInputParameter(ParameterConstants.PARAM_SEED, Long.class));
         }
         return aSolver;
     }

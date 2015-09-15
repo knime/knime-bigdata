@@ -64,6 +64,11 @@ public class ParameterConstants {
     public static final String PARAM_MAX_DEPTH = "maxDepth";
 
     /**
+     * a random seed to have deterministic results.
+     */
+    public static final String PARAM_SEED = "Seed";
+
+    /**
      * param for maximal number of bins
      */
     public static final String PARAM_MAX_BINS = "maxBins";
