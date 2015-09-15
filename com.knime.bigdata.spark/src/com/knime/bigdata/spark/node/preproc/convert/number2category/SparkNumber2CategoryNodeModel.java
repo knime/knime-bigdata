@@ -41,7 +41,7 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 
 import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -52,7 +52,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkNumber2CategoryNodeModel extends AbstractSparkNodeModel {
+public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     //TODO: add an option to replace processed columns
     private final SettingsModelString m_colSuffix = createColSuffixModel();
 

@@ -39,7 +39,7 @@ import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -51,7 +51,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkSamplingNodeModel extends AbstractSparkNodeModel {
+public class SparkSamplingNodeModel extends SparkNodeModel {
 
     private final SparkSamplingNodeSettings m_settings = new SparkSamplingNodeSettings();
 

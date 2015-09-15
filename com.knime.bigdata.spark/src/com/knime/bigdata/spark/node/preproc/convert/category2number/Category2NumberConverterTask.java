@@ -81,8 +81,9 @@ public class Category2NumberConverterTask {
     public MappedRDDContainer execute(final ExecutionMonitor exec) throws Exception {
         final String params = paramDef();
         exec.checkCanceled();
-        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
-            ConvertNominalValuesJob.class.getCanonicalName(), params, exec);
+        final JobResult result =
+            JobControler.startJobAndWaitForResult(m_context, ConvertNominalValuesJob.class.getCanonicalName(), params,
+                exec);
         return (MappedRDDContainer)result.getObjectResult();
     }
 
@@ -99,18 +100,16 @@ public class Category2NumberConverterTask {
      * @param mappingType
      * @param inputTableName
      * @param outputTableName
-     * @param outputMappingTableName
      * @return Json String with parameter settings
      */
-    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
-        final String mappingType, final String inputTableName, final String outputTableName) {
+    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames, final String mappingType,
+        final String inputTableName, final String outputTableName) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),
                 ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])includeColNames),
                 ConvertNominalValuesJob.PARAM_MAPPING_TYPE, mappingType, KnimeSparkJob.PARAM_INPUT_TABLE,
-                inputTableName},
-            ParameterConstants.PARAM_OUTPUT,
+                inputTableName}, ParameterConstants.PARAM_OUTPUT,
             new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
     }
 

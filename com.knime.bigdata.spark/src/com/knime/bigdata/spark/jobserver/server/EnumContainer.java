@@ -81,7 +81,34 @@ public class EnumContainer {
             }
             return valueOf(aString);
         }
-
     }
+
+    /**
+     * enum for the two different correlation methods
+     *
+     * @author dwk
+     */
+    public enum CorrelationMethods {
+        /** Pearson */
+        pearson,
+        /** Spearman */
+        spearman;
+
+        /**
+         * convert string representation of KNIME correlation method to this correlation method
+         * @param aString
+         * @return Enum value corresponding to given string
+         */
+        public static CorrelationMethods fromKnimeEnum(final String aString) {
+            if (pearson.toString().equals(aString)) {
+                return pearson;
+            }
+            if (spearman.toString().equals(aString)) {
+                return spearman;
+            }
+            return valueOf(aString);
+        }
+    }
+
 
 }

@@ -32,7 +32,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -45,7 +45,7 @@ import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibNaiveBayesNodeModel extends AbstractSparkNodeModel {
+public class MLlibNaiveBayesNodeModel extends SparkNodeModel {
 
     private final SettingsModelDouble m_lambda = createLambdaModel();
 

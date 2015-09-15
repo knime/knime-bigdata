@@ -32,7 +32,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -43,7 +43,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJoinerNodeModel extends AbstractSparkNodeModel {
+public class SparkJoinerNodeModel extends SparkNodeModel {
 
     /**
      * Constructor.

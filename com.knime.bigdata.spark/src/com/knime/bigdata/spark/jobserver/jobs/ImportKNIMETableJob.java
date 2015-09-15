@@ -81,7 +81,7 @@ public class ImportKNIMETableJob extends KnimeSparkJob implements Serializable {
      */
     public static List<Row> getInputData(final JobConfig aConfig) throws GenericKnimeSparkException {
         final List<Row> rows = new ArrayList<>();
-        final Object[][] data = aConfig.decodeFromInputParameter(PARAM_INPUT_TABLE);
+        final Object[][] data = aConfig.readInputFromFileAndDecode(PARAM_INPUT_TABLE);
         if (data == null) {
             throw new GenericKnimeSparkException("Input parameter '" + PARAM_INPUT_TABLE + "' is empty' ");
         }

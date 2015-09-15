@@ -58,7 +58,7 @@ public class SGDLearnerTask implements Serializable {
 
     private final String m_inputTableName;
 
-    private final String[] m_colNames;
+    //private final String[] m_colNames;
 
     private final int m_numIterations;
 
@@ -76,7 +76,7 @@ public class SGDLearnerTask implements Serializable {
         m_numericColIdx = featureColIdxs;
         final List<String> allColNames = new LinkedList<>(aNumericColNames);
         allColNames.add(classColName);
-        m_colNames = allColNames.toArray(new String[allColNames.size()]);
+        //m_colNames = allColNames.toArray(new String[allColNames.size()]);
         m_classColIdx = classColIdx;
         m_nomFeatureInfo = nominalFeatureInfo;
         m_jobClassPath = jobClass.getCanonicalName();
@@ -95,7 +95,7 @@ public class SGDLearnerTask implements Serializable {
      */
 
     private String learnerDef() throws GenericKnimeSparkException {
-        return learnerDef(m_inputTableName, m_nomFeatureInfo, m_colNames, m_numericColIdx, m_classColIdx,
+        return learnerDef(m_inputTableName, m_nomFeatureInfo, m_numericColIdx, m_classColIdx,
             m_numIterations, m_regularizationValue);
     }
 
@@ -105,7 +105,6 @@ public class SGDLearnerTask implements Serializable {
      * @param aInputTableName
      * @param nomFeatureInfo the nominal column indices as first element and the number of unique values of the corresponding
      * column as second argument
-     * @param aColNames
      * @param aNumericColIdx
      * @param aClassColIdx
      * @param aNumIterations
@@ -113,8 +112,8 @@ public class SGDLearnerTask implements Serializable {
      * @return Json representation of parameters
      * @throws GenericKnimeSparkException
      */
-    public static  String learnerDef(final String aInputTableName, final NominalFeatureInfo nomFeatureInfo,
-        final String[] aColNames, final Integer[] aNumericColIdx, final Integer aClassColIdx,
+    public static String learnerDef(final String aInputTableName, final NominalFeatureInfo nomFeatureInfo,
+        final Integer[] aNumericColIdx, final Integer aClassColIdx,
         final Integer aNumIterations, final Double aRegularizationValue) throws GenericKnimeSparkException {
 
         final Object[] inputParamas;
@@ -123,7 +122,7 @@ public class SGDLearnerTask implements Serializable {
                     new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations,
                     SGDJob.PARAM_REGULARIZATION, aRegularizationValue,
                     ParameterConstants.PARAM_LABEL_INDEX, aClassColIdx,
-                    ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])aColNames),
+                    //ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])aColNames),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
                     KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
         } else {
@@ -131,7 +130,7 @@ public class SGDLearnerTask implements Serializable {
                 new Object[]{ParameterConstants.PARAM_NUM_ITERATIONS, aNumIterations,
                 SGDJob.PARAM_REGULARIZATION, aRegularizationValue,
                 ParameterConstants.PARAM_LABEL_INDEX, aClassColIdx,
-                ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])aColNames),
+                //ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])aColNames),
                 ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aNumericColIdx),
                 KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName,
                 SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO, JobConfig.encodeToBase64(nomFeatureInfo)};

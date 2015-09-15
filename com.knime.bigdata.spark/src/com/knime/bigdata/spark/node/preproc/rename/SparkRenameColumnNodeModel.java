@@ -61,7 +61,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.ConvenienceMethods;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -70,7 +70,7 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkRenameColumnNodeModel extends AbstractSparkNodeModel {
+public class SparkRenameColumnNodeModel extends SparkNodeModel {
     /**
      * Config identifier for the NodeSettings object contained in the NodeSettings which contains the settings.
      */

@@ -33,7 +33,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -45,7 +45,7 @@ import com.knime.bigdata.spark.util.SparkIDs;
  *
  * @author koetter
  */
-public class MLlibPredictorNodeModel extends AbstractSparkNodeModel {
+public class MLlibPredictorNodeModel extends SparkNodeModel {
 
     private final SettingsModelString m_colName = createColumnNameModel();
 

@@ -331,7 +331,7 @@ public class RDDUtilsInJava {
                             .doubleValue();
                 } else {
                     //no mapping given - label must already be numeric
-                    label = row.getDouble(labelColumnIndex);
+                    label = RDDUtils.getDouble(row, labelColumnIndex);
                 }
                 return new LabeledPoint(label, Vectors.dense(convertedValues));
             }
@@ -390,6 +390,31 @@ public class RDDUtilsInJava {
         final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
         return toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, null);
     }
+
+    /**
+    *
+    * sub-select given columns by index from the given RDD and put result into new RDD
+    *
+    * @param aInputRdd Row RDD to be converted
+    * @param aColumnIndices column selector (and, possibly, re-ordering)
+    * @return RDD with selected columns and same number of rows as original
+    * @throws IllegalArgumentException if values are encountered that are not numeric
+    */
+   public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd,
+       final List<Integer> aColumnIndices) {
+       return aInputRdd.map(new Function<Row, Row>() {
+           private static final long serialVersionUID = 1L;
+
+           @Override
+           public Row call(final Row row) {
+               RowBuilder rb = RowBuilder.emptyRow();
+               for (int idx : aColumnIndices) {
+                   rb.add(row.get(idx));
+               }
+               return rb.build();
+           }
+       });
+   }
 
     /**
      * extracts the given keys from the given rdd and constructs a pair rdd from it
@@ -519,7 +544,7 @@ public class RDDUtilsInJava {
 
             @Override
             public Rating call(final Row aRow) {
-                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), aRow.getDouble(aRatingIx));
+                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils.getDouble(aRow, aRatingIx));
             }
         });
         return ratings;

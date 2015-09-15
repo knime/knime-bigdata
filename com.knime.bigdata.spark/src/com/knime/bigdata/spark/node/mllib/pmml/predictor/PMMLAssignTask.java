@@ -28,7 +28,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.PMMLAssign;
+import com.knime.bigdata.spark.jobserver.jobs.PMMLAssignJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -44,6 +44,21 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 public class PMMLAssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private boolean m_transformation;
+
+    /**
+     * Constructor.
+     */
+    public PMMLAssignTask() {
+        this(false);
+    }
+
+    /**
+     * @param isTransformation <code>true</code> if the assignment is based on a PMML transformation
+     */
+    public PMMLAssignTask(final boolean isTransformation) {
+        m_transformation = isTransformation;
+    }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
         final Map<String,byte[]> bytecode, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
@@ -53,7 +68,8 @@ public class PMMLAssignTask implements Serializable {
                 KnimeSparkJob.PARAM_INPUT_TABLE, inputID,
                     ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64((Serializable)bytecode),
                     ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
-                    PMMLAssign.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
+                    PMMLAssignJob.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
+                    PMMLAssignJob.PARAM_IS_TRANSFORMATION, Boolean.toString(m_transformation),
                     //we have to replace the . with / since the key in the map uses / instead of .
                     ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')},
                 ParameterConstants.PARAM_OUTPUT,
@@ -78,6 +94,6 @@ public class PMMLAssignTask implements Serializable {
             pmml.getModelClassName(), resultRDD.getID());
         KNIMESparkContext context = inputRDD.getContext();
         exec.checkCanceled();
-        JobControler.startJobAndWaitForResult(context, PMMLAssign.class.getCanonicalName(), predictorParams, exec);
+        JobControler.startJobAndWaitForResult(context, PMMLAssignJob.class.getCanonicalName(), predictorParams, exec);
     }
 }

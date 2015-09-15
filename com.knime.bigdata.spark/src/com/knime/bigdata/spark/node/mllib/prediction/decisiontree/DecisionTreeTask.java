@@ -21,7 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
@@ -30,7 +30,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearner;
+import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -53,13 +53,11 @@ public class DecisionTreeTask implements Serializable {
 
     private final int m_classColIdx;
 
-    private final String m_classColName;
-
     private final KNIMESparkContext m_context;
 
     private String m_inputTableName;
 
-    private final String[] m_colNames;
+    //private final String[] m_colNames;
 
     private int m_maxDepth;
 
@@ -74,62 +72,78 @@ public class DecisionTreeTask implements Serializable {
     DecisionTreeTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final List<String> afeatureColNames,
         final NominalFeatureInfo nominalFeatureInfo, final String classColName, final int classColIdx,
         final Long noOfClasses, final int maxDepth, final int maxNoOfBins, final String qualityMeasure) {
+        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses,
+            maxDepth, maxNoOfBins, qualityMeasure);
+    }
+
+    DecisionTreeTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
+        final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
+        final int maxNoOfBins, final String qualityMeasure) {
         m_maxDepth = maxDepth;
         m_maxNoOfBins = maxNoOfBins;
         m_qualityMeasure = qualityMeasure;
-        m_context = inputRDD.getContext();
-        m_inputTableName = inputRDD.getID();
+        m_context = aContext;
+        m_inputTableName = aInputRDD;
         m_featureColIdxs = featureColIdxs;
         m_nomFeatureInfo = nominalFeatureInfo;
-        m_classColName = classColName;
         m_classColIdx = classColIdx;
         m_noOfClasses = noOfClasses;
-        final List<String> allColNames = new LinkedList<>(afeatureColNames);
-        allColNames.add(classColName);
-        m_colNames = allColNames.toArray(new String[allColNames.size()]);
+        //        final List<String> allColNames = new LinkedList<>(afeatureColNames);
+        //        allColNames.add(classColName);
+        //        m_colNames = allColNames.toArray(new String[allColNames.size()]);
     }
 
     DecisionTreeModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,
         CanceledExecutionException {
         final String learnerParams = learnerDef();
-        exec.checkCanceled();
-        final JobResult result = JobControler.startJobAndWaitForResult(m_context,
-            DecisionTreeLearner.class.getCanonicalName(), learnerParams, exec);
+        if (exec != null) {
+            exec.checkCanceled();
+        }
+        final JobResult result =
+            JobControler.startJobAndWaitForResult(m_context, DecisionTreeLearnerJob.class.getCanonicalName(),
+                learnerParams, exec);
 
         return (DecisionTreeModel)result.getObjectResult();
     }
 
     /**
      * names of the columns (must include label column), required for value mapping info
+     *
      * @throws GenericKnimeSparkException
      */
+    String learnerDef() throws GenericKnimeSparkException {
+        return paramsAsJason(m_inputTableName, m_featureColIdxs, m_nomFeatureInfo, m_classColIdx, m_noOfClasses,
+            m_maxDepth, m_maxNoOfBins, m_qualityMeasure);
+    }
 
-    private String learnerDef() throws GenericKnimeSparkException {
-        final Object[] inputParamas;
-        if (m_nomFeatureInfo == null) {
-            inputParamas =
-                    new Object[]{DecisionTreeLearner.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                        DecisionTreeLearner.PARAM_MAX_BINS, m_maxNoOfBins,
-                        DecisionTreeLearner.PARAM_MAX_DEPTH, m_maxDepth,
-                        ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
-                        DecisionTreeLearner.PARAM_NO_OF_CLASSES, m_noOfClasses,
-                        ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])m_colNames),
-                        ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_featureColIdxs),
-                        KnimeSparkJob.PARAM_INPUT_TABLE, m_inputTableName};
-        } else {
-        inputParamas =
-            new Object[]{DecisionTreeLearner.PARAM_INFORMATION_GAIN, m_qualityMeasure,
-                DecisionTreeLearner.PARAM_MAX_BINS, m_maxNoOfBins,
-                DecisionTreeLearner.PARAM_MAX_DEPTH, m_maxDepth,
-                ParameterConstants.PARAM_LABEL_INDEX, m_classColIdx,
-                DecisionTreeLearner.PARAM_NO_OF_CLASSES, m_noOfClasses,
-                ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])m_colNames),
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])m_featureColIdxs),
-                KnimeSparkJob.PARAM_INPUT_TABLE, m_inputTableName,
-                SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO, JobConfig.encodeToBase64(m_nomFeatureInfo)};
+    static String paramsAsJason(final String aInputRDD, final Integer[] featureColIdxs,
+        final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
+        final int maxNoOfBins, final String qualityMeasure) throws GenericKnimeSparkException {
+        final List<Object> inputParams = new ArrayList<>();
+        inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
+        inputParams.add(aInputRDD);
+        if (nominalFeatureInfo != null) {
+            inputParams.add(SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO);
+            inputParams.add(JobConfig.encodeToBase64(nominalFeatureInfo));
         }
-        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,
-            ParameterConstants.PARAM_OUTPUT, new String[]{}});
+        inputParams.add(DecisionTreeLearnerJob.PARAM_INFORMATION_GAIN);
+        inputParams.add(qualityMeasure);
+        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_BINS);
+        inputParams.add(maxNoOfBins);
+        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_DEPTH);
+        inputParams.add(maxDepth);
+        inputParams.add(ParameterConstants.PARAM_LABEL_INDEX);
+        inputParams.add(classColIdx);
+        if (noOfClasses != null) {
+            inputParams.add(DecisionTreeLearnerJob.PARAM_NO_OF_CLASSES);
+            inputParams.add(noOfClasses);
+        }
+        //        inputParams.add(ParameterConstants.PARAM_COL_NAMES);
+        //        inputParams.add(JsonUtils.toJsonArray((Object[])m_colNames));
+        inputParams.add(ParameterConstants.PARAM_COL_IDXS);
+        inputParams.add(JsonUtils.toJsonArray((Object[])featureColIdxs));
+        return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
+            inputParams.toArray(new Object[inputParams.size()]), ParameterConstants.PARAM_OUTPUT, new String[]{}});
     }
 
 }

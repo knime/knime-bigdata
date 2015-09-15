@@ -28,14 +28,16 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.node.SparkNodeModel;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkContextCreatorNodeModel extends AbstractSparkNodeModel {
+class SparkContextCreatorNodeModel extends SparkNodeModel {
 
     private final ContextSettings m_settings = new ContextSettings();
 
@@ -59,7 +61,12 @@ class SparkContextCreatorNodeModel extends AbstractSparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        return new PortObject[] {new SparkContextPortObject(m_settings.createContext())};
+        final KNIMESparkContext context = m_settings.createContext();
+        //try to open the context
+        exec.setMessage("Establish connection to Spark job server...");
+        KnimeContext.openSparkContext(context);
+        exec.setMessage("Connection established");
+        return new PortObject[] {new SparkContextPortObject(context)};
     }
 
     /**

@@ -20,10 +20,6 @@
  */
 package com.knime.bigdata.spark.node.io.hive.reader;
 
-import java.net.ConnectException;
-
-import javax.ws.rs.ProcessingException;
-
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -37,8 +33,7 @@ import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -46,9 +41,9 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
+public class Hive2SparkNodeModel extends SparkSourceNodeModel {
 
     /**
      * Constructor.
@@ -63,34 +58,15 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-        if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("No input Hive query found");
         }
         final DatabasePortObjectSpec spec = (DatabasePortObjectSpec)inSpecs[0];
         if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(), spec.getDataTableSpec());
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs), spec.getDataTableSpec());
         return new PortObjectSpec[] {resultSpec};
-    }
-
-    private KNIMESparkContext getContext() throws InvalidSettingsException {
-        try {
-            return KnimeContext.getSparkContext();
-        } catch (Exception e) {
-            if (e instanceof ProcessingException) {
-                final Throwable cause = e.getCause();
-                if (cause != null && (cause instanceof ConnectException)) {
-                    throw new InvalidSettingsException("Unable to connect to Spark job server. Exception: "
-                            + cause.getMessage());
-                }
-            }
-            if (e instanceof ConnectException) {
-                throw new InvalidSettingsException("Unable to connect to Spark job server. Exception: "
-                        + e.getMessage());
-            }
-            throw new InvalidSettingsException(e.getMessage());
-        }
     }
 
     /**
@@ -99,11 +75,12 @@ public class Hive2SparkNodeModel extends AbstractSparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
+        final KNIMESparkContext context = getContext(inData);
         final DatabasePortObject db = (DatabasePortObject)inData[0];
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
         final String hiveQuery = settings.getQuery();
-        final SparkDataTable resultTable = new SparkDataTable(getContext(), resultTableSpec);
+        final SparkDataTable resultTable = new SparkDataTable(context, resultTableSpec);
         final HiveToRDDTask hiveToRDDTask = new HiveToRDDTask(resultTable, hiveQuery);
         hiveToRDDTask.execute(exec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);

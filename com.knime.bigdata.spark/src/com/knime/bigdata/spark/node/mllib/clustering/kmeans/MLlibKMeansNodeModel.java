@@ -31,7 +31,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.AbstractSparkNodeModel;
+import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
@@ -47,7 +47,7 @@ import com.knime.bigdata.spark.util.SparkIDs;
  *
  * @author knime
  */
-public class MLlibKMeansNodeModel extends AbstractSparkNodeModel {
+public class MLlibKMeansNodeModel extends SparkNodeModel {
 
     private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
 

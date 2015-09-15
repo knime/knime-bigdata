@@ -4,6 +4,21 @@
    <extension-point id="com.knime.bigdata.spark.SparkTypeConverter" name="SparkTypeConverter" schema="schema/SparkTypeConverter.exsd"/>
    <extension-point id="com.knime.bigdata.spark.TemplateRepository" name="Spark Java Snippet Template Repository" schema="schema/TemplateRepository.exsd"/>
    <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.knime.bigdata.spark.preferences.SparkPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.knime.workbench.ui.preferences"
+            class="com.knime.bigdata.spark.preferences.SparkPreferencePage"
+            id="com.knime.bigdata.spark.preferences.SparkPreferencePage"
+            name="Spark">
+      </page>
+   </extension>
+   <extension
          point="org.knime.workbench.repository.categories">
       <category
             icon="icons/category.png"
@@ -27,7 +42,7 @@
             path="/labs/spark/column">
       </category>
       <category
-            icon="icons/category_mining.png"
+            icon="icons/category_learner.gif"
             level-id="mining"
             locked="true"
             name="Mining"
@@ -76,6 +91,27 @@
             name="Column"
             path="/labs/spark">
       </category>
+      <category
+            icon="icons/read.png"
+            level-id="read"
+            locked="true"
+            name="Read"
+            path="/labs/spark/io">
+      </category>
+      <category
+            icon="icons/write.png"
+            level-id="write"
+            locked="true"
+            name="Write"
+            path="/labs/spark/io">
+      </category>
+      <category
+            icon="icons/category_database.png"
+            level-id="db"
+            locked="true"
+            name="Database"
+            path="/labs/spark/io">
+      </category>
    </extension>
    <extension
          point="org.knime.workbench.repository.nodes">
@@ -110,7 +146,7 @@
             id="com.knime.bigdata.spark.node.mllib.pmml.predictor.MLlibPMMLPredictorNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io"
+            category-path="/labs/spark/io/db"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory">
@@ -122,7 +158,7 @@
             id="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io/"
+            category-path="/labs/spark/io/db"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory">
@@ -176,16 +212,16 @@
             id="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io"
+            category-path="/labs/spark/io/read"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.reader.Spark2TableNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
       </node>
       <node
-            category-path="/labs/spark/io"
+            category-path="/labs/spark/io/write"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.writer.Table2SparkNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
+            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
       <node
             category-path="/labs/spark/mining"
@@ -234,6 +270,36 @@
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/io"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory"
+            id="com.knime.bigdata.spark.node.util.cache.SparkPersistNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/io"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory"
+            id="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/column"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
+            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/row"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory">
       </node>
     </extension>
    <extension

@@ -20,16 +20,20 @@
  */
 package com.knime.bigdata.spark.node.context;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.jobserver.client.KNIMEConfigContainer;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
  * Settings model that transfers Spark context information between the node model and its dialog.
@@ -37,13 +41,15 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  */
 public class ContextSettings {
 
+    private final SettingsModelString m_protocol = createProtocolModel();
+
     private final SettingsModelString m_host = createHostModel();
 
     private final SettingsModelInteger m_port = createPortModel();
 
     private final SettingsModelString m_user = createUserModel();
 
-    private final SettingsModelString m_password = createPasswordModel();
+    private final SettingsModelString m_pwd = createPasswordModel();
 
     private final SettingsModelString m_contextName = createIDModel();
 
@@ -51,24 +57,29 @@ public class ContextSettings {
 
     private final SettingsModelString m_memory = createMemoryModel();
 
-    private final SettingsModelInteger m_jobCheckFrequency = createJobCheckFrequencyModel();
-
     private final SettingsModelInteger m_jobTimeout = createJobTimeoutModel();
 
-    private final SettingsModel[] m_models = new SettingsModel[] {m_host, m_port, m_user, m_contextName, m_noOfCores,
-        m_memory, m_jobCheckFrequency, m_jobTimeout};
+    private final SettingsModelInteger m_jobCheckFrequency = createJobCheckFrequencyModel();
+
+    private final SettingsModelBoolean m_deleteRDDsOnDispose = createDeleteRDDsOnDisposeModel();
+
+    private static final char[] MY =
+            "3O}accA80479[7b@05b9378K}18358QLG32P§92JZW76b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
+
+    private final SettingsModel[] m_models = new SettingsModel[] {m_protocol, m_host, m_port, m_user, m_contextName, m_noOfCores,
+        m_memory, m_jobTimeout, m_jobCheckFrequency, m_deleteRDDsOnDispose};
     /**
      * @return the context id model
      */
     static SettingsModelString createHostModel() {
-        return new SettingsModelString("host", KNIMEConfigContainer.m_config.getString("spark.jobServer"));
+        return new SettingsModelString("host", KNIMEConfigContainer.getJobServer());
     }
 
     /**
      * @return the cpu cores model
      */
     static SettingsModelInteger createPortModel() {
-        return new SettingsModelIntegerBounded("port", KNIMEConfigContainer.m_config.getInt("spark.jobServerPort"),
+        return new SettingsModelIntegerBounded("port", KNIMEConfigContainer.getJobServerPort(),
             0, Integer.MAX_VALUE);
     }
 
@@ -76,35 +87,43 @@ public class ContextSettings {
      * @return the user model
      */
     static  SettingsModelString createUserModel() {
-        return new SettingsModelString("user", KNIMEConfigContainer.m_config.getString("spark.userName"));
+        return new SettingsModelString("user", KNIMEConfigContainer.getUserName());
     }
 
     /**
      * @return the user model
      */
     static  SettingsModelString createPasswordModel() {
-        return new SettingsModelString("password", KNIMEConfigContainer.m_config.getString("spark.password"));
+        final char[] pwd = KNIMEConfigContainer.getPassword();
+        return new SettingsModelString("password", pwd == null ? null : pwd.toString());
     }
 
     /**
      * @return the context id model
      */
     static SettingsModelString createIDModel() {
-        return new SettingsModelString("contextName", KNIMEConfigContainer.m_config.getString("spark.contextName"));
+        return new SettingsModelString("contextName", KNIMEConfigContainer.getSparkContext());
+    }
+
+    /**
+     * @return the protocol model
+     */
+    static  SettingsModelString createProtocolModel() {
+        return new SettingsModelString("protocol", KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
      * @return the memory model
      */
     static  SettingsModelString createMemoryModel() {
-        return new SettingsModelString("memPerNode", KNIMEConfigContainer.m_config.getString("spark.memPerNode"));
+        return new SettingsModelString("memPerNode", KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
      * @return the cpu cores model
      */
     static SettingsModelInteger createNoOfCoresModel() {
-        return new SettingsModelIntegerBounded("numCPUCores", KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"),
+        return new SettingsModelIntegerBounded("numCPUCores", KNIMEConfigContainer.getNumOfCPUCores(),
             1, Integer.MAX_VALUE);
     }
 
@@ -113,7 +132,7 @@ public class ContextSettings {
      */
     static SettingsModelInteger createJobTimeoutModel() {
         return new SettingsModelIntegerBounded("sparkJobTimeout",
-            KNIMEConfigContainer.m_config.getInt("spark.jobTimeout"), 1, Integer.MAX_VALUE);
+            KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
     }
 
     /**
@@ -121,7 +140,11 @@ public class ContextSettings {
      */
     static SettingsModelInteger createJobCheckFrequencyModel() {
         return new SettingsModelIntegerBounded("sparkJobCheckFrequency",
-            KNIMEConfigContainer.m_config.getInt("spark.jobCheckFrequency"), 1, Integer.MAX_VALUE);
+            KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
+    }
+
+    static SettingsModelBoolean createDeleteRDDsOnDisposeModel() {
+        return new SettingsModelBoolean("deleteRDDsOnDispose", KNIMEConfigContainer.deleteRDDsOnDispose());
     }
 
     /**
@@ -156,7 +179,8 @@ public class ContextSettings {
      * @return the password
      */
     public char[] getPassword() {
-        return m_password.getStringValue().toCharArray();
+        final String pwd = m_pwd.getStringValue();
+        return pwd == null ? null : pwd.toCharArray();
     }
 
     /**
@@ -195,12 +219,48 @@ public class ContextSettings {
     }
 
     /**
+     * @return the deleteRDDsOnDispose
+     */
+    public boolean getDeleteRDDsOnDispose() {
+        return m_deleteRDDsOnDispose.getBooleanValue();
+    }
+
+
+    /**
+     * @param password
+     * @return
+     */
+    private static String demix(final String p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] cs = p.toCharArray();
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return cs.toString();
+    }
+
+    /**
+     * @param password
+     * @return
+     */
+    private static String mix(final String p) {
+        if (p == null) {
+            return null;
+        }
+        final char[] c = p.toCharArray();
+        final char[] cs = Arrays.copyOf(c, c.length);
+        ArrayUtils.reverse(cs, 0, cs.length);
+        return String.valueOf(cs);
+    }
+
+    /**
      * @param settings the NodeSettingsWO to write to
      */
     public void saveSettingsTo(final NodeSettingsWO settings) {
         for (SettingsModel m : m_models) {
             m.saveSettingsTo(settings);
         }
+        settings.addPassword(m_pwd.getKey(), String.valueOf(MY), mix(m_pwd.getStringValue()));
     }
 
     /**
@@ -221,6 +281,7 @@ public class ContextSettings {
         for (SettingsModel m : m_models) {
             m.loadSettingsFrom(settings);
         }
+        m_pwd.setStringValue(demix(settings.getPassword(m_pwd.getKey(), String.valueOf(MY), null)));
     }
 
     /**
@@ -228,7 +289,7 @@ public class ContextSettings {
      */
     public KNIMESparkContext createContext() {
         return new KNIMESparkContext(getHost(), getProtocol(), getPort(), getUser(), getPassword(), getContextName(),
-            getNoOfCores(), getMemory(), getJobCheckFrequency(), getJobTimeout());
+            getNoOfCores(), getMemory(), getJobCheckFrequency(), getJobTimeout(), getDeleteRDDsOnDispose());
     }
 
     /**
@@ -253,6 +314,8 @@ public class ContextSettings {
         builder.append(getJobTimeout());
         builder.append(", jobCheckFrequency=");
         builder.append(getJobCheckFrequency());
+        builder.append(", deleteRDDsOnDispose=");
+        builder.append(getDeleteRDDsOnDispose());
         builder.append("]");
         return builder.toString();
     }

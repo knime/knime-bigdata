@@ -22,7 +22,6 @@ package com.knime.bigdata.spark.util;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,7 +33,6 @@ import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.InlineTableDocument.InlineTable;
 import org.dmg.pmml.MapValuesDocument.MapValues;
 import org.dmg.pmml.RowDocument.Row;
-import org.knime.base.pmml.translation.CompiledModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -114,43 +112,6 @@ public final class SparkUtil {
     }
 
     /**
-     * @param inputSpec {@link DataTableSpec}
-     * @param model PMML {@link CompiledModel}
-     * @return the indices of the columns required by the compiled PMML model
-     * @throws InvalidSettingsException if a required column is not present in the input table
-     */
-    public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model)
-            throws InvalidSettingsException {
-        return getColumnIndices(inputSpec, model, null);
-    }
-    /**
-     * @param inputSpec {@link DataTableSpec}
-     * @param model PMML {@link CompiledModel}
-     * @param missingFieldNames <code>null</code> if missing indices should raise an exception. If not <code>null</code>
-     * the list will contain all missing fields
-     * @return the indices of the columns required by the compiled PMML model
-     * @throws InvalidSettingsException if a required column is not present in the input table
-     */
-    public static Integer[] getColumnIndices(final DataTableSpec inputSpec, final CompiledModel model,
-        final Collection<String> missingFieldNames)
-            throws InvalidSettingsException {
-        final String[] inputFields = model.getInputFields();
-        final Integer[] colIdxs = new Integer[inputFields.length];
-        for (String fieldName : inputFields) {
-            final int colIdx = inputSpec.findColumnIndex(fieldName);
-            if (colIdx < 0) {
-                if (missingFieldNames == null) {
-                    throw new InvalidSettingsException("Column with name " + fieldName + " not found in input data");
-                } else {
-                    missingFieldNames.add(fieldName);
-                }
-            }
-            colIdxs[model.getInputFieldIndex(fieldName)] = Integer.valueOf(colIdx);
-        }
-        return colIdxs;
-    }
-
-    /**
      * @param spec {@link DataTableSpec} to convert
      * @return the {@link StructType} representing the input {@link DataTableSpec}
      */
@@ -200,7 +161,7 @@ public final class SparkUtil {
                     final int colIdx = tableSpec.findColumnIndex(field.getName());
                     if (colIdx >= 0) {
                         final InlineTable table = mapValues.getInlineTable();
-                        for (Row row : table.getRowList()) {
+                        for (final Row row : table.getRowList()) {
                             final XmlObject[] inChilds = row.selectChildren("http://www.dmg.org/PMML-4_0", in);
                             final String inVal = inChilds.length > 0 ? inChilds[0].newCursor().getTextValue() : null;
                             final XmlObject[] outChilds = row.selectChildren("http://www.dmg.org/PMML-4_0", out);

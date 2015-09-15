@@ -25,7 +25,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.jobs.KMeansLearner;
+import com.knime.bigdata.spark.jobserver.jobs.KMeansLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -84,7 +84,7 @@ public class KMeansTask {
         final String learnerKMeansParams = kmeansLearnerDef();
         exec.checkCanceled();
         final JobResult result = JobControler.startJobAndWaitForResult(m_context,
-            KMeansLearner.class.getCanonicalName(), learnerKMeansParams, exec);
+            KMeansLearnerJob.class.getCanonicalName(), learnerKMeansParams, exec);
 
         return (KMeansModel)result.getObjectResult();
     }
@@ -107,7 +107,7 @@ public class KMeansTask {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aIncludeColIdxs),
-                KMeansLearner.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
+                KMeansLearnerJob.PARAM_NUM_CLUSTERS, aNoOfCluster, ParameterConstants.PARAM_NUM_ITERATIONS,
                 aNoOfIteration, KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName}, ParameterConstants.PARAM_OUTPUT,
             new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
