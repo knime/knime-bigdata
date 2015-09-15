@@ -44,7 +44,7 @@ public class DataUploader {
     public static String uploadDataFile(final KNIMESparkContext aContextContainer, final String aPath, final String aFileNamePrefix)
             throws GenericKnimeSparkException {
         Response response = uploadFile(aContextContainer, aPath, DATA_PATH+aFileNamePrefix);
-        return RestClient.getJSONFieldFromResponse(response, "result", "filename");
+        return aContextContainer.getREST().getJSONFieldFromResponse(response, "result", "filename");
     }
 
     /**
@@ -68,9 +68,9 @@ public class DataUploader {
             throw new GenericKnimeSparkException(msg);
         }
 
-        Response response = RestClient.post(aContextContainer, aRoute, null,
+        Response response = aContextContainer.getREST().post(aContextContainer, aRoute, null,
             Entity.entity(file, MediaType.APPLICATION_OCTET_STREAM));
-        RestClient.checkStatus(response, "Failed to upload file to server. Path: " + aDataPath, Status.OK);
+        aContextContainer.getREST().checkStatus(response, "Failed to upload file to server. Path: " + aDataPath, Status.OK);
         return response;
     }
 
@@ -84,8 +84,8 @@ public class DataUploader {
     public static void deleteFile(final KNIMESparkContext aContextContainer, final String aFileName)
             throws GenericKnimeSparkException {
         try {
-            Response response = RestClient.delete(aContextContainer, DATA_PATH + URLEncoder.encode(aFileName, "UTF-8"));
-            RestClient.checkStatus(response, "Failed to delete file " + aFileName + "!", Status.OK);
+            Response response = aContextContainer.getREST().delete(aContextContainer, DATA_PATH + URLEncoder.encode(aFileName, "UTF-8"));
+            aContextContainer.getREST().checkStatus(response, "Failed to delete file " + aFileName + "!", Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new GenericKnimeSparkException(e);
         }
@@ -102,7 +102,7 @@ public class DataUploader {
      */
     public static String[] listFiles(final KNIMESparkContext aContextContainer)
             throws GenericKnimeSparkException {
-        final JsonArray files = RestClient.toJSONArray(aContextContainer, "/data");
+        final JsonArray files = aContextContainer.getREST().toJSONArray(aContextContainer, "/data");
         final String[] res = new String[files.size()];
         for (int i = 0; i < files.size(); i++) {
             res[i] = files.getString(i);

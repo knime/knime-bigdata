@@ -16,10 +16,8 @@ import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.jar.SparkJobCompiler;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 
 /**
  *
@@ -113,15 +111,13 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
             //start job
             final String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
 
-            KNIMEConfigContainer.m_config =
-                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
-                    ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
+            DummyRestClient.jobResponse = "{\"result\":\""+RES_STR+"\"}";
 
             assertNotSame("job should have finished properly", JobControler.waitForJob(CONTEXT_ID, jobId, null), JobStatus.UNKNOWN);
 
             assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-            final JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+            final JsonObject res = CONTEXT_ID.getREST().toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
             assertTrue("job result", res.getString("result").contains(RES_STR));
 
     }
@@ -171,16 +167,14 @@ public class SparkJobCompilerTest extends SparkWithJobServerSpec {
            JobControler.uploadJobJar(CONTEXT_ID, aJarPath);
            //start job
            final String jobId = JobControler.startJob(CONTEXT_ID, jobInstance, configText);
-
-           KNIMEConfigContainer.m_config =
-               KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
-                   ConfigValueFactory.fromAnyRef("{\"result\":\""+RES_STR+"\"}"));
+	
+           DummyRestClient.jobResponse = "{\"result\":\""+RES_STR+"\"}";
 
            assertNotSame("job should have finished properly", JobControler.waitForJob(CONTEXT_ID, jobId, null), JobStatus.UNKNOWN);
 
            assertNotSame("job should not be running anymore", JobStatus.OK, JobControler.getJobStatus(CONTEXT_ID, jobId));
 
-           final JsonObject res = RestClient.toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
+           final JsonObject res = CONTEXT_ID.getREST().toJSONObject(CONTEXT_ID, JobControler.JOBS_PATH + jobId); //JobControler.fetchJobResult(jobId).getMessage();
            assertTrue("job result", res.getString("result").contains(RES_STR));
 
 

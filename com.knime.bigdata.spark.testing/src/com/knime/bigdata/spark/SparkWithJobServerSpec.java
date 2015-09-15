@@ -28,7 +28,7 @@ import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigValueFactory;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -37,13 +37,13 @@ import com.typesafe.config.ConfigValueFactory;
  */
 public abstract class SparkWithJobServerSpec extends UnitSpec {
 
-	private static Config origConfig = KNIMEConfigContainer.m_config;
-
 	@SuppressWarnings("javadoc")
 	protected static KNIMESparkContext CONTEXT_ID;
 
 	final static String ROOT_PATH = ".." + File.separatorChar
 			+ "com.knime.bigdata.spark" + File.separator;
+
+	protected static final String CONTEXT_PREFIX_UNIT_TESTS = "unitTesting";
 
 	/**
 	 * @return path to job jar (in main project)
@@ -68,19 +68,29 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			}
 		};
 
-		KNIMEConfigContainer.m_config = KNIMEConfigContainer.m_config
-				.withValue("unitTestMode",
-						ConfigValueFactory.fromAnyRef("true"));
-		// comment this out if you want to test the real server
-		// use a dummy RestClient to be able to test things locally
-		// KNIMEConfigContainer.m_config =
-		// KNIMEConfigContainer.m_config.withValue("spark.jobServer",
-		// ConfigValueFactory.fromAnyRef("dummy"));
+		final Config config = ConfigFactory.load();
+		// use config if you want to test the real server
+		final String host = config.getString("spark.jobServer");// "dummy"; //
+		final String protocol = config.getString("spark.jobServerProtocol");
+		final int port = config.getInt("spark.jobServerPort");
+		final String userName = config.getString("spark.userName");
+		final String password = config.hasPath("spark.password") ? config
+				.getString("spark.password") : "";
 
-		CONTEXT_ID = KnimeContext.getSparkContext();
+		final int numCPUCores = config.getInt("spark.numCPUCores");
+		final String memPerNode = config.getString("spark.memPerNode");
 
-		// TODO: Upload the static jobs jar only if not exists
-		JobControler.uploadJobJar(CONTEXT_ID, getJobJarPath());
+		final int timeout = config.getInt("knime.jobTimeout");
+		final int frequency = config.getInt("knime.jobCheckFrequency");
+		final Boolean dispose = config.getBoolean("knime.deleteRDDsOnDispose");
+
+		CONTEXT_ID = KnimeContext.openSparkContext(new KNIMESparkContext(host,
+				protocol, port, userName, password.toCharArray(),
+				CONTEXT_PREFIX_UNIT_TESTS, numCPUCores, memPerNode, frequency, timeout,
+				dispose));
+		if (!host.equals("dummy")) {
+			JobControler.uploadJobJar(CONTEXT_ID, getJobJarPath());
+		}
 	}
 
 	/**
@@ -90,7 +100,6 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 	 */
 	@AfterClass
 	public static void afterSuite() throws Exception {
-		KNIMEConfigContainer.m_config = origConfig;
 		// KnimeContext.destroySparkContext(CONTEXT_ID);
 		// //need to wait a bit before we can actually test whether it is really
 		// gone
@@ -130,11 +139,12 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 	public static String importTestTable(final KNIMESparkContext contextName,
 			final Object[][] aTable, final String resTableName)
 			throws GenericKnimeSparkException, CanceledExecutionException {
-		final String fName = System.currentTimeMillis()+"unittest";
+		final String fName = System.currentTimeMillis() + "unittest";
 		final UploadUtil util = new UploadUtil(contextName, aTable, fName);
-        util.upload();
+		util.upload();
 
-		final String params = Table2SparkNodeModel.paramDef(util.getServerFileName(), resTableName);
+		final String params = Table2SparkNodeModel.paramDef(
+				util.getServerFileName(), resTableName);
 		final String jobId = JobControler
 				.startJob(contextName,
 						ImportKNIMETableJob.class.getCanonicalName(),
@@ -163,8 +173,8 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			final String resTableName, final Object[][] aExpected)
 			throws Exception {
 
-		final Object[][] arrayRes = fetchResultTable(aContextName, resTableName,
-				aExpected.length);
+		final Object[][] arrayRes = fetchResultTable(aContextName,
+				resTableName, aExpected.length);
 
 		for (int i = 0; i < arrayRes.length; i++) {
 			boolean found = false;
@@ -206,8 +216,8 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 		final String takeJobId = JobControler.startJob(aContextName,
 				FetchRowsJob.class.getCanonicalName(),
 				rowFetcherDef(aExpectedLength, aResTableName));
-		final JobResult res = JobControler.waitForJobAndFetchResult(aContextName,
-				takeJobId, null);
+		final JobResult res = JobControler.waitForJobAndFetchResult(
+				aContextName, takeJobId, null);
 		assertNotNull("row fetcher must return a result", res);
 
 		final Object[][] arrayRes = (Object[][]) res.getObjectResult();
@@ -215,14 +225,16 @@ public abstract class SparkWithJobServerSpec extends UnitSpec {
 			assertEquals("fetcher should return correct number of rows",
 					aExpectedLength, arrayRes.length);
 		} else {
-			assertTrue("fetcher should return correct number of rows, got "
-					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * (100 - aAllowedPercentageOff)
-							/ 100 <= arrayRes.length);
-			assertTrue("fetcher should return correct number of rows, got "
-					+ arrayRes.length + ", expected: " + aExpectedLength,
-					aExpectedLength * (100 + aAllowedPercentageOff)
-							/ 100 >= arrayRes.length);
+			assertTrue(
+					"fetcher should return correct number of rows, got "
+							+ arrayRes.length + ", expected: "
+							+ aExpectedLength,
+					aExpectedLength * (100 - aAllowedPercentageOff) / 100 <= arrayRes.length);
+			assertTrue(
+					"fetcher should return correct number of rows, got "
+							+ arrayRes.length + ", expected: "
+							+ aExpectedLength,
+					aExpectedLength * (100 + aAllowedPercentageOff) / 100 >= arrayRes.length);
 
 		}
 		return arrayRes;

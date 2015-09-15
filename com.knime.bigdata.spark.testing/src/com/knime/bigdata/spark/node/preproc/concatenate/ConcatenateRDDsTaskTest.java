@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.preproc.concatenate;
 
 import static org.junit.Assert.assertEquals;
 
