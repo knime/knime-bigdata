@@ -30,6 +30,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -126,16 +127,16 @@ public class DecisionTreeTask implements Serializable {
             inputParams.add(SupervisedLearnerUtils.PARAM_NOMINAL_FEATURE_INFO);
             inputParams.add(JobConfig.encodeToBase64(nominalFeatureInfo));
         }
-        inputParams.add(DecisionTreeLearnerJob.PARAM_INFORMATION_GAIN);
+        inputParams.add(AbstractTreeLearnerJob.PARAM_INFORMATION_GAIN);
         inputParams.add(qualityMeasure);
-        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_BINS);
+        inputParams.add(AbstractTreeLearnerJob.PARAM_MAX_BINS);
         inputParams.add(maxNoOfBins);
-        inputParams.add(DecisionTreeLearnerJob.PARAM_MAX_DEPTH);
+        inputParams.add(AbstractTreeLearnerJob.PARAM_MAX_DEPTH);
         inputParams.add(maxDepth);
         inputParams.add(ParameterConstants.PARAM_LABEL_INDEX);
         inputParams.add(classColIdx);
         if (noOfClasses != null) {
-            inputParams.add(DecisionTreeLearnerJob.PARAM_NO_OF_CLASSES);
+            inputParams.add(AbstractTreeLearnerJob.PARAM_NO_OF_CLASSES);
             inputParams.add(noOfClasses);
         }
         //        inputParams.add(ParameterConstants.PARAM_COL_NAMES);

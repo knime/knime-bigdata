@@ -13,6 +13,7 @@ import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
+import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
@@ -70,6 +71,9 @@ public class ModelUtils {
         } else if (aModel instanceof DecisionTreeModel) {
             LOGGER.fine("DecisionTreeModel found for prediction");
             predictions = ((DecisionTreeModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof RandomForestModel) {
+            LOGGER.fine("RandomForestModel found for prediction");
+            predictions = ((RandomForestModel)aModel).predict(aNumericData);
         } else if (aModel instanceof SVMModel) {
             LOGGER.fine("SVMModel found for prediction");
             predictions = ((SVMModel)aModel).predict(aNumericData);

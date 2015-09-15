@@ -199,7 +199,7 @@ public class CollaborativeFilteringTask implements Serializable {
         }
         //
         if (aSeed != null) {
-            inputParams.add(CollaborativeFilteringJob.PARAM_SEED);
+            inputParams.add(ParameterConstants.PARAM_SEED);
             inputParams.add(aSeed);
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
