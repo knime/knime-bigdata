@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Learner" icon="icon.png">
+	<name>Spark PCA</name>
+	<shortDescription>Principal component analysis in Spark.</shortDescription>
+	<fullDescription>
+		<intro>
+			This node utilizes the Apache Spark 
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-dimensionality-reduction.html#principal-component-analysis-pca">Principal component analysis (PCA)</a> implementation.
+			
+		</intro>
+
+		<option name="Number of components">
+			The number of principal components to compute.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
+		<outPort index="0" name="Projecte Input RDD">The input RDD projected onto the principal components.</outPort>
+		<outPort index="1" name="Principal Component Matrix">The principal component matrix.</outPort>
+	</ports>
+</knimeNode>

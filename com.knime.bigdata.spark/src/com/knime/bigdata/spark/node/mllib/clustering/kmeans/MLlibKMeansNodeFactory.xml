@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Learner" icon="icon.png">
+	<name>Spark k-Means</name>
+	<shortDescription>K-means model learning performed in Spark.</shortDescription>
+	<fullDescription>
+		<intro>
+			This node utilizes the Apache Spark implementation of the K-means
+			clustering algorithm.
+			It outputs the cluster centers for a predefined number of clusters (no
+			dynamic number of clusters). K-means performs a crisp clustering that
+			assigns a data vector to exactly one cluster. The algorithm
+			terminates when the cluster assignments do not change anymore.
+			The clustering algorithm uses the Euclidean distance on the selected
+			attributes. The data is not normalized by the node (if required, you
+			should consider to use the "Normalizer" as a preprocessing step).
+			
+			TODO: 
+			If the optional PMML import is connected and contains preprocessing
+			operations in the TransformationDictionary those are added to the
+			learned model. The node can be configured as follows:
+		</intro>
+
+		<option name="Number of clusters">
+			The number of clusters (cluster centers) to be created.
+		</option>
+		<option name="Number of iterations">
+			The maximal number of iterations after which the algorithm terminates,
+			independent of the accuracy improvement of the cluster centers.
+		</option>
+		<option name="Result Settings: Column name">
+			Name of column with cluster assignments (result preview only).
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="JavaRDD">Input data (JavaRDD)</inPort>
+		<outPort index="0" name="Labeled input">The input data labeled with the cluster they are contained in.</outPort>
+		<outPort index="1" name="MLlib Cluster Model">MLlib Cluster Model</outPort>
+	</ports>
+</knimeNode>
