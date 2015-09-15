@@ -58,7 +58,7 @@ public class SortJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = SortTaskTest.paramsAsJason("tab1",
 				new Integer[] { 0, 1 }, new Boolean[] { false, false }, "out");
-		KnimeSparkJob testObj = new ColumnFilterJob();
+		KnimeSparkJob testObj = new SortJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
 		assertEquals("Configuration should be recognized as valid",

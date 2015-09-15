@@ -10,7 +10,6 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
  * creates and handles REST requests
@@ -21,21 +20,23 @@ import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 public class RestClient {
     private static class RestClientFactory {
 
-        static IRestClient getClient() {
-            final String host;
-            if (!KNIMEConfigContainer.m_config.hasPath("spark.jobServer")) {
-                host = null;
-            } else {
-                host = KNIMEConfigContainer.m_config.getString("spark.jobServer");
-            }
-            if (host == null || host.equals("dummy") || host.length() < 2) {
+        static IRestClient getClient(final String aJobServerURL) {
+            if (aJobServerURL == null || aJobServerURL.equals("dummy") || aJobServerURL.length() < 2) {
                 return new DummyRestClient();
             }
             return new WsRsRestClient();
         }
     }
 
-    private static final IRestClient client = RestClientFactory.getClient();
+    private final IRestClient client;
+
+    /**
+     * create a config-specific REST client instance
+     * @param aJobServerURL
+     */
+    public RestClient(final String aJobServerURL) {
+        client = RestClientFactory.getClient(aJobServerURL);
+    }
 
     /**
      * check the status of the given response
@@ -45,10 +46,11 @@ public class RestClient {
      * @param aJsonParams the {@link JobConfig} of the job
      * @throws GenericKnimeSparkException if the status is not ok
      */
-    public static void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
-            throws GenericKnimeSparkException {
+    public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
+        throws GenericKnimeSparkException {
         client.checkJobStatus(response, jobClassName, aJsonParams);
     }
+
     /**
      * check the status of the given response
      *
@@ -57,13 +59,14 @@ public class RestClient {
      * @param aStatus array of expected stati that are OK, all other response stati will cause an exception
      * @throws GenericKnimeSparkException
      */
-    public static void checkStatus(final Response response, final String aErrorMsg, final Status... aStatus)
+    public void checkStatus(final Response response, final String aErrorMsg, final Status... aStatus)
         throws GenericKnimeSparkException {
         client.checkStatus(response, aErrorMsg, aStatus);
     }
 
     /**
      * post the given request
+     *
      * @param aContextContainer context configuration container
      *
      * @param aPath
@@ -72,18 +75,21 @@ public class RestClient {
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public static <T>  Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
+    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath,
+        final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
         return client.post(aContextContainer, aPath, aArgs, aEntity);
     }
 
     /**
      * post the given delete request
+     *
      * @param aContextContainer context configuration container
      * @param aPath
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public static Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
+    public Response delete(final KNIMESparkContext aContextContainer, final String aPath)
+        throws GenericKnimeSparkException {
         return client.delete(aContextContainer, aPath);
     }
 
@@ -95,7 +101,8 @@ public class RestClient {
      * @return JSonArray with result
      * @throws GenericKnimeSparkException
      */
-    public static JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
         return client.toJSONArray(aContextContainer, aType);
     }
 
@@ -107,7 +114,8 @@ public class RestClient {
      * @return JsonObject with result
      * @throws GenericKnimeSparkException
      */
-    public static JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
         return client.toJSONObject(aContextContainer, aType);
     }
 
@@ -120,7 +128,7 @@ public class RestClient {
      * @return String value
      * @throws GenericKnimeSparkException
      */
-    public static String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
+    public String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
         throws GenericKnimeSparkException {
         return client.getJSONFieldFromResponse(response, aField, aSubField);
     }

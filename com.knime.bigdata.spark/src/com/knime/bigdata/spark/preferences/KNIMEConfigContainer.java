@@ -3,25 +3,12 @@ package com.knime.bigdata.spark.preferences;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.knime.bigdata.spark.SparkPlugin;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 /**
- * configuration container (reads values from application.conf file, located in
- * src/main/resources)
- *
- * mutable for unit testing, application program should not change values
- *
- * @author dwk
+ * @author Tobias Koetter
  *
  */
 public class KNIMEConfigContainer {
-
-    /**
-     * mutable configuration object
-     */
-    //TODO: make config private
-	public static Config m_config = ConfigFactory.load();
 
 	private static IPreferenceStore PREFERENCE_STORE = SparkPlugin.getDefault().getPreferenceStore();
 
@@ -104,13 +91,5 @@ public class KNIMEConfigContainer {
      */
     public static boolean deleteRDDsOnDispose() {
         return PREFERENCE_STORE.getBoolean(SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE);
-    }
-
-    /**
-     * @param path the config path to check
-     * @return <code>true</code> if the path exists in the application.config file
-     */
-    public static boolean hasPath(final String path) {
-        return m_config.hasPath(path);
     }
 }

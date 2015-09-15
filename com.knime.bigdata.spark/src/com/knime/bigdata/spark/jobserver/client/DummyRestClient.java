@@ -13,8 +13,6 @@ import javax.ws.rs.core.Response.Status;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
-import com.typesafe.config.ConfigValueFactory;
 
 /**
  * creates and handles REST requests
@@ -25,6 +23,9 @@ import com.typesafe.config.ConfigValueFactory;
 class DummyRestClient implements IRestClient {
     private final static Logger LOGGER = Logger.getLogger(DummyRestClient.class.getName());
 
+    public static String jobResponse = "[]";
+
+    public static String contextResponse = "[]";
 
     /**
      * check the status of the given response
@@ -62,49 +63,55 @@ class DummyRestClient implements IRestClient {
     }
 
     @Override
-    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs, final Entity<T> aEntity)
-        throws GenericKnimeSparkException {
+    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath, final String[] aArgs,
+        final Entity<T> aEntity) throws GenericKnimeSparkException {
+
+        jobResponse = "[]";
+        contextResponse = "[]";
 
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH)) {
-            KNIMEConfigContainer.m_config =
-                KNIMEConfigContainer.m_config.withValue(
-                    KnimeContext.CONTEXTS_PATH,
-                    ConfigValueFactory.fromAnyRef("[\"" + aPath.substring(KnimeContext.CONTEXTS_PATH.length() + 1)
-                        + "\"]"));
+            contextResponse = "[\"" + aPath.substring(KnimeContext.CONTEXTS_PATH.length() + 1) + "\"]";
         }
         if (aPath.startsWith(JobControler.JOBS_PATH)) {
-            KNIMEConfigContainer.m_config =
-                KNIMEConfigContainer.m_config.withValue(
-                    JobControler.JOBS_PATH,
-                    ConfigValueFactory.fromAnyRef("{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf"
-                        + System.currentTimeMillis() + "\"}}"));
+            jobResponse = "{\"result\" : {\"jobId\":\"sldkkjksjEURXBflskf" + System.currentTimeMillis() + "\"}}";
         }
 
         return Response.ok().build();
     }
 
     @Override
-    public Response delete(final KNIMESparkContext aContextContainer, final String aPath) throws GenericKnimeSparkException {
+    public Response delete(final KNIMESparkContext aContextContainer, final String aPath)
+        throws GenericKnimeSparkException {
+        jobResponse = "[]";
+        contextResponse = "[]";
         if (aPath.startsWith(KnimeContext.CONTEXTS_PATH + "/")) {
-            KNIMEConfigContainer.m_config = KNIMEConfigContainer.m_config.withoutPath(KnimeContext.CONTEXTS_PATH);
+            contextResponse = null;
         }
         return Response.ok().build();
     }
 
     @Override
-    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
         String val = "[]";
-        if (KNIMEConfigContainer.m_config.hasPath(aType)) {
-            val = KNIMEConfigContainer.m_config.getString(aType);
+        if (aType.startsWith(KnimeContext.CONTEXTS_PATH)) {
+            val = contextResponse;
+        }
+        if (aType.startsWith(JobControler.JOBS_PATH)) {
+            val = jobResponse;
         }
         return Json.createReader(new StringReader(val)).readArray();
     }
 
     @Override
-    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType) throws GenericKnimeSparkException {
+    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType)
+        throws GenericKnimeSparkException {
         String val = JobResult.emptyJobResult().withMessage("OK").toString();
-        if (KNIMEConfigContainer.m_config.hasPath(aType)) {
-            val = KNIMEConfigContainer.m_config.getString(aType);
+        if (aType.startsWith(KnimeContext.CONTEXTS_PATH)) {
+            val = contextResponse;
+        }
+        if (aType.startsWith(JobControler.JOBS_PATH)) {
+            val = jobResponse;
         }
         return Json.createReader(new StringReader(val)).readObject();
     }
@@ -121,9 +128,12 @@ class DummyRestClient implements IRestClient {
     @Override
     public String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
         throws GenericKnimeSparkException {
-        String val = "";
+        String val = "[]";
         if (aSubField.equals("jobId")) {
-            val = KNIMEConfigContainer.m_config.getString(JobControler.JOBS_PATH);
+            val = jobResponse;
+        }
+        if (aSubField.equals("filename")) {
+            val = JobResult.emptyJobResult().withObjectResult("tmpFile").withMessage("OK").toString();
         }
 
         JsonObject jsonObject = Json.createReader(new StringReader(val)).readObject();

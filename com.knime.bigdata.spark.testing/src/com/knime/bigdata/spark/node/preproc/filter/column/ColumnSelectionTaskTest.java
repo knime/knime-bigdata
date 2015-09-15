@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.preproc.filter.column;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.ColumnFilterJob;
+import com.knime.bigdata.spark.jobserver.jobs.ColumnSelectionJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -37,7 +37,7 @@ public class ColumnSelectionTaskTest extends SparkWithJobServerSpec {
 
 		assertEquals("Configuration should be recognized as valid",
 				ValidationResultConverter.valid(),
-				new ColumnFilterJob().validate(config));
+				new ColumnSelectionJob().validate(config));
 	}
 
 	@Test

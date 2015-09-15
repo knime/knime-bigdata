@@ -28,6 +28,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 
+import com.knime.bigdata.spark.jobserver.client.RestClient;
 import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
@@ -76,6 +77,12 @@ public class KNIMESparkContext implements Serializable {
     private final int m_jobCheckFrequency;
 
     private final boolean m_deleteRDDsOnDispose;
+
+    /**
+     * reference to the REST client that handles communication
+     * with the JobServer
+     */
+    private RestClient m_restClient;
 
 
     /**
@@ -154,6 +161,7 @@ public class KNIMESparkContext implements Serializable {
         m_jobCheckFrequency = jobCheckFrequency;
         m_jobTimeout = jobTimeout;
         m_deleteRDDsOnDispose = deleteRDDsOnExit;
+        m_restClient = new RestClient(host);
     }
 
     /**
@@ -460,6 +468,13 @@ public class KNIMESparkContext implements Serializable {
         buf.append("</tt><br>");
         buf.append("<strong>Memory:</strong>&nbsp;&nbsp;<tt>" + getMemPerNode() + "</tt><br>");
         return buf.toString();
+    }
+
+    /**
+     * @return reference to REST client
+     */
+    public RestClient getREST() {
+        return m_restClient;
     }
 
 }

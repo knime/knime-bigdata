@@ -48,6 +48,8 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -98,23 +100,25 @@ public class SparkPreferenceInitializer extends
     @Override
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
+        final Config config = ConfigFactory.load();
+
         //set default values
-        store.setDefault(PREF_JOB_SERVER, KNIMEConfigContainer.m_config.getString("spark.jobServer"));
-        store.setDefault(PREF_JOB_SERVER_PROTOCOL, KNIMEConfigContainer.m_config.getString("spark.jobServerProtocol"));
-        store.setDefault(PREF_JOB_SERVER_PORT, KNIMEConfigContainer.m_config.getInt("spark.jobServerPort"));
-        store.setDefault(PREF_USER_NAME, KNIMEConfigContainer.m_config.getString("spark.userName"));
-        final String password = KNIMEConfigContainer.m_config.hasPath("spark.password") ?
-            KNIMEConfigContainer.m_config.getString("spark.password") : "";
+        store.setDefault(PREF_JOB_SERVER, config.getString("spark.jobServer"));
+        store.setDefault(PREF_JOB_SERVER_PROTOCOL, config.getString("spark.jobServerProtocol"));
+        store.setDefault(PREF_JOB_SERVER_PORT, config.getInt("spark.jobServerPort"));
+        store.setDefault(PREF_USER_NAME, config.getString("spark.userName"));
+        final String password = config.hasPath("spark.password") ?
+            config.getString("spark.password") : "";
         store.setDefault(PREF_PWD, password);
 
-        final String contextName = KNIMEConfigContainer.m_config.hasPath("spark.contextName") ?
-            KNIMEConfigContainer.m_config.getString("spark.contextName") : "knime";
+        final String contextName = config.hasPath("spark.contextName") ?
+            config.getString("spark.contextName") : "knime";
         store.setDefault(PREF_CONTEXT_NAME, contextName);
-        store.setDefault(PREF_NUM_CPU_CORES, KNIMEConfigContainer.m_config.getInt("spark.numCPUCores"));
-        store.setDefault(PREF_MEM_PER_NODE, KNIMEConfigContainer.m_config.getString("spark.memPerNode"));
+        store.setDefault(PREF_NUM_CPU_CORES, config.getInt("spark.numCPUCores"));
+        store.setDefault(PREF_MEM_PER_NODE, config.getString("spark.memPerNode"));
 
-        store.setDefault(PREF_JOB_TIMEOUT, KNIMEConfigContainer.m_config.getInt("knime.jobTimeout"));
-        store.setDefault(PREF_JOB_CHECK_FREQUENCY, KNIMEConfigContainer.m_config.getInt("knime.jobCheckFrequency"));
-        store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, KNIMEConfigContainer.m_config.getBoolean("knime.deleteRDDsOnDispose"));
+        store.setDefault(PREF_JOB_TIMEOUT, config.getInt("knime.jobTimeout"));
+        store.setDefault(PREF_JOB_CHECK_FREQUENCY, config.getInt("knime.jobCheckFrequency"));
+        store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, config.getBoolean("knime.deleteRDDsOnDispose"));
     }
 }

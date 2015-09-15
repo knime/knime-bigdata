@@ -184,14 +184,14 @@ public class JobControler {
         // 'xxx.xxx.xxx.xxx:8090/jobs?appName=knime&context=knime&classPath=com....SparkClassificationJob'&sync=true
         final String jobClassName = aJobInstance.getClass().getCanonicalName();
         Response response =
-            RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
+                aContextContainer.getREST().post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
                 aContextContainer.getContextName(), "classPath", jobClassName}, Entity.text(aJsonParams));
-        RestClient.checkJobStatus(response, jobClassName, aJsonParams);
+        aContextContainer.getREST().checkJobStatus(response, jobClassName, aJsonParams);
 //        RestClient.checkStatus(response, "Error: failed to start job: " + aJobInstance.getClass().getCanonicalName()
 //            + "\nPossible reasons:\n\t'Bad Request' implies missing or incorrect parameters."
 //            + "\t'Not Found' implies that class file with job info was not uploaded to server.", new Status[]{
 //            Status.ACCEPTED, Status.OK});
-        return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
+        return aContextContainer.getREST().getJSONFieldFromResponse(response, "result", "jobId");
     }
 
     /**
@@ -218,15 +218,16 @@ public class JobControler {
                 new FileDataBodyPart(ParameterConstants.PARAM_INPUT + "." + KnimeSparkJob.PARAM_INPUT_TABLE,
                     aDataFile));
 
+            RestClient client = aContextContainer.getREST();
             final Response response =
-                RestClient.post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
+                    client.post(aContextContainer, JOBS_PATH, new String[]{"appName", APP_NAME, "context",
                     aContextContainer.getContextName(), "classPath", aClassPath},
                     Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
             multiPart.close();
 
             //			Response response = builder.post(Entity.text(aJsonParams));
-            RestClient.checkJobStatus(response, aClassPath, aJsonParams);
-            return RestClient.getJSONFieldFromResponse(response, "result", "jobId");
+            client.checkJobStatus(response, aClassPath, aJsonParams);
+            return client.getJSONFieldFromResponse(response, "result", "jobId");
         } catch (final IOException e) {
             throw new GenericKnimeSparkException("Error closing multi part entity", e);
         }
@@ -243,7 +244,7 @@ public class JobControler {
     public static JobStatus getJobStatus(final KNIMESparkContext aContextContainer, final String aJobId)
             throws GenericKnimeSparkException {
 
-        JsonArray jobs = RestClient.toJSONArray(aContextContainer, "/jobs");
+        JsonArray jobs = aContextContainer.getREST().toJSONArray(aContextContainer, "/jobs");
 
         for (int i = 0; i < jobs.size(); i++) {
             JsonObject jobInfo = jobs.getJsonObject(i);
@@ -265,9 +266,9 @@ public class JobControler {
      */
     public static void killJob(final KNIMESparkContext aContextContainer, final String aJobId)
             throws GenericKnimeSparkException {
-        Response response = RestClient.delete(aContextContainer, JOBS_PATH + aJobId);
+        Response response = aContextContainer.getREST().delete(aContextContainer, JOBS_PATH + aJobId);
         // we don't care about the response as long as it is "OK"
-        RestClient.checkStatus(response, "Failed to kill job " + aJobId + "!", Status.OK);
+        aContextContainer.getREST().checkStatus(response, "Failed to kill job " + aJobId + "!", Status.OK);
 
     }
 
@@ -351,7 +352,7 @@ public class JobControler {
     public static JobResult fetchJobResult(final KNIMESparkContext aContextContainer, final String aJobId)
             throws GenericKnimeSparkException {
         // GET /jobs/<jobId> - Gets the result or status of a specific job
-        JsonObject json = RestClient.toJSONObject(aContextContainer, JOBS_PATH + aJobId);
+        JsonObject json = aContextContainer.getREST().toJSONObject(aContextContainer, JOBS_PATH + aJobId);
         if (json.containsKey("result")) {
             return JobResult.fromBase64String(json.getString("result"));
         } else {

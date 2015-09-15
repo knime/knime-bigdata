@@ -1,6 +1,5 @@
 package com.knime.bigdata.spark.jobserver.client;
 
-import java.io.File;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.Set;
@@ -14,14 +13,12 @@ import javax.ws.rs.core.Response.Status;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -101,7 +98,7 @@ public class KnimeContext {
             throw new IllegalArgumentException("context must not be empty");
         }
         //query server for existing context so that we can re-use it if there is one
-        JsonArray contexts = RestClient.toJSONArray(context, CONTEXTS_PATH);
+        JsonArray contexts = context.getREST().toJSONArray(context, CONTEXTS_PATH);
         if (contexts.size() > 0) {
             for (int i = 0; i < contexts.size(); i++) {
                 if (context.getContextName().equals(contexts.getString(i))) {
@@ -115,25 +112,24 @@ public class KnimeContext {
     /**
      * create a new spark context (name prefix can be specified in the application.conf file), the postfix is number
      * between 0 and 10000
+     *
      * @param aContextContainer the {@link KNIMESparkContext} to create
      *
      * @return context container
      * @throws GenericKnimeSparkException
      */
     private static KNIMESparkContext createSparkContext(final KNIMESparkContext aContextContainer)
-            throws GenericKnimeSparkException {
-        //upload jar with our extensions
-        final String jobJarPath = getJobJarPath();
-        //TODO: Upload the static jobs jar only if not exists
-        JobControler.uploadJobJar(aContextContainer, jobJarPath);
+        throws GenericKnimeSparkException {
 
+        RestClient client = aContextContainer.getREST();
+        uploadJobJar(aContextContainer);
         // curl command would be:
         // curl -d ""
         // 'xxx.xxx.xxx.xxx:8090/contexts/knime?num-cpu-cores=4&memory-per-node=512m'
         //use this to add specific extensions:
         //"dependent-jar-uris", "file:///path-on-server.jar"
         final Response response =
-            RestClient.post(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName(),
+            client.post(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName(),
                 new String[]{"num-cpu-cores", "" + aContextContainer.getNumCpuCores(), "memory-per-node",
                     aContextContainer.getMemPerNode(),
                     //TODO - make this configurable
@@ -143,17 +139,23 @@ public class KnimeContext {
         // MediaType.APPLICATION_JSON),
         // String.class);
         // we don't care about the response as long as it is "OK"
-        RestClient.checkStatus(response, "Failed to create context!", Status.OK);
+        client.checkStatus(response, "Failed to create context!", Status.OK);
 
         return aContextContainer;
     }
 
-    private static String getJobJarPath() {
-        if (KNIMEConfigContainer.hasPath("unitTestMode")) {
-            return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + ".." + File.separatorChar
-                + "com.knime.bigdata.spark" + File.separator + "resources" + File.separatorChar + "knimeJobs.jar";
+    private static void uploadJobJar(final KNIMESparkContext aContextContainer) throws GenericKnimeSparkException {
+        if (aContextContainer.getHost().equals("dummy")) {
+            //        if (aContextContainer.getHost().equals("dummy")) {
+            //            //unit testing only
+            //            return SparkPlugin.getDefault().getPluginRootPath() + File.separatorChar + ".." + File.separatorChar
+            //                + "com.knime.bigdata.spark" + File.separator + "resources" + File.separatorChar + "knimeJobs.jar";
+
+        } else {
+            //TODO: Upload the static jobs jar only if not exists
+            //upload jar with our extensions
+            JobControler.uploadJobJar(aContextContainer, SparkUtil.getJobJarPath());
         }
-        return SparkUtil.getJobJarPath();
     }
 
     // "WARN yarn.YarnAllocationHandler: Container killed by YARN for exceeding memory limits. 2.1 GB of 2.1 GB virtual memory used. Consider boosting spark.yarn.executor.memoryOverhead.
@@ -167,7 +169,7 @@ public class KnimeContext {
     public static JobStatus getSparkContextStatus(final KNIMESparkContext aContextContainer)
         throws GenericKnimeSparkException {
         // curl xxx.xxx.xxx.xxx:8090/contexts
-        JsonArray contexts = RestClient.toJSONArray(aContextContainer, CONTEXTS_PATH);
+        JsonArray contexts = aContextContainer.getREST().toJSONArray(aContextContainer, CONTEXTS_PATH);
         // response texts looks like this: ["c1", "c2", ...]
         for (int i = 0; i < contexts.size(); i++) {
             String info = contexts.getString(i);
@@ -190,11 +192,11 @@ public class KnimeContext {
         // if it were not OK, then an exception would be thrown by the handler
         // client.delete("/contexts/" + contextName, Status.Ok).run;
         LOGGER.info("Shutting down context " + aContextContainer.getContextName());
-        Response response =
-            RestClient.delete(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName());
+        RestClient client = aContextContainer.getREST();
+        Response response = client.delete(aContextContainer, CONTEXTS_PATH + "/" + aContextContainer.getContextName());
         // we don't care about the response as long as it is "OK"
-        RestClient.checkStatus(response,
-            "Failed to destroy context " + aContextContainer.getContextName() + "!", Status.OK);
+        client
+            .checkStatus(response, "Failed to destroy context " + aContextContainer.getContextName() + "!", Status.OK);
     }
 
     /**
@@ -207,8 +209,8 @@ public class KnimeContext {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
-                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE,
-                    KnimeSparkJob.PARAM_INPUT_TABLE, JsonUtils.toJsonArray((Object[])rddName)}});
+                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE, KnimeSparkJob.PARAM_INPUT_TABLE,
+                    JsonUtils.toJsonArray((Object[])rddName)}});
         try {
             JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
                 jsonArgs, null);
@@ -236,8 +238,9 @@ public class KnimeContext {
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_INFO}});
         try {
-            final JobResult res = JobControler.startJobAndWaitForResult(aContextContainer,
-                NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs, null);
+            final JobResult res =
+                JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
+                    jsonArgs, null);
             return res.getTableNames();
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
