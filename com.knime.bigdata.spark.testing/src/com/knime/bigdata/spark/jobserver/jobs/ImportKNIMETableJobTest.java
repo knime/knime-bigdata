@@ -6,9 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
-import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
@@ -24,7 +21,7 @@ import com.typesafe.config.ConfigFactory;
 
 /**
  *
- * @author dwk
+ * @author dwk	
  *
  */
 @SuppressWarnings("javadoc")

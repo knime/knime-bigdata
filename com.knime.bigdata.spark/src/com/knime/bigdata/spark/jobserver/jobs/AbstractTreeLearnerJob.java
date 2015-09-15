@@ -70,9 +70,6 @@ public abstract class AbstractTreeLearnerJob extends KnimeSparkJob implements Se
      */
     public static final String PARAM_MAX_BINS = ParameterConstants.PARAM_MAX_BINS;
 
-    /** Number of classes. **/
-    public static final String PARAM_NO_OF_CLASSES = "NumberOfClasses";
-
     /**
      * parse parameters - there are no default values, all values are required
      *

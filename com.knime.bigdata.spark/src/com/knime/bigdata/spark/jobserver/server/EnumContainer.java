@@ -143,4 +143,32 @@ public class EnumContainer {
             return valueOf(aString);
         }
     }
+
+    /**
+     *
+     *
+     * @author dwk
+     */
+    public enum LossFunctions {
+        /**  */
+        AbsoluteError,
+        /**  */
+        LogLoss,
+        /**  */
+        SquaredError;
+        /**
+         * convert string representation of KNIME to this
+         *
+         * @param aString
+         * @return Enum value corresponding to given string
+         */
+        public static LossFunctions fromKnimeEnum(final String aString) {
+            for (LossFunctions s : values()) {
+                if (s.toString().equals(aString)) {
+                    return s;
+                }
+            }
+            return valueOf(aString);
+        }
+    }
 }

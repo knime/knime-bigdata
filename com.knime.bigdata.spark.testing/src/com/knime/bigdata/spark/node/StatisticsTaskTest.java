@@ -1,16 +1,14 @@
 package com.knime.bigdata.spark.node;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.StatisticsJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
+import com.knime.bigdata.spark.jobserver.jobs.StatisticsJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;

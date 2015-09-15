@@ -34,7 +34,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
@@ -70,7 +70,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      * @return the quality measure model
      */
     static SettingsModelString createQualityMeasureModel() {
-        return new SettingsModelString("qualityMeasure", DecisionTreeLearnerJob.VALUE_GINI);
+        return new SettingsModelString("qualityMeasure", AbstractTreeLearnerJob.VALUE_GINI);
     }
 
     /**

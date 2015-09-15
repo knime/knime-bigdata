@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
-import com.knime.bigdata.spark.jobserver.jobs.DecisionTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.RandomForestLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.FeatureSubsetStrategies;
