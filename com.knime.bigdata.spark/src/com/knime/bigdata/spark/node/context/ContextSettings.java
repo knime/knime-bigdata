@@ -71,14 +71,14 @@ public class ContextSettings {
     /**
      * @return the context id model
      */
-    static SettingsModelString createHostModel() {
+    private static SettingsModelString createHostModel() {
         return new SettingsModelString("host", KNIMEConfigContainer.getJobServer());
     }
 
     /**
      * @return the cpu cores model
      */
-    static SettingsModelInteger createPortModel() {
+    private static SettingsModelInteger createPortModel() {
         return new SettingsModelIntegerBounded("port", KNIMEConfigContainer.getJobServerPort(),
             0, Integer.MAX_VALUE);
     }
@@ -86,14 +86,14 @@ public class ContextSettings {
     /**
      * @return the user model
      */
-    static  SettingsModelString createUserModel() {
+    private static  SettingsModelString createUserModel() {
         return new SettingsModelString("user", KNIMEConfigContainer.getUserName());
     }
 
     /**
      * @return the user model
      */
-    static  SettingsModelString createPasswordModel() {
+    private static  SettingsModelString createPasswordModel() {
         final char[] pwd = KNIMEConfigContainer.getPassword();
         return new SettingsModelString("password", pwd == null ? null : pwd.toString());
     }
@@ -101,28 +101,28 @@ public class ContextSettings {
     /**
      * @return the context id model
      */
-    static SettingsModelString createIDModel() {
+    private static SettingsModelString createIDModel() {
         return new SettingsModelString("contextName", KNIMEConfigContainer.getSparkContext());
     }
 
     /**
      * @return the protocol model
      */
-    static  SettingsModelString createProtocolModel() {
+    private static SettingsModelString createProtocolModel() {
         return new SettingsModelString("protocol", KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
      * @return the memory model
      */
-    static  SettingsModelString createMemoryModel() {
+    private static SettingsModelString createMemoryModel() {
         return new SettingsModelString("memPerNode", KNIMEConfigContainer.getMemoryPerNode());
     }
 
     /**
      * @return the cpu cores model
      */
-    static SettingsModelInteger createNoOfCoresModel() {
+    private static SettingsModelInteger createNoOfCoresModel() {
         return new SettingsModelIntegerBounded("numCPUCores", KNIMEConfigContainer.getNumOfCPUCores(),
             1, Integer.MAX_VALUE);
     }
@@ -130,7 +130,7 @@ public class ContextSettings {
     /**
      * @return the job check frequency model
      */
-    static SettingsModelInteger createJobTimeoutModel() {
+    private static SettingsModelInteger createJobTimeoutModel() {
         return new SettingsModelIntegerBounded("sparkJobTimeout",
             KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
     }
@@ -138,13 +138,89 @@ public class ContextSettings {
     /**
      * @return the job check frequency model
      */
-    static SettingsModelInteger createJobCheckFrequencyModel() {
+    private static SettingsModelInteger createJobCheckFrequencyModel() {
         return new SettingsModelIntegerBounded("sparkJobCheckFrequency",
             KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
     }
 
-    static SettingsModelBoolean createDeleteRDDsOnDisposeModel() {
+    private static SettingsModelBoolean createDeleteRDDsOnDisposeModel() {
         return new SettingsModelBoolean("deleteRDDsOnDispose", KNIMEConfigContainer.deleteRDDsOnDispose());
+    }
+    /**
+     * @return the host
+     */
+    protected SettingsModelString getHostModel() {
+        return m_host;
+    }
+
+    /**
+     * @return the port
+     */
+    protected SettingsModelInteger getPortModel() {
+        return m_port;
+    }
+
+    /**
+     * @return the protocol to use to connect to the server
+     */
+    protected SettingsModelString getProtocolModel() {
+        return m_protocol;
+    }
+
+    /**
+     * @return the user
+     */
+    protected SettingsModelString getUserModel() {
+        return m_user;
+    }
+
+    /**
+     * @return the password
+     */
+    protected SettingsModelString getPasswordModel() {
+        return m_pwd;
+    }
+
+    /**
+     * @return the id
+     */
+    protected SettingsModelString getContextNameModel() {
+        return m_contextName;
+    }
+
+    /**
+     * @return the noOfCores
+     */
+    protected SettingsModelInteger getNoOfCoresModel() {
+        return m_noOfCores;
+    }
+
+    /**
+     * @return the memory
+     */
+    protected SettingsModelString getMemoryModel() {
+        return m_memory;
+    }
+
+    /**
+     * @return the Spark job timeout in seconds
+     */
+    protected SettingsModelInteger getJobTimeoutModel() {
+        return m_jobTimeout;
+    }
+
+    /**
+     * @return the Spark job timeout check frequency in seconds
+     */
+    protected SettingsModelInteger getJobCheckFrequencyModel() {
+        return m_jobCheckFrequency;
+    }
+
+    /**
+     * @return the deleteRDDsOnDispose
+     */
+    protected SettingsModelBoolean getDeleteRDDsOnDisposeModel() {
+        return m_deleteRDDsOnDispose;
     }
 
     /**
@@ -165,7 +241,7 @@ public class ContextSettings {
      * @return the protocol to use to connect to the server
      */
     public String getProtocol() {
-        return "https";
+        return m_protocol.getStringValue();
     }
 
     /**
@@ -225,7 +301,6 @@ public class ContextSettings {
         return m_deleteRDDsOnDispose.getBooleanValue();
     }
 
-
     /**
      * @param password
      * @return
@@ -236,7 +311,7 @@ public class ContextSettings {
         }
         final char[] cs = p.toCharArray();
         ArrayUtils.reverse(cs, 0, cs.length);
-        return cs.toString();
+        return  String.valueOf(cs);
     }
 
     /**

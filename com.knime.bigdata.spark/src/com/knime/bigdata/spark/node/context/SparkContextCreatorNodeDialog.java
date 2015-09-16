@@ -20,42 +20,155 @@
  */
 package com.knime.bigdata.spark.node.context;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.port.PortObjectSpec;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkContextCreatorNodeDialog extends DefaultNodeSettingsPane {
+class SparkContextCreatorNodeDialog extends NodeDialogPane {
+
+    private ContextSettings m_settings = new ContextSettings();
 
     /**
      * Constructor.
      */
     SparkContextCreatorNodeDialog() {
-        createNewGroup(" KNIME ");
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createJobTimeoutModel(),
-            "Spark job timeout (seconds): ", 1));
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createJobCheckFrequencyModel(),
-            "Spark job check frequency (seconds): ", 1));
-        addDialogComponent(new DialogComponentBoolean(ContextSettings.createDeleteRDDsOnDisposeModel(),
-                "Delete RDDs on dispose"));
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(createKNIMEPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(createContextPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(createJobServerPanel(), gbc);
+        addTab("Settings", panel);
+    }
 
-        createNewGroup(" Spark Context ");
-        addDialogComponent(new DialogComponentString(ContextSettings.createIDModel(), "Context name: "));
-        addDialogComponent(new DialogComponentString(ContextSettings.createMemoryModel(), "Memory: "));
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createNoOfCoresModel(), "Number of cores: ", 1));
+    /**
+     * @param panel
+     * @param gbc
+     * @return
+     */
+    private JPanel createJobServerPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
+            .createEtchedBorder(), " Job Server "));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentButtonGroup(m_settings.getProtocolModel(), false, " Protocol ",
+            new String[] {"http", "https"}).getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentString(m_settings.getHostModel(), "Host: ").getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentNumber(m_settings.getPortModel(), "Port: ", 1).getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentString(m_settings.getUserModel(), "User: ").getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentPasswordField(m_settings.getPasswordModel(), "Password: ").getComponentPanel(), gbc);
+        return panel;
+    }
 
-        createNewGroup(" Job Server ");
-        addDialogComponent(new DialogComponentButtonGroup(ContextSettings.createProtocolModel(), false, " Protocol ",
-            new String[] {"http", "https"}));
-        addDialogComponent(new DialogComponentString(ContextSettings.createHostModel(), "Host: "));
-        addDialogComponent(new DialogComponentNumber(ContextSettings.createPortModel(), "Port: ", 1));
-        addDialogComponent(new DialogComponentString(ContextSettings.createUserModel(), "User: "));
-        addDialogComponent(new DialogComponentPasswordField(ContextSettings.createPasswordModel(), "Password: "));
+    private JPanel createContextPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
+            .createEtchedBorder(), " Spark Context "));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ").getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentString(m_settings.getMemoryModel(), "Memory: ").getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentNumber(m_settings.getNoOfCoresModel(), "Number of cores: ", 1).getComponentPanel(), gbc);
+        return panel;
+    }
+
+    private JPanel createKNIMEPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
+            .createEtchedBorder(), " KNIME "));
+        panel.add(new DialogComponentNumber(m_settings.getJobTimeoutModel(),
+            "Spark job timeout (seconds): ", 1).getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentNumber(m_settings.getJobCheckFrequencyModel(),
+            "Spark job check frequency (seconds): ", 1).getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new DialogComponentBoolean(m_settings.getDeleteRDDsOnDisposeModel(),
+                "Delete RDDs on dispose").getComponentPanel(), gbc);
+        return panel;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.saveSettingsTo(settings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+        try {
+            m_settings.loadSettingsFrom(settings);
+        } catch (InvalidSettingsException e) {
+            throw new NotConfigurableException(e.getMessage());
+        }
     }
 }
