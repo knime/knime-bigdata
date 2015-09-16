@@ -360,7 +360,7 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
     /**
      * @param aConfig
      * @param aInputRdd
-     * @return
+     * @return rating RDD
      */
     public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final JobConfig aConfig, final JavaRDD<Row> aInputRdd) {
         final int userIx = aConfig.getInputParameter(PARAM_USER_INDEX, Integer.class);

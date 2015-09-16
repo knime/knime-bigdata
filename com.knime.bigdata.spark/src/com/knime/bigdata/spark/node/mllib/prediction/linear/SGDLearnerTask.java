@@ -137,9 +137,23 @@ public class SGDLearnerTask implements Serializable {
     /**
      * only values that are explicitly marked as Nullable are truly optional, the others are only checked for null so
      * that we can unit test the job validation
+     * @param aInputRDD
+     * @param featureColIdxs
+     * @param classColIdx
+     * @param aNumIterations
+     * @param aRegularization
+     * @param aUseSGD
      *
-     * @param aTolerance
-     * @param aNumCorrections
+     * @param aTolerance - only required when aUseSGD == false
+     * @param aNumCorrections - only required when aUseSGD == false
+     * @param aUpdaterType
+     * @param aValidateData
+     * @param aAddIntercept
+     * @param aUseFeatureScaling
+     * @param aGradientType
+     * @param aStepSize  - only required when aUseSGD == true
+     * @param aFraction  - only required when aUseSGD == true
+     * @return JSON representation of parameters
      *
      * @throws GenericKnimeSparkException
      */
