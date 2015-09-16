@@ -36,7 +36,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
@@ -60,16 +62,17 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
 
     private final SettingsModelDouble m_regularization = createRegularizationModel();
 
-    private Class<? extends SGDJob> m_jobClassPath;
+    private Class<? extends AbstractRegularizationJob> m_jobClassPath;
 
     private SparkModelInterpreter<SparkModel<M>> m_interpreter;
 
     /**
      * Constructor.
+     *
      * @param jobClassPath the class path to the job class
      * @param interpreter the SparkModelInterpreter
      */
-    public LinearMethodsNodeModel(final Class<? extends SGDJob> jobClassPath,
+    public LinearMethodsNodeModel(final Class<? extends AbstractRegularizationJob> jobClassPath,
         final SparkModelInterpreter<SparkModel<M>> interpreter) {
         super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
             new PortType[]{SparkModelPortObject.TYPE});
@@ -100,10 +103,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
-//      if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-//          throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-//      }
+        //        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+        //      if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+        //          throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+        //      }
         m_classCol.check(spec.getTableSpec());
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
@@ -121,9 +124,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
         final MLlibSettings s = m_classCol.getSettings(data, mapping);
         final double regularization = m_regularization.getDoubleValue();
         final int noOfIterations = m_noOfIterations.getIntValue();
-        final SGDLearnerTask task = new SGDLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getFatureColNames(),
-            s.getClassColName(), s.getClassColIdx(), s.getNominalFeatureInfo(), noOfIterations, regularization,
-            m_jobClassPath);
+        final SGDLearnerTask task =
+            new SGDLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
+                regularization, UpdaterType.L1Updater, true, false, false, GradientType.LeastSquaresGradient, 1.0, 1.0,
+                m_jobClassPath);
         @SuppressWarnings("unchecked")
         final M linearModel = (M)task.execute(exec);
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel, m_interpreter, s))};
@@ -177,33 +181,33 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
     public static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
         final NumberFormat nf, final double[] weights) {
         final StringBuilder buf = new StringBuilder();
-//        for (String string : columnNames) {
-//            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
-//            buf.append("&nbsp;").append(weights[idx++]).append("<br>");
-//        }
-      buf.append("<table border ='0'>");
-      buf.append("<tr>");
-      buf.append("<th>").append("Column Name").append("</th>");
-      buf.append("<th>").append(numericColName).append("</th>");
-      buf.append("</tr>");
-      int idx = 0;
-      for (String colName : columnNames) {
-          if (idx % 2 == 0) {
-              buf.append("<tr>");
-          } else {
-              buf.append("<tr bgcolor='#EEEEEE'>");
-          }
-          buf.append("<th align='left'>").append(colName).append("</th>");
-          buf.append("<td align='right'>&nbsp;&nbsp;").append(nf.format(weights[idx++])).append("</td>");
-          buf.append("</tr>");
-      }
-      buf.append("</table>");
-//        buf.append("<dl>");
-//        for (String string : columnNames) {
-//            buf.append("<dt>&nbsp;&nbsp;").append(string).append("</dt>");
-//            buf.append("<dd>").append(weights[idx++]).append("</dd>");
-//        }
-//        buf.append("</dl>");
+        //        for (String string : columnNames) {
+        //            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
+        //            buf.append("&nbsp;").append(weights[idx++]).append("<br>");
+        //        }
+        buf.append("<table border ='0'>");
+        buf.append("<tr>");
+        buf.append("<th>").append("Column Name").append("</th>");
+        buf.append("<th>").append(numericColName).append("</th>");
+        buf.append("</tr>");
+        int idx = 0;
+        for (String colName : columnNames) {
+            if (idx % 2 == 0) {
+                buf.append("<tr>");
+            } else {
+                buf.append("<tr bgcolor='#EEEEEE'>");
+            }
+            buf.append("<th align='left'>").append(colName).append("</th>");
+            buf.append("<td align='right'>&nbsp;&nbsp;").append(nf.format(weights[idx++])).append("</td>");
+            buf.append("</tr>");
+        }
+        buf.append("</table>");
+        //        buf.append("<dl>");
+        //        for (String string : columnNames) {
+        //            buf.append("<dt>&nbsp;&nbsp;").append(string).append("</dt>");
+        //            buf.append("<dd>").append(weights[idx++]).append("</dd>");
+        //        }
+        //        buf.append("</dl>");
         return buf.toString();
     }
 

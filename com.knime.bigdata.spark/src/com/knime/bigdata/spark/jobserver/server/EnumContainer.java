@@ -156,6 +156,7 @@ public class EnumContainer {
         LogLoss,
         /**  */
         SquaredError;
+
         /**
          * convert string representation of KNIME to this
          *
@@ -164,6 +165,61 @@ public class EnumContainer {
          */
         public static LossFunctions fromKnimeEnum(final String aString) {
             for (LossFunctions s : values()) {
+                if (s.toString().equals(aString)) {
+                    return s;
+                }
+            }
+            return valueOf(aString);
+        }
+    }
+
+    /**
+     *
+     * @author dwk
+     */
+    public enum UpdaterType {
+        /** */
+        L1Updater,
+        /** */
+        SimpleUpdater,
+        /** */
+        SquaredL2Updater;
+        /**
+         * convert string representation of KNIME to this
+         *
+         * @param aString
+         * @return Enum value corresponding to given string
+         */
+        public static UpdaterType fromKnimeEnum(final String aString) {
+            for (UpdaterType s : values()) {
+                if (s.toString().equals(aString)) {
+                    return s;
+                }
+            }
+            return valueOf(aString);
+        }
+    }
+
+    /**
+     *
+     * @author dwk
+     */
+    public enum GradientType {
+        /** */
+        HingeGradient,
+        /** */
+        LeastSquaresGradient,
+        /** */
+        LogisticGradient;
+
+        /**
+         * convert string representation of KNIME to this
+         *
+         * @param aString
+         * @return Enum value corresponding to given string
+         */
+        public static GradientType fromKnimeEnum(final String aString) {
+            for (GradientType s : values()) {
                 if (s.toString().equals(aString)) {
                     return s;
                 }

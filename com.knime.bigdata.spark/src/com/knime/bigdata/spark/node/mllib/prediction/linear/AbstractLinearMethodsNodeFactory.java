@@ -26,7 +26,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.jobserver.jobs.SGDJob;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
@@ -54,7 +54,7 @@ extends NodeFactory<LinearMethodsNodeModel<M>> {
     /**
      * @return the SGDJob class
      */
-    protected abstract Class<? extends SGDJob> getJobClassPath();
+    protected abstract Class<? extends AbstractRegularizationJob> getJobClassPath();
 
     /**
      * {@inheritDoc}

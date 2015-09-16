@@ -376,15 +376,15 @@ public class JobControler {
             throw new GenericKnimeSparkException("Job failure: " + status);
         }
         JobResult result = fetchJobResult(aContextContainer, jobId);
-        if (result.isError()) {
-            throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
-        }
         //format of msg: [Source, Actual Message]
         for (String[] msg : result.getWarnings()) {
             LOGGER.warn(Arrays.toString(msg));
         }
         for (String[] msg : result.getErrors()) {
             LOGGER.error(Arrays.toString(msg));
+        }
+        if (result.isError()) {
+            throw new GenericKnimeSparkException("Job failure: " + result.getMessage());
         }
         return result;
     }
