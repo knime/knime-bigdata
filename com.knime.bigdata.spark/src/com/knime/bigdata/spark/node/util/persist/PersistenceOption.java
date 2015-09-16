@@ -42,7 +42,7 @@ enum PersistenceOption implements ButtonGroupEnumInterface {
     MEMORY_AND_DISK_SER("Memory and disk serialized", "Similar to MEMORY_ONLY_SER, but spill partitions that don't fit "
         + "in memory to disk instead of recomputing them on the fly each time they're needed.",
         StorageLevel.MEMORY_AND_DISK_SER(), false),
-    DISK_ONLY("Disk only", "", StorageLevel.DISK_ONLY(), false),
+    DISK_ONLY("Disk only", "Store the RDD partitions only on disk.", StorageLevel.DISK_ONLY(), false),
     OFF_HEAP("Off heap (experimental)",
         "Store RDD in serialized format in Tachyon. Compared to MEMORY_ONLY_SER, OFF_HEAP reduces garbage collection "
         + "overhead and allows executors to be smaller and to share a pool of memory, making it attractive in "

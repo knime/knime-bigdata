@@ -17,7 +17,7 @@
         <option name="Storage level">
             Defines the storage level to use for persisting the incoming Spark RDD. The available levels are:
             <ul>
-                <li><b>Memory only:</b>Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in 
+                <li><b>Memory only:</b><br></br>Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in 
                 memory, some partitions will not be cached and will be recomputed on the fly each time they're needed. 
                 This is the default level.</li>
                 <li><b>Memory and disk:</b>Store RDD as deserialized Java objects in the JVM. If the RDD does not fit 
