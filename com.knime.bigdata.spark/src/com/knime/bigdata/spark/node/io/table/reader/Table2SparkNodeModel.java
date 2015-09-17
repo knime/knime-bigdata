@@ -35,7 +35,6 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.client.UploadUtil;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -43,7 +42,6 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -106,14 +104,6 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         executeSparkJob(exec, data, resultTable);
         exec.setProgress(1, "Spark data object created");
         return new PortObject[]{new SparkDataPortObject(resultTable)};
-    }
-
-    private KNIMESparkContext getContext() throws InvalidSettingsException {
-        try {
-            return KnimeContext.getSparkContext();
-        } catch (GenericKnimeSparkException e) {
-            throw new InvalidSettingsException(e.getMessage());
-        }
     }
 
     /**

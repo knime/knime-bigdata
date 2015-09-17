@@ -43,7 +43,7 @@ import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class MLlibPredictorNodeModel extends SparkNodeModel {
 

@@ -78,8 +78,8 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
-        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "DIM_");
-        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component_");
+        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "PCA dimension ");
+        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component ");
         return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), projectedSpec),
             new SparkDataPortObjectSpec(spec.getContext(), matrixSpec)};
     }
@@ -120,7 +120,7 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         final SparkDataTable matrixRDD = new SparkDataTable(data.getContext(), matrixName, matrixSpec);
         final PCATask task = new PCATask(data.getData(), settings.getFeatueColIdxs(), noOfComponents, matrixName, projectionMatrixName);
         task.execute(exec);
-        exec.setMessage("PCA (SPARK)done.");
+        exec.setMessage("PCA (SPARK) done.");
         return new PortObject[]{new SparkDataPortObject(projectionMatixRDD), new SparkDataPortObject(matrixRDD)};
     }
 
