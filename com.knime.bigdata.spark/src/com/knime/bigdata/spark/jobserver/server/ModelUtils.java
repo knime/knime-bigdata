@@ -126,18 +126,5 @@ public class ModelUtils {
             }
         });
         return RDDUtils.addColumn(aRowRdd.zip(predictions));
-
-        //        return aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Row>() {
-        //            private static final long serialVersionUID = 1L;
-        //
-        //            @Override
-        //            public Row call(final Rating r) {
-        //                RowBuilder b = RowBuilder.emptyRow();
-        //                b.add(r.user());
-        //                b.add(r.product());
-        //                b.add(r.rating());
-        //                return b.build();
-        //            }
-        //        });
     }
 }
