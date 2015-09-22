@@ -1,13 +1,13 @@
 package com.knime.bigdata.spark.jobserver.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -27,6 +27,8 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
+import scala.Tuple2;
+
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -38,7 +40,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 @SuppressWarnings("javadoc")
 public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
-	private static class MyMapper implements Serializable {
+	public static class MyMapper implements Serializable {
 		private static final long serialVersionUID = 1L;
 
 		JavaRDD<Vector> apply(final JavaDoubleRDD o) {
@@ -72,7 +74,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		final static String[] colors = { "red", "blue", "green", "black",
 				"white" };
 
-		final static String[] teams = { "FC1", "FC 2", "FC 1987", "Mein Klub" };
+		public final static String[] teams = { "FC1", "FC 2", "FC 1987", "Mein Klub" };
 
 		JavaRDD<Row> toRowRddWithNominalLabels(final JavaDoubleRDD o) {
 			return o.map(new Function<Double, Row>() {
@@ -108,6 +110,28 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 					ix = ix + 1;
 					return Row.create(team, x, team + color, team,
 							color.substring(0, 1), color);
+				}
+			});
+		}
+
+		public JavaRDD<Row> toRowRddWithSomeTeamChanges(final JavaDoubleRDD o,
+				final double aProb) {
+			return o.map(new Function<Double, Row>() {
+				private static final long serialVersionUID = 1L;
+
+				private int ix = 0;
+
+				@Override
+				public Row call(final Double x) {
+					final String team = teams[ix % teams.length];
+					ix = ix + 1;
+					final String team2;
+					if (Math.random() < aProb) {
+						team2 = teams[(int) (Math.random() * teams.length)];
+					} else {
+						team2 = team;
+					}
+					return Row.create(team, team2);
 				}
 			});
 		}
@@ -281,7 +305,8 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 				0.8, 0.9, 0.10, 0.11, 0.12 };
 		Matrix matrix = Matrices.dense(nRows, nCols, dat);
 
-		JavaRDD<Row> covertedBackToRDD = RDDUtilsInJava.fromMatrix(sparkContextResource.sparkContext, matrix);
+		JavaRDD<Row> covertedBackToRDD = RDDUtilsInJava.fromMatrix(
+				sparkContextResource.sparkContext, matrix);
 
 		final List<Row> rows = covertedBackToRDD.collect();
 
@@ -293,8 +318,9 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 			assertEquals("conversion should create correct length of vectors ",
 					nCols, r.length());
 			for (int j = 0; j < nCols; j++) {
-				assertEquals("conversion should not change values ["+i+","+j+"]", dat[j
-						* nRows + i], r.getDouble(j), 0.0000001);
+				assertEquals("conversion should not change values [" + i + ","
+						+ j + "]", dat[j * nRows + i], r.getDouble(j),
+						0.0000001);
 			}
 		}
 
@@ -916,6 +942,72 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 			assertEquals("petal width", row[3], normalizedRow.getDouble(3),
 					0.0001);
 		}
+	}
+
+	@Test
+	public void aggregateValuePairForDiagonalMatrix() throws Throwable {
+
+		JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+		JavaRDD<Row> rowRDD = new MyMapper().toRowRddWithNominalValues(o);
+
+		Map<Tuple2<Object, Object>, Integer> res = RDDUtilsInJava
+				.aggregatePairs(rowRDD, 2, 2);
+		assertEquals("diagonal matrix must have one entry for each color",
+				MyMapper.colors.length * MyMapper.teams.length, res.size());
+		int sum = 0;
+		for (Integer val : res.values()) {
+			sum += val;
+		}
+		assertEquals("values in matrix must count up to number of rows",
+				rowRDD.count(), sum);
+
+	}
+
+	@Test
+	public void aggregateValuePairForNonDiagonalMatrix() throws Throwable {
+
+		JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+		JavaRDD<Row> rowRDD = new MyMapper().toRowRddWithSomeTeamChanges(o,
+				0.25d).cache();
+		final List<Row> rows = rowRDD.collect();
+
+		Map<Tuple2<Object, Object>, Integer> res = RDDUtilsInJava
+				.aggregatePairs(rowRDD, 0, 1);
+		final List<Row> distinct = rowRDD.distinct().collect();
+		assertEquals("diagonal matrix must have one entry for each team, ",
+				distinct.size(), res.size());
+		int sum = 0;
+		for (Integer val : res.values()) {
+			sum += val;
+		}
+		assertEquals("values in matrix must count up to number of rows",
+				rowRDD.count(), sum);
+
+		final int[] team0Counts = new int[MyMapper.teams.length];
+		Arrays.fill(team0Counts, 0);
+		for (Row row : rows) {
+			if (row.getString(0).equals(MyMapper.teams[0])) {
+				for (int i = 0; i < MyMapper.teams.length; i++) {
+					if (row.getString(1).equals(MyMapper.teams[i])) {
+						team0Counts[i] = team0Counts[i] + 1;
+					}
+				}
+			}
+		}
+		for (int i = 0; i < MyMapper.teams.length; i++) {
+			if (team0Counts[i] > 0) {
+				assertEquals(
+						"incorrect count for Team 0[" + i + "]",
+						team0Counts[i],
+						res.get(new Tuple2<Object, Object>(MyMapper.teams[0],
+								MyMapper.teams[i])).intValue());
+			} else {
+				assertFalse("incorrect count for Team 0[" + i + "]",
+						res.containsKey(new Tuple2<Object, Object>(
+								MyMapper.teams[0], MyMapper.teams[i])));
+			}
+		}
+
 	}
 
 	@Nonnull
