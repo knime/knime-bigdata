@@ -78,20 +78,23 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
-        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue());
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), matrixSpec)};
+        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "PCA dimension ");
+        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component ");
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), projectedSpec),
+            new SparkDataPortObjectSpec(spec.getContext(), matrixSpec)};
     }
 
     /**
+     * @param colPrefix
      * @param context the {@link KNIMESparkContext} to use
      * @param i the number of principal components
      * @return the {@link SparkDataPortObjectSpec}
      */
-    private static DataTableSpec createResultSpec(final int noOfComponents) {
+    private static DataTableSpec createResultSpec(final int noOfComponents, final String colPrefix) {
         final List<DataColumnSpec> specs = new LinkedList<>();
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", DoubleCell.TYPE);
         for (int i = 0; i < noOfComponents; i++) {
-            specCreator.setName("Component_" + i);
+            specCreator.setName(colPrefix + i);
             specs.add(specCreator.createSpec());
         }
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
@@ -108,14 +111,16 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = data.getTableSpec();
         final MLlibSettings settings = m_settings.getSettings(tableSpec);
         int noOfComponents = m_noOfComponents.getIntValue();
-        final DataTableSpec resultSpec = createResultSpec(noOfComponents);
+        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "DIM_");
+        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component_");
         final String matrixName = SparkIDs.createRDDID();
         final String projectionMatrixName = SparkIDs.createRDDID();
-        final SparkDataTable matrixRDD = new SparkDataTable(data.getContext(), matrixName, resultSpec);
-        final SparkDataTable projectionMatixRDD = new SparkDataTable(data.getContext(), projectionMatrixName, resultSpec);
+        final SparkDataTable projectionMatixRDD =
+                new SparkDataTable(data.getContext(), projectionMatrixName, projectedSpec);
+        final SparkDataTable matrixRDD = new SparkDataTable(data.getContext(), matrixName, matrixSpec);
         final PCATask task = new PCATask(data.getData(), settings.getFeatueColIdxs(), noOfComponents, matrixName, projectionMatrixName);
         task.execute(exec);
-        exec.setMessage("PCA (SPARK)done.");
+        exec.setMessage("PCA (SPARK) done.");
         return new PortObject[]{new SparkDataPortObject(projectionMatixRDD), new SparkDataPortObject(matrixRDD)};
     }
 

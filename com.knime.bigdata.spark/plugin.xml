@@ -301,6 +301,24 @@
             factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">

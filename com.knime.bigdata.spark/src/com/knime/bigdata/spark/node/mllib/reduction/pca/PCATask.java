@@ -75,21 +75,7 @@ public class PCATask implements Serializable {
         }
         JobControler.startJobAndWaitForResult(m_context, PCAJob.class.getCanonicalName(),
             learnerParams, exec);
-
-        //return convertColumMajorArrayTo2Dim((double[])result.getObjectResult(), m_k);
     }
-
-//    static double[][] convertColumMajorArrayTo2Dim(final double[] aValues, final int aNCols) {
-//        final int nRows = aValues.length / aNCols;
-//        final double[][] res = new double[nRows][];
-//        for (int i = 0; i < nRows; i++) {
-//            res[i] = new double[aNCols];
-//            for (int j = 0; j < aNCols; j++) {
-//                res[i][j] = aValues[j * nRows + i];
-//            }
-//        }
-//        return res;
-//    }
 
     String paramsAsJason() {
         return paramsAsJason(m_inputTableName, m_numericColIdx, m_k, m_MatrixName, m_ProjectionMatrixName);

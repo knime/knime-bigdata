@@ -117,6 +117,9 @@ public class JsonUtils {
         try {
             return Json.createReader(new StringReader(aJsonArrayString)).readArray();
         } catch (JsonParsingException e) {
+            if (aJsonArrayString != null && aJsonArrayString.equals("The supplied authentication is invalid")) {
+                throw new GenericKnimeSparkException("Could not login to server: " + aJsonArrayString, e);
+            }
             throw new GenericKnimeSparkException("Failed to parse server response: " + aJsonArrayString, e);
         }
     }

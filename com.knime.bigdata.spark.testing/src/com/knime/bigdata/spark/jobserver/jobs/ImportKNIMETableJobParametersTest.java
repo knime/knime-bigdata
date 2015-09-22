@@ -8,7 +8,6 @@ import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.client.UploadUtil;
-import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;

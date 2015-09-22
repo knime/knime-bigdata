@@ -40,14 +40,14 @@ public interface SparkModelInterpreter <M extends SparkModel<? extends Serializa
     public String getModelName();
 
     /**
-     * @param model the model
+     * @param sparkModel the {@link SparkModel}
      * @return the {@link JComponent} views of the model
      */
-    public JComponent[] getViews(M model);
+    public JComponent[] getViews(M sparkModel);
 
     /**
-     * @param model the model
+     * @param sparkModel the {@link SparkModel}
      * @return summary of the model to show in the port tooltip
      */
-    public String getSummary(M model);
+    public String getSummary(M sparkModel);
 }

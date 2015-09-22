@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.json.Json;
@@ -49,8 +51,8 @@ class WsRsRestClient implements IRestClient {
         };
     }
 
-    /**Access only via getClient() method!**/
-    private static Client CLIENT = null;
+    /**Access only via getClient() method! Cashes the clients per context.**/
+    private static Map<KNIMESparkContext, Client> CLIENTS = new HashMap<>();
 
     static {
         //disable loop-backs that ask for user login
@@ -58,23 +60,25 @@ class WsRsRestClient implements IRestClient {
         java.net.Authenticator.setDefault(new Authenticator() {});
     }
 
-    private static Client getClient() throws KeyManagementException, NoSuchAlgorithmException {
-        if (CLIENT == null) {
-            CLIENT = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
+    private static Client getClient(final KNIMESparkContext aContextContainer) throws KeyManagementException, NoSuchAlgorithmException {
+        Client client = CLIENTS.get(aContextContainer);
+        if (client == null) {
+            client = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
             .hostnameVerifier(getHostnameVerifier()).build();
-            CLIENT.register(MultiPartFeature.class);
+            client.register(MultiPartFeature.class);
+            if (aContextContainer.getUser() != null && aContextContainer.getPassword() != null) {
+                client.register(HttpAuthenticationFeature.basic(aContextContainer.getUser(),
+                        String.valueOf(aContextContainer.getPassword())));
+            }
+            CLIENTS.put(aContextContainer, client);
         }
-        return CLIENT;
+        return client;
     }
 
     private static WebTarget getTarget(final KNIMESparkContext aContextContainer, final String aPath,
         final String aQuery, final String aFragment)
                 throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException {
-        final Client client = getClient();
-        if (aContextContainer.getUser() != null && aContextContainer.getPassword() != null) {
-            client.register(HttpAuthenticationFeature.basic(aContextContainer.getUser(),
-                    String.valueOf(aContextContainer.getPassword())));
-        }
+        final Client client = getClient(aContextContainer);
         WebTarget target = client.target(new URI(aContextContainer.getProtocol(), null, aContextContainer.getHost(),
                     aContextContainer.getPort(), aPath, aQuery, aFragment));
         return target;

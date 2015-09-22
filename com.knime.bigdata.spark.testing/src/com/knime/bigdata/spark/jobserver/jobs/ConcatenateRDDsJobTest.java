@@ -8,7 +8,7 @@ import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.ConcatenateRDDsTaskTest;
+import com.knime.bigdata.spark.node.preproc.concatenate.ConcatenateRDDsTaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

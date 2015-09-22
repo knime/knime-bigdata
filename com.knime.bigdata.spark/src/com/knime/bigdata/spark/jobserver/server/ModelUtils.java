@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.mllib.classification.LogisticRegressionModel;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -13,6 +14,8 @@ import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
+import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
+import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
@@ -70,12 +73,21 @@ public class ModelUtils {
         } else if (aModel instanceof DecisionTreeModel) {
             LOGGER.fine("DecisionTreeModel found for prediction");
             predictions = ((DecisionTreeModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof RandomForestModel) {
+            LOGGER.fine("RandomForestModel found for prediction");
+            predictions = ((RandomForestModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof GradientBoostedTreesModel) {
+            LOGGER.fine("GradientBoostedTreesModel found for prediction");
+            predictions = ((GradientBoostedTreesModel)aModel).predict(aNumericData);
         } else if (aModel instanceof SVMModel) {
             LOGGER.fine("SVMModel found for prediction");
             predictions = ((SVMModel)aModel).predict(aNumericData);
         } else if (aModel instanceof LinearRegressionModel) {
             LOGGER.fine("LinearRegressionModel found for prediction");
             predictions = ((LinearRegressionModel)aModel).predict(aNumericData);
+        } else if (aModel instanceof LogisticRegressionModel) {
+            LOGGER.fine("LogisticRegressionModel found for prediction");
+            predictions = ((LogisticRegressionModel)aModel).predict(aNumericData);
         } else if (aModel instanceof NaiveBayesModel) {
             LOGGER.fine("NaiveBayesModel found for prediction");
             predictions = ((NaiveBayesModel)aModel).predict(aNumericData);
