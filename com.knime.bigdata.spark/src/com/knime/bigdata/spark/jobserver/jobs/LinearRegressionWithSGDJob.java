@@ -1,6 +1,5 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
-import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -8,7 +7,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.optimization.L1Updater;
+import org.apache.spark.mllib.regression.GeneralizedLinearAlgorithm;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.regression.LinearRegressionWithSGD;
@@ -20,35 +19,27 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 /**
  * @author dwk
  */
-public class LinearRegressionWithSGDJob extends SGDJob {
+public class LinearRegressionWithSGDJob extends AbstractRegularizationJob {
 
     private final static Logger LOGGER = Logger.getLogger(LinearRegressionWithSGDJob.class.getName());
 
     /**
-     * @param sc
-     * @param aConfig
      * @param inputRdd
-     * @return
-     */
-    @Override
-    Serializable execute(final SparkContext sc, final JobConfig aConfig, final JavaRDD<LabeledPoint> inputRdd) {
-        return execute(inputRdd, getNumIterations(aConfig), getRegularization(aConfig));
-    }
-
-    /**
-     * (for unit testing)
-     * @param inputRdd
-     * @param aNoOfIterations
-     * @param aRegParam
      * @return LinearRegressionModel
      */
-    public LinearRegressionModel execute(final JavaRDD<LabeledPoint> inputRdd, final int aNoOfIterations, final double aRegParam) {
-        final LinearRegressionWithSGD alg = new LinearRegressionWithSGD();
-        alg.optimizer().setNumIterations(aNoOfIterations).setRegParam(aRegParam)
-        .setUpdater(new L1Updater());
-        LinearRegressionModel model = alg.run(inputRdd.rdd().cache());
-        evaluateModel(inputRdd, model);
+    @Override
+    public LinearRegressionModel execute(final SparkContext aContext, final JobConfig aConfig, final JavaRDD<LabeledPoint> inputRdd) {
+        LinearRegressionModel model = configureLinRegWithSGD(aConfig).run(inputRdd.rdd().cache());
+        //evaluateModel(inputRdd, model);
         return model;
+    }
+
+    static GeneralizedLinearAlgorithm<LinearRegressionModel> configureLinRegWithSGD(final JobConfig aConfig) {
+        final LinearRegressionWithSGD alg = new LinearRegressionWithSGD();
+        alg.setFeatureScaling(getFeatureScaling(aConfig)).setIntercept(getIntercept(aConfig))
+        .setValidateData(getValidateData(aConfig));
+        configureSGDOptimizer(aConfig, alg.optimizer());
+        return alg;
     }
 
     /**
@@ -74,7 +65,7 @@ public class LinearRegressionWithSGDJob extends SGDJob {
             @Override
             public Object call(final Tuple2<Double, Double> pair) {
                 final double mse = Math.pow(pair._1() - pair._2(), 2.0);
-                LOGGER.log(Level.SEVERE, "error: " + mse+ " for value: "+pair._2()+ " and prediction: "+pair._1());
+                LOGGER.log(Level.SEVERE, "error: " + mse + " for value: " + pair._2() + " and prediction: " + pair._1());
                 return mse;
             }
         }).rdd()).mean();

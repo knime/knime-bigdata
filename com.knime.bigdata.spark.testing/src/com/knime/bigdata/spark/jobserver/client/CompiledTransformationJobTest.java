@@ -13,8 +13,6 @@ import com.knime.bigdata.spark.jobserver.jobs.TransformationTestJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
-import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
-import com.typesafe.config.ConfigValueFactory;
 
 /**
  *
@@ -91,9 +89,7 @@ public class CompiledTransformationJobTest extends SparkWithJobServerSpec {
             final String jobId =
                 JobControler.startJob(CONTEXT_ID, TransformationTestJob.class.getCanonicalName(), params2Json("unitTestRDD1", "unitTestRDD2"));
 
-            KNIMEConfigContainer.m_config =
-                KNIMEConfigContainer.m_config.withValue(JobControler.JOBS_PATH + jobId,
-                    ConfigValueFactory.fromAnyRef("{\"result\":\"OK\"}"));
+            DummyRestClient.jobResponse = "{\"result\":\"OK\"}";
 
             //throws exception if job did not finish properly
             JobControler.waitForJobAndFetchResult(CONTEXT_ID, jobId, null);

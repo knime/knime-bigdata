@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.LocalSparkSpec;
+import com.knime.bigdata.spark.UnitSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.ColumnSelectionTaskTest;
+import com.knime.bigdata.spark.node.preproc.filter.column.ColumnSelectionTaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -19,7 +19,7 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class ColumnSelectionJobTest extends LocalSparkSpec {
+public class ColumnSelectionJobTest extends UnitSpec {
 
 	@Test
 	public void jobValidationShouldCheckMissingInputDataParameter()
@@ -49,7 +49,7 @@ public class ColumnSelectionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = ColumnSelectionTaskTest.paramsAsJason("tab1",
 				new Integer[] { 0, 1 }, "out");
-		KnimeSparkJob testObj = new ColumnFilterJob();
+		KnimeSparkJob testObj = new ColumnSelectionJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
 		assertEquals("Configuration should be recognized as valid",
@@ -62,7 +62,7 @@ public class ColumnSelectionJobTest extends LocalSparkSpec {
 	}
 
 	private void myCheck(final String params, final String aMsg) {
-		KnimeSparkJob testObj = new ColumnFilterJob();
+		KnimeSparkJob testObj = new ColumnSelectionJob();
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 		assertEquals("Configuration should be recognized as invalid",
 				ValidationResultConverter.invalid(aMsg),

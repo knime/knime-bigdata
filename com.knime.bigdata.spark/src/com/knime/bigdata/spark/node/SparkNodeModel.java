@@ -60,10 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -371,6 +368,7 @@ public abstract class SparkNodeModel extends NodeModel {
     private void deleteRDDs(final boolean onDispose) {
         if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
             LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
+            @SuppressWarnings("unused")
             Future<?> future = KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
                 @Override
                 public void run() {
@@ -388,20 +386,20 @@ public abstract class SparkNodeModel extends NodeModel {
                     }
                     final long endTime = System.currentTimeMillis();
                         final long durationTime = endTime - startTime;
-                    LOGGER.debug("Time deleting " + m_namedRDDs.size() + "namedRDDs: " + durationTime + " ms");
+                    LOGGER.warn("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
                     m_namedRDDs.clear();
                 }
             });
-            try {
-                //give the thread at least 5 seconds to delete the rdds
-                future.get(5, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " was interrupted prior completion.");
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " failed. Error: " + e.getMessage(), e);
-            }
+//            try {
+//                //give the thread at least 5 seconds to delete the rdds
+//                future.get(5, TimeUnit.SECONDS);
+//            } catch (TimeoutException e) {
+//                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+//                    + " was interrupted prior completion.");
+//            } catch (InterruptedException | ExecutionException e) {
+//                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+//                    + " failed. Error: " + e.getMessage(), e);
+//            }
         }
     }
 }

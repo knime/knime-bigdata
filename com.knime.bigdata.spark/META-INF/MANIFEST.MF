@@ -27,6 +27,7 @@ Bundle-ClassPath: knime-spark.jar,
  lib/scala-reflect.jar,
  lib/javax.annotation-api-1.2.jar,
  lib/spark-sql-api.jar
+Bundle-Activator: com.knime.bigdata.spark.SparkPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Require-Bundle: org.knime.base;bundle-version="2.11.0",
  org.knime.workbench.repository;bundle-version="2.11.0",
@@ -47,4 +48,3 @@ Require-Bundle: org.knime.base;bundle-version="2.11.0",
  com.fifesoft.rsyntaxtextarea;bundle-version="[2.5.7,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: com.knime.bigdata.spark.SparkPlugin

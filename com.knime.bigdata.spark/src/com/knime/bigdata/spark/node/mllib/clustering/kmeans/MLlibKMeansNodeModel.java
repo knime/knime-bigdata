@@ -86,8 +86,17 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
         final SparkDataPortObjectSpec asignedSpec = new SparkDataPortObjectSpec(spec.getContext(),
-                    MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster"));
-        return new PortObjectSpec[]{asignedSpec, createMLSpec()};
+                    createResultTableSpec(tableSpec));
+        final SparkModelPortObjectSpec resultSpec = new SparkModelPortObjectSpec(MLlibKMeansInterpreter.getInstance().getModelName());
+        return new PortObjectSpec[]{asignedSpec, resultSpec};
+    }
+
+    /**
+     * @param tableSpec
+     * @return
+     */
+    private DataTableSpec createResultTableSpec(final DataTableSpec tableSpec) {
+        return MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
     }
 
     /**
@@ -100,7 +109,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final MLlibSettings settings = m_settings.getSettings(tableSpec);
-        final DataTableSpec resultSpec = MLlibClusterAssignerNodeModel.createSpec(tableSpec, "Cluster");
+        final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), settings.getFeatueColIdxs(), m_noOfCluster.getIntValue(),
@@ -109,14 +118,6 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
                  clusters, MLlibKMeansInterpreter.getInstance(), settings))};
-    }
-
-
-    /**
-     * @return
-     */
-    private SparkModelPortObjectSpec createMLSpec() {
-        return new SparkModelPortObjectSpec(MLlibKMeansInterpreter.getInstance().getModelName());
     }
 
     /**

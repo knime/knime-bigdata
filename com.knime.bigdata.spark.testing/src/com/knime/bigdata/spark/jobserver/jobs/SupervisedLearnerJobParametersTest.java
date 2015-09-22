@@ -10,6 +10,8 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
 import com.typesafe.config.ConfigFactory;
 
@@ -26,8 +28,9 @@ public class SupervisedLearnerJobParametersTest {
 			final Integer aLabelIx, final String aResultTableName)
 			throws GenericKnimeSparkException {
 
-		return SGDLearnerTask.learnerDef(aTable, aMappingTable, aColIdxs,
-				aLabelIx, 10, 0.5d);
+		return SGDLearnerTask.paramsAsJason(aTable,  aColIdxs,
+				aLabelIx, 10, 0.5d, false, 5, 0.9d, UpdaterType.L1Updater, true, false, true,
+				GradientType.LogisticGradient, 0.6, 0.9);
 	}
 
 	@Test

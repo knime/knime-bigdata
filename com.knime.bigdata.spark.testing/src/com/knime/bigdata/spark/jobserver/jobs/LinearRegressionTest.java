@@ -38,9 +38,15 @@ import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -66,8 +72,9 @@ public class LinearRegressionTest {
 
         /**
          * @param aData
+         * @throws GenericKnimeSparkException 
          */
-        private void runRegression(final JavaRDD<Double[]> aUnnormalizedData) {
+        private void runRegression(final JavaRDD<Double[]> aUnnormalizedData) throws GenericKnimeSparkException {
 
             JavaRDD<Row> rowData = aUnnormalizedData.map(new Function<Double[], Row>() {
                 private static final long serialVersionUID = 1L;
@@ -107,7 +114,10 @@ public class LinearRegressionTest {
             int numIterations = 10;
             final LinearRegressionModel model = LinearRegressionWithSGD.train(JavaRDD.toRDD(parsedData), numIterations);
 
-            final LinearRegressionModel model2 = (new LinearRegressionWithSGDJob()).execute(parsedData, numIterations, 0);
+            final String jsonParams = SGDLearnerTask.paramsAsJason("in", new Integer[] {1,2}, 1, numIterations, 0d, true, null, null, UpdaterType.L1Updater, true, false, false,
+    				GradientType.LeastSquaresGradient, 1.0, 1.0);
+            final JobConfig config = new JobConfig(ConfigFactory.parseString(jsonParams));
+            final LinearRegressionModel model2 = (new LinearRegressionWithSGDJob()).execute(null, config, parsedData);
 
             assertEquals("local and job model should give same results", LinearRegressionWithSGDJob.evaluateModel(parsedData, model), LinearRegressionWithSGDJob.evaluateModel(parsedData, model2), 0.00001d);
         }

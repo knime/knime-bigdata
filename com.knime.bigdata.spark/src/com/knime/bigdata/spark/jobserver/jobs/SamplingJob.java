@@ -43,6 +43,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
 /**
@@ -73,11 +74,6 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
      * sample fraction
      */
     public static final String PARAM_FRACTION = "fraction";
-
-    /**
-     * random seed parameter
-     */
-    public static final String PARAM_SEED = "seed";
 
     /**
      * absolute number of rows to sample (only relevant for sampling method 'absolute')
@@ -367,8 +363,8 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
      * @return
      */
     static long getSeed(final JobConfig aConfig) {
-        if (aConfig.hasInputParameter(PARAM_SEED)) {
-            return aConfig.getInputParameter(PARAM_SEED, Long.class);
+        if (aConfig.hasInputParameter(ParameterConstants.PARAM_SEED)) {
+            return aConfig.getInputParameter(ParameterConstants.PARAM_SEED, Long.class);
         }
         return DEFAULT_RANDOM_SEED;
     }

@@ -16,7 +16,6 @@ import org.knime.core.node.NodeLogger;
 import com.knime.bigdata.spark.jobserver.jobs.NamedRDDUtilsJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.util.SparkUtil;
@@ -56,7 +55,7 @@ public class KnimeContext {
     /**
      * @param context the {@link KNIMESparkContext} to open
      * @return the opened {@link KNIMESparkContext}
-     * @throws GenericKnimeSparkException if the context could not be created on the Spark Jobsever
+     * @throws GenericKnimeSparkException if the context could not be created on the Spark job sever
      */
     public static KNIMESparkContext openSparkContext(final KNIMESparkContext context) throws GenericKnimeSparkException {
         if (context == null) {
@@ -66,14 +65,13 @@ public class KnimeContext {
         //and it is (one of) the current user's context(s)
         try {
             synchronized (LOGGER) {
-                //TODO: Check that only one context exists or multi contexts is enabled in the application config
                 if (sparkContextExists(context)) {
                     return context;
                 }
                 return createSparkContext(context);
             }
         } catch (ProcessingException e) {
-            final StringBuilder buf = new StringBuilder("Could not establish connection to Spark Jobserver.");
+            final StringBuilder buf = new StringBuilder("Could not establish connection to Spark job server.");
             if (e.getCause() != null && e.getCause() instanceof SocketException) {
                 buf.append(" Error: '" + e.getCause().getMessage()
                     + "' possible reason job server down or incompatible connection settings. "
@@ -209,7 +207,7 @@ public class KnimeContext {
         String jsonArgs =
             JsonUtils.asJson(new Object[]{
                 ParameterConstants.PARAM_INPUT,
-                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE, KnimeSparkJob.PARAM_INPUT_TABLE,
+                new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE, NamedRDDUtilsJob.PARAM_INPUT_TABLES,
                     JsonUtils.toJsonArray((Object[])rddName)}});
         try {
             JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),

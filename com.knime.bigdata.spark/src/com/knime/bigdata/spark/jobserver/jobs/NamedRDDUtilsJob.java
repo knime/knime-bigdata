@@ -77,9 +77,9 @@ public class NamedRDDUtilsJob extends KnimeSparkJob implements Serializable {
             msg = "Input parameter '" + PARAM_OP + "' missing.";
         }
 
-        if (msg == null && !config.hasInputParameter(PARAM_INPUT_TABLE)
+        if (msg == null && !config.hasInputParameter(PARAM_INPUT_TABLES)
             && OP_DELETE.equalsIgnoreCase(config.getInputParameter(PARAM_OP).toString())) {
-            msg = "Input parameter '" + PARAM_INPUT_TABLE + "' missing.";
+            msg = "Input parameter '" + PARAM_INPUT_TABLES + "' missing.";
         }
 
         if (msg != null) {

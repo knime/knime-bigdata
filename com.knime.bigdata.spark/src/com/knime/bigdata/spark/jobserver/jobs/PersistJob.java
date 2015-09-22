@@ -106,6 +106,7 @@ public class PersistJob extends KnimeSparkJob implements Serializable {
         if (unpersist) {
             LOGGER.log(Level.INFO, "unpersist RDD...");
             rowRDD.unpersist();
+            LOGGER.log(Level.INFO, "...RDD successful unpersisted");
         } else {
             final boolean useDisk = aConfig.getInputParameter(PARAM_USE_DISK, Boolean.class);
             final boolean useMemory = aConfig.getInputParameter(PARAM_USE_MEMORY, Boolean.class);
@@ -115,6 +116,7 @@ public class PersistJob extends KnimeSparkJob implements Serializable {
             final StorageLevel level = StorageLevels.create(useDisk, useMemory, useOffHeap, deserialized, replication);
             LOGGER.log(Level.INFO, "persist RDD with storage level: " + level.description());
             rowRDD.persist(level);
+            LOGGER.log(Level.INFO, "...RDD successful persisted");
         }
         return JobResult.emptyJobResult().withMessage("OK");
     }
