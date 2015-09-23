@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +34,8 @@ import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModelFactory;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -190,14 +193,12 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
 
         final JavaRDD<Rating> ratings = convertRowRDD2RatingsRdd(aConfig, rowRDD);
-        final MatrixFactorizationModel model = execute(sc, aConfig, ratings);
+        final MatrixFactorizationModel serverModel = execute(sc, aConfig, ratings);
 
+        CollaborativeFilteringModel model =
+            CollaborativeFilteringModelFactory.fromMatrixFactorizationModel(sc, this, serverModel);
         JobResult res = JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);
 
-        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
-            final JavaRDD<Row> predictions = ModelUtils.predict(rowRDD, ratings, model);
-            addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predictions);
-        }
         LOGGER.log(Level.INFO, " Collaborative Filtering done");
         // note that with Spark 1.4 we can use PMML instead
         return res;
@@ -362,10 +363,21 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
      * @param aInputRdd
      * @return rating RDD
      */
-    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final JobConfig aConfig, final JavaRDD<Row> aInputRdd) {
+    static JavaRDD<Rating> convertRowRDD2RatingsRdd(final JobConfig aConfig, final JavaRDD<Row> aInputRdd) {
         final int userIx = aConfig.getInputParameter(PARAM_USER_INDEX, Integer.class);
         final int productIx = aConfig.getInputParameter(PARAM_PRODUCT_INDEX, Integer.class);
         final int ratingIx = aConfig.getInputParameter(PARAM_RATING_INDEX, Integer.class);
         return RDDUtilsInJava.convertRowRDD2RatingsRdd(userIx, productIx, ratingIx, aInputRdd);
     }
+
+    static JavaRDD<Row> predict(final KnimeSparkJob aJob, final JobConfig aConfig, final JavaRDD<Row> aRowRDD,
+        final List<Integer> colIdxs, final CollaborativeFilteringModel aModel) {
+        final MatrixFactorizationModel model =
+            CollaborativeFilteringModelFactory.fromCollaborativeFilteringModel(aJob, aModel);
+        LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
+
+        final JavaRDD<Rating> ratings = RDDUtilsInJava.convertRowRDD2RatingsRdd(colIdxs.get(0), colIdxs.get(1), colIdxs.get(2), aRowRDD);
+        return ModelUtils.predict(aRowRDD, ratings, model);
+    }
+
 }

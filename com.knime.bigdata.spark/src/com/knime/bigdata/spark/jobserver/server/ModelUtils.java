@@ -20,8 +20,6 @@ import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
 
-import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
-
 /**
  *
  * model serialization and application utility (until Spark supports PMML import and export, hopefully with 1.4)
@@ -42,14 +40,13 @@ public class ModelUtils {
      */
     public static <T> JavaRDD<Row> predict(final JobConfig aConfig, final JavaRDD<Row> aRowRDD,
         final List<Integer> aColIdxs, final T aModel) throws GenericKnimeSparkException {
-        if (aModel instanceof MatrixFactorizationModel) {
-
-            LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
-            JavaRDD<Rating> ratings = CollaborativeFilteringJob.convertRowRDD2RatingsRdd(aConfig, aRowRDD);
-            return predict(aRowRDD, ratings, (MatrixFactorizationModel)aModel);
-        } else {
+//        if (aModel instanceof CollaborativeFilteringModel) {
+//            final MatrixFactorizationModel model =
+//                CollaborativeFilteringModelFactory.fromCollaborativeFilteringModel((CollaborativeFilteringModel)aModel);
+//            LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
+//            final JavaRDD<Rating> ratings = CollaborativeFilteringJob.convertRowRDD2RatingsRdd(aConfig, aRowRDD);
+//            return predict(aRowRDD, ratings, model);
             return predict(RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aRowRDD, aColIdxs), aRowRDD, aModel);
-        }
     }
 
     /**
@@ -61,8 +58,9 @@ public class ModelUtils {
      * @return original data with appended column containing predictions
      * @throws GenericKnimeSparkException thrown when model type cannot be handled
      */
-    public static <T> JavaRDD<Row> predict(final JavaRDD<Vector> aNumericData,
-        final JavaRDD<Row> rowRDD, final T aModel) throws GenericKnimeSparkException {
+    public static <T> JavaRDD<Row>
+        predict(final JavaRDD<Vector> aNumericData, final JavaRDD<Row> rowRDD, final T aModel)
+            throws GenericKnimeSparkException {
         //use only the column indices when converting to vector
         aNumericData.cache();
 
@@ -105,7 +103,8 @@ public class ModelUtils {
      * @param aModel
      * @return original data plus one new column with predicted ratings
      */
-    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aRatings, final MatrixFactorizationModel aModel) {
+    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aRatings,
+        final MatrixFactorizationModel aModel) {
 
         // Evaluate the model on rating data
         final JavaRDD<Tuple2<Object, Object>> userProducts =
@@ -117,14 +116,15 @@ public class ModelUtils {
                     return new Tuple2<Object, Object>(r.user(), r.product());
                 }
             });
-        JavaRDD<Double> predictions = aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Double>() {
-            private static final long serialVersionUID = 1L;
+        JavaRDD<Double> predictions =
+            aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Double>() {
+                private static final long serialVersionUID = 1L;
 
-            @Override
-            public Double call(final Rating r) {
-                return r.rating();
-            }
-        });
+                @Override
+                public Double call(final Rating r) {
+                    return r.rating();
+                }
+            });
         return RDDUtils.addColumn(aRowRdd.zip(predictions));
     }
 }

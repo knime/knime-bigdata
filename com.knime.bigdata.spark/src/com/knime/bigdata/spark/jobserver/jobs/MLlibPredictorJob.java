@@ -31,6 +31,7 @@ import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
 
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -107,8 +108,15 @@ public class MLlibPredictorJob extends KnimeSparkJob implements Serializable {
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
 
         final Serializable model = aConfig.readInputFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
+        final JavaRDD<Row> predictions;
 
-        final JavaRDD<Row> predictions = ModelUtils.predict(aConfig, rowRDD, colIdxs, model);
+        if (model instanceof CollaborativeFilteringModel) {
+            //this is a very special model as we need to convert it to the real model first
+            predictions = CollaborativeFilteringJob.predict(this, aConfig, rowRDD, colIdxs, (CollaborativeFilteringModel)model);
+        } else {
+            predictions = ModelUtils.predict(aConfig, rowRDD, colIdxs, model);
+        }
+
 
         LOGGER.log(Level.INFO, "Prediction done");
         addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), predictions);

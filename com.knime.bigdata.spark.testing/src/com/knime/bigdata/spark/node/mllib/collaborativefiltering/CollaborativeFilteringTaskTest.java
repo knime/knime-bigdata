@@ -3,17 +3,15 @@ package com.knime.bigdata.spark.node.mllib.collaborativefiltering;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
+import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringTask;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionTask;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -26,17 +24,16 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 
 	public static String paramsAsJason(final String aInputTableName,
 			final Integer aUserIndex, final Integer aProductIndex,
-			final Integer aRatingIndex, final Double aLambda,
-			final String aResult) {
+			final Integer aRatingIndex, final Double aLambda) {
 		return CollaborativeFilteringTask.paramsAsJason(aInputTableName,
 				aUserIndex, aProductIndex, aRatingIndex, aLambda, null, null,
-				null, null, null, null, null, null, null, aResult);
+				null, null, null, null, null, null, null);
 	}
 
 	@Test
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 		CollaborativeFilteringTask testObj = new CollaborativeFilteringTask(
-				null, "inputRDD", 4, 0, 1, 2d, "u");
+				null, "inputRDD", 4, 0, 1, 2d);
 		final String params = testObj.paramsAsJason();
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 
@@ -48,8 +45,7 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 	@Test
 	public void verifyThatCollaborativeFilteringJobStoresResultMatrixAsNamedRDDAndReturnsModel()
 			throws Throwable {
-		KNIMESparkContext context = KnimeContext.getSparkContext();
-		ImportKNIMETableJobTest.importTestTable(context, MINI_RATING_TABLE,
+		ImportKNIMETableJobTest.importTestTable(CONTEXT_ID, MINI_RATING_TABLE,
 				"tab1");
 
 		// data must be entirely numeric!
@@ -57,15 +53,17 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 		final int rank = 10;
 		final int numIterations = 20;
 		CollaborativeFilteringTask testObj = new CollaborativeFilteringTask(
-				context, "tab1", 0, 1, 2, null, "predictions");
+				CONTEXT_ID, "tab1", 0, 1, 2, null);
 		testObj.withAlpha(alpha).withRank(rank)
 				.withNumIterations(numIterations);
 
-		MatrixFactorizationModel model = testObj.execute(null);
+		CollaborativeFilteringModel model = testObj.execute(null);
 		assertTrue("model expected", model != null);
 
+		//run predictor
+		PredictionTask.predict(null, CONTEXT_ID, "tab1", model, new Integer[] {0,1,2}, "predictions");
 		// not sure what else to check here....
-		fetchResultTable(context, "predictions", 4);
+		fetchResultTable(CONTEXT_ID, "predictions", 4);
 
 	}
 }
