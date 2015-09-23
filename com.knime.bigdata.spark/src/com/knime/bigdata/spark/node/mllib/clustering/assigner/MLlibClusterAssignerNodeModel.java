@@ -35,6 +35,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
+import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionTask;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -91,8 +92,8 @@ public class MLlibClusterAssignerNodeModel extends SparkNodeModel {
         final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final AssignTask task = new AssignTask();
-        task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
+
+        PredictionTask.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
         exec.setMessage("Spark Predictor finished.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
     }

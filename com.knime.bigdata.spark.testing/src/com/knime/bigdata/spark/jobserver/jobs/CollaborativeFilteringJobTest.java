@@ -32,7 +32,7 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissingInputDataParameter()
 			throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason(null, 1,
-				2, 3, 8d, "U");
+				2, 3, 8d);
 		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
@@ -40,7 +40,7 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissingUserParameter()
 			throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason("tab", null,
-				2, 3, 8d, "U");
+				2, 3, 8d);
 		myCheck(params, CollaborativeFilteringJob.PARAM_USER_INDEX, "Input");
 	}
 	
@@ -48,7 +48,7 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissingProductParameter()
 			throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason("tab", 
-				2, null,3, 8d, "U");
+				2, null,3, 8d);
 		myCheck(params, CollaborativeFilteringJob.PARAM_PRODUCT_INDEX, "Input");
 	}
 	
@@ -56,14 +56,14 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissingRatingParameter()
 			throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason("tab", 
-				2, 3, null,8d, "U");
+				2, 3, null,8d);
 		myCheck(params, CollaborativeFilteringJob.PARAM_RATING_INDEX, "Input");
 	}
 
 	@Test
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = CollaborativeFilteringTaskTest.paramsAsJason("tab1", 1,
-				2, 3, 5d, "U");
+				2, 3, 5d);
 		KnimeSparkJob testObj = new CollaborativeFilteringJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
@@ -93,7 +93,7 @@ public class CollaborativeFilteringJobTest extends LocalSparkSpec {
 		JavaDoubleRDD o = getRandomDoubleRDD(100, 2);
 		final double lambda = 0.2;
 		String params = CollaborativeFilteringTaskTest.paramsAsJason("tab1", 4,
-				2, 3, lambda, "U");
+				2, 3, lambda);
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);
 		MatrixFactorizationModel model = CollaborativeFilteringJob.execute(

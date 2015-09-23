@@ -551,6 +551,26 @@ public class RDDUtilsInJava {
     }
 
     /**
+     * converts ratings to rows
+     * @param aInputRdd
+     * @return JavaRDD of Rows
+     */
+    public static JavaRDD<Row> convertRatings2RowRDDRdd(final JavaRDD<Rating> aInputRdd) {
+        JavaRDD<Row> rows = aInputRdd.map(new Function<Rating, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Rating aRating) {
+                RowBuilder rb = RowBuilder.emptyRow();
+                rb.add(aRating.user()).add(aRating.product()).add(aRating.rating());
+                return rb.build();
+            }
+        });
+        return rows;
+    }
+
+
+    /**
      * count the number of times each pair of values of the given two indices occurs in the rdd
      * @param aInputRdd
      * @param aIndex1 - first index in pair

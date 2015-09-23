@@ -106,7 +106,8 @@ public class ConcatenateRDDsJob extends KnimeSparkJob implements Serializable {
         final JavaRDD<Row> firstRDD = getFromNamedRdds(rddNames.get(0));
         final List<JavaRDD<Row>> restRDDs = new ArrayList<>();
         for (int i = 1; i < rddNames.size(); i++) {
-            restRDDs.add(getFromNamedRdds(rddNames.get(i)));
+            JavaRDD<Row> tmp = getFromNamedRdds(rddNames.get(i));
+            restRDDs.add(tmp);
         }
 
         final JavaSparkContext js = JavaSparkContext.fromSparkContext(sc);

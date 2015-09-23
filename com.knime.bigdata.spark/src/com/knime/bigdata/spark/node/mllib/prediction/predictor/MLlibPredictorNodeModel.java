@@ -89,8 +89,7 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
-        final PredictionTask task = new PredictionTask();
-        task.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
+        PredictionTask.execute(exec, data.getData(), model.getModel(), colIdxs, resultRDD);
         exec.setMessage("(SPARK) prediction done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
     }
