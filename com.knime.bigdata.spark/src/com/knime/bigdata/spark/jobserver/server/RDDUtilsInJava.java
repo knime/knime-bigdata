@@ -216,7 +216,7 @@ public class RDDUtilsInJava {
                 public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues0,
                     final Map<Integer, Set<String>> aAggregatedValues1) throws Exception {
                     for (Map.Entry<Integer, Set<String>> entry : aAggregatedValues0.entrySet()) {
-                        aAggregatedValues0.get(entry.getKey()).addAll(aAggregatedValues1.get(entry.getKey()));
+                        entry.getValue().addAll(aAggregatedValues1.get(entry.getKey()));
                     }
                     return aAggregatedValues0;
                 }
