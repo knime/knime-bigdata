@@ -1,11 +1,10 @@
-package com.knime.bigdata.spark.node.mllib.prediction.logisticregression;
+package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 
-import org.apache.spark.mllib.classification.LogisticRegressionModel;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
@@ -16,7 +15,6 @@ import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -40,7 +38,7 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 			final Integer aNumIterations, final Double aRegularization,
 			final Boolean aUseSGD, final Integer aNumCorrections,
 			final Double aTolerance) throws GenericKnimeSparkException {
-		return SGDLearnerTask.paramsAsJason(aInputRDD, featureColIdxs,
+		return LinearLearnerTask.paramsAsJason(aInputRDD, featureColIdxs,
 				classColIdx, aNumIterations, aRegularization, aUseSGD,
 				aNumCorrections, aTolerance, UpdaterType.L1Updater, true,
 				false, true, GradientType.LeastSquaresGradient, 0.6, 0.9);
@@ -53,7 +51,7 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 			final Boolean aUseFeatureScaling, final GradientType aGradientType,
 			final Double aStepSize, final Double aFraction)
 			throws GenericKnimeSparkException {
-		return SGDLearnerTask.paramsAsJason("in",
+		return LinearLearnerTask.paramsAsJason("in",
 				new Integer[] { 0, 1 }, 1, 25, 0.2d, true, 8, 0.9d,
 				aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling,
 				aGradientType, aStepSize, aFraction);
@@ -61,10 +59,10 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 
 	@Test
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
-		final LogisticRegressionTask testObj = new LogisticRegressionTask(null,
+		final LinearLearnerTask testObj = new LinearLearnerTask(null,
 				"inputRDD", new Integer[] { 0, 1 }, 1, 23, 0.4d, false, 5,
 				0.4d, UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9);
+				GradientType.LeastSquaresGradient, 0.6, 0.9, LogisticRegressionJob.class);
 		final String params = testObj.learnerDef();
 		final JobConfig config = new JobConfig(
 				ConfigFactory.parseString(params));
@@ -87,11 +85,11 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 
 		// data must be entirely numeric!
 		final Integer[] cols = new Integer[] { 0, 2, 1 };
-		final LogisticRegressionTask testObj = new LogisticRegressionTask(
+		final LinearLearnerTask testObj = new LinearLearnerTask(
 				CONTEXT_ID, "tab1", cols, 3, 29, 0.4d, false, 5, 0.2d, UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, null, null);
+				GradientType.LeastSquaresGradient, null, null, LogisticRegressionJob.class);
 
-		final LogisticRegressionModel model = testObj.execute(null);
+		final Serializable model = testObj.execute(null);
 		assertTrue(model != null);
 		// not sure what else to check here....
 
@@ -110,11 +108,11 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 
 		// data must be entirely numeric!
 		final Integer[] cols = new Integer[] { 0, 2, 1 };
-		final LogisticRegressionTask testObj = new LogisticRegressionTask(
+		final LinearLearnerTask testObj = new LinearLearnerTask(
 				CONTEXT_ID, "tab1", cols, 3, 15, 0.4d, true, null, null, UpdaterType.SquaredL2Updater, true, false, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9);
+				GradientType.LeastSquaresGradient, 0.6, 0.9, LogisticRegressionJob.class);
 
-		final LogisticRegressionModel model = testObj.execute(null);
+		final Serializable model = testObj.execute(null);
 		assertTrue(model != null);
 		// not sure what else to check here....
 
