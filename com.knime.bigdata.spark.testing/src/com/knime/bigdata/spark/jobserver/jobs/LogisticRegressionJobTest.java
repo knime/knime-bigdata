@@ -11,7 +11,7 @@ import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.mllib.prediction.logisticregression.LogisticRegressionTaskTest;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.LogisticRegressionTaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

@@ -40,30 +40,32 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
- *
- * @author koetter
+ * @author koetter, dwk
  */
-public class SGDLearnerTask implements Serializable {
+public class LinearLearnerTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Integer[] m_numericColIdx;
+    private final Integer[] m_featureColIdxs;
 
     private final int m_classColIdx;
 
     private final KNIMESparkContext m_context;
 
-
     private final String m_inputTableName;
 
-    private final int m_numIterations;
+    private final Integer m_numCorrections;
 
-    private final double m_regularizationValue;
+    private final Double m_tolerance;
 
-    private final String m_jobClassPath;
+    private final Integer m_numIterations;
+
+    private final Boolean m_useSGD;
+
+    private final double m_regularization;
 
     private final UpdaterType m_UpdaterType;
 
@@ -79,31 +81,71 @@ public class SGDLearnerTask implements Serializable {
 
     private final Double m_Fraction;
 
+    private final String m_jobClassPath;
+
     /**
-     * create a logistic regression task that uses SGD
-     *
+     * create a linear learner task that uses SGD
      * @param inputRDD
      * @param featureColIdxs
      * @param classColIdx
      * @param aNumIterations
      * @param aRegularization
-     * @param aUseSGD
-     * @param aNumCorrections - only required when aUseSGD == false
-     * @param aTolerance - only required when aUseSGD == false
-     * @param aStepSize - only required when aUseSGD == true
-     * @param aFraction - only required when aUseSGD == true
+     * @param aUpdaterType
+     * @param aValidateData
+     * @param aAddIntercept
+     * @param aUseFeatureScaling
+     * @param aGradientType
+     * @param aStepSize
+     * @param aFraction
      */
-    SGDLearnerTask(final SparkDataTable inputRDD, final Integer[] featureColIdxs, final Integer classColIdx,
-        final int aNumIterations, final double aRegularization, final UpdaterType aUpdaterType,
-        final boolean aValidateData, final boolean aAddIntercept, final boolean aUseFeatureScaling,
-        final GradientType aGradientType, final double aStepSize, final double aFraction,
-        final Class<? extends AbstractRegularizationJob> jobClass) {
-        m_numIterations = aNumIterations;
-        m_regularizationValue = aRegularization;
-        m_context = inputRDD.getContext();
-        m_inputTableName = inputRDD.getID();
-        m_numericColIdx = featureColIdxs;
+    LinearLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final int classColIdx,
+        final int aNumIterations, final double aRegularization,
+        final UpdaterType aUpdaterType,
+        final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
+        final GradientType aGradientType, final Double aStepSize,final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
+        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
+            true, null, null, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, aStepSize, aFraction, jobClass);
+    }
+
+    /**
+     * create a linear learner task that uses LBFGS
+     * @param inputRDD
+     * @param featureColIdxs
+     * @param classColIdx
+     * @param aNumIterations
+     * @param aRegularization
+     * @param aNumCorrections
+     * @param aTolerance
+     * @param aUpdaterType
+     * @param aValidateData
+     * @param aAddIntercept
+     * @param aUseFeatureScaling
+     * @param aGradientType
+     */
+    LinearLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final int classColIdx,
+        final int aNumIterations, final double aRegularization,
+        final Integer aNumCorrections, final Double aTolerance, final UpdaterType aUpdaterType,
+        final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
+        final GradientType aGradientType, final Class<? extends AbstractRegularizationJob> jobClass) {
+        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
+            false, aNumCorrections, aTolerance, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, null, null, jobClass);
+    }
+
+    //unit testing constructor only
+    LinearLearnerTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
+        final int classColIdx, final int aNumIterations, final double aRegularization, final boolean aUseSGD,
+        @Nullable final Integer aNumCorrections, @Nullable final Double aTolerance, final UpdaterType aUpdaterType,
+        final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
+        final GradientType aGradientType, @Nullable final Double aStepSize, @Nullable final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
+        m_numCorrections = aNumCorrections;
+        m_tolerance = aTolerance;
+        m_context = aContext;
+        m_inputTableName = aInputRDD;
+        m_featureColIdxs = featureColIdxs;
         m_classColIdx = classColIdx;
+        m_numIterations = aNumIterations;
+        m_useSGD = aUseSGD;
+        m_regularization = aRegularization;
         m_UpdaterType = aUpdaterType;
         m_ValidateData = aValidateData;
         m_AddIntercept = aAddIntercept;
@@ -111,13 +153,15 @@ public class SGDLearnerTask implements Serializable {
         m_GradientType = aGradientType;
         m_StepSize = aStepSize;
         m_Fraction = aFraction;
-
         m_jobClassPath = jobClass.getCanonicalName();
     }
 
-    Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,
+        CanceledExecutionException {
         final String learnerParams = learnerDef();
-        exec.checkCanceled();
+        if (exec != null) {
+            exec.checkCanceled();
+        }
         final JobResult result = JobControler.startJobAndWaitForResult(m_context, m_jobClassPath, learnerParams, exec);
         return (Serializable)result.getObjectResult();
     }
@@ -127,12 +171,12 @@ public class SGDLearnerTask implements Serializable {
      *
      * @throws GenericKnimeSparkException
      */
-
-    private String learnerDef() throws GenericKnimeSparkException {
-        return paramsAsJason(m_inputTableName, m_numericColIdx, m_classColIdx, m_numIterations, m_regularizationValue,
-            true, null, null, m_UpdaterType, m_ValidateData, m_AddIntercept,
+    String learnerDef() throws GenericKnimeSparkException {
+        return paramsAsJason(m_inputTableName, m_featureColIdxs, m_classColIdx, m_numIterations, m_regularization,
+            m_useSGD, m_numCorrections, m_tolerance, m_UpdaterType, m_ValidateData, m_AddIntercept,
             m_UseFeatureScaling, m_GradientType, m_StepSize, m_Fraction);
     }
+
 
     /**
      * only values that are explicitly marked as Nullable are truly optional, the others are only checked for null so

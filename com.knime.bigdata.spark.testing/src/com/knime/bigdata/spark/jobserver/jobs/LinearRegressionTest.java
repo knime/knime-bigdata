@@ -45,7 +45,7 @@ import com.knime.bigdata.spark.jobserver.server.NormalizationSettingsFactory;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.SGDLearnerTask;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerTask;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -114,7 +114,7 @@ public class LinearRegressionTest {
             int numIterations = 10;
             final LinearRegressionModel model = LinearRegressionWithSGD.train(JavaRDD.toRDD(parsedData), numIterations);
 
-            final String jsonParams = SGDLearnerTask.paramsAsJason("in", new Integer[] {1,2}, 1, numIterations, 0d, true, null, null, UpdaterType.L1Updater, true, false, false,
+            final String jsonParams = LinearLearnerTask.paramsAsJason("in", new Integer[] {1,2}, 1, numIterations, 0d, true, null, null, UpdaterType.L1Updater, true, false, false,
     				GradientType.LeastSquaresGradient, 1.0, 1.0);
             final JobConfig config = new JobConfig(ConfigFactory.parseString(jsonParams));
             final LinearRegressionModel model2 = (new LinearRegressionWithSGDJob()).execute(null, config, parsedData);

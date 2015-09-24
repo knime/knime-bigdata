@@ -124,8 +124,8 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
         final MLlibSettings s = m_classCol.getSettings(data, mapping);
         final double regularization = m_regularization.getDoubleValue();
         final int noOfIterations = m_noOfIterations.getIntValue();
-        final SGDLearnerTask task =
-            new SGDLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
+        final LinearLearnerTask task =
+            new LinearLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
                 regularization, UpdaterType.L1Updater, true, false, false, GradientType.LeastSquaresGradient, 1.0, 1.0,
                 m_jobClassPath);
         @SuppressWarnings("unchecked")
