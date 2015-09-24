@@ -96,6 +96,8 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
         //remove first line
         debugString = debugString.replaceFirst(".*\n", "");
         debugString = debugString.replaceAll("\\n", "<br>");
+        debugString = debugString.replaceAll("<=", "&le");
+        debugString = debugString.replaceAll(">=", "&ge");
         debugString = debugString.replaceAll("\\s", "&nbsp;");
         buf.append(debugString);
         return buf.toString();
