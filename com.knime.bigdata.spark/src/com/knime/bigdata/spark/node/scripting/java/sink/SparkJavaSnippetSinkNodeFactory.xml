@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Sink" icon="../icon.png">
+	<name>Spark Java Snippet (Sink)</name>
+	<shortDescription></shortDescription>
+	<fullDescription>
+		<intro>
+			
+		</intro>
+	</fullDescription>
+
+	<ports>
+		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
+		<inPort index="0" name="Spark RDD">Spark RDD.</inPort>
+	</ports>
+</knimeNode>

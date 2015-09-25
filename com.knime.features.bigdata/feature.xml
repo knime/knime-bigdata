@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.knime.features.bigdata"
+      label="KNIME Big Data Connectors"
+      version="1.2.0.qualifier"
+      provider-name="KNIME.com, Zurich, Switzerland">
+
+   <description>
+      KNIME nodes for accessing Big Data infrastructure such as Hive, Impala, or HDFS.
+   </description>
+
+   <copyright>
+      Copyright by KNIME.com, Zurich, Switzerland
+All rights reserved.
+   </copyright>
+
+   <license url="">
+      All rights reserved.
+Copyright by 
+KNIME.com, Zurich, Switzerland
+You may not use, modify, publish, transmit, transfer or sell,
+reproduce, create derivative works from, distribute, perform,
+display, or in any way exploit any of the content, in whole 
+or in part, except as otherwise expressly permitted in writing
+by the copyright owner.
+In case of any questions, please contact KNIME.com at contact@knime.com
+   </license>
+
+   <plugin
+         id="com.knime.bigdata.cdh5"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.knime.bigdata.filehandling"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.knime.bigdata.hive"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.knime.bigdata.impala"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.knime.bigdata.scripting"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>

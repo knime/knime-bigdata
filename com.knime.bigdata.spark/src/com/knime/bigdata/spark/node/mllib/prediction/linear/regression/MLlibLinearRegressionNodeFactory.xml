@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
+    type="Learner" icon="icon.png">
+    <name>Spark Linear Regression</name>
+	<shortDescription>Linear regressionmodel learning performed in Spark.</shortDescription>
+	<fullDescription>
+		<intro>
+			This node applies the Apache Spark 
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#linear-least-squares-lasso-and-ridge-regression">Linear Regression</a> algorithm.
+			It outputs the the learned model for later application.
+			<p>
+            Please note that all data must be numeric, including the label column. 
+            Use the Spark Category To Number nodes to convert nominal values to
+            numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
+            </p>
+            <p>
+            Use the Spark Predictor node to apply the learned model to unseen data.
+            </p>
+		</intro>
+    	<option name="Number of iterations">
+            The number of iterations the method should run.
+        </option>
+        <option name="Regularizer">
+              The purpose of the <a href="http://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> is 
+              to encourage simple models and avoid overfitting. For more details on supported regularizers see the 
+              <a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#regularizers">MLlib documentation</a>.
+        </option>
+        <option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+        <option name="Class column">The classification column. Must be numeric.</option>
+	</fullDescription>
+
+    <ports>
+		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+		<inPort optional="true" index="1" name="Mapping dictionary">Spark RDD with the mapping dictionary of nominal values</inPort>
+        <outPort index="0" name="Linear Regression Model">Spark MLlib Linear Regression Model</outPort>
+    </ports>
+</knimeNode>

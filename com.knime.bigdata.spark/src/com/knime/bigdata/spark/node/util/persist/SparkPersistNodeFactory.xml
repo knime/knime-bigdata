@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    type="Manipulator" icon="icon.png">
+    <name>Spark Persist</name>
+    <shortDescription>Persists the incoming Spark RDD using the specified storage level.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node persists (caches) the incoming SparkRDD using the specified persistence level. The different storage levels
+            are described in detail in the 
+            <a href="http://spark.apache.org/docs/1.2.0/programming-guide.html#rdd-persistence">Spark documentation</a>.
+            <p>
+            Caching Spark RDDs might speed up operations that need to access the same RDD several times e.g. when 
+            working with the same RDD within a loop body in a KNIME workflow.
+            </p> 
+        </intro>
+        <option name="Storage level">
+            Defines the storage level to use for persisting the incoming Spark RDD. The available levels are:
+            <ul>
+                <li><b>Memory only:</b><br></br>Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in 
+                memory, some partitions will not be cached and will be recomputed on the fly each time they're needed. 
+                This is the default level.</li>
+                <li><b>Memory and disk:</b>Store RDD as deserialized Java objects in the JVM. If the RDD does not fit 
+                in memory, store the partitions that don't fit on disk, and read them from there when they're needed.
+                </li>
+                <li><b>Memory only serialized:</b>Store RDD as serialized Java objects (one byte array per partition). 
+                This is generally more space-efficient than deserialized objects, especially when using a 
+                <a href="http://spark.apache.org/docs/1.2.0/tuning.html">fast serializer</a>, but more CPU-intensive 
+                to read.</li>
+                <li><b>Memory and disk serialized:</b>Similar to MEMORY_ONLY_SER, but spill partitions that don't fit 
+                in memory to disk instead of recomputing them on the fly each time they're needed.</li>
+                <li><b>Disk only:</b>Store the RDD partitions only on disk.</li>
+                <li><b>Off heap (experimental):</b>Store RDD in serialized format in 
+                <a href="http://tachyon-project.org/">Tachyon</a>. Compared to MEMORY_ONLY_SER, OFF_HEAP reduces 
+                garbage collection overhead and allows executors to be smaller and to share a pool of memory, making it 
+                attractive in environments with large heaps or multiple concurrent applications. Furthermore, as the 
+                RDDs reside in Tachyon, the crash of an executor does not lead to losing the in-memory cache. In this 
+                mode, the memory in Tachyon is discardable. Thus, Tachyon does not attempt to reconstruct a block that 
+                it evicts from memory.</li>
+                <li><b>Custom:</b>Allows you to define your own persistence level using the custom storage parameters.</li>
+            </ul>
+        </option>
+        <option name="Custom Storage Parameter">
+            <ul>
+               <li><b>Use disk:</b>If RDD should be cached on disk.</li>
+               <li><b>Use memory:</b>If RDD should be cached in memory.</li>
+               <li><b>Use off heap:</b>If RDD should be cached off heap. This is an experimental option.</li>
+               <li><b>Deserialized:</b>If RDD should be cached in deserialized form.</li>
+               <li><b>Replication:</b>The number of cluster nodes the RDD should be cached on.</li>
+            </ul>
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark RDD">Spark RDD to persist.</inPort>
+        <outPort index="0" name="Persisted Spark RDD">The persisted Spark RDD.</outPort>
+    </ports>
+</knimeNode>
