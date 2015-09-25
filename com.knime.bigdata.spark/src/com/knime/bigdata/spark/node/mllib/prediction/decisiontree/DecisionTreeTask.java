@@ -41,7 +41,6 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkRDD;
-
 /**
  *
  * @author koetter
@@ -104,7 +103,8 @@ public class DecisionTreeTask implements Serializable {
             JobControler.startJobAndWaitForResult(m_context, DecisionTreeLearnerJob.class.getCanonicalName(),
                 learnerParams, exec);
 
-        return (DecisionTreeModel)result.getObjectResult();
+        DecisionTreeModel model = (DecisionTreeModel)result.getObjectResult();
+        return model;
     }
 
     /**

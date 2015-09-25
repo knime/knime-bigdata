@@ -96,10 +96,10 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
-//        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-//            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-//        }
+        //        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+        //        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+        //            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+        //        }
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
@@ -119,10 +119,13 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
         final int maxDepth = m_maxDepth.getIntValue();
         final int maxNoOfBins = m_maxNumberOfBins.getIntValue();
         final String qualityMeasure = m_qualityMeasure.getStringValue();
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), settings.getFeatueColIdxs(),
-            settings.getFatureColNames(), settings.getNominalFeatureInfo(), settings.getClassColName(),
-            settings.getClassColIdx(), settings.getNumberOfClasses(), maxDepth, maxNoOfBins, qualityMeasure);
+        final DecisionTreeTask task =
+            new DecisionTreeTask(data.getData(), settings.getFeatueColIdxs(), settings.getFatureColNames(),
+                settings.getNominalFeatureInfo(), settings.getClassColName(), settings.getClassColIdx(),
+                settings.getNumberOfClasses(), maxDepth, maxNoOfBins, qualityMeasure);
         final DecisionTreeModel treeModel = task.execute(exec);
+
+
         final MLlibDecisionTreeInterpreter interpreter = MLlibDecisionTreeInterpreter.getInstance();
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(treeModel, interpreter, settings))};
 
