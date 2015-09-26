@@ -109,7 +109,8 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
         final int col1Idx = getColIdx(tableSpec, m_col1);
         final int col2Idx = getColIdx(tableSpec, m_col2);
         final MLlibCorrelationMethod method = MLlibCorrelationMethod.get(m_method.getStringValue());
-        final CorrelationTask task = new CorrelationTask(data.getData(), new Integer[] {col1Idx, col2Idx}, method.getMethod(), null, true);
+        final CorrelationTask task = new CorrelationTask(data.getData(), new Integer[] {col1Idx, col2Idx},
+            method.getMethod(), null, false);
         final HalfDoubleMatrix corr = task.execute(exec);
         final BufferedDataContainer container = exec.createDataContainer(createResultSpec());
         container.addRowToTable(new DefaultRow(RowKey.createRowKey(0), new DoubleCell(corr.get(0, 0))));

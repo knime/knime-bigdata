@@ -389,7 +389,7 @@ public abstract class SparkNodeModel extends NodeModel {
                     }
                     final long endTime = System.currentTimeMillis();
                         final long durationTime = endTime - startTime;
-                    LOGGER.warn("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
+                    LOGGER.debug("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
                     m_namedRDDs.clear();
                 }
             });
@@ -397,7 +397,7 @@ public abstract class SparkNodeModel extends NodeModel {
                 //give the thread at least 1 seconds to delete the rdds
                 future.get(1, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
-                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+                LOGGER.info("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
                     + " was interrupted prior completion.");
             } catch (InterruptedException | ExecutionException e) {
                 LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
