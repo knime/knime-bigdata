@@ -12,7 +12,7 @@
 
 	<ports>
 		<inPort index="0" name="Hive query">Input data (Hive query).</inPort>
-		<inPort index="1" name="Spark context">Optional Spark context</inPort>
+		<!-- <inPort index="1" name="Spark context">Optional Spark context</inPort>  -->
 		<outPort index="0" name="Spark data">Spark RDD</outPort>
 	</ports>
 </knimeNode>

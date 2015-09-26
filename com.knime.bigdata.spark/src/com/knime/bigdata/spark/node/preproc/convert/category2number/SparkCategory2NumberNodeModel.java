@@ -68,10 +68,8 @@ import com.knime.bigdata.spark.jobserver.server.MappingType;
 import com.knime.bigdata.spark.jobserver.server.MyRecord;
 import com.knime.bigdata.spark.jobserver.server.NominalValueMapping;
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -136,7 +134,6 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
-        final KNIMESparkContext context = rdd.getContext();
         final DataTableSpec inputTableSpec = rdd.getTableSpec();
         final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
         final FilterResult result = m_cols.applyTo(inputTableSpec);
@@ -155,18 +152,17 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         //we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
         final DataColumnSpec[] mappingSpecs = createMappingSpecs(inputTableSpec, names);
-        final DataTableSpec firstSpec = new DataTableSpec(inputTableSpec, new DataTableSpec(mappingSpecs));
-        final SparkDataTable firstRDD = new SparkDataTable(context, outputTableName, firstSpec);
+        final DataTableSpec resultSpec = new DataTableSpec(inputTableSpec, new DataTableSpec(mappingSpecs));
 
         // the optional PMML in port (can be null)
         exec.setMessage("Create PMML model");
-        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(firstSpec);
+        final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(resultSpec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
         final Collection<TransformationDictionary> dicts = getTransformations(inputTableSpec, mapping);
         for (final TransformationDictionary dict : dicts) {
             outPMMLPort.addGlobalTransformations(dict);
         }
-        return new PortObject[]{new SparkDataPortObject(firstRDD), outPMMLPort};
+        return new PortObject[]{SparkNodeModel.createSparkPortObject(rdd, resultSpec, outputTableName), outPMMLPort};
     }
 
     private Collection<TransformationDictionary> getTransformations(final DataTableSpec inputTableSpec,

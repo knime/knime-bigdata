@@ -42,7 +42,6 @@ import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
@@ -115,13 +114,11 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component_");
         final String matrixName = SparkIDs.createRDDID();
         final String projectionMatrixName = SparkIDs.createRDDID();
-        final SparkDataTable projectionMatixRDD =
-                new SparkDataTable(data.getContext(), projectionMatrixName, projectedSpec);
-        final SparkDataTable matrixRDD = new SparkDataTable(data.getContext(), matrixName, matrixSpec);
         final PCATask task = new PCATask(data.getData(), settings.getFeatueColIdxs(), noOfComponents, matrixName, projectionMatrixName);
         task.execute(exec);
         exec.setMessage("PCA (SPARK) done.");
-        return new PortObject[]{new SparkDataPortObject(projectionMatixRDD), new SparkDataPortObject(matrixRDD)};
+        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName),
+            createSparkPortObject(data, matrixSpec, matrixName)};
     }
 
     /**

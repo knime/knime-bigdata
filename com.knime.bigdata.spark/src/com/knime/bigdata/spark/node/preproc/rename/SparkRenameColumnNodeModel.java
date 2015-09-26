@@ -64,7 +64,6 @@ import org.knime.core.node.util.ConvenienceMethods;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
@@ -111,9 +110,8 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject sparkRDD = (SparkDataPortObject)inObjects[0];
-        final SparkDataTable renamedRDD = new SparkDataTable(sparkRDD.getContext(), sparkRDD.getTableName(),
-            m_config.getNewSpec(sparkRDD.getTableSpec()));
-        return new PortObject[]{new SparkDataPortObject(renamedRDD)};
+        return new PortObject[]{SparkNodeModel.createSparkPortObject(sparkRDD,
+            m_config.getNewSpec(sparkRDD.getTableSpec()))};
     }
 
     /**

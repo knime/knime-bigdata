@@ -89,7 +89,7 @@ public class PMMLAssignTask implements Serializable {
      * @throws GenericKnimeSparkException
      */
     public void execute(final ExecutionContext exec, final SparkDataTable data, final CompiledModelPortObject pmml, final Integer[] colIdxs,
-        final boolean booleanValue, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
+        final boolean booleanValue, final String resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
         execute(exec, data, pmml.getBytecode(), pmml.getModelClassName(), colIdxs, booleanValue, resultRDD);
     }
 
@@ -106,14 +106,14 @@ public class PMMLAssignTask implements Serializable {
      */
     public void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD,
         final Map<String,byte[]> bytecode, final String mainClass, final Integer[] colIdxs,
-        final boolean appendProbabilities, final SparkDataTable resultRDD)
+        final boolean appendProbabilities, final String resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final KNIMESparkContext context = inputRDD.getContext();
         final UploadUtil util = new UploadUtil(context, (Serializable)bytecode, "bytecode");
         util.upload();
         try {
             final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, util.getServerFileName(), appendProbabilities,
-                mainClass, resultRDD.getID());
+                mainClass, resultRDD);
             exec.checkCanceled();
             JobControler.startJobAndWaitForResult(context, PMMLAssignJob.class.getCanonicalName(), predictorParams, exec);
         } finally {

@@ -178,4 +178,16 @@ public final class SparkUtil {
         }
         return map;
     }
+
+    /**
+     * @param vals the primitive booleans to convert to Object array
+     * @return the {@link Boolean} array representation
+     */
+    public static Boolean[] convert(final boolean[] vals) {
+        Boolean[] objVals = new Boolean[vals.length];
+        for (int i = 0, length = objVals.length; i < length; i++) {
+            objVals[i] = vals[i];
+        }
+        return objVals;
+    }
 }

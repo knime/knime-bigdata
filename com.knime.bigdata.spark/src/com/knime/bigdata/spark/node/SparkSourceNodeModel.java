@@ -30,7 +30,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 
@@ -57,7 +56,8 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      */
     protected SparkSourceNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final boolean deleteOnReset) {
-        super(addContextPort(inPortTypes), outPortTypes, deleteOnReset);
+        super(inPortTypes, outPortTypes, deleteOnReset);
+//        super(addContextPort(inPortTypes), outPortTypes, deleteOnReset);
     }
 
     /**
@@ -84,9 +84,9 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @throws InvalidSettingsException
      */
     public static KNIMESparkContext getContext(final Object[] in) throws InvalidSettingsException {
-        if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
-            return ((SparkContextProvider)in[in.length - 1]).getContext();
-        }
+//        if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
+//            return ((SparkContextProvider)in[in.length - 1]).getContext();
+//        }
         try {
             return KnimeContext.getSparkContext();
         } catch (Exception e) {

@@ -36,7 +36,7 @@ import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -100,11 +100,11 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final Integer[] rightIncludCols = SparkUtil.getColumnIndices(rightSpec, joiner.getRightIncluded(leftSpec));
         final JoinMode joinMode = m_settings.getJoinMode();
         final DataTableSpec outputSpec = joiner.getOutputSpec();
-        final SparkDataTable result = new SparkDataTable(context, outputSpec);
-        SparkJoinerTask task = new SparkJoinerTask(left.getData(), right.getData(), joinMode, leftJoinColumns,
-            rightJoinColumns, leftIncludCols, rightIncludCols, result.getID());
+        final String resultRDDName = SparkIDs.createRDDID();
+        final SparkJoinerTask task = new SparkJoinerTask(left.getData(), right.getData(), joinMode, leftJoinColumns,
+            rightJoinColumns, leftIncludCols, rightIncludCols, resultRDDName);
         task.execute(exec);
-        return new PortObject[] {new SparkDataPortObject(result)};
+        return new PortObject[] {createSparkPortObject(left, outputSpec, resultRDDName)};
     }
 
     /**
