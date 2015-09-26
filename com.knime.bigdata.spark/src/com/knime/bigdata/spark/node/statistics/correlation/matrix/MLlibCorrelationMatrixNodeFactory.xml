@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
-    icon="../correlation.png" type="Manipulator">
+    icon="../correlation.png" type="Other">
     <name>Spark Correlation Matrix</name>
     <shortDescription>Computes the correlation matrix for the selected input columns.</shortDescription>
     <fullDescription>
@@ -12,7 +12,10 @@
 	</fullDescription>
     <ports>
         <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation matrix for.</inPort>
-        <outPort index="0" name="Correlation matrix">Spark RDD representing the correlation matrix.</outPort>
+        <outPort index="0" name="Spark RDD correlation matrix">Spark RDD representing the correlation matrix.</outPort>
+        <outPort index="1" name="Correlation measure">Correlation variables in a square matrix</outPort>
+        <outPort name="Correlation Model" index="2"> A model containing the correlation measures. 
+        This model is appropriate to be read by the Spark Correlation Filter node.</outPort>
 	</ports>
 	<views>
         <view name="Correlation Matrix" index="0">Squared table view showing

@@ -112,7 +112,7 @@ implements BufferedDataTableHolder {
                 new PMCCPortObjectAndSpec(includeNames, correlationMatrix);
         final BufferedDataTable out = pmccModel.createCorrelationMatrix(exec);
         m_correlationTable = out;
-        return new PortObject[] {createSparkPortObject(data, resultSpec, resultRDD)};
+        return new PortObject[] {createSparkPortObject(data, resultSpec, resultRDD), out, pmccModel};
     }
 
     /** {@inheritDoc} */
@@ -125,6 +125,14 @@ implements BufferedDataTableHolder {
     @Override
     public void setInternalTables(final BufferedDataTable[] tables) {
         m_correlationTable = tables[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void resetInternal() {
+        m_correlationTable = null;
     }
 
     /**

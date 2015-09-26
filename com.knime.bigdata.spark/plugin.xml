@@ -344,6 +344,12 @@
             factory-class="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/statistics"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory"
+            id="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory">
+      </node>
       <!--
       <node
             category-path="/labs/spark"
