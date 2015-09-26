@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.statistics.compute;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,6 +11,7 @@ import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.StatisticsJob;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.statistics.compute.StatisticsTask;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 
