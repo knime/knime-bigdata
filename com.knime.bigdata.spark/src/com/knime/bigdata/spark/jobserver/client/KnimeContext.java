@@ -153,6 +153,7 @@ public class KnimeContext {
             //TODO: Upload the static jobs jar only if not exists
             //upload jar with our extensions
             JobControler.uploadJobJar(aContextContainer, SparkUtil.getJobJarPath());
+//            JobControler.uploadJobJar(aContextContainer, SparkJobRegistry.getInstance().getJobJarPath());
         }
     }
 
@@ -198,28 +199,17 @@ public class KnimeContext {
     }
 
     /**
-     * remove reference to named RDD from context
+     * remove reference to named RDD from context. Starts the job and does not wait for result.
      *
      * @param aContextContainer context configuration container
      * @param rddName RDD name reference
      */
     public static void deleteNamedRDDs(final KNIMESparkContext aContextContainer, final String... rddName) {
-        String jsonArgs =
-            JsonUtils.asJson(new Object[]{
-                ParameterConstants.PARAM_INPUT,
+        final String jsonArgs = JsonUtils.asJson(new Object[]{ ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE, NamedRDDUtilsJob.PARAM_INPUT_TABLES,
                     JsonUtils.toJsonArray((Object[])rddName)}});
         try {
-            JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
-                jsonArgs, null);
-            //just for testing:
-            //            Set<String> names = listNamedRDDs(aContextContainer);
-            //            int ix = 1;
-            //            for (String name : names){
-            //                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
-            //            }
-        } catch (CanceledExecutionException e) {
-            // impossible with null execution context
+            JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
         } catch (GenericKnimeSparkException e) {
             LOGGER.warn("Failed to remove reference to named RDD on server.");
         }

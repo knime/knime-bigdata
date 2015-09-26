@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.statistics.correlation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,12 +71,12 @@ public class CorrelationTask implements Serializable {
      *            returned, otherwise a matrix with all correlations between all given indices is constructed and stored
      *            in an RDD
      */
-    CorrelationTask(final SparkRDD inputRDD, final Integer[] aColIdxs, final CorrelationMethods aStatMethod,
+    public CorrelationTask(final SparkRDD inputRDD, final Integer[] aColIdxs, final CorrelationMethods aStatMethod,
         @Nullable final String aOutputTable, final boolean aReturnCorrelationMatrix) {
         this(inputRDD.getContext(), inputRDD.getID(), aColIdxs, aStatMethod, aOutputTable, aReturnCorrelationMatrix);
     }
 
-    CorrelationTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] aColIds,
+    public CorrelationTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] aColIds,
         final CorrelationMethods aStatMethod, @Nullable final String aOutputTable,
         final boolean aReturnCorrelationMatrix) {
         m_context = aContext;
@@ -87,7 +87,7 @@ public class CorrelationTask implements Serializable {
         m_returnCorrelationMatrix = aReturnCorrelationMatrix;
     }
 
-    HalfDoubleMatrix execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    public HalfDoubleMatrix execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String jasonParams = paramsAsJason();
         if (exec != null) {
             exec.checkCanceled();

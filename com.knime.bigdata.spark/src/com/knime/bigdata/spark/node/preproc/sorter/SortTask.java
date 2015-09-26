@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.preproc.sorter;
 
 import java.io.Serializable;
 
@@ -52,17 +52,21 @@ public class SortTask implements Serializable {
 
     private final String m_outputTableName;
 
+    private boolean m_missingToEnd;
+
     SortTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final Boolean[] aSortDirectionIsAscending,
-        final String aOutputTable) {
-        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, aSortDirectionIsAscending, aOutputTable);
+        final boolean missingToEnd, final String aOutputTable) {
+        this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, aSortDirectionIsAscending, missingToEnd,
+            aOutputTable);
     }
 
     SortTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
-        final Boolean[] aSortDirectionIsAscending, final String aOutputTable) {
+        final Boolean[] aSortDirectionIsAscending, final boolean missingToEnd, final String aOutputTable) {
         m_context = aContext;
         m_inputTableName = aInputRDD;
         m_colIdx = featureColIdxs;
         m_sortDirectionIsAscending = aSortDirectionIsAscending;
+        m_missingToEnd = missingToEnd;
         m_outputTableName = aOutputTable;
     }
 
@@ -75,7 +79,7 @@ public class SortTask implements Serializable {
     }
 
     String paramsAsJason() {
-        return paramsAsJason(m_inputTableName, m_colIdx, m_sortDirectionIsAscending, m_outputTableName);
+        return paramsAsJason(m_inputTableName, m_colIdx, m_sortDirectionIsAscending, m_missingToEnd, m_outputTableName);
     }
 
     /**
@@ -84,11 +88,12 @@ public class SortTask implements Serializable {
      * @return Json representation of parameters
      */
     static String paramsAsJason(final String aInputTableName, final Integer[] aColIdxs,
-        final Boolean[] aSortDirectionIsAscending, final String aOutputTable) {
+        final Boolean[] aSortDirectionIsAscending, final boolean missingToEnd, final String aOutputTable) {
 
         final Object[] inputParamas =
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])aColIdxs),
                 SortJob.PARAM_SORT_IS_ASCENDING, JsonUtils.toJsonArray((Object[])aSortDirectionIsAscending),
+                SortJob.PARAM_MISSING_TO_END, Boolean.valueOf(missingToEnd),
                 KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName};
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParamas,

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    icon="../correlation.png" type="Manipulator">
+    <name>Spark Correlation Matrix</name>
+    <shortDescription>Computes the correlation matrix for the selected input columns.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node computes the correlation matrix for the selected input columns using the 
+            <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">MLlib Statistics</a> package.
+		</intro>
+	</fullDescription>
+    <ports>
+        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation matrix for.</inPort>
+        <outPort index="0" name="Correlation matrix">Spark RDD representing the correlation matrix.</outPort>
+	</ports>
+	<views>
+        <view name="Correlation Matrix" index="0">Squared table view showing
+            the pair-wise correlation values of all columns. The color range varies from
+            dark red (strong negative correlation), over white (no correlation) to
+            dark blue (strong positive correlation). If a correlation value for a
+            pair of column is not available, the corresponding cell contains a missing
+            value (shown as cross in the color view).</view>
+    </views>
+</knimeNode>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.knime.bigdata.spark.SparkTypeConverter" name="SparkTypeConverter" schema="schema/SparkTypeConverter.exsd"/>
-   <extension-point id="com.knime.bigdata.spark.TemplateRepository" name="Spark Java Snippet Template Repository" schema="schema/TemplateRepository.exsd"/>
+   <extension-point id="SparkTypeConverter" name="SparkTypeConverter" schema="schema/SparkTypeConverter.exsd"/>
+   <extension-point id="TemplateRepository" name="Spark Java Snippet Template Repository" schema="schema/TemplateRepository.exsd"/>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
@@ -111,6 +111,13 @@
             locked="true"
             name="Database"
             path="/labs/spark/io">
+      </category>
+      <category
+            icon="icons/category_statistics.png"
+            level-id="statistics"
+            locked="true"
+            name="Statistics"
+            path="/labs/spark">
       </category>
    </extension>
    <extension
@@ -290,12 +297,6 @@
             id="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory">
       </node>
       <node
-            category-path="/labs/spark"
-            expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
-            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
-      </node>
-      <node
             category-path="/labs/spark/row"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
@@ -319,6 +320,37 @@
             factory-class="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/row"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory"
+            id="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/statistics"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory"
+            id="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/statistics"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory"
+            id="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/statistics"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory"
+            id="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory">
+      </node>
+      <!--
+      <node
+            category-path="/labs/spark"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
+            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
+      </node> -->
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">

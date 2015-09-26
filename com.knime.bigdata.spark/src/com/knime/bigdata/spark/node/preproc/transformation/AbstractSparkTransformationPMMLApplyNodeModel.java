@@ -36,7 +36,6 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
@@ -76,7 +75,6 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final CompiledModelPortObject pmml = getCompiledPMMLModel(exec, inObjects);
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
-        final String aOutputTableName = SparkIDs.createRDDID();
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         exec.setMessage("Create table specification");
         final Collection<String> missingFieldNames  = new LinkedList<String>();
@@ -85,12 +83,12 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
             setWarningMessage("Missing input fields: " + missingFieldNames);
         }
         final DataTableSpec resultSpec = SparkPMMLUtil.createResultSpec(data.getTableSpec(), cms, colIdxs);
-        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final PMMLTransformationTask task = new PMMLTransformationTask();
         exec.setMessage("Execute Spark job");
         exec.checkCanceled();
-        task.execute(exec, data.getData(), pmml, colIdxs, true, resultRDD);
-        return new PortObject[] {new SparkDataPortObject(resultRDD)};
+        final String aOutputTableName = SparkIDs.createRDDID();
+        task.execute(exec, data.getData(), pmml, colIdxs, true, aOutputTableName);
+        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
     }
 
 

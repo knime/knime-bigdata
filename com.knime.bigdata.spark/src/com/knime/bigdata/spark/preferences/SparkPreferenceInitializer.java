@@ -99,26 +99,50 @@ public class SparkPreferenceInitializer extends
      */
     @Override
     public void initializeDefaultPreferences() {
+//        SparkJobRegistry.getInstance().getJobJarPath();
+
         final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
         final Config config = ConfigFactory.load();
 
         //set default values
-        store.setDefault(PREF_JOB_SERVER, config.getString("spark.jobServer"));
-        store.setDefault(PREF_JOB_SERVER_PROTOCOL, config.getString("spark.jobServerProtocol"));
-        store.setDefault(PREF_JOB_SERVER_PORT, config.getInt("spark.jobServerPort"));
-        store.setDefault(PREF_USER_NAME, config.getString("spark.userName"));
-        final String password = config.hasPath("spark.password") ?
-            config.getString("spark.password") : "";
-        store.setDefault(PREF_PWD, password);
+        store.setDefault(PREF_JOB_SERVER, getPresetString(config, "spark.jobServer"));
+        store.setDefault(PREF_JOB_SERVER_PROTOCOL, getPresetString(config, "spark.jobServerProtocol"));
+        store.setDefault(PREF_JOB_SERVER_PORT, getPresetInt(config, "spark.jobServerPort", 8090));
+        store.setDefault(PREF_USER_NAME, getPresetString(config, "spark.userName"));
+        store.setDefault(PREF_PWD, getPresetString(config, "spark.password"));
 
-        final String contextName = config.hasPath("spark.contextName") ?
-            config.getString("spark.contextName") : "knime";
-        store.setDefault(PREF_CONTEXT_NAME, contextName);
-        store.setDefault(PREF_NUM_CPU_CORES, config.getInt("spark.numCPUCores"));
-        store.setDefault(PREF_MEM_PER_NODE, config.getString("spark.memPerNode"));
+        store.setDefault(PREF_CONTEXT_NAME, getPresetString(config, "spark.contextName", "knime"));
+        store.setDefault(PREF_NUM_CPU_CORES, getPresetInt(config, "spark.numCPUCores", 2));
+        store.setDefault(PREF_MEM_PER_NODE, getPresetString(config, "spark.memPerNode", "512m"));
 
-        store.setDefault(PREF_JOB_TIMEOUT, config.getInt("knime.jobTimeout"));
-        store.setDefault(PREF_JOB_CHECK_FREQUENCY, config.getInt("knime.jobCheckFrequency"));
-        store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, config.getBoolean("knime.deleteRDDsOnDispose"));
+        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 100));
+        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 2));
+        store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteRDDsOnDispose", true));
+    }
+
+
+    private String getPresetString(final Config config, final String string) {
+        return getPresetString(config, string, "");
+    }
+
+    private String getPresetString(final Config config, final String string, final String defaultVal) {
+        if (config.hasPath(string)) {
+            return config.getString(string);
+        }
+        return defaultVal;
+    }
+
+    private final int getPresetInt(final Config config, final String string, final int defaultVal) {
+        if (config.hasPath(string)) {
+            return config.getInt(string);
+        }
+        return defaultVal;
+    }
+
+    private final boolean getPresetBoolean(final Config config, final String string, final boolean defaultVal) {
+        if (config.hasPath(string)) {
+            return config.getBoolean(string);
+        }
+        return defaultVal;
     }
 }

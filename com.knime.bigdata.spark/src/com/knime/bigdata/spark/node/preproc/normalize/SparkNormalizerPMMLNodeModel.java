@@ -53,7 +53,6 @@ import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -178,13 +177,12 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         Arrays.fill(max, m_config.getMax());
         AffineTransConfiguration normConfig =
             new AffineTransConfiguration(includedCols, res.getScales(), res.getTranslations(), min, max, null);
-        final SparkDataTable resultRDD = new SparkDataTable(context, outputTableName, spec);
         final PMMLNormalizeTranslator trans =
                 new PMMLNormalizeTranslator(normConfig, new DerivedFieldMapper((PMMLPortObject)null));
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
         outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-        return new PortObject[]{new SparkDataPortObject(resultRDD), outPMMLPort};
+        return new PortObject[]{createSparkPortObject(rdd, outputTableName), outPMMLPort};
     }
 
     /**

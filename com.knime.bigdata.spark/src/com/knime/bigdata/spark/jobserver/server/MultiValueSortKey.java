@@ -37,14 +37,26 @@ public class MultiValueSortKey implements Serializable, Comparable<MultiValueSor
 
     final Boolean[] m_isSortAscending;
 
+    private Boolean m_aMissingToEnd;
+
+    /**
+     * @param aValues
+     * @param aIsSortAscending
+     * @param aMissingToEnd
+     */
+    public MultiValueSortKey(final Object[] aValues, final Boolean[] aIsSortAscending, final Boolean aMissingToEnd) {
+        m_values = aValues;
+        m_isSortAscending = aIsSortAscending;
+        m_aMissingToEnd = aMissingToEnd;
+    }
+
     /**
      *
      * @param aValues
      * @param aIsSortAscending
      */
     public MultiValueSortKey(final Object[] aValues, final Boolean[] aIsSortAscending) {
-        m_values = aValues;
-        m_isSortAscending = aIsSortAscending;
+        this(aValues, aIsSortAscending, false);
     }
 
     /**
@@ -56,6 +68,7 @@ public class MultiValueSortKey implements Serializable, Comparable<MultiValueSor
         int result = 1;
         result = prime * result + Arrays.hashCode(m_isSortAscending);
         result = prime * result + Arrays.hashCode(m_values);
+        result = prime * result + m_aMissingToEnd.hashCode();
         return result;
     }
 
@@ -80,6 +93,9 @@ public class MultiValueSortKey implements Serializable, Comparable<MultiValueSor
         if (!Arrays.equals(m_values, other.m_values)) {
             return false;
         }
+        if (m_aMissingToEnd != other.m_aMissingToEnd) {
+            return false;
+        }
         return true;
     }
 
@@ -97,23 +113,31 @@ public class MultiValueSortKey implements Serializable, Comparable<MultiValueSor
         }
         if (m_values[aLevel] == null || aOther.m_values[aLevel] == null) {
             if (m_values[aLevel] == null && aOther.m_values[aLevel] == null) {
-                return 0;
+                return compareTo(aOther, aLevel + 1);
             }
             int m = -1;
             if (m_values[aLevel] == null) {
                 m = 1;
             }
-            if (m_isSortAscending[aLevel]) {
-                return m;
+            if (m_aMissingToEnd) {
+                if (m > 0) {
+                    //this object is null
+                    return +1;
+                }
+                //the aOther object is null
+                return -1;
             }
-            return -1 * m;
+            if (m_isSortAscending[aLevel]) {
+                return -1 * m;
+            }
+            return m;
         }
         if (m_values[aLevel].equals(aOther.m_values[aLevel])) {
             return compareTo(aOther, aLevel + 1);
         }
         Object o1 = m_values[aLevel];
         Object o2 = aOther.m_values[aLevel];
-        if (o1 instanceof Number) {
+        if (o1 instanceof Number && o2 instanceof Number) {
             final boolean isSmaller = ((Number)o1).doubleValue() < ((Number)o2).doubleValue();
             if (isSmaller == m_isSortAscending[aLevel]) {
                 return -1;

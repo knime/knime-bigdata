@@ -34,7 +34,6 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
@@ -91,14 +90,14 @@ public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final CompiledModelPortObject pmml = (CompiledModelPortObject)inObjects[0];
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
-        final String aOutputTableName = SparkIDs.createRDDID();
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), pmml.getModel());
         final DataTableSpec resultSpec = SparkPMMLUtil.createResultSpec(data.getTableSpec(), cms, colIdxs);
-        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
+        final String aOutputTableName = SparkIDs.createRDDID();
         final PMMLPredictionTask assignTask = new PMMLPredictionTask();
-        assignTask.execute(exec, data.getData(), pmml, colIdxs, m_outputProbabilities.getBooleanValue(), resultRDD);
-        return new PortObject[] {new SparkDataPortObject(resultRDD)};
+        assignTask.execute(exec, data.getData(), pmml, colIdxs, m_outputProbabilities.getBooleanValue(),
+            aOutputTableName);
+        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
     }
 
     /**
