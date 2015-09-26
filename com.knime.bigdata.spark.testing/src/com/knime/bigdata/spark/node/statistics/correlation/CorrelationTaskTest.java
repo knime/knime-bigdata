@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node;
+package com.knime.bigdata.spark.node.statistics.correlation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
