@@ -71,11 +71,13 @@ public class MLlibCorrelationColumnNodeDialog extends NodeDialogPane {
         gbc.insets = new Insets(0, 0, 0, 0);
         gbc.gridx++;
         panel.add(m_method.getComponentPanel(), gbc);
+
+        gbc.gridy++;
         gbc.gridx = 0;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        gbc.gridy++;
         panel.add(m_col1.getComponentPanel(), gbc);
         gbc.gridy++;
         panel.add(m_col2.getComponentPanel(), gbc);

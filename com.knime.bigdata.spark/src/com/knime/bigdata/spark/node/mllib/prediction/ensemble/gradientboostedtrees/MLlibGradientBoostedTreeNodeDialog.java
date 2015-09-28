@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -41,8 +41,9 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  *
  * @author koetter
  */
-public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
-    private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
+public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
+
+    private final GradientBoostedTreeSettings m_settings = new GradientBoostedTreeSettings();
 
     private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
 
@@ -54,26 +55,37 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     /**
      *
      */
-    public MLlibDecisionTreeNodeDialog() {
+    public MLlibGradientBoostedTreeNodeDialog() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_treeSettings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_treeSettings.getMaxDepthComponent().getComponentPanel(), gbc);
+        panel.add(m_settings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_treeSettings.getQualityMeasureComponent().getComponentPanel(), gbc);
+        panel.add(m_settings.getMaxDepthComponent().getComponentPanel(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(m_settings.getLossFunctionComponent().getComponentPanel(), gbc);
         gbc.gridx++;
+        panel.add(m_settings.getIsClassificationComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getLearningRateComponent().getComponentPanel(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;
+        gbc.gridwidth = 3;
         // class column selection
         panel.add(m_classColumn.getComponentPanel(), gbc);
 
+        gbc.gridwidth=3;
         gbc.gridx = 0;
-        gbc.gridwidth=4;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
@@ -95,7 +107,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         for (DialogComponent c : m_components) {
             c.loadSettingsFrom(settings, tableSpecs);
         }
-        m_treeSettings.loadSettingsFrom(settings, tableSpecs[0]);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
     /**
@@ -107,6 +119,6 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         for (DialogComponent c : m_components) {
             c.saveSettingsTo(settings);
         }
-        m_treeSettings.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 }

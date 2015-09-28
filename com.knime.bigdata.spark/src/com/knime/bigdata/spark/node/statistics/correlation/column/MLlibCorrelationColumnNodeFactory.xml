@@ -3,15 +3,15 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
     icon="../correlation.png" type="Other">
     <name>Spark Linear Correlation</name>
-    <shortDescription>Computes the correlation between two columns.</shortDescription>
+    <shortDescription>Computes the correlation coefficient between two columns.</shortDescription>
     <fullDescription>
         <intro>
-            This node computes the correlation for two selected input columns using the 
+            This node computes the correlation coefficient for two selected input columns using the 
             <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">MLlib Statistics</a> package.
 		</intro>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation for.</inPort>
-        <outPort index="0" name="Correlation value">KNIME data table with the correlation value of the two columns.</outPort>
+        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation coefficient for.</inPort>
+        <outPort index="0" name="Correlation coefficient">KNIME data table with the correlation coefficient of the two columns.</outPort>
 	</ports>
 </knimeNode>

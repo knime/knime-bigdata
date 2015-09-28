@@ -350,6 +350,18 @@
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory">
       </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.randomforest.MLlibRandomForestNodeFactory">
+      </node>
+      <node
+            category-path="/labs/spark/mining"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory">
+      </node>
       <!--
       <node
             category-path="/labs/spark"

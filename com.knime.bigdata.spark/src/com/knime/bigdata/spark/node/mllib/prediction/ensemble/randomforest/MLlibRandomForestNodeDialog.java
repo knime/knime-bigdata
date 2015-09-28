@@ -18,12 +18,15 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
@@ -41,8 +44,9 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  *
  * @author koetter
  */
-public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
-    private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
+public class MLlibRandomForestNodeDialog extends NodeDialogPane {
+
+    private final RandomForestSettings m_settings = new RandomForestSettings();
 
     private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
 
@@ -54,26 +58,49 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     /**
      *
      */
-    public MLlibDecisionTreeNodeDialog() {
+    public MLlibRandomForestNodeDialog() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_treeSettings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
+        gbc.gridx = 0;
+        panel.add(m_settings.getNoOfTreesComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_treeSettings.getMaxDepthComponent().getComponentPanel(), gbc);
+        panel.add(m_settings.getMaxDepthComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_treeSettings.getQualityMeasureComponent().getComponentPanel(), gbc);
+        panel.add(m_settings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(m_settings.getFeatureSubsetStrategyComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getIsClassificationComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getQualityMeasureComponent().getComponentPanel(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        final JButton seedButton = new JButton("Seed");
+        seedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_settings.nextSeed();
+            }
+        });
+        final JPanel seedPanel = new JPanel();
+        seedPanel.add(m_settings.getSeedComponent().getComponentPanel());
+        seedPanel.add(seedButton);
+        panel.add(seedPanel, gbc);
         gbc.gridx++;
         gbc.weightx = 1;
         gbc.weighty = 0;
+        gbc.gridwidth = 2;
         // class column selection
         panel.add(m_classColumn.getComponentPanel(), gbc);
 
+        gbc.gridwidth=3;
         gbc.gridx = 0;
-        gbc.gridwidth=4;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
@@ -95,7 +122,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         for (DialogComponent c : m_components) {
             c.loadSettingsFrom(settings, tableSpecs);
         }
-        m_treeSettings.loadSettingsFrom(settings, tableSpecs[0]);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
     /**
@@ -107,6 +134,6 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         for (DialogComponent c : m_components) {
             c.saveSettingsTo(settings);
         }
-        m_treeSettings.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 }
