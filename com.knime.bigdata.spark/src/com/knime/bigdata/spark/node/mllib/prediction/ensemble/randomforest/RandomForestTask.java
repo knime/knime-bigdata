@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.randomforest;
+package com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import java.io.Serializable;
 import java.util.ArrayList;

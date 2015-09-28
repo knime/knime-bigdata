@@ -54,7 +54,7 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class MLlibNodeSettings {
-
+    //TODO: Return the internal node models for usage in dialog instead of using the static factory methods
     private final SettingsModelString m_classCol = createClassColModel();
 
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();

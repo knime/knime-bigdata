@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node.mllib.prediction.randomforest;
+package com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +17,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.RandomForestTask;
 import com.typesafe.config.ConfigFactory;
 
 /**

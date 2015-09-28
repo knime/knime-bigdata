@@ -123,7 +123,8 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
     @Override
     public String getSummary() {
         StringBuilder buf = new StringBuilder();
-        buf.append("Spark data object");
+        buf.append("Cols " + getTableSpec().getNumColumns()
+            + "Context " + getContext().getContextName() + " ID " + getData().getID());
         return buf.toString();
     }
 
