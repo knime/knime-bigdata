@@ -392,29 +392,28 @@ public class RDDUtilsInJava {
     }
 
     /**
-    *
-    * sub-select given columns by index from the given RDD and put result into new RDD
-    *
-    * @param aInputRdd Row RDD to be converted
-    * @param aColumnIndices column selector (and, possibly, re-ordering)
-    * @return RDD with selected columns and same number of rows as original
-    * @throws IllegalArgumentException if values are encountered that are not numeric
-    */
-   public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd,
-       final List<Integer> aColumnIndices) {
-       return aInputRdd.map(new Function<Row, Row>() {
-           private static final long serialVersionUID = 1L;
+     *
+     * sub-select given columns by index from the given RDD and put result into new RDD
+     *
+     * @param aInputRdd Row RDD to be converted
+     * @param aColumnIndices column selector (and, possibly, re-ordering)
+     * @return RDD with selected columns and same number of rows as original
+     * @throws IllegalArgumentException if values are encountered that are not numeric
+     */
+    public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd, final List<Integer> aColumnIndices) {
+        return aInputRdd.map(new Function<Row, Row>() {
+            private static final long serialVersionUID = 1L;
 
-           @Override
-           public Row call(final Row row) {
-               RowBuilder rb = RowBuilder.emptyRow();
-               for (int idx : aColumnIndices) {
-                   rb.add(row.get(idx));
-               }
-               return rb.build();
-           }
-       });
-   }
+            @Override
+            public Row call(final Row row) {
+                RowBuilder rb = RowBuilder.emptyRow();
+                for (int idx : aColumnIndices) {
+                    rb.add(row.get(idx));
+                }
+                return rb.build();
+            }
+        });
+    }
 
     /**
      * extracts the given keys from the given rdd and constructs a pair rdd from it
@@ -528,23 +527,27 @@ public class RDDUtilsInJava {
         return aContext.parallelize(rows);
     }
 
-
     /**
      *
      * @param aUserIx
      * @param aProductIx
-     * @param aRatingIx
+     * @param aRatingIx - optional ratings index, use -1 if no ratings are available
      * @param aInputRdd
      * @return ratings rdd
      */
-    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx, final int aRatingIx,
-        final JavaRDD<Row> aInputRdd) {
+    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx,
+        final int aRatingIx, final JavaRDD<Row> aInputRdd) {
         JavaRDD<Rating> ratings = aInputRdd.map(new Function<Row, Rating>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Rating call(final Row aRow) {
-                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils.getDouble(aRow, aRatingIx));
+                if (aRatingIx > -1) {
+                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils
+                        .getDouble(aRow, aRatingIx));
+                } else {
+                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), -1);
+                }
             }
         });
         return ratings;
@@ -552,6 +555,7 @@ public class RDDUtilsInJava {
 
     /**
      * converts ratings to rows
+     *
      * @param aInputRdd
      * @return JavaRDD of Rows
      */
@@ -569,56 +573,61 @@ public class RDDUtilsInJava {
         return rows;
     }
 
-
     /**
      * count the number of times each pair of values of the given two indices occurs in the rdd
+     *
      * @param aInputRdd
      * @param aIndex1 - first index in pair
      * @param aIndex2 - second index in pair
      * @return map with counts for all pairs of values that occur at least once
      */
-    public static Map<Tuple2<Object, Object>, Integer> aggregatePairs(final JavaRDD<Row> aInputRdd,
-        final int aIndex1, final int aIndex2) {
+    public static Map<Tuple2<Object, Object>, Integer> aggregatePairs(final JavaRDD<Row> aInputRdd, final int aIndex1,
+        final int aIndex2) {
         Map<Tuple2<Object, Object>, Integer> emptyMap = new HashMap<>();
 
-
         Map<Tuple2<Object, Object>, Integer> counts =
-            aInputRdd.aggregate(emptyMap, new Function2<Map<Tuple2<Object, Object>, Integer>, Row, Map<Tuple2<Object, Object>, Integer>>() {
-                private static final long serialVersionUID = 1L;
+            aInputRdd
+                .aggregate(
+                    emptyMap,
+                    new Function2<Map<Tuple2<Object, Object>, Integer>, Row, Map<Tuple2<Object, Object>, Integer>>() {
+                        private static final long serialVersionUID = 1L;
 
-                @Override
-                public Map<Tuple2<Object, Object>, Integer> call(final Map<Tuple2<Object, Object>, Integer> aAggregatedValues, final Row row)
-                    throws Exception {
+                        @Override
+                        public Map<Tuple2<Object, Object>, Integer> call(
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues, final Row row)
+                            throws Exception {
 
-                        Object val1 = row.get(aIndex1);
-                        Object val2 = row.get(aIndex2);
-                        final Tuple2<Object,Object> key = new Tuple2<>(val1, val2);
-                        final Integer count;
-                        if (aAggregatedValues.containsKey(key)) {
-                            count = aAggregatedValues.get(key) + 1;
-                        } else {
-                            count = 1;
+                            Object val1 = row.get(aIndex1);
+                            Object val2 = row.get(aIndex2);
+                            final Tuple2<Object, Object> key = new Tuple2<>(val1, val2);
+                            final Integer count;
+                            if (aAggregatedValues.containsKey(key)) {
+                                count = aAggregatedValues.get(key) + 1;
+                            } else {
+                                count = 1;
+                            }
+                            aAggregatedValues.put(key, count);
+                            return aAggregatedValues;
                         }
-                        aAggregatedValues.put(key, count);
-                    return aAggregatedValues;
-                }
-            }, new Function2<Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>>() {
-                private static final long serialVersionUID = 1L;
+                    },
+                    new Function2<Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>>() {
+                        private static final long serialVersionUID = 1L;
 
-                @Override
-                public Map<Tuple2<Object, Object>, Integer> call(final Map<Tuple2<Object, Object>, Integer> aAggregatedValues0,
-                    final Map<Tuple2<Object, Object>, Integer> aAggregatedValues1) throws Exception {
-                    for (Map.Entry<Tuple2<Object, Object>, Integer> entry : aAggregatedValues0.entrySet()) {
-                        if (aAggregatedValues1.containsKey(entry.getKey())) {
-                            final Integer val = aAggregatedValues1.remove(entry.getKey());
-                            aAggregatedValues0.put(entry.getKey(), entry.getValue() + val);
+                        @Override
+                        public Map<Tuple2<Object, Object>, Integer> call(
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues0,
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues1) throws Exception {
+                            for (Map.Entry<Tuple2<Object, Object>, Integer> entry : aAggregatedValues0.entrySet()) {
+                                if (aAggregatedValues1.containsKey(entry.getKey())) {
+                                    final Integer val = aAggregatedValues1.remove(entry.getKey());
+                                    aAggregatedValues0.put(entry.getKey(), entry.getValue() + val);
+                                }
+                            }
+                            //copy remaining values over
+                            aAggregatedValues0.putAll(aAggregatedValues1);
+                            return aAggregatedValues0;
                         }
-                    }
-                    //copy remaining values over
-                    aAggregatedValues0.putAll(aAggregatedValues1);
-                    return aAggregatedValues0;
-                }
-            });
+                    });
         return counts;
     }
 }

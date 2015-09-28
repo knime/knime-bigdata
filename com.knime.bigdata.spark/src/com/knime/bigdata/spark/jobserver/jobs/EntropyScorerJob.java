@@ -212,7 +212,6 @@ public class EntropyScorerJob extends KnimeSparkJob implements Serializable {
             final int size = computeClusterSize(cluster);
             patCount += size;
             final double e = clusterEntropy(cluster, size);
-            System.err.println("size: "+size+", entropy: "+e);
             entropy += size * e;
         }
         // normalizing over the number of objects in the reference set

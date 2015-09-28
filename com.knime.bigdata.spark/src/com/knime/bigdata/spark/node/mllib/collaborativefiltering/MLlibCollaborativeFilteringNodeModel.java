@@ -43,6 +43,7 @@ import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
  *
@@ -132,10 +133,12 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final double lambda = m_lambda.getDoubleValue();
         final CollaborativeFilteringTask task =
                 new CollaborativeFilteringTask(data.getData(), userIdx, productIdx, ratingIdx, lambda);
-        final CollaborativeFilteringModel model = task.execute(exec);
+        final String predictions = SparkIDs.createRDDID();
+        final CollaborativeFilteringModel model = task.execute(exec, predictions);
         exec.setMessage("Collaborative filtering (SPARK) done.");
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), resultSpec);
+
+        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), predictions, resultSpec);
 
         final SparkModel<CollaborativeFilteringModel> sparkModel = new SparkModel<CollaborativeFilteringModel>(
                 model, MatrixFactorizationModelInterpreter.getInstance(), settings);
@@ -167,7 +170,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         if (colIdx < 0) {
             throw new InvalidSettingsException(colType + " column with name: + " + colName + " not found in input data");
         }
-        return 0;
+        return colIdx;
     }
 
     /**

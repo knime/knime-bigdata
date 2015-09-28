@@ -37,11 +37,6 @@ public class CollaborativeFilteringModelFactory {
      * @return container with rank and references to the names of the named RDDs for user and product features
      */
     public static CollaborativeFilteringModel fromMatrixFactorizationModel(final SparkContext aContext, final KnimeSparkJob aJob, final MatrixFactorizationModel serverModel) {
-//        JavaSparkContext jsc = JavaSparkContext.fromSparkContext(aContext);
-//        JavaRDD<Tuple2<Object, double[]>> userFeatures = jsc.emptyRDD();
-//        userFeatures = userFeatures.wrapRDD(serverModel.userFeatures());
-//        JavaRDD<Tuple2<Object, double[]>>  productFeatures = jsc.emptyRDD();
-//        productFeatures = productFeatures.wrapRDD(serverModel.productFeatures());
         final String userFeaturesRDDName = "userFeatures_"+System.currentTimeMillis();
         final String productFeaturesRDDName = "productFeatures_"+System.currentTimeMillis();
         final CollaborativeFilteringModel model = new CollaborativeFilteringModel(serverModel.rank(), userFeaturesRDDName, productFeaturesRDDName);

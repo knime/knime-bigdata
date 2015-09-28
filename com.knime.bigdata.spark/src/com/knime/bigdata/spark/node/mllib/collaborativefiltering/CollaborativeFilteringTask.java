@@ -100,9 +100,9 @@ public class CollaborativeFilteringTask implements Serializable {
         m_ratingIdx = aRatingIdx;
     }
 
-    CollaborativeFilteringModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
+    CollaborativeFilteringModel execute(final ExecutionContext exec, final String aResultTableName) throws GenericKnimeSparkException,
         CanceledExecutionException {
-        final String learnerParams = paramsAsJason();
+        final String learnerParams = paramsAsJason(aResultTableName);
         if (exec != null) {
             exec.checkCanceled();
         }
@@ -112,10 +112,10 @@ public class CollaborativeFilteringTask implements Serializable {
         return (CollaborativeFilteringModel)result.getObjectResult();
     }
 
-    String paramsAsJason() {
+    String paramsAsJason(final String aResultTableName) {
         return paramsAsJason(m_inputTableName, m_userIdx, m_productIdx, m_ratingIdx, m_lambda, m_alpha, m_rank,
             m_numIterations, m_IsNonNegative, m_NumBlocks, m_NumUserBlocks,
-            m_NumProductBlocks, m_IsImplicitPrefs, m_randomSeed);
+            m_NumProductBlocks, m_IsImplicitPrefs, m_randomSeed, aResultTableName);
     }
 
     /**
@@ -136,7 +136,7 @@ public class CollaborativeFilteringTask implements Serializable {
     static String paramsAsJason(final String aInputTableName, final Integer aUserIndex, final Integer aProductIndex,
         final Integer aRatingIndex, @Nullable final Double aLambda, @Nullable final Double aAlpha, final Integer aRank,
         final Integer aNumIterations, final Boolean aIsNonNegative, final Integer aNumBlocks, final Integer aNumUserBlocks,
-        final Integer aNumProductBlocks, final Boolean aIsImplicitPrefs, final Long aSeed) {
+        final Integer aNumProductBlocks, final Boolean aIsImplicitPrefs, final Long aSeed, final String aResultTableName) {
 
         final List<Object> inputParams = new ArrayList<>();
         inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
@@ -201,7 +201,7 @@ public class CollaborativeFilteringTask implements Serializable {
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             inputParams.toArray(new Object[inputParams.size()]), ParameterConstants.PARAM_OUTPUT,
-            new String[]{}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultTableName}});
     }
 
     /**
