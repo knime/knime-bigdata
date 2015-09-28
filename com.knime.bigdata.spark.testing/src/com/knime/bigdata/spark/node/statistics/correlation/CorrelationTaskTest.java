@@ -7,13 +7,11 @@ import org.junit.Test;
 import org.knime.base.util.HalfDoubleMatrix;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.CorrelationJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.CorrelationMethods;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 
 /**

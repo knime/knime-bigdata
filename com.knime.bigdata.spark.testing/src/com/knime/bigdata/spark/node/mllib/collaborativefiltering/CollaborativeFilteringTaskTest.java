@@ -25,16 +25,23 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 	public static String paramsAsJason(final String aInputTableName,
 			final Integer aUserIndex, final Integer aProductIndex,
 			final Integer aRatingIndex, final Double aLambda) {
-		return CollaborativeFilteringTask.paramsAsJason(aInputTableName,
-				aUserIndex, aProductIndex, aRatingIndex, aLambda, null, null,
-				null, null, null, null, null, null, null);
+		return paramsAsJason(aInputTableName,
+				aUserIndex, aProductIndex, aRatingIndex, aLambda, null);
 	}
 
+	public static String paramsAsJason(final String aInputTableName,
+			final Integer aUserIndex, final Integer aProductIndex,
+			final Integer aRatingIndex, final Double aLambda, final String aPredictions) {
+		return CollaborativeFilteringTask.paramsAsJason(aInputTableName,
+				aUserIndex, aProductIndex, aRatingIndex, aLambda, null, null,
+				null, null, null, null, null, null, null, aPredictions);
+	}
+	
 	@Test
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 		CollaborativeFilteringTask testObj = new CollaborativeFilteringTask(
 				null, "inputRDD", 4, 0, 1, 2d);
-		final String params = testObj.paramsAsJason();
+		final String params = testObj.paramsAsJason("out");
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 
 		assertEquals("Configuration should be recognized as valid",
@@ -57,13 +64,26 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 		testObj.withAlpha(alpha).withRank(rank)
 				.withNumIterations(numIterations);
 
-		CollaborativeFilteringModel model = testObj.execute(null);
+		//learn and run predictor
+		CollaborativeFilteringModel model = testObj.execute(null, "predictions1");
 		assertTrue("model expected", model != null);
 
-		//run predictor
-		PredictionTask.predict(null, CONTEXT_ID, "tab1", model, new Integer[] {0,1,2}, "predictions");
+		Object[][] predictions1 = fetchResultTable(CONTEXT_ID, "predictions", MINI_RATING_TABLE.length);
+		
+		int numErrors = 0;
+		for (Object[] r : predictions1) {
+			if (((Double)r[2]).intValue() != Math.round(((Double)r[3]))) {
+				numErrors++;
+			}
+		}
+		assertTrue("unexpected large number of errors", numErrors < 0.01*predictions1.length);
+		
+		//predict again, with re-constructed model
+		PredictionTask.predict(null, CONTEXT_ID, "tab1", model, new Integer[] {0,1,2}, "predictions2");
 		// not sure what else to check here....
-		fetchResultTable(CONTEXT_ID, "predictions", 4);
-
+		Object[][] predictions2 = fetchResultTable(CONTEXT_ID, "predictions2", MINI_RATING_TABLE.length);
+		for (int r = 0; r<predictions1.length; r++) {
+			assertEquals("predictions should be the same", (Double)predictions1[r][3], (Double)predictions2[r][3], 0.001);
+		}
 	}
 }
