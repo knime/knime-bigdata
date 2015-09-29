@@ -187,10 +187,17 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
                             treePanel.repaint();
                             treePanel.revalidate();
                         } else {
-
                             dt.setName("Decision Tree (" + tree + ")");
                             treePanel.removeAll();
-                            treePanel.add(new JLabel("Showing Spark tree model number " + tree +":"), BorderLayout.NORTH);
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Showing Spark tree model number ");
+                            sb.append(tree);
+                            double w = getTreeWeight(aDecisionTreeModel.getModel(), tree - 1);
+                            if (w >= 0) {
+                                sb.append(" (weight: ").append(String.format("%3.2f", 100 * w)).append("%)");
+                            }
+                            sb.append(":");
+                            treePanel.add(new JLabel(sb.toString()), BorderLayout.NORTH);
                             treePanel.add(dt, BorderLayout.CENTER);
                             component.setName(dt.getName());
                             component.repaint();
@@ -202,5 +209,14 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
             }
         });
         return component;
+    }
+
+    double getTreeWeight(final M aDecisionTreeModel, final int aTree) {
+        final double[] weights = aDecisionTreeModel.treeWeights();
+        double sum = 0;
+        for (int i = 0; i < weights.length; i++) {
+            sum += weights[i];
+        }
+        return weights[aTree] / sum;
     }
 }

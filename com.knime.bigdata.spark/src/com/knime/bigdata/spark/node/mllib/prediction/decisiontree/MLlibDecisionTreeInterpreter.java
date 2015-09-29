@@ -197,25 +197,27 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
     static private PMMLPortObject createPMMLPortObjectSpec(final PMML pmml) throws Exception {
         pmml.setVersion("4.2");
         File temp = File.createTempFile("dtpmml", ".xml");
-        OutputStream os = new FileOutputStream(temp);
-        StreamResult result = new StreamResult(os);
-
-        JAXBUtil.marshalPMML(pmml, result);
-
-        PMMLPortObject m_pmmlPort;
         try {
-            PMMLImport pmmlImport = new PMMLImport(temp, false);
-            m_pmmlPort = pmmlImport.getPortObject();
-        } catch (IllegalArgumentException e) {
-            String msg = "PMML model \"" + pmml.getHeader() + "\" is not a valid PMML model:\n" + e.getMessage();
-            //setWarningMessage(msg);
-            throw new InvalidSettingsException(msg);
-        } catch (XmlException e) {
-            throw new InvalidSettingsException(e);
-        } catch (IOException e) {
-            throw new InvalidSettingsException(e);
+            try (OutputStream os = new FileOutputStream(temp)) {
+                StreamResult result = new StreamResult(os);
+
+                JAXBUtil.marshalPMML(pmml, result);
+            }
+            try {
+                PMMLImport pmmlImport = new PMMLImport(temp, false);
+                return pmmlImport.getPortObject();
+            } catch (IllegalArgumentException e) {
+                String msg = "PMML model \"" + pmml.getHeader() + "\" is not a valid PMML model:\n" + e.getMessage();
+                //setWarningMessage(msg);
+                throw new InvalidSettingsException(msg);
+            } catch (XmlException e) {
+                throw new InvalidSettingsException(e);
+            } catch (IOException e) {
+                throw new InvalidSettingsException(e);
+            }
+        } finally {
+            temp.delete();
         }
-        return m_pmmlPort;
     }
 
     private JComponent getTreePanel(final SparkModel<DecisionTreeModel> aDecisionTreeModel) {

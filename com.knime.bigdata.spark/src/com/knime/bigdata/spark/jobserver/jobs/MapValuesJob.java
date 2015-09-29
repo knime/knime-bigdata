@@ -45,7 +45,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
  */
 public class MapValuesJob extends KnimeSparkJob {
 
-    private final static Logger LOGGER = Logger.getLogger(FetchRowsJob.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(MapValuesJob.class.getName());
 
     /**The parameter that contains the {@link ColumnBasedValueMapping}. */
     public static final String PARAM_MAPPING = "mapping";
