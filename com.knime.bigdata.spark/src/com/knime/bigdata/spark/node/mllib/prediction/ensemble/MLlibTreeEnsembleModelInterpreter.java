@@ -20,10 +20,30 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.ensemble;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeView;
 
+import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeInterpreter;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
 
@@ -36,6 +56,8 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
     HTMLModelInterpreter<SparkModel<M>> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibTreeEnsembleModelInterpreter.class);
 
     /**
      * {@inheritDoc}
@@ -73,4 +95,112 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
         return buf.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JComponent[] getViews(final SparkModel<M> aDecisionTreeModel) {
+
+        return new JComponent[]{getTreePanel(aDecisionTreeModel), super.getViews(aDecisionTreeModel)[0]};
+    }
+
+    private JComponent getTreePanel(final SparkModel<M> aDecisionTreeModel) {
+
+        final DecisionTreeModel[] treeModel = aDecisionTreeModel.getModel().trees();
+
+        final JComponent component = new JPanel();
+        component.setLayout(new BorderLayout());
+        component.setBackground(NodeView.COLOR_BACKGROUND);
+
+        final int numTrees = treeModel.length;
+
+        final JPanel p = new JPanel(new FlowLayout());
+        final JButton b = new JButton("Show tree: ");
+        final SpinnerNumberModel spinnerModel = new SpinnerNumberModel();
+        spinnerModel.setValue(1);
+        final JSpinner numTreesSelector = new JSpinner(spinnerModel);
+        numTreesSelector.setMinimumSize(new Dimension(50, 20));
+        numTreesSelector.setPreferredSize(new Dimension(50, 20));
+        p.add(b);
+        p.add(numTreesSelector);
+        p.add(new JLabel(" of " + numTrees + "."));
+        spinnerModel.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                final int tree = ((Number)numTreesSelector.getValue()).intValue();
+                if (tree < 1) {
+                    spinnerModel.setValue(1);
+                }
+                if (tree > numTrees) {
+                    spinnerModel.setValue(numTrees);
+                }
+            }
+        });
+
+        component.add(p, BorderLayout.NORTH);
+        final JPanel treePanel = new JPanel();
+        treePanel.setLayout(new BorderLayout());
+        component.add(treePanel, BorderLayout.CENTER);
+        component.setName("Decision Tree View");
+        b.addActionListener(new ActionListener() {
+            /** {@inheritDoc} */
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                final int tree = ((Number)numTreesSelector.getValue()).intValue();
+                treePanel.removeAll();
+                treePanel.add(new JLabel("Converting decision tree #" + tree + " ..."), BorderLayout.NORTH);
+                treePanel.repaint();
+                treePanel.revalidate();
+                //TK_TODO: Add job cancel button to the dialog to allow users to stop the fetching job
+                final SwingWorker<JComponent, Void> worker = new SwingWorker<JComponent, Void>() {
+                    /** {@inheritDoc} */
+                    @Override
+                    protected JComponent doInBackground() throws Exception {
+                        return MLlibDecisionTreeInterpreter.getTreeView(treeModel[tree - 1]);
+                    }
+
+                    /** {@inheritDoc} */
+                    @Override
+                    protected void done() {
+                        JComponent dt = null;
+                        try {
+                            dt = super.get();
+                        } catch (ExecutionException | InterruptedException ee) {
+                            LOGGER.warn("Error converting Spark tree model, reason: " + ee.getMessage(), ee);
+                            final Throwable cause = ee.getCause();
+                            final String msg;
+                            if (cause != null) {
+                                msg = cause.getMessage();
+                            } else {
+                                msg = ee.getMessage();
+                            }
+                            treePanel.removeAll();
+                            treePanel.add(new JLabel("Error converting Spark tree model: " + msg), BorderLayout.NORTH);
+                            treePanel.repaint();
+                            treePanel.revalidate();
+                            return;
+                        }
+                        if (dt == null) {
+                            treePanel.removeAll();
+                            treePanel.add(new JLabel("Error converting Spark tree model " + tree
+                                + ". For details see log file."), BorderLayout.NORTH);
+                            treePanel.repaint();
+                            treePanel.revalidate();
+                        } else {
+
+                            dt.setName("Decision Tree (" + tree + ")");
+                            treePanel.removeAll();
+                            treePanel.add(new JLabel("Showing Spark tree model number " + tree +":"), BorderLayout.NORTH);
+                            treePanel.add(dt, BorderLayout.CENTER);
+                            component.setName(dt.getName());
+                            component.repaint();
+                            component.revalidate();
+                        }
+                    }
+                };
+                worker.execute();
+            }
+        });
+        return component;
+    }
 }

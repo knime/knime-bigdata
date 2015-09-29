@@ -20,13 +20,22 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.spark.mllib.pmml.export.PMMLModelExport;
@@ -41,6 +50,8 @@ import org.knime.base.node.mine.decisiontree2.PMMLDecisionTreeTranslator;
 import org.knime.base.node.mine.decisiontree2.model.DecisionTree;
 import org.knime.base.node.mine.decisiontree2.view.DecTreeGraphView;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeView;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
@@ -52,6 +63,8 @@ import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
  */
 public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkModel<DecisionTreeModel>> {
     //implements SparkModelInterpreter<SparkModel<DecisionTreeModel>> {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibDecisionTreeInterpreter.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -125,37 +138,63 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
      */
     @Override
     public JComponent[] getViews(final SparkModel<DecisionTreeModel> aDecisionTreeModel) {
-        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel.getModel());
+        return new JComponent[]{getTreePanel(aDecisionTreeModel), super.getViews(aDecisionTreeModel)[0]};
+    }
+
+    /**
+     * converts the given tree model into PMML and packs it into a JComponent
+     *
+     * @param aDecisionTreeModel
+     * @return displayable component
+     */
+    public static JComponent getTreeView(final DecisionTreeModel aDecisionTreeModel) {
+        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel);
+        return getTreeView(pmmlModel.pmml());
+    }
+
+    /**
+     * converts the given tree model into PMML and packs it into a JComponent
+     *
+     * @param aDecisionTreeModel
+     * @param aColNames
+     * @param aClassColName
+     * @return displayable component
+     */
+    static JComponent getTreeView(final DecisionTreeModel aDecisionTreeModel, final List<String> aColNames,
+        final String aClassColName) {
+        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel);
         PMML pmml = pmmlModel.pmml();
         //TODO - verify that we can really assume that the order is the same....
         List<DataField> fields = pmml.getDataDictionary().getDataFields();
-        final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
 
-        for (int i = 0; i < colNames.size(); i++) {
+        for (int i = 0; i < aColNames.size(); i++) {
             DataField field = fields.get(i);
-            field.setDisplayName(colNames.get(i));
+            field.setDisplayName(aColNames.get(i));
         }
-        fields.get(fields.size() - 1).setDisplayName(aDecisionTreeModel.getClassColumnName());
-        try {
-            PMMLPortObject outPMMLPort = createPMMLPortObjectSpec(pmml);
+        fields.get(fields.size() - 1).setDisplayName(aClassColName);
+        return getTreeView(pmml);
+    }
 
-            PMMLDecisionTreeTranslator trans = new PMMLDecisionTreeTranslator();
+    static JComponent getTreeView(final PMML aPMML) {
+        try {
+            final PMMLPortObject outPMMLPort = createPMMLPortObjectSpec(aPMML);
+
+            final PMMLDecisionTreeTranslator trans = new PMMLDecisionTreeTranslator();
             outPMMLPort.initializeModelTranslator(trans);
-            DecisionTree decTree = trans.getDecisionTree();
+            final DecisionTree decTree = trans.getDecisionTree();
 
             decTree.resetColorInformation();
-            JComponent view = new DecTreeGraphView(decTree.getRootNode(), decTree.getColorColumn()).getView();
+            final JComponent view = new DecTreeGraphView(decTree.getRootNode(), decTree.getColorColumn()).getView();
             view.setName("MLLib TreeView");
             //
-            return new JComponent[]{view, super.getViews(aDecisionTreeModel)[0]};
+            return view;
         } catch (Exception e) {
-            // TODO ????
-            e.printStackTrace();
+            LOGGER.warn("Error converting Spark tree model, reason: " + e.getMessage(), e);
         }
         return null;
     }
 
-    private PMMLPortObject createPMMLPortObjectSpec(final PMML pmml) throws Exception {
+    static private PMMLPortObject createPMMLPortObjectSpec(final PMML pmml) throws Exception {
         pmml.setVersion("4.2");
         File temp = File.createTempFile("dtpmml", ".xml");
         OutputStream os = new FileOutputStream(temp);
@@ -179,4 +218,82 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
         return m_pmmlPort;
     }
 
+    private JComponent getTreePanel(final SparkModel<DecisionTreeModel> aDecisionTreeModel) {
+
+        final DecisionTreeModel treeModel = aDecisionTreeModel.getModel();
+        final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
+        final String classColName = aDecisionTreeModel.getClassColumnName();
+
+        final JComponent component = new JPanel();
+        component.setLayout(new BorderLayout());
+        component.setBackground(NodeView.COLOR_BACKGROUND);
+
+        final JPanel p = new JPanel(new FlowLayout());
+        final JButton b = new JButton("Show tree");
+
+        p.add(b);
+
+        component.add(p, BorderLayout.NORTH);
+        final JPanel treePanel = new JPanel();
+        treePanel.setLayout(new BorderLayout());
+        component.add(treePanel, BorderLayout.CENTER);
+        component.setName("Decision Tree View");
+        b.addActionListener(new ActionListener() {
+            /** {@inheritDoc} */
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+
+                treePanel.removeAll();
+                treePanel.add(new JLabel("Converting decision tree ..."), BorderLayout.NORTH);
+                treePanel.repaint();
+                treePanel.revalidate();
+                //TK_TODO: Add job cancel button to the dialog to allow users to stop the fetching job
+                final SwingWorker<JComponent, Void> worker = new SwingWorker<JComponent, Void>() {
+                    /** {@inheritDoc} */
+                    @Override
+                    protected JComponent doInBackground() throws Exception {
+                        return MLlibDecisionTreeInterpreter.getTreeView(treeModel, colNames, classColName);
+                    }
+
+                    /** {@inheritDoc} */
+                    @Override
+                    protected void done() {
+                        JComponent dt = null;
+                        try {
+                            dt = super.get();
+                        } catch (ExecutionException | InterruptedException ee) {
+                            LOGGER.warn("Error converting Spark tree model, reason: " + ee.getMessage(), ee);
+                            final Throwable cause = ee.getCause();
+                            final String msg;
+                            if (cause != null) {
+                                msg = cause.getMessage();
+                            } else {
+                                msg = ee.getMessage();
+                            }
+                            treePanel.removeAll();
+                            treePanel.add(new JLabel("Error converting Spark tree model: " + msg), BorderLayout.NORTH);
+                            treePanel.repaint();
+                            treePanel.revalidate();
+                            return;
+                        }
+                        if (dt == null) {
+                            treePanel.removeAll();
+                            treePanel.add(new JLabel("Error converting Spark tree model. For details see log file."),
+                                BorderLayout.NORTH);
+                            treePanel.repaint();
+                            treePanel.revalidate();
+                        } else {
+                            treePanel.removeAll();
+                            treePanel.add(dt, BorderLayout.CENTER);
+                            component.setName(dt.getName());
+                            component.repaint();
+                            component.revalidate();
+                        }
+                    }
+                };
+                worker.execute();
+            }
+        });
+        return component;
+    }
 }
