@@ -107,6 +107,8 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
     private JComponent getTreePanel(final SparkModel<M> aDecisionTreeModel) {
 
         final DecisionTreeModel[] treeModel = aDecisionTreeModel.getModel().trees();
+        final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
+        final String classColName = aDecisionTreeModel.getClassColumnName();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());
@@ -156,7 +158,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
                     /** {@inheritDoc} */
                     @Override
                     protected JComponent doInBackground() throws Exception {
-                        return MLlibDecisionTreeInterpreter.getTreeView(treeModel[tree - 1]);
+                        return MLlibDecisionTreeInterpreter.getTreeView(treeModel[tree - 1], colNames, classColName);
                     }
 
                     /** {@inheritDoc} */
