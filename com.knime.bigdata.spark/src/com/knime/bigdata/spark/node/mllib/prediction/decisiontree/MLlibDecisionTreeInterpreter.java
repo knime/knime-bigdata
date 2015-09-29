@@ -28,7 +28,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
@@ -42,7 +44,6 @@ import org.apache.spark.mllib.pmml.export.PMMLModelExport;
 import org.apache.spark.mllib.pmml.export.PMMLModelExportFactory;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.xmlbeans.XmlException;
-import org.dmg.pmml.DataField;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.JAXBUtil;
 import org.knime.base.node.io.pmml.read.PMMLImport;
@@ -147,8 +148,8 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
      * @param aDecisionTreeModel
      * @return displayable component
      */
-    public static JComponent getTreeView(final DecisionTreeModel aDecisionTreeModel) {
-        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel);
+    public static JComponent _getTreeView(final DecisionTreeModel aDecisionTreeModel) {
+        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, new HashMap<Integer, String>());
         return getTreeView(pmmlModel.pmml());
     }
 
@@ -160,18 +161,23 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
      * @param aClassColName
      * @return displayable component
      */
-    static JComponent getTreeView(final DecisionTreeModel aDecisionTreeModel, final List<String> aColNames,
+    public static JComponent getTreeView(final DecisionTreeModel aDecisionTreeModel, final List<String> aColNames,
         final String aClassColName) {
-        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel);
-        PMML pmml = pmmlModel.pmml();
-        //TODO - verify that we can really assume that the order is the same....
-        List<DataField> fields = pmml.getDataDictionary().getDataFields();
-
-        for (int i = 0; i < aColNames.size(); i++) {
-            DataField field = fields.get(i);
-            field.setDisplayName(aColNames.get(i));
+        final Map<Integer, String> features = new HashMap<>();
+        int ctr =0;
+        for (String col : aColNames) {
+            features.put(ctr++, col.replace("_num", ""));
         }
-        fields.get(fields.size() - 1).setDisplayName(aClassColName);
+        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, features);
+        PMML pmml = pmmlModel.pmml();
+//        //TODO - verify that we can really assume that the order is the same....
+//        List<DataField> fields = pmml.getDataDictionary().getDataFields();
+//
+//        for (int i = 0; i < aColNames.size(); i++) {
+//            DataField field = fields.get(i);
+//            field.setDisplayName(aColNames.get(i));
+//        }
+//        fields.get(fields.size() - 1).setDisplayName(aClassColName);
         return getTreeView(pmml);
     }
 
