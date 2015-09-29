@@ -166,7 +166,7 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
         final Map<Integer, String> features = new HashMap<>();
         int ctr =0;
         for (String col : aColNames) {
-            features.put(ctr++, col.replace("_num", ""));
+            features.put(ctr++, col);
         }
         PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, features);
         PMML pmml = pmmlModel.pmml();
