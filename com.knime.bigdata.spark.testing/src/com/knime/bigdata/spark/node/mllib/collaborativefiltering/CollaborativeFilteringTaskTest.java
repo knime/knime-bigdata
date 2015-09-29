@@ -68,7 +68,7 @@ public class CollaborativeFilteringTaskTest extends SparkWithJobServerSpec {
 		CollaborativeFilteringModel model = testObj.execute(null, "predictions1");
 		assertTrue("model expected", model != null);
 
-		Object[][] predictions1 = fetchResultTable(CONTEXT_ID, "predictions", MINI_RATING_TABLE.length);
+		Object[][] predictions1 = fetchResultTable(CONTEXT_ID, "predictions1", MINI_RATING_TABLE.length);
 		
 		int numErrors = 0;
 		for (Object[] r : predictions1) {

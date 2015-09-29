@@ -80,7 +80,7 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
         final PMMLPortObject mapping = (PMMLPortObject)inData[1];
-        exec.setMessage("Starting Random Forest (SPARK) Learner");
+        exec.setMessage("Starting Gradient Boosted Tree (SPARK) Learner");
         exec.checkCanceled();
         final MLlibSettings settings = m_settings.getSettings(data, mapping);
         final GradientBoostedTreesTask task =

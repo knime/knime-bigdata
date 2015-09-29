@@ -61,7 +61,7 @@ public class MLlibGradientBoostedTreeInterpreter extends MLlibTreeEnsembleModelI
      */
     @Override
     public String getModelName() {
-        return "GradientBosstedTree";
+        return "GradientBoostedTree";
     }
 
 }
