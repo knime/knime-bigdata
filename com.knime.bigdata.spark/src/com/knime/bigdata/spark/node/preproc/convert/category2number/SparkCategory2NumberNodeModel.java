@@ -140,8 +140,10 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         final String[] includedCols = result.getIncludes();
         final Integer[] includeColIdxs = SparkUtil.getColumnIndices(inputTableSpec, includedCols);
         final String outputTableName = SparkIDs.createRDDID();
+        //TODO_TK
+        final boolean keepOriginalColumns = true;
         final Category2NumberConverterTask task =  new Category2NumberConverterTask(rdd.getData(), includeColIdxs,
-            includedCols, mappingType, outputTableName);
+            includedCols, mappingType, keepOriginalColumns, outputTableName);
         //create port object from mapping
         final MappedRDDContainer mapping = task.execute(exec);
         //these are all the column names of the original (selected) and the mapped columns

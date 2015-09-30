@@ -24,6 +24,7 @@ import org.knime.core.node.ExecutionMonitor;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
+import com.knime.bigdata.spark.jobserver.jobs.ConvertNominalValuesJob;
 import com.knime.bigdata.spark.jobserver.jobs.MapValuesJob;
 import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -47,21 +48,25 @@ public class Number2CategoryConverterTask {
 
     private ColumnBasedValueMapping m_map;
 
+    private final boolean m_keepOriginalColumns;
+
     /**
      * @param inputRDD input RDD
      * @param map the {@link ColumnBasedValueMapping}
+     * @param aKeepOriginalColumns keep original columns or not, default is true
      * @param aOutputRDD the name of the output RDD
      */
     public Number2CategoryConverterTask(final SparkDataTable inputRDD, final ColumnBasedValueMapping map,
-        final String aOutputRDD) {
-        this(inputRDD.getContext(), inputRDD.getID(), map, aOutputRDD);
+        final boolean aKeepOriginalColumns, final String aOutputRDD) {
+        this(inputRDD.getContext(), inputRDD.getID(), map, aKeepOriginalColumns, aOutputRDD);
     }
 
     Number2CategoryConverterTask(final KNIMESparkContext aContext, final String inputRDD,
-        final ColumnBasedValueMapping map, final String aOutputRDD) {
+        final ColumnBasedValueMapping map, final boolean aKeepOriginalColumns, final String aOutputRDD) {
         m_context = aContext;
         m_inputTableName = inputRDD;
         m_map = map;
+        m_keepOriginalColumns = aKeepOriginalColumns;
         m_outputTableName = aOutputRDD;
     }
 
@@ -81,7 +86,7 @@ public class Number2CategoryConverterTask {
     }
 
     String paramDef() throws GenericKnimeSparkException {
-        return paramDef(m_inputTableName, m_map, m_outputTableName);
+        return paramDef(m_inputTableName, m_map, m_keepOriginalColumns, m_outputTableName);
     }
 
     /**
@@ -93,17 +98,16 @@ public class Number2CategoryConverterTask {
      * @return Json String with parameter settings
      * @throws GenericKnimeSparkException
      */
-    static String
-        paramDef(final String inputTableName, final ColumnBasedValueMapping map, final String outputTableName)
-            throws GenericKnimeSparkException {
+    static String paramDef(final String inputTableName, final ColumnBasedValueMapping map,
+        final boolean aKeepOriginalColumns, final String outputTableName) throws GenericKnimeSparkException {
         if (map == null) {
             throw new NullPointerException("Column Value Mapping must not be null!");
         }
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{MapValuesJob.PARAM_MAPPING, JobConfig.encodeToBase64(map), KnimeSparkJob.PARAM_INPUT_TABLE,
-                inputTableName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
+                inputTableName, ConvertNominalValuesJob.PARAM_KEEP_ORIGINAL_COLUMNS, aKeepOriginalColumns},
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
     }
 
 }

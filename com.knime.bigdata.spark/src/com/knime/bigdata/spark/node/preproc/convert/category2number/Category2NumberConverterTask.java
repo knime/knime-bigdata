@@ -51,6 +51,8 @@ public class Category2NumberConverterTask {
 
     private final KNIMESparkContext m_context;
 
+    private final boolean m_keepOriginalColumns;
+
     /**
      * constructor - simply stores parameters
      *
@@ -58,10 +60,12 @@ public class Category2NumberConverterTask {
      * @param includeColIdxs - indices of the columns to include starting with 0
      * @param aIncludedColsNames
      * @param aMappingType - type of value mapping (global, per column or binary)
+     * @param aKeepOriginalColumns  keep original columns or not, default is true
      * @param aOutputRDD - table identifier (output data)
      */
     public Category2NumberConverterTask(final SparkRDD inputRDD, final Integer[] includeColIdxs,
-        final String[] aIncludedColsNames, final MappingType aMappingType, final String aOutputRDD) {
+        final String[] aIncludedColsNames, final MappingType aMappingType, final boolean aKeepOriginalColumns,
+        final String aOutputRDD) {
 
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
@@ -69,6 +73,7 @@ public class Category2NumberConverterTask {
         m_includeColNames = aIncludedColsNames;
         m_outputTableName = aOutputRDD;
         m_mappingType = aMappingType;
+        m_keepOriginalColumns = aKeepOriginalColumns;
     }
 
     /**
@@ -78,7 +83,7 @@ public class Category2NumberConverterTask {
      * @return NominalValueMapping the mapping
      * @throws Exception
      */
-    public MappedRDDContainer execute(final ExecutionMonitor exec) throws Exception {
+    MappedRDDContainer execute(final ExecutionMonitor exec) throws Exception {
         final String params = paramDef();
         exec.checkCanceled();
         final JobResult result =
@@ -89,7 +94,7 @@ public class Category2NumberConverterTask {
 
     private String paramDef() {
         return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName,
-            m_outputTableName);
+            m_outputTableName, m_keepOriginalColumns);
     }
 
     /**
@@ -100,17 +105,19 @@ public class Category2NumberConverterTask {
      * @param mappingType
      * @param inputTableName
      * @param outputTableName
+     * @param aKeepOriginalColumns  keep original columns or not, default is true
      * @return Json String with parameter settings
      */
-    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames, final String mappingType,
-        final String inputTableName, final String outputTableName) {
+    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
+        final String mappingType, final String inputTableName, final String outputTableName,
+        final boolean aKeepOriginalColumns) {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),
                 ParameterConstants.PARAM_COL_NAMES, JsonUtils.toJsonArray((Object[])includeColNames),
                 ConvertNominalValuesJob.PARAM_MAPPING_TYPE, mappingType, KnimeSparkJob.PARAM_INPUT_TABLE,
-                inputTableName}, ParameterConstants.PARAM_OUTPUT,
-            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
+                inputTableName, ConvertNominalValuesJob.PARAM_KEEP_ORIGINAL_COLUMNS, aKeepOriginalColumns},
+            ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputTableName}});
     }
 
 }
