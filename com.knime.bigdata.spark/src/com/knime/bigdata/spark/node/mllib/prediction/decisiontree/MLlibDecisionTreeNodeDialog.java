@@ -32,7 +32,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
@@ -43,13 +42,6 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  */
 public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
-
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
-
-    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
-
-    private final DialogComponent[] m_components =
-            new DialogComponent[] {m_cols, m_classColumn};
 
     /**
      *
@@ -70,7 +62,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         gbc.weightx = 1;
         gbc.weighty = 0;
         // class column selection
-        panel.add(m_classColumn.getComponentPanel(), gbc);
+        panel.add(m_treeSettings.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridwidth=4;
@@ -78,7 +70,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_cols.getComponentPanel();
+        final JPanel colsPanel = m_treeSettings.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
 
@@ -92,9 +84,6 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, tableSpecs);
-        }
         m_treeSettings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
@@ -104,9 +93,6 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        for (DialogComponent c : m_components) {
-            c.saveSettingsTo(settings);
-        }
         m_treeSettings.saveSettingsTo(settings);
     }
 }

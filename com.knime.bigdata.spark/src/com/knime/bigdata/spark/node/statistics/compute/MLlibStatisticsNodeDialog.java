@@ -31,7 +31,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
@@ -41,7 +40,7 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  * @author Tobias Koetter, KNIME.com
  */
 public class MLlibStatisticsNodeDialog extends NodeDialogPane {
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
 
     /**
      *
@@ -58,7 +57,7 @@ public class MLlibStatisticsNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        panel.add(m_cols.getComponentPanel(), gbc);
+        panel.add(m_settings.getFeatureColsComponent().getComponentPanel(), gbc);
         addTab("Settings", panel);
     }
 
@@ -67,7 +66,7 @@ public class MLlibStatisticsNodeDialog extends NodeDialogPane {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        m_cols.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -76,6 +75,6 @@ public class MLlibStatisticsNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
-        m_cols.loadSettingsFrom(settings, tableSpecs);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 }

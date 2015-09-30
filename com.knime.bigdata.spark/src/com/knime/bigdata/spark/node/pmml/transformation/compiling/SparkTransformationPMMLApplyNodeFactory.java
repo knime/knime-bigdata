@@ -16,24 +16,24 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Feb 13, 2015 by koetter
+ *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.mllib.pmml.predictor;
+package com.knime.bigdata.spark.node.pmml.transformation.compiling;
 
-import com.knime.bigdata.spark.node.mllib.pmml.PMMLAssignTask;
+import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeFactory;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
+ * @author dwk
  */
-public class PMMLPredictionTask extends PMMLAssignTask {
-
-    private static final long serialVersionUID = 1L;
+public class SparkTransformationPMMLApplyNodeFactory
+extends AbstractSparkTransformationPMMLApplyNodeFactory<SparkTransformationPMMLApplyNodeModel> {
 
     /**
-     * Constructor.
+     * {@inheritDoc}
      */
-    public PMMLPredictionTask() {
-        super(false);
+    @Override
+    public SparkTransformationPMMLApplyNodeModel createNodeModel() {
+        return new SparkTransformationPMMLApplyNodeModel();
     }
 }

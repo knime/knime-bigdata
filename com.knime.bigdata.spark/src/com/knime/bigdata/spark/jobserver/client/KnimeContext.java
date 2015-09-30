@@ -18,6 +18,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -95,8 +96,13 @@ public class KnimeContext {
         if (context == null) {
             throw new IllegalArgumentException("context must not be empty");
         }
+        LOGGER.debug("Check if context exists. Name: " + context.getContextName());
         //query server for existing context so that we can re-use it if there is one
-        JsonArray contexts = context.getREST().toJSONArray(context, CONTEXTS_PATH);
+        final JsonArray contexts = context.getREST().toJSONArray(context, CONTEXTS_PATH);
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Context details: " + context);
+            LOGGER.debug("Available contexts list: " + contexts);
+        }
         if (contexts.size() > 0) {
             for (int i = 0; i < contexts.size(); i++) {
                 if (context.getContextName().equals(contexts.getString(i))) {
@@ -104,6 +110,7 @@ public class KnimeContext {
                 }
             }
         }
+        LOGGER.debug("Context does not exists. Name: " + context.getContextName());
         return false;
     }
 
@@ -118,8 +125,14 @@ public class KnimeContext {
      */
     private static KNIMESparkContext createSparkContext(final KNIMESparkContext aContextContainer)
         throws GenericKnimeSparkException {
-
-        RestClient client = aContextContainer.getREST();
+        if (aContextContainer == null) {
+            throw new IllegalArgumentException("context must not be empty");
+        }
+        LOGGER.debug("Create new Spark context. Name: " + aContextContainer.getContextName());
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Context details: " + aContextContainer);
+        }
+        final RestClient client = aContextContainer.getREST();
         uploadJobJar(aContextContainer);
         // curl command would be:
         // curl -d ""

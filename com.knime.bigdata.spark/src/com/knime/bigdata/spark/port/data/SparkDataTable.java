@@ -69,7 +69,6 @@ public class SparkDataTable extends AbstractSparkRDD {
     /**
      * @param in
      */
-    @SuppressWarnings("resource")
     SparkDataTable(final ZipInputStream in) throws IOException {
         super(in);
         try {
@@ -90,7 +89,6 @@ public class SparkDataTable extends AbstractSparkRDD {
      * @throws IOException
      */
     @Override
-    @SuppressWarnings("resource")
     protected void save(final ZipOutputStream out) throws IOException {
         super.save(out);
         final ModelContent specModel = new ModelContent(TABLE_SPEC);

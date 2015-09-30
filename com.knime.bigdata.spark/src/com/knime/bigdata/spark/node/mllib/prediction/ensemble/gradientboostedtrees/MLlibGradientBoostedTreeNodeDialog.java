@@ -32,7 +32,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
@@ -44,13 +43,6 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
 
     private final GradientBoostedTreeSettings m_settings = new GradientBoostedTreeSettings();
-
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
-
-    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
-
-    private final DialogComponent[] m_components =
-            new DialogComponent[] {m_cols, m_classColumn};
 
     /**
      *
@@ -82,7 +74,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
         gbc.weighty = 0;
         gbc.gridwidth = 3;
         // class column selection
-        panel.add(m_classColumn.getComponentPanel(), gbc);
+        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridwidth=3;
         gbc.gridx = 0;
@@ -90,7 +82,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_cols.getComponentPanel();
+        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
 
@@ -104,9 +96,6 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, tableSpecs);
-        }
         m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
@@ -114,11 +103,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
-            throws InvalidSettingsException {
-        for (DialogComponent c : m_components) {
-            c.saveSettingsTo(settings);
-        }
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.saveSettingsTo(settings);
     }
 }

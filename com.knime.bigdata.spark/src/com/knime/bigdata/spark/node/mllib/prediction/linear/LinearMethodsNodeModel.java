@@ -28,19 +28,14 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -56,11 +51,7 @@ import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
  */
 public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeModel {
 
-    private final MLlibNodeSettings m_classCol = new MLlibNodeSettings(true);
-
-    private final SettingsModelInteger m_noOfIterations = createNumberOfIterationsModel();
-
-    private final SettingsModelDouble m_regularization = createRegularizationModel();
+    private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
 
     private Class<? extends AbstractRegularizationJob> m_jobClassPath;
 
@@ -74,24 +65,10 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
      */
     public LinearMethodsNodeModel(final Class<? extends AbstractRegularizationJob> jobClassPath,
         final SparkModelInterpreter<SparkModel<M>> interpreter) {
-        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
+        super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkModelPortObject.TYPE});
         m_jobClassPath = jobClassPath;
         m_interpreter = interpreter;
-    }
-
-    /**
-     * @return the maximum number of bins model
-     */
-    static SettingsModelIntegerBounded createNumberOfIterationsModel() {
-        return new SettingsModelIntegerBounded("numberOfIteration", 100, 1, Integer.MAX_VALUE);
-    }
-
-    /**
-     * @return the regularization model
-     */
-    static SettingsModelDouble createRegularizationModel() {
-        return new SettingsModelDouble("regularization", 0);
     }
 
     /**
@@ -99,15 +76,15 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        if (inSpecs == null || inSpecs.length != 2) {
-            throw new InvalidSettingsException("");
+        if (inSpecs == null || inSpecs.length < 1) {
+            throw new InvalidSettingsException("No input data available");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         //        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
         //      if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
         //          throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
         //      }
-        m_classCol.check(spec.getTableSpec());
+        m_settings.check(spec.getTableSpec());
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
     }
@@ -118,12 +95,11 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting " + m_interpreter.getModelName() + " learner");
         exec.checkCanceled();
-        final MLlibSettings s = m_classCol.getSettings(data, mapping);
-        final double regularization = m_regularization.getDoubleValue();
-        final int noOfIterations = m_noOfIterations.getIntValue();
+        final MLlibSettings s = m_settings.getSettings(data);
+        final double regularization = m_settings.getRegularization();
+        final int noOfIterations = m_settings.getNoOfIterations();
         final LinearLearnerTask task =
             new LinearLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
                 regularization, UpdaterType.L1Updater, true, false, false, GradientType.LeastSquaresGradient, 1.0, 1.0,
@@ -146,9 +122,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_classCol.saveSettingsTo(settings);
-        m_noOfIterations.saveSettingsTo(settings);
-        m_regularization.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -156,9 +130,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_classCol.validateSettings(settings);
-        m_noOfIterations.validateSettings(settings);
-        m_regularization.validateSettings(settings);
+        m_settings.validateSettings(settings);
     }
 
     /**
@@ -166,9 +138,7 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_classCol.loadSettingsFrom(settings);
-        m_noOfIterations.loadSettingsFrom(settings);
-        m_regularization.loadSettingsFrom(settings);
+        m_settings.loadSettingsFrom(settings);
     }
 
     /**

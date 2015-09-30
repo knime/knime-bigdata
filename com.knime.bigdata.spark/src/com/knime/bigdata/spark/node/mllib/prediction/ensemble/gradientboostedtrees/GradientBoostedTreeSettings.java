@@ -154,13 +154,13 @@ public class GradientBoostedTreeSettings extends DecisionTreeSettings {
     }
 
     /**
-     * @return the models
+     * @param tableSpec the original input {@link DataTableSpec}
+     * @throws InvalidSettingsException  if the settings are invalid
      */
     @Override
-    public Collection<SettingsModel> getModels() {
-        final List<SettingsModel> modelList = Arrays.asList(m_models);
-        modelList.addAll(super.getModels());
-        return modelList;
+    public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        super.check(tableSpec);
+        // nothing to check
     }
 
     /**
@@ -206,22 +206,22 @@ public class GradientBoostedTreeSettings extends DecisionTreeSettings {
     }
 
     /**
-     * @return the components
+     * @return the models
      */
     @Override
-    public Collection<DialogComponent> getComponents() {
-        final List<DialogComponent> list = Arrays.asList(m_components);
-        list.addAll(super.getComponents());
-        return list;
+    protected Collection<SettingsModel> getModels() {
+        final List<SettingsModel> modelList = Arrays.asList(m_models);
+        modelList.addAll(super.getModels());
+        return modelList;
     }
 
     /**
-     * @param tableSpec the original input {@link DataTableSpec}
-     * @throws InvalidSettingsException  if the settings are invalid
+     * @return the components
      */
     @Override
-    public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
-        super.check(tableSpec);
-        // nothing to check
+    protected Collection<DialogComponent> getComponents() {
+        final List<DialogComponent> list = Arrays.asList(m_components);
+        list.addAll(super.getComponents());
+        return list;
     }
 }

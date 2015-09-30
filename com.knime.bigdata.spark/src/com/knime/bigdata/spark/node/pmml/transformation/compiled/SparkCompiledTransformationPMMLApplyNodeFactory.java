@@ -18,26 +18,16 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.transformation.compiled;
+package com.knime.bigdata.spark.node.pmml.transformation.compiled;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeFactory;
 
 /**
  *
  * @author dwk
  */
 public class SparkCompiledTransformationPMMLApplyNodeFactory
-extends NodeFactory<SparkCompiledTransformationPMMLApplyNodeModel> {
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return null;
-    }
+extends AbstractSparkTransformationPMMLApplyNodeFactory<SparkCompiledTransformationPMMLApplyNodeModel> {
 
     /**
      * {@inheritDoc}
@@ -46,31 +36,4 @@ extends NodeFactory<SparkCompiledTransformationPMMLApplyNodeModel> {
     public SparkCompiledTransformationPMMLApplyNodeModel createNodeModel() {
         return new SparkCompiledTransformationPMMLApplyNodeModel();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<SparkCompiledTransformationPMMLApplyNodeModel> createNodeView(
-            final int viewIndex, final SparkCompiledTransformationPMMLApplyNodeModel nodeModel) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return false;
-    }
-
-
 }

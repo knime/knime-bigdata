@@ -18,7 +18,7 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.transformation.compiling;
+package com.knime.bigdata.spark.node.pmml.transformation.compiling;
 
 import java.io.IOException;
 
@@ -34,18 +34,19 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 
-import com.knime.bigdata.spark.node.preproc.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
+import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 /**
  * The PMML transformation node model.
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransformationPMMLApplyNodeModel
     implements MessageListener {
@@ -58,6 +59,16 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
     SparkTransformationPMMLApplyNodeModel() {
         super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec) inSpecs[0];
+//        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
+        return new PortObjectSpec[] {null};
     }
 
     /**

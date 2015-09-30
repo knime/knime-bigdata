@@ -18,11 +18,12 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.pmml;
+package com.knime.bigdata.spark.node.pmml;
 
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -30,8 +31,8 @@ import org.knime.core.node.ExecutionMonitor;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.UploadUtil;
-import com.knime.bigdata.spark.jobserver.jobs.PMMLAssignJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -42,55 +43,51 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class PMMLAssignTask implements Serializable {
+public abstract class PMMLAssignTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private boolean m_transformation;
+    private String m_jobClass;
 
     /**
-     * Constructor.
+     * @param jobClass the cjob class name
      */
-    protected PMMLAssignTask() {
-        this(false);
-    }
-
-    /**
-     * @param isTransformation <code>true</code> if the assignment is based on a PMML transformation
-     */
-    protected PMMLAssignTask(final boolean isTransformation) {
-        m_transformation = isTransformation;
+    protected PMMLAssignTask(final String jobClass) {
+        m_jobClass = jobClass;
     }
 
     private String predictorDef(final String inputID, final Integer[] colIdxs,
-        final String aTmpFileName, final boolean appendProbabilities, final String mainClass, final String outputID) throws GenericKnimeSparkException {
-        return JsonUtils.asJson(new Object[]{
-            ParameterConstants.PARAM_INPUT,
-            new Object[]{
-                KnimeSparkJob.PARAM_INPUT_TABLE, inputID,
-                    ParameterConstants.PARAM_MODEL_NAME, aTmpFileName,
-                    ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
-                    PMMLAssignJob.PARAM_APPEND_PROBABILITIES, Boolean.toString(appendProbabilities),
-                    PMMLAssignJob.PARAM_IS_TRANSFORMATION, Boolean.toString(m_transformation),
-                    //we have to replace the . with / since the key in the map uses / instead of .
-                    ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')},
-                ParameterConstants.PARAM_OUTPUT,
-                    new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputID}});
+        final String aTmpFileName, final String mainClass, final String outputID) throws GenericKnimeSparkException {
+        final Object[] inputParams = new Object[]{
+            KnimeSparkJob.PARAM_INPUT_TABLE, inputID,
+                ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aTmpFileName),
+                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs),
+                //we have to replace the . with / since the key in the map uses / instead of .
+                ParameterConstants.PARAM_MAIN_CLASS, mainClass.replace('.', '/')};
+        final Object[] additionalInputParams = getAdditionalInputParams();
+        final Object[] combinedInput = ArrayUtils.addAll(inputParams, additionalInputParams);
+        return JsonUtils.asJson(
+            new Object[]{ParameterConstants.PARAM_INPUT, combinedInput,
+                ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, outputID}});
     }
 
+
+    /**
+     * @return additional input parameters
+     */
+    protected abstract Object[] getAdditionalInputParams();
 
     /**
      * @param exec
      * @param data
      * @param pmml
      * @param colIdxs
-     * @param booleanValue
      * @param resultRDD
      * @throws CanceledExecutionException
      * @throws GenericKnimeSparkException
      */
     public void execute(final ExecutionContext exec, final SparkDataTable data, final CompiledModelPortObject pmml, final Integer[] colIdxs,
-        final boolean booleanValue, final String resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
-        execute(exec, data, pmml.getBytecode(), pmml.getModelClassName(), colIdxs, booleanValue, resultRDD);
+        final String resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
+        execute(exec, data, pmml.getBytecode(), pmml.getModelClassName(), colIdxs, resultRDD);
     }
 
     /**
@@ -99,23 +96,20 @@ public class PMMLAssignTask implements Serializable {
      * @param bytecode
      * @param mainClass
      * @param colIdxs
-     * @param appendProbabilities
      * @param resultRDD
      * @throws GenericKnimeSparkException
      * @throws CanceledExecutionException
      */
     public void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD,
-        final Map<String,byte[]> bytecode, final String mainClass, final Integer[] colIdxs,
-        final boolean appendProbabilities, final String resultRDD)
+        final Map<String,byte[]> bytecode, final String mainClass, final Integer[] colIdxs, final String resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final KNIMESparkContext context = inputRDD.getContext();
         final UploadUtil util = new UploadUtil(context, (Serializable)bytecode, "bytecode");
         util.upload();
         try {
-            final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, util.getServerFileName(), appendProbabilities,
-                mainClass, resultRDD);
+            final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, util.getServerFileName(), mainClass, resultRDD);
             exec.checkCanceled();
-            JobControler.startJobAndWaitForResult(context, PMMLAssignJob.class.getCanonicalName(), predictorParams, exec);
+            JobControler.startJobAndWaitForResult(context, m_jobClass, predictorParams, exec);
         } finally {
             util.cleanup();
         }
