@@ -16,24 +16,25 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Feb 13, 2015 by koetter
+ *   Created on 29.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.transformation;
+package com.knime.bigdata.spark.node.pmml.transformation;
 
-import com.knime.bigdata.spark.node.mllib.pmml.PMMLAssignTask;
+import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class PMMLTransformationTask extends PMMLAssignTask {
+public class SparkTransformationPMMLApplyNodeDialog extends DefaultNodeSettingsPane {
 
-    private static final long serialVersionUID = 1L;
 
     /**
-     * Transformation task.
+     * Constructor.
      */
-    public PMMLTransformationTask() {
-        super(true);
+    public SparkTransformationPMMLApplyNodeDialog() {
+        addDialogComponent(new DialogComponentBoolean(AbstractSparkTransformationPMMLApplyNodeModel.createReplaceModel(),
+            "Replace original columns"));
     }
 }

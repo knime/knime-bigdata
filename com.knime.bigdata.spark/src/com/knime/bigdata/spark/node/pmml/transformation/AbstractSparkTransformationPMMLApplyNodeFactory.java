@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 03.08.2015 by dwk
+ *   Created on 30.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.transformation.compiling;
+package com.knime.bigdata.spark.node.pmml.transformation;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -26,36 +26,10 @@ import org.knime.core.node.NodeView;
 
 /**
  *
- * @author dwk
+ * @author Tobias Koetter, KNIME.com
+ * @param <N> the {@link AbstractSparkTransformationPMMLApplyNodeModel} implementation
  */
-public class SparkTransformationPMMLApplyNodeFactory
-extends NodeFactory<SparkTransformationPMMLApplyNodeModel> {
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparkTransformationPMMLApplyNodeModel createNodeModel() {
-        return new SparkTransformationPMMLApplyNodeModel();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<SparkTransformationPMMLApplyNodeModel> createNodeView(
-            final int viewIndex, final SparkTransformationPMMLApplyNodeModel nodeModel) {
-        return null;
-    }
-
+public abstract class AbstractSparkTransformationPMMLApplyNodeFactory<N extends AbstractSparkTransformationPMMLApplyNodeModel> extends NodeFactory<N> {
     /**
      * {@inheritDoc}
      */
@@ -68,9 +42,24 @@ extends NodeFactory<SparkTransformationPMMLApplyNodeModel> {
      * {@inheritDoc}
      */
     @Override
+    public NodeView<N> createNodeView(final int viewIndex, final N nodeModel) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected boolean hasDialog() {
         return false;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return null;
+//        return new SparkTransformationPMMLApplyNodeDialog();
+    }
 }

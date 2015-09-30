@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.pmml.converter;
+package com.knime.bigdata.spark.node.pmml.converter;
 
 import java.io.File;
 import java.util.LinkedHashSet;

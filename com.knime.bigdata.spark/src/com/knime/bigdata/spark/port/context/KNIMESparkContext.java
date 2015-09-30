@@ -461,7 +461,6 @@ public class KNIMESparkContext implements Serializable {
         buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + getUser() + "</tt><br><br>");
         buf.append("<strong>Context</strong><hr>");
         buf.append("<strong>ID:</strong>&nbsp;&nbsp;<tt>" + getContextName() + "</tt><br>");
-        //TODO: We might want to hide this information since we only support one context
         buf.append("<strong>Number of cores:</strong>&nbsp;&nbsp;<tt>");
         final int numCpuCores = getNumCpuCores();
         buf.append(numCpuCores < 0 ? "unknown" : numCpuCores);

@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.pmml.predictor;
+package com.knime.bigdata.spark.node.pmml.predictor;
 
 import java.awt.Dimension;
 

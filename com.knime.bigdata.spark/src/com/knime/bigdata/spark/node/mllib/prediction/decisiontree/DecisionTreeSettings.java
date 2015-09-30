@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -42,12 +43,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class DecisionTreeSettings {
+public class DecisionTreeSettings extends MLlibNodeSettings {
 
     private final SettingsModelInteger m_maxDepthModel =
             new SettingsModelIntegerBounded("maxDepth", 5, 1, Integer.MAX_VALUE);
@@ -72,9 +74,10 @@ public class DecisionTreeSettings {
         m_maxNoOfBinsComponent, m_qualityMeasureComponent, m_isClassificationComponent};
 
     /**
-     *
+     * Constructor
      */
     public DecisionTreeSettings() {
+        super(true);
         m_isClassificationModel.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(final ChangeEvent e) {
@@ -105,9 +108,20 @@ public class DecisionTreeSettings {
     }
 
     /**
+     * @param tableSpec the original input {@link DataTableSpec}
+     * @throws InvalidSettingsException  if the settings are invalid
+     */
+    @Override
+    public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        super.check(tableSpec);
+    }
+
+    /**
      * @param settings the {@link NodeSettingsWO} to write to
      */
+    @Override
     public void saveSettingsTo(final NodeSettingsWO settings) {
+        super.saveSettingsTo(settings);
         for (SettingsModel m : m_models) {
             m.saveSettingsTo(settings);
         }
@@ -117,18 +131,12 @@ public class DecisionTreeSettings {
      * @param settings the {@link NodeSettingsRO} to read from
      * @throws InvalidSettingsException  if the settings are invalid
      */
+    @Override
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        super.validateSettings(settings);
         for (SettingsModel m : m_models) {
             m.validateSettings(settings);
         }
-    }
-
-    /**
-     * @param tableSpec the original input {@link DataTableSpec}
-     * @throws InvalidSettingsException  if the settings are invalid
-     */
-    public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
-        //nothing to check
     }
 
     /**
@@ -136,8 +144,10 @@ public class DecisionTreeSettings {
      * @param tableSpecs input {@link DataTableSpec}
      * @throws NotConfigurableException if the settings are invalid
      */
+    @Override
     public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
             throws NotConfigurableException {
+        super.loadSettingsFrom(settings, tableSpecs);
         for (DialogComponent c : m_components) {
             c.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
         }
@@ -147,17 +157,12 @@ public class DecisionTreeSettings {
      * @param settings the {@link NodeSettingsRO} to read from
      * @throws InvalidSettingsException if the settings are invalid
      */
+    @Override
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        super.loadSettingsFrom(settings);
         for (SettingsModel m : m_models) {
             m.loadSettingsFrom(settings);
         }
-    }
-
-    /**
-     * @return the models
-     */
-    public Collection<SettingsModel> getModels() {
-        return Arrays.asList(m_models);
     }
 
     /**
@@ -179,13 +184,6 @@ public class DecisionTreeSettings {
      */
     public SettingsModelString getQualityMeasureModel() {
         return m_qualityMeasure;
-    }
-
-    /**
-     * @return the components
-     */
-    public Collection<DialogComponent> getComponents() {
-        return Arrays.asList(m_components);
     }
 
     /**
@@ -228,5 +226,25 @@ public class DecisionTreeSettings {
      */
     public DialogComponent getIsClassificationComponent() {
         return m_isClassificationComponent;
+    }
+
+    /**
+     * @return the models
+     */
+    @Override
+    protected Collection<SettingsModel> getModels() {
+        final List<SettingsModel> modelList = Arrays.asList(m_models);
+        modelList.addAll(super.getModels());
+        return modelList;
+    }
+
+    /**
+     * @return the components
+     */
+    @Override
+    protected Collection<DialogComponent> getComponents() {
+        final List<DialogComponent> list = Arrays.asList(m_components);
+        list.addAll(super.getComponents());
+        return list;
     }
 }

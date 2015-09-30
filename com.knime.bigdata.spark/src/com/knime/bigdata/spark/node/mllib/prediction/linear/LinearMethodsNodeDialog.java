@@ -32,9 +32,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
@@ -44,20 +41,8 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  * @author koetter
  */
 public class LinearMethodsNodeDialog extends NodeDialogPane {
-    private final SettingsModelIntegerBounded m_maxNumberOfIterations =
-            LinearMethodsNodeModel.createNumberOfIterationsModel();
-    private final DialogComponentNumber m_maxNoBins = new DialogComponentNumber(m_maxNumberOfIterations,
-        "Number of iterations: ", 10, createFlowVariableModel(m_maxNumberOfIterations));
 
-    private final DialogComponentNumber m_regularization =
-            new DialogComponentNumber(LinearMethodsNodeModel.createRegularizationModel(), "Regularizer: ", 25);
-
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
-
-    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
-
-    private final DialogComponent[] m_components =
-            new DialogComponent[] {m_maxNoBins, m_regularization, m_cols, m_classColumn};
+    private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
 
     /**
      *
@@ -69,25 +54,21 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_maxNoBins.getComponentPanel(), gbc);
+        panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_regularization.getComponentPanel(), gbc);
+        panel.add(m_settings.getRegularizationComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
 
-        gbc.gridwidth=2;
+        gbc.gridwidth=3;
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_cols.getComponentPanel();
+        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
-
-        gbc.gridy++;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        // class column selection
-        panel.add(m_classColumn.getComponentPanel(), gbc);
 
         addTab("Settings", panel);
     }
@@ -99,9 +80,7 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] specs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, specs);
-        }
+        m_settings.loadSettingsFrom(settings, specs[0]);
     }
 
     /**
@@ -110,8 +89,6 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        for (DialogComponent c : m_components) {
-            c.saveSettingsTo(settings);
-        }
+        m_settings.saveSettingsTo(settings);
     }
 }

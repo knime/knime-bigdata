@@ -92,4 +92,11 @@ public class KNIMEConfigContainer {
     public static boolean deleteRDDsOnDispose() {
         return PREFERENCE_STORE.getBoolean(SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE);
     }
+
+    /**
+     * @return <code>true</code> if verbose logging is enabled
+     */
+    public static boolean verboseLogging() {
+        return PREFERENCE_STORE.getBoolean(SparkPreferenceInitializer.PREF_VERBOSE_LOGGING);
+    }
 }

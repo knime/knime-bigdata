@@ -56,8 +56,7 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      */
     protected SparkSourceNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final boolean deleteOnReset) {
-        super(inPortTypes, outPortTypes, deleteOnReset);
-//        super(addContextPort(inPortTypes), outPortTypes, deleteOnReset);
+        super(addContextPort(inPortTypes), outPortTypes, deleteOnReset);
     }
 
     /**
@@ -65,17 +64,18 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @return the input {@link PortType} array plus the {@link SparkContextPortObject} type as last port
      */
     public static PortType[] addContextPort(final PortType[] inTypes) {
-        final PortType[] types;
-        if (inTypes == null) {
-            types = new PortType[1];
-        } else {
-            types = new PortType[inTypes.length + 1];
-            for (int i = 0, length = inTypes.length; i < length; i++) {
-                types[i] = inTypes[i];
-            }
-        }
-        types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
-        return types;
+        return inTypes;
+//        final PortType[] types;
+//        if (inTypes == null) {
+//            types = new PortType[1];
+//        } else {
+//            types = new PortType[inTypes.length + 1];
+//            for (int i = 0, length = inTypes.length; i < length; i++) {
+//                types[i] = inTypes[i];
+//            }
+//        }
+//        types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
+//        return types;
     }
 
     /**

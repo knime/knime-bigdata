@@ -32,7 +32,6 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -45,8 +44,6 @@ import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
  * @author knime
  */
 public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
-
-    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(true);
 
     private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
 
@@ -75,7 +72,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
         //            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
         //        }
         final DataTableSpec tableSpec = spec.getTableSpec();
-        m_settings.check(tableSpec);
+        m_treeSettings.check(tableSpec);
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
     }
@@ -89,7 +86,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
         final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting Decision Tree (SPARK) Learner");
         exec.checkCanceled();
-        final MLlibSettings settings = m_settings.getSettings(data, mapping);
+        final MLlibSettings settings = m_treeSettings.getSettings(data, mapping);
         final int maxDepth = m_treeSettings.getMaxDepth();
         final int maxNoOfBins = m_treeSettings.getMaxNoOfBins();
         final String qualityMeasure = m_treeSettings.getQualityMeasure();
@@ -117,7 +114,6 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
         m_treeSettings.saveSettingsTo(settings);
     }
 
@@ -126,7 +122,6 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
         m_treeSettings.validateSettings(settings);
     }
 
@@ -135,7 +130,6 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
         m_treeSettings.loadSettingsFrom(settings);
     }
 

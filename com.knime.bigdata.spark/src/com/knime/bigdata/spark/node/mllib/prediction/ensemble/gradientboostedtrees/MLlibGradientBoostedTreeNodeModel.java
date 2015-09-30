@@ -32,7 +32,6 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeInterpreter;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -47,7 +46,6 @@ import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
  */
 public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
 
-    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(true);
     private final GradientBoostedTreeSettings m_forestSettings = new GradientBoostedTreeSettings();
 
     /**
@@ -68,7 +66,6 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec tableSpec = spec.getTableSpec();
-        m_settings.check(tableSpec);
         m_forestSettings.check(tableSpec);
         return new PortObjectSpec[]{createMLSpec()};
     }
@@ -82,7 +79,7 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
         final PMMLPortObject mapping = (PMMLPortObject)inData[1];
         exec.setMessage("Starting Gradient Boosted Tree (SPARK) Learner");
         exec.checkCanceled();
-        final MLlibSettings settings = m_settings.getSettings(data, mapping);
+        final MLlibSettings settings = m_forestSettings.getSettings(data, mapping);
         final GradientBoostedTreesTask task =
             new GradientBoostedTreesTask(data.getData(), settings.getFeatueColIdxs(), settings.getNominalFeatureInfo(),
                 settings.getClassColName(), settings.getClassColIdx(), settings.getNumberOfClasses(),
@@ -106,7 +103,6 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
         m_forestSettings.saveSettingsTo(settings);
     }
 
@@ -115,7 +111,6 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
         m_forestSettings.validateSettings(settings);
     }
 
@@ -124,7 +119,6 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
         m_forestSettings.loadSettingsFrom(settings);
     }
 

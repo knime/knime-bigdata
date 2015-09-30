@@ -21,7 +21,9 @@
 package com.knime.bigdata.spark.node.mllib;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
@@ -54,10 +57,19 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class MLlibNodeSettings {
-    //TODO: Return the internal node models for usage in dialog instead of using the static factory methods
-    private final SettingsModelString m_classCol = createClassColModel();
+    private final SettingsModelString m_classColModel = new SettingsModelString("classColumn", null);
 
-    private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+    @SuppressWarnings("unchecked")
+    private final SettingsModelColumnFilter2 m_featureColsModel =
+            new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
+
+    @SuppressWarnings("unchecked")
+    private final DialogComponent m_classColComponent = new DialogComponentColumnNameSelection(m_classColModel,
+        "Class column ", 0, DoubleValue.class);
+
+    /*Access the feature columns component only via the getter method since it is generated only when necessary
+     * to prevent NullPointerExceptions in loadSettingsFrom method due to change listener and missing table spec.*/
+    private DialogComponent m_featureColsComponent;
 
     private boolean m_requiresClassCol;
 
@@ -70,18 +82,56 @@ public class MLlibNodeSettings {
     }
 
     /**
-     * @return the class column model
+     * @return the class column name
      */
-    public static SettingsModelString createClassColModel() {
-        return new SettingsModelString("classColumn", null);
+    public String getClassCol() {
+        return m_classColModel.getStringValue();
     }
 
     /**
-     * @return the feature column model
+     * @param spec the {@link DataTableSpec} to get the feature columns for
+     * @return the selected feature column names
      */
-    @SuppressWarnings("unchecked")
-    public static SettingsModelColumnFilter2 createColumnsModel() {
-        return new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
+    public String[] getFeatureCols(final DataTableSpec spec) {
+        return m_featureColsModel.applyTo(spec).getIncludes();
+    }
+
+    /**
+     * @return the classColModel
+     */
+    public SettingsModelString getClassColModel() {
+        return m_classColModel;
+    }
+
+    /**
+     * @return the featureColsModel
+     */
+    public SettingsModelColumnFilter2 getFeatureColsModel() {
+        return m_featureColsModel;
+    }
+
+    /**
+     * @return the classColComponent
+     */
+    public DialogComponent getClassColComponent() {
+        return m_classColComponent;
+    }
+
+    /**
+     * @return the colsComponent
+     */
+    public DialogComponent getFeatureColsComponent() {
+        if (m_featureColsComponent == null) {
+            m_featureColsComponent = new DialogComponentColumnFilter2(m_featureColsModel, 0);
+        }
+        return m_featureColsComponent;
+    }
+
+    /**
+     * @return the requiresClassCol
+     */
+    public boolean isRequiresClassCol() {
+        return m_requiresClassCol;
     }
 
     /**
@@ -89,7 +139,7 @@ public class MLlibNodeSettings {
      * @throws InvalidSettingsException  if the settings are invalid
      */
     public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
-        final String classColName = m_classCol.getStringValue();
+        final String classColName = m_classColModel.getStringValue();
         if (m_requiresClassCol && classColName == null) {
             throw new InvalidSettingsException("No class column selected");
         }
@@ -97,7 +147,7 @@ public class MLlibNodeSettings {
         if (m_requiresClassCol && classColIdx < 0) {
             throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
         }
-        final FilterResult result = m_cols.applyTo(tableSpec);
+        final FilterResult result = m_featureColsModel.applyTo(tableSpec);
         final List<String> featureColNames =  Arrays.asList(result.getIncludes());
         Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
         if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
@@ -109,8 +159,8 @@ public class MLlibNodeSettings {
      * @param settings the {@link NodeSettingsWO} to write to
      */
     public void saveSettingsTo(final NodeSettingsWO settings) {
-        m_classCol.saveSettingsTo(settings);
-        m_cols.saveSettingsTo(settings);
+        m_classColModel.saveSettingsTo(settings);
+        m_featureColsModel.saveSettingsTo(settings);
     }
 
     /**
@@ -119,14 +169,27 @@ public class MLlibNodeSettings {
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         if (m_requiresClassCol) {
-            m_classCol.validateSettings(settings);
+            m_classColModel.validateSettings(settings);
             final String classCol =
-                    ((SettingsModelString)m_classCol.createCloneWithValidatedValue(settings)).getStringValue();
+                    ((SettingsModelString)m_classColModel.createCloneWithValidatedValue(settings)).getStringValue();
             if (classCol == null || classCol.isEmpty()) {
                 throw new InvalidSettingsException("Class column must not be empty");
             }
         }
-        m_cols.validateSettings(settings);
+        m_featureColsModel.validateSettings(settings);
+    }
+
+    /**
+     * @param settings the {@link NodeSettingsRO} to read from
+     * @param tableSpecs input {@link DataTableSpec}
+     * @throws NotConfigurableException if the settings are invalid
+     */
+    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
+            throws NotConfigurableException {
+        if (m_requiresClassCol) {
+            m_classColComponent.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
+        }
+        getFeatureColsComponent().loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
     }
 
     /**
@@ -135,11 +198,34 @@ public class MLlibNodeSettings {
      */
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         if (m_requiresClassCol) {
-            m_classCol.loadSettingsFrom(settings);
+            m_classColModel.loadSettingsFrom(settings);
         }
-        m_cols.loadSettingsFrom(settings);
+        m_featureColsModel.loadSettingsFrom(settings);
     }
 
+    /**
+     * @return the models
+     */
+    protected Collection<SettingsModel> getModels() {
+        final Collection<SettingsModel> models = new LinkedList<>();
+        if (m_requiresClassCol) {
+            models.add(m_classColModel);
+        }
+        models.add(m_featureColsModel);
+        return models;
+    }
+
+    /**
+     * @return the components
+     */
+    protected Collection<DialogComponent> getComponents() {
+        final Collection<DialogComponent> models = new LinkedList<>();
+        if (m_requiresClassCol) {
+            models.add(m_classColComponent);
+        }
+        models.add(getFeatureColsComponent());
+        return models;
+    }
 
     /**
      * @param rdd the {@link SparkDataPortObject}
@@ -177,13 +263,12 @@ public class MLlibNodeSettings {
      * @throws InvalidSettingsException if the settings are invalid
      */
     public MLlibSettings getSettings(final DataTableSpec tableSpec, final PMMLPortObject mapping) throws InvalidSettingsException {
-        final String classColName = m_classCol.getStringValue();
+        final String classColName = getClassCol();
         final int classColIdx = tableSpec.findColumnIndex(classColName);
         if (m_requiresClassCol && classColIdx < 0) {
             throw new InvalidSettingsException("Class column :" + classColName + " not found in input data");
         }
-        final FilterResult filterResult = m_cols.applyTo(tableSpec);
-        final List<String> featureColNames = Arrays.asList(filterResult.getIncludes());
+        final List<String> featureColNames = Arrays.asList(getFeatureCols(tableSpec));
         final Integer[] featureColIdxs = SparkUtil.getColumnIndices(tableSpec, featureColNames);
         if (Arrays.asList(featureColIdxs).contains(Integer.valueOf(classColIdx))) {
             throw new InvalidSettingsException("Class column also selected as feature column");
@@ -273,43 +358,13 @@ public class MLlibNodeSettings {
      * {@link DialogComponent}s
      * @throws NotConfigurableException if the specs are not valid
      */
-    public static DataTableSpec[] getTableSpecInDialog(final int portIdx, final PortObjectSpec[] specs) throws NotConfigurableException {
+    public static DataTableSpec[] getTableSpecInDialog(final int portIdx, final PortObjectSpec[] specs)
+            throws NotConfigurableException {
         if (specs == null || specs.length <= portIdx || specs[portIdx] == null) {
             throw new NotConfigurableException("No input connection available");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)specs[portIdx];
         final DataTableSpec[] tableSpecs = new DataTableSpec[] {spec.getTableSpec()};
         return tableSpecs;
-    }
-
-    /**
-     * @return the {@link DialogComponent} that should be used for the feature column selection
-     */
-    public static DialogComponent createFeatureColsComponent() {
-        return createFeatureColsComponent(0);
-    }
-
-    /**
-     * @param portIdx the port index of the input {@link DataTableSpec}
-     * @return the {@link DialogComponent} that should be used for the feature column selection
-     */
-    public static DialogComponent createFeatureColsComponent(final int portIdx) {
-        return new DialogComponentColumnFilter2(createColumnsModel(), portIdx);
-    }
-    /**
-     * @return the {@link DialogComponent} that should be used for the class column selection
-     */
-    public static DialogComponent createClassColComponent() {
-        return createClassColComponent(0);
-    }
-
-    /**
-     * @param portIdx the port index of the input {@link DataTableSpec}
-     * @return the {@link DialogComponent} that should be used for the class column selection
-     */
-    @SuppressWarnings("unchecked")
-    public static DialogComponent createClassColComponent(final int portIdx) {
-        return new DialogComponentColumnNameSelection(createClassColModel(),
-        "Class column ", portIdx, DoubleValue.class);
     }
 }

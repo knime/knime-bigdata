@@ -72,6 +72,8 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.fife.rsta.ac.LanguageSupport;
 import org.fife.rsta.ac.LanguageSupportFactory;
@@ -94,6 +96,7 @@ import org.knime.base.node.jsnippet.ui.FlowVariableList;
 import org.knime.base.node.jsnippet.ui.InFieldsTable;
 import org.knime.base.node.jsnippet.ui.JSnippetFieldsController;
 import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
+import org.knime.base.node.jsnippet.ui.JarListPanel;
 import org.knime.base.node.jsnippet.ui.OutFieldsTable;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.data.DataTableSpec;
@@ -139,7 +142,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
     private OutFieldsTable m_outFieldsTable;
     private JSnippetFieldsController m_fieldsController;
 
-//    private JarListPanel m_jarPanel;
+    private JarListPanel m_jarPanel;
 
     private DefaultTemplateController<SparkJavaSnippetTemplate> m_templatesController;
     private boolean m_isEnabled;
@@ -191,7 +194,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         if (!isPreview) {
             panel.setPreferredSize(new Dimension(800, 600));
         }
-//        addTab("Additional Libraries", createJarPanel());
+        addTab("Additional Libraries", createJarPanel());
         if (!isPreview) {
             // The preview does not have the templates tab
             addTab("Templates", createTemplatesPanel());
@@ -320,36 +323,36 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         return templateInfoPanel;
     }
 
-//    private JPanel createJarPanel() {
-//        m_jarPanel = new JarListPanel();
-//        m_jarPanel.addListDataListener(new ListDataListener() {
-//            private void updateSnippet() {
-//                m_snippet.setJarFiles(m_jarPanel.getJarFiles());
-//                // force reparsing of the snippet
-//                for (int i = 0; i < m_snippetTextArea.getParserCount(); i++) {
-//                    m_snippetTextArea.forceReparsing(i);
-//                }
-//                // update autocompletion
-//                updateAutocompletion();
-//            }
-//
-//            @Override
-//            public void intervalRemoved(final ListDataEvent e) {
-//                updateSnippet();
-//            }
-//
-//            @Override
-//            public void intervalAdded(final ListDataEvent e) {
-//                updateSnippet();
-//            }
-//
-//            @Override
-//            public void contentsChanged(final ListDataEvent e) {
-//                updateSnippet();
-//            }
-//        });
-//        return m_jarPanel;
-//    }
+    private JPanel createJarPanel() {
+        m_jarPanel = new JarListPanel();
+        m_jarPanel.addListDataListener(new ListDataListener() {
+            private void updateSnippet() {
+                m_snippet.setJarFiles(m_jarPanel.getJarFiles());
+                // force reparsing of the snippet
+                for (int i = 0; i < m_snippetTextArea.getParserCount(); i++) {
+                    m_snippetTextArea.forceReparsing(i);
+                }
+                // update autocompletion
+                updateAutocompletion();
+            }
+
+            @Override
+            public void intervalRemoved(final ListDataEvent e) {
+                updateSnippet();
+            }
+
+            @Override
+            public void intervalAdded(final ListDataEvent e) {
+                updateSnippet();
+            }
+
+            @Override
+            public void contentsChanged(final ListDataEvent e) {
+                updateSnippet();
+            }
+        });
+        return m_jarPanel;
+    }
 
     /** Create the templates tab. */
     private JPanel createTemplatesPanel() {
@@ -543,7 +546,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
             m_flowVarsList.setEnabled(enabled);
             m_inFieldsTable.setEnabled(enabled);
             m_outFieldsTable.setEnabled(enabled);
-//            m_jarPanel.setEnabled(enabled);
+            m_jarPanel.setEnabled(enabled);
             m_snippetTextArea.setEnabled(enabled);
         }
         m_isEnabled = enabled;
@@ -586,7 +589,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 //        m_colList.setSpec(specs[0]);
         m_flowVarsList.setFlowVariables(getAvailableFlowVariables().values());
         m_snippet.setSettings(m_settings);
-//        m_jarPanel.setJarFiles(m_settings.getJarFiles());
+        m_jarPanel.setJarFiles(m_settings.getJarFiles());
         final DataTableSpec tableSpec;
         if (specs == null || specs.length < 1 || specs[0] == null) {
             tableSpec = new DataTableSpec();
@@ -642,7 +645,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 //        m_colList.setSpec(spec);
         m_flowVarsList.setFlowVariables(flowVariables.values());
         m_snippet.setSettings(m_settings);
-//        m_jarPanel.setJarFiles(m_settings.getJarFiles());
+        m_jarPanel.setJarFiles(m_settings.getJarFiles());
 
         m_fieldsController.updateData(m_settings, spec,
                 flowVariables);

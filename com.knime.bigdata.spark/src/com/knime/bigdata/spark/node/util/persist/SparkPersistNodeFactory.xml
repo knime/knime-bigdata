@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
-    type="Manipulator" icon="icon.png">
+    type="Other" icon="icon.png">
     <name>Spark Persist</name>
     <shortDescription>Persists the incoming Spark RDD using the specified storage level.</shortDescription>
     <fullDescription>

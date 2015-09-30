@@ -59,6 +59,8 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
 
     private final SettingsModelDouble m_lambda = createLambdaModel();
 
+    private CollaborativeFilteringModel m_model = null;
+
     /**
      *
      */
@@ -134,14 +136,14 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final CollaborativeFilteringTask task =
                 new CollaborativeFilteringTask(data.getData(), userIdx, productIdx, ratingIdx, lambda);
         final String predictions = SparkIDs.createRDDID();
-        final CollaborativeFilteringModel model = task.execute(exec, predictions);
+        m_model = task.execute(exec, predictions);
         exec.setMessage("Collaborative filtering (SPARK) done.");
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
 
         final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), predictions, resultSpec);
 
         final SparkModel<CollaborativeFilteringModel> sparkModel = new SparkModel<CollaborativeFilteringModel>(
-                model, MatrixFactorizationModelInterpreter.getInstance(), settings);
+                m_model, MatrixFactorizationModelInterpreter.getInstance(), settings);
         return new PortObject[]{new SparkDataPortObject(vMatrixRDD),
             new SparkModelPortObject<CollaborativeFilteringModel>(sparkModel)};
     }
@@ -171,6 +173,24 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException(colType + " column with name: + " + colName + " not found in input data");
         }
         return colIdx;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void resetInternal() {
+        //delete model rdds
+        super.resetInternal();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onDisposeInternal() {
+        //delete model rdds
+        super.onDisposeInternal();
     }
 
     /**
