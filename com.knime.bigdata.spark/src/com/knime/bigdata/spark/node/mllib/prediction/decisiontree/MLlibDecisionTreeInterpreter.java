@@ -146,17 +146,6 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
      * converts the given tree model into PMML and packs it into a JComponent
      *
      * @param aDecisionTreeModel
-     * @return displayable component
-     */
-    public static JComponent _getTreeView(final DecisionTreeModel aDecisionTreeModel) {
-        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, new HashMap<Integer, String>());
-        return getTreeView(pmmlModel.pmml());
-    }
-
-    /**
-     * converts the given tree model into PMML and packs it into a JComponent
-     *
-     * @param aDecisionTreeModel
      * @param aColNames
      * @param aClassColName
      * @return displayable component
@@ -170,14 +159,6 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
         }
         PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, features);
         PMML pmml = pmmlModel.pmml();
-//        //TODO - verify that we can really assume that the order is the same....
-//        List<DataField> fields = pmml.getDataDictionary().getDataFields();
-//
-//        for (int i = 0; i < aColNames.size(); i++) {
-//            DataField field = fields.get(i);
-//            field.setDisplayName(aColNames.get(i));
-//        }
-//        fields.get(fields.size() - 1).setDisplayName(aClassColName);
         return getTreeView(pmml);
     }
 
@@ -190,9 +171,9 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
             final DecisionTree decTree = trans.getDecisionTree();
 
             decTree.resetColorInformation();
-            final JComponent view = new DecTreeGraphView(decTree.getRootNode(), decTree.getColorColumn()).getView();
+            DecTreeGraphView graph = new DecTreeGraphView(decTree.getRootNode(), decTree.getColorColumn());
+            final JComponent view = new MLlibDecTreeGraphView(new MLlibDecisionTreeNodeModel(), graph).getView();
             view.setName("MLLib TreeView");
-            //
             return view;
         } catch (Exception e) {
             LOGGER.warn("Error converting Spark tree model, reason: " + e.getMessage(), e);
