@@ -41,6 +41,7 @@ import org.apache.spark.sql.api.java.Row;
 import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.EnumContainer;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LossFunctions;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -156,8 +157,10 @@ public class GradientBoostedTreesLearnerJob extends KnimeSparkJob implements Ser
             LOGGER.log(Level.INFO, "Training Regression GBT.");
         }
 
-        boostingStrategy.setLoss(LossFactory.getLossFunction(EnumContainer.LossFunctions.fromKnimeEnum(aConfig
-            .getInputParameter(PARAM_LOSS_FUNCTION))));
+        LossFunctions lossFunction = EnumContainer.LossFunctions.fromKnimeEnum(aConfig
+            .getInputParameter(PARAM_LOSS_FUNCTION));
+        LOGGER.log(Level.INFO, "GBT loss function: "+lossFunction.toString());
+        boostingStrategy.setLoss(LossFactory.getLossFunction(lossFunction));
 
         return GradientBoostedTrees.train(aInputData, boostingStrategy);
     }

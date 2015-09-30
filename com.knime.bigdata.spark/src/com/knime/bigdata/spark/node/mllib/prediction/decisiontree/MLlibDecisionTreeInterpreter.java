@@ -42,6 +42,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.spark.mllib.pmml.export.PMMLModelExport;
 import org.apache.spark.mllib.pmml.export.PMMLModelExportFactory;
+import org.apache.spark.mllib.tree.configuration.Algo;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.xmlbeans.XmlException;
 import org.dmg.pmml.PMML;
@@ -157,7 +158,15 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
         for (String col : aColNames) {
             features.put(ctr++, col);
         }
-        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(aDecisionTreeModel, features);
+        //TODO - this is a HACK to avoid the error message in
+        //  org.knime.base.node.mine.decisiontree2.PMMLDecisionTreeTranslator.parseDecTreeFromModel(TreeModel)
+        final DecisionTreeModel decisionTreeModel;
+        if (aDecisionTreeModel.algo().toString().equalsIgnoreCase("Classification")) {
+            decisionTreeModel = aDecisionTreeModel;
+        } else {
+            decisionTreeModel = new DecisionTreeModel(aDecisionTreeModel.topNode(), Algo.Classification());
+        }
+        PMMLModelExport pmmlModel = PMMLModelExportFactory.createPMMLModelExport(decisionTreeModel, features);
         PMML pmml = pmmlModel.pmml();
         return getTreeView(pmml);
     }
@@ -191,7 +200,7 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
                 JAXBUtil.marshalPMML(pmml, result);
             }
             try {
-                PMMLImport pmmlImport = new PMMLImport(temp, false);
+                PMMLImport pmmlImport = new PMMLImport(temp, true);
                 return pmmlImport.getPortObject();
             } catch (IllegalArgumentException e) {
                 String msg = "PMML model \"" + pmml.getHeader() + "\" is not a valid PMML model:\n" + e.getMessage();
