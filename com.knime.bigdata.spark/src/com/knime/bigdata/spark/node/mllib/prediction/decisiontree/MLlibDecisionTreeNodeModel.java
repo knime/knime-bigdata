@@ -50,6 +50,9 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
 
     private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
 
+    /** Index of input data port. */
+    static final int DATA_INPORT = 0;
+
     /**
      * Constructor.
      */
