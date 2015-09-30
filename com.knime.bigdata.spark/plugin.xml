@@ -56,6 +56,13 @@
             path="/spark/column">
       </category>
       <category
+            icon="icons/missing.gif"
+            level-id="scoring"
+            locked="true"
+            name="Scoring"
+            path="/spark/mining">
+      </category>
+      <category
             icon="icons/category_misc.png"
             level-id="misc"
             locked="true"
@@ -348,6 +355,12 @@
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory">
+      </node>
+      <node
+            category-path="/spark/mining/scoring"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory"
+            id="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory">
       </node>
       <node
             category-path="/spark/row"
