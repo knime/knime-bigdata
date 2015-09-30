@@ -434,7 +434,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2, 3,
-						4 }, MappingType.GLOBAL);
+						4 }, MappingType.GLOBAL, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -479,11 +479,11 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2 },
-						MappingType.GLOBAL);
+						MappingType.GLOBAL, true);
 
 		// 3 and 5 were not mapped, should be ignored
 		List<Row> rows = RDDUtilsInJava.applyLabelMapping(v,
-				new int[] { 0, 2, 3, 5 }, info.m_Mappings).collect();
+				new int[] { 0, 2, 3, 5 }, info.m_Mappings, true).collect();
 		for (int i = 0; i < rows.size(); i++) {
 			Row row = rows.get(i);
 			// 6 original columns + 2! converted columns
@@ -511,13 +511,13 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 2 },
-						MappingType.GLOBAL);
+						MappingType.GLOBAL, true);
 		JavaRDD<Row> v2 = new MyMapper().toRowRddWithNominalValues(o,
 				new String[] { "red", "blue", "v1", "v2" }).cache();
 
 		try {
 			RDDUtilsInJava.applyLabelMapping(v2, new int[] { 2 },
-					info.m_Mappings).collect();
+					info.m_Mappings, true).collect();
 		} catch (Exception nse) {
 			nse.printStackTrace();
 			throw nse;
@@ -541,7 +541,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2, 3,
-						4 }, MappingType.COLUMN);
+						4 }, MappingType.COLUMN, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -591,7 +591,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 3, 2,
-						4 }, MappingType.BINARY);
+						4 }, MappingType.BINARY, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -671,6 +671,87 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		}
 	}
 
+	/**
+	 * convert all nominal values in selected columns to corresponding binary
+	 * columns
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void conversionOfNominalValuesInRDDOfRowsBinaryDropOriginalColumns() throws Exception {
+		JavaDoubleRDD o = getRandomDoubleRDD(25L, 1);
+		JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
+
+		// convert all but the last column with nominal values:
+		MappedRDDContainer info = RDDUtilsInJava
+				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 3, 2,
+						4 }, MappingType.BINARY, false);
+
+		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
+		NominalValueMapping mappings = info.m_Mappings;
+
+		assertEquals("Conversion changed the number of rows ",
+				rddWithConvertedValues.count(), 25);
+
+		List<Row> rows = rddWithConvertedValues.collect();
+		List<Row> origRows = v.collect();
+		for (int i = 0; i < rows.size(); i++) {
+			Row row = rows.get(i);
+			Row origRow = origRows.get(i);
+			int offset = 2;
+			// 6 original columns + 32 converted values - 4 original, but converted cols
+			assertEquals("conversion should create correct length of rows ",
+					offset + 32, row.length());
+			{
+				int colIx = mappings.getNumberForValue(0, origRow.getString(0));
+				assertEquals("incorrect number of values for 'teams'",
+						MyMapper.teams.length, mappings.getNumberOfValues(0));
+				assertTrue("row " + i
+						+ ": converted values should be in proper column",
+						colIx >= 0 && colIx < MyMapper.teams.length);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += MyMapper.teams.length;
+			}
+
+			// teams
+			{
+				int colIx = mappings.getNumberForValue(3, origRow.getString(3));
+				assertEquals("incorrect number of values for 'teams'",
+						MyMapper.teams.length, mappings.getNumberOfValues(3));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < MyMapper.teams.length);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += mappings.getNumberOfValues(3);
+			}
+
+			{
+				int colIx = mappings.getNumberForValue(2, origRow.getString(2));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < mappings.getNumberOfValues(2));
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(offset + colIx));
+				offset += mappings.getNumberOfValues(2);
+			}
+
+			// 4 values
+			{
+				int colIx = mappings.getNumberForValue(4, origRow.getString(4));
+				assertEquals(
+						"incorrect number of values for first letter of 'colors'",
+						4, mappings.getNumberOfValues(4));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < 4);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += mappings.getNumberOfValues(4);
+			}
+			assertEquals("incorrect number of new columns added ", 2 + 32,
+					offset);
+
+		}
+	}
 	static class CreateData implements Serializable {
 		private static final long serialVersionUID = 1L;
 

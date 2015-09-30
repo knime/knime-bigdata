@@ -36,6 +36,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -87,7 +88,14 @@ public class MapValuesJob extends KnimeSparkJob {
         }
         final JavaRDD<Row> inputRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final ColumnBasedValueMapping map = getMapping(aConfig);
-        final JavaRDD<Row> mappedRDD = execute(inputRDD, map);
+        final boolean keepOriginalColumns;
+        if (aConfig.hasInputParameter(ConvertNominalValuesJob.PARAM_KEEP_ORIGINAL_COLUMNS)) {
+            keepOriginalColumns = aConfig.getInputParameter(ConvertNominalValuesJob.PARAM_KEEP_ORIGINAL_COLUMNS, Boolean.class);
+        } else {
+            keepOriginalColumns = true;
+        }
+
+        final JavaRDD<Row> mappedRDD = execute(inputRDD, map, keepOriginalColumns);
         LOGGER.log(Level.INFO, "Mapping done");
         addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), mappedRDD);
         return JobResult.emptyJobResult().withMessage("OK")
@@ -108,13 +116,18 @@ public class MapValuesJob extends KnimeSparkJob {
      * @param aMap
      * @return
      */
-    private static JavaRDD<Row> execute(final JavaRDD<Row> aInputRDD, final ColumnBasedValueMapping aMap) {
+    private static JavaRDD<Row> execute(final JavaRDD<Row> aInputRDD, final ColumnBasedValueMapping aMap, final boolean aKeepOriginalColumns) {
         final List<Integer> idxs = aMap.getColumnIndices();
         final Function<Row, Row> function = new Function<Row, Row>(){
             private static final long serialVersionUID = 1L;
             @Override
             public Row call(final Row r) throws Exception {
-                final RowBuilder rowBuilder = RowBuilder.fromRow(r);
+                final RowBuilder rowBuilder;
+                if (aKeepOriginalColumns) {
+                    rowBuilder = RowBuilder.fromRow(r);
+                } else {
+                    rowBuilder = RDDUtilsInJava.dropColumnsFromRow(idxs, r);
+                }
                 for (final Integer idx : idxs) {
                     final Object object = r.get(idx);
                     final Object mapVal = aMap.map(idx, object);

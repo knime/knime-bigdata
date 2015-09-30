@@ -110,7 +110,9 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
             resultTable = rdd.getData();
         } else {
             final String outputTableName = SparkIDs.createRDDID();
-            final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, outputTableName);
+          //TODO_TK
+            final boolean keepOriginalColumns = true;
+            final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, keepOriginalColumns, outputTableName);
             exec.checkCanceled();
             task.execute(exec);
             setDeleteOnReset(true);

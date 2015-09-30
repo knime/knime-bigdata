@@ -5,14 +5,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.MapValuesJob;
 import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.typesafe.config.ConfigFactory;
 
 /**
@@ -26,7 +24,7 @@ public class Number2CategoryConverterTaskTest extends SparkWithJobServerSpec {
 	public static String paramsAsJason(final String aInputTableName,
 			final ColumnBasedValueMapping aMap, final String aOutputRDD)
 			throws GenericKnimeSparkException {
-		return Number2CategoryConverterTask.paramDef(aInputTableName, aMap,
+		return Number2CategoryConverterTask.paramDef(aInputTableName, aMap, true, 
 				aOutputRDD);
 	}
 
@@ -34,7 +32,7 @@ public class Number2CategoryConverterTaskTest extends SparkWithJobServerSpec {
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 		ColumnBasedValueMapping map = new ColumnBasedValueMapping();
 		Number2CategoryConverterTask testObj = new Number2CategoryConverterTask(
-				null, "inputRDD", map, "outputRDD");
+				null, "inputRDD", map,  true, "outputRDD");
 		final String params = testObj.paramDef();
 		JobConfig config = new JobConfig(ConfigFactory.parseString(params));
 
@@ -46,8 +44,7 @@ public class Number2CategoryConverterTaskTest extends SparkWithJobServerSpec {
 	@Test
 	public void verifyThatValuesAreMapped()
 			throws Throwable {
-		KNIMESparkContext context = KnimeContext.getSparkContext();
-		ImportKNIMETableJobTest.importTestTable(context, MINI_IRIS_TABLE,
+		ImportKNIMETableJobTest.importTestTable(CONTEXT_ID, MINI_IRIS_TABLE,
 				"tab1");
 
 		ColumnBasedValueMapping map = new ColumnBasedValueMapping();
@@ -59,16 +56,46 @@ public class Number2CategoryConverterTaskTest extends SparkWithJobServerSpec {
 		map.add(4, "Iris-versicolor", "II");
 		map.add(4, "Iris-virginica", "II");
 		Number2CategoryConverterTask testObj = new Number2CategoryConverterTask(
-				context, "tab1", map, "outTab");
+				CONTEXT_ID, "tab1", map, true, "outTab");
 
 		testObj.execute(null);
 
 		// not sure what else to check here....
-		Object[][] arrayRes = fetchResultTable(context, "outTab", 4);
+		Object[][] arrayRes = fetchResultTable(CONTEXT_ID, "outTab", 4);
 		for (int i=0; i< arrayRes.length; i++) {
 			Object[] row = arrayRes[i];
 			assertEquals("column 0 all mapped to ", "0-0", row[5]);
 			assertEquals("column 1 all mapped to ", "II", row[6]);
+		}
+	}
+	
+	@Test
+	public void verifyThatValuesAreMappedAndOrigColsAreDropped()
+			throws Throwable {
+		ImportKNIMETableJobTest.importTestTable(CONTEXT_ID, MINI_IRIS_TABLE,
+				"tab1");
+
+		ColumnBasedValueMapping map = new ColumnBasedValueMapping();
+		map.add(0, MINI_IRIS_TABLE[0][0], "0-0");
+		map.add(0, MINI_IRIS_TABLE[1][0], "0-0");
+		map.add(0, MINI_IRIS_TABLE[2][0], "0-0");
+		map.add(0, MINI_IRIS_TABLE[3][0], "0-0");
+		map.add(4, "Iris-setosa", "II");
+		map.add(4, "Iris-versicolor", "II");
+		map.add(4, "Iris-virginica", "II");
+		Number2CategoryConverterTask testObj = new Number2CategoryConverterTask(
+				CONTEXT_ID, "tab1", map, false, "outTab");
+
+		testObj.execute(null);
+
+		// not sure what else to check here....
+		Object[][] arrayRes = fetchResultTable(CONTEXT_ID, "outTab", 4);
+		for (int i=0; i< arrayRes.length; i++) {
+			Object[] row = arrayRes[i];
+			assertEquals("only mapped cols should remain ", 5, row.length);
+			
+			assertEquals("column 0 all mapped to ", "0-0", row[3]);
+			assertEquals("column 1 all mapped to ", "II", row[4]);
 		}
 	}
 

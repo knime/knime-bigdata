@@ -47,14 +47,16 @@ public class RDDUtilsInJava {
      * @param aInputRdd Row RDD to be processed
      * @param aColumnIds array of indices to be converted
      * @param aMappingType indicates how values are to be mapped
+     * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
     public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType) {
+        final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
-        final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
+        final JavaRDD<Row> rddWithConvertedValues =
+            applyLabelMapping(aInputRdd, aColumnIds, mappings, aKeepOriginalColumns);
         return new MappedRDDContainer(rddWithConvertedValues, mappings);
     }
 
@@ -64,18 +66,24 @@ public class RDDUtilsInJava {
      * @param aInputRdd
      * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
      * @param aMappings
+     * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return JavaRDD<Row> with converted data (columns are appended)
      */
     public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
-        final NominalValueMapping aMappings) {
+        final NominalValueMapping aMappings, final boolean aKeepOriginalColumns) {
 
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Row call(final Row row) {
-                RowBuilder builder = RowBuilder.fromRow(row);
+                final RowBuilder builder;
+                if (aKeepOriginalColumns) {
+                    builder = RowBuilder.fromRow(row);
+                } else {
+                    builder = dropColumnsFromRow(aColumnIds, row);
+                }
                 for (int ix : aColumnIds) {
                     //ignore columns that have no mapping
                     if (aMappings.hasMappingForColumn(ix)) {
@@ -103,6 +111,30 @@ public class RDDUtilsInJava {
             }
         });
         return rddWithConvertedValues;
+    }
+
+    /**
+     * @param aColumnIdsToDrop
+     * @param aRow
+     * @return rowBuilder with subset of columns already added
+     */
+    public static RowBuilder dropColumnsFromRow(final List<Integer> aColumnIdsToDrop, final Row aRow) {
+        final RowBuilder builder;
+        builder = RowBuilder.emptyRow();
+        for (int ix = 0; ix < aRow.length(); ix++) {
+            if (!aColumnIdsToDrop.contains(ix)) {
+                builder.add(aRow.get(ix));
+            }
+        }
+        return builder;
+    }
+
+    private static RowBuilder dropColumnsFromRow(final int[] aColumnIdsToDrop, final Row aRow) {
+        List<Integer> cols = new ArrayList<>();
+        for (int ix : aColumnIdsToDrop) {
+            cols.add(ix);
+        }
+        return dropColumnsFromRow(cols, aRow);
     }
 
     /**

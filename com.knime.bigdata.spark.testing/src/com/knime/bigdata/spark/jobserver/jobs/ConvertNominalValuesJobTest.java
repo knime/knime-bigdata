@@ -18,11 +18,11 @@ import com.typesafe.config.ConfigFactory;
  *
  */
 @SuppressWarnings("javadoc")
-public class SparkStringMapperJobTest extends SparkWithJobServerSpec {
+public class ConvertNominalValuesJobTest extends SparkWithJobServerSpec {
 
     private static String getParams(final String aInputDataPath, final String aType, final Integer[] aColIdxes,
         final String[] aColNames, final String aOutputDataPath1) {
-        return Category2NumberConverterTask.paramDef(aColIdxes, aColNames, aType, aInputDataPath, aOutputDataPath1);
+        return Category2NumberConverterTask.paramDef(aColIdxes, aColNames, aType, aInputDataPath, aOutputDataPath1, true);
     }
 
     @Test
