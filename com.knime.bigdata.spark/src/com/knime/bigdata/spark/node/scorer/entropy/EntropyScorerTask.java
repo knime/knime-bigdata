@@ -16,7 +16,7 @@
  * ---------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node.scorer.accuracy;
+package com.knime.bigdata.spark.node.scorer.entropy;
 
 import java.io.Serializable;
 import java.util.ArrayList;

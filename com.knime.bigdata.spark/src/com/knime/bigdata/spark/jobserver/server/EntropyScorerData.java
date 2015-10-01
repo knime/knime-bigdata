@@ -40,7 +40,7 @@ public class EntropyScorerData implements Serializable {
 
     private final int m_nrClusters;
 
-    private final int m_nrReference;
+    private final int m_nrReferenceClusters;
 
 
     /**
@@ -54,8 +54,7 @@ public class EntropyScorerData implements Serializable {
         m_entropy = aEntropy;
         m_quality = aQuality;
         m_nrClusters = aNrClusters;
-
-        m_nrReference = aNrReferenceClusters;
+        m_nrReferenceClusters = aNrReferenceClusters;
     }
 
     /**
@@ -82,7 +81,23 @@ public class EntropyScorerData implements Serializable {
     /**
      * @return the nrReference
      */
-    public int getNrReference() {
-        return m_nrReference;
+    public int getNrReferenceClusters() {
+        return m_nrReferenceClusters;
+    }
+
+    /**
+     * @return
+     */
+    public int getOverallSize() {
+        // FIXME
+        return 0;
+    }
+
+    /**
+     * @return
+     */
+    public double getOverallNormalizedEntropy() {
+        // FIXME
+        return 0;
     }
 }

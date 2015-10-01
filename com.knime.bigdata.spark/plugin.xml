@@ -370,6 +370,18 @@
             id="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory">
       </node>
       <node
+            category-path="/spark/mining/scoring"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory"
+            id="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory">
+      </node>
+      <node
+            category-path="/spark/mining/scoring"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory"
+            id="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory">
+      </node>      
+      <node
             category-path="/spark/row"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory"
