@@ -235,6 +235,8 @@ public class KnimeContext {
      * @return Set of named RDD names
      */
     public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
+        //TODO: Add this option as a new REST request to the job server to speedup the requests.
+        //This would also make it easier to show the named RDDs in the job server web GUI
         String jsonArgs =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_INFO}});

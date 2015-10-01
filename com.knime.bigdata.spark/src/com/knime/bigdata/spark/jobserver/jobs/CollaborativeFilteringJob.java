@@ -190,12 +190,13 @@ public class CollaborativeFilteringJob extends KnimeSparkJob implements Serializ
         throws GenericKnimeSparkException {
         SupervisedLearnerUtils.validateInput(aConfig, this, LOGGER);
         LOGGER.log(Level.INFO, "starting Collaborative Filtering job...");
-        final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
+        final String inputRDD = aConfig.getInputParameter(PARAM_INPUT_TABLE);
+        final JavaRDD<Row> rowRDD = getFromNamedRdds(inputRDD);
 
         final JavaRDD<Rating> ratings = convertRowRDD2RatingsRdd(aConfig, rowRDD);
         final MatrixFactorizationModel serverModel = execute(sc, aConfig, rowRDD, ratings);
         final CollaborativeFilteringModel model =
-                CollaborativeFilteringModelFactory.fromMatrixFactorizationModel(sc, this, serverModel);
+                CollaborativeFilteringModelFactory.fromMatrixFactorizationModel(sc, this, inputRDD, serverModel);
 
         LOGGER.log(Level.INFO, " Collaborative Filtering done");
         return JobResult.emptyJobResult().withMessage("OK").withObjectResult(model);

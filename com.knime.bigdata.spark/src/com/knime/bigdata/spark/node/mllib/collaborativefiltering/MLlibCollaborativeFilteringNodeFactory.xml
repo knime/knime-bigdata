@@ -7,7 +7,14 @@
 	<fullDescription>
 		<intro>
 			This node utilizes the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-collaborative-filtering.html">collaborative filtering</a> implementation.
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-collaborative-filtering.html">collaborative filtering</a> 
+			implementation.
+			<p>
+			<b>Notice: The matrix factorization model contains references to Spark RDDs and thus is not selfcontained. 
+			The referenced Spark RDDs will be deleted, like any other Spark RDD generated in KNIME, when the node is 
+			reseted or when the workflow is closed if the "Delete Spark RDDs on dispose" option is enabled for the 
+			current Spark Context.</b>
+			</p>
 		</intro>
 
 		<option name="Number of leading singular values">
@@ -26,7 +33,8 @@
 
 	<ports>
 	    <inPort index="0" name="Ratings RDD">Spark RDD with user ratings of products</inPort>
-        <outPort index="0" name="Labeled input">The input data labeled with the prediction.</outPort>
-        <outPort index="1" name="Matrix factorization model">The matrix factorization model.</outPort>
+        <outPort index="0" name="Labeled input">The input data labelled with the prediction.</outPort>
+        <outPort index="1" name="Matrix factorization model (unstorable)">The matrix factorization model. 
+        Is not selfcontained and thus can not be saved to file.</outPort>
 	</ports>
 </knimeNode>

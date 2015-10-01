@@ -23,12 +23,15 @@ package com.knime.bigdata.spark.node.preproc.convert.category2number;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dmg.pmml.DATATYPE;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
@@ -44,6 +47,7 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.StringValue;
+import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
@@ -78,12 +82,17 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkCategory2NumberNodeModel extends SparkNodeModel {
-    //TODO: add an option to replace processed columns
+    //TODO add support for column suffix and keep original columns option.
+    //The problem with the keep original columns is the pmml generation.
+    //The problem with the column suffix is that some functions check for the column name ending _num.
     private static final DataType MAP_TYPE = DoubleCell.TYPE;
 
     private final SettingsModelString m_mappingType = createMappingTypeModel();
 
     private final SettingsModelColumnFilter2 m_cols = createColumnsModel();
+
+//    private final SettingsModelString m_colSuffix = createSuffixModel();
+//    private final SettingsModelBoolean m_keepOriginalCols = createKeepOriginalColsModel();
 
     /**
      * {@link DataTableSpec} of the mapping RDD.
@@ -94,6 +103,20 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         super(new PortType[] {SparkDataPortObject.TYPE},
             new PortType[] {SparkDataPortObject.TYPE, PMMLPortObject.TYPE});
     }
+
+//    /**
+//     * @return the column suffix model
+//     */
+//    static SettingsModelString createSuffixModel() {
+//        return new SettingsModelString("columnSuffix", "_num");
+//    }
+//
+//    /**
+//     * @return the keep original columns model
+//     */
+//    static SettingsModelBoolean createKeepOriginalColsModel() {
+//        return new SettingsModelBoolean("keepOriginalColumns", false);
+//    }
 
     /**
      * @return
@@ -122,10 +145,30 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         if (includedCols == null || includedCols.length < 1) {
             throw new InvalidSettingsException("No nominal columns selected");
         }
+        final Integer[] includeColIdxs = SparkUtil.getColumnIndices(spec, includedCols);
+        final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
+//        final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
+        final boolean keepOriginalColumns = true;
+//        final String suffix = m_colSuffix.getStringValue();
+        final String suffix = NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+        final DataTableSpec tableSpec =
+                createResultSpec(spec, includeColIdxs, null, keepOriginalColumns, mappingType, suffix);
+        final SparkDataPortObjectSpec resultSpec;
+        if (tableSpec != null) {
+            resultSpec = new SparkDataPortObjectSpec(sparkSpec.getContext(), tableSpec);
+        } else {
+            resultSpec = null;
+        }
         //PMML section
+        final List<String> inputCols = new ArrayList<String>();
+        for (DataColumnSpec column : spec) {
+            if (column.getType().isCompatible(StringValue.class)) {
+                inputCols.add(column.getName());
+            }
+        }
         final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(spec);
-        pmmlSpecCreator.addPreprocColNames(Arrays.asList(includedCols));
-        return new PortObjectSpec[] {null, pmmlSpecCreator.createSpec()};
+        pmmlSpecCreator.addPreprocColNames(inputCols);
+        return new PortObjectSpec[] {resultSpec, pmmlSpecCreator.createSpec()};
     }
 
     /**
@@ -136,14 +179,16 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
         final DataTableSpec inputTableSpec = rdd.getTableSpec();
         final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
+//        final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
+        final boolean keepOriginalColumns = true;
+//        final String suffix = m_colSuffix.getStringValue();
+        final String suffix = NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
         final FilterResult result = m_cols.applyTo(inputTableSpec);
         final String[] includedCols = result.getIncludes();
         final Integer[] includeColIdxs = SparkUtil.getColumnIndices(inputTableSpec, includedCols);
         final String outputTableName = SparkIDs.createRDDID();
-        //TODO_TK
-        final boolean keepOriginalColumns = true;
         final Category2NumberConverterTask task =  new Category2NumberConverterTask(rdd.getData(), includeColIdxs,
-            includedCols, mappingType, keepOriginalColumns, outputTableName);
+            includedCols, mappingType, keepOriginalColumns, suffix, outputTableName);
         //create port object from mapping
         final MappedRDDContainer mapping = task.execute(exec);
         //these are all the column names of the original (selected) and the mapped columns
@@ -154,21 +199,64 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         //we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
         final DataColumnSpec[] mappingSpecs = createMappingSpecs(inputTableSpec, names);
-        final DataTableSpec resultSpec = new DataTableSpec(inputTableSpec, new DataTableSpec(mappingSpecs));
+        final DataTableSpec resultSpec =
+                createResultSpec(inputTableSpec, includeColIdxs, mappingSpecs, keepOriginalColumns, mappingType, suffix);
 
         // the optional PMML in port (can be null)
         exec.setMessage("Create PMML model");
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(resultSpec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
-        final Collection<TransformationDictionary> dicts = getTransformations(inputTableSpec, mapping);
+        final Collection<TransformationDictionary> dicts =
+                getTransformations(inputTableSpec, mapping, keepOriginalColumns, suffix);
         for (final TransformationDictionary dict : dicts) {
             outPMMLPort.addGlobalTransformations(dict);
         }
         return new PortObject[]{SparkNodeModel.createSparkPortObject(rdd, resultSpec, outputTableName), outPMMLPort};
     }
 
+    private static DataTableSpec createResultSpec(final DataTableSpec inputTableSpec, final Integer[] includeColIdxs,
+        final DataColumnSpec[] mappingSpecs, final boolean keepOriginalColumns, final MappingType mappingType,
+        final String suffix) {
+        if (MappingType.BINARY.equals(mappingType)) {
+            if (mappingSpecs == null) {
+                return null;
+            }
+            if (keepOriginalColumns) {
+                //simply append the new mapping specs
+                return new DataTableSpec(inputTableSpec, new DataTableSpec(mappingSpecs));
+            }
+            final ColumnRearranger rearranger = new ColumnRearranger(inputTableSpec);
+            rearranger.remove(SparkUtil.convert(includeColIdxs));
+            return new DataTableSpec(rearranger.createSpec(), new DataTableSpec(mappingSpecs));
+        }
+        final Set<Integer> col2filter = new HashSet<>(Arrays.asList(includeColIdxs));
+        final List<DataColumnSpec> resultCols = new LinkedList<DataColumnSpec>();
+        final List<DataColumnSpec> appendCols = new LinkedList<>();
+        DataColumnSpecCreator creator = new DataColumnSpecCreator("Dummy", DoubleCell.TYPE);
+        for (int i = 0; i < inputTableSpec.getNumColumns(); i++) {
+            final DataColumnSpec colSpec = inputTableSpec.getColumnSpec(i);
+            if (col2filter.contains(Integer.valueOf(i))) {
+                final String origColName = colSpec.getName();
+                final String colName;
+                if (keepOriginalColumns) {
+                    resultCols.add(colSpec);
+                    colName = DataTableSpec.getUniqueColumnName(inputTableSpec, origColName + suffix);
+                } else {
+                    colName = DataTableSpec.getUniqueColumnName(inputTableSpec, origColName + suffix);
+//                    colName = origColName;
+                }
+                creator.setName(colName);
+                appendCols.add(creator.createSpec());
+            } else {
+                resultCols.add(colSpec);
+            }
+        }
+        Collections.addAll(resultCols, appendCols.toArray(new DataColumnSpec[0]));
+        return new DataTableSpec(resultCols.toArray(new DataColumnSpec[0]));
+    }
+
     private Collection<TransformationDictionary> getTransformations(final DataTableSpec inputTableSpec,
-        final MappedRDDContainer mapping) {
+        final MappedRDDContainer mapping, final boolean keepOriginalCols, final String suffix) {
         final Collection<TransformationDictionary> dicts = new LinkedList<>();
         final NominalValueMapping mappings = mapping.m_Mappings;
         final Iterator<MyRecord> records = mappings.iterator();
@@ -225,8 +313,12 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
             }
             for (Entry<String, Map<DataCell, DoubleCell>> col : colValMap.entrySet()) {
                 final String origColName = col.getKey();
-                final String mapColName = DataTableSpec.getUniqueColumnName(inputTableSpec,
-                    origColName + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX);
+                final String mapColName;
+//                if (keepOriginalCols) {
+                    mapColName = DataTableSpec.getUniqueColumnName(inputTableSpec, origColName + suffix);
+//                } else {
+//                    mapColName = origColName;
+//                }
                 final MapValuesConfiguration config =
                         new MapValuesConfiguration(origColName, mapColName, col.getValue()) {
                     /**{@inheritDoc}*/
@@ -301,6 +393,8 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_cols.saveSettingsTo(settings);
         m_mappingType.saveSettingsTo(settings);
+//        m_keepOriginalCols.saveSettingsTo(settings);
+//        m_colSuffix.saveSettingsTo(settings);
     }
 
     /**
@@ -314,6 +408,8 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         if (MappingType.valueOf(mappingType) == null) {
             throw new InvalidSettingsException("Invalid mapping type: " + mappingType);
         }
+//        m_keepOriginalCols.validateSettings(settings);
+//        m_colSuffix.validateSettings(settings);
     }
 
     /**
@@ -323,5 +419,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_cols.loadSettingsFrom(settings);
         m_mappingType.loadSettingsFrom(settings);
+//        m_keepOriginalCols.loadSettingsFrom(settings);
+//        m_colSuffix.loadSettingsFrom(settings);
     }
 }
