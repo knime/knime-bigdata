@@ -58,7 +58,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
- * Node model for Spark scorer. Provides the same settings as the regular {@link AccuracyScorerNodeModel}, except that it does not 
+ * Node model for Spark scorer. Provides the same settings as the regular {@link AccuracyScorerNodeModel}, except that it does not
  * support insertion order sorting (due to vanilla Spark RDDs not having an order).
  *
  * TODO: Remove code duplicates with {@link AccuracyScorerNodeModel} as much as possible
@@ -434,8 +434,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
      *
      * @return the view data or <code>null</code>
      */
-        SparkAccuracyScorerViewData getViewData() {
+    public SparkAccuracyScorerViewData getViewData() {
         return m_viewData;
     }
-
 }

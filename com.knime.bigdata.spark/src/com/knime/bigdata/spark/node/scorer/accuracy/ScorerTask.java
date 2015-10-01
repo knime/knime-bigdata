@@ -57,7 +57,13 @@ public class ScorerTask implements Serializable {
 
     private final Boolean m_isClassification;
 
-    ScorerTask(final SparkRDD inputRDD, final Integer aActualColumnIdx, final Integer aPredictionColumnIdx,
+    /**
+     * @param inputRDD
+     * @param aActualColumnIdx
+     * @param aPredictionColumnIdx
+     * @param aIsClassification
+     */
+    public ScorerTask(final SparkRDD inputRDD, final Integer aActualColumnIdx, final Integer aPredictionColumnIdx,
         final Boolean aIsClassification) {
         this(inputRDD.getContext(), inputRDD.getID(), aActualColumnIdx, aPredictionColumnIdx, aIsClassification            );
     }
@@ -72,7 +78,13 @@ public class ScorerTask implements Serializable {
         m_inputTableName = aInputRDD;
     }
 
-    Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    /**
+     * @param exec
+     * @return
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
+    public Serializable execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String learnerParams = learnerDef();
         if (exec != null) {
             exec.checkCanceled();
