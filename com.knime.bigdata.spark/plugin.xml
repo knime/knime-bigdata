@@ -154,6 +154,13 @@
             name="Dimensionality Reduction"
             path="/spark/mining">
       </category>
+      <category
+            icon="icons/missing.gif"
+            level-id="management"
+            locked="true"
+            name="Management"
+            path="/spark/misc">
+      </category>
    </extension>
    <extension
          point="org.knime.workbench.repository.nodes">
@@ -318,7 +325,7 @@
             category-path="/spark/io"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory"
-            id="com.knime.bigdata.spark.node.util.cache.SparkPersistNodeFactory">
+            id="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory">
       </node>
       <node
             category-path="/spark/io"
@@ -396,13 +403,24 @@
             category-path="/spark/mining/prediction"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.randomforest.MLlibRandomForestNodeFactory">
+            id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory">
       </node>
       <node
             category-path="/spark/mining/prediction"
             expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory">
+      </node>
+      <node
+            category-path="/spark/misc/management"
+            factory-class="com.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNodeFactory"
+            id="com.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNodeFactory">
+      </node>
+      <node
+            category-path="/spark/misc/management"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory"
+            id="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory">
       </node>
       <!--
       <node

@@ -53,6 +53,8 @@ public class Category2NumberConverterTask {
 
     private final boolean m_keepOriginalColumns;
 
+    private String m_colSuffix;
+
     /**
      * constructor - simply stores parameters
      *
@@ -61,12 +63,13 @@ public class Category2NumberConverterTask {
      * @param aIncludedColsNames
      * @param aMappingType - type of value mapping (global, per column or binary)
      * @param aKeepOriginalColumns  keep original columns or not, default is true
+     * @param colSuffix the column name suffix to use for none binary mappings
      * @param aOutputRDD - table identifier (output data)
      */
     public Category2NumberConverterTask(final SparkRDD inputRDD, final Integer[] includeColIdxs,
         final String[] aIncludedColsNames, final MappingType aMappingType, final boolean aKeepOriginalColumns,
-        final String aOutputRDD) {
-
+        final String colSuffix, final String aOutputRDD) {
+        m_colSuffix = colSuffix;
         m_context = inputRDD.getContext();
         m_inputTableName = inputRDD.getID();
         m_includeColIdxs = includeColIdxs;
@@ -94,9 +97,8 @@ public class Category2NumberConverterTask {
 
     private String paramDef() {
         return paramDef(m_includeColIdxs, m_includeColNames, m_mappingType.toString(), m_inputTableName,
-            m_outputTableName, m_keepOriginalColumns);
+            m_outputTableName, m_keepOriginalColumns, m_colSuffix);
     }
-
     /**
      * (for better unit testing)
      *
@@ -111,6 +113,25 @@ public class Category2NumberConverterTask {
     public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
         final String mappingType, final String inputTableName, final String outputTableName,
         final boolean aKeepOriginalColumns) {
+        return paramDef(includeColIdxs, includeColNames, mappingType, inputTableName, outputTableName,
+            aKeepOriginalColumns, null);
+    }
+    /**
+     * (for better unit testing)
+     *
+     * @param includeColIdxs
+     * @param includeColNames
+     * @param mappingType
+     * @param inputTableName
+     * @param outputTableName
+     * @param aKeepOriginalColumns  keep original columns or not, default is true
+     * @param colNameSuffix the column name suffix
+     * @return Json String with parameter settings
+     */
+    public static String paramDef(final Integer[] includeColIdxs, final String[] includeColNames,
+        final String mappingType, final String inputTableName, final String outputTableName,
+        final boolean aKeepOriginalColumns, final String colNameSuffix) {
+        //TODO: Also use the column name suffix in the Spark job not only within KNIME
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])includeColIdxs),

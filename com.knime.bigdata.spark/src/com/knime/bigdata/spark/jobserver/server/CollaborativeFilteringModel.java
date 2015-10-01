@@ -50,6 +50,33 @@ public class CollaborativeFilteringModel implements Serializable {
         m_productFeatures = productFeaturesRDDName;
     }
 
+
+
+    /**
+     * @return the rank
+     */
+    public int getRank() {
+        return rank();
+    }
+
+
+
+    /**
+     * @return the id of the userFeatures RDD
+     */
+    public String getUserFeaturesRDDID() {
+        return m_userFeatures;
+    }
+
+
+
+    /**
+     * @return the id of the productFeatures RDD
+     */
+    public String getProductFeaturesRDDID() {
+        return m_productFeatures;
+    }
+
     /**
      * @return feature rank
      */

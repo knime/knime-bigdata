@@ -61,6 +61,8 @@ import com.knime.bigdata.spark.util.SparkDataTableCreator;
  */
 public class SparkDataPortObject implements PortObject, SparkContextProvider {
 
+    //TODO: Should extendSparkContextPortObject
+
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkDataPortObject.class);
 
     /**

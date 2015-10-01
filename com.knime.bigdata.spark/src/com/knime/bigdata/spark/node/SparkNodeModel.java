@@ -221,14 +221,28 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     private void addSparkObject(final SparkDataPortObject sparkObject) {
-        final KNIMESparkContext context = sparkObject.getContext();
+        addSparkObject(sparkObject.getContext(), sparkObject.getTableName());
+    }
+
+    private void addSparkObject(final KNIMESparkContext context, final String... RDDIDs) {
         List<String> rdds = m_namedRDDs.get(context);
         if (rdds == null) {
             rdds = new LinkedList<String>();
             m_namedRDDs.put(context, rdds);
         }
-        rdds.add(sparkObject.getTableName());
+        for (String RDDID : RDDIDs) {
+            rdds.add(RDDID);
+        }
     }
+
+    /**
+     * @param context the {@link KNIMESparkContext} the RDDs live in
+     * @param RDDIDs the RDD ids to delete when the node is reseted or disposed
+     */
+    protected final void additionalRDDs2Delete(final KNIMESparkContext context, final String... RDDIDs) {
+        addSparkObject(context, RDDIDs);
+    }
+
 
     /**
      *

@@ -33,14 +33,14 @@ import javax.swing.JTextPane;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkConextConnectionView extends JPanel {
+public class SparkContextConnectionView extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * @param context
      */
-    SparkConextConnectionView(final KNIMESparkContext context) {
+    SparkContextConnectionView(final KNIMESparkContext context) {
         super(new GridBagLayout());
         super.setName("Spark");
         StringBuilder buf = new StringBuilder("<html><body>");

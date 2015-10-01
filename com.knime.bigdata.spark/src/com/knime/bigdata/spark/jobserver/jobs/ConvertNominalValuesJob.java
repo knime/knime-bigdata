@@ -53,6 +53,11 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
     public static final String PARAM_MAPPING_TYPE = "MappingType";
 
     /**
+     * type of mapping
+     */
+    public static final String PARAM_COL_NAME_SUFFIX = "ColumnNameSuffix";
+
+    /**
      * keep original columns or not, default is true
      */
     public static final String PARAM_KEEP_ORIGINAL_COLUMNS = "keepOrigCols";
@@ -99,7 +104,13 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
         final int[] aColIds, final Map<Integer, String> aColNameForIndex)
         throws GenericKnimeSparkException {
         final MappingType mappingType = MappingType.valueOf(aConfig.getInputParameter(PARAM_MAPPING_TYPE));
-
+        //TODO: Add support for user defined column suffix
+        final String colNameSuffix;
+        if (aConfig.hasInputParameter(PARAM_COL_NAME_SUFFIX)) {
+            colNameSuffix = aConfig.getInputParameter(PARAM_COL_NAME_SUFFIX);
+        } else {
+            colNameSuffix = "_num";
+        }
         final boolean keepOriginalColumns;
         if (aConfig.hasInputParameter(PARAM_KEEP_ORIGINAL_COLUMNS)) {
             keepOriginalColumns = aConfig.getInputParameter(PARAM_KEEP_ORIGINAL_COLUMNS, Boolean.class);
@@ -108,8 +119,8 @@ public class ConvertNominalValuesJob extends AbstractStringMapperJob {
         }
 
         //use only the column indices when converting
-        final MappedRDDContainer mappedData =
-            RDDUtilsInJava.convertNominalValuesForSelectedIndices(aRowRDD, aColIds, mappingType, keepOriginalColumns);
+        final MappedRDDContainer mappedData = RDDUtilsInJava.convertNominalValuesForSelectedIndices(aRowRDD, aColIds,
+            mappingType, keepOriginalColumns);
 
         LOGGER
             .log(Level.INFO, "Storing mapped data under key: " + aConfig.getOutputStringParameter(PARAM_RESULT_TABLE));

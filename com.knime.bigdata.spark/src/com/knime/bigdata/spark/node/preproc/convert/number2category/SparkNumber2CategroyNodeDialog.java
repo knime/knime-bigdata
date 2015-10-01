@@ -20,8 +20,14 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.number2category;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  *
@@ -30,7 +36,15 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 public class SparkNumber2CategroyNodeDialog extends DefaultNodeSettingsPane {
 
     SparkNumber2CategroyNodeDialog() {
-        addDialogComponent(new DialogComponentString(SparkNumber2CategoryNodeModel.createColSuffixModel(),
-            "Column suffix: ", true, 30));
+        final SettingsModelBoolean keepModel = SparkNumber2CategoryNodeModel.createKeepOriginalColsModel();
+        final SettingsModelString suffixModel = SparkNumber2CategoryNodeModel.createColSuffixModel();
+        keepModel.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                suffixModel.setEnabled(keepModel.getBooleanValue());
+            }
+        });
+        addDialogComponent(new DialogComponentBoolean(keepModel, "Keep original columns"));
+        addDialogComponent(new DialogComponentString(suffixModel, "Column suffix: ", true, 30));
     }
 }

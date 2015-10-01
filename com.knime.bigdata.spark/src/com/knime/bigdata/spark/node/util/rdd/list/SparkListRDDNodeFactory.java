@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 21.08.2015 by koetter
+ *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.number2category;
+package com.knime.bigdata.spark.node.util.rdd.list;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -28,14 +28,14 @@ import org.knime.core.node.NodeView;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2CategoryNodeModel> {
+public class SparkListRDDNodeFactory extends NodeFactory<SparkListRDDNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkNumber2CategoryNodeModel createNodeModel() {
-        return new SparkNumber2CategoryNodeModel();
+    public SparkListRDDNodeModel createNodeModel() {
+        return new SparkListRDDNodeModel();
     }
 
     /**
@@ -50,8 +50,7 @@ public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2Cat
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkNumber2CategoryNodeModel>
-        createNodeView(final int viewIndex, final SparkNumber2CategoryNodeModel nodeModel) {
+    public NodeView<SparkListRDDNodeModel> createNodeView(final int viewIndex, final SparkListRDDNodeModel nodeModel) {
         return null;
     }
 
@@ -60,7 +59,7 @@ public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2Cat
      */
     @Override
     protected boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -68,7 +67,7 @@ public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2Cat
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkNumber2CategroyNodeDialog();
+        return null;
     }
 
 }

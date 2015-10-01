@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
@@ -189,11 +190,7 @@ public final class SparkUtil {
      * @return the {@link Boolean} array representation
      */
     public static Boolean[] convert(final boolean[] vals) {
-        Boolean[] objVals = new Boolean[vals.length];
-        for (int i = 0, length = objVals.length; i < length; i++) {
-            objVals[i] = vals[i];
-        }
-        return objVals;
+        return ArrayUtils.toObject(vals);
     }
 
     /**
@@ -205,7 +202,16 @@ public final class SparkUtil {
     public static void testPredictorParams(final String aJsonParams) throws GenericKnimeSparkException {
         Config conf = ConfigFactory.parseString(aJsonParams);
         JobConfig aConfig = new JobConfig(conf);
+        @SuppressWarnings("unused")
         Object decodeFromInputParameter = aConfig.decodeFromInputParameter(ParameterConstants.PARAM_MODEL_NAME);
         aConfig.readInputFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
+    }
+
+    /**
+     * @param vals the Integer vals to convert to int
+     * @return the int array
+     */
+    public static int[] convert(final Integer[] vals) {
+        return ArrayUtils.toPrimitive(vals);
     }
 }

@@ -39,7 +39,7 @@ import org.knime.core.node.port.PortType;
  * @param <M>
  */
 public class SparkModelPortObject<M extends Serializable> implements PortObject {
-
+    //TODO: Should extendSparkContextPortObject
     /**
      * Database port type.
      */

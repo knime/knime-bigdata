@@ -175,7 +175,7 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec, Spark
      */
     @Override
     public JComponent[] getViews() {
-        return new JComponent[] {new SparkConextConnectionView(m_context)};
+        return new JComponent[] {new SparkContextConnectionView(m_context)};
     }
 
     /**
