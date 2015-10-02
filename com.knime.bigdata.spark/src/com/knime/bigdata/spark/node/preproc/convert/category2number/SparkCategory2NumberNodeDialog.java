@@ -32,13 +32,14 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.jobserver.server.MappingType;
-import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
  *
@@ -54,8 +55,8 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
     private final DialogComponentStringSelection m_mappingType = new DialogComponentStringSelection(
         m_mappingTypeModel, "Mapping type: ", mappings);
 
-//    private final DialogComponentBoolean m_keepOrigCols = new DialogComponentBoolean(
-//        SparkCategory2NumberNodeModel.createKeepOriginalColsModel(), "Keep original columns");
+    private final DialogComponentBoolean m_keepOrigCols = new DialogComponentBoolean(
+        SparkCategory2NumberNodeModel.createKeepOriginalColsModel(), "Keep original columns");
 //    private final SettingsModelString m_suffixModel = SparkCategory2NumberNodeModel.createSuffixModel();
 //    private final DialogComponentString m_suffix = new DialogComponentString(m_suffixModel, "Column suffix");
 
@@ -73,16 +74,16 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
         gc.weightx = 1;
         gc.weighty = 0;
         panel.add(m_mappingType.getComponentPanel(), gc);
+        gc.gridx++;
+        panel.add(m_keepOrigCols.getComponentPanel(), gc);
 //        gc.gridx++;
 //        panel.add(m_suffix.getComponentPanel(), gc);
-//        gc.gridx++;
-//        panel.add(m_keepOrigCols.getComponentPanel(), gc);
 
         gc.gridx = 0;
         gc.gridy++;
         gc.weightx = 1;
         gc.weighty = 1;
-        gc.gridwidth = 1;
+        gc.gridwidth = 2;
         gc.fill = GridBagConstraints.BOTH;
         final JPanel colsPanel = m_cols.getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Columns to convert "));
@@ -98,12 +99,10 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
         if (specs == null || specs.length < 1 || specs[0] == null) {
             throw new NotConfigurableException("No input spec available");
         }
-        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)specs[0];
-        final DataTableSpec spec = sparkSpec.getTableSpec();
-        final DataTableSpec[] fakeSpec = new DataTableSpec[] {spec};
+        final DataTableSpec[] fakeSpec = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_cols.loadSettingsFrom(settings, fakeSpec);
         m_mappingType.loadSettingsFrom(settings, fakeSpec);
-//        m_keepOrigCols.loadSettingsFrom(settings, fakeSpec);
+        m_keepOrigCols.loadSettingsFrom(settings, fakeSpec);
 //        m_suffix.loadSettingsFrom(settings, specs);
     }
 
@@ -114,7 +113,7 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_cols.saveSettingsTo(settings);
         m_mappingType.saveSettingsTo(settings);
-//        m_keepOrigCols.saveSettingsTo(settings);
+        m_keepOrigCols.saveSettingsTo(settings);
 //        m_suffix.saveSettingsTo(settings);
     }
 

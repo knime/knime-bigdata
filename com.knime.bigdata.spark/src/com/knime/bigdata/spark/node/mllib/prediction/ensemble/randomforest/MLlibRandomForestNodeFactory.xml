@@ -41,7 +41,7 @@
 
     <ports>
 		<inPort index="0" name="Input data">Input Spark RDD</inPort>
-		<inPort optional="true" index="1" name="Mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
+		<inPort optional="true" index="1" name="PMML mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
         <outPort index="0" name="Random Forests Model">Spark MLlib Random Forests Model</outPort>
     </ports>
     
