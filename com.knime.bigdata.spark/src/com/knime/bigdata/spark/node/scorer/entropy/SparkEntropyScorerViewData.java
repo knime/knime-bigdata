@@ -20,14 +20,14 @@
  */
 package com.knime.bigdata.spark.node.scorer.entropy;
 
-import org.knime.core.data.DataTable;
 import org.knime.core.node.BufferedDataTable;
 
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData;
 
 /**
+ * Utility class that holds entropy scoring information to be displayed by the node view.
  *
- * @author bjoern
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkEntropyScorerViewData {
 
@@ -35,6 +35,11 @@ public class SparkEntropyScorerViewData {
 
     private final BufferedDataTable m_scoreTable;
 
+    /**
+     *
+     * @param scoreData The raw scoring data to display.
+     * @param scoreTable The scoring data as a data table (which is also forward by the scorer node).
+     */
     public SparkEntropyScorerViewData(final EntropyScorerData scoreData, final BufferedDataTable scoreTable) {
         m_scoreData = scoreData;
         m_scoreTable = scoreTable;
@@ -43,54 +48,54 @@ public class SparkEntropyScorerViewData {
     /**
      * @return the scoring data as returned by the Spark job.
      */
-    public EntropyScorerData getM_scoreData() {
+    public EntropyScorerData getEntropyScorerData() {
         return m_scoreData;
     }
 
     /**
      * @return the scoring data as a data table.
      */
-    public BufferedDataTable getM_scoreTable() {
+    public BufferedDataTable getScoreTable() {
         return m_scoreTable;
     }
 
+    /**
+     * @return {@link EntropyScorerData#getOverallSize()}
+     */
     public int getOverallSize() {
         return m_scoreData.getOverallSize();
     }
 
+    /**
+     * @return {@link EntropyScorerData#getOverallEntropy()}
+     */
     public double getOverallEntropy() {
-        return m_scoreData.getEntropy();
+        return m_scoreData.getOverallEntropy();
     }
 
+    /**
+     * @return {@link EntropyScorerData#getOverallNormalizedEntropy()}
+     */
     public double getOverallNormalizedEntropy() {
         return m_scoreData.getOverallNormalizedEntropy();
     }
 
-   public double getOverallQuality() {
-       return m_scoreData.getQuality();
-   }
-
-   public DataTable getScoreTable() {
-       return m_scoreTable;
-   }
+    /**
+     * @return {@link EntropyScorerData#getOverallQuality()}
+     */
+    public double getOverallQuality() {
+        return m_scoreData.getOverallQuality();
+    }
 
     /**
-     * @return number of cluster found in data
+     * @return {@link EntropyScorerData#getNrClusters()}
      */
     public int getNrClusters() {
         return m_scoreData.getNrClusters();
     }
 
     /**
-     * @return
-     */
-    public int getOverallSizeOfClusters() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    /**
-     * @return
+     * @return {@link EntropyScorerData#getNrReferenceClusters()}
      */
     public int getNrReferenceClusters() {
         return m_scoreData.getNrReferenceClusters();

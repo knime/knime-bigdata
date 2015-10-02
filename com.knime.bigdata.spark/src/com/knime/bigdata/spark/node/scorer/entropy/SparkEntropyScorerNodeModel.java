@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.scorer.entropy;
 import org.knime.base.node.mine.scorer.entrop.EntropyCalculator;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
@@ -38,21 +39,19 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData;
+import com.knime.bigdata.spark.jobserver.server.EntropyScorerData.ClusterScore;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
 /**
+ * Node model for the Spark Entropy Scorer node. Triggers a Spark job to compute the entropy score of a clustering.
  *
- * @author bjoern
+ * TODO: this has some code duplicates with {@link org.knime.base.node.mine.scorer.entrop.EntropyNodeModel}
+ *
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkEntropyScorerNodeModel extends SparkNodeModel {
-
-    /** Inport port of the reference clustering. */
-    public static final int INPORT_REFERENCE = 0;
-
-    /** Inport port of the clustering to judge. */
-    public static final int INPORT_CLUSTERING = 1;
 
     /** Config identifier: column name in reference table. */
     public static final String CFG_REFERENCE_COLUMN = "reference_table_col_column";
@@ -71,7 +70,7 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
      * port.
      */
     public SparkEntropyScorerNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE}, new PortType[]{BufferedDataTable.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{BufferedDataTable.TYPE});
     }
 
     /**
@@ -83,13 +82,12 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("No auto configuration available\n" + "Please configure in dialog.");
 
         }
-        DataTableSpec refSpec = ((SparkDataPortObjectSpec)inSpecs[INPORT_REFERENCE]).getTableSpec();
-        DataTableSpec clusterSpec = ((SparkDataPortObjectSpec)inSpecs[INPORT_CLUSTERING]).getTableSpec();
+        DataTableSpec spec = ((SparkDataPortObjectSpec)inSpecs[0]).getTableSpec();
 
-        if (!refSpec.containsName(m_referenceCol)) {
+        if (!spec.containsName(m_referenceCol)) {
             throw new InvalidSettingsException("Invalid reference column name " + m_referenceCol);
         }
-        if (!clusterSpec.containsName(m_clusteringCol)) {
+        if (!spec.containsName(m_clusteringCol)) {
             throw new InvalidSettingsException("Invalid clustering column name " + m_clusteringCol);
         }
         return new DataTableSpec[]{EntropyCalculator.getScoreTableSpec()};
@@ -108,17 +106,25 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
 
         m_viewData = new SparkEntropyScorerViewData(scoringResult, createQualityTable(scoringResult, exec));
 
-        return new BufferedDataTable[]{m_viewData.getM_scoreTable()};
+        return new BufferedDataTable[]{m_viewData.getScoreTable()};
     }
 
     private BufferedDataTable createQualityTable(final EntropyScorerData scoringResult, final ExecutionContext exec) {
         BufferedDataContainer container = exec.createDataContainer(EntropyCalculator.getScoreTableSpec());
 
+        for (ClusterScore clusterScore : scoringResult.getClusterScores()) {
+            container.addRowToTable(new DefaultRow(new RowKey(clusterScore.getCluster().toString()),
+                new DataCell[]{new IntCell(clusterScore.getSize()), // size
+                    new DoubleCell(clusterScore.getEntropy()), // entropy
+                    new DoubleCell(clusterScore.getNormalizedEntropy()), new MissingCell("?") // normalized entropy
+            }));
+        }
+
         container.addRowToTable(new DefaultRow(new RowKey("Overall"),
-            new DataCell[]{new IntCell(0), // size
-                new DoubleCell(scoringResult.getEntropy()), // entropy
-                new DoubleCell(-1), // normalized entropy
-                new DoubleCell(scoringResult.getQuality()) // quality
+            new DataCell[]{new IntCell(scoringResult.getOverallSize()), // size
+                new DoubleCell(scoringResult.getOverallEntropy()), // entropy
+                new DoubleCell(scoringResult.getOverallNormalizedEntropy()), // normalized entropy
+                new DoubleCell(scoringResult.getOverallQuality()) // quality
         }));
 
         container.close();

@@ -29,11 +29,15 @@ import org.knime.core.node.NodeView;
 import org.knime.core.node.tableview.TableView;
 
 /**
+ * Node view of the Spark Entropy Scorer node, which displays some quality statistics about a clustering.
  *
- * @author bjoern
+ * TODO: this is in large parts a code duplicate of {@link org.knime.base.node.mine.scorer.entrop.EntropyNodeView}
+ *
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkEntropyScorerNodeView extends NodeView<SparkEntropyScorerNodeModel> {
 
+	/** The top level split pane hold some text and a table view */
     private final JSplitPane m_pane;
 
     /** The table view containing cluster statistics. */
@@ -47,7 +51,7 @@ public class SparkEntropyScorerNodeView extends NodeView<SparkEntropyScorerNodeM
 
     /**
      *
-     * @param model the node model from which o display results.
+     * @param model the node model from which of display results.
      */
     public SparkEntropyScorerNodeView(final SparkEntropyScorerNodeModel model) {
         super(model);
@@ -59,6 +63,7 @@ public class SparkEntropyScorerNodeView extends NodeView<SparkEntropyScorerNodeM
         m_editorPaneScroller = new JScrollPane(m_editorPane);
         m_pane.setTopComponent(m_editorPaneScroller);
         m_pane.setBottomComponent(m_tableView);
+        setComponent(m_pane);
     }
 
     /**
@@ -89,7 +94,7 @@ public class SparkEntropyScorerNodeView extends NodeView<SparkEntropyScorerNodeM
                 "Number of objects in clusters: ",
                 "Number of reference clusters: ", "Total number of patterns: "};
         int[] vals = new int[]{viewData.getNrClusters(),
-                viewData.getOverallSizeOfClusters(),
+                viewData.getOverallSize(),
                 viewData.getNrReferenceClusters(),
                 viewData.getOverallSize()};
         for (int i = 0; i < stats.length; i++) {

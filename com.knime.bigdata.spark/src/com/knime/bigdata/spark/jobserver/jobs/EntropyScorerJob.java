@@ -23,6 +23,8 @@ package com.knime.bigdata.spark.jobserver.jobs;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -30,24 +32,26 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.sql.api.java.Row;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData;
+import com.knime.bigdata.spark.jobserver.server.EntropyScorerData.ClusterScore;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import scala.Tuple2;
+import spark.jobserver.SparkJobValidation;
 
 /**
  * computes cluster some entropy and quality values for clustering results given a reference clustering.
  *
  * @author dwk
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class EntropyScorerJob extends KnimeSparkJob implements Serializable {
 
@@ -116,148 +120,97 @@ public class EntropyScorerJob extends KnimeSparkJob implements Serializable {
         return res;
     }
 
-    static Serializable scoreCluster(final JavaRDD<Row> aRowRDD, final Integer referenceCol, final Integer clusterCol) {
+    private static Serializable scoreCluster(final JavaRDD<Row> aRowRDD, final Integer referenceCol,
+        final Integer clusterCol) {
+        // maps cluster -> (refCluster -> count)
+        final Map<Object, Map<Object, Integer>> counts =
+            toMapOfMaps(RDDUtilsInJava.aggregatePairs(aRowRDD, clusterCol, referenceCol));
 
-        final Map<Integer, Map<Integer, Integer>> emptyMap = new HashMap<>();
+        final int nrReferenceClusters = computeNrReferenceClusters(counts);
+        final List<ClusterScore> clusterScores = computeClusterScores(counts, nrReferenceClusters);
 
-        //for each (predicted) cluster, we collect the distribution of its members over the reference clusters
-        // clusterId -> (referenceClusterId -> count)
-        final Map<Integer, Map<Integer, Integer>> clusters =
-            aRowRDD
-                .aggregate(
-                    emptyMap,
-                    new Function2<Map<Integer, Map<Integer, Integer>>, Row, Map<Integer, Map<Integer, Integer>>>() {
-                        private static final long serialVersionUID = 1L;
+        return computeOverallValuesAndCreateEntropyScorerData(clusterScores, nrReferenceClusters);
+    }
 
-                        @Override
-                        public Map<Integer, Map<Integer, Integer>> call(
-                            final Map<Integer, Map<Integer, Integer>> aAggregatedValues, final Row aRow)
-                            throws Exception {
-                            final Integer cluster = (int)RDDUtils.getDouble(aRow, clusterCol);
-                            final Integer reference = (int)RDDUtils.getDouble(aRow, referenceCol);
-                            final Map<Integer, Integer> values;
-                            if (!aAggregatedValues.containsKey(cluster)) {
-                                values = new HashMap<>();
-                                aAggregatedValues.put(cluster, values);
-                            } else {
-                                values = aAggregatedValues.get(cluster);
-                            }
-                            if (!values.containsKey(reference)) {
-                                values.put(reference, 1);
-                            } else {
-                                values.put(reference, values.get(reference) + 1);
-                            }
-                            return aAggregatedValues;
-                        }
-                    },
-                    new Function2<Map<Integer, Map<Integer, Integer>>, Map<Integer, Map<Integer, Integer>>, Map<Integer, Map<Integer, Integer>>>() {
-                        private static final long serialVersionUID = 1L;
+    private static EntropyScorerData computeOverallValuesAndCreateEntropyScorerData(
+        final List<ClusterScore> clusterScores, final int nrReferenceClusters) {
 
-                        @Override
-                        public Map<Integer, Map<Integer, Integer>> call(
-                            final Map<Integer, Map<Integer, Integer>> aAggregatedValues0,
-                            final Map<Integer, Map<Integer, Integer>> aAggregatedValues1) throws Exception {
-                            for (Map.Entry<Integer, Map<Integer, Integer>> entry : aAggregatedValues0.entrySet()) {
-                                final Integer key = entry.getKey();
-                                final Map<Integer, Integer> aggregatedCounts = entry.getValue();
-                                if (aAggregatedValues1.containsKey(key)) {
-                                    Map<Integer, Integer> values = aAggregatedValues1.remove(key);
-                                    for (Map.Entry<Integer, Integer> counts : aggregatedCounts.entrySet()) {
-                                        if (values.containsKey(counts.getKey())) {
-                                            final Integer count = values.remove(counts.getKey());
-                                            aggregatedCounts.put(counts.getKey(), counts.getValue() + count);
-                                        }
-                                    }
-                                    for (Map.Entry<Integer, Integer> counts : values.entrySet()) {
-                                        aggregatedCounts.put(counts.getKey(), counts.getValue());
-                                    }
-                                }
-                            }
-                            for (Map.Entry<Integer, Map<Integer, Integer>> entry : aAggregatedValues1.entrySet()) {
-                                aAggregatedValues0.put(entry.getKey(), entry.getValue());
-                            }
-                            return aAggregatedValues0;
-                        }
-                    });
+        final int nrClusters = clusterScores.size();
 
+        int overallSize = 0;
+        double overallEntropy = 0;
+        double overallNormalizedEntropy = 0;
+        double overallQuality = 0;
+
+        if (clusterScores.isEmpty()) {
+            overallEntropy = 0;
+            overallNormalizedEntropy = 0;
+            // optimistic guess (we don't have counterexamples!)
+            overallQuality = 1;
+        } else {
+            for (ClusterScore clusterScore : clusterScores) {
+                overallSize += clusterScore.getSize();
+                overallEntropy += clusterScore.getSize() * clusterScore.getEntropy();
+                overallNormalizedEntropy += clusterScore.getSize() * clusterScore.getNormalizedEntropy();
+                overallQuality += clusterScore.getSize() * (1.0 - clusterScore.getNormalizedEntropy());
+            }
+
+            overallQuality /= overallSize;
+            overallEntropy /= overallSize;
+            overallNormalizedEntropy /= overallSize;
+        }
+
+        return new EntropyScorerData(clusterScores, overallEntropy, overallNormalizedEntropy, overallQuality,
+            overallSize, nrClusters, nrReferenceClusters);
+    }
+
+    private static int computeNrReferenceClusters(final Map<Object, Map<Object, Integer>> counts) {
         // get the number of different clusters in the reference set
-        final Set<Integer> reference = new HashSet<>();
-        for (Map<Integer, Integer> pats : clusters.values()) {
-            reference.addAll(pats.keySet());
+        final Set<Object> reference = new HashSet<>();
+        for (Map<Object, Integer> clusterCounts : counts.values()) {
+            reference.addAll(clusterCounts.keySet());
         }
-        final int refClusterCount = reference.size();
-
-        final double entropy = entropy(clusters);
-        final double quality = quality(clusters, refClusterCount);
-        final int clusterCount = clusters.size();
-
-        return new EntropyScorerData(entropy, quality, clusterCount, refClusterCount);
+        return reference.size();
     }
 
-    /**
-     * Get entropy for a number of clusters, the entropy value is not normalized, i.e. the result is in the range of
-     * <code>[0, log<sub>2</sub>(|cluster|)</code>.
-     *
-     *
-     * @param clusters the clusters to score
-     * @return entropy value
-     */
-    static double entropy(final Map<Integer, Map<Integer, Integer>> clusters) {
-        if (clusters.isEmpty()) {
-            return 0.0;
+    private static Map<Object, Map<Object, Integer>>
+        toMapOfMaps(final Map<Tuple2<Object, Object>, Integer> mapOfTuples) {
+
+        final Map<Object, Map<Object, Integer>> mapOfMaps = new HashMap<>();
+        for (Tuple2<Object, Object> tuple : mapOfTuples.keySet()) {
+            Map<Object, Integer> map = mapOfMaps.get(tuple._1);
+            if (map == null) {
+                map = new HashMap<>();
+                mapOfMaps.put(tuple._1, map);
+            }
+
+            Integer count = map.get(tuple._2);
+            if (count == null) {
+                count = 0;
+            }
+            map.put(tuple._2, count + mapOfTuples.get(tuple));
         }
-        double entropy = 0.0;
-        int patCount = 0;
-        for (Map<Integer, Integer> cluster : clusters.values()) {
-            final int size = computeClusterSize(cluster);
-            patCount += size;
-            final double e = clusterEntropy(cluster, size);
-            entropy += size * e;
-        }
-        // normalizing over the number of objects in the reference set
-        return entropy / patCount;
+
+        return mapOfMaps;
     }
 
-    /**
-     * Get quality measure of current cluster result (in 0-1). The quality value is defined as
-     * <p>
-     * sum over all clusters (curren_cluster_size / patterns_count * (1 - entropy (current_cluster wrt. reference).
-     * <p>
-     * For further details see Bernd Wiswedel, Michael R. Berthold, <b>Fuzzy Clustering in Parallel Universes</b>,
-     * <i>International Journal of Approximate Reasoning</i>, 2006.
-     *
-     * @param refClusterCount
-     *
-     * @param clusters the map containing the clusters that have been found, i.e. clusterID (as above) as key and the
-     *            set of all contained patterns as value
-     * @return quality value in [0,1]
-     */
-    static double quality(final Map<Integer, Map<Integer, Integer>> clusters, final int refClusterCount) {
-        // optimistic guess (we don't have counterexamples!)
-        if (clusters.isEmpty()) {
-            return 1.0;
-        }
+    private static List<ClusterScore> computeClusterScores(final Map<Object, Map<Object, Integer>> counts,
+        final int nrReferenceClusters) {
+
+        final List<ClusterScore> clusterScores = new LinkedList<>();
 
         // normalizing value (such that the maximum value for the entropy is 1
-        double normalizer = Math.log(refClusterCount) / Math.log(2.0);
-        double quality = 0.0;
-        int patCount = 0;
-        //use group by predicted cluster, then compute entropy for each group in this loop
-        for (Map<Integer, Integer> pats : clusters.values()) {
-            int size = computeClusterSize(pats);
-            patCount += size;
-            double entropy = clusterEntropy(pats, size);
-            double normalizedEntropy;
-            if (normalizer == 0.0) {
-                assert entropy == 0.0;
-                normalizedEntropy = 0.0;
-            } else {
-                normalizedEntropy = entropy / normalizer;
-            }
-            quality += size * (1.0 - normalizedEntropy);
+        final double normalizer = Math.log(nrReferenceClusters) / Math.log(2d);
+
+        for (Object cluster : counts.keySet()) {
+            Map<Object, Integer> clusterCounts = counts.get(cluster);
+
+            final int clusterSize = computeClusterSize(clusterCounts);
+            final double clusterEntropy = clusterEntropy(clusterCounts, clusterSize);
+            final double normalizedClusterEntropy = clusterEntropy / normalizer;
+            clusterScores.add(new ClusterScore(cluster, clusterSize, clusterEntropy, normalizedClusterEntropy));
         }
-        // normalizing over the number of objects in the reference set
-        return quality / patCount;
+        return clusterScores;
     }
 
     /**
@@ -266,27 +219,27 @@ public class EntropyScorerJob extends KnimeSparkJob implements Serializable {
      * @param cluster the single cluster to score
      * @return the (not-normalized) entropy of <code>pats</code> wrt. <code>ref</code>
      */
-    static double clusterEntropy(final Map<Integer, Integer> cluster, final int size) {
+    private static double clusterEntropy(final Map<Object, Integer> cluster, final int size) {
 
         double e = 0.0;
-        for (Integer clusterCount : cluster.values()) {
-            int count = clusterCount.intValue();
-            double quot = count / (double)size;
+        for (int clusterCount : cluster.values()) {
+            double quot = clusterCount / (double)size;
             e -= quot * Math.log(quot) / Math.log(2.0);
         }
         return e;
     }
 
     /**
-     * @param cluster
-     * @return
+     * Counts the number of objects that were classified as within the same cluster.
+     *
+     * @param map from _reference_ cluster to number of objects
+     * @return number of objects in cluster
      */
-    private static int computeClusterSize(final Map<Integer, Integer> cluster) {
+    private static int computeClusterSize(final Map<Object, Integer> cluster) {
         int size = 0;
         for (Integer s : cluster.values()) {
             size += s;
         }
         return size;
     }
-
 }
