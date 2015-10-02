@@ -148,8 +148,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         }
         final Integer[] includeColIdxs = SparkUtil.getColumnIndices(spec, includedCols);
         final MappingType mappingType = MappingType.valueOf(m_mappingType.getStringValue());
-//        final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
-        final boolean keepOriginalColumns = true;
+        final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
 //        final String suffix = m_colSuffix.getStringValue();
         final String suffix = NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
         final DataTableSpec tableSpec =
