@@ -8,7 +8,6 @@
 		<intro>
 			Maps nominal column to double columns.
 		</intro>
-		<option name="Columns to convert">The columns to convert</option>
 		<option name="Mapping type">The mapping type to use.
 		<ul>
 		  <li><b>Column: </b>Uses a separate dictionary for each column</li>
@@ -16,13 +15,15 @@
 		  <li><b>Binary: </b>Converts the selected columns into binary vectors by 
 		  generating a new column for each unique column value.</li>
 		</ul>
-		  
 		</option>
+		<option name="Keep original columns">Select this option to keep the original columns otherwise all
+		selected columns to convert are removed from the output table.</option>
+		<option name="Columns to convert">The columns to convert</option>
 	</fullDescription>
 
 	<ports>
 		<inPort index="0" name="Input data">Input Spark RDD.</inPort>
 		<outPort index="0" name="Mapped input data">Mapped input Spark RDD</outPort>
-		<outPort index="1" name="Mapping dictionary">Mapping dictionary as Spark RDD</outPort>
+		<outPort index="1" name="PMML mapping dictionary">PMML mapping dictionary</outPort>
 	</ports>
 </knimeNode>
