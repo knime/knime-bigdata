@@ -67,7 +67,6 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.BOTH;
         panel.add(m_userCol.getComponentPanel(), gbc);
         gbc.gridy++;
         panel.add(m_productCol.getComponentPanel(), gbc);

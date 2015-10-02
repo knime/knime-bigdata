@@ -168,7 +168,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         }
         final int colIdx = spec.findColumnIndex(colName);
         if (colIdx < 0) {
-            throw new InvalidSettingsException(colType + " column with name: + " + colName + " not found in input data");
+            throw new InvalidSettingsException(colType + " column with name: " + colName + " not found in input data");
         }
         return colIdx;
     }
