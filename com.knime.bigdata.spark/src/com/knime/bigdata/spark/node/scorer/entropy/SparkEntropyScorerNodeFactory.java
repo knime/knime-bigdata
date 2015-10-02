@@ -31,10 +31,9 @@ import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 
-
 /**
  *
- * @author bjoern
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkEntropyScorerNodeFactory extends NodeFactory<SparkEntropyScorerNodeModel> {
 
@@ -58,7 +57,8 @@ public class SparkEntropyScorerNodeFactory extends NodeFactory<SparkEntropyScore
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkEntropyScorerNodeModel> createNodeView(final int viewIndex, final SparkEntropyScorerNodeModel nodeModel) {
+    public NodeView<SparkEntropyScorerNodeModel> createNodeView(final int viewIndex,
+        final SparkEntropyScorerNodeModel nodeModel) {
         return new SparkEntropyScorerNodeView(nodeModel);
     }
 
@@ -80,24 +80,12 @@ public class SparkEntropyScorerNodeFactory extends NodeFactory<SparkEntropyScore
              * {@inheritDoc}
              */
             @Override
-            protected void loadSettingsFrom(final NodeSettingsRO settings,
-                    final PortObjectSpec[] specs) throws NotConfigurableException {
-                super.loadSettingsFrom(settings, new DataTableSpec[] { ((SparkDataPortObjectSpec) specs[0]).getTableSpec(), ((SparkDataPortObjectSpec) specs[1]).getTableSpec()} );
+            protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                super.loadSettingsFrom(settings, new DataTableSpec[]{((SparkDataPortObjectSpec)specs[0]).getTableSpec(),
+                    ((SparkDataPortObjectSpec)specs[0]).getTableSpec()});
             }
-
         };
-//
-//        pane.addDialogComponent(new DialogComponentColumnNameSelection(new SettingsModelString(SparkEntropyScorerNodeModel.CFG_REFERENCE_COLUMN, null),
-//            "Reference Column",
-//            0,
-//            new Class[] { StringValue.class }));
-//
-//        pane.addDialogComponent(new DialogComponentColumnNameSelection(new SettingsModelString(SparkEntropyScorerNodeModel.CFG_CLUSTERING_COLUMN, null),
-//            "Clustering Column",
-//            0,
-//            new Class[] { StringValue.class }));
-//
-//        return pane;
     }
 
 }
