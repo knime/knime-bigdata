@@ -1,8 +1,10 @@
 package com.knime.bigdata.spark.jobserver.server;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.classification.LogisticRegressionModel;
@@ -20,7 +22,7 @@ import org.apache.spark.sql.api.java.Row;
 
 import scala.Tuple2;
 
-import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
+import com.google.common.base.Optional;
 
 /**
  *
@@ -42,14 +44,13 @@ public class ModelUtils {
      */
     public static <T> JavaRDD<Row> predict(final JobConfig aConfig, final JavaRDD<Row> aRowRDD,
         final List<Integer> aColIdxs, final T aModel) throws GenericKnimeSparkException {
-        if (aModel instanceof MatrixFactorizationModel) {
-
-            LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
-            JavaRDD<Rating> ratings = CollaborativeFilteringJob.convertRowRDD2RatingsRdd(aConfig, aRowRDD);
-            return predict(aRowRDD, ratings, (MatrixFactorizationModel)aModel);
-        } else {
-            return predict(RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aRowRDD, aColIdxs), aRowRDD, aModel);
-        }
+        //        if (aModel instanceof CollaborativeFilteringModel) {
+        //            final MatrixFactorizationModel model =
+        //                CollaborativeFilteringModelFactory.fromCollaborativeFilteringModel((CollaborativeFilteringModel)aModel);
+        //            LOGGER.fine("MatrixFactorizationModel (Collaborative Filtering) found for prediction");
+        //            final JavaRDD<Rating> ratings = CollaborativeFilteringJob.convertRowRDD2RatingsRdd(aConfig, aRowRDD);
+        //            return predict(aRowRDD, ratings, model);
+        return predict(RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aRowRDD, aColIdxs), aRowRDD, aModel);
     }
 
     /**
@@ -61,8 +62,9 @@ public class ModelUtils {
      * @return original data with appended column containing predictions
      * @throws GenericKnimeSparkException thrown when model type cannot be handled
      */
-    public static <T> JavaRDD<Row> predict(final JavaRDD<Vector> aNumericData,
-        final JavaRDD<Row> rowRDD, final T aModel) throws GenericKnimeSparkException {
+    public static <T> JavaRDD<Row>
+        predict(final JavaRDD<Vector> aNumericData, final JavaRDD<Row> rowRDD, final T aModel)
+            throws GenericKnimeSparkException {
         //use only the column indices when converting to vector
         aNumericData.cache();
 
@@ -101,43 +103,43 @@ public class ModelUtils {
     /**
      *
      * @param aRowRdd
-     * @param aRatings
+     * @param aUserProductInfo
+     * @param aProductIdx
+     * @param aUserIdx
      * @param aModel
      * @return original data plus one new column with predicted ratings
      */
-    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aRatings, final MatrixFactorizationModel aModel) {
+    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aUserProductInfo,
+        final int aUserIdx, final int aProductIdx, final MatrixFactorizationModel aModel) {
 
-        // Evaluate the model on rating data
-        final JavaRDD<Tuple2<Object, Object>> userProducts =
-            aRatings.map(new Function<Rating, Tuple2<Object, Object>>() {
+        // apply the model to user/product data
+        final JavaPairRDD<Integer, Integer> userProducts =
+            JavaPairRDD.fromJavaRDD(aUserProductInfo.map(new Function<Rating, Tuple2<Integer, Integer>>() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
-                public Tuple2<Object, Object> call(final Rating r) {
-                    return new Tuple2<Object, Object>(r.user(), r.product());
+                public Tuple2<Integer, Integer> call(final Rating r) {
+                    return new Tuple2<Integer, Integer>(r.user(), r.product());
                 }
-            });
-        JavaRDD<Double> predictions = aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Double>() {
-            private static final long serialVersionUID = 1L;
+            }));
+        final JavaRDD<Rating> userProductsAndPredictions = aModel.predict(userProducts);
 
-            @Override
-            public Double call(final Rating r) {
-                return r.rating();
-            }
-        });
-        return RDDUtils.addColumn(aRowRdd.zip(predictions));
+        final JavaRDD<Row> predictions = RDDUtilsInJava.convertRatings2RowRDDRdd(userProductsAndPredictions);
+        // join again with original data, use left outer join since predict does not necessarily return a prediction for each
+        // record
+        final JavaPairRDD<MyJoinKey, Row> leftRdd =
+            RDDUtilsInJava.extractKeys(aRowRdd, new Integer[]{aUserIdx, aProductIdx});
 
-        //        return aModel.predict(userProducts.rdd()).toJavaRDD().map(new Function<Rating, Row>() {
-        //            private static final long serialVersionUID = 1L;
-        //
-        //            @Override
-        //            public Row call(final Rating r) {
-        //                RowBuilder b = RowBuilder.emptyRow();
-        //                b.add(r.user());
-        //                b.add(r.product());
-        //                b.add(r.rating());
-        //                return b.build();
-        //            }
-        //        });
+        final JavaPairRDD<MyJoinKey, Row> rightRdd = RDDUtilsInJava.extractKeys(predictions, new Integer[]{0, 1});
+        final JavaRDD<Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd).values();
+        final List<Integer> predictedRatingIdx = new ArrayList<>();
+        predictedRatingIdx.add(2);
+        final int nFeatures = aRowRdd.take(1).get(0).length();
+        final List<Integer> origIdx = new ArrayList<>();
+        for (int i = 0; i < nFeatures; i++) {
+            origIdx.add(i);
+        }
+        return RDDUtilsInJava.mergeRows(joinedRdd, origIdx, predictedRatingIdx);
+
     }
 }

@@ -32,7 +32,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
@@ -46,12 +45,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
     private final DialogComponentNumber m_lambda =
             new DialogComponentNumber(MLlibNaiveBayesNodeModel.createLambdaModel(), "Lambda: ", 0.05);
 
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
-
-    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
-
-    private final DialogComponent[] m_components =
-            new DialogComponent[] {m_lambda, m_cols, m_classColumn};
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(true);
 
     /**
      *
@@ -64,21 +58,19 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(m_lambda.getComponentPanel(), gbc);
+        gbc.gridx++;
+        // class column selection
+        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_cols.getComponentPanel();
+        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
-
-        gbc.gridy++;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        // class column selection
-        panel.add(m_classColumn.getComponentPanel(), gbc);
 
         addTab("Settings", panel);
     }
@@ -90,9 +82,8 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, tableSpecs);
-        }
+        m_lambda.loadSettingsFrom(settings, tableSpecs);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
     /**
@@ -101,8 +92,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        for (DialogComponent c : m_components) {
-            c.saveSettingsTo(settings);
-        }
+        m_lambda.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 }

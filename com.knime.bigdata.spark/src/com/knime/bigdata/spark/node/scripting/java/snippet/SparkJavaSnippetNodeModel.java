@@ -62,6 +62,9 @@ public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
         final DataTableSpec resultSpec = getResultSpec(inSpecs);
+        if (resultSpec == null) {
+            return new PortObjectSpec[] {null};
+        }
         return new PortObjectSpec[] {new SparkDataPortObjectSpec(getContext(inSpecs), resultSpec)};
     }
 

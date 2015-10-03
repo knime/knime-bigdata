@@ -29,9 +29,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.jobs.SamplingJob;
 import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
-import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 
 /**
@@ -67,12 +65,9 @@ public class SparkPartionNodeModel extends SparkSamplingNodeModel {
         final String partition1 = SparkIDs.createRDDID();
         final String partition2 = SparkIDs.createRDDID();
         final String paramInJson = paramDef(rdd, getSettings(), partition1, partition2);
-        final KNIMESparkContext context = rdd.getContext();
         exec.checkCanceled();
         exec.setMessage("Start Spark sampling job...");
-        JobControler.startJobAndWaitForResult(context, SamplingJob.class.getCanonicalName(), paramInJson, exec);
-        final SparkDataTable result1 = new SparkDataTable(context, partition1, rdd.getTableSpec());
-        final SparkDataTable result2 = new SparkDataTable(context, partition2, rdd.getTableSpec());
-        return new PortObject[] {new SparkDataPortObject(result1), new SparkDataPortObject(result2)};
+        JobControler.startJobAndWaitForResult(rdd.getContext(), SamplingJob.class.getCanonicalName(), paramInJson, exec);
+        return new PortObject[] {createSparkPortObject(rdd, partition1), createSparkPortObject(rdd, partition2)};
     }
 }

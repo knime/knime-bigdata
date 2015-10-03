@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.number2category;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -53,8 +55,10 @@ import com.knime.bigdata.spark.util.SparkUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
-    //TODO: add an option to replace processed columns
+
     private final SettingsModelString m_colSuffix = createColSuffixModel();
+
+    private final SettingsModelBoolean m_keepOriginalCols = createKeepOriginalColsModel();
 
     SparkNumber2CategoryNodeModel() {
         super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE},
@@ -62,10 +66,19 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     }
 
     /**
+     * @return the keep original columns model
+     */
+    static SettingsModelBoolean createKeepOriginalColsModel() {
+        return new SettingsModelBoolean("keepOriginalColumns", false);
+    }
+
+    /**
      * @return the column name suffix model
      */
     static SettingsModelString createColSuffixModel() {
-        return new SettingsModelString("columnSuffix", " (to category)");
+        SettingsModelString model = new SettingsModelString("columnSuffix", " (to category)");
+        model.setEnabled(false);
+        return model;
     }
 
     /**
@@ -75,24 +88,36 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final PMMLPortObjectSpec pmml = (PMMLPortObjectSpec)inSpecs[0];
         final SparkDataPortObjectSpec rdd = (SparkDataPortObjectSpec)inSpecs[1];
-        final DataTableSpec resultSpec = createResultSpec(rdd.getTableSpec(), pmml, m_colSuffix.getStringValue());
+        final DataTableSpec resultSpec = createResultSpec(rdd.getTableSpec(), pmml, m_colSuffix.getStringValue(),
+            m_keepOriginalCols.getBooleanValue());
         return new PortObjectSpec[] {new SparkDataPortObjectSpec(rdd.getContext(), resultSpec)};
     }
 
     private static DataTableSpec createResultSpec(final DataTableSpec tableSpec, final PMMLPortObjectSpec pmml,
-        final String nameSuffix) {
+        final String nameSuffix, final boolean keepOriginal) {
         final Set<String> preprocessingFields = new HashSet<>(pmml.getPreprocessingFields());
-        List<DataColumnSpec> newCols = new LinkedList<DataColumnSpec>();
-        DataColumnSpecCreator creator = new DataColumnSpecCreator("DUMMY", StringCell.TYPE);
+        final List<DataColumnSpec> resultCols = new LinkedList<DataColumnSpec>();
+        final List<DataColumnSpec> appendedCols = new LinkedList<DataColumnSpec>();
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator("DUMMY", StringCell.TYPE);
         for (final DataColumnSpec colSpec : tableSpec) {
             final String colName = colSpec.getName();
             if (preprocessingFields.contains(colName)) {
-                final String newName = colName + nameSuffix;
-                creator.setName(DataTableSpec.getUniqueColumnName(tableSpec, newName));
-                newCols.add(creator.createSpec());
+                final String newName;
+                if (keepOriginal) {
+                    //keep the original column and add a new column with a new unique name
+                    resultCols.add(colSpec);
+                    newName = DataTableSpec.getUniqueColumnName(tableSpec, colName + nameSuffix);
+                } else {
+                    newName = colName;
+                }
+                creator.setName(newName);
+                appendedCols.add(creator.createSpec());
+            } else {
+                resultCols.add(colSpec);
             }
         }
-        return new DataTableSpec(tableSpec, new DataTableSpec(newCols.toArray(new DataColumnSpec[0])));
+        Collections.addAll(resultCols, appendedCols.toArray(new DataColumnSpec[0]));
+        return new DataTableSpec(resultCols.toArray(new DataColumnSpec[0]));
     }
 
     /**
@@ -110,12 +135,15 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
             resultTable = rdd.getData();
         } else {
             final String outputTableName = SparkIDs.createRDDID();
-            final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, outputTableName);
+          //TODO_TK
+            final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
+            final Number2CategoryConverterTask task = new Number2CategoryConverterTask(rdd.getData(), map, keepOriginalColumns, outputTableName);
             exec.checkCanceled();
             task.execute(exec);
             setDeleteOnReset(true);
-            resultTable = new SparkDataTable(rdd.getContext(), outputTableName,
-                createResultSpec(rdd.getTableSpec(), pmml.getSpec(), m_colSuffix.getStringValue()));
+            final DataTableSpec resultSpec = createResultSpec(rdd.getTableSpec(), pmml.getSpec(),
+                m_colSuffix.getStringValue(), keepOriginalColumns);
+            resultTable = new SparkDataTable(rdd.getContext(), outputTableName, resultSpec);
         }
         return new PortObject[] {new SparkDataPortObject(resultTable)};
     }
@@ -126,6 +154,7 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_colSuffix.saveSettingsTo(settings);
+        m_keepOriginalCols.saveSettingsTo(settings);
     }
 
     /**
@@ -134,6 +163,7 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_colSuffix.validateSettings(settings);
+        m_keepOriginalCols.validateSettings(settings);
     }
 
     /**
@@ -142,6 +172,7 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_colSuffix.loadSettingsFrom(settings);
+        m_keepOriginalCols.loadSettingsFrom(settings);
     }
 
 }

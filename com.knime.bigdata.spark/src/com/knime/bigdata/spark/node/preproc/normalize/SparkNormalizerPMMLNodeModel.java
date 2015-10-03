@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.preproc.normalize;
 import java.util.Arrays;
 
 import org.knime.base.data.normalize.AffineTransConfiguration;
+import org.knime.base.data.normalize.Normalizer2;
 import org.knime.base.data.normalize.PMMLNormalizeTranslator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -53,7 +54,6 @@ import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -115,8 +115,9 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
             setWarningMessage("Auto-configure: [0, 1] normalization on all numeric columns: "
                 + ConvenienceMethods.getShortStringFrom(Arrays.asList(includes), MAX_UNKNOWN_COLS));
         }
-        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(dataSpec);
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), dataSpec),
+        final DataTableSpec resultSpec = Normalizer2.generateNewSpec(dataSpec, includes);
+        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContext(), resultSpec),
             pmmlSpecCreator.createSpec()};
     }
 
@@ -178,13 +179,13 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         Arrays.fill(max, m_config.getMax());
         AffineTransConfiguration normConfig =
             new AffineTransConfiguration(includedCols, res.getScales(), res.getTranslations(), min, max, null);
-        final SparkDataTable resultRDD = new SparkDataTable(context, outputTableName, spec);
         final PMMLNormalizeTranslator trans =
                 new PMMLNormalizeTranslator(normConfig, new DerivedFieldMapper((PMMLPortObject)null));
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
         outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-        return new PortObject[]{new SparkDataPortObject(resultRDD), outPMMLPort};
+        final DataTableSpec resultSpec = Normalizer2.generateNewSpec(spec, includes);
+        return new PortObject[]{createSparkPortObject(rdd, resultSpec, outputTableName), outPMMLPort};
     }
 
     /**

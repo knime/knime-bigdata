@@ -30,7 +30,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
-import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 
@@ -65,17 +64,18 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @return the input {@link PortType} array plus the {@link SparkContextPortObject} type as last port
      */
     public static PortType[] addContextPort(final PortType[] inTypes) {
-        final PortType[] types;
-        if (inTypes == null) {
-            types = new PortType[1];
-        } else {
-            types = new PortType[inTypes.length + 1];
-            for (int i = 0, length = inTypes.length; i < length; i++) {
-                types[i] = inTypes[i];
-            }
-        }
-        types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
-        return types;
+        return inTypes;
+//        final PortType[] types;
+//        if (inTypes == null) {
+//            types = new PortType[1];
+//        } else {
+//            types = new PortType[inTypes.length + 1];
+//            for (int i = 0, length = inTypes.length; i < length; i++) {
+//                types[i] = inTypes[i];
+//            }
+//        }
+//        types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
+//        return types;
     }
 
     /**
@@ -84,9 +84,9 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @throws InvalidSettingsException
      */
     public static KNIMESparkContext getContext(final Object[] in) throws InvalidSettingsException {
-        if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
-            return ((SparkContextProvider)in[in.length - 1]).getContext();
-        }
+//        if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
+//            return ((SparkContextProvider)in[in.length - 1]).getContext();
+//        }
         try {
             return KnimeContext.getSparkContext();
         } catch (Exception e) {

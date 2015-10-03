@@ -18,6 +18,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.util.SparkUtil;
 
 /**
@@ -95,8 +96,13 @@ public class KnimeContext {
         if (context == null) {
             throw new IllegalArgumentException("context must not be empty");
         }
+        LOGGER.debug("Check if context exists. Name: " + context.getContextName());
         //query server for existing context so that we can re-use it if there is one
-        JsonArray contexts = context.getREST().toJSONArray(context, CONTEXTS_PATH);
+        final JsonArray contexts = context.getREST().toJSONArray(context, CONTEXTS_PATH);
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Context details: " + context);
+            LOGGER.debug("Available contexts list: " + contexts);
+        }
         if (contexts.size() > 0) {
             for (int i = 0; i < contexts.size(); i++) {
                 if (context.getContextName().equals(contexts.getString(i))) {
@@ -104,6 +110,7 @@ public class KnimeContext {
                 }
             }
         }
+        LOGGER.debug("Context does not exists. Name: " + context.getContextName());
         return false;
     }
 
@@ -118,8 +125,14 @@ public class KnimeContext {
      */
     private static KNIMESparkContext createSparkContext(final KNIMESparkContext aContextContainer)
         throws GenericKnimeSparkException {
-
-        RestClient client = aContextContainer.getREST();
+        if (aContextContainer == null) {
+            throw new IllegalArgumentException("context must not be empty");
+        }
+        LOGGER.debug("Create new Spark context. Name: " + aContextContainer.getContextName());
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Context details: " + aContextContainer);
+        }
+        final RestClient client = aContextContainer.getREST();
         uploadJobJar(aContextContainer);
         // curl command would be:
         // curl -d ""
@@ -153,6 +166,7 @@ public class KnimeContext {
             //TODO: Upload the static jobs jar only if not exists
             //upload jar with our extensions
             JobControler.uploadJobJar(aContextContainer, SparkUtil.getJobJarPath());
+//            JobControler.uploadJobJar(aContextContainer, SparkJobRegistry.getInstance().getJobJarPath());
         }
     }
 
@@ -198,28 +212,17 @@ public class KnimeContext {
     }
 
     /**
-     * remove reference to named RDD from context
+     * remove reference to named RDD from context. Starts the job and does not wait for result.
      *
      * @param aContextContainer context configuration container
      * @param rddName RDD name reference
      */
     public static void deleteNamedRDDs(final KNIMESparkContext aContextContainer, final String... rddName) {
-        String jsonArgs =
-            JsonUtils.asJson(new Object[]{
-                ParameterConstants.PARAM_INPUT,
+        final String jsonArgs = JsonUtils.asJson(new Object[]{ ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_DELETE, NamedRDDUtilsJob.PARAM_INPUT_TABLES,
                     JsonUtils.toJsonArray((Object[])rddName)}});
         try {
-            JobControler.startJobAndWaitForResult(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(),
-                jsonArgs, null);
-            //just for testing:
-            //            Set<String> names = listNamedRDDs(aContextContainer);
-            //            int ix = 1;
-            //            for (String name : names){
-            //                LOGGER.info("Active named RDD "+(ix++)+" of "+names.size()+": "+name);
-            //            }
-        } catch (CanceledExecutionException e) {
-            // impossible with null execution context
+            JobControler.startJob(aContextContainer, NamedRDDUtilsJob.class.getCanonicalName(), jsonArgs);
         } catch (GenericKnimeSparkException e) {
             LOGGER.warn("Failed to remove reference to named RDD on server.");
         }
@@ -232,6 +235,8 @@ public class KnimeContext {
      * @return Set of named RDD names
      */
     public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
+        //TODO: Add this option as a new REST request to the job server to speedup the requests.
+        //This would also make it easier to show the named RDDs in the job server web GUI
         String jsonArgs =
             JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
                 new String[]{NamedRDDUtilsJob.PARAM_OP, NamedRDDUtilsJob.OP_INFO}});

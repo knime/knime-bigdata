@@ -32,7 +32,7 @@ import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
  * @author dwk
  */
 public class BoundedMultiVariateStatisticalSummary implements Serializable, MultivariateStatisticalSummary {
-
+    //TODO: Convert vectors to double[], remove dependency to MultivariateStatisticalSummary and make bound a variable
     private static final long serialVersionUID = 1L;
 
     // maximal number of values to store

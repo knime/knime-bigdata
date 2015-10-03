@@ -9,7 +9,7 @@ import com.knime.bigdata.spark.jobserver.server.EnumContainer.CorrelationMethods
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.CorrelationTaskTest;
+import com.knime.bigdata.spark.node.statistics.correlation.CorrelationTaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

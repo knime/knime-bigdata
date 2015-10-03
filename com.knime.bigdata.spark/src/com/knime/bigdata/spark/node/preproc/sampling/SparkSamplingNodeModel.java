@@ -43,7 +43,6 @@ import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -103,8 +102,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
             setWarningMessage("Sampling failed.");
         }
         setDeleteOnReset(successful.booleanValue());
-        final SparkDataTable result = new SparkDataTable(context, outputTableName, rdd.getTableSpec());
-        return new PortObject[] {new SparkDataPortObject(result)};
+        return new PortObject[] {createSparkPortObject(rdd, outputTableName)};
     }
 
     /**

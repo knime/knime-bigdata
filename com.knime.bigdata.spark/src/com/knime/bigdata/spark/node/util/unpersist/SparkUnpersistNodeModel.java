@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 public class SparkUnpersistNodeModel extends SparkNodeModel {
 
     SparkUnpersistNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE}, false);
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[0]);
     }
 
     /**
@@ -46,7 +46,7 @@ public class SparkUnpersistNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        return inSpecs;
+        return new PortObjectSpec[0];
     }
 
     /**
@@ -57,7 +57,7 @@ public class SparkUnpersistNodeModel extends SparkNodeModel {
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
         final UnpersistTask task = new UnpersistTask();
         task.execute(exec, rdd.getData());
-        return inData;
+        return new PortObject[0];
     }
 
     /**

@@ -1,13 +1,13 @@
 package com.knime.bigdata.spark.jobserver.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -27,6 +27,8 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
 import org.junit.Test;
 
+import scala.Tuple2;
+
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 
@@ -38,7 +40,7 @@ import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 @SuppressWarnings("javadoc")
 public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
-	private static class MyMapper implements Serializable {
+	public static class MyMapper implements Serializable {
 		private static final long serialVersionUID = 1L;
 
 		JavaRDD<Vector> apply(final JavaDoubleRDD o) {
@@ -72,7 +74,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		final static String[] colors = { "red", "blue", "green", "black",
 				"white" };
 
-		final static String[] teams = { "FC1", "FC 2", "FC 1987", "Mein Klub" };
+		public final static String[] teams = { "FC1", "FC 2", "FC 1987", "Mein Klub" };
 
 		JavaRDD<Row> toRowRddWithNominalLabels(final JavaDoubleRDD o) {
 			return o.map(new Function<Double, Row>() {
@@ -108,6 +110,28 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 					ix = ix + 1;
 					return Row.create(team, x, team + color, team,
 							color.substring(0, 1), color);
+				}
+			});
+		}
+
+		public JavaRDD<Row> toRowRddWithSomeTeamChanges(final JavaDoubleRDD o,
+				final double aProb) {
+			return o.map(new Function<Double, Row>() {
+				private static final long serialVersionUID = 1L;
+
+				private int ix = 0;
+
+				@Override
+				public Row call(final Double x) {
+					final String team = teams[ix % teams.length];
+					ix = ix + 1;
+					final String team2;
+					if (Math.random() < aProb) {
+						team2 = teams[(int) (Math.random() * teams.length)];
+					} else {
+						team2 = team;
+					}
+					return Row.create(team, team2);
 				}
 			});
 		}
@@ -281,7 +305,8 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 				0.8, 0.9, 0.10, 0.11, 0.12 };
 		Matrix matrix = Matrices.dense(nRows, nCols, dat);
 
-		JavaRDD<Row> covertedBackToRDD = RDDUtilsInJava.fromMatrix(sparkContextResource.sparkContext, matrix);
+		JavaRDD<Row> covertedBackToRDD = RDDUtilsInJava.fromMatrix(
+				sparkContextResource.sparkContext, matrix);
 
 		final List<Row> rows = covertedBackToRDD.collect();
 
@@ -293,8 +318,9 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 			assertEquals("conversion should create correct length of vectors ",
 					nCols, r.length());
 			for (int j = 0; j < nCols; j++) {
-				assertEquals("conversion should not change values ["+i+","+j+"]", dat[j
-						* nRows + i], r.getDouble(j), 0.0000001);
+				assertEquals("conversion should not change values [" + i + ","
+						+ j + "]", dat[j * nRows + i], r.getDouble(j),
+						0.0000001);
 			}
 		}
 
@@ -408,7 +434,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2, 3,
-						4 }, MappingType.GLOBAL);
+						4 }, MappingType.GLOBAL, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -453,11 +479,11 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2 },
-						MappingType.GLOBAL);
+						MappingType.GLOBAL, true);
 
 		// 3 and 5 were not mapped, should be ignored
 		List<Row> rows = RDDUtilsInJava.applyLabelMapping(v,
-				new int[] { 0, 2, 3, 5 }, info.m_Mappings).collect();
+				new int[] { 0, 2, 3, 5 }, info.m_Mappings, true).collect();
 		for (int i = 0; i < rows.size(); i++) {
 			Row row = rows.get(i);
 			// 6 original columns + 2! converted columns
@@ -485,13 +511,13 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 2 },
-						MappingType.GLOBAL);
+						MappingType.GLOBAL, true);
 		JavaRDD<Row> v2 = new MyMapper().toRowRddWithNominalValues(o,
 				new String[] { "red", "blue", "v1", "v2" }).cache();
 
 		try {
 			RDDUtilsInJava.applyLabelMapping(v2, new int[] { 2 },
-					info.m_Mappings).collect();
+					info.m_Mappings, true).collect();
 		} catch (Exception nse) {
 			nse.printStackTrace();
 			throw nse;
@@ -515,7 +541,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 2, 3,
-						4 }, MappingType.COLUMN);
+						4 }, MappingType.COLUMN, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -565,7 +591,7 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		// convert all but the last column with nominal values:
 		MappedRDDContainer info = RDDUtilsInJava
 				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 3, 2,
-						4 }, MappingType.BINARY);
+						4 }, MappingType.BINARY, true);
 
 		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
 		NominalValueMapping mappings = info.m_Mappings;
@@ -645,6 +671,87 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 		}
 	}
 
+	/**
+	 * convert all nominal values in selected columns to corresponding binary
+	 * columns
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void conversionOfNominalValuesInRDDOfRowsBinaryDropOriginalColumns() throws Exception {
+		JavaDoubleRDD o = getRandomDoubleRDD(25L, 1);
+		JavaRDD<Row> v = new MyMapper().toRowRddWithNominalValues(o).cache();
+
+		// convert all but the last column with nominal values:
+		MappedRDDContainer info = RDDUtilsInJava
+				.convertNominalValuesForSelectedIndices(v, new int[] { 0, 3, 2,
+						4 }, MappingType.BINARY, false);
+
+		JavaRDD<Row> rddWithConvertedValues = info.m_RddWithConvertedValues;
+		NominalValueMapping mappings = info.m_Mappings;
+
+		assertEquals("Conversion changed the number of rows ",
+				rddWithConvertedValues.count(), 25);
+
+		List<Row> rows = rddWithConvertedValues.collect();
+		List<Row> origRows = v.collect();
+		for (int i = 0; i < rows.size(); i++) {
+			Row row = rows.get(i);
+			Row origRow = origRows.get(i);
+			int offset = 2;
+			// 6 original columns + 32 converted values - 4 original, but converted cols
+			assertEquals("conversion should create correct length of rows ",
+					offset + 32, row.length());
+			{
+				int colIx = mappings.getNumberForValue(0, origRow.getString(0));
+				assertEquals("incorrect number of values for 'teams'",
+						MyMapper.teams.length, mappings.getNumberOfValues(0));
+				assertTrue("row " + i
+						+ ": converted values should be in proper column",
+						colIx >= 0 && colIx < MyMapper.teams.length);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += MyMapper.teams.length;
+			}
+
+			// teams
+			{
+				int colIx = mappings.getNumberForValue(3, origRow.getString(3));
+				assertEquals("incorrect number of values for 'teams'",
+						MyMapper.teams.length, mappings.getNumberOfValues(3));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < MyMapper.teams.length);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += mappings.getNumberOfValues(3);
+			}
+
+			{
+				int colIx = mappings.getNumberForValue(2, origRow.getString(2));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < mappings.getNumberOfValues(2));
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(offset + colIx));
+				offset += mappings.getNumberOfValues(2);
+			}
+
+			// 4 values
+			{
+				int colIx = mappings.getNumberForValue(4, origRow.getString(4));
+				assertEquals(
+						"incorrect number of values for first letter of 'colors'",
+						4, mappings.getNumberOfValues(4));
+				assertTrue("converted values should be in proper column",
+						colIx >= 0 && colIx < 4);
+				assertEquals("converted values should be 1", 1,
+						(int) row.getDouble(colIx + offset));
+				offset += mappings.getNumberOfValues(4);
+			}
+			assertEquals("incorrect number of new columns added ", 2 + 32,
+					offset);
+
+		}
+	}
 	static class CreateData implements Serializable {
 		private static final long serialVersionUID = 1L;
 
@@ -916,6 +1023,72 @@ public class RDDUtilsInJavaTest extends LocalSparkSpec {
 			assertEquals("petal width", row[3], normalizedRow.getDouble(3),
 					0.0001);
 		}
+	}
+
+	@Test
+	public void aggregateValuePairForDiagonalMatrix() throws Throwable {
+
+		JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+		JavaRDD<Row> rowRDD = new MyMapper().toRowRddWithNominalValues(o);
+
+		Map<Tuple2<Object, Object>, Integer> res = RDDUtilsInJava
+				.aggregatePairs(rowRDD, 2, 2);
+		assertEquals("diagonal matrix must have one entry for each color",
+				MyMapper.colors.length * MyMapper.teams.length, res.size());
+		int sum = 0;
+		for (Integer val : res.values()) {
+			sum += val;
+		}
+		assertEquals("values in matrix must count up to number of rows",
+				rowRDD.count(), sum);
+
+	}
+
+	@Test
+	public void aggregateValuePairForNonDiagonalMatrix() throws Throwable {
+
+		JavaDoubleRDD o = getRandomDoubleRDD(100L, 2);
+		JavaRDD<Row> rowRDD = new MyMapper().toRowRddWithSomeTeamChanges(o,
+				0.25d).cache();
+		final List<Row> rows = rowRDD.collect();
+
+		Map<Tuple2<Object, Object>, Integer> res = RDDUtilsInJava
+				.aggregatePairs(rowRDD, 0, 1);
+		final List<Row> distinct = rowRDD.distinct().collect();
+		assertEquals("diagonal matrix must have one entry for each team, ",
+				distinct.size(), res.size());
+		int sum = 0;
+		for (Integer val : res.values()) {
+			sum += val;
+		}
+		assertEquals("values in matrix must count up to number of rows",
+				rowRDD.count(), sum);
+
+		final int[] team0Counts = new int[MyMapper.teams.length];
+		Arrays.fill(team0Counts, 0);
+		for (Row row : rows) {
+			if (row.getString(0).equals(MyMapper.teams[0])) {
+				for (int i = 0; i < MyMapper.teams.length; i++) {
+					if (row.getString(1).equals(MyMapper.teams[i])) {
+						team0Counts[i] = team0Counts[i] + 1;
+					}
+				}
+			}
+		}
+		for (int i = 0; i < MyMapper.teams.length; i++) {
+			if (team0Counts[i] > 0) {
+				assertEquals(
+						"incorrect count for Team 0[" + i + "]",
+						team0Counts[i],
+						res.get(new Tuple2<Object, Object>(MyMapper.teams[0],
+								MyMapper.teams[i])).intValue());
+			} else {
+				assertFalse("incorrect count for Team 0[" + i + "]",
+						res.containsKey(new Tuple2<Object, Object>(
+								MyMapper.teams[0], MyMapper.teams[i])));
+			}
+		}
+
 	}
 
 	@Nonnull

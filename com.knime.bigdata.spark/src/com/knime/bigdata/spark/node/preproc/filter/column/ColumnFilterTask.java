@@ -50,11 +50,22 @@ public class ColumnFilterTask implements Serializable {
 
     private final String m_outputTableName;
 
-    ColumnFilterTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final String aOutputTable) {
+    /**
+     * @param inputRDD
+     * @param featureColIdxs
+     * @param aOutputTable
+     */
+    public ColumnFilterTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final String aOutputTable) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, aOutputTable);
     }
 
-    ColumnFilterTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
+    /**
+     * @param aContext
+     * @param aInputRDD
+     * @param featureColIdxs
+     * @param aOutputTable
+     */
+    public ColumnFilterTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
         final String aOutputTable) {
         m_context = aContext;
         m_inputTableName = aInputRDD;
@@ -62,7 +73,12 @@ public class ColumnFilterTask implements Serializable {
         m_outputTableName = aOutputTable;
     }
 
-    void execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    /**
+     * @param exec
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
+    public void execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
         final String jasonParams = paramsAsJason();
         if (exec != null) {
             exec.checkCanceled();

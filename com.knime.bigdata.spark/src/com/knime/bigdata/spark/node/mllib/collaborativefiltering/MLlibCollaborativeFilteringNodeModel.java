@@ -22,7 +22,6 @@ package com.knime.bigdata.spark.node.mllib.collaborativefiltering;
 
 import java.util.Arrays;
 
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -34,6 +33,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
@@ -131,18 +131,19 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final int productIdx = settings.getFeatueColIdxs()[1];
         final int ratingIdx = settings.getClassColIdx();
         final double lambda = m_lambda.getDoubleValue();
-        final String vMatrixName = SparkIDs.createRDDID();
         final CollaborativeFilteringTask task =
-                new CollaborativeFilteringTask(data.getData(), userIdx, productIdx, ratingIdx, lambda, vMatrixName);
-        final MatrixFactorizationModel model = task.execute(exec);
+                new CollaborativeFilteringTask(data.getData(), userIdx, productIdx, ratingIdx, lambda);
+        final String predictions = SparkIDs.createRDDID();
+        final CollaborativeFilteringModel model = task.execute(exec, predictions);
         exec.setMessage("Collaborative filtering (SPARK) done.");
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), vMatrixName, resultSpec);
-
-        final SparkModel<MatrixFactorizationModel> sparkModel = new SparkModel<MatrixFactorizationModel>(
+        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), predictions, resultSpec);
+        final SparkModel<CollaborativeFilteringModel> sparkModel = new SparkModel<CollaborativeFilteringModel>(
                 model, MatrixFactorizationModelInterpreter.getInstance(), settings);
+        //add the model RDDs to the list of RDDs to delete on reset
+        additionalRDDs2Delete(data.getContext(), model.getUserFeaturesRDDID(), model.getProductFeaturesRDDID());
         return new PortObject[]{new SparkDataPortObject(vMatrixRDD),
-            new SparkModelPortObject<MatrixFactorizationModel>(sparkModel)};
+            new SparkModelPortObject<CollaborativeFilteringModel>(sparkModel)};
     }
 
     private MLlibSettings createMLlibSettings(final DataTableSpec tableSpec) throws InvalidSettingsException {
@@ -167,9 +168,9 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         }
         final int colIdx = spec.findColumnIndex(colName);
         if (colIdx < 0) {
-            throw new InvalidSettingsException(colType + " column with name: + " + colName + " not found in input data");
+            throw new InvalidSettingsException(colType + " column with name: " + colName + " not found in input data");
         }
-        return 0;
+        return colIdx;
     }
 
     /**

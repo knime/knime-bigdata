@@ -47,14 +47,16 @@ public class RDDUtilsInJava {
      * @param aInputRdd Row RDD to be processed
      * @param aColumnIds array of indices to be converted
      * @param aMappingType indicates how values are to be mapped
+     * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
     public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType) {
+        final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
         final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
 
-        final JavaRDD<Row> rddWithConvertedValues = applyLabelMapping(aInputRdd, aColumnIds, mappings);
+        final JavaRDD<Row> rddWithConvertedValues =
+            applyLabelMapping(aInputRdd, aColumnIds, mappings, aKeepOriginalColumns);
         return new MappedRDDContainer(rddWithConvertedValues, mappings);
     }
 
@@ -64,18 +66,24 @@ public class RDDUtilsInJava {
      * @param aInputRdd
      * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
      * @param aMappings
+     * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return JavaRDD<Row> with converted data (columns are appended)
      */
     public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
-        final NominalValueMapping aMappings) {
+        final NominalValueMapping aMappings, final boolean aKeepOriginalColumns) {
 
         JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Row call(final Row row) {
-                RowBuilder builder = RowBuilder.fromRow(row);
+                final RowBuilder builder;
+                if (aKeepOriginalColumns) {
+                    builder = RowBuilder.fromRow(row);
+                } else {
+                    builder = dropColumnsFromRow(aColumnIds, row);
+                }
                 for (int ix : aColumnIds) {
                     //ignore columns that have no mapping
                     if (aMappings.hasMappingForColumn(ix)) {
@@ -103,6 +111,30 @@ public class RDDUtilsInJava {
             }
         });
         return rddWithConvertedValues;
+    }
+
+    /**
+     * @param aColumnIdsToDrop
+     * @param aRow
+     * @return rowBuilder with subset of columns already added
+     */
+    public static RowBuilder dropColumnsFromRow(final List<Integer> aColumnIdsToDrop, final Row aRow) {
+        final RowBuilder builder;
+        builder = RowBuilder.emptyRow();
+        for (int ix = 0; ix < aRow.length(); ix++) {
+            if (!aColumnIdsToDrop.contains(ix)) {
+                builder.add(aRow.get(ix));
+            }
+        }
+        return builder;
+    }
+
+    private static RowBuilder dropColumnsFromRow(final int[] aColumnIdsToDrop, final Row aRow) {
+        List<Integer> cols = new ArrayList<>();
+        for (int ix : aColumnIdsToDrop) {
+            cols.add(ix);
+        }
+        return dropColumnsFromRow(cols, aRow);
     }
 
     /**
@@ -216,7 +248,7 @@ public class RDDUtilsInJava {
                 public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues0,
                     final Map<Integer, Set<String>> aAggregatedValues1) throws Exception {
                     for (Map.Entry<Integer, Set<String>> entry : aAggregatedValues0.entrySet()) {
-                        aAggregatedValues0.get(entry.getKey()).addAll(aAggregatedValues1.get(entry.getKey()));
+                        entry.getValue().addAll(aAggregatedValues1.get(entry.getKey()));
                     }
                     return aAggregatedValues0;
                 }
@@ -392,29 +424,28 @@ public class RDDUtilsInJava {
     }
 
     /**
-    *
-    * sub-select given columns by index from the given RDD and put result into new RDD
-    *
-    * @param aInputRdd Row RDD to be converted
-    * @param aColumnIndices column selector (and, possibly, re-ordering)
-    * @return RDD with selected columns and same number of rows as original
-    * @throws IllegalArgumentException if values are encountered that are not numeric
-    */
-   public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd,
-       final List<Integer> aColumnIndices) {
-       return aInputRdd.map(new Function<Row, Row>() {
-           private static final long serialVersionUID = 1L;
+     *
+     * sub-select given columns by index from the given RDD and put result into new RDD
+     *
+     * @param aInputRdd Row RDD to be converted
+     * @param aColumnIndices column selector (and, possibly, re-ordering)
+     * @return RDD with selected columns and same number of rows as original
+     * @throws IllegalArgumentException if values are encountered that are not numeric
+     */
+    public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd, final List<Integer> aColumnIndices) {
+        return aInputRdd.map(new Function<Row, Row>() {
+            private static final long serialVersionUID = 1L;
 
-           @Override
-           public Row call(final Row row) {
-               RowBuilder rb = RowBuilder.emptyRow();
-               for (int idx : aColumnIndices) {
-                   rb.add(row.get(idx));
-               }
-               return rb.build();
-           }
-       });
-   }
+            @Override
+            public Row call(final Row row) {
+                RowBuilder rb = RowBuilder.emptyRow();
+                for (int idx : aColumnIndices) {
+                    rb.add(row.get(idx));
+                }
+                return rb.build();
+            }
+        });
+    }
 
     /**
      * extracts the given keys from the given rdd and constructs a pair rdd from it
@@ -528,26 +559,107 @@ public class RDDUtilsInJava {
         return aContext.parallelize(rows);
     }
 
-
     /**
      *
      * @param aUserIx
      * @param aProductIx
-     * @param aRatingIx
+     * @param aRatingIx - optional ratings index, use -1 if no ratings are available
      * @param aInputRdd
      * @return ratings rdd
      */
-    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx, final int aRatingIx,
-        final JavaRDD<Row> aInputRdd) {
+    public static JavaRDD<Rating> convertRowRDD2RatingsRdd(final int aUserIx, final int aProductIx,
+        final int aRatingIx, final JavaRDD<Row> aInputRdd) {
         JavaRDD<Rating> ratings = aInputRdd.map(new Function<Row, Rating>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Rating call(final Row aRow) {
-                return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils.getDouble(aRow, aRatingIx));
+                if (aRatingIx > -1) {
+                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), RDDUtils
+                        .getDouble(aRow, aRatingIx));
+                } else {
+                    return new Rating(aRow.getInt(aUserIx), aRow.getInt(aProductIx), -1);
+                }
             }
         });
         return ratings;
     }
 
+    /**
+     * converts ratings to rows
+     *
+     * @param aInputRdd
+     * @return JavaRDD of Rows
+     */
+    public static JavaRDD<Row> convertRatings2RowRDDRdd(final JavaRDD<Rating> aInputRdd) {
+        JavaRDD<Row> rows = aInputRdd.map(new Function<Rating, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Rating aRating) {
+                RowBuilder rb = RowBuilder.emptyRow();
+                rb.add(aRating.user()).add(aRating.product()).add(aRating.rating());
+                return rb.build();
+            }
+        });
+        return rows;
+    }
+
+    /**
+     * count the number of times each pair of values of the given two indices occurs in the rdd
+     *
+     * @param aInputRdd
+     * @param aIndex1 - first index in pair
+     * @param aIndex2 - second index in pair
+     * @return map with counts for all pairs of values that occur at least once
+     */
+    public static Map<Tuple2<Object, Object>, Integer> aggregatePairs(final JavaRDD<Row> aInputRdd, final int aIndex1,
+        final int aIndex2) {
+        Map<Tuple2<Object, Object>, Integer> emptyMap = new HashMap<>();
+
+        Map<Tuple2<Object, Object>, Integer> counts =
+            aInputRdd
+                .aggregate(
+                    emptyMap,
+                    new Function2<Map<Tuple2<Object, Object>, Integer>, Row, Map<Tuple2<Object, Object>, Integer>>() {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public Map<Tuple2<Object, Object>, Integer> call(
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues, final Row row)
+                            throws Exception {
+
+                            Object val1 = row.get(aIndex1);
+                            Object val2 = row.get(aIndex2);
+                            final Tuple2<Object, Object> key = new Tuple2<>(val1, val2);
+                            final Integer count;
+                            if (aAggregatedValues.containsKey(key)) {
+                                count = aAggregatedValues.get(key) + 1;
+                            } else {
+                                count = 1;
+                            }
+                            aAggregatedValues.put(key, count);
+                            return aAggregatedValues;
+                        }
+                    },
+                    new Function2<Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>, Map<Tuple2<Object, Object>, Integer>>() {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public Map<Tuple2<Object, Object>, Integer> call(
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues0,
+                            final Map<Tuple2<Object, Object>, Integer> aAggregatedValues1) throws Exception {
+                            for (Map.Entry<Tuple2<Object, Object>, Integer> entry : aAggregatedValues0.entrySet()) {
+                                if (aAggregatedValues1.containsKey(entry.getKey())) {
+                                    final Integer val = aAggregatedValues1.remove(entry.getKey());
+                                    aAggregatedValues0.put(entry.getKey(), entry.getValue() + val);
+                                }
+                            }
+                            //copy remaining values over
+                            aAggregatedValues0.putAll(aAggregatedValues1);
+                            return aAggregatedValues0;
+                        }
+                    });
+        return counts;
+    }
 }

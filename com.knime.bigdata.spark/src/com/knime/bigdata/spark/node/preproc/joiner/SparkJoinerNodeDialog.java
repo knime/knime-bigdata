@@ -24,7 +24,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.knime.base.node.preproc.joiner.Joiner2NodeDialog;

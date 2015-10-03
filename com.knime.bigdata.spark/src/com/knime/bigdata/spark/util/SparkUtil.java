@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
@@ -42,9 +43,14 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.server.ColumnBasedValueMapping;
+import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
+import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
 import com.knime.bigdata.spark.util.converter.SparkTypeRegistry;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  *
@@ -177,5 +183,35 @@ public final class SparkUtil {
             }
         }
         return map;
+    }
+
+    /**
+     * @param vals the primitive booleans to convert to Object array
+     * @return the {@link Boolean} array representation
+     */
+    public static Boolean[] convert(final boolean[] vals) {
+        return ArrayUtils.toObject(vals);
+    }
+
+    /**
+     * Helper method that can be used for debugging the predictor params string that is send to the Spark job server
+     * via the JobControler.startJobAndWaitForResult() method.
+     * @param aJsonParams json formated string with job parameters
+     * @throws GenericKnimeSparkException
+     */
+    public static void testPredictorParams(final String aJsonParams) throws GenericKnimeSparkException {
+        Config conf = ConfigFactory.parseString(aJsonParams);
+        JobConfig aConfig = new JobConfig(conf);
+        @SuppressWarnings("unused")
+        Object decodeFromInputParameter = aConfig.decodeFromInputParameter(ParameterConstants.PARAM_MODEL_NAME);
+        aConfig.readInputFromFileAndDecode(ParameterConstants.PARAM_MODEL_NAME);
+    }
+
+    /**
+     * @param vals the Integer vals to convert to int
+     * @return the int array
+     */
+    public static int[] convert(final Integer[] vals) {
+        return ArrayUtils.toPrimitive(vals);
     }
 }

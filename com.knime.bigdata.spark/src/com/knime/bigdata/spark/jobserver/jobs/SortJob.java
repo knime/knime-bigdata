@@ -57,6 +57,11 @@ public class SortJob extends KnimeSparkJob implements Serializable {
     public static final String PARAM_SORT_IS_ASCENDING = "sortOrderAscending";
 
     /**
+     * indicates whether null values should always be sorted to the end
+     */
+    public static final String PARAM_MISSING_TO_END = "missingToEnd";
+
+    /**
      * parse parameters - there are no default values, all values are required
      *
      */
@@ -70,6 +75,10 @@ public class SortJob extends KnimeSparkJob implements Serializable {
 
         if (!aConfig.hasInputParameter(PARAM_SORT_IS_ASCENDING) || (getSortOrders(aConfig).size() == 0)) {
             msg = "Input parameter '" + PARAM_SORT_IS_ASCENDING + "' missing.";
+        }
+
+        if (!aConfig.hasInputParameter(PARAM_MISSING_TO_END)) {
+            msg = "Input parameter '" + PARAM_MISSING_TO_END + "' missing.";
         }
 
         if (msg == null && !aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
@@ -113,15 +122,17 @@ public class SortJob extends KnimeSparkJob implements Serializable {
         final JavaRDD<Row> rowRDD = getFromNamedRdds(aConfig.getInputParameter(PARAM_INPUT_TABLE));
         final List<Integer> colIdxs = SupervisedLearnerUtils.getSelectedColumnIds(aConfig);
         final List<Boolean> sortOrders = getSortOrders(aConfig);
+        final Boolean missingToEnd = aConfig.getInputParameter(PARAM_MISSING_TO_END, Boolean.class);
 
-        final JavaRDD<Row> res = execute(sc.defaultMinPartitions(), rowRDD, colIdxs, sortOrders);
+        final JavaRDD<Row> res = execute(sc.defaultMinPartitions(), rowRDD, colIdxs, sortOrders, missingToEnd);
         addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE), res);
 
         LOGGER.log(Level.INFO, "RDD Sort done");
         return JobResult.emptyJobResult().withMessage("OK");
     }
 
-    static JavaRDD<Row> execute(final int aNumPartitions, final JavaRDD<Row> rowRDD, final List<Integer> colIdxs, final List<Boolean> sortOrders) {
+    static JavaRDD<Row> execute(final int aNumPartitions, final JavaRDD<Row> rowRDD, final List<Integer> colIdxs,
+        final List<Boolean> sortOrders, final Boolean missingToEnd) {
         //special (and more efficient) handling of sorting by a single key:
         if (colIdxs.size() == 1) {
             return rowRDD.sortBy(new Function<Row, Object>() {
@@ -144,7 +155,7 @@ public class SortJob extends KnimeSparkJob implements Serializable {
                         values[i] = aRow.get(colIdxs.get(i));
                         isAscending[i] = sortOrders.get(i);
                     }
-                    return new MultiValueSortKey(values, isAscending);
+                    return new MultiValueSortKey(values, isAscending, missingToEnd);
                 }
             }, true, aNumPartitions);
         }
