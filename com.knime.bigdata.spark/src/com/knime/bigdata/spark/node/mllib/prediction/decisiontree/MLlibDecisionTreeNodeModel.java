@@ -26,17 +26,12 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
@@ -50,13 +45,10 @@ import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
  */
 public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
 
-    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(true);
+    private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
 
-    private final SettingsModelString m_qualityMeasure = createQualityMeasureModel();
-
-    private final SettingsModelInteger m_maxNumberOfBins = createMaxNumberBinsModel();
-
-    private final SettingsModelInteger m_maxDepth = createMaxDepthModel();
+    /** Index of input data port. */
+    static final int DATA_INPORT = 0;
 
     /**
      * Constructor.
@@ -64,27 +56,6 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
     MLlibDecisionTreeNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
             new PortType[]{SparkModelPortObject.TYPE});
-    }
-
-    /**
-     * @return the quality measure model
-     */
-    static SettingsModelString createQualityMeasureModel() {
-        return new SettingsModelString("qualityMeasure", AbstractTreeLearnerJob.VALUE_GINI);
-    }
-
-    /**
-     * @return the maximum number of bins model
-     */
-    static SettingsModelIntegerBounded createMaxNumberBinsModel() {
-        return new SettingsModelIntegerBounded("maxNumBins", 10, 1, Integer.MAX_VALUE);
-    }
-
-    /**
-     * @return the maximum depth model
-     */
-    static SettingsModelIntegerBounded createMaxDepthModel() {
-        return new SettingsModelIntegerBounded("maxDepth", 25, 1, Integer.MAX_VALUE);
     }
 
     /**
@@ -96,12 +67,12 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-//        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
-//        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
-//            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
-//        }
+        //        final PMMLPortObjectSpec pmmlSpec = (PMMLPortObjectSpec)inSpecs[1];
+        //        if (mapSpec != null && !SparkCategory2NumberNodeModel.MAP_SPEC.equals(mapSpec.getTableSpec())) {
+        //            throw new InvalidSettingsException("Invalid mapping dictionary on second input port.");
+        //        }
         final DataTableSpec tableSpec = spec.getTableSpec();
-        m_settings.check(tableSpec);
+        m_treeSettings.check(tableSpec);
         //MLlibClusterAssignerNodeModel.createSpec(tableSpec),
         return new PortObjectSpec[]{createMLSpec()};
     }
@@ -115,14 +86,17 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
         final PMMLPortObject mapping = (PMMLPortObject)inObjects[1];
         exec.setMessage("Starting Decision Tree (SPARK) Learner");
         exec.checkCanceled();
-        final MLlibSettings settings = m_settings.getSettings(data, mapping);
-        final int maxDepth = m_maxDepth.getIntValue();
-        final int maxNoOfBins = m_maxNumberOfBins.getIntValue();
-        final String qualityMeasure = m_qualityMeasure.getStringValue();
-        final DecisionTreeTask task = new DecisionTreeTask(data.getData(), settings.getFeatueColIdxs(),
-            settings.getFatureColNames(), settings.getNominalFeatureInfo(), settings.getClassColName(),
-            settings.getClassColIdx(), settings.getNumberOfClasses(), maxDepth, maxNoOfBins, qualityMeasure);
+        final MLlibSettings settings = m_treeSettings.getSettings(data, mapping);
+        final int maxDepth = m_treeSettings.getMaxDepth();
+        final int maxNoOfBins = m_treeSettings.getMaxNoOfBins();
+        final String qualityMeasure = m_treeSettings.getQualityMeasure();
+        final DecisionTreeTask task =
+            new DecisionTreeTask(data.getData(), settings.getFeatueColIdxs(), settings.getFatureColNames(),
+                settings.getNominalFeatureInfo(), settings.getClassColName(), settings.getClassColIdx(),
+                settings.getNumberOfClasses(), maxDepth, maxNoOfBins, qualityMeasure);
         final DecisionTreeModel treeModel = task.execute(exec);
+
+
         final MLlibDecisionTreeInterpreter interpreter = MLlibDecisionTreeInterpreter.getInstance();
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(treeModel, interpreter, settings))};
 
@@ -140,10 +114,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
-        m_maxNumberOfBins.saveSettingsTo(settings);
-        m_maxDepth.saveSettingsTo(settings);
-        m_qualityMeasure.saveSettingsTo(settings);
+        m_treeSettings.saveSettingsTo(settings);
     }
 
     /**
@@ -151,10 +122,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-        m_maxNumberOfBins.validateSettings(settings);
-        m_maxDepth.validateSettings(settings);
-        m_qualityMeasure.validateSettings(settings);
+        m_treeSettings.validateSettings(settings);
     }
 
     /**
@@ -162,10 +130,7 @@ public class MLlibDecisionTreeNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
-        m_maxNumberOfBins.loadSettingsFrom(settings);
-        m_maxDepth.loadSettingsFrom(settings);
-        m_qualityMeasure.loadSettingsFrom(settings);
+        m_treeSettings.loadSettingsFrom(settings);
     }
 
 }

@@ -60,6 +60,9 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final DataTableSpec resultSpec = getResultSpec(inSpecs);
+        if (resultSpec == null) {
+            return new PortObjectSpec[] {null};
+        }
         return new PortObjectSpec[] {new SparkDataPortObjectSpec(getContext(inSpecs), resultSpec)};
     }
 

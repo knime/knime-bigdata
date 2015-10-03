@@ -31,7 +31,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
@@ -44,7 +43,7 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 public class MLlibPCANodeDialog extends NodeDialogPane {
     private final DialogComponentNumber m_noOfComponents =
             new DialogComponentNumber(MLlibPCANodeModel.createNoComponentsModel(), "Number of components: ", 10);
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
     /**
      *
      */
@@ -64,7 +63,7 @@ public class MLlibPCANodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        panel.add(m_cols.getComponentPanel(), gbc);
+        panel.add(m_settings.getFeatureColsComponent().getComponentPanel(), gbc);
         addTab("Settings", panel);
     }
 
@@ -74,7 +73,7 @@ public class MLlibPCANodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_noOfComponents.saveSettingsTo(settings);
-        m_cols.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -84,6 +83,6 @@ public class MLlibPCANodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_noOfComponents.loadSettingsFrom(settings, tableSpecs);
-        m_cols.loadSettingsFrom(settings, tableSpecs);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 }

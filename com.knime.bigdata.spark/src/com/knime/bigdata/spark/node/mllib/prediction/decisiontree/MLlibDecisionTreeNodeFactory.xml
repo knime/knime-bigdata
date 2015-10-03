@@ -2,18 +2,16 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
-    <name>Spark Decision Tree</name>
+    <name>Spark Decision Tree Learner</name>
 	<shortDescription>Decision tree induction performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
 			<a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html">Decision Tree</a> algorithm.
-			It outputs the original data and the decision tree predictions for the 
-			result preview as well as the learned model for later application.
 			<p>
             Please note that all data must be numeric, including the label column. 
             Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
+            numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
             </p>
             <p>
             Use the Spark Predictor node to apply the learned model to unseen data.
@@ -37,7 +35,8 @@
 
     <ports>
 		<inPort index="0" name="Input data">Input Spark RDD</inPort>
-		<inPort optional="true" index="1" name="Mapping dictionary">Spark RDD with the mapping dictionary of nominal values</inPort>
+		<inPort optional="true" index="1" name="PMML mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
         <outPort index="0" name="Decision Tree Model">Spark MLlib Decision Tree Model</outPort>
     </ports>
+    
 </knimeNode>

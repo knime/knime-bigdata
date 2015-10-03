@@ -33,7 +33,6 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
  *
@@ -64,8 +63,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
         final SparkDataPortObject sparkRDD = (SparkDataPortObject)inObjects[0];
         final DataTableSpec inSpec = sparkRDD.getTableSpec();
         final DataTableSpec outSpec = createNewSpec(inSpec);
-        final SparkDataTable renamedRDD = new SparkDataTable(sparkRDD.getContext(), sparkRDD.getTableName(), outSpec);
-        return new PortObject[]{new SparkDataPortObject(renamedRDD)};
+        return new PortObject[]{SparkNodeModel.createSparkPortObject(sparkRDD, outSpec)};
     }
 
     private DataTableSpec createNewSpec(final DataTableSpec inSpec) throws InvalidSettingsException {

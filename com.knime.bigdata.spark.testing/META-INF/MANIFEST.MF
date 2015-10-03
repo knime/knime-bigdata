@@ -6,6 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Fragment-Host: com.knime.bigdata.spark;bundle-version="0.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: .,
- lib/spark-assembly-1.2.1-hadoop2.4.0.jar
-Require-Bundle: com.google.guava
+Bundle-ClassPath: .
+Require-Bundle: com.google.guava,
+ org.apache.commons.math3;bundle-version="3.4.1"

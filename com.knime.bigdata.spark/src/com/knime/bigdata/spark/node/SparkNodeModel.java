@@ -60,7 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -83,6 +86,7 @@ import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 
 /**
@@ -217,14 +221,28 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     private void addSparkObject(final SparkDataPortObject sparkObject) {
-        final KNIMESparkContext context = sparkObject.getContext();
+        addSparkObject(sparkObject.getContext(), sparkObject.getTableName());
+    }
+
+    private void addSparkObject(final KNIMESparkContext context, final String... RDDIDs) {
         List<String> rdds = m_namedRDDs.get(context);
         if (rdds == null) {
             rdds = new LinkedList<String>();
             m_namedRDDs.put(context, rdds);
         }
-        rdds.add(sparkObject.getTableName());
+        for (String RDDID : RDDIDs) {
+            rdds.add(RDDID);
+        }
     }
+
+    /**
+     * @param context the {@link KNIMESparkContext} the RDDs live in
+     * @param RDDIDs the RDD ids to delete when the node is reseted or disposed
+     */
+    protected final void additionalRDDs2Delete(final KNIMESparkContext context, final String... RDDIDs) {
+        addSparkObject(context, RDDIDs);
+    }
+
 
     /**
      *
@@ -368,7 +386,6 @@ public abstract class SparkNodeModel extends NodeModel {
     private void deleteRDDs(final boolean onDispose) {
         if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
             LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
-            @SuppressWarnings("unused")
             Future<?> future = KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
                 @Override
                 public void run() {
@@ -386,20 +403,58 @@ public abstract class SparkNodeModel extends NodeModel {
                     }
                     final long endTime = System.currentTimeMillis();
                         final long durationTime = endTime - startTime;
-                    LOGGER.warn("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
+                    LOGGER.debug("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
                     m_namedRDDs.clear();
                 }
             });
-//            try {
-//                //give the thread at least 5 seconds to delete the rdds
-//                future.get(5, TimeUnit.SECONDS);
-//            } catch (TimeoutException e) {
-//                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-//                    + " was interrupted prior completion.");
-//            } catch (InterruptedException | ExecutionException e) {
-//                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-//                    + " failed. Error: " + e.getMessage(), e);
-//            }
+            try {
+                //give the thread at least 1 seconds to delete the rdds
+                future.get(1, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                LOGGER.info("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+                    + " was interrupted prior completion.");
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
+                    + " failed. Error: " + e.getMessage(), e);
+            }
         }
+    }
+
+
+    /**
+     * @param inputRDD the original {@link SparkDataPortObject}
+     * @param newSpec the new {@link DataTableSpec} of the input {@link SparkDataPortObject}
+     * @param resultRDDName the name of the result RDD
+     * @return {@link SparkDataPortObject}
+     */
+    public static PortObject createSparkPortObject(final SparkDataPortObject inputRDD, final DataTableSpec newSpec,
+        final String resultRDDName) {
+        return new SparkDataPortObject(
+            new SparkDataTable(inputRDD.getContext(), resultRDDName, newSpec));
+    }
+
+
+    /**
+     * @param inputRDD the original {@link SparkDataPortObject}
+     * @param newSpec the new {@link DataTableSpec} of the input {@link SparkDataPortObject}
+     * @return the a new {@link SparkDataPortObject} based on the input object and spec
+     */
+    public static SparkDataPortObject createSparkPortObject(final SparkDataPortObject inputRDD,
+        final DataTableSpec newSpec) {
+        final SparkDataTable renamedRDD = new SparkDataTable(inputRDD.getContext(), inputRDD.getTableName(), newSpec);
+        SparkDataPortObject result = new SparkDataPortObject(renamedRDD);
+        return result;
+    }
+
+
+    /**
+     * @param inputRDD the {@link SparkDataPortObject} that provides the context and the table spec
+     * @param resultRDDName the name of the result RDD
+     * @return {@link SparkDataPortObject}
+     */
+    public static SparkDataPortObject createSparkPortObject(final SparkDataPortObject inputRDD,
+        final String resultRDDName) {
+        return new SparkDataPortObject(
+            new SparkDataTable(inputRDD.getContext(), resultRDDName, inputRDD.getTableSpec()));
     }
 }

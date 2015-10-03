@@ -37,6 +37,7 @@ import spark.jobserver.SparkJobValidation;
 
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.CorrelationMethods;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.HalfDoubleMatrixFromLinAlgMatrix;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -46,7 +47,7 @@ import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
 /**
- * sorts input RDD by given indices, in given order
+ * computes correlation of selected indices
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
@@ -60,6 +61,11 @@ public class CorrelationJob extends KnimeSparkJob implements Serializable {
      * either pearson or spearman
      */
     public static final String PARAM_STAT_METHOD = "statMethod";
+
+    /**
+     * indicates whether correlations should be returned as a matrix
+     */
+    public static final String PARAM_RETURN_MATRIX = "returnMatrix";
 
     @Override
     public SparkJobValidation validate(final JobConfig aConfig) {
@@ -109,11 +115,17 @@ public class CorrelationJob extends KnimeSparkJob implements Serializable {
         final Matrix mat =
             computeCorrelation(rowRDD, colIdxs, CorrelationMethods.fromKnimeEnum(aConfig.getInputParameter(PARAM_STAT_METHOD)));
 
-        final double correlation;
-        if (!aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
+        final Serializable correlation;
+        if (aConfig.hasOutputParameter(PARAM_RETURN_MATRIX)) {
+            correlation = new HalfDoubleMatrixFromLinAlgMatrix(mat, false);
+        }
+        else if (!aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             correlation = mat.apply(0, 1);
         } else {
             correlation = Double.MIN_VALUE;
+        }
+
+        if (aConfig.hasOutputParameter(PARAM_RESULT_TABLE)) {
             addToNamedRdds(aConfig.getOutputStringParameter(PARAM_RESULT_TABLE),
                 RDDUtilsInJava.fromMatrix(JavaSparkContext.fromSparkContext(sc), mat));
         }

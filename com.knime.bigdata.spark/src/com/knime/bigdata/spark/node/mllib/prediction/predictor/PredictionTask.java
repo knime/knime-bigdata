@@ -33,6 +33,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
 
 /**
@@ -43,35 +44,59 @@ public class PredictionTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String getPredictorDef(final String aTempFileName, final String aInputTableName,
+    static private String getPredictorDef(final String aTempFileName, final String aInputTableName,
         final Integer[] colIdxs, final String aOutputTableName) throws GenericKnimeSparkException {
         return JsonUtils.asJson(new Object[]{
             ParameterConstants.PARAM_INPUT,
             new Object[]{ParameterConstants.PARAM_MODEL_NAME, JobConfig.encodeToBase64(aTempFileName),
-                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName,
-                ParameterConstants.PARAM_COL_IDXS, JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
+                KnimeSparkJob.PARAM_INPUT_TABLE, aInputTableName, ParameterConstants.PARAM_COL_IDXS,
+                JsonUtils.toJsonArray((Object[])colIdxs)}, ParameterConstants.PARAM_OUTPUT,
             new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aOutputTableName}});
     }
+
     /**
+     * run predictor for given model
+     *
      * @param exec
-     * @param data
+     * @param inputRDD
      * @param model
-     * @param integers
+     * @param colIdxs
      * @param resultRDD
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
      */
-    void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final Serializable model,
-        final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException, CanceledExecutionException {
-        final UploadUtil util = new UploadUtil(inputRDD.getContext(), model, "model");
+    public static void execute(final ExecutionMonitor exec, final SparkDataTable inputRDD, final Serializable model,
+        final Integer[] colIdxs, final SparkDataTable resultRDD) throws GenericKnimeSparkException,
+        CanceledExecutionException {
+        predict(exec, inputRDD.getContext(), inputRDD.getID(), model, colIdxs, resultRDD.getID());
+    }
+
+    /**
+     * run predictor for given model
+     * @param exec
+     * @param aContext
+     * @param inputRDD
+     * @param model
+     * @param colIdxs
+     * @param resultRDD
+     * @throws GenericKnimeSparkException
+     * @throws CanceledExecutionException
+     */
+    public static void predict(final ExecutionMonitor exec, final KNIMESparkContext aContext, final String inputRDD,
+        final Serializable model, final Integer[] colIdxs, final String resultRDD) throws GenericKnimeSparkException,
+        CanceledExecutionException {
+        final UploadUtil util = new UploadUtil(aContext, model, "model");
         util.upload();
         try {
-            final String predictorParams = getPredictorDef(util.getServerFileName(), inputRDD.getID(), colIdxs, resultRDD.getID());
-            exec.checkCanceled();
-            JobControler.startJobAndWaitForResult(inputRDD.getContext(), MLlibPredictorJob.class.getCanonicalName(),
+            final String predictorParams = getPredictorDef(util.getServerFileName(), inputRDD, colIdxs, resultRDD);
+            if (exec != null) {
+                exec.checkCanceled();
+            }
+            JobControler.startJobAndWaitForResult(aContext, MLlibPredictorJob.class.getCanonicalName(),
                 predictorParams, exec);
         } finally {
             util.cleanup();
         }
     }
-
 
 }

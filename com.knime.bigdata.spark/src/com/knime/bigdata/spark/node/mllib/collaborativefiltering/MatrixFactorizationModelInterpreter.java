@@ -20,11 +20,7 @@
  */
 package com.knime.bigdata.spark.node.mllib.collaborativefiltering;
 
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
-import org.apache.spark.rdd.RDD;
-
-import scala.Tuple2;
-
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
@@ -33,7 +29,7 @@ import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MatrixFactorizationModelInterpreter extends HTMLModelInterpreter<SparkModel<MatrixFactorizationModel>> {
+public class MatrixFactorizationModelInterpreter extends HTMLModelInterpreter<SparkModel<CollaborativeFilteringModel>> {
 
     /**Feature column index of the user column in the {@link MLlibSettings} object.*/
     public static final int SETTINGS_USER_COL_IDX = 0;
@@ -74,27 +70,27 @@ public class MatrixFactorizationModelInterpreter extends HTMLModelInterpreter<Sp
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel<MatrixFactorizationModel> sparkModel) {
-        final MatrixFactorizationModel model = sparkModel.getModel();
-        return "Rank: " + model.rank() + " Log name: " + model.logName();
+    public String getSummary(final SparkModel<CollaborativeFilteringModel> sparkModel) {
+        final CollaborativeFilteringModel model = sparkModel.getModel();
+        return "Rank: " + model.rank(); //TODO - what is this? + " Log name: " + model.logName();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected String getHTMLDescription(final SparkModel<MatrixFactorizationModel> sparkModel) {
-        final MatrixFactorizationModel model = sparkModel.getModel();
-        StringBuilder buf = new StringBuilder();
-        RDD<Tuple2<Object, double[]>> userFeatures = model.userFeatures();
-        createHTMLDesc(buf, "User" , userFeatures);
-        RDD<Tuple2<Object, double[]>> productFeatures = model.productFeatures();
-        createHTMLDesc(buf, "Product" , productFeatures);
-        return "Rank: " + model.rank() + " Log name: " + model.logName();
+    protected String getHTMLDescription(final SparkModel<CollaborativeFilteringModel> sparkModel) {
+        final CollaborativeFilteringModel model = sparkModel.getModel();
+//        StringBuilder buf = new StringBuilder();
+//        RDD<Tuple2<Object, double[]>> userFeatures = model.userFeatures();
+//        createHTMLDesc(buf, "User" , userFeatures);
+//        RDD<Tuple2<Object, double[]>> productFeatures = model.productFeatures();
+//        createHTMLDesc(buf, "Product" , productFeatures);
+        return "Rank: " + model.rank(); //TODO - what is this? + " Log name: " + model.logName();
     }
 
-    private void createHTMLDesc(final StringBuilder buf, final String type,
-        final RDD<Tuple2<Object, double[]>> features) {
-        Object collect = features.collect();
-    }
+//    private void createHTMLDesc(final StringBuilder buf, final String type,
+//        final RDD<Tuple2<Object, double[]>> features) {
+//        Object collect = features.collect();
+//    }
 }

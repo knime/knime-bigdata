@@ -6,10 +6,13 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.knime.core.node.NodeLogger;
+
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 /**
  * creates and handles REST requests
@@ -18,10 +21,14 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
  *
  */
 public class RestClient {
+
+    private final static NodeLogger LOGGER = NodeLogger.getLogger(RestClient.class.getName());
+
     private static class RestClientFactory {
 
         static IRestClient getClient(final String aJobServerURL) {
             if (aJobServerURL == null || aJobServerURL.equals("dummy") || aJobServerURL.length() < 2) {
+                LOGGER.debug("Using dummy client");
                 return new DummyRestClient();
             }
             return new WsRsRestClient();
@@ -35,6 +42,10 @@ public class RestClient {
      * @param aJobServerURL
      */
     public RestClient(final String aJobServerURL) {
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Create RestClient");
+            LOGGER.debug("Url: " + aJobServerURL);
+        }
         client = RestClientFactory.getClient(aJobServerURL);
     }
 
@@ -48,6 +59,12 @@ public class RestClient {
      */
     public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
         throws GenericKnimeSparkException {
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Rest checkJobStatus");
+            LOGGER.debug("Response: " + response);
+            LOGGER.debug("JobClass: " + jobClassName);
+            LOGGER.debug("JsonParam: " + aJsonParams);
+        }
         client.checkJobStatus(response, jobClassName, aJsonParams);
     }
 
@@ -61,6 +78,12 @@ public class RestClient {
      */
     public void checkStatus(final Response response, final String aErrorMsg, final Status... aStatus)
         throws GenericKnimeSparkException {
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Rest checkStatus");
+            LOGGER.debug("Response: " + response);
+            LOGGER.debug("ErrorMsg: " + aErrorMsg);
+            LOGGER.debug("Expected stati: " + aStatus);
+        }
         client.checkStatus(response, aErrorMsg, aStatus);
     }
 
@@ -77,6 +100,13 @@ public class RestClient {
      */
     public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath,
         final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Rest post");
+            LOGGER.debug("Context: " + aContextContainer);
+            LOGGER.debug("Path: " + aPath);
+            LOGGER.debug("Args: " + aArgs);
+            LOGGER.debug("Entity: " + aEntity);
+        }
         return client.post(aContextContainer, aPath, aArgs, aEntity);
     }
 
@@ -90,6 +120,11 @@ public class RestClient {
      */
     public Response delete(final KNIMESparkContext aContextContainer, final String aPath)
         throws GenericKnimeSparkException {
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Rest delete");
+            LOGGER.debug("Context: " + aContextContainer);
+            LOGGER.debug("Path: " + aPath);
+        }
         return client.delete(aContextContainer, aPath);
     }
 

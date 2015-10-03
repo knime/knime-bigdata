@@ -31,7 +31,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
@@ -48,7 +47,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         "Number of clusters: ", 1, createFlowVariableModel(m_noOfClusterModel));
     private final DialogComponentNumber m_noOfIterations =
             new DialogComponentNumber(MLlibKMeansNodeModel.createNoOfIterationModel(), "Number of iterations: ", 10);
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
     /**
      *
      */
@@ -70,7 +69,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        panel.add(m_cols.getComponentPanel(), gbc);
+        panel.add(m_settings.getFeatureColsComponent().getComponentPanel(), gbc);
         addTab("Settings", panel);
     }
 
@@ -81,7 +80,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIterations.saveSettingsTo(settings);
-        m_cols.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -92,6 +91,6 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_noOfCluster.loadSettingsFrom(settings, tableSpecs);
         m_noOfIterations.loadSettingsFrom(settings, tableSpecs);
-        m_cols.loadSettingsFrom(settings, tableSpecs);
+        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 }

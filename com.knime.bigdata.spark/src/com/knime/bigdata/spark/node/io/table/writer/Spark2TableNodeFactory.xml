@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
-	<name>Spark Table Reader</name>
+	<name>Spark to Table</name>
 	<shortDescription>Loads the incoming Spark RDD into a KNIME data table.</shortDescription>
 	<fullDescription>
 		<intro>

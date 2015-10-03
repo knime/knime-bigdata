@@ -84,7 +84,8 @@ public class EnumContainer {
     }
 
     /**
-     * enum for the two different correlation methods
+     * enum for the two different correlation methods see
+     * <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">Correlation</a>
      *
      * @author dwk
      */
@@ -145,7 +146,8 @@ public class EnumContainer {
     }
 
     /**
-     *
+     * Defines the
+     * <a href="http://spark.apache.org/docs/1.2.0/mllib-ensembles.html#losses">Gradient boosted trees losses</a>.
      *
      * @author dwk
      */
@@ -174,7 +176,8 @@ public class EnumContainer {
     }
 
     /**
-     *
+     * Defines the
+     * <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#regularizers">linear methods regularizer</a>.
      * @author dwk
      */
     public enum UpdaterType {
@@ -201,7 +204,8 @@ public class EnumContainer {
     }
 
     /**
-     *
+     * Defines the
+     * <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#loss-functions">linear method loss function</a>.
      * @author dwk
      */
     public enum GradientType {
@@ -226,5 +230,17 @@ public class EnumContainer {
             }
             return valueOf(aString);
         }
+    }
+
+    /**
+     * @param e the Enum
+     * @return the names of the Enum
+     */
+    public static String[] getNames(final Enum<?>... e) {
+        final String[] names = new String[e.length];
+        for (int i = 0, length = e.length; i < length; i++) {
+            names[i] = e[i].name();
+        }
+        return names;
     }
 }

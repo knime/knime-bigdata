@@ -203,13 +203,13 @@ public class JoinJob extends KnimeSparkJob implements Serializable {
         LOGGER.log(Level.INFO, "computing " + mode.toString() + " of two RDDs...");
 
         final List<Integer> joinIdxLeft = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_LEFT, Integer.class);
-        JavaPairRDD<MyJoinKey, Row> leftRdd =
-            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_LEFT_RDD)),
-                joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
+        final JavaRDD<Row> leftRowRdd = getFromNamedRdds(aConfig.getInputParameter(PARAM_LEFT_RDD));
+        final JavaPairRDD<MyJoinKey, Row> leftRdd =
+            RDDUtilsInJava.extractKeys(leftRowRdd, joinIdxLeft.toArray(new Integer[joinIdxLeft.size()]));
         final List<Integer> joinIdxRight = aConfig.getInputListParameter(PARAM_JOIN_INDEXES_RIGHT, Integer.class);
-        JavaPairRDD<MyJoinKey, Row> rightRdd =
-            RDDUtilsInJava.extractKeys(getFromNamedRdds(aConfig.getInputParameter(PARAM_RIGHT_RDD)),
-                joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
+        final JavaRDD<Row> rightRowRdd = getFromNamedRdds(aConfig.getInputParameter(PARAM_RIGHT_RDD));
+        final JavaPairRDD<MyJoinKey, Row> rightRdd =
+            RDDUtilsInJava.extractKeys(rightRowRdd, joinIdxRight.toArray(new Integer[joinIdxRight.size()]));
 
         final List<Integer> colIdxLeft = aConfig.getInputListParameter(PARAM_SELECT_INDEXES_LEFT, Integer.class);
         final List<Integer> colIdxRight = aConfig.getInputListParameter(PARAM_SELECT_INDEXES_RIGHT, Integer.class);

@@ -32,13 +32,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
@@ -46,24 +41,7 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
  * @author koetter
  */
 public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
-    private final SettingsModelIntegerBounded m_maxNumberBinsModel = MLlibDecisionTreeNodeModel
-        .createMaxNumberBinsModel();
-    private final DialogComponentNumber m_maxNoBins = new DialogComponentNumber(m_maxNumberBinsModel,
-        "Max number of bins: ", 10, createFlowVariableModel(m_maxNumberBinsModel));
-
-    private final DialogComponentNumber m_maxDepth =
-            new DialogComponentNumber(MLlibDecisionTreeNodeModel.createMaxDepthModel(), "Max depth: ", 25);
-
-    private final DialogComponentStringSelection m_quality = new DialogComponentStringSelection(
-        MLlibDecisionTreeNodeModel.createQualityMeasureModel(), "Quality measure: ",
-        new String[] {AbstractTreeLearnerJob.VALUE_GINI, AbstractTreeLearnerJob.VALUE_ENTROPY});
-
-    private final DialogComponent m_cols = MLlibNodeSettings.createFeatureColsComponent();
-
-    private final DialogComponent m_classColumn = MLlibNodeSettings.createClassColComponent();
-
-    private final DialogComponent[] m_components =
-            new DialogComponent[] {m_maxNoBins, m_maxDepth, m_quality, m_cols, m_classColumn};
+    private final DecisionTreeSettings m_treeSettings = new DecisionTreeSettings();
 
     /**
      *
@@ -75,27 +53,26 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_maxNoBins.getComponentPanel(), gbc);
+        panel.add(m_treeSettings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_maxDepth.getComponentPanel(), gbc);
+        panel.add(m_treeSettings.getMaxDepthComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_quality.getComponentPanel(), gbc);
+        panel.add(m_treeSettings.getQualityMeasureComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        // class column selection
+        panel.add(m_treeSettings.getClassColComponent().getComponentPanel(), gbc);
 
-        gbc.gridwidth=3;
         gbc.gridx = 0;
+        gbc.gridwidth=4;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_cols.getComponentPanel();
+        final JPanel colsPanel = m_treeSettings.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
-
-        gbc.gridy++;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        // class column selection
-        panel.add(m_classColumn.getComponentPanel(), gbc);
 
         addTab("Settings", panel);
     }
@@ -107,9 +84,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, tableSpecs);
-        }
+        m_treeSettings.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
     /**
@@ -118,8 +93,6 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        for (DialogComponent c : m_components) {
-            c.saveSettingsTo(settings);
-        }
+        m_treeSettings.saveSettingsTo(settings);
     }
 }

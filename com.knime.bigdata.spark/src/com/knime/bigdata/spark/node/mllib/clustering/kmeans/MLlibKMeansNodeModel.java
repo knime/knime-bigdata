@@ -37,7 +37,6 @@ import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
@@ -111,12 +110,11 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         final MLlibSettings settings = m_settings.getSettings(tableSpec);
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
-        final SparkDataTable resultRDD = new SparkDataTable(data.getContext(), aOutputTableName, resultSpec);
         final KMeansTask task = new KMeansTask(data.getData(), settings.getFeatueColIdxs(), m_noOfCluster.getIntValue(),
-            m_noOfIteration.getIntValue(), resultRDD);
+            m_noOfIteration.getIntValue(), aOutputTableName);
         final KMeansModel clusters = task.execute(exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
-        return new PortObject[]{new SparkDataPortObject(resultRDD), new SparkModelPortObject<>(new SparkModel<>(
+        return new PortObject[]{createSparkPortObject(data, resultSpec, aOutputTableName), new SparkModelPortObject<>(new SparkModel<>(
                  clusters, MLlibKMeansInterpreter.getInstance(), settings))};
     }
 

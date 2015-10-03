@@ -60,7 +60,7 @@ public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2Cat
      */
     @Override
     protected boolean hasDialog() {
-        return false;
+        return true;
     }
 
     /**
@@ -68,7 +68,7 @@ public class SparkNumber2CategoryNodeFactory extends NodeFactory<SparkNumber2Cat
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return null;
+        return new SparkNumber2CategroyNodeDialog();
     }
 
 }

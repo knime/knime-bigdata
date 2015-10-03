@@ -26,13 +26,13 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.CollaborativeFilteringJob;
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -53,8 +53,6 @@ public class CollaborativeFilteringTask implements Serializable {
     private final KNIMESparkContext m_context;
 
     private final String m_inputTableName;
-
-    private final String m_MatrixName;
 
     private final Double m_lambda;
 
@@ -84,12 +82,12 @@ public class CollaborativeFilteringTask implements Serializable {
     private Long m_randomSeed = null;
 
     CollaborativeFilteringTask(final SparkRDD inputRDD, final int aUserIdx, final int aProductIdx,
-        final int aRatingIdx, final double aLambda, final String aMatrix) {
-        this(inputRDD.getContext(), inputRDD.getID(), aUserIdx, aProductIdx, aRatingIdx, aLambda, aMatrix);
+        final int aRatingIdx, final double aLambda) {
+        this(inputRDD.getContext(), inputRDD.getID(), aUserIdx, aProductIdx, aRatingIdx, aLambda);
     }
 
     CollaborativeFilteringTask(final KNIMESparkContext aContext, final String aInputRDD, final int aUserIdx,
-        final int aProductIdx, final int aRatingIdx, final Double aLambda, final String aMatrix) {
+        final int aProductIdx, final int aRatingIdx, final Double aLambda) {
         m_lambda = aLambda;
         m_context = aContext;
         m_inputTableName = aInputRDD;
@@ -97,27 +95,27 @@ public class CollaborativeFilteringTask implements Serializable {
         //note that user and product columns must be integer valued
         m_userIdx = aUserIdx;
         m_productIdx = aProductIdx;
-        m_MatrixName = aMatrix;
+
         //rating column should be double valued
         m_ratingIdx = aRatingIdx;
     }
 
-    MatrixFactorizationModel execute(final ExecutionContext exec) throws GenericKnimeSparkException,
+    CollaborativeFilteringModel execute(final ExecutionContext exec, final String aResultTableName) throws GenericKnimeSparkException,
         CanceledExecutionException {
-        final String learnerParams = paramsAsJason();
+        final String learnerParams = paramsAsJason(aResultTableName);
         if (exec != null) {
             exec.checkCanceled();
         }
         final JobResult result = JobControler.startJobAndWaitForResult(m_context,
             CollaborativeFilteringJob.class.getCanonicalName(), learnerParams, exec);
 
-        return (MatrixFactorizationModel)result.getObjectResult();
+        return (CollaborativeFilteringModel)result.getObjectResult();
     }
 
-    String paramsAsJason() {
+    String paramsAsJason(final String aResultTableName) {
         return paramsAsJason(m_inputTableName, m_userIdx, m_productIdx, m_ratingIdx, m_lambda, m_alpha, m_rank,
             m_numIterations, m_IsNonNegative, m_NumBlocks, m_NumUserBlocks,
-            m_NumProductBlocks, m_IsImplicitPrefs, m_randomSeed, m_MatrixName);
+            m_NumProductBlocks, m_IsImplicitPrefs, m_randomSeed, aResultTableName);
     }
 
     /**
@@ -133,13 +131,12 @@ public class CollaborativeFilteringTask implements Serializable {
      * @param aNumProductBlocks
      * @param aIsImplicitPrefs
      * @param aSeed
-     * @param aMatrix
      * @return Json representation of parameters
      */
     static String paramsAsJason(final String aInputTableName, final Integer aUserIndex, final Integer aProductIndex,
         final Integer aRatingIndex, @Nullable final Double aLambda, @Nullable final Double aAlpha, final Integer aRank,
         final Integer aNumIterations, final Boolean aIsNonNegative, final Integer aNumBlocks, final Integer aNumUserBlocks,
-        final Integer aNumProductBlocks, final Boolean aIsImplicitPrefs, final Long aSeed, final String aResultRdd) {
+        final Integer aNumProductBlocks, final Boolean aIsImplicitPrefs, final Long aSeed, final String aResultTableName) {
 
         final List<Object> inputParams = new ArrayList<>();
         inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
@@ -204,7 +201,7 @@ public class CollaborativeFilteringTask implements Serializable {
         }
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
             inputParams.toArray(new Object[inputParams.size()]), ParameterConstants.PARAM_OUTPUT,
-            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultRdd}});
+            new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, aResultTableName}});
     }
 
     /**

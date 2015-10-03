@@ -35,7 +35,6 @@ import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.port.data.SparkDataTable;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkUtil;
 
@@ -114,8 +113,7 @@ public class SparkColumnFilterNodeModel extends SparkNodeModel {
         task.execute(exec);
         final ColumnRearranger c = createColumnRearranger(tableSpec);
         DataTableSpec resultSpec = c.createSpec();
-        return new PortObject[] {
-            new SparkDataPortObject(new SparkDataTable(rdd.getContext(), resultTable, resultSpec))};
+        return new PortObject[] {createSparkPortObject(rdd, resultSpec, resultTable)};
     }
 
     /**

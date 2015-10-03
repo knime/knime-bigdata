@@ -63,6 +63,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Type;
+import org.knime.core.util.FileUtil;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -246,7 +247,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
         m_classNames = classMap.keySet().toArray(new String[0]);
         synchronized (SNIPPET_FILE) {
             try {
-                final File tempFile = File.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile());
+                final File tempFile = FileUtil.createTempFile("SJS", ".jar", SNIPPET_FILE.getParentFile(), true);
                 if (!SNIPPET_FILE.exists()) {
                     //create a new jar with the new snippet classes
                     JarPacker.createJar(tempFile, PACKAGE_PATH, classMap);

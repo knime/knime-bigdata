@@ -184,12 +184,11 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         }
         dc.close();
         exec.setMessage("SVD (SPARK) done.");
-        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContext(), vMatrixName, vSpec);
         SparkDataTable uMatixRDD = null;
         if (computeU) {
             uMatixRDD = new SparkDataTable(data.getContext(), uMatrixName, uSpec);
         }
-        return new PortObject[]{dc.getTable(), new SparkDataPortObject(vMatrixRDD),
+        return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName),
             uMatixRDD == null ? null : new SparkDataPortObject(uMatixRDD)};
     }
 

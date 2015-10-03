@@ -119,6 +119,8 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             jobCheckFrequency.setValidRange(1, Integer.MAX_VALUE);
             final BooleanFieldEditor deleteRDDsOnDispose = new BooleanFieldEditor(
                 SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE, "Delete Spark RDDs on dispose", parent);
+            final BooleanFieldEditor verboseLogging = new BooleanFieldEditor(
+                SparkPreferenceInitializer.PREF_VERBOSE_LOGGING, "Enable verbose logging", parent);
 
             addField(jobServerUrl);
             addField(jobServerProtocol);
@@ -134,6 +136,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             addField(jobTimeout);
             addField(jobCheckFrequency);
             addField(deleteRDDsOnDispose);
+            addField(verboseLogging);
     }
 
     /**

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    icon="../correlation.png" type="Other">
+    <name>Spark Linear Correlation</name>
+    <shortDescription>Computes the correlation coefficient between two columns.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node computes the correlation coefficient for two selected input columns using the 
+            <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">MLlib Statistics</a> package.
+		</intro>
+	</fullDescription>
+    <ports>
+        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation coefficient for.</inPort>
+        <outPort index="0" name="Correlation coefficient">KNIME data table with the correlation coefficient of the two columns.</outPort>
+	</ports>
+</knimeNode>
