@@ -18,23 +18,23 @@
  * History
  *   Created on 30.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.linear.regression;
+package com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression;
 
-import org.apache.spark.mllib.regression.LinearRegressionModel;
+import org.apache.spark.mllib.classification.LogisticRegressionModel;
 
-import com.knime.bigdata.spark.jobserver.jobs.LinearRegressionWithSGDJob;
+import com.knime.bigdata.spark.jobserver.jobs.LogisticRegressionJob;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibLinearRegressionNodeFactory extends AbstractLinearMethodsNodeFactory<LinearRegressionModel> {
+public class MLlibLogisticRegressionNodeFactory extends AbstractLinearMethodsNodeFactory<LogisticRegressionModel> {
 
     /**
      * Constructor.
      */
-    public MLlibLinearRegressionNodeFactory() {
-        super(MLlibLinearRegressionInterpreter.getInstance(), LinearRegressionWithSGDJob.class, false);
+    public MLlibLogisticRegressionNodeFactory() {
+        super(MLlibLogisticRegressionInterpreter.getInstance(), LogisticRegressionJob.class, true);
     }
 }

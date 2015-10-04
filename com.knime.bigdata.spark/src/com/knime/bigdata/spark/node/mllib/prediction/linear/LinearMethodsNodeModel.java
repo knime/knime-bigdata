@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
 
+import org.apache.spark.mllib.linalg.Vector;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -33,8 +34,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.mllib.MLlibSettings;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
@@ -100,10 +99,18 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
         final MLlibSettings s = m_settings.getSettings(data);
         final double regularization = m_settings.getRegularization();
         final int noOfIterations = m_settings.getNoOfIterations();
-        final LinearLearnerTask task =
-            new LinearLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
-                regularization, UpdaterType.L1Updater, true, false, false, GradientType.LeastSquaresGradient, 1.0, 1.0,
-                m_jobClassPath);
+        final LinearLearnerTask task;
+        if (m_settings.getUseSGD()) {
+            task = new LinearLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
+                regularization, m_settings.getUpdaterType(), m_settings.getValidateData(), m_settings.getAddIntercept(),
+                m_settings.getUseFeatureScaling(), m_settings.getGradientType(), m_settings.getStepSize(),
+                m_settings.getFraction(), m_jobClassPath);
+        } else {
+            task = new LinearLearnerTask(data.getData(), s.getFeatueColIdxs(), s.getClassColIdx(), noOfIterations,
+                regularization, m_settings.getNoOfCorrections(), m_settings.getTolerance(), m_settings.getUpdaterType(),
+                m_settings.getValidateData(), m_settings.getAddIntercept(), m_settings.getUseFeatureScaling(),
+                m_settings.getGradientType(), m_jobClassPath);
+        }
         @SuppressWarnings("unchecked")
         final M linearModel = (M)task.execute(exec);
         return new PortObject[]{new SparkModelPortObject<>(new SparkModel<>(linearModel, m_interpreter, s))};
@@ -139,6 +146,24 @@ public class LinearMethodsNodeModel<M extends Serializable> extends SparkNodeMod
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
+    }
+
+    /**
+     * @param weights the weights vector
+     * @param nf {@link NumberFormat} to use
+     * @return the String representation
+     */
+    public static String printWeights(final Vector weights, final NumberFormat nf) {
+        final StringBuilder buf = new StringBuilder();
+        final double[] weightsArray = weights.toArray();
+        for (int i = 0, length = weightsArray.length; i < length; i++) {
+            if (i > 0) {
+                buf.append(", ");
+            }
+            buf.append(nf.format(weightsArray[i]));
+        }
+        final String weightString = buf.toString();
+        return weightString;
     }
 
     /**

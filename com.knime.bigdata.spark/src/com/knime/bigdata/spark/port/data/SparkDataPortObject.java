@@ -50,8 +50,8 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
 
-import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
@@ -59,7 +59,7 @@ import com.knime.bigdata.spark.util.SparkDataTableCreator;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDataPortObject implements PortObject, SparkContextProvider {
+public class SparkDataPortObject extends SparkContextPortObject {
 
     //TODO: Should extendSparkContextPortObject
 
@@ -68,11 +68,13 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
     /**
      * Database port type.
      */
+    @SuppressWarnings("hiding")
     public static final PortType TYPE = new PortType(SparkDataPortObject.class);
 
     /**
      * Database type for optional ports.
      */
+    @SuppressWarnings("hiding")
     public static final PortType TYPE_OPTIONAL = new PortType(SparkDataPortObject.class, true);
 
     /**
@@ -80,16 +82,16 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
      *
      * @return a new serializer
      */
-    public static PortObjectSerializer<SparkDataPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkDataPortObject>() {
+    public static PortObjectSerializer<SparkContextPortObject> getPortObjectSerializer() {
+        return new PortObjectSerializer<SparkContextPortObject>() {
             /**
              * {@inheritDoc}
              */
             @Override
-            public void savePortObject(final SparkDataPortObject portObject,
+            public void savePortObject(final SparkContextPortObject portObject,
                 final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
                 CanceledExecutionException {
-                portObject.m_data.save(out);
+                ((SparkDataPortObject)portObject).m_data.save(out);
             }
 
             /**
@@ -108,6 +110,7 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
      * @param data
      */
     public SparkDataPortObject(final SparkDataTable data) {
+        super(data.getContext());
         m_data = data;
     }
 

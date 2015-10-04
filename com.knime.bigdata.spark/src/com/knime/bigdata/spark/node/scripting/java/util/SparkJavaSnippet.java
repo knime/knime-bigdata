@@ -82,6 +82,7 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
  * {@link JSnippet} implementation for the SPark Java Snippet nodes.
  * @author Tobias Koetter, KNIME.com
  */
+@SuppressWarnings("restriction")
 public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     private static File jSnippetJar;
     private String[] m_jarFiles;
@@ -286,7 +287,6 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     /**
      * Create the java-file of the snippet.
      */
-    @SuppressWarnings("restriction")
     private JavaFileObject createJSnippetFile() throws IOException {
         m_snippetFile = new File(m_tempClassPathDir, m_className + ".java");
         try (FileOutputStream fos = new FileOutputStream(m_snippetFile);

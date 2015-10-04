@@ -324,14 +324,14 @@
       <node
             category-path="/spark/io"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory"
-            id="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory"
+            id="com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory">
       </node>
       <node
             category-path="/spark/io"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory"
-            id="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.util.rdd.unpersist.SparkUnpersistNodeFactory"
+            id="com.knime.bigdata.spark.node.util.rdd.unpersist.SparkUnpersistNodeFactory">
       </node>
       <node
             category-path="/spark/column"
@@ -434,13 +434,18 @@
             factory-class="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory"
             id="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory">
       </node>
-      <!--
       <node
-            category-path="/spark"
+            category-path="/spark/mining/prediction"
             expert-flag="false"
-            factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
-            id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
-      </node> -->
+            factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory"
+            id="com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory">
+      </node>
+      <node
+            category-path="/spark/misc/management"
+            expert-flag="false"
+            factory-class="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory"
+            id="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">

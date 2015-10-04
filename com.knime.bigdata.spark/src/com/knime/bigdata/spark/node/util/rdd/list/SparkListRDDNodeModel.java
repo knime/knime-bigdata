@@ -40,7 +40,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.port.SparkContextProvider;
-import com.knime.bigdata.spark.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 
 /**
  *
@@ -49,8 +49,7 @@ import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 public class SparkListRDDNodeModel extends SparkNodeModel {
 
     SparkListRDDNodeModel() {
-        //TODO: Change to SparkContextPortObject once all other SparkObjects implement it
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[] {BufferedDataTable.TYPE});
+        super(new PortType[]{SparkContextPortObject.TYPE}, new PortType[] {BufferedDataTable.TYPE});
     }
 
     /**

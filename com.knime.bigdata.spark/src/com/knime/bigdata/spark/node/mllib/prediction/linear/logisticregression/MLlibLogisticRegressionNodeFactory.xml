@@ -2,17 +2,17 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
-    <name>Spark Linear Regression Learner</name>
-	<shortDescription>Linear regression model learning performed in Spark.</shortDescription>
+    <name>Spark Logistic Regression Learner</name>
+	<shortDescription>Logistic regression model learning performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#linear-least-squares-lasso-and-ridge-regression">Linear Regression</a> algorithm.
+			<a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#logistic-regression">Logistic Regression</a> algorithm.
 			It outputs the the learned model for later application.
 			<p>
             Please note that all data must be numeric, including the label column. 
-            Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of second in port of this node.
+            Use the Spark Category To Number nodes to convert nominal values to numeric columns. 
+            The mapping dictionary of the converter node is the input of second in port of this node.
             </p>
             <p>
             Use the Spark Predictor node to apply the learned model to unseen data.
@@ -32,6 +32,6 @@
 
     <ports>
 		<inPort index="0" name="Input data">Input Spark RDD</inPort>
-        <outPort index="0" name="Linear Regression Model">Spark MLlib Linear Regression Model</outPort>
+        <outPort index="0" name="Logistic Regression Model">Spark MLlib Logistic Regression Model</outPort>
     </ports>
 </knimeNode>

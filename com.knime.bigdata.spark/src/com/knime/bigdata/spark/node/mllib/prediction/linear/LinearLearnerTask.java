@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
@@ -46,6 +47,8 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
  * @author koetter, dwk
  */
 public class LinearLearnerTask implements Serializable {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(LinearLearnerTask.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -99,12 +102,14 @@ public class LinearLearnerTask implements Serializable {
      * @param aFraction
      */
     LinearLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final int classColIdx,
-        final int aNumIterations, final double aRegularization,
-        final UpdaterType aUpdaterType,
+        final int aNumIterations, final double aRegularization, final UpdaterType aUpdaterType,
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
-        final GradientType aGradientType, final Double aStepSize,final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
+        final GradientType aGradientType, final Double aStepSize,final Double aFraction,
+        final Class<? extends AbstractRegularizationJob> jobClass) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
-            true, null, null, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, aStepSize, aFraction, jobClass);
+            true, null, null, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, aStepSize,
+            aFraction, jobClass);
+        LOGGER.debug("Use SGD learner task");
     }
 
     /**
@@ -128,7 +133,9 @@ public class LinearLearnerTask implements Serializable {
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
         final GradientType aGradientType, final Class<? extends AbstractRegularizationJob> jobClass) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
-            false, aNumCorrections, aTolerance, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, null, null, jobClass);
+            false, aNumCorrections, aTolerance, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling,
+            aGradientType, null, null, jobClass);
+        LOGGER.debug("Use LBFGS learner task");
     }
 
     //unit testing constructor only

@@ -38,16 +38,17 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class LinearMethodsNodeDialog extends NodeDialogPane {
 
     private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
 
     /**
+     * @param supportsLBFGS
      *
      */
-    public LinearMethodsNodeDialog() {
+    public LinearMethodsNodeDialog(final boolean supportsLBFGS) {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
@@ -58,7 +59,51 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         gbc.gridx++;
         panel.add(m_settings.getRegularizationComponent().getComponentPanel(), gbc);
         gbc.gridx++;
+        panel.add(m_settings.getUpdaterTypeComponent().getComponentPanel(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(m_settings.getUseFeatureScalingComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getAddInterceptComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getValidateDataComponent().getComponentPanel(), gbc);
+
+
+        int startX = 0;
+        gbc.gridwidth = 1;
+        if (supportsLBFGS) {
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.gridwidth = 3;
+            panel.add(m_settings.getOptimizationMethodComponent().getComponentPanel(), gbc);
+            gbc.gridwidth = 1;
+            startX = 1;
+            gbc.gridy++;
+            gbc.gridx = startX;
+            panel.add(m_settings.getToleranceComponent().getComponentPanel(), gbc);
+            gbc.gridx++;
+            panel.add(m_settings.getNoOfCorrectionsComponent().getComponentPanel(), gbc);
+        }
+
+        gbc.gridx = startX;
+        gbc.gridy++;
+        panel.add(m_settings.getFractionComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getStepSizeComponent().getComponentPanel(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(m_settings.getGradientTypeComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        gbc.gridwidth = 2;
         panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
+
+//        gbc.gridx = 0;
+//        gbc.gridy++;
+//        gbc.gridwidth = 3;
+//        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
+
 
         gbc.gridwidth=3;
         gbc.gridx = 0;

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+    <name>Create Spark Context</name>
+    
+    <shortDescription>Creates a new Spark context.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a new Spark Context. The settings e.g. dispose on reset affect all connected Spark nodes and 
+            their successors.
+            <p>The default values of the node are taken from the Spark preference page which
+            you can open via <i>File->Preferences->KNIME->Spark</i>.</p> 
+            <p><b>Using multiple contexts with the same Spark Job Server is experimental.</b></p>
+        </intro>
+        <tab name="KNIME Settings">
+        <option name="Spark job timeout (seconds)">The timeout of a Spark job.</option>
+        <option name="Spark job check frequency (seconds)">The frequency KNIME has to check the job status.</option>
+        <option name="Delete RDDs on dispose">If selected KNIME deletes the created named RDDs when the workflow or 
+        KNIME is closed. This way resources on the Spark job server are released but ALL nodes have to be re-executed 
+        the next time the workflow is opened.</option>
+        </tab>
+        <tab name="Spark Context Settings">
+        <option name="Context name">The unique name of the context.</option>
+        <option name="Memory">
+        	The memory to allocate on each cluster node.
+        </option>
+        <option name="Number of cores">The number of cores per cluster node.</option>
+        </tab>
+        <tab name="Job Server Settings">
+        <option name="Protocol">The protocol for the Spark job server connection.</option>
+        <option name="Host">The URL or IP address of the Spark job server.</option>
+        <option name="Port">The port the of the Spark job server.</option>
+        <option name="User">The user name which is required if authentication is enabled in the Spark job server.</option>
+        <option name="Password">The password which is required if authentication is enabled in the Spark job server.</option>
+        </tab>
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Spark context">Spark context.</outPort>
+    </ports>    
+</knimeNode>
