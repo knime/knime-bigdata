@@ -18,42 +18,27 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.context.destroy;
+package com.knime.bigdata.spark.node.util.rdd.unpersist;
 
-import javax.swing.JOptionPane;
-
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.jobserver.client.KnimeContext;
 import com.knime.bigdata.spark.node.SparkNodeModel;
-import com.knime.bigdata.spark.port.SparkContextProvider;
-import com.knime.bigdata.spark.port.context.SparkContextPortObject;
+import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDestroyContextNodeModel extends SparkNodeModel {
+public class SparkUnpersistNodeModel extends SparkNodeModel {
 
-    private final SettingsModelBoolean m_noDialog = createNoDialogModel();
-
-    SparkDestroyContextNodeModel() {
-        super(new PortType[]{SparkContextPortObject.TYPE}, new PortType[0]);
-    }
-
-    /**
-     * @return the no dialog option
-     */
-    static SettingsModelBoolean createNoDialogModel() {
-        return new SettingsModelBoolean("hideConfirmationDialog", false);
+    SparkUnpersistNodeModel() {
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[0]);
     }
 
     /**
@@ -69,18 +54,9 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        final SparkContextProvider provider = (SparkContextProvider)inData[0];
-        exec.setMessage("Destroy input Spark context...");
-        exec.setMessage("Confirmation dialog opened. Wait for user response...");
-        if (!m_noDialog.getBooleanValue()) {
-            final int n = JOptionPane.showConfirmDialog(null, "Do you realy want to destroy the Spark context?",
-                "Destroy Spark Context", JOptionPane.OK_CANCEL_OPTION);
-            if (n == JOptionPane.CANCEL_OPTION) {
-                throw new CanceledExecutionException("Execution aborted. Context has not been destroyed.");
-            }
-        }
-        exec.checkCanceled();
-        KnimeContext.destroySparkContext(provider.getContext());
+        final SparkDataPortObject rdd = (SparkDataPortObject)inData[0];
+        final UnpersistTask task = new UnpersistTask();
+        task.execute(exec, rdd.getData());
         return new PortObject[0];
     }
 
@@ -89,7 +65,7 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_noDialog.saveSettingsTo(settings);
+        //nothing to do
     }
 
     /**
@@ -97,7 +73,7 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noDialog.validateSettings(settings);
+        //nothing to do
     }
 
     /**
@@ -105,6 +81,6 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noDialog.loadSettingsFrom(settings);
+        //nothing to do
     }
 }

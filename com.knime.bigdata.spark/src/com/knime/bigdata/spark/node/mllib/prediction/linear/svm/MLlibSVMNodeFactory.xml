@@ -32,7 +32,6 @@
 
     <ports>
 		<inPort index="0" name="Input data">Input Spark RDD</inPort>
-		<inPort optional="true" index="1" name="Mapping dictionary">Spark RDD with the mapping dictionary of nominal values</inPort>
         <outPort index="0" name="Linear SVM Model">Spark MLlib Linear SVM Model</outPort>
     </ports>
 </knimeNode>

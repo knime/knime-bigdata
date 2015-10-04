@@ -50,6 +50,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -59,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  *
@@ -86,9 +88,17 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             final StringFieldEditor jobServerUrl = new StringFieldEditor(
                     SparkPreferenceInitializer.PREF_JOB_SERVER, "Job server url: ", parent);
             jobServerUrl.setEmptyStringAllowed(false);
-            final StringFieldEditor jobServerProtocol = new StringFieldEditor(
-                SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL, "Job server protocol (http/https): ", parent);
-            jobServerProtocol.setEmptyStringAllowed(false);
+//            final StringFieldEditor jobServerProtocol = new StringFieldEditor(
+//                SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL, "Job server protocol (http/https): ", parent);
+//            jobServerProtocol.setEmptyStringAllowed(false);
+            final String[] protocols = KNIMESparkContext.getSupportedProtocols();
+            final String[][] options = new String[protocols.length][2];
+            for (int i = 0, length = protocols.length; i < length; i++) {
+                options[i][0] = protocols[i];
+                options[i][1] = protocols[i];
+            }
+            final RadioGroupFieldEditor jobServerProtocol = new RadioGroupFieldEditor(SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL,
+                "Job server protocol", 1, options, parent, false);
             final IntegerFieldEditor jobServerPort = new IntegerFieldEditor(
                 SparkPreferenceInitializer.PREF_JOB_SERVER_PORT, "Job server port: ", parent);
             jobServerPort.setValidRange(0, Integer.MAX_VALUE);

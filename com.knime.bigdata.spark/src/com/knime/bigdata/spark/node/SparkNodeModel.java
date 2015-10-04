@@ -54,6 +54,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -84,6 +86,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.client.KnimeContext;
+import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
@@ -181,35 +184,53 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        exec.setMessage("Validate input data...");
         SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
-        KNIMESparkContext context = null;
+        KNIMESparkContext checkedContext = null;
+        final Map<KNIMESparkContext, Set<String>> namedRDDsMap = new HashMap<>();
         for (final PortObject portObject : inData) {
-            if (portObject instanceof  SparkDataPortObject) {
-                final SparkDataPortObject data = (SparkDataPortObject)portObject;
+            if (portObject instanceof  SparkContextProvider) {
+                exec.setMessage("Check Spark context...");
+                //check that the context is still available
+                final SparkContextProvider data = (SparkContextProvider)portObject;
                 final KNIMESparkContext newContext = data.getContext();
-                if (context == null || !context.equals(newContext)) {
-                    context = newContext;
-                    if (!KnimeContext.sparkContextExists(context)) {
+                if (checkedContext == null || !checkedContext.equals(newContext)) {
+                    if (!KnimeContext.sparkContextExists(newContext)) {
                         throw new IllegalStateException(
                             "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
                     }
+                    checkedContext = newContext;
                 }
-                Set<String> listNamedRDDs = KnimeContext.listNamedRDDs(context);
-                if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
-
+                exec.setMessage("Spark context valid.");
+            }
+            if (portObject instanceof  SparkDataPortObject) {
+                exec.setMessage("Check Spark RDD...");
+                final SparkDataPortObject data = (SparkDataPortObject)portObject;
+                final KNIMESparkContext newContext = data.getContext();
+                Set<String> listNamedRDDs = namedRDDsMap.get(newContext);
+                if (listNamedRDDs == null) {
+                    //this is the first time the context is used get all its RDDs and put them into the map
+                    listNamedRDDs = new HashSet<>(KnimeContext.listNamedRDDs(newContext));
+                    namedRDDsMap.put(newContext, listNamedRDDs);
+                }
+                if (!listNamedRDDs.contains(data.getData().getID())) {
                     //JobServer comment in 'NamedRDDSupport.scala': "The caller should always expect
                     // that the data returned from the method 'getNames()' may be stale and incorrect.
                     //hence: wait a bit and try again
                     Thread.sleep(1000);
-                    listNamedRDDs = KnimeContext.listNamedRDDs(context);
-                    if (listNamedRDDs != null && !listNamedRDDs.contains(data.getData().getID())) {
+                    listNamedRDDs.addAll(KnimeContext.listNamedRDDs(newContext));
+                    if (!listNamedRDDs.contains(data.getData().getID())) {
                         throw new IllegalStateException(
                             "Incoming Spark data object no longer exists. Please reset all preceding Spark nodes.");
                     }
                 }
+                exec.setMessage("Spark RDD valid.");
             }
         }
+        exec.setMessage("Validation finished.");
+        exec.setMessage("Start execution...");
         final PortObject[] portObjects = executeInternal(inData, exec);
+        exec.setMessage("Execution finished.");
         if (portObjects != null && portObjects.length > 0) {
             for (final PortObject portObject : portObjects) {
                 if (portObject instanceof  SparkDataPortObject) {

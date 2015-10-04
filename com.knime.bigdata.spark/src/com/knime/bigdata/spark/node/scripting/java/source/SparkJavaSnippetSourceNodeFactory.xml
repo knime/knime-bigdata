@@ -92,7 +92,9 @@
        </tab>
     </fullDescription>
 
-	<ports>
+	<ports><inPort index="0" name="Spark context">
+        Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
+        </inPort>
 		<outPort index="0" name="Spark RDD">The new created Spark RDD.</outPort>
 	</ports>
 </knimeNode>

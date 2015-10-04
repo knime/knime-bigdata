@@ -42,7 +42,6 @@ import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
 import com.knime.bigdata.spark.port.model.SparkModel;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec;
 
 /**
  *
@@ -62,7 +61,7 @@ public class MLlib2PMMLNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec) inSpecs[0];
+//        final SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec) inSpecs[0];
         //TODO: Check that the model is supported by the node
 //        final PMMLPortObjectSpecCreator specCreator = new PMMLPortObjectSpecCreator(spec.get);
         return new PortObjectSpec[] {null};

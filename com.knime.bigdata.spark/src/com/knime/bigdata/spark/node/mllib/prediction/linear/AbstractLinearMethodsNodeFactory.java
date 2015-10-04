@@ -32,29 +32,37 @@ import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  * @param <M> the MLlib model
  */
 public abstract class AbstractLinearMethodsNodeFactory<M extends Serializable>
 extends NodeFactory<LinearMethodsNodeModel<M>> {
 
+
+    private SparkModelInterpreter<SparkModel<M>> m_modelInterpreter;
+    private Class<? extends AbstractRegularizationJob> m_jobClassPath;
+    private boolean m_supportsLBFGS;
+
+    /**
+     * @param modelInterpreter the model interpreter
+     * @param jobClassPath the job class path
+     * @param supportsLBFGS <code>true</code> if the method supports LBFGS
+     *
+     */
+    protected AbstractLinearMethodsNodeFactory(final SparkModelInterpreter<SparkModel<M>> modelInterpreter,
+        final Class<? extends AbstractRegularizationJob> jobClassPath, final boolean supportsLBFGS) {
+            m_modelInterpreter = modelInterpreter;
+            m_jobClassPath = jobClassPath;
+            m_supportsLBFGS = supportsLBFGS;
+
+    }
     /**
      * {@inheritDoc}
      */
     @Override
     public LinearMethodsNodeModel<M> createNodeModel() {
-        return new LinearMethodsNodeModel<M>(getJobClassPath(), getModelInterpreter());
+        return new LinearMethodsNodeModel<M>(m_jobClassPath, m_modelInterpreter);
     }
-
-    /**
-     * @return the SparkModelInterpreter
-     */
-    protected abstract SparkModelInterpreter<SparkModel<M>> getModelInterpreter();
-
-    /**
-     * @return the SGDJob class
-     */
-    protected abstract Class<? extends AbstractRegularizationJob> getJobClassPath();
 
     /**
      * {@inheritDoc}
@@ -86,7 +94,7 @@ extends NodeFactory<LinearMethodsNodeModel<M>> {
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new LinearMethodsNodeDialog();
+        return new LinearMethodsNodeDialog(m_supportsLBFGS);
     }
 
 }
