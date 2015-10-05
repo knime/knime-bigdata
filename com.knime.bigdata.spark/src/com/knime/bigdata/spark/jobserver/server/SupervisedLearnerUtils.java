@@ -33,6 +33,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.storage.StorageLevel;
 
 /**
  *
@@ -189,7 +190,7 @@ public class SupervisedLearnerUtils {
                 "Storing predicted data under key: " + aConfig.getOutputStringParameter(KnimeSparkJob.PARAM_RESULT_TABLE));
             //TODO - revert the label to int mapping ????
             JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
-            aJob.addToNamedRdds(aConfig.getOutputStringParameter(KnimeSparkJob.PARAM_RESULT_TABLE), predictedData);
+            aJob.addJavaRddToNamedRdds(aConfig.getOutputStringParameter(KnimeSparkJob.PARAM_RESULT_TABLE), predictedData, false, StorageLevel.MEMORY_ONLY());
         }
     }
 
