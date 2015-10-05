@@ -95,7 +95,7 @@ public class ContextSettings {
      */
     private static  SettingsModelString createPasswordModel() {
         final char[] pwd = KNIMEConfigContainer.getPassword();
-        return new SettingsModelString("password", pwd == null ? null : pwd.toString());
+        return new SettingsModelString("password", pwd == null ? null : String.valueOf(pwd));
     }
 
     /**
