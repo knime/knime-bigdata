@@ -54,7 +54,7 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridy = 0;
         gbc.gridx = 0;
         panel.add(m_settings.getNoOfTreesComponent().getComponentPanel(), gbc);
