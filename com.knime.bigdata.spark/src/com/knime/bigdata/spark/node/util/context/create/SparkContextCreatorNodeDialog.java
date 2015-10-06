@@ -82,8 +82,8 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
     private JPanel createJobServerPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 1;
@@ -94,18 +94,19 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         gbc.gridy++;
         panel.add(new DialogComponentButtonGroup(m_settings.getProtocolModel(), false, " Protocol ",
             KNIMESparkContext.getSupportedProtocols()).getComponentPanel(), gbc);
+        gbc.fill = GridBagConstraints.NONE;
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getHostModel(), "Host: ").getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getHostModel(), "Host: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentNumber(m_settings.getPortModel(), "Port: ", 1).getComponentPanel(), gbc);
+        panel.add(new DialogComponentNumber(m_settings.getPortModel(), "Port: ", 1, 28).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getUserModel(), "User: ").getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getUserModel(), "User: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentPasswordField(m_settings.getPasswordModel(), "Password: ").getComponentPanel(), gbc);
+        panel.add(new DialogComponentPasswordField(m_settings.getPasswordModel(), "Password: ", 30).getComponentPanel(), gbc);
         return panel;
     }
 
@@ -113,7 +114,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 1;
@@ -122,13 +123,13 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
 //            .createEtchedBorder(), " Spark Context "));
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ").getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getMemoryModel(), "Memory: ").getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getMemoryModel(), "Memory: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentNumber(m_settings.getNoOfCoresModel(), "Number of cores: ", 1).getComponentPanel(), gbc);
+        panel.add(new DialogComponentNumber(m_settings.getNoOfCoresModel(), "Number of cores: ", 1, 28).getComponentPanel(), gbc);
         return panel;
     }
 
@@ -136,7 +137,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 1;
@@ -144,11 +145,11 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
 //        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
 //            .createEtchedBorder(), " KNIME "));
         panel.add(new DialogComponentNumber(m_settings.getJobTimeoutModel(),
-            "Spark job timeout (seconds): ", 1).getComponentPanel(), gbc);
+            "Spark job timeout (seconds): ", 1, 5).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentNumber(m_settings.getJobCheckFrequencyModel(),
-            "Spark job check frequency (seconds): ", 1).getComponentPanel(), gbc);
+            "Spark job check frequency (seconds): ", 1, 5).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteRDDsOnDisposeModel(),

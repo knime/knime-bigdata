@@ -105,7 +105,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
         m_useFeatureScalingModel, m_gradientTypeModel, m_stepSizeModel, m_fractionModel};
 
     private final DialogComponentNumber m_noOfCorrectionsComponent =
-            new DialogComponentNumber(m_noOfCorrectionsModel, "Number of corrections: ", 5);
+            new DialogComponentNumber(m_noOfCorrectionsModel, "Number of corrections: ", 5, 5);
 
     private final DialogComponentNumber m_toleranceComponent =
             new DialogComponentNumber(m_toleranceModel, "Tolerance: ", 0.001, 5);
