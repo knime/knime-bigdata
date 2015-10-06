@@ -438,7 +438,9 @@ public class JobControler {
             JsonObject jobInfo = jobs.getJsonObject(i);
             //LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
             if (aJobId.equals(jobInfo.getString("jobId"))) {
-                return JobStatus.valueOf(jobInfo.getString("status"));
+                final String statusString = jobInfo.getString("status");
+                LOGGER.debug("Job status for id: " + aJobId + " is " + statusString);
+                return JobStatus.valueOf(statusString);
             }
         }
 
