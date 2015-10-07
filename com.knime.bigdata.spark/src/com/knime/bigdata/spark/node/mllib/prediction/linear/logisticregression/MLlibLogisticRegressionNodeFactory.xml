@@ -11,23 +11,88 @@
 			It outputs the the learned model for later application.
 			<p>
             Please note that all data must be numeric, including the label column. 
-            Use the Spark Category To Number nodes to convert nominal values to numeric columns. 
-            The mapping dictionary of the converter node is the input of second in port of this node.
+            Use the Spark Category To Number nodes to convert nominal values to numeric columns.
+            </p>
+            <p>
+            For more details about linear methods in Spark see the 
+            <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html">Linear methods</a> section of the 
+            MLlib documentation.
             </p>
             <p>
             Use the Spark Predictor node to apply the learned model to unseen data.
             </p>
 		</intro>
+		
+        <option name="Regularizer">
+            The purpose of the <a href="http://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> is 
+            to encourage simple models and avoid overfitting. For more details on supported regularizers see the 
+            <a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#regularizers">Regularizers</a>
+            section of the MLlib documentation.
+        </option>
+        <option name="Regularization">
+            The fixed regularization parameter r &gt;= 0 defines the trade-off between the two goals 
+            of minimizing the loss (i.e., training error) and minimizing model complexity (i.e., to avoid overfitting).
+        </option>
     	<option name="Number of iterations">
             The number of iterations the method should run.
         </option>
-        <option name="Regularizer">
-              The purpose of the <a href="http://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> is 
-              to encourage simple models and avoid overfitting. For more details on supported regularizers see the 
-              <a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#regularizers">MLlib documentation</a>.
+        
+        <option name="Optimization Method">
+            Under the hood, linear methods use convex optimization methods to optimize the objective functions. 
+            MLlib uses two methods, <a href="http://en.wikipedia.org/wiki/Gradient_descent">Stoachastic Gradient Descent (SGD)</a>  
+            and <a href="http://en.wikipedia.org/wiki/Limited-memory_BFGS">Limited-memory BFGS (L-BFGS)</a> which are 
+            described in detail in the 
+            <a href="http://spark.apache.org/docs/1.2.1/mllib-optimization.html">MLlib optimization section</a>.
         </option>
-        <option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+        <option name="Number of corrections">
+            The number of corrections used in the L-BFGS update.
+            Only available for L-BFGS.
+        </option>
+        <option name="Tolerance">
+            The convergence tolerance. The tolerance is a condition which decides iteration termination.
+            The end of iteration is decided based on below logic.
+            <ul>
+                <li>
+                    If the norm of the new solution vector is &gt; 1, the diff of solution vectors
+                    is compared to relative tolerance which means normalizing by the norm of
+                    the new solution vector.
+                </li>
+                <li>
+                    If the norm of the new solution vector is &lt;= 1, the diff of solution vectors
+                    is compared to absolute tolerance which is not normalizing.
+                </li>
+            </ul>
+            Only available for L-BFGS.
+        </option>
+        
+        <option name="Loss function">
+            For more details on the supported loss functions see the
+            <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#loss-functions">Loss function</a> 
+            section of the MLlib documentation.
+        </option>
+        <option name="Step size">
+            The initial step size of SGD for the first step. In subsequent steps, the step size 
+            will decrease with stepSize/sqrt(t).
+            Only available for SGD.
+        </option>
+        <option name="Fraction">
+            The fraction of data to be used for each SGD iteration. 
+            The default of 1.0 corresponds to deterministic/classical gradient descent.
+            Only available for SGD.
+        </option>
+
+        <option name="Use feature scaling">
+            Select this option to use feature scaling before model training to reduce the condition numbers which can 
+            significantly help the optimizer converging faster.
+            Whether to perform feature scaling before model training to reduce the condition numbers
+            which can significantly help the optimizer converging faster. The scaling correction will be
+            translated back to resulting model weights, so it's transparent to users.
+        </option>
+        <option name="Add intercept">Select this option to add intercept.</option>
+        <option name="Validate data">Select this option if the algorithm should validate data before training.</option>
+        
         <option name="Class column">The classification column. Must be numeric.</option>
+        <option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
 	</fullDescription>
 
     <ports>
