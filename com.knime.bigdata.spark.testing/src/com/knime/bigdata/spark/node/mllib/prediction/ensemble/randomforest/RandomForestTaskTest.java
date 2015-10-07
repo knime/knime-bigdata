@@ -12,7 +12,7 @@ import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.RandomForestLearnerJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.FeatureSubsetStrategies;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.RandomForestFeatureSubsetStrategies;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
@@ -34,7 +34,7 @@ public class RandomForestTaskTest extends SparkWithJobServerSpec {
 			final Integer classColIdx, final Long noOfClasses,
 			final Integer maxDepth, final Integer maxNoOfBins,
 			final String qualityMeasure, Integer aNumTrees,
-			Boolean aIsClassification, FeatureSubsetStrategies aFSStrategy, final Integer aSeed)
+			Boolean aIsClassification, RandomForestFeatureSubsetStrategies aFSStrategy, final Integer aSeed)
 			throws GenericKnimeSparkException {
 		return RandomForestTask.paramsAsJason(aInputRDD, featureColIdxs,
 				nominalFeatureInfo, classColIdx, noOfClasses, maxDepth,
@@ -48,7 +48,7 @@ public class RandomForestTaskTest extends SparkWithJobServerSpec {
 			final Integer classColIdx, final Long noOfClasses,
 			final Integer maxDepth, final Integer maxNoOfBins,
 			final String qualityMeasure, Integer aNumTrees,
-			Boolean aIsClassification, FeatureSubsetStrategies aFSStrategy)
+			Boolean aIsClassification, RandomForestFeatureSubsetStrategies aFSStrategy)
 			throws GenericKnimeSparkException {
 		return RandomForestTask.paramsAsJason(aInputRDD, featureColIdxs,
 				nominalFeatureInfo, classColIdx, noOfClasses, maxDepth,
@@ -60,7 +60,7 @@ public class RandomForestTaskTest extends SparkWithJobServerSpec {
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 		final RandomForestTask testObj = new RandomForestTask(null, "inputRDD",
 				new Integer[] { 0, 1 }, new NominalFeatureInfo(), 1, 2l, 1, 2,
-				"gini", 125, false, FeatureSubsetStrategies.auto, 875634);
+				"gini", 125, false, RandomForestFeatureSubsetStrategies.auto, 875634);
 		final String params = testObj.learnerDef();
 		final JobConfig config = new JobConfig(
 				ConfigFactory.parseString(params));
@@ -86,7 +86,7 @@ public class RandomForestTaskTest extends SparkWithJobServerSpec {
 		final RandomForestTask testObj = new RandomForestTask(CONTEXT_ID,
 				"tab1", cols, null, 3, 3l, 11, 12,
 				AbstractTreeLearnerJob.VALUE_GINI, 133, true,
-				FeatureSubsetStrategies.auto, 875634);
+				RandomForestFeatureSubsetStrategies.auto, 875634);
 
 		final RandomForestModel model = testObj.execute(null);
 		assertTrue(model != null);
@@ -110,7 +110,7 @@ public class RandomForestTaskTest extends SparkWithJobServerSpec {
 		final RandomForestTask testObj = new RandomForestTask(CONTEXT_ID,
 				"tab1", cols, null, 2, 3l, 11, 12,
 				AbstractTreeLearnerJob.VALUE_VARIANCE, 133, false,
-				FeatureSubsetStrategies.auto, 875634);
+				RandomForestFeatureSubsetStrategies.auto, 875634);
 
 		final RandomForestModel model = testObj.execute(null);
 		assertTrue(model != null);

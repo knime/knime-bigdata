@@ -40,7 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.FeatureSubsetStrategies;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.RandomForestFeatureSubsetStrategies;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
 
 /**
@@ -54,7 +54,7 @@ public class RandomForestSettings extends DecisionTreeSettings {
             new SettingsModelIntegerBounded("noOfTrees", 5, 1, Integer.MAX_VALUE);
 
     private final SettingsModelString m_featureSubsetStrategyModel = new SettingsModelString("featureSubsetStrategy",
-        FeatureSubsetStrategies.auto.name());
+        RandomForestFeatureSubsetStrategies.auto.name());
 
     private final SettingsModelInteger m_seedModel = new SettingsModelInteger("seed", RND.nextInt());
 
@@ -65,9 +65,9 @@ public class RandomForestSettings extends DecisionTreeSettings {
             new DialogComponentNumber(getNoOfTreesModel(), "Number of trees", 5, 5);
 
     private final DialogComponent m_featureSubsetStrategyComponent = new DialogComponentStringSelection(
-        getFeatureSubsetStragegyModel(), "Feature selection strategy", FeatureSubsetStrategies.all.name(),
-        FeatureSubsetStrategies.auto.name(), FeatureSubsetStrategies.log2.name(), FeatureSubsetStrategies.onethird.name(),
-        FeatureSubsetStrategies.sqrt.name());
+        getFeatureSubsetStragegyModel(), "Feature selection strategy", RandomForestFeatureSubsetStrategies.all.name(),
+        RandomForestFeatureSubsetStrategies.auto.name(), RandomForestFeatureSubsetStrategies.log2.name(), RandomForestFeatureSubsetStrategies.onethird.name(),
+        RandomForestFeatureSubsetStrategies.sqrt.name());
 
     private final DialogComponent m_seedComponent = new DialogComponentNumberEdit(getSeedModel(), "Seed");
 
@@ -102,9 +102,9 @@ public class RandomForestSettings extends DecisionTreeSettings {
     /**
      * @return the featureSubsetStragegy
      */
-    public FeatureSubsetStrategies getFeatureSubsetStragegy() {
+    public RandomForestFeatureSubsetStrategies getFeatureSubsetStragegy() {
         final String stategy = m_featureSubsetStrategyModel.getStringValue();
-        return FeatureSubsetStrategies.valueOf(stategy);
+        return RandomForestFeatureSubsetStrategies.valueOf(stategy);
     }
 
     /**

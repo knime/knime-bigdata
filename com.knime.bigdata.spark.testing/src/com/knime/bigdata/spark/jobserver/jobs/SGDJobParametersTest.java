@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -25,23 +25,23 @@ public class SGDJobParametersTest {
     @Test
     public void jobValidationShouldCheckMissingNumIterationsParameter() throws Throwable {
         final String params =
-                LinearLearnerTask.paramsAsJason("tab1",  new Integer[] {0, 1}, 1, null, 0.5, false, 5, 0.9d, UpdaterType.L1Updater, true, false, true,
-        				GradientType.LogisticGradient, 0.6, 0.9);
+                LinearLearnerTask.paramsAsJason("tab1",  new Integer[] {0, 1}, 1, null, 0.5, false, 5, 0.9d, LinearRegularizerType.L1, true, false, true,
+        				LinearLossFunctionTypeType.Logistic, 0.6, 0.9);
         myCheck(params, ParameterConstants.PARAM_NUM_ITERATIONS, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckMissingRegularizationParameter() throws Throwable {
         final String params =
-                LinearLearnerTask.paramsAsJason("tab1",  new Integer[] {0, 1}, 1, 10, null, false, 5, 0.9d, UpdaterType.L1Updater, true, false, true,
-        				GradientType.LogisticGradient, 0.6, 0.9);
+                LinearLearnerTask.paramsAsJason("tab1",  new Integer[] {0, 1}, 1, 10, null, false, 5, 0.9d, LinearRegularizerType.L1, true, false, true,
+        				LinearLossFunctionTypeType.Logistic, 0.6, 0.9);
         myCheck(params, LinearRegressionWithSGDJob.PARAM_REGULARIZATION, "Input");
     }
 
     @Test
     public void jobValidationShouldCheckAllValidParams() throws Throwable {
-        final String params = LinearLearnerTask.paramsAsJason("tab1", new Integer[] {0, 1}, 1, 10, 0.4d, false, 5, 0.9d, UpdaterType.L1Updater, true, false, true,
-				GradientType.LogisticGradient, 0.6, 0.9);
+        final String params = LinearLearnerTask.paramsAsJason("tab1", new Integer[] {0, 1}, 1, 10, 0.4d, false, 5, 0.9d, LinearRegularizerType.L1, true, false, true,
+				LinearLossFunctionTypeType.Logistic, 0.6, 0.9);
         final KnimeSparkJob testObj = new LinearRegressionWithSGDJob();
         final Config config = ConfigFactory.parseString(params);
         final JobConfig config2 = new JobConfig(ConfigFactory.parseString(SupervisedLearnerJobParametersTest.allValidParams()).withFallback(config));

@@ -20,8 +20,8 @@ import org.apache.spark.sql.api.java.Row;
 
 import spark.jobserver.SparkJobValidation;
 
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -230,13 +230,13 @@ public abstract class AbstractRegularizationJob extends KnimeSparkJob {
      */
     static Gradient getGradient(final JobConfig aConfig) {
         //HingeGradient, LeastSquaresGradient, LogisticGradient
-        final GradientType type = GradientType.fromKnimeEnum(aConfig.getInputParameter(PARAM_GRADIENT_TYPE));
+        final LinearLossFunctionTypeType type = LinearLossFunctionTypeType.fromKnimeEnum(aConfig.getInputParameter(PARAM_GRADIENT_TYPE));
         switch (type) {
-            case HingeGradient:
+            case Hinge:
                 return new HingeGradient();
-            case LeastSquaresGradient:
+            case LeastSquares:
                 return new LeastSquaresGradient();
-            case LogisticGradient:
+            case Logistic:
                 return new LogisticGradient();
             default:
                 throw new IllegalArgumentException("Unsupported gradient type: " + type);
@@ -249,13 +249,13 @@ public abstract class AbstractRegularizationJob extends KnimeSparkJob {
      */
     static Updater getUpdater(final JobConfig aConfig) {
         // supported are: L1Updater, SimpleUpdater, SquaredL2Updater
-        final UpdaterType updaterType = UpdaterType.fromKnimeEnum(aConfig.getInputParameter(PARAM_UPDATER_TYPE));
+        final LinearRegularizerType updaterType = LinearRegularizerType.fromKnimeEnum(aConfig.getInputParameter(PARAM_UPDATER_TYPE));
         switch (updaterType) {
-            case L1Updater:
+            case L1:
                 return new L1Updater();
-            case SimpleUpdater:
+            case zero:
                 return new SimpleUpdater();
-            case SquaredL2Updater:
+            case L2:
                 return new SquaredL2Updater();
             default:
                 throw new IllegalArgumentException("Unsupported updated type: " + updaterType);

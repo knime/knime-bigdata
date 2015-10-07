@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.knime.bigdata.spark.LocalSparkSpec;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
@@ -91,7 +91,7 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_UPDATER_TYPE_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(null, true,
-				false, true, GradientType.LeastSquaresGradient, 0.6, 0.9);
+				false, true, LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_UPDATER_TYPE, "Input");
 	}
 
@@ -99,8 +99,8 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_VALIDATE_DATA_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, null, false, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9);
+				LinearRegularizerType.L1, null, false, true,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_VALIDATE_DATA, "Input");
 	}
 
@@ -108,8 +108,8 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_ADD_INTERCEPT_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, true, null, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9);
+				LinearRegularizerType.L1, true, null, true,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_ADD_INTERCEPT, "Input");
 	}
 
@@ -117,8 +117,8 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_USE_FEATURE_SCALING_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, true, false, null,
-				GradientType.LeastSquaresGradient, 0.6, 0.9);
+				LinearRegularizerType.L1, true, false, null,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_USE_FEATURE_SCALING,
 				"Input");
 	}
@@ -127,7 +127,7 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_GRADIENT_TYPE_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, true, false, true,
+				LinearRegularizerType.L1, true, false, true,
 				null, 0.6, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_GRADIENT_TYPE, "Input");
 	}
@@ -136,8 +136,8 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_STEP_SIZE_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, null, 0.9);
+				LinearRegularizerType.L1, true, false, true,
+				LinearLossFunctionTypeType.LeastSquares, null, 0.9);
 		myCheck(params, LogisticRegressionJob.PARAM_STEP_SIZE, "Input");
 	}
 
@@ -145,8 +145,8 @@ public class LogisticRegressionJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckMissing_PARAM_FRACTION_Parameter()
 			throws Throwable {
 		String params = LogisticRegressionTaskTest.paramsAsJason(
-				UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, 0.6, null);
+				LinearRegularizerType.L1, true, false, true,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, null);
 		myCheck(params, LogisticRegressionJob.PARAM_FRACTION, "Input");
 	}
 
