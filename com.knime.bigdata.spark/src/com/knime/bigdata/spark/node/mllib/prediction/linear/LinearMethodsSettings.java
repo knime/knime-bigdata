@@ -47,8 +47,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import com.knime.bigdata.spark.jobserver.server.EnumContainer;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
@@ -66,7 +66,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
             new String[] {OPTIMIZATION_METHOD_SGD, OPTIMIZATION_METHOD_LBFGS};
 
     private final SettingsModelInteger m_noOfCorrectionsModel =
-            new SettingsModelIntegerBounded("numberOfCorrections", 100, 1, Integer.MAX_VALUE);
+            new SettingsModelIntegerBounded("numberOfCorrections", 10, 1, Integer.MAX_VALUE);
     //only available for none SGD
     private final SettingsModelDouble m_toleranceModel = new SettingsModelDoubleBounded("tolerance", 0.001, 0, 1);
     //only available for none SGD
@@ -81,7 +81,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
 
     /*This defines the http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#regularizers */
     private final SettingsModelString m_updaterTypeModel =
-            new SettingsModelString("updaterType", UpdaterType.SquaredL2Updater.name());
+            new SettingsModelString("updaterType", LinearRegularizerType.L2.name());
 
     private final SettingsModelBoolean m_validateDataModel = new SettingsModelBoolean("validateDataBeforeTraining", true);
 
@@ -90,7 +90,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     private final SettingsModelBoolean m_useFeatureScalingModel = new SettingsModelBoolean("useFeatureScaling", false);
     /*This defines the http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#loss-functions */
     private final SettingsModelString m_gradientTypeModel =
-            new SettingsModelString("gradientType", GradientType.LogisticGradient.name());
+            new SettingsModelString("gradientType", LinearLossFunctionTypeType.Logistic.name());
 
     private final SettingsModelDouble m_stepSizeModel =
             new SettingsModelDoubleBounded("stepSize", 1.0, 0, Double.MAX_VALUE);
@@ -121,7 +121,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
             new DialogComponentNumber(m_regularizationModel, "Regularization: ", 0.005, 5);
 
     private final DialogComponentStringSelection m_updaterTypeComponent = new DialogComponentStringSelection(
-        m_updaterTypeModel, "Regularizer", EnumContainer.getNames(UpdaterType.values()));
+        m_updaterTypeModel, "Regularizer", EnumContainer.getNames(LinearRegularizerType.values()));
 
     private final DialogComponentBoolean m_validateDataComponent =
             new DialogComponentBoolean(m_validateDataModel, "Validate data");
@@ -133,7 +133,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
             new DialogComponentBoolean(m_useFeatureScalingModel, "Use feature scaling");
 
     private final DialogComponentStringSelection m_gradientTypeComponent = new DialogComponentStringSelection(
-        m_gradientTypeModel, "Loss function", EnumContainer.getNames(GradientType.values()));
+        m_gradientTypeModel, "Loss function", EnumContainer.getNames(LinearLossFunctionTypeType.values()));
 
     private final DialogComponentNumber m_stepSizeComponent =
             new DialogComponentNumber(m_stepSizeModel, "Step size: ", 0.001, 5);
@@ -206,13 +206,13 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
         }
         final String gTypeString =
                 ((SettingsModelString)m_gradientTypeModel.createCloneWithValidatedValue(settings)).getStringValue();
-        final GradientType gType = GradientType.valueOf(gTypeString);
+        final LinearLossFunctionTypeType gType = LinearLossFunctionTypeType.valueOf(gTypeString);
         if (gType == null) {
             throw new InvalidSettingsException("Invalid gradient type selected: " + gTypeString);
         }
         final String uTypeString =
                 ((SettingsModelString)m_updaterTypeModel.createCloneWithValidatedValue(settings)).getStringValue();
-        final UpdaterType uType = UpdaterType.valueOf(uTypeString);
+        final LinearRegularizerType uType = LinearRegularizerType.valueOf(uTypeString);
         if (uType == null) {
             throw new InvalidSettingsException("Invalid updater type selected: " + uTypeString);
         }
@@ -331,8 +331,8 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     /**
      * @return the updaterType
      */
-    public UpdaterType getUpdaterType() {
-        return UpdaterType.valueOf(m_updaterTypeModel.getStringValue());
+    public LinearRegularizerType getUpdaterType() {
+        return LinearRegularizerType.valueOf(m_updaterTypeModel.getStringValue());
     }
 
     /**
@@ -359,8 +359,8 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     /**
      * @return the gradientType
      */
-    public GradientType getGradientType() {
-        return GradientType.valueOf(m_gradientTypeModel.getStringValue());
+    public LinearLossFunctionTypeType getGradientType() {
+        return LinearLossFunctionTypeType.valueOf(m_gradientTypeModel.getStringValue());
     }
 
     /**

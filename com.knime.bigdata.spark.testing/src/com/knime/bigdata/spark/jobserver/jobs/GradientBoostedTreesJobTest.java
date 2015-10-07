@@ -25,7 +25,7 @@ public class GradientBoostedTreesJobTest extends LocalSparkSpec {
 
 	// not tested since optional: PARAM_NO_OF_CLASSES,
 	// PARAM_NOMINAL_FEATURE_INFO
-	final static EnumContainer.LossFunctions loss = EnumContainer.LossFunctions.LogLoss;
+	final static EnumContainer.EnsembleLossesType loss = EnumContainer.EnsembleLossesType.LogLoss;
 
 	@Test
 	public void jobValidationShouldCheckMissingInputDataParameter()

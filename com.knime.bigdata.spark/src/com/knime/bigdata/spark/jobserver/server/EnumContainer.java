@@ -117,7 +117,7 @@ public class EnumContainer {
      * "log2", "onethird". If "auto" is set, parameter is set based on numTrees: if numTrees == 1, set to "all"; if
      * numTrees > 1 (forest) set to "sqrt".
      */
-    public enum FeatureSubsetStrategies {
+    public enum RandomForestFeatureSubsetStrategies {
         /**  */
         auto,
         /**  */
@@ -135,8 +135,8 @@ public class EnumContainer {
          * @param aString
          * @return Enum value corresponding to given string
          */
-        public static FeatureSubsetStrategies fromKnimeEnum(final String aString) {
-            for (FeatureSubsetStrategies s : values()) {
+        public static RandomForestFeatureSubsetStrategies fromKnimeEnum(final String aString) {
+            for (RandomForestFeatureSubsetStrategies s : values()) {
                 if (s.toString().equals(aString)) {
                     return s;
                 }
@@ -151,13 +151,13 @@ public class EnumContainer {
      *
      * @author dwk
      */
-    public enum LossFunctions {
-        /**  */
-        AbsoluteError,
+    public enum EnsembleLossesType {
         /**  */
         LogLoss,
         /**  */
-        SquaredError;
+        SquaredError,
+        /**  */
+        AbsoluteError;
 
         /**
          * convert string representation of KNIME to this
@@ -165,8 +165,8 @@ public class EnumContainer {
          * @param aString
          * @return Enum value corresponding to given string
          */
-        public static LossFunctions fromKnimeEnum(final String aString) {
-            for (LossFunctions s : values()) {
+        public static EnsembleLossesType fromKnimeEnum(final String aString) {
+            for (EnsembleLossesType s : values()) {
                 if (s.toString().equals(aString)) {
                     return s;
                 }
@@ -180,21 +180,21 @@ public class EnumContainer {
      * <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#regularizers">linear methods regularizer</a>.
      * @author dwk
      */
-    public enum UpdaterType {
+    public enum LinearRegularizerType {
         /** */
-        L1Updater,
+        zero,
         /** */
-        SimpleUpdater,
+        L2,
         /** */
-        SquaredL2Updater;
+        L1;
         /**
          * convert string representation of KNIME to this
          *
          * @param aString
          * @return Enum value corresponding to given string
          */
-        public static UpdaterType fromKnimeEnum(final String aString) {
-            for (UpdaterType s : values()) {
+        public static LinearRegularizerType fromKnimeEnum(final String aString) {
+            for (LinearRegularizerType s : values()) {
                 if (s.toString().equals(aString)) {
                     return s;
                 }
@@ -208,13 +208,13 @@ public class EnumContainer {
      * <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#loss-functions">linear method loss function</a>.
      * @author dwk
      */
-    public enum GradientType {
+    public enum LinearLossFunctionTypeType {
         /** */
-        HingeGradient,
+        Hinge,
         /** */
-        LeastSquaresGradient,
+        LeastSquares,
         /** */
-        LogisticGradient;
+        Logistic;
 
         /**
          * convert string representation of KNIME to this
@@ -222,8 +222,8 @@ public class EnumContainer {
          * @param aString
          * @return Enum value corresponding to given string
          */
-        public static GradientType fromKnimeEnum(final String aString) {
-            for (GradientType s : values()) {
+        public static LinearLossFunctionTypeType fromKnimeEnum(final String aString) {
+            for (LinearLossFunctionTypeType s : values()) {
                 if (s.toString().equals(aString)) {
                     return s;
                 }

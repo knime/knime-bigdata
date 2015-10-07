@@ -40,7 +40,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.GradientBoostedTreesLearnerJob;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.LossFunctions;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.EnsembleLossesType;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -83,7 +83,7 @@ public class GradientBoostedTreesTask implements Serializable {
     private final double m_learningRate;
 
     //TODO - add as param
-    private final LossFunctions m_lossFunction;
+    private final EnsembleLossesType m_lossFunction;
 
     //there are more options, seach for 'further options' below
 
@@ -114,7 +114,7 @@ public class GradientBoostedTreesTask implements Serializable {
         m_isClassification = aIsClassification;
         m_learningRate = aLearningRate;
         m_lossFunction =
-            aIsClassification ? EnumContainer.LossFunctions.LogLoss : EnumContainer.LossFunctions.SquaredError;
+            aIsClassification ? EnumContainer.EnsembleLossesType.LogLoss : EnumContainer.EnsembleLossesType.SquaredError;
     }
 
     GradientBoostedTreesModel execute(final ExecutionMonitor exec) throws GenericKnimeSparkException,
@@ -149,7 +149,7 @@ public class GradientBoostedTreesTask implements Serializable {
     static String paramsAsJason(final String aInputRDD, final Integer[] featureColIdxs,
         @Nullable final NominalFeatureInfo nominalFeatureInfo, final Integer classColIdx,
         @Nullable final Long aNrOfClasses, final int maxDepth, final int maxBins, final Integer aNumIterations,
-        final double aLearningRate, final boolean aIsClassification, final EnumContainer.LossFunctions aLossFunction)
+        final double aLearningRate, final boolean aIsClassification, final EnumContainer.EnsembleLossesType aLossFunction)
         throws GenericKnimeSparkException {
         final List<Object> inputParams = new ArrayList<>();
         inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);

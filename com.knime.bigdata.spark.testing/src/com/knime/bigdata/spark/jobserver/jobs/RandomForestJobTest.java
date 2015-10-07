@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.FeatureSubsetStrategies;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.RandomForestFeatureSubsetStrategies;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.NominalFeatureInfo;
@@ -37,7 +37,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason(null, new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", 101,
-				true, EnumContainer.FeatureSubsetStrategies.auto);
+				true, EnumContainer.RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, KnimeSparkJob.PARAM_INPUT_TABLE, "Input");
 	}
 
@@ -46,7 +46,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, null, 99, true,
-				FeatureSubsetStrategies.auto);
+				RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, AbstractTreeLearnerJob.PARAM_INFORMATION_GAIN, "Input");
 	}
 
@@ -55,7 +55,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, null, 25, "gini", 99,
-				true, FeatureSubsetStrategies.auto);
+				true, RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, AbstractTreeLearnerJob.PARAM_MAX_DEPTH, "Input");
 	}
 
@@ -64,7 +64,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, null, "gini", 99,
-				true, FeatureSubsetStrategies.auto);
+				true, RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, AbstractTreeLearnerJob.PARAM_MAX_BINS, "Input");
 	}
 
@@ -73,7 +73,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), null, 2l, 4, 25, "gini", 99,
-				true, FeatureSubsetStrategies.auto);
+				true, RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, ParameterConstants.PARAM_LABEL_INDEX, "Input");
 	}
 
@@ -82,7 +82,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", null,
 				new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", 99, true,
-				FeatureSubsetStrategies.auto);
+				RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, ParameterConstants.PARAM_COL_IDXS, "Input");
 	}
 
@@ -101,7 +101,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", null,
-				false, FeatureSubsetStrategies.auto);
+				false, RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, RandomForestLearnerJob.PARAM_NUM_TREES, "Input");
 	}
 
@@ -110,7 +110,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", 138,
-				null, FeatureSubsetStrategies.auto);
+				null, RandomForestFeatureSubsetStrategies.auto);
 		myCheck(params, RandomForestLearnerJob.PARAM_IS_CLASSIFICATION, "Input");
 	}
 
@@ -119,7 +119,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 			throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", 138,
-				false, FeatureSubsetStrategies.auto, null);
+				false, RandomForestFeatureSubsetStrategies.auto, null);
 		myCheck(params, ParameterConstants.PARAM_SEED, "Input");
 	}
 
@@ -127,7 +127,7 @@ public class RandomForestJobTest extends LocalSparkSpec {
 	public void jobValidationShouldCheckAllValidParams() throws Throwable {
 		String params = RandomForestTaskTest.paramsAsJason("in", new Integer[] {
 				0, 1 }, new NominalFeatureInfo(), 1, 2l, 4, 25, "gini", 138,
-				false, FeatureSubsetStrategies.auto);
+				false, RandomForestFeatureSubsetStrategies.auto);
 		KnimeSparkJob testObj = new RandomForestLearnerJob();
 		Config config = ConfigFactory.parseString(params);
 		JobConfig config2 = new JobConfig(config);

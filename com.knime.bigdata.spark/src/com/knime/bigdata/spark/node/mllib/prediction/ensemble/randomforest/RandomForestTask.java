@@ -34,7 +34,7 @@ import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
 import com.knime.bigdata.spark.jobserver.jobs.RandomForestLearnerJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.FeatureSubsetStrategies;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.RandomForestFeatureSubsetStrategies;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -71,7 +71,7 @@ public class RandomForestTask implements Serializable {
 
     private final NominalFeatureInfo m_nomFeatureInfo;
 
-    private final FeatureSubsetStrategies m_featureSubsetStrategy;
+    private final RandomForestFeatureSubsetStrategies m_featureSubsetStrategy;
 
     private final Integer m_numTrees;
 
@@ -82,7 +82,7 @@ public class RandomForestTask implements Serializable {
     RandomForestTask(final SparkRDD inputRDD, final Integer[] featureColIdxs,
         final NominalFeatureInfo nominalFeatureInfo, final String classColName, final int classColIdx,
         final Long noOfClasses, final int maxDepth, final int maxNoOfBins, final String qualityMeasure,
-        final int aNumTrees, final boolean aIsClassification, final FeatureSubsetStrategies aFSStrategy,
+        final int aNumTrees, final boolean aIsClassification, final RandomForestFeatureSubsetStrategies aFSStrategy,
         final Integer aRandomSeed) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses,
             maxDepth, maxNoOfBins, qualityMeasure, aNumTrees, aIsClassification, aFSStrategy, aRandomSeed);
@@ -91,7 +91,7 @@ public class RandomForestTask implements Serializable {
     RandomForestTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
         final int maxNoOfBins, final String qualityMeasure, final int aNumTrees, final boolean aIsClassification,
-        final FeatureSubsetStrategies aFSStrategy, final Integer aRandomSeed) {
+        final RandomForestFeatureSubsetStrategies aFSStrategy, final Integer aRandomSeed) {
         m_maxDepth = maxDepth;
         m_maxNoOfBins = maxNoOfBins;
         m_qualityMeasure = qualityMeasure;
@@ -154,7 +154,7 @@ public class RandomForestTask implements Serializable {
         @Nullable final NominalFeatureInfo nominalFeatureInfo, final Integer classColIdx,
         @Nullable final Long noOfClasses, final Integer maxDepth, final Integer maxNoOfBins,
         final String qualityMeasure, final Integer aNumTrees, final Boolean aIsClassification,
-        final FeatureSubsetStrategies aFSStrategy, final Integer aSeed) throws GenericKnimeSparkException {
+        final RandomForestFeatureSubsetStrategies aFSStrategy, final Integer aSeed) throws GenericKnimeSparkException {
         final List<Object> inputParams = new ArrayList<>();
         inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);
         inputParams.add(aInputRDD);
