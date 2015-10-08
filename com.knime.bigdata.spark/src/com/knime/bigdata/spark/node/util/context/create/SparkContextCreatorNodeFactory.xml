@@ -22,10 +22,10 @@
         </tab>
         <tab name="Spark Context Settings">
         <option name="Context name">The unique name of the context.</option>
-        <option name="Memory">
+        <option name="Memory per node">
         	The memory to allocate on each cluster node.
         </option>
-        <option name="Number of cores">The number of cores per cluster node.</option>
+        <option name="Number of cores per node">The number of cores per cluster node.</option>
         </tab>
         <tab name="Job Server Settings">
         <option name="Protocol">The protocol for the Spark job server connection.</option>
