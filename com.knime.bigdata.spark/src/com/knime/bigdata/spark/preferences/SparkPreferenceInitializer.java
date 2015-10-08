@@ -117,8 +117,8 @@ public class SparkPreferenceInitializer extends
         store.setDefault(PREF_NUM_CPU_CORES, getPresetInt(config, "spark.numCPUCores", 2));
         store.setDefault(PREF_MEM_PER_NODE, getPresetString(config, "spark.memPerNode", "512m"));
 
-        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 100));
-        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 2));
+        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 7200));
+        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 5));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteRDDsOnDispose", true));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.verboseLogging", false));
     }
