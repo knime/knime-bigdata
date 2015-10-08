@@ -115,7 +115,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
 
             //We might want to hide these settings here since we support only one context anyway
             final IntegerFieldEditor numCPUCores = new IntegerFieldEditor(
-                    SparkPreferenceInitializer.PREF_NUM_CPU_CORES, "Number of CPU cores: ", parent);
+                    SparkPreferenceInitializer.PREF_NUM_CPU_CORES, "Number of CPU cores per node: ", parent);
             numCPUCores.setValidRange(1, Integer.MAX_VALUE);
             final StringFieldEditor memPerNode = new StringFieldEditor(
                 SparkPreferenceInitializer.PREF_MEM_PER_NODE, "Memory per node: ", parent);
