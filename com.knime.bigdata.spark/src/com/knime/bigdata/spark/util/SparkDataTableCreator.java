@@ -68,15 +68,42 @@ public final class SparkDataTableCreator {
      *
      * @param exec optional ExecutionMonitor to check for cancel. Can be <code>null</code>.
      * @param data the Spark data object
-     * @param cacheNoRows the number of rows to retrieve
+     * @param cacheNoRows the number of rows to retrieve. Returns empty table if 0.
      * @return the named RDD as a DataTable
      * @throws CanceledExecutionException
      * @throws GenericKnimeSparkException
      */
     public static DataTable getDataTable(final ExecutionMonitor exec, final SparkDataTable data, final int cacheNoRows)
         throws CanceledExecutionException, GenericKnimeSparkException {
-        final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
+        if (cacheNoRows < 0) {
+            throw new IllegalArgumentException("Fetch size should be a positive number");
+        }
+        if (cacheNoRows == 0) {
+            //return an empty table
+            return new DataTable() {
+                @Override
+                public RowIterator iterator() {
+                    return new RowIterator() {
 
+                        @Override
+                        public DataRow next() {
+                            return null;
+                        }
+
+                        @Override
+                        public boolean hasNext() {
+                            return false;
+                        }
+                    };
+                }
+
+                @Override
+                public DataTableSpec getDataTableSpec() {
+                    return data.getTableSpec();
+                }
+            };
+        }
+        final String fetchParams = rowFetcherDef(cacheNoRows, data.getID());
         final KNIMESparkContext context = data.getContext();
         if (exec != null) {
             exec.checkCanceled();
