@@ -93,6 +93,9 @@ public class SparkPreferenceInitializer extends
     /** Preference key for the cache DataCell flag. */
     public static final String PREF_DELETE_RDDS_ON_DISPOSE = "com.knime.bigdata.spark.deleteRDDsOnDispose";
 
+    /** Preference key for the RDD validation flag. */
+    public static final String PREF_VALIDATE_RDDS = "com.knime.bigdata.spark.validateRDDsPriorExecution";
+
     /** Preference key for verbose logging. */
     public static final String PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.verboseLogging";
 
@@ -120,6 +123,7 @@ public class SparkPreferenceInitializer extends
         store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 7200));
         store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 5));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteRDDsOnDispose", true));
+        store.setDefault(PREF_VALIDATE_RDDS, getPresetBoolean(config, "knime.validateRDDs", true));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.verboseLogging", false));
     }
 

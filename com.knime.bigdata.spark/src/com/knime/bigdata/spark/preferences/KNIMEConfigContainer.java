@@ -87,10 +87,14 @@ public class KNIMEConfigContainer {
     }
 
     /**
-     * @return the default Spark context name
+     * @return the delete RDDS on dispose flag
      */
     public static boolean deleteRDDsOnDispose() {
         return PREFERENCE_STORE.getBoolean(SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE);
+    }
+
+    public static boolean validateRDDsPriorExecution() {
+        return PREFERENCE_STORE.getBoolean(SparkPreferenceInitializer.PREF_VALIDATE_RDDS);
     }
 
     /**
