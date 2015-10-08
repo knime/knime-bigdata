@@ -63,7 +63,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      */
     static SettingsModelIntegerBounded createFetchSizeModel() {
         final SettingsModelIntegerBounded model =
-                new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
+                new SettingsModelIntegerBounded("fetchSize", 1000, 0, Integer.MAX_VALUE);
         model.setEnabled(false);
         return model;
     }
