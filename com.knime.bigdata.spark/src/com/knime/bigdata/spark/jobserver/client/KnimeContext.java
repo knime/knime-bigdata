@@ -106,6 +106,7 @@ public class KnimeContext {
         if (contexts.size() > 0) {
             for (int i = 0; i < contexts.size(); i++) {
                 if (context.getContextName().equals(contexts.getString(i))) {
+                    LOGGER.debug("Context exists. Name: " + context.getContextName());
                     return true;
                 }
             }
