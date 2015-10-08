@@ -90,6 +90,7 @@ import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.port.data.SparkDataTable;
+import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 
 
 /**
@@ -123,6 +124,8 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private boolean m_deleteOnDispose = DEFAULT_DELETE_ON_DISPOSE;
 
+    private boolean m_validateRDDs;
+
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
      * @param outPortTypes the output port types
@@ -130,7 +133,6 @@ public abstract class SparkNodeModel extends NodeModel {
     protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
         this(inPortTypes, outPortTypes, true);
     }
-
 
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
@@ -140,8 +142,21 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final boolean deleteOnReset) {
+        this(inPortTypes, outPortTypes, deleteOnReset, true);
+    }
+
+    /**Constructor for class AbstractGraphNodeModel.
+     * @param inPortTypes the input port types
+     * @param outPortTypes the output port types
+     * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
+     * Always set this flag to <code>false</code> when you return the input RDD also as output RDD!
+     * @param validateRDDs set to <code>false</code> to disable RDD validation prior execution
+     */
+    protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
+        final boolean deleteOnReset, final boolean validateRDDs) {
         super(inPortTypes, outPortTypes);
         m_deleteOnReset = deleteOnReset;
+        m_validateRDDs = validateRDDs;
     }
 
     /**
@@ -187,47 +202,51 @@ public abstract class SparkNodeModel extends NodeModel {
         exec.setMessage("Validate input data...");
         SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
         KNIMESparkContext checkedContext = null;
-        final Map<KNIMESparkContext, Set<String>> namedRDDsMap = new HashMap<>();
-        for (final PortObject portObject : inData) {
-            if (portObject instanceof  SparkContextProvider) {
-                exec.setMessage("Check Spark context...");
-                //check that the context is still available
-                final SparkContextProvider data = (SparkContextProvider)portObject;
-                final KNIMESparkContext newContext = data.getContext();
-                if (checkedContext == null || !checkedContext.equals(newContext)) {
-                    if (!KnimeContext.sparkContextExists(newContext)) {
-                        throw new IllegalStateException(
-                            "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
+        if (m_validateRDDs && KNIMEConfigContainer.validateRDDsPriorExecution()) {
+            final Map<KNIMESparkContext, Set<String>> namedRDDsMap = new HashMap<>();
+            for (final PortObject portObject : inData) {
+                if (portObject instanceof  SparkContextProvider) {
+                    exec.setMessage("Check Spark context...");
+                    //check that the context is still available
+                    final SparkContextProvider data = (SparkContextProvider)portObject;
+                    final KNIMESparkContext newContext = data.getContext();
+                    if (checkedContext == null || !checkedContext.equals(newContext)) {
+                        if (!KnimeContext.sparkContextExists(newContext)) {
+                            throw new IllegalStateException(
+                                "Incoming Spark context no longer exists. Please reset all preceding Spark nodes.");
+                        }
+                        checkedContext = newContext;
                     }
-                    checkedContext = newContext;
+                    exec.setMessage("Spark context valid.");
                 }
-                exec.setMessage("Spark context valid.");
-            }
-            if (portObject instanceof  SparkDataPortObject) {
-                exec.setMessage("Check Spark RDD...");
-                final SparkDataPortObject data = (SparkDataPortObject)portObject;
-                final KNIMESparkContext newContext = data.getContext();
-                Set<String> listNamedRDDs = namedRDDsMap.get(newContext);
-                if (listNamedRDDs == null) {
-                    //this is the first time the context is used get all its RDDs and put them into the map
-                    listNamedRDDs = new HashSet<>(KnimeContext.listNamedRDDs(newContext));
-                    namedRDDsMap.put(newContext, listNamedRDDs);
-                }
-                if (!listNamedRDDs.contains(data.getData().getID())) {
-                    //JobServer comment in 'NamedRDDSupport.scala': "The caller should always expect
-                    // that the data returned from the method 'getNames()' may be stale and incorrect.
-                    //hence: wait a bit and try again
-                    Thread.sleep(1000);
-                    listNamedRDDs.addAll(KnimeContext.listNamedRDDs(newContext));
+                if (portObject instanceof  SparkDataPortObject) {
+                    exec.setMessage("Check Spark RDD...");
+                    final SparkDataPortObject data = (SparkDataPortObject)portObject;
+                    final KNIMESparkContext newContext = data.getContext();
+                    Set<String> listNamedRDDs = namedRDDsMap.get(newContext);
+                    if (listNamedRDDs == null) {
+                        //this is the first time the context is used get all its RDDs and put them into the map
+                        listNamedRDDs = new HashSet<>(KnimeContext.listNamedRDDs(newContext));
+                        namedRDDsMap.put(newContext, listNamedRDDs);
+                    }
                     if (!listNamedRDDs.contains(data.getData().getID())) {
-                        throw new IllegalStateException(
-                            "Incoming Spark data object no longer exists. Please reset all preceding Spark nodes.");
+                        //JobServer comment in 'NamedRDDSupport.scala': "The caller should always expect
+                        // that the data returned from the method 'getNames()' may be stale and incorrect.
+                        //hence: wait a bit and try again
+                        Thread.sleep(1000);
+                        listNamedRDDs.addAll(KnimeContext.listNamedRDDs(newContext));
+                        if (!listNamedRDDs.contains(data.getData().getID())) {
+                            throw new IllegalStateException(
+                                "Incoming Spark data object no longer exists. Please reset all preceding Spark nodes.");
+                        }
                     }
+                    exec.setMessage("Spark RDD valid.");
                 }
-                exec.setMessage("Spark RDD valid.");
             }
+            exec.setMessage("Validation finished.");
+        } else {
+            LOGGER.debug("RDD validation disabled");
         }
-        exec.setMessage("Validation finished.");
         exec.setMessage("Start execution...");
         final PortObject[] portObjects = executeInternal(inData, exec);
         exec.setMessage("Execution finished.");

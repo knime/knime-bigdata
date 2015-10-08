@@ -129,6 +129,8 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             jobCheckFrequency.setValidRange(1, Integer.MAX_VALUE);
             final BooleanFieldEditor deleteRDDsOnDispose = new BooleanFieldEditor(
                 SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE, "Delete Spark RDDs on dispose", parent);
+            final BooleanFieldEditor validateRDDs = new BooleanFieldEditor(
+                SparkPreferenceInitializer.PREF_VALIDATE_RDDS, "Validate RDDs prior execution", parent);
             final BooleanFieldEditor verboseLogging = new BooleanFieldEditor(
                 SparkPreferenceInitializer.PREF_VERBOSE_LOGGING, "Enable verbose logging", parent);
 
@@ -147,6 +149,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             addField(jobCheckFrequency);
             addField(deleteRDDsOnDispose);
             addField(verboseLogging);
+            addField(validateRDDs);
     }
 
     /**
@@ -157,6 +160,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
         getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent event) {
+                //TODO: The change listener opens up a popup for each of the values if it has changed os might be three times in a row
                 final String[] restartProps = new String[] {SparkPreferenceInitializer.PREF_CONTEXT_NAME,
                     SparkPreferenceInitializer.PREF_MEM_PER_NODE,  SparkPreferenceInitializer.PREF_NUM_CPU_CORES};
                 final String property = event.getProperty();

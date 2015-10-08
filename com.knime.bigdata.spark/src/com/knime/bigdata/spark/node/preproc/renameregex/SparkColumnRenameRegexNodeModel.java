@@ -43,7 +43,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
     private ColumnRenameRegexConfiguration m_config;
 
     SparkColumnRenameRegexNodeModel() {
-        super(new PortType[] {SparkDataPortObject.TYPE}, new PortType[] {SparkDataPortObject.TYPE}, false);
+        super(new PortType[] {SparkDataPortObject.TYPE}, new PortType[] {SparkDataPortObject.TYPE}, false, false);
     }
     /**
      * {@inheritDoc}
