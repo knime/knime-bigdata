@@ -43,7 +43,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec, SparkContextProv
      *
      * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
      */
-    protected static class ConnectionSpecSerializer extends PortObjectSpecSerializer<SparkDataPortObjectSpec> {
+    public static final class Serializer extends PortObjectSpecSerializer<SparkDataPortObjectSpec> {
         @Override
         public SparkDataPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in)
             throws IOException {
@@ -73,15 +73,6 @@ public class SparkDataPortObjectSpec implements PortObjectSpec, SparkContextProv
      */
     public SparkDataPortObjectSpec(final KNIMESparkContext context, final DataTableSpec spec) {
         this(new SparkDataTable(context, "dummy", spec));
-    }
-
-    /**
-     * Serializer used to save {@link SparkDataPortObjectSpec}s.
-     *
-     * @return a new serializer
-     */
-    public static PortObjectSpecSerializer<SparkDataPortObjectSpec> getPortObjectSpecSerializer() {
-        return new ConnectionSpecSerializer();
     }
 
     /**

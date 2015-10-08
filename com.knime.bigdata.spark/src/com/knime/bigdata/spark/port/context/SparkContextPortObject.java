@@ -102,48 +102,41 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec, Spark
 
     /**
      * Serializer used to save {@link SparkContextPortObject}s.
-     * @return a new serializer
      */
-    public static PortObjectSpecSerializer<SparkContextPortObject> getPortObjectSpecSerializer() {
-        return new PortObjectSpecSerializer<SparkContextPortObject>() {
-            @Override
-            public void savePortObjectSpec(final SparkContextPortObject portObjectSpec,
-                final PortObjectSpecZipOutputStream out)
-                throws IOException {
-                save(portObjectSpec, out);
-            }
-            @Override
-            public SparkContextPortObject loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
-                return load(in);
-            }
-        };
+    public static final class SpecSerializer extends PortObjectSpecSerializer<SparkContextPortObject> {
+        @Override
+        public void savePortObjectSpec(final SparkContextPortObject portObjectSpec,
+            final PortObjectSpecZipOutputStream out)
+            throws IOException {
+            save(portObjectSpec, out);
+        }
+        @Override
+        public SparkContextPortObject loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
+            return load(in);
+        }
     }
 
     /**
      * Serializer used to save {@link SparkContextPortObject}s.
-     *
-     * @return a new serializer
      */
-    public static PortObjectSerializer<SparkContextPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkContextPortObject>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void savePortObject(final SparkContextPortObject portObject,
-                final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
-                CanceledExecutionException {
-                save(portObject, out);
-            }
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
-                final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                return load(in);
-            }
-        };
+    public static final class ModelSerializer extends PortObjectSerializer<SparkContextPortObject> {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void savePortObject(final SparkContextPortObject portObject,
+            final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+            save(portObject, out);
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
+            final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+            return load(in);
+        }
     }
 
     private static SparkContextPortObject load(final ZipInputStream in) throws IOException {

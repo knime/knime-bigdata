@@ -166,260 +166,217 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/toolintegration/spark/mining/clustering"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/clustering"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.pmml.converter.MLlib2PMMLNodeFactory"
             id="com.knime.bigdata.spark.node.pmml.converter.MLlib2PMMLNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.pmml.predictor.SparkPMMLPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.pmml.predictor.SparkPMMLPredictorNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io/db"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"
             id="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io/db"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory"
             id="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory"
             id="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"
             id="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/split"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io/read"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
             id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io/write"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
             id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.pmml.transformation.compiling.SparkTransformationPMMLApplyNodeFactory"
             id="com.knime.bigdata.spark.node.pmml.transformation.compiling.SparkTransformationPMMLApplyNodeFactory">
       </node>
 <!--      <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.pmml.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory"
             id="com.knime.bigdata.spark.node.pmml.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
       </node>
       -->
       <node
             category-path="/toolintegration/spark/row"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/row"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory"
             id="com.knime.bigdata.spark.node.util.persist.SparkPersistNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory"
             id="com.knime.bigdata.spark.node.util.unpersist.SparkUnpersistNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/column"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/row"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/reduction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory"
             id="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/reduction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory"
             id="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory"
             id="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory"
             id="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory">
       </node>      
       <node
             category-path="/toolintegration/spark/row"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory"
             id="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory"
             id="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory">
       </node>
@@ -430,14 +387,12 @@
       </node>
       <node
             category-path="/toolintegration/spark/misc/management"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory"
             id="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory">
       </node>
       <!--
       <node
             category-path="/toolintegration/spark"
-            expert-flag="false"
             factory-class="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory"
             id="com.knime.bigdata.spark.node.context.SparkContextCreatorNodeFactory">
       </node> -->
@@ -452,5 +407,32 @@
             id="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetPluginTemplateRepositoryProvider"
             provider-class="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetPluginTemplateRepositoryProvider">
       </template-repository>
+   </extension>
+   <extension
+         point="org.knime.core.PortType">
+      <portType
+            hidden="false"
+            name="Spark Context"
+            objectClass="com.knime.bigdata.spark.port.context.SparkContextPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObject$ModelSerializer"
+            specClass="com.knime.bigdata.spark.port.context.SparkContextPortObject"
+            specSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObject$SpecSerializer">
+      </portType>
+      <portType
+            hidden="false"
+            name="Spark Data"
+            objectClass="com.knime.bigdata.spark.port.data.SparkDataPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec$Serializer">
+      </portType>
+      <portType
+            hidden="false"
+            name="Spark Model"
+            objectClass="com.knime.bigdata.spark.port.model.SparkModelPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec$Serializer">
+      </portType>
    </extension>
 </plugin>

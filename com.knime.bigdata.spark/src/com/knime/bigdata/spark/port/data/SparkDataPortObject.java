@@ -77,30 +77,26 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
 
     /**
      * Serializer used to save {@link SparkDataPortObject}s.
-     *
-     * @return a new serializer
      */
-    public static PortObjectSerializer<SparkDataPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkDataPortObject>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void savePortObject(final SparkDataPortObject portObject,
-                final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
-                CanceledExecutionException {
-                portObject.m_data.save(out);
-            }
+    public static final class Serializer extends PortObjectSerializer<SparkDataPortObject> {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void savePortObject(final SparkDataPortObject portObject,
+            final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+            portObject.m_data.save(out);
+        }
 
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public SparkDataPortObject loadPortObject(final PortObjectZipInputStream in,
-                final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                return new SparkDataPortObject(new SparkDataTable(in));
-            }
-        };
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SparkDataPortObject loadPortObject(final PortObjectZipInputStream in,
+            final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+            return new SparkDataPortObject(new SparkDataTable(in));
+        }
     }
     private final SparkDataTable m_data;
 
