@@ -35,6 +35,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectRegistry;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
@@ -53,12 +54,13 @@ public class SparkContextPortObject implements PortObject, PortObjectSpec, Spark
     /**
      * Spark context port type.
      */
-    public static final PortType TYPE = new PortType(SparkContextPortObject.class);
+    public static final PortType TYPE = PortObjectRegistry.getInstance().getPortType(SparkContextPortObject.class);
 
     /**
      * Spark context type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(SparkContextPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL =
+        PortObjectRegistry.getInstance().getPortType(SparkContextPortObject.class, true);
 
     private static final String CONTEXT = "SparkContext";
 
