@@ -24,7 +24,7 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.IntCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -115,7 +115,7 @@ public class MLlibClusterAssignerNodeModel extends SparkNodeModel {
     public static DataTableSpec createSpec(final DataTableSpec inputSpec, final String resultColName) {
         //TK_TODO: return Cluster instead of cluster
         final String clusterColName = DataTableSpec.getUniqueColumnName(inputSpec, resultColName);
-        final DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, StringCell.TYPE);
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator(clusterColName, IntCell.TYPE);
         final DataColumnSpec labelColSpec = creator.createSpec();
         return new DataTableSpec(inputSpec, new DataTableSpec(labelColSpec));
     }
