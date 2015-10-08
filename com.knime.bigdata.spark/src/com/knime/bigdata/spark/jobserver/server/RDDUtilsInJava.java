@@ -40,6 +40,8 @@ import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
  */
 public class RDDUtilsInJava {
 
+    //TODO: Improve missing value handling in scala     RDDUtils line 157 in getDouble() method
+
     /**
      * (Java friendly version) convert nominal values in columns for given column indices to integers and append columns
      * with mapped values
