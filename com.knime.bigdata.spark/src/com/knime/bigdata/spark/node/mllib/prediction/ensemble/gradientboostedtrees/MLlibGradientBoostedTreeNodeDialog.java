@@ -70,6 +70,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
 
         gbc.gridy++;
         gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = 3;

@@ -191,8 +191,15 @@ public class SparkNormalizerPMMLNodeDialog  extends NodeDialogPane {
         @Override
         protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
+            if (specs == null || specs.length <= 0 || specs[0] == null) {
+                throw new NotConfigurableException("No input Spark RDD available");
+            }
+            final DataTableSpec spec = ((SparkDataPortObjectSpec)specs[0]).getTableSpec();
+            if (spec == null || spec.getNumColumns() == 0) {
+                throw new NotConfigurableException("No columns available for "
+                        + "selection.");
+            }
             SparkNormalizerPMMLConfig config = new SparkNormalizerPMMLConfig();
-            DataTableSpec spec = ((SparkDataPortObjectSpec)specs[0]).getTableSpec();
             config.loadConfigurationInDialog(settings, spec);
             m_maxTextField.setText(Double.toString(config.getMax()));
             m_minTextField.setText(Double.toString(config.getMin()));

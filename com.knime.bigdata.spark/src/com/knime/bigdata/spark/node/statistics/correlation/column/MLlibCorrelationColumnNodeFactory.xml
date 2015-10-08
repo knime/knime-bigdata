@@ -9,6 +9,14 @@
             This node computes the correlation coefficient for two selected input columns using the 
             <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">MLlib Statistics</a> package.
 		</intro>
+        <option name="Correlation method">
+          <ul>
+              <li><a href="https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient">Pearson</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Spearman's_rank_correlation_coefficient">Spearman</a></li>
+          </ul>
+        </option>
+        <option name="Column 1">The first column to compare</option>
+        <option name="Column 2">The second column to compare</option>
 	</fullDescription>
     <ports>
         <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation coefficient for.</inPort>

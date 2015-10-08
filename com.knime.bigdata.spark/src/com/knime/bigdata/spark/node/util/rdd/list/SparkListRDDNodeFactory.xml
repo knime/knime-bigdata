@@ -11,7 +11,7 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Spark Context">The Spark Context.</inPort>
+        <inPort index="0" name="Spark context">The Spark context.</inPort>
         <outPort index="0" name="Spark RDDs">The list of Spark RDDs.</outPort>
     </ports>
 </knimeNode>
