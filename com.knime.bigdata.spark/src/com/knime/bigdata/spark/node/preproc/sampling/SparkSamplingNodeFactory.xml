@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
     type="Manipulator" icon="icon.png">
     <name>Spark Row Sampling</name>
-    <shortDescription>Extracts a sample (a bunch of rows) from the input data.</shortDescription>
+    <shortDescription>Extracts a sample from the input data.</shortDescription>
     <fullDescription>
         <intro>
-            This node extracts a sample (a bunch of rows) from the input data. The dialog enables you to specify the
+            This node extracts a sample from the input data. The dialog enables you to specify the
             sample size.
         </intro>
         <option name="Absolute">

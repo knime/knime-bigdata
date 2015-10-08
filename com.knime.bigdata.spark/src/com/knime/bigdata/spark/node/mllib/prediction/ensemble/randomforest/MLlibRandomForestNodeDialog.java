@@ -87,6 +87,7 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         gbc.gridx++;
         gbc.weightx = 1;
         gbc.weighty = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.gridwidth = 2;
         // class column selection
         panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);

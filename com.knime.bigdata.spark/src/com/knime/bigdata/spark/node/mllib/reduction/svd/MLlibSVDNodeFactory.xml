@@ -23,6 +23,7 @@
 		<option name="Compute U matrix">
 		  Select this option to compute the U matrix (left singular vectors).
 		</option>
+		<option name="Feature Columns">The feature columns to use during computation. Supports only numeric columns.</option>
 	</fullDescription>
 
 	<ports>

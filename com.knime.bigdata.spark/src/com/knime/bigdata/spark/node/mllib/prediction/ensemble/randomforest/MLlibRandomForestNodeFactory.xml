@@ -18,18 +18,31 @@
             </p>
 		</intro>
     	<option name="Number of trees">Number of trees in the random forest.</option>
-    	<option name="Max number of bins">
-			Maximum number of bins used for splitting features (suggested value: 100).
-		</option>
 		<option name="Max depth">
-			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes. (suggested value: 4)
+			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes.
+		</option>
+    	<option name="Max number of bins">
+			Maximum number of bins used for splitting features.
 		</option>
 		<option name="Feature selection strategy">Number of features to consider for splits at each node. 
-		Supported: "auto", "all", "sqrt", "log2", "onethird". If "auto" is set, this parameter is set based 
-		on numTrees: if numTrees == 1, set to "all"; if numTrees > 1 (forest) set to "sqrt".</option>
+		Supported: 
+		<ul>
+		  <li>auto</li>
+		  <li>all</li>
+		  <li>sqrt</li>
+		  <li>log2</li>
+		  <li>onethird</li> 
+		</ul> 
+		If "auto" is set, this parameter is set based on numTrees: if numTrees == 1, set to "all"; 
+		if numTrees > 1 (forest) set to "sqrt".
+		</option>
         <option name="Is classification">Select this option for binary or multiclass classification.</option>
 		<option name="Quality measure">
-			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".
+			  Criterion used for information gain calculation. Available methods: 
+			  <ul>
+			     <li>gini (recommended)</li>
+                 <li>entropy</li>
+			  </ul>
 			  For more details on the available methods see the 
 			  <a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
 			  Only available for classifications.

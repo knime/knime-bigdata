@@ -14,6 +14,7 @@
 		<option name="Number of components">
 			The number of top principal components to compute.
 		</option>
+		<option name="Feature Columns">The feature columns to use during computation. Supports only numeric columns.</option>
 	</fullDescription>
 
 	<ports>

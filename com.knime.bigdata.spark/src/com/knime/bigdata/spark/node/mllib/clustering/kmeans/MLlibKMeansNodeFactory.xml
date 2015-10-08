@@ -6,20 +6,15 @@
 	<shortDescription>K-means model learning performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			This node utilizes the Apache Spark implementation of the K-means
-			clustering algorithm.
+			This node applies the Apache Spark 
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-clustering.html">K-means</a> clustering algorithm.
 			It outputs the cluster centers for a predefined number of clusters (no
 			dynamic number of clusters). K-means performs a crisp clustering that
-			assigns a data vector to exactly one cluster. The algorithm
-			terminates when the cluster assignments do not change anymore.
-			The clustering algorithm uses the Euclidean distance on the selected
-			attributes. The data is not normalized by the node (if required, you
-			should consider to use the "Normalizer" as a preprocessing step).
-			
-			TODO: 
-			If the optional PMML import is connected and contains preprocessing
-			operations in the TransformationDictionary those are added to the
-			learned model. The node can be configured as follows:
+			assigns a data vector to exactly one cluster. The data is not normalized by the node (if required, you
+			should consider to use the "Spark Normalizer" as a preprocessing step).
+			<p>
+            Use the Spark Cluster Assigner node to apply the learned model to unseen data.
+            </p>
 		</intro>
 
 		<option name="Number of clusters">
@@ -29,9 +24,7 @@
 			The maximal number of iterations after which the algorithm terminates,
 			independent of the accuracy improvement of the cluster centers.
 		</option>
-		<option name="Result Settings: Column name">
-			Name of column with cluster assignments (result preview only).
-		</option>
+		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
 	</fullDescription>
 
 	<ports>

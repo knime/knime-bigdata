@@ -8,7 +8,7 @@
         <intro>
             Destroys the Spark context and all RDDs that exists within the context.
             <p>This node will open up a confirmation dialog as a safeguard which can be suppressed with 
-            the 'Hide confirmation dialog' dialog option.</p>
+            the 'Hide confirmation dialog' option.</p>
             <p>
             <b>Do not use this node if you use a shared context in your company.</b>
             </p>
