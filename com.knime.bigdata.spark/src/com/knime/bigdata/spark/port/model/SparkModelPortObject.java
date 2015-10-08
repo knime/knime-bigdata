@@ -83,33 +83,29 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
 
     /**
      * Serializer used to save {@link SparkModelPortObject}s.
-     *
-     * @return a new serializer
      */
     @SuppressWarnings("rawtypes")
-    public static PortObjectSerializer<SparkModelPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkModelPortObject>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void savePortObject(final SparkModelPortObject portObject,
-                final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
-                CanceledExecutionException {
-                SparkModel model = portObject.getModel();
-                model.write(exec, out);
-            }
+    public static final class Serializer extends PortObjectSerializer<SparkModelPortObject> {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void savePortObject(final SparkModelPortObject portObject,
+            final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+            SparkModel model = portObject.getModel();
+            model.write(exec, out);
+        }
 
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in,
-                final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                SparkModel<Serializable> model = new SparkModel<>(exec, in);
-                return new SparkModelPortObject<>(model);
-            }
-        };
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in,
+            final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+            SparkModel<Serializable> model = new SparkModel<>(exec, in);
+            return new SparkModelPortObject<>(model);
+        }
     }
 
     /**

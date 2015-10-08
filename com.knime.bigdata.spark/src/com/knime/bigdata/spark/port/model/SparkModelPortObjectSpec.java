@@ -44,7 +44,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
      *
      * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
      */
-    protected static class ConnectionSpecSerializer extends PortObjectSpecSerializer<SparkModelPortObjectSpec> {
+    public static final class Serializer extends PortObjectSpecSerializer<SparkModelPortObjectSpec> {
         @Override
         public SparkModelPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in)
             throws IOException {
@@ -117,15 +117,6 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
      */
     protected ModelContentRO getConnectionModel() {
         return m_model;
-    }
-
-    /**
-     * Serializer used to save {@link SparkModelPortObjectSpec}s.
-     *
-     * @return a new serializer
-     */
-    public static PortObjectSpecSerializer<SparkModelPortObjectSpec> getPortObjectSpecSerializer() {
-        return new ConnectionSpecSerializer();
     }
 
     /**
