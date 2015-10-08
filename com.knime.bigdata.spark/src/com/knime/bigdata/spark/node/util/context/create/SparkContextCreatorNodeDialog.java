@@ -126,10 +126,10 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getMemoryModel(), "Memory: ", true, 30).getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getMemoryModel(), "Memory per node: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentNumber(m_settings.getNoOfCoresModel(), "Number of cores: ", 1, 28).getComponentPanel(), gbc);
+        panel.add(new DialogComponentNumber(m_settings.getNoOfCoresModel(), "Number of cores per node: ", 1, 28).getComponentPanel(), gbc);
         return panel;
     }
 
