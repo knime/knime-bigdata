@@ -43,6 +43,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectRegistry;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
@@ -68,12 +69,13 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
     /**
      * Database port type.
      */
-    public static final PortType TYPE = new PortType(SparkDataPortObject.class);
+    public static final PortType TYPE = PortObjectRegistry.getInstance().getPortType(SparkDataPortObject.class);
 
     /**
      * Database type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(SparkDataPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL =
+        PortObjectRegistry.getInstance().getPortType(SparkDataPortObject.class, true);
 
     /**
      * Serializer used to save {@link SparkDataPortObject}s.

@@ -28,6 +28,7 @@ import javax.swing.JComponent;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectRegistry;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
@@ -43,12 +44,13 @@ public class SparkModelPortObject<M extends Serializable> implements PortObject 
     /**
      * Database port type.
      */
-    public static final PortType TYPE = new PortType(SparkModelPortObject.class);
+    public static final PortType TYPE = PortObjectRegistry.getInstance().getPortType(SparkModelPortObject.class);
 
     /**
      * Database type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(SparkModelPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL =
+        PortObjectRegistry.getInstance().getPortType(SparkModelPortObject.class, true);
 
     /**
      * The spec for this port object.

@@ -52,7 +52,7 @@ public class MLlibGradientBoostedTreeNodeModel extends SparkNodeModel {
      * Constructor.
      */
     protected MLlibGradientBoostedTreeNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
+        super(new PortType[]{SparkDataPortObject.TYPE, PMMLPortObject.TYPE_OPTIONAL},
             new PortType[]{SparkModelPortObject.TYPE});
     }
 
