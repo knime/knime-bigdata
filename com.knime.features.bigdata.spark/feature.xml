@@ -6,7 +6,7 @@
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for assembling, executing and managing Apache Spark jobs. This feature supports Hortonworks HDP 2.2 (Spark Versions 1.2 and Hadoop Version 2.6) and Cloudera CDH 5.3 (Spark 1.2 and Hadoop Version 2.6). You need to setup the connection to your Spark job server prior usage. For details about your job server settings contact your system administrator.
+      KNIME nodes for assembling, executing and managing Apache Spark jobs. This feature supports Hortonworks HDP 2.2 and Cloudera CDH 5.3 with Spark 1.2. You need to setup the connection to your Spark job server prior usage. For details about your job server settings contact your system administrator.
    </description>
 
    <copyright>
