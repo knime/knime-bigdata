@@ -75,9 +75,6 @@ public final class SparkDataTableCreator {
      */
     public static DataTable getDataTable(final ExecutionMonitor exec, final SparkDataTable data, final int cacheNoRows)
         throws CanceledExecutionException, GenericKnimeSparkException {
-        if (cacheNoRows < 0) {
-            throw new IllegalArgumentException("Fetch size should be a positive number");
-        }
         if (cacheNoRows == 0) {
             //return an empty table
             return new DataTable() {
