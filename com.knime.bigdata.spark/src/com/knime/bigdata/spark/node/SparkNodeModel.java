@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -250,6 +251,7 @@ public abstract class SparkNodeModel extends NodeModel {
         exec.setMessage("Start execution...");
         final PortObject[] portObjects = executeInternal(inData, exec);
         exec.setMessage("Execution finished.");
+        m_namedRDDs.clear();
         if (portObjects != null && portObjects.length > 0) {
             for (final PortObject portObject : portObjects) {
                 if (portObject instanceof  SparkDataPortObject) {
@@ -339,7 +341,7 @@ public abstract class SparkNodeModel extends NodeModel {
                 final Config contextSettingsConfig = contextConfig.getConfig(CFG_CONTEXT);
                 final KNIMESparkContext context = new KNIMESparkContext(contextSettingsConfig);
                 final String[] namedRDDUUIDs = contextConfig.getStringArray(CFG_NAMED_RDD_UUIDS);
-                m_namedRDDs.put(context, Arrays.asList(namedRDDUUIDs));
+                m_namedRDDs.put(context, new ArrayList<>(Arrays.asList(namedRDDUUIDs)));
             }
             loadAdditionalInternals(nodeInternDir, exec);
         } catch (final InvalidSettingsException | RuntimeException e) {
@@ -411,6 +413,9 @@ public abstract class SparkNodeModel extends NodeModel {
     protected final void reset() {
         if (m_deleteOnReset) {
             deleteRDDs(false);
+        } else {
+            //if we do not delete the rdds we have to clear at least the rdds list
+            m_namedRDDs.clear();
         }
         resetInternal();
     }
