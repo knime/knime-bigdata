@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.knime.features.bigdata.spark"
-      label="KNIME Big Data Executor for Spark"
-      version="2.12.1.qualifier"
+      label="KNIME Big Data Executor for Spark version 1.2"
+      version="1.0.0.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for assembling, executing and managing Apache Spark jobs.
+      KNIME nodes for assembling, executing and managing Apache Spark jobs. This feature supports Hortonworks HDP 2.2 (Spark Versions 1.2 and Hadoop Version 2.6) and Cloudera CDH 5.3 (Spark 1.2 and Hadoop Version 2.6). You need to setup the connection to your Spark job server prior usage. For details about your job server settings contact your system administrator.
    </description>
 
    <copyright>
