@@ -49,7 +49,7 @@ import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 public class SparkListRDDNodeModel extends SparkNodeModel {
 
     SparkListRDDNodeModel() {
-        super(new PortType[]{SparkContextPortObject.TYPE}, new PortType[] {BufferedDataTable.TYPE});
+        super(new PortType[]{SparkContextPortObject.TYPE}, new PortType[] {BufferedDataTable.TYPE}, false);
     }
 
     /**
