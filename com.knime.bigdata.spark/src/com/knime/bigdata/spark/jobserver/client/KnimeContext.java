@@ -234,8 +234,10 @@ public class KnimeContext {
      *
      * @param aContextContainer context configuration container
      * @return Set of named RDD names
+     * @throws GenericKnimeSparkException if the RDD list can not be fetched
      */
-    public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer) {
+    public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer)
+            throws GenericKnimeSparkException {
         //TODO: Add this option as a new REST request to the job server to speedup the requests.
         //This would also make it easier to show the named RDDs in the job server web GUI
         String jsonArgs =
@@ -250,8 +252,9 @@ public class KnimeContext {
             // impossible with null execution context
             return Collections.emptySet();
         } catch (GenericKnimeSparkException e) {
-            LOGGER.warn("Failed to query server for set of named RDDs.");
-            return Collections.emptySet();
+            LOGGER.warn("Failed to query server for set of named RDDs. Exception: " + e.getMessage(), e);
+            throw e;
+//            return Collections.emptySet();
         }
     }
 

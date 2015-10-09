@@ -110,7 +110,7 @@ public class SparkPreferenceInitializer extends
         final Config config = ConfigFactory.load();
 
         //set default values
-        store.setDefault(PREF_JOB_SERVER, getPresetString(config, "spark.jobServer"));
+        store.setDefault(PREF_JOB_SERVER, getPresetString(config, "spark.jobServer", "localhost"));
         store.setDefault(PREF_JOB_SERVER_PROTOCOL, getPresetString(config, "spark.jobServerProtocol"));
         store.setDefault(PREF_JOB_SERVER_PORT, getPresetInt(config, "spark.jobServerPort", 8090));
         store.setDefault(PREF_USER_NAME, getPresetString(config, "spark.userName"));
