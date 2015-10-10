@@ -50,7 +50,7 @@ public class HiveToRDDTask {
         m_hiveQuery = hiveQuery;
     }
 
-    /**
+        /**
      * run the job on the server
      * @param exec execution context
      * @throws Exception if anything goes wrong
@@ -63,7 +63,7 @@ public class HiveToRDDTask {
 
     private final String params2Json() {
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT,
-            new String[]{HiveToRDDJob.PARAM_SQL_STATEMENT, m_hiveQuery},
+            new String[]{HiveToRDDJob.PARAM_SQL_STATEMENT, JsonUtils.cleanupSQL(m_hiveQuery)},
             ParameterConstants.PARAM_OUTPUT, new String[]{KnimeSparkJob.PARAM_RESULT_TABLE, m_rdd.getID()}});
     }
 

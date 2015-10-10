@@ -123,4 +123,17 @@ public class JsonUtils {
             throw new GenericKnimeSparkException("Failed to parse server response: " + aJsonArrayString, e);
         }
     }
+
+    /**
+     * @param sql the sql string to cleanup
+     * @return the cleaned up sql string
+     */
+    public static String cleanupSQL(final String sql) {
+        //TODO: Provide a (un)scape function for strings for client and server side
+        if (sql == null || sql.isEmpty()) {
+            return sql;
+        }
+        //replace all new lines with spaces
+        return sql.replaceAll("\\n", " ");
+    }
 }
