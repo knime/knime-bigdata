@@ -67,6 +67,9 @@ public class KnimeContext {
         try {
             synchronized (LOGGER) {
                 if (sparkContextExists(context)) {
+                    //TODO: We might want to check if the application path exists and upload the jar only when the
+                    //application does not exist. However this is only done once per KNIME session
+                    uploadJobJar(context);
                     return context;
                 }
                 return createSparkContext(context);
