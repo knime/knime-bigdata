@@ -453,8 +453,9 @@ public abstract class SparkNodeModel extends NodeModel {
                 }
             });
             try {
-                //give the thread at least 1 seconds to delete the rdds
-                future.get(1, TimeUnit.SECONDS);
+                //TODO: Find better way to ensure that the delete thread has some time during shutdown of KNIME
+                //give the thread at least 10 milliseconds to start the delete job
+                future.get(50, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 LOGGER.info("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
                     + " was interrupted prior completion.");
