@@ -129,7 +129,7 @@ public class JsonUtils {
      * @return the cleaned up sql string
      */
     public static String cleanupSQL(final String sql) {
-        //TODO: Provide a (un)scape function for strings for client and server side
+        //TODO: Provide a (un)escape function for strings for client and server side
         if (sql == null || sql.isEmpty()) {
             return sql;
         }
