@@ -217,7 +217,6 @@ public class SamplingJob extends KnimeSparkJob implements Serializable {
                 LOGGER.log(Level.INFO, "Using random sampling, fraction: " + fraction);
 
                 samples = aRdd2Sample.sample(getWithReplacement(aConfig), fraction, getSeed(aConfig));
-                LOGGER.log(Level.INFO, "Sampled " + samples.count() + " of " + aRdd2Sample.count() + " rows.");
                 break;
             }
             default: {
