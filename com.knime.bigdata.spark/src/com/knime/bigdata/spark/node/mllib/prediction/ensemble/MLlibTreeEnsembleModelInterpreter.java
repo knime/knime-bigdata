@@ -101,7 +101,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
     @Override
     public JComponent[] getViews(final SparkModel<M> aDecisionTreeModel) {
 
-        return new JComponent[]{getTreePanel(aDecisionTreeModel), super.getViews(aDecisionTreeModel)[0]};
+        return new JComponent[]{super.getViews(aDecisionTreeModel)[0], getTreePanel(aDecisionTreeModel)};
     }
 
     private JComponent getTreePanel(final SparkModel<M> aDecisionTreeModel) {

@@ -51,7 +51,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridy = 0;
         gbc.gridx = 0;
         panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
@@ -70,6 +70,7 @@ public class MLlibGradientBoostedTreeNodeDialog extends NodeDialogPane {
 
         gbc.gridy++;
         gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = 3;

@@ -7,7 +7,7 @@
     <fullDescription>
         <intro>
 	        <p>
-	        This node takes the PMML model and compiles it into bytecode and runs it on the given data.
+	        This node takes the PMML transformation model and compiles it into bytecode and runs it on the given data.
         	</p>
         	<p>
         	This node is typically used when test data shall be transformed e.g normalized the same

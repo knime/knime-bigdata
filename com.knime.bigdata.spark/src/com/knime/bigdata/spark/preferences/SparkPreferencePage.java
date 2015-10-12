@@ -50,6 +50,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -59,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 import com.knime.bigdata.spark.SparkPlugin;
+import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
 /**
  *
@@ -86,9 +88,17 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             final StringFieldEditor jobServerUrl = new StringFieldEditor(
                     SparkPreferenceInitializer.PREF_JOB_SERVER, "Job server url: ", parent);
             jobServerUrl.setEmptyStringAllowed(false);
-            final StringFieldEditor jobServerProtocol = new StringFieldEditor(
-                SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL, "Job server protocol (http/https): ", parent);
-            jobServerProtocol.setEmptyStringAllowed(false);
+//            final StringFieldEditor jobServerProtocol = new StringFieldEditor(
+//                SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL, "Job server protocol (http/https): ", parent);
+//            jobServerProtocol.setEmptyStringAllowed(false);
+            final String[] protocols = KNIMESparkContext.getSupportedProtocols();
+            final String[][] options = new String[protocols.length][2];
+            for (int i = 0, length = protocols.length; i < length; i++) {
+                options[i][0] = protocols[i];
+                options[i][1] = protocols[i];
+            }
+            final RadioGroupFieldEditor jobServerProtocol = new RadioGroupFieldEditor(SparkPreferenceInitializer.PREF_JOB_SERVER_PROTOCOL,
+                "Job server protocol", 1, options, parent, false);
             final IntegerFieldEditor jobServerPort = new IntegerFieldEditor(
                 SparkPreferenceInitializer.PREF_JOB_SERVER_PORT, "Job server port: ", parent);
             jobServerPort.setValidRange(0, Integer.MAX_VALUE);
@@ -105,7 +115,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
 
             //We might want to hide these settings here since we support only one context anyway
             final IntegerFieldEditor numCPUCores = new IntegerFieldEditor(
-                    SparkPreferenceInitializer.PREF_NUM_CPU_CORES, "Number of CPU cores: ", parent);
+                    SparkPreferenceInitializer.PREF_NUM_CPU_CORES, "Number of CPU cores per node: ", parent);
             numCPUCores.setValidRange(1, Integer.MAX_VALUE);
             final StringFieldEditor memPerNode = new StringFieldEditor(
                 SparkPreferenceInitializer.PREF_MEM_PER_NODE, "Memory per node: ", parent);
@@ -119,6 +129,8 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             jobCheckFrequency.setValidRange(1, Integer.MAX_VALUE);
             final BooleanFieldEditor deleteRDDsOnDispose = new BooleanFieldEditor(
                 SparkPreferenceInitializer.PREF_DELETE_RDDS_ON_DISPOSE, "Delete Spark RDDs on dispose", parent);
+            final BooleanFieldEditor validateRDDs = new BooleanFieldEditor(
+                SparkPreferenceInitializer.PREF_VALIDATE_RDDS, "Validate RDDs prior execution", parent);
             final BooleanFieldEditor verboseLogging = new BooleanFieldEditor(
                 SparkPreferenceInitializer.PREF_VERBOSE_LOGGING, "Enable verbose logging", parent);
 
@@ -137,6 +149,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
             addField(jobCheckFrequency);
             addField(deleteRDDsOnDispose);
             addField(verboseLogging);
+            addField(validateRDDs);
     }
 
     /**
@@ -147,6 +160,7 @@ public class SparkPreferencePage extends FieldEditorPreferencePage
         getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent event) {
+                //TODO: The change listener opens up a popup for each of the values if it has changed os might be three times in a row
                 final String[] restartProps = new String[] {SparkPreferenceInitializer.PREF_CONTEXT_NAME,
                     SparkPreferenceInitializer.PREF_MEM_PER_NODE,  SparkPreferenceInitializer.PREF_NUM_CPU_CORES};
                 final String property = event.getProperty();

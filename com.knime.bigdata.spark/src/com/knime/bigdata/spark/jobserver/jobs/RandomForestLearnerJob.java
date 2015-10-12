@@ -84,7 +84,7 @@ public class RandomForestLearnerJob extends AbstractTreeLearnerJob {
         } else {
             final String val = aConfig.getInputParameter(PARAM_FEATURE_SUBSET_STRATEGY, String.class);
             try {
-                EnumContainer.FeatureSubsetStrategies.fromKnimeEnum(val);
+                EnumContainer.RandomForestFeatureSubsetStrategies.fromKnimeEnum(val);
             } catch (Exception e) {
                 msg = "Input parameter '" + PARAM_FEATURE_SUBSET_STRATEGY + "' has incompatible value '" + val + "'.";
             }

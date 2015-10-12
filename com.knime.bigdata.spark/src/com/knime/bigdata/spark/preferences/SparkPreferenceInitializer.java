@@ -93,6 +93,9 @@ public class SparkPreferenceInitializer extends
     /** Preference key for the cache DataCell flag. */
     public static final String PREF_DELETE_RDDS_ON_DISPOSE = "com.knime.bigdata.spark.deleteRDDsOnDispose";
 
+    /** Preference key for the RDD validation flag. */
+    public static final String PREF_VALIDATE_RDDS = "com.knime.bigdata.spark.validateRDDsPriorExecution";
+
     /** Preference key for verbose logging. */
     public static final String PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.verboseLogging";
 
@@ -107,7 +110,7 @@ public class SparkPreferenceInitializer extends
         final Config config = ConfigFactory.load();
 
         //set default values
-        store.setDefault(PREF_JOB_SERVER, getPresetString(config, "spark.jobServer"));
+        store.setDefault(PREF_JOB_SERVER, getPresetString(config, "spark.jobServer", "localhost"));
         store.setDefault(PREF_JOB_SERVER_PROTOCOL, getPresetString(config, "spark.jobServerProtocol"));
         store.setDefault(PREF_JOB_SERVER_PORT, getPresetInt(config, "spark.jobServerPort", 8090));
         store.setDefault(PREF_USER_NAME, getPresetString(config, "spark.userName"));
@@ -117,9 +120,10 @@ public class SparkPreferenceInitializer extends
         store.setDefault(PREF_NUM_CPU_CORES, getPresetInt(config, "spark.numCPUCores", 2));
         store.setDefault(PREF_MEM_PER_NODE, getPresetString(config, "spark.memPerNode", "512m"));
 
-        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 100));
-        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 2));
+        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "knime.jobTimeout", 7200));
+        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 5));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteRDDsOnDispose", true));
+        store.setDefault(PREF_VALIDATE_RDDS, getPresetBoolean(config, "knime.validateRDDs", true));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.verboseLogging", false));
     }
 

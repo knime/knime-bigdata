@@ -18,16 +18,12 @@
         </p>
        
         </intro>
-        <!-- <option name="Append columns">
-            If checked, the computed columns will be appended to the 
-            input table. Otherwise the computed columns replace their
-            source columns.
-        </option>
+        <option name="Keep original columns">Select this option to keep the original columns otherwise all
+        selected columns to convert are removed from the output table.</option>
         <option name="Column suffix">
             The column name of the computed columns are the name of the 
             column in the input appended by this suffix.
         </option>
-         --> 
     </fullDescription>
     
     <ports>

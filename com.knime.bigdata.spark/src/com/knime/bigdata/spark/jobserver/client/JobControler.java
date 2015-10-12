@@ -357,9 +357,10 @@ public class JobControler {
      * @param aExecutionContext execution context to watch out for cancel
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
+     * @throws GenericKnimeSparkException
      */
     static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
-        @Nullable final ExecutionMonitor aExecutionContext) throws CanceledExecutionException {
+        @Nullable final ExecutionMonitor aExecutionContext) throws CanceledExecutionException, GenericKnimeSparkException {
         return waitForJob(aContextContainer, aJobId, aExecutionContext, aContextContainer.getJobTimeout(),
             aContextContainer.getJobCheckFrequency());
     }
@@ -375,10 +376,11 @@ public class JobControler {
      * @param aCheckFrequencyInSeconds (the wait interval between server requests, in seconds)
      * @return JobStatus status as returned by the server
      * @throws CanceledExecutionException user canceled the operation
+     * @throws GenericKnimeSparkException if the timeout is reached
      */
     static JobStatus waitForJob(final KNIMESparkContext aContextContainer, final String aJobId,
         @Nullable final ExecutionMonitor aExecutionContext, final int aTimeoutInSeconds,
-        final int aCheckFrequencyInSeconds) throws CanceledExecutionException {
+        final int aCheckFrequencyInSeconds) throws CanceledExecutionException, GenericKnimeSparkException {
         LOGGER.debug("Start waiting for job...");
         if (aExecutionContext != null) {
             aExecutionContext.setMessage("Waiting for Spark job to finish...");
@@ -396,7 +398,8 @@ public class JobControler {
                     if (aExecutionContext != null) {
                         aExecutionContext.checkCanceled();
                         aExecutionContext.setMessage(
-                            "Waiting for Spark job to finish (Execution time: " + (i + 1) + " seconds)");
+                            "Waiting for Spark job to finish (Execution time: "
+                                    + (i + 1) * aCheckFrequencyInSeconds + " seconds)");
                     }
                 } catch (GenericKnimeSparkException e) {
                     // Log and continue to wait... we might want to exit if
@@ -415,8 +418,11 @@ public class JobControler {
                 // ignore and continue...
             }
         }
-        LOGGER.debug("Max number of checks done return job status unknown");
-        return JobStatus.UNKNOWN;
+        LOGGER.warn("Job timeout of " + aTimeoutInSeconds + " seconds reached. You might want to increase the "
+            + "job timeout for this Spark context in the Spark preference page or the Create Spark Context node.");
+        LOGGER.warn("Cancelling job on server side: " + aJobId);
+        killJob(aContextContainer, aJobId);
+        throw new GenericKnimeSparkException("Job timeout of " + aTimeoutInSeconds + " seconds reached.");
     }
 
     /**
@@ -438,7 +444,9 @@ public class JobControler {
             JsonObject jobInfo = jobs.getJsonObject(i);
             //LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
             if (aJobId.equals(jobInfo.getString("jobId"))) {
-                return JobStatus.valueOf(jobInfo.getString("status"));
+                final String statusString = jobInfo.getString("status");
+                LOGGER.debug("Job status for id: " + aJobId + " is " + statusString);
+                return JobStatus.valueOf(statusString);
             }
         }
 

@@ -20,26 +20,22 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
-import java.util.List;
-
 import org.apache.spark.mllib.classification.SVMModel;
 
-import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearMethodsNodeModel;
-import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.interpreter.HTMLModelInterpreter;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.GeneralizedLinearModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibSVMInterpreter extends HTMLModelInterpreter<SparkModel<SVMModel>> {
+public class MLlibSVMInterpreter extends GeneralizedLinearModelInterpreter<SVMModel> {
 
     private static final long serialVersionUID = 1L;
 
-    private static volatile MLlibSVMInterpreter instance;
+    private static final MLlibSVMInterpreter instance = new MLlibSVMInterpreter();
 
     private MLlibSVMInterpreter() {
-        //avoid object creation
+        super("Linear SVM");
     }
 
     /**
@@ -47,42 +43,6 @@ public class MLlibSVMInterpreter extends HTMLModelInterpreter<SparkModel<SVMMode
      * @return the only instance
      */
     public static MLlibSVMInterpreter getInstance() {
-        if (instance == null) {
-            synchronized (MLlibSVMInterpreter.class) {
-                if (instance == null) {
-                    instance = new MLlibSVMInterpreter();
-                }
-            }
-        }
         return instance;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getModelName() {
-        return "Linear SVM";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getSummary(final SparkModel<SVMModel> model) {
-        final SVMModel svmModel = model.getModel();
-        return "Model weights: " + svmModel.weights();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getHTMLDescription(final SparkModel<SVMModel> model) {
-        final SVMModel svmModel = model.getModel();
-        final List<String> columnNames = model.getLearningColumnNames();
-        final double[] weights = svmModel.weights().toArray();
-        return LinearMethodsNodeModel.printWeightedColumnHTMLList("Weight:", columnNames, NF, weights);
-    }
-
 }

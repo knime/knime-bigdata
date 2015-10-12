@@ -140,7 +140,7 @@ public class MLlibDecisionTreeInterpreter extends HTMLModelInterpreter<SparkMode
      */
     @Override
     public JComponent[] getViews(final SparkModel<DecisionTreeModel> aDecisionTreeModel) {
-        return new JComponent[]{getTreePanel(aDecisionTreeModel), super.getViews(aDecisionTreeModel)[0]};
+        return new JComponent[]{super.getViews(aDecisionTreeModel)[0], getTreePanel(aDecisionTreeModel)};
     }
 
     /**

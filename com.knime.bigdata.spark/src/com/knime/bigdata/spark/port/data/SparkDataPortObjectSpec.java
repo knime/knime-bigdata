@@ -25,19 +25,18 @@ import java.io.IOException;
 import javax.swing.JComponent;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.workflow.DataTableSpecView;
 
-import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec;
 
 /**
  * Spark data port object specification.
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDataPortObjectSpec implements PortObjectSpec, SparkContextProvider {
+public class SparkDataPortObjectSpec extends SparkContextPortObjectSpec {
     /**
      * A serializer for {@link SparkDataPortObjectSpec}s.
      *
@@ -64,6 +63,7 @@ public class SparkDataPortObjectSpec implements PortObjectSpec, SparkContextProv
      * @param sparkData
      */
     SparkDataPortObjectSpec(final SparkDataTable sparkData) {
+        super(sparkData.getContext());
         m_data = sparkData;
     }
 
