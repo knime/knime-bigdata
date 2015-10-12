@@ -55,7 +55,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      * @return
      */
     static SettingsModelBoolean createFetchAllModel() {
-        return new SettingsModelBoolean("fetchAll", true);
+        return new SettingsModelBoolean("fetchAll", false);
     }
 
     /**
@@ -63,8 +63,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      */
     static SettingsModelIntegerBounded createFetchSizeModel() {
         final SettingsModelIntegerBounded model =
-                new SettingsModelIntegerBounded("fetchSize", 1000, 1, Integer.MAX_VALUE);
-        model.setEnabled(false);
+                new SettingsModelIntegerBounded("fetchSize", 1000, 0, Integer.MAX_VALUE);
         return model;
     }
 
@@ -75,6 +74,10 @@ public class Spark2TableNodeModel extends SparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length != 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
+        }
+        if (!m_fetchAll.getBooleanValue()) {
+            //warn the user that we only retrieve the top k rows
+            setWarningMessage("Fetching only first " + m_fetchSize.getIntValue() + " rows");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         return new PortObjectSpec[] {spec.getTableSpec()};

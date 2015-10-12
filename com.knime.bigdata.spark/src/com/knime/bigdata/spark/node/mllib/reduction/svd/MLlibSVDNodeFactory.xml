@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
-	type="Learner" icon="icon.png">
+	type="Manipulator" icon="icon.png">
 	<name>Spark SVD</name>
 	<shortDescription>Singular value decomposition (SVD) in Spark.</shortDescription>
 	<fullDescription>
@@ -23,6 +23,7 @@
 		<option name="Compute U matrix">
 		  Select this option to compute the U matrix (left singular vectors).
 		</option>
+		<option name="Feature Columns">The feature columns to use during computation. Supports only numeric columns.</option>
 	</fullDescription>
 
 	<ports>

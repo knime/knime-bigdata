@@ -28,13 +28,14 @@ import javax.annotation.Nullable;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.jobserver.client.JobControler;
 import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
 import com.knime.bigdata.spark.jobserver.jobs.LogisticRegressionJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -46,6 +47,8 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
  * @author koetter, dwk
  */
 public class LinearLearnerTask implements Serializable {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(LinearLearnerTask.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -67,7 +70,7 @@ public class LinearLearnerTask implements Serializable {
 
     private final double m_regularization;
 
-    private final UpdaterType m_UpdaterType;
+    private final LinearRegularizerType m_UpdaterType;
 
     private final Boolean m_ValidateData;
 
@@ -75,7 +78,7 @@ public class LinearLearnerTask implements Serializable {
 
     private final Boolean m_UseFeatureScaling;
 
-    private final GradientType m_GradientType;
+    private final LinearLossFunctionTypeType m_GradientType;
 
     private final Double m_StepSize;
 
@@ -99,12 +102,14 @@ public class LinearLearnerTask implements Serializable {
      * @param aFraction
      */
     LinearLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final int classColIdx,
-        final int aNumIterations, final double aRegularization,
-        final UpdaterType aUpdaterType,
+        final int aNumIterations, final double aRegularization, final LinearRegularizerType aUpdaterType,
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
-        final GradientType aGradientType, final Double aStepSize,final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
+        final LinearLossFunctionTypeType aGradientType, final Double aStepSize,final Double aFraction,
+        final Class<? extends AbstractRegularizationJob> jobClass) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
-            true, null, null, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, aStepSize, aFraction, jobClass);
+            true, null, null, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, aStepSize,
+            aFraction, jobClass);
+        LOGGER.debug("Use SGD learner task");
     }
 
     /**
@@ -124,19 +129,21 @@ public class LinearLearnerTask implements Serializable {
      */
     LinearLearnerTask(final SparkRDD inputRDD, final Integer[] featureColIdxs, final int classColIdx,
         final int aNumIterations, final double aRegularization,
-        final Integer aNumCorrections, final Double aTolerance, final UpdaterType aUpdaterType,
+        final Integer aNumCorrections, final Double aTolerance, final LinearRegularizerType aUpdaterType,
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
-        final GradientType aGradientType, final Class<? extends AbstractRegularizationJob> jobClass) {
+        final LinearLossFunctionTypeType aGradientType, final Class<? extends AbstractRegularizationJob> jobClass) {
         this(inputRDD.getContext(), inputRDD.getID(), featureColIdxs, classColIdx, aNumIterations, aRegularization,
-            false, aNumCorrections, aTolerance, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling, aGradientType, null, null, jobClass);
+            false, aNumCorrections, aTolerance, aUpdaterType, aValidateData, aAddIntercept, aUseFeatureScaling,
+            aGradientType, null, null, jobClass);
+        LOGGER.debug("Use LBFGS learner task");
     }
 
     //unit testing constructor only
     LinearLearnerTask(final KNIMESparkContext aContext, final String aInputRDD, final Integer[] featureColIdxs,
         final int classColIdx, final int aNumIterations, final double aRegularization, final boolean aUseSGD,
-        @Nullable final Integer aNumCorrections, @Nullable final Double aTolerance, final UpdaterType aUpdaterType,
+        @Nullable final Integer aNumCorrections, @Nullable final Double aTolerance, final LinearRegularizerType aUpdaterType,
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
-        final GradientType aGradientType, @Nullable final Double aStepSize, @Nullable final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
+        final LinearLossFunctionTypeType aGradientType, @Nullable final Double aStepSize, @Nullable final Double aFraction, final Class<? extends AbstractRegularizationJob> jobClass) {
         m_numCorrections = aNumCorrections;
         m_tolerance = aTolerance;
         m_context = aContext;
@@ -203,9 +210,9 @@ public class LinearLearnerTask implements Serializable {
      */
     public static String paramsAsJason(final String aInputRDD, final Integer[] featureColIdxs,
         final Integer classColIdx, final Integer aNumIterations, final Double aRegularization, final Boolean aUseSGD,
-        @Nullable final Integer aNumCorrections, @Nullable final Double aTolerance, final UpdaterType aUpdaterType,
+        @Nullable final Integer aNumCorrections, @Nullable final Double aTolerance, final LinearRegularizerType aUpdaterType,
         final Boolean aValidateData, final Boolean aAddIntercept, final Boolean aUseFeatureScaling,
-        final GradientType aGradientType, @Nullable final Double aStepSize, @Nullable final Double aFraction)
+        final LinearLossFunctionTypeType aGradientType, @Nullable final Double aStepSize, @Nullable final Double aFraction)
         throws GenericKnimeSparkException {
         final List<Object> inputParams = new ArrayList<>();
         inputParams.add(KnimeSparkJob.PARAM_INPUT_TABLE);

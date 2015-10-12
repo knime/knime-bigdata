@@ -24,6 +24,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
@@ -38,29 +39,34 @@ import com.knime.bigdata.spark.node.mllib.MLlibNodeSettings;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class LinearMethodsNodeDialog extends NodeDialogPane {
 
     private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
 
     /**
+     * @param supportsLBFGS
      *
      */
-    public LinearMethodsNodeDialog() {
+    public LinearMethodsNodeDialog(final boolean supportsLBFGS) {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
-        gbc.gridx++;
-        panel.add(m_settings.getRegularizationComponent().getComponentPanel(), gbc);
-        gbc.gridx++;
+        panel.add(getGDAPanel(supportsLBFGS), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(getGLAPanel(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 1;
         panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
 
-        gbc.gridwidth=3;
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
@@ -71,6 +77,59 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         panel.add(colsPanel, gbc);
 
         addTab("Settings", panel);
+    }
+
+    protected JComponent getGDAPanel(final boolean supportsLBFGS) {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
+            .createEtchedBorder(), " Gradient Descent Optimizer Settings "));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(m_settings.getUpdaterTypeComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getRegularizationComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
+
+        if (supportsLBFGS) {
+            gbc.gridy++;
+            gbc.gridx = 0;
+            panel.add(m_settings.getOptimizationMethodComponent().getComponentPanel(), gbc);
+            gbc.gridx++;
+            panel.add(m_settings.getNoOfCorrectionsComponent().getComponentPanel(), gbc);
+            gbc.gridx++;
+            panel.add(m_settings.getToleranceComponent().getComponentPanel(), gbc);
+        }
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(m_settings.getGradientTypeComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getStepSizeComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getFractionComponent().getComponentPanel(), gbc);
+        return panel;
+    }
+
+    protected JComponent getGLAPanel() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
+            .createEtchedBorder(), " Algorithm Settings "));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridy++;
+        panel.add(m_settings.getUseFeatureScalingComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getAddInterceptComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
+        panel.add(m_settings.getValidateDataComponent().getComponentPanel(), gbc);
+        return panel;
     }
 
     /**

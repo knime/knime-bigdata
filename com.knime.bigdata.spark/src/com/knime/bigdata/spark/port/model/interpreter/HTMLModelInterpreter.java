@@ -46,14 +46,14 @@ implements SparkModelInterpreter<M> {
      * {@inheritDoc}
      */
     @Override
-    public JComponent[] getViews(final M model) {
-        final String htmlDesc = getHTMLDescription(model);
-        return new JComponent[] {new HTMLModelView(model, htmlDesc)};
+    public JComponent[] getViews(final M sparkModel) {
+        final String htmlDesc = getHTMLDescription(sparkModel);
+        return new JComponent[] {new HTMLModelView(sparkModel, htmlDesc)};
     }
 
     /**
-     * @param model the {@link SparkModel}
+     * @param sparkModel the {@link SparkModel}
      * @return the HTML description of the model
      */
-    protected abstract String getHTMLDescription(M model);
+    protected abstract String getHTMLDescription(M sparkModel);
 }

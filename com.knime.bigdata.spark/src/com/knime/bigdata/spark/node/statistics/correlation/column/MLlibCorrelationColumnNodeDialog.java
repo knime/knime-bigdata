@@ -47,8 +47,10 @@ import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMetho
  * @author koetter
  */
 public class MLlibCorrelationColumnNodeDialog extends NodeDialogPane {
+    @SuppressWarnings("unchecked")
     private final DialogComponent m_col1 = new DialogComponentColumnNameSelection(
         MLlibCorrelationColumnNodeModel.createCol1Model(), "Column 1: ", 0, DoubleValue.class);
+    @SuppressWarnings("unchecked")
     private final DialogComponent m_col2 = new DialogComponentColumnNameSelection(
         MLlibCorrelationColumnNodeModel.createCol2Model(), "Column 2: ", 0, DoubleValue.class);
     private final DialogComponent m_method = new DialogComponentButtonGroup(

@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.preproc.joiner;
 
+import java.util.List;
+
 import org.knime.base.node.preproc.joiner.Joiner;
 import org.knime.base.node.preproc.joiner.Joiner2Settings;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
@@ -96,8 +98,20 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final Joiner joiner = new Joiner(leftSpec, rightSpec, m_settings);
         final Integer[] leftJoinColumns = SparkUtil.getColumnIndices(leftSpec, m_settings.getLeftJoinColumns());
         final Integer[] rightJoinColumns = SparkUtil.getColumnIndices(rightSpec, m_settings.getRightJoinColumns());
-        final Integer[] leftIncludCols = SparkUtil.getColumnIndices(leftSpec, joiner.getLeftIncluded(leftSpec));
-        final Integer[] rightIncludCols = SparkUtil.getColumnIndices(rightSpec, joiner.getRightIncluded(leftSpec));
+        final List<String> leftIncluded = joiner.getLeftIncluded(leftSpec);
+        final Integer[] leftIncludCols;
+//        if (leftIncluded == null || leftIncluded.isEmpty()) {
+//            leftIncludCols = new Integer[0];
+//        } else {
+            leftIncludCols = SparkUtil.getColumnIndices(leftSpec, leftIncluded);
+//        }
+        final List<String> rightIncluded = joiner.getRightIncluded(rightSpec);
+        final Integer[] rightIncludCols;
+//        if (rightIncluded == null || rightIncluded.isEmpty()) {
+//            rightIncludCols = new Integer[0];
+//        } else {
+            rightIncludCols = SparkUtil.getColumnIndices(rightSpec, rightIncluded);
+//        }
         final JoinMode joinMode = m_settings.getJoinMode();
         final DataTableSpec outputSpec = joiner.getOutputSpec();
         final String resultRDDName = SparkIDs.createRDDID();

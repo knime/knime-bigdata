@@ -35,7 +35,7 @@ public class GradientBoostedTreesTaskTest extends SparkWithJobServerSpec {
 			final Integer classColIdx, final Long aNrOfClasses,
 			final int maxDepth, final int maxNoOfBins,
 			final Integer aNumIterations, final double aLearningRate,
-			final boolean aIsClassification, final EnumContainer.LossFunctions aLossFunction)
+			final boolean aIsClassification, final EnumContainer.EnsembleLossesType aLossFunction)
 			throws GenericKnimeSparkException {
 		return GradientBoostedTreesTask.paramsAsJason(aInputRDD,
 				featureColIdxs, nominalFeatureInfo, classColIdx, aNrOfClasses,

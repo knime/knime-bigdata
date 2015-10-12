@@ -10,8 +10,8 @@ import org.junit.Test;
 import com.knime.bigdata.spark.SparkWithJobServerSpec;
 import com.knime.bigdata.spark.jobserver.jobs.ImportKNIMETableJobTest;
 import com.knime.bigdata.spark.jobserver.jobs.LogisticRegressionJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.GradientType;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.UpdaterType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearLossFunctionTypeType;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.LinearRegularizerType;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
@@ -40,15 +40,15 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 			final Double aTolerance) throws GenericKnimeSparkException {
 		return LinearLearnerTask.paramsAsJason(aInputRDD, featureColIdxs,
 				classColIdx, aNumIterations, aRegularization, aUseSGD,
-				aNumCorrections, aTolerance, UpdaterType.L1Updater, true,
-				false, true, GradientType.LeastSquaresGradient, 0.6, 0.9);
+				aNumCorrections, aTolerance, LinearRegularizerType.L1, true,
+				false, true, LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9);
 	}
 
 	// PARAM_UPDATER_TYPE,PARAM_VALIDATE_DATA,PARAM_ADD_INTERCEPT ,
 	// PARAM_USE_FEATURE_SCALING,PARAM_STEP_SIZE,PARAM_GRADIENT_TYPE,PARAM_FRACTION
-	public static String paramsAsJason(final UpdaterType aUpdaterType,
+	public static String paramsAsJason(final LinearRegularizerType aUpdaterType,
 			final Boolean aValidateData, final Boolean aAddIntercept,
-			final Boolean aUseFeatureScaling, final GradientType aGradientType,
+			final Boolean aUseFeatureScaling, final LinearLossFunctionTypeType aGradientType,
 			final Double aStepSize, final Double aFraction)
 			throws GenericKnimeSparkException {
 		return LinearLearnerTask.paramsAsJason("in",
@@ -61,8 +61,8 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 	public void ensureThatAllRequiredParametersAreSet() throws Throwable {
 		final LinearLearnerTask testObj = new LinearLearnerTask(null,
 				"inputRDD", new Integer[] { 0, 1 }, 1, 23, 0.4d, false, 5,
-				0.4d, UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9, LogisticRegressionJob.class);
+				0.4d, LinearRegularizerType.L1, true, false, true,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9, LogisticRegressionJob.class);
 		final String params = testObj.learnerDef();
 		final JobConfig config = new JobConfig(
 				ConfigFactory.parseString(params));
@@ -86,8 +86,8 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 		// data must be entirely numeric!
 		final Integer[] cols = new Integer[] { 0, 2, 1 };
 		final LinearLearnerTask testObj = new LinearLearnerTask(
-				CONTEXT_ID, "tab1", cols, 3, 29, 0.4d, false, 5, 0.2d, UpdaterType.L1Updater, true, false, true,
-				GradientType.LeastSquaresGradient, null, null, LogisticRegressionJob.class);
+				CONTEXT_ID, "tab1", cols, 3, 29, 0.4d, false, 5, 0.2d, LinearRegularizerType.L1, true, false, true,
+				LinearLossFunctionTypeType.LeastSquares, null, null, LogisticRegressionJob.class);
 
 		final Serializable model = testObj.execute(null);
 		assertTrue(model != null);
@@ -109,8 +109,8 @@ public class LogisticRegressionTaskTest extends SparkWithJobServerSpec {
 		// data must be entirely numeric!
 		final Integer[] cols = new Integer[] { 0, 2, 1 };
 		final LinearLearnerTask testObj = new LinearLearnerTask(
-				CONTEXT_ID, "tab1", cols, 3, 15, 0.4d, true, null, null, UpdaterType.SquaredL2Updater, true, false, true,
-				GradientType.LeastSquaresGradient, 0.6, 0.9, LogisticRegressionJob.class);
+				CONTEXT_ID, "tab1", cols, 3, 15, 0.4d, true, null, null, LinearRegularizerType.L2, true, false, true,
+				LinearLossFunctionTypeType.LeastSquares, 0.6, 0.9, LogisticRegressionJob.class);
 
 		final Serializable model = testObj.execute(null);
 		assertTrue(model != null);

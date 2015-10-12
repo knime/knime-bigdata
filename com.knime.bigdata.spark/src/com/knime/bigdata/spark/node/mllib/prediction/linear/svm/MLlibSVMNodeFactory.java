@@ -22,32 +22,19 @@ package com.knime.bigdata.spark.node.mllib.prediction.linear.svm;
 
 import org.apache.spark.mllib.classification.SVMModel;
 
-import com.knime.bigdata.spark.jobserver.jobs.AbstractRegularizationJob;
 import com.knime.bigdata.spark.jobserver.jobs.SVMLearnerJob;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.AbstractLinearMethodsNodeFactory;
-import com.knime.bigdata.spark.port.model.SparkModel;
-import com.knime.bigdata.spark.port.model.interpreter.SparkModelInterpreter;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class MLlibSVMNodeFactory extends AbstractLinearMethodsNodeFactory<SVMModel> {
 
     /**
-     * {@inheritDoc}
+     * Constructor.
      */
-    @Override
-    protected SparkModelInterpreter<SparkModel<SVMModel>> getModelInterpreter() {
-        return MLlibSVMInterpreter.getInstance();
+    public MLlibSVMNodeFactory() {
+        super(MLlibSVMInterpreter.getInstance(), SVMLearnerJob.class, false);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Class<? extends AbstractRegularizationJob> getJobClassPath() {
-        return SVMLearnerJob.class;
-    }
-
 }

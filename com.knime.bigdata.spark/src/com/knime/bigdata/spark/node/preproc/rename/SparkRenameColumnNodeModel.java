@@ -83,7 +83,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
      */
     protected SparkRenameColumnNodeModel() {
 
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE}, false);
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE}, false, false);
     }
 
     /**

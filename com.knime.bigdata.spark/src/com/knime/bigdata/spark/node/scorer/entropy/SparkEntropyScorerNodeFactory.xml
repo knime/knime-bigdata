@@ -8,7 +8,7 @@
 	<fullDescription>
 		<intro>
 			Scorer for clustering results given a reference clustering.
-			Connect the table containing a column with the reference cluster IDs
+			Connect the Spark RDD containing a column with the reference cluster IDs
 			as well as a column containing the clustering results to
 			the input port. The respective columns can be selected in the dialog.
 			After successful execution, the view will show entropy values (the smaller the better) and a
@@ -21,12 +21,10 @@
 			, section 6: "Experimental results").
 		</intro>
 		<option name="Reference column">
-			Column containing the reference clustering. This column is
-			provided by the first input table.
+			Column containing the reference clustering.
 		</option>
 		<option name="Clustering column">
-			Column containing the cluster IDs to evaluate. This column
-			is provided by the second input table.
+			Column containing the cluster IDs to evaluate.
 		</option>
 	</fullDescription>
 	<ports>

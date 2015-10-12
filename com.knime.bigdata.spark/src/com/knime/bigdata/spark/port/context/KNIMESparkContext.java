@@ -454,18 +454,26 @@ public class KNIMESparkContext implements Serializable {
      */
     public String getHTMLDescription() {
         StringBuilder buf = new StringBuilder();
-        buf.append("<strong>Job Server</strong><hr>");
-        buf.append("<strong>Host:</strong>&nbsp;&nbsp;<tt>" + getHost() + "</tt><br>");
-        buf.append("<strong>Protocol:</strong>&nbsp;&nbsp;<tt>" + getProtocol() + "</tt><br>");
-        buf.append("<strong>Port:</strong>&nbsp;&nbsp;<tt>" + getPort() + "</tt><br>");
-        buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + getUser() + "</tt><br><br>");
-        buf.append("<strong>Context</strong><hr>");
-        buf.append("<strong>ID:</strong>&nbsp;&nbsp;<tt>" + getContextName() + "</tt><br>");
+        buf.append("<strong>KNIME Settings</strong><hr>");
+        buf.append("<strong>Job timeout:</strong>&nbsp;&nbsp;<tt>" + getJobTimeout() + " seconds</tt><br>");
+        buf.append("<strong>Job check frequency:</strong>&nbsp;&nbsp;<tt>" + getJobCheckFrequency() + " seconds</tt><br>");
+        buf.append("<strong>Delete RDDs on dispose:</strong>&nbsp;&nbsp;<tt>" + deleteRDDsOnDispose() + "</tt><br>");
+
+        buf.append("<br>");
+        buf.append("<strong>Context Settings</strong><hr>");
+        buf.append("<strong>Context name:</strong>&nbsp;&nbsp;<tt>" + getContextName() + "</tt><br>");
+        buf.append("<strong>Memory:</strong>&nbsp;&nbsp;<tt>" + getMemPerNode() + "</tt><br>");
         buf.append("<strong>Number of cores:</strong>&nbsp;&nbsp;<tt>");
         final int numCpuCores = getNumCpuCores();
         buf.append(numCpuCores < 0 ? "unknown" : numCpuCores);
         buf.append("</tt><br>");
-        buf.append("<strong>Memory:</strong>&nbsp;&nbsp;<tt>" + getMemPerNode() + "</tt><br>");
+
+        buf.append("<br>");
+        buf.append("<strong>Job Server Settings</strong><hr>");
+        buf.append("<strong>Protocol:</strong>&nbsp;&nbsp;<tt>" + getProtocol() + "</tt><br>");
+        buf.append("<strong>Host:</strong>&nbsp;&nbsp;<tt>" + getHost() + "</tt><br>");
+        buf.append("<strong>Port:</strong>&nbsp;&nbsp;<tt>" + getPort() + "</tt><br>");
+        buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + getUser() + "</tt>");
         return buf.toString();
     }
 
@@ -474,6 +482,13 @@ public class KNIMESparkContext implements Serializable {
      */
     public RestClient getREST() {
         return m_restClient;
+    }
+
+    /**
+     * @return the supported job server protocols
+     */
+    public static String[] getSupportedProtocols() {
+        return new String[] {"http", "https"};
     }
 
 }

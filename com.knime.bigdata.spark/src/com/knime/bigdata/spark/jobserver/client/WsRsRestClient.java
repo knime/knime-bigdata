@@ -119,6 +119,10 @@ class WsRsRestClient implements IRestClient {
                 throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. Reason: "
                     + s.getReasonPhrase() + ". This might be caused by missing or incorrect job parameters."
                     + " For more details see the KNIME log file.");
+            case 404:
+                throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. "
+                    + "Reset all Spark nodes and try again. Spark application context not properly initialized. "
+                    + "Server response: " + s.getReasonPhrase() + ". ");
             case 500:
                 throw new GenericKnimeSparkException("Executing Spark job '" + className + "' failed. Reason: "
                     + s.getReasonPhrase()

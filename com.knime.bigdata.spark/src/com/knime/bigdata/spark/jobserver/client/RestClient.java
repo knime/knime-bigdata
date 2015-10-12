@@ -1,5 +1,7 @@
 package com.knime.bigdata.spark.jobserver.client;
 
+import java.util.Arrays;
+
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
@@ -82,7 +84,7 @@ public class RestClient {
             LOGGER.debug("Rest checkStatus");
             LOGGER.debug("Response: " + response);
             LOGGER.debug("ErrorMsg: " + aErrorMsg);
-            LOGGER.debug("Expected stati: " + aStatus);
+            LOGGER.debug("Expected stati: " + Arrays.toString(aStatus));
         }
         client.checkStatus(response, aErrorMsg, aStatus);
     }
@@ -104,7 +106,7 @@ public class RestClient {
             LOGGER.debug("Rest post");
             LOGGER.debug("Context: " + aContextContainer);
             LOGGER.debug("Path: " + aPath);
-            LOGGER.debug("Args: " + aArgs);
+            LOGGER.debug("Args: " + Arrays.toString(aArgs));
             LOGGER.debug("Entity: " + aEntity);
         }
         return client.post(aContextContainer, aPath, aArgs, aEntity);

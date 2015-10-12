@@ -43,16 +43,16 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
 
-import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
+import com.knime.bigdata.spark.port.context.SparkContextPortObject;
 import com.knime.bigdata.spark.util.SparkDataTableCreator;
 
 /**
@@ -60,7 +60,7 @@ import com.knime.bigdata.spark.util.SparkDataTableCreator;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDataPortObject implements PortObject, SparkContextProvider {
+public class SparkDataPortObject extends SparkContextPortObject {
 
     //TODO: Should extendSparkContextPortObject
 
@@ -69,11 +69,13 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
     /**
      * Database port type.
      */
+    @SuppressWarnings("hiding")
     public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(SparkDataPortObject.class);
 
     /**
      * Database type for optional ports.
      */
+    @SuppressWarnings("hiding")
     public static final PortType TYPE_OPTIONAL =
         PortTypeRegistry.getInstance().getPortType(SparkDataPortObject.class, true);
 
@@ -106,6 +108,7 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
      * @param data
      */
     public SparkDataPortObject(final SparkDataTable data) {
+        super(data.getContext());
         m_data = data;
     }
 
@@ -123,8 +126,8 @@ public class SparkDataPortObject implements PortObject, SparkContextProvider {
     @Override
     public String getSummary() {
         StringBuilder buf = new StringBuilder();
-        buf.append("Cols " + getTableSpec().getNumColumns()
-            + "Context " + getContext().getContextName() + " ID " + getData().getID());
+        buf.append("Cols: " + getTableSpec().getNumColumns()
+            + " Context: " + getContext().getContextName() + " ID: " + getData().getID());
         return buf.toString();
     }
 

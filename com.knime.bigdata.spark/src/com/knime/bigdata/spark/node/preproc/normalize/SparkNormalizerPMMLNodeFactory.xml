@@ -6,9 +6,7 @@
     <shortDescription>Normalizes the attributes of a Spark RDD.</shortDescription>
     <fullDescription>
         <intro>
-	        This node normalizes the values of all (numeric) columns. In the
-			dialog, you can choose the columns you want to work on.
-			The following normalization methods are available in the dialog:
+	        This node normalizes the values of all selected (numeric) columns.
 		</intro>
 		<option name="Min-max normalization">
 			Linear transformation of all values such that the minimum and maximum 

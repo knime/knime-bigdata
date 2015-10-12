@@ -40,7 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import com.knime.bigdata.spark.jobserver.jobs.AbstractTreeLearnerJob;
-import com.knime.bigdata.spark.jobserver.server.EnumContainer.LossFunctions;
+import com.knime.bigdata.spark.jobserver.server.EnumContainer.EnsembleLossesType;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
 
 /**
@@ -54,7 +54,7 @@ public class GradientBoostedTreeSettings extends DecisionTreeSettings {
     private final SettingsModelDouble m_learningRate = new SettingsModelDoubleBounded("learningRate", 0.1, 0, 1);
 
     private final SettingsModelString m_lossFunction =
-            new SettingsModelString("lossFunction", LossFunctions.LogLoss.name());
+            new SettingsModelString("lossFunction", EnsembleLossesType.LogLoss.name());
 
     private final SettingsModel[] m_models =  new SettingsModel[] {m_noOfIterations, m_lossFunction, m_learningRate};
 
@@ -62,8 +62,8 @@ public class GradientBoostedTreeSettings extends DecisionTreeSettings {
             new DialogComponentNumber(getNoOfIterationsModel(), "Number of iterations", 5, 5);
 
     private final DialogComponent m_lossFunctionComponent = new DialogComponentStringSelection(
-        getLossFunctionModel(), "Loss function", LossFunctions.AbsoluteError.name(),
-        LossFunctions.LogLoss.name(), LossFunctions.SquaredError.name());
+        getLossFunctionModel(), "Loss function", EnsembleLossesType.AbsoluteError.name(),
+        EnsembleLossesType.LogLoss.name(), EnsembleLossesType.SquaredError.name());
 
     private final DialogComponent m_learningRateComponent =
             new DialogComponentNumber(getLearningRateModel(), "Learning rate", 0.01);
@@ -90,11 +90,11 @@ public class GradientBoostedTreeSettings extends DecisionTreeSettings {
     }
 
     /**
-     * @return the {@link LossFunctions}
+     * @return the {@link EnsembleLossesType}
      */
-    public LossFunctions getLossFunction() {
+    public EnsembleLossesType getLossFunction() {
         final String stategy = m_lossFunction.getStringValue();
-        return LossFunctions.valueOf(stategy);
+        return EnsembleLossesType.valueOf(stategy);
     }
 
     /**
