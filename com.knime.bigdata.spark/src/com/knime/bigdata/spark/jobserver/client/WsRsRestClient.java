@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.stream.JsonParsingException;
 import javax.net.ssl.HostnameVerifier;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -256,7 +257,11 @@ class WsRsRestClient implements IRestClient {
         throws GenericKnimeSparkException {
         final Invocation.Builder builder = getInvocationBuilder(aContextContainer, aType, null);
         final Response response = builder.get();
-        return Json.createReader(new StringReader(responseToString(response))).readObject();
+        try{
+            return Json.createReader(new StringReader(responseToString(response))).readObject();
+        } catch (JsonParsingException e) {
+            throw new GenericKnimeSparkException("Unexpected exception while parsing job server resonse. Exception: " + e.getMessage(), e);
+        }
     }
 
     private static String responseToString(final Response response) throws GenericKnimeSparkException {
@@ -288,10 +293,12 @@ class WsRsRestClient implements IRestClient {
     @Override
     public String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
         throws GenericKnimeSparkException {
-
-        JsonObject jsonObject = Json.createReader(new StringReader(responseToString(response))).readObject();
-        JsonObject myResponse = jsonObject.getJsonObject(aField);
-
-        return myResponse.getString(aSubField);
+        try {
+            JsonObject jsonObject = Json.createReader(new StringReader(responseToString(response))).readObject();
+            JsonObject myResponse = jsonObject.getJsonObject(aField);
+            return myResponse.getString(aSubField);
+        } catch (JsonParsingException e) {
+            throw new GenericKnimeSparkException("Unexpected exception while parsing job server resonse. Exception: " + e.getMessage(), e);
+        }
     }
 }
