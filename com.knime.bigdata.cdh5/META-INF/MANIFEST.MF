@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Cloudera CDH5 Libraries
 Bundle-SymbolicName: com.knime.bigdata.cdh5;singleton:=true
-Bundle-Version: 5.1.0.qualifier
+Bundle-Version: 5.1.100.qualifier
 Bundle-ClassPath: knime-cdh5.jar,
  lib/apacheds-i18n-2.0.0-M15.jar,
  lib/apacheds-kerberos-codec-2.0.0-M15.jar,
