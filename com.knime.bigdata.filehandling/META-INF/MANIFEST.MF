@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data File Handling
 Bundle-SymbolicName: com.knime.bigdata.filehandling;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.100.qualifier
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.hdfs.filehandler
 Require-Bundle: com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
