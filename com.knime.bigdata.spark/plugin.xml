@@ -186,8 +186,8 @@
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
-            factory-class="com.knime.bigdata.spark.node.pmml.predictor.SparkPMMLPredictorNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.predictor.SparkPMMLPredictorNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.pmml.predictor.compiled.SparkPMMLPredictorNodeFactory"
+            id="com.knime.bigdata.spark.node.pmml.predictor.compiled.SparkPMMLPredictorNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/io/db"
