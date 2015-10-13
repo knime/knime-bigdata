@@ -28,7 +28,7 @@
             path="/toolintegration">
       </category>
       <category
-            icon="icons/category_io.png"
+            icon="icons/category_reader.png"
             level-id="io"
             locked="true"
             name="IO"
@@ -42,7 +42,7 @@
             path="/toolintegration/spark/column">
       </category>
       <category
-            icon="icons/category_learner.gif"
+            icon="icons/category_mining.png"
             level-id="mining"
             locked="true"
             name="Mining"
@@ -400,6 +400,12 @@
             factory-class="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory"
             id="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory">
       </node>
+      <node
+            category-path="/toolintegration/spark/mining/pmml"
+            deprecated="false"
+            factory-class="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory"
+            id="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory">
+      </node>
     </extension>
    <extension
          point="com.knime.bigdata.spark.TemplateRepository">
@@ -423,6 +429,7 @@
             specSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec$SpecSerializer">
       </portType>
       <portType
+            color="#000000"
             hidden="false"
             name="Spark Data"
             objectClass="com.knime.bigdata.spark.port.data.SparkDataPortObject"
@@ -431,6 +438,7 @@
             specSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec$Serializer">
       </portType>
       <portType
+            color="#7DBDFF"
             hidden="false"
             name="Spark Model"
             objectClass="com.knime.bigdata.spark.port.model.SparkModelPortObject"
