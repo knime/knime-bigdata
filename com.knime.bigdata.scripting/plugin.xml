@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/scripting/python"
+            factory-class="com.knime.bigdata.scripting.nodes.python.hive.PythonScriptHiveNodeFactory"
+            id="com.knime.bigdata.scripting.nodes.python.hive.PythonScriptHiveNodeFactory">
+      </node>
+   </extension>
+</plugin>

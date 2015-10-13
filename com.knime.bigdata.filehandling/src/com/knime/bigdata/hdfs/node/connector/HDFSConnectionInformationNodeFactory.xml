@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
+    icon="./hdfsconnection16x16.png" type="Source">
+    <name>HDFS Connection</name>
+
+    <shortDescription>
+        Configures the connection information used to connect to a
+        remote host.
+    </shortDescription>
+
+    <fullDescription>
+        <intro>
+            This node configures the connection information that will be used to
+            connect to a remote host.
+        </intro>
+
+        <option name="Host">
+            Address of the host.
+        </option>
+        <option name="Port">
+            Port of the service.
+        </option>
+        <option name="Authentication">
+            Method of authentication.
+            <br/>
+            <b>None</b>
+            <br/>
+            Do not authenticate.
+            <br />
+            <b>Password</b>
+            <br />
+            Use username and password to authenticate.
+        </option>
+        <option name="Workflow credentials">
+            Use workflow credentials to determine user
+            and password.
+        </option>
+        <option name="User">
+            Name of the user.
+        </option>
+        <option name="Password">
+            Password of the user or to the keyfile, if
+            authentication via keyfile is
+            selected.
+        </option>
+        <option name="Test connection">
+            Open dialog that test the current connection.
+        </option>
+    </fullDescription>
+
+    <ports>
+        <outPort name="HDFS Connection information port" index="0">
+            Port object containing the HDFS connection information.
+        </outPort>
+    </ports>
+</knimeNode>
