@@ -42,6 +42,6 @@ public enum JobStatus {
 	 * @return true if given status is neither unknown nor error
 	 */
 	public static boolean isErrorStatus(final JobStatus aStatus) {
-	    return aStatus == ERROR || aStatus == UNKNOWN;
+	    return aStatus == ERROR || aStatus == UNKNOWN || aStatus == GONE;
 	}
 }
