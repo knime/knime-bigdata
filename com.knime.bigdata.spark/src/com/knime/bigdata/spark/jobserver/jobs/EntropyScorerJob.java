@@ -34,6 +34,9 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.api.java.Row;
 
+import scala.Tuple2;
+import spark.jobserver.SparkJobValidation;
+
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData;
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData.ClusterScore;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -43,9 +46,6 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-
-import scala.Tuple2;
-import spark.jobserver.SparkJobValidation;
 
 /**
  * computes cluster some entropy and quality values for clustering results given a reference clustering.
@@ -219,7 +219,7 @@ public class EntropyScorerJob extends KnimeSparkJob implements Serializable {
      * @param cluster the single cluster to score
      * @return the (not-normalized) entropy of <code>pats</code> wrt. <code>ref</code>
      */
-    private static double clusterEntropy(final Map<Object, Integer> cluster, final int size) {
+    static double clusterEntropy(final Map<Object, Integer> cluster, final int size) {
 
         double e = 0.0;
         for (int clusterCount : cluster.values()) {

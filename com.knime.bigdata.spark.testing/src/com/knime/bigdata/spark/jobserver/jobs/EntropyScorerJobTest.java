@@ -15,7 +15,7 @@ import com.knime.bigdata.spark.LocalSparkSpec;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
-import com.knime.bigdata.spark.node.scorer.accuracy.EntropyScorerTaskTest;
+import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerTaskTest;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -75,7 +75,7 @@ public class EntropyScorerJobTest extends LocalSparkSpec {
 
 	@Test
 	public void entropyOfTrivialClusterShouldBe0() throws Throwable {
-		Map<Integer, Integer> cluster = new HashMap<>();
+		Map<Object, Integer> cluster = new HashMap<>();
 		cluster.put(0, 3);
 		Map<RowKey, RowKey> ref = new HashMap<>();
 
@@ -94,7 +94,7 @@ public class EntropyScorerJobTest extends LocalSparkSpec {
 
 	@Test
 	public void entropyOfNonTrivialCluster() throws Throwable {
-		Map<Integer, Integer> cluster = new HashMap<>();
+		Map<Object, Integer> cluster = new HashMap<>();
 		cluster.put(0, 3);
 		cluster.put(1, 1);
 		cluster.put(2, 1);
@@ -118,41 +118,6 @@ public class EntropyScorerJobTest extends LocalSparkSpec {
 				EntropyScorerJob.clusterEntropy(cluster, 5), 0.000001d);
 	}
 
-	@Test
-	public void computeScoresForSomeCluster() throws Throwable {
-
-		Object[][] data = new Object[][] { { 1, 0d, 0d }, { 2, 0d, 1d },
-				{ 3, 1d, 3d }, { 4, 1d, 1d }, { 5, 2d, 2d }, { 6, 2d, 2d },
-				{ 7, 3d, 3d }, { 8, 3d, 1d }, { 9, 4d, 0d }, { 10, 4d, 0d }, };
-
-		Map<RowKey, RowKey> reference = new HashMap<>();
-		Map<RowKey, Set<RowKey>> clusterMap = new HashMap<>();
-
-		EntropyScorerTaskTest.table2RowKeys(data, reference, clusterMap);
-
-		Map<Integer, Map<Integer, Integer>> clusters = new HashMap<>();
-		Map<Integer, Integer> c0 = new HashMap<>();
-		Map<Integer, Integer> c1 = new HashMap<>();
-		Map<Integer, Integer> c2 = new HashMap<>();
-		Map<Integer, Integer> c3 = new HashMap<>();
-		c0.put(0, 1);
-		c0.put(4, 2);
-		c1.put(0, 1);
-		c1.put(1, 1);
-		c1.put(3, 1);
-		c2.put(2, 2);
-		c3.put(1, 1);
-		c3.put(3, 1);
-
-		clusters.put(0, c0);
-		clusters.put(1, c1);
-		clusters.put(2, c2);
-		clusters.put(3, c3);
-
-		double entropyScore = EntropyScorerJob.entropy(clusters);
-		assertEquals("entropy, ", getEntropy(reference, clusterMap),
-				entropyScore, 0.00001d);
-	}
 
 	static double getEntropy(final Map<RowKey, RowKey> reference,
 			final Map<RowKey, Set<RowKey>> clusterMap) {
