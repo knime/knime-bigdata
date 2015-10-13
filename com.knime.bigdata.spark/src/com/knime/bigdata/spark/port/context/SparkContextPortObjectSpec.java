@@ -56,24 +56,4 @@ public class SparkContextPortObjectSpec extends SparkContextPortObjectHelper imp
             return new SparkContextPortObjectSpec(context);
         }
     }
-
-    /**
-     * Serializer used to save {@link SparkContextPortObjectSpec}s.
-     * @return a new serializer
-     */
-    public static PortObjectSpecSerializer<SparkContextPortObjectSpec> getPortObjectSpecSerializer() {
-        return new PortObjectSpecSerializer<SparkContextPortObjectSpec>() {
-            @Override
-            public void savePortObjectSpec(final SparkContextPortObjectSpec portObjectSpec,
-                final PortObjectSpecZipOutputStream out)
-                throws IOException {
-                SparkContextPortObjectHelper.save(portObjectSpec.getContext(), out);
-            }
-            @Override
-            public SparkContextPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
-                KNIMESparkContext context = SparkContextPortObjectHelper.load(in);
-                return new SparkContextPortObjectSpec(context);
-            }
-        };
-    }
 }
