@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.predictor;
+package com.knime.bigdata.spark.node.pmml.predictor.compiling;
 
 import java.awt.Dimension;
 
@@ -41,14 +41,14 @@ import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
  *
  * @author koetter
  */
-public class SparkPMMLPredictorNodeFactory extends NodeFactory<SparkPMMLPredictorNodeModel> {
+public class SparkPMMLCompilingPredictorNodeFactory extends NodeFactory<SparkPMMLCompilingPredictorNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkPMMLPredictorNodeModel createNodeModel() {
-        return new SparkPMMLPredictorNodeModel();
+    public SparkPMMLCompilingPredictorNodeModel createNodeModel() {
+        return new SparkPMMLCompilingPredictorNodeModel();
     }
 
     /**
@@ -63,8 +63,8 @@ public class SparkPMMLPredictorNodeFactory extends NodeFactory<SparkPMMLPredicto
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SparkPMMLPredictorNodeModel>
-        createNodeView(final int viewIndex, final SparkPMMLPredictorNodeModel nodeModel) {
+    public NodeView<SparkPMMLCompilingPredictorNodeModel>
+        createNodeView(final int viewIndex, final SparkPMMLCompilingPredictorNodeModel nodeModel) {
         return null;
     }
 
@@ -81,7 +81,7 @@ public class SparkPMMLPredictorNodeFactory extends NodeFactory<SparkPMMLPredicto
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new PredictorNodeDialog(SparkPMMLPredictorNodeModel.createOutputProbabilitiesSettingsModel()) {
+        return new PredictorNodeDialog(SparkPMMLCompilingPredictorNodeModel.createOutputProbabilitiesSettingsModel()) {
             {
                 getPanel().setPreferredSize(new Dimension(510, 200));
             }

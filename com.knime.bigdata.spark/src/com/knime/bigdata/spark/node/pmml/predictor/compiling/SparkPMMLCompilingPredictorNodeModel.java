@@ -18,12 +18,17 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.predictor;
+package com.knime.bigdata.spark.node.pmml.predictor.compiling;
+
+import javax.xml.transform.SourceLocator;
 
 import org.knime.base.node.mine.util.PredictorHelper;
+import org.knime.base.pmml.translation.PMMLTranslator;
+import org.knime.base.pmml.translation.TerminatingMessageException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -31,20 +36,33 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
+import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
+import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
 import com.knime.bigdata.spark.node.SparkNodeModel;
+import com.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionTask;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.knime.bigdata.spark.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
+import net.sf.saxon.s9api.MessageListener;
+import net.sf.saxon.s9api.XdmNode;
+
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
-public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
+public class SparkPMMLCompilingPredictorNodeModel extends SparkNodeModel
+implements MessageListener {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkPMMLCompilingPredictorNodeModel.class);
+    /**The name of the java package.*/
+    private static final String PACKAGE_NAME = "";
+    /**The name of the java class.*/
+    private static final String MODEL_NAME = "MainModel";
 
     private static final String CFG_KEY_OUTPROP = "outProp";
 
@@ -59,8 +77,8 @@ public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
     /**
      *
      */
-    public SparkPMMLPredictorNodeModel() {
-        super(new PortType[]{CompiledModelPortObject.TYPE, SparkDataPortObject.TYPE},
+    public SparkPMMLCompilingPredictorNodeModel() {
+        super(new PortType[]{PMMLPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
     }
 
@@ -77,11 +95,8 @@ public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec) inSpecs[0];
-        final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
-        final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(sparkSpec.getTableSpec(), cms,
-            m_predColName.getStringValue(), m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContext(), resultSpec)};
+//        final PMMLPortObjectSpec cms = (PMMLPortObjectSpec) inSpecs[0];
+        return new PortObjectSpec[] {null};
     }
 
     /**
@@ -89,16 +104,38 @@ public class SparkPMMLPredictorNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final CompiledModelPortObject pmml = (CompiledModelPortObject)inObjects[0];
+        final PMMLPortObject pmml = (PMMLPortObject)inObjects[0];
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
-        final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
-        final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
-            m_predColName.getStringValue(), m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
-        final String aOutputTableName = SparkIDs.createRDDID();
-        final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
-        final PMMLPredictionTask assignTask = new PMMLPredictionTask(m_outputProbabilities.getBooleanValue());
-        assignTask.execute(exec, data.getData(), pmml, colIdxs, aOutputTableName);
-        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
+        final String doc = pmml.getPMMLValue().toString();
+        try {
+            final String code = PMMLTranslator.generateJava(doc, this, PACKAGE_NAME, MODEL_NAME);
+            CompiledModelPortObject cm = new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME, JavaCodeCompiler.JavaVersion.JAVA_7);
+            final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)cm.getSpec();
+            final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
+                m_predColName.getStringValue(), m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
+            final String aOutputTableName = SparkIDs.createRDDID();
+            final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
+            final PMMLPredictionTask assignTask = new PMMLPredictionTask(m_outputProbabilities.getBooleanValue());
+            assignTask.execute(exec, data.getData(), cm, colIdxs, aOutputTableName);
+            return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
+        } catch (TerminatingMessageException tme) {
+            throw new UnsupportedOperationException(tme.getMessage());
+        } catch (CompilationFailedException e) {
+            throw new InvalidSettingsException("The compilation of the generated code failed.\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void message(final XdmNode arg0, final boolean arg1, final SourceLocator arg2) {
+        if (!arg1) {
+            setWarningMessage(arg0.toString());
+            LOGGER.warn(arg0.toString());
+        } else {
+            throw new TerminatingMessageException(arg0.toString());
+        }
     }
 
     /**

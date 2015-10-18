@@ -2,7 +2,7 @@
 <feature
       id="com.knime.features.bigdata.spark"
       label="KNIME Big Data Executor for Spark version 1.2"
-      version="1.0.0.qualifier"
+      version="1.0.100.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
