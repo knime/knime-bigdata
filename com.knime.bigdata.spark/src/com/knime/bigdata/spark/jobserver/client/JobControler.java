@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -18,8 +17,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -30,6 +27,8 @@ import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 import com.knime.bigdata.spark.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.util.SparkIDs;
 import com.typesafe.config.ConfigFactory;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * handles the client side of the job-server in all requests related to jobs
@@ -436,21 +435,12 @@ public class JobControler {
     public static JobStatus getJobStatus(final KNIMESparkContext aContextContainer, final String aJobId)
             throws GenericKnimeSparkException {
         LOGGER.debug("Getting job status for id: " + aJobId);
-        final JsonArray jobs = aContextContainer.getREST().toJSONArray(aContextContainer, "/jobs");
-        if (KNIMEConfigContainer.verboseLogging()) {
-            LOGGER.debug("Job list: " + jobs);
-        }
-        for (int i = 0; i < jobs.size(); i++) {
-            JsonObject jobInfo = jobs.getJsonObject(i);
-            //LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
-            if (aJobId.equals(jobInfo.getString("jobId"))) {
-                final String statusString = jobInfo.getString("status");
-                LOGGER.debug("Job status for id: " + aJobId + " is " + statusString);
-                return JobStatus.valueOf(statusString);
-            }
-        }
 
-        return JobStatus.GONE;
+        final JsonObject jobInfo = aContextContainer.getREST().toJSONObject(aContextContainer, "/jobs/" + aJobId);
+        //LOGGER.log(Level.INFO, "job: " + jobInfo.getString("jobId") + ", searching for " + aJobId);
+        final String statusString = jobInfo.getString("status");
+        LOGGER.debug("Job status for id: " + aJobId + " is " + statusString);
+        return JobStatus.valueOf(statusString);
     }
 
     /**
@@ -470,7 +460,8 @@ public class JobControler {
             LOGGER.debug("Job result json:" + json);
         }
         if (json.containsKey("result")) {
-            return JobResult.fromBase64String(json.getString("result"));
+            final JobResult result = JobResult.fromBase64String(json.getString("result"));
+            return result;
         } else {
             return JobResult.emptyJobResult().withMessage("ERROR: no job result in: " + json.toString());
         }
