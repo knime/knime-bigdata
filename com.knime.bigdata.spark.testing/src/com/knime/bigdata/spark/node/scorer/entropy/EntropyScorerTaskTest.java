@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.node.scorer.accuracy;
+package com.knime.bigdata.spark.node.scorer.entropy;
 
 import static org.junit.Assert.assertEquals;
 
@@ -65,13 +65,13 @@ public class EntropyScorerTaskTest extends SparkWithJobServerSpec {
 
 		EntropyScorerData entropyScore = (EntropyScorerData) testObj.execute(null);
 		assertEquals("number of reference cluster, ", 5,
-				entropyScore.getNrReference());
+				entropyScore.getNrReferenceClusters());
 		assertEquals("number of computed cluster, ", 5,
 				entropyScore.getNrClusters());
 		assertEquals("entropy, ",
 				EntropyCalculator.getEntropy(reference, clusterMap),
-				entropyScore.getEntropy(), 0.00001d);
-		assertEquals("quality, ", entropyScore.getQuality(), entropyScore.getQuality(), 0.00001d);
+				entropyScore.getOverallEntropy(), 0.00001d);
+		assertEquals("quality, ", entropyScore.getOverallQuality(), entropyScore.getOverallQuality(), 0.00001d);
 	}
 
 	/**
@@ -113,13 +113,13 @@ public class EntropyScorerTaskTest extends SparkWithJobServerSpec {
 
 		EntropyScorerData entropyScore = (EntropyScorerData) testObj.execute(null);
 		assertEquals("number of reference clusters, ", 5,
-				entropyScore.getNrReference());
+				entropyScore.getNrReferenceClusters());
 		assertEquals("number of computed clusters, ", 4,
 				entropyScore.getNrClusters());
 		assertEquals("entropy, ",
 				EntropyCalculator.getEntropy(reference, clusterMap),
-				entropyScore.getEntropy(), 0.00001d);
-		assertEquals("quality, ", entropyScore.getQuality(), entropyScore.getQuality(), 0.00001d);
+				entropyScore.getOverallEntropy(), 0.00001d);
+		assertEquals("quality, ", entropyScore.getOverallQuality(), entropyScore.getOverallQuality(), 0.00001d);
 	}
 
 	
