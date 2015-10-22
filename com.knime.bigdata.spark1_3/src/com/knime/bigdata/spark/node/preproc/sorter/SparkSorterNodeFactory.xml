@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    icon="./icon.png" type = "Manipulator">
+	<name>Spark Sorter</name>
+	<shortDescription>Sorts the rows according to user-defined criteria.</shortDescription>
+    <fullDescription>
+        <intro>
+			This node sorts the rows according to user-defined criteria. In the dialog, select 
+		    the columns according to which the data should be sorted. Also select
+		    whether it should be sorted in ascending or descending order.
+		</intro>
+		<option name="Add columns">If you want to extend the sorting criteria
+		to a higher number of columns as displayed, set the number of columns at
+		the bottom and click 'new columns' to add them to the dialog.</option>
+		<option name="Move Missing Cells to end of sorted list">If selected missing
+		values are always placed at the end of the sorted output. This is
+		independent of the sort order, i.e. if sorted ascendingly they are 
+		considered to be larger than a non-missing value and if sorted descendingly
+		they are smaller than any non-missing value.</option>
+		</fullDescription>
+		<ports>
+    <inPort index="0" name = "Input RDD">Spark RDD to be sorted.</inPort>
+    <outPort index="0" name = "Sorted RDD">A sorted Spark RDD.</outPort>
+    </ports>
+    </knimeNode>
