@@ -30,9 +30,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.recommendation.ALS;
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
-import org.apache.spark.sql.api.java.Row;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModelFactory;
@@ -45,6 +43,8 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * runs MLlib Collaborative Filtering on a given RDD

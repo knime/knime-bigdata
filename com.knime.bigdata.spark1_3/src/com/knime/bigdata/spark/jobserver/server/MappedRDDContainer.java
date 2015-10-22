@@ -31,7 +31,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
 

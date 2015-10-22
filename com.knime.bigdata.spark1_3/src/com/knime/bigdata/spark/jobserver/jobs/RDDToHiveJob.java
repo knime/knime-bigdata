@@ -26,13 +26,10 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructType;
-import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.hive.HiveContext;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -41,6 +38,8 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * Converts the given named RDD into a Hive table.
@@ -92,8 +91,8 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
         final StructType resultSchema = StructTypeBuilder.fromConfigString(schemaString);
         final String hiveTableName = aConfig.getOutputStringParameter(PARAM_RESULT_TABLE);
         try {
-            final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
-            final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, resultSchema);
+            final HiveContext hiveContext = new HiveContext(sc);
+            final DataFrame schemaPredictedData = hiveContext.createDataFrame(rowRDD, resultSchema);
             schemaPredictedData.saveAsTable(hiveTableName);
         } catch (Exception e) {
             String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";

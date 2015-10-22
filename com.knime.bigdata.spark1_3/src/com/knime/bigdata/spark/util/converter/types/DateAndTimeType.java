@@ -35,8 +35,8 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  */
 public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date> {
 
-    private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-            org.apache.spark.sql.api.java.DataType.DateType};
+    private static final org.apache.spark.sql.types.DataType[] SPARK = new org.apache.spark.sql.types.DataType[] {
+            org.apache.spark.sql.types.DataTypes.DateType};
 
     private static final DataType[] KNIME = new DataType[] {DateAndTimeCell.TYPE};
 
@@ -65,7 +65,7 @@ public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType getSparkSqlType() {
+    public org.apache.spark.sql.types.DataType getSparkSqlType() {
         return getSparkSqlTypes()[0];
     }
 
@@ -89,7 +89,7 @@ public class DateAndTimeType implements SparkTypeConverter<DateAndTimeCell, Date
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
+    public org.apache.spark.sql.types.DataType[] getSparkSqlTypes() {
         return SPARK;
     }
 

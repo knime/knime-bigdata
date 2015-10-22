@@ -28,10 +28,7 @@ import java.util.logging.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.api.java.Row;
-
-import scala.Tuple2;
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.google.common.base.Optional;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
@@ -42,6 +39,9 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.MyJoinKey;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import scala.Tuple2;
+import spark.jobserver.SparkJobValidation;
 
 /**
  * executes join of two JavaRDD<Row> and puts result into a JavaRDD<Row>

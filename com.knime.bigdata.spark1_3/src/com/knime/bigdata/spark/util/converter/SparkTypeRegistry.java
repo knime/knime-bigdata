@@ -58,7 +58,7 @@ public class SparkTypeRegistry {
     private static volatile SparkTypeRegistry instance;
 
     private final Map<DataType, SparkTypeConverter<?, ?>> m_knime = new HashMap<>();
-    private final Map<org.apache.spark.sql.api.java.DataType, SparkTypeConverter<?, ?>> m_spark = new HashMap<>();
+    private final Map<org.apache.spark.sql.types.DataType, SparkTypeConverter<?, ?>> m_spark = new HashMap<>();
 
     private SparkTypeRegistry() {
         //avoid object creation
@@ -138,8 +138,8 @@ public class SparkTypeRegistry {
                     + " with " + converter.getClass().getName());
             }
         }
-        final org.apache.spark.sql.api.java.DataType[] sparkSqlTypes = converter.getSparkSqlTypes();
-        for (org.apache.spark.sql.api.java.DataType sparkSqlType : sparkSqlTypes) {
+        final org.apache.spark.sql.types.DataType[] sparkSqlTypes = converter.getSparkSqlTypes();
+        for (org.apache.spark.sql.types.DataType sparkSqlType : sparkSqlTypes) {
             final SparkTypeConverter<?, ?> old = m_spark.put(sparkSqlType, converter);
             if (old != null) {
                 LOGGER.info("Replace default converter " + old.getClass().getName()
@@ -159,11 +159,11 @@ public class SparkTypeRegistry {
     }
 
     /**
-     * @param type the {@link org.apache.spark.sql.api.java.DataType} to get the converter for
+     * @param type the {@link org.apache.spark.sql.types.DataType} to get the converter for
      * @return the {@link SparkTypeConverter} to use or the default converter
      * @see #getDefaultConverter()
      */
-    public static SparkTypeConverter<?, ?> get(final org.apache.spark.sql.api.java.DataType type) {
+    public static SparkTypeConverter<?, ?> get(final org.apache.spark.sql.types.DataType type) {
         SparkTypeConverter<?, ?> converter = getInstance().m_spark.get(type);
         return converter != null ? converter : getDefaultConverter();
     }

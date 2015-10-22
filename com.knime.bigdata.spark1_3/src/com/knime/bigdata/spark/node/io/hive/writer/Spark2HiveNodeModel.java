@@ -22,7 +22,7 @@ package com.knime.bigdata.spark.node.io.hive.writer;
 
 import java.sql.Connection;
 
-import org.apache.spark.sql.api.java.StructType;
+import org.apache.spark.sql.types.StructType;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;

@@ -32,10 +32,7 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.api.java.Row;
-
-import scala.Tuple2;
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData;
 import com.knime.bigdata.spark.jobserver.server.EntropyScorerData.ClusterScore;
@@ -46,6 +43,9 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.RDDUtilsInJava;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import scala.Tuple2;
+import spark.jobserver.SparkJobValidation;
 
 /**
  * computes cluster some entropy and quality values for clustering results given a reference clustering.

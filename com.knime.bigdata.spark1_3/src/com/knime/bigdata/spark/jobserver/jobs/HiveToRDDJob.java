@@ -26,19 +26,18 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.api.java.JavaSchemaRDD;
-import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructField;
-import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.hive.HiveContext;
+import org.apache.spark.sql.types.StructField;
 
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD
@@ -90,17 +89,17 @@ public class HiveToRDDJob extends KnimeSparkJob implements Serializable {
 
         LOGGER.log(Level.FINE, "context: " + sc.conf().toDebugString());
 
-        final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
+        final HiveContext hiveContext = new HiveContext(sc);
         final String sqlStatement = aConfig.getInputParameter(PARAM_SQL_STATEMENT);
         LOGGER.log(Level.INFO, "sql statement: " + sqlStatement);
 
-        final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
+        final DataFrame dataFrame = hiveContext.sql(sqlStatement);
 
-        for (final StructField field : schemaInputRDD.schema().getFields()) {
-            LOGGER.log(Level.FINE, "Field '" + field.getName() + "' of type '" + field.getDataType() + "'");
+        for (final StructField field : dataFrame.schema().fields()) {
+            LOGGER.log(Level.FINE, "Field '" + field.name() + "' of type '" + field.dataType() + "'");
         }
 
-        final RDD<Row> rdd = schemaInputRDD.rdd();
+        final RDD<Row> rdd = dataFrame.rdd();
         final JavaRDD<Row> javaRDD = new JavaRDD<>(rdd, rdd.elementClassTag());
 
         //        List<Row> d = javaRDD.take(10);

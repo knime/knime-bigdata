@@ -33,8 +33,8 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  */
 public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
 
-    private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-            org.apache.spark.sql.api.java.DataType.BooleanType};
+    private static final org.apache.spark.sql.types.DataType[] SPARK = new org.apache.spark.sql.types.DataType[] {
+            org.apache.spark.sql.types.DataTypes.BooleanType};
 
     private static final DataType[] KNIME = new DataType[] {BooleanCell.TYPE};
 
@@ -63,7 +63,7 @@ public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType getSparkSqlType() {
+    public org.apache.spark.sql.types.DataType getSparkSqlType() {
         return getSparkSqlTypes()[0];
     }
 
@@ -87,7 +87,7 @@ public class BooleanType implements SparkTypeConverter<BooleanCell, Boolean> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
+    public org.apache.spark.sql.types.DataType[] getSparkSqlTypes() {
         return SPARK;
     }
 

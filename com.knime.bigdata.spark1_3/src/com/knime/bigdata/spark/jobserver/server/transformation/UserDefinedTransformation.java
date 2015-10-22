@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.annotation.Nonnull;
 
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.Row;
 
 /**
  * Abstract class for transformations of {@link Row}-valued {@link JavaRDD RDDs}.

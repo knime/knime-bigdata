@@ -7,7 +7,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 
 
 /**
@@ -69,7 +70,7 @@ public class RowBuilder {
    */
   @Nonnull
   public Row build() {
-    return Row.create(columnValues.toArray());
+    return RowFactory.create(columnValues.toArray());
   }
 
   /**

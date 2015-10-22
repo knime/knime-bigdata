@@ -13,10 +13,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.api.java.Row;
-import org.apache.spark.sql.api.java.StructField;
-import org.apache.spark.sql.api.java.StructType;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.typesafe.config.Config;
@@ -133,26 +134,26 @@ public class StructTypeBuilder {
      */
     public static final Map<Class<?>, DataType> DATA_TYPES_BY_CLASS = new HashMap<>();
     static {
-        DATA_TYPES_BY_CLASS.put(Boolean.class, DataType.BooleanType);
-        DATA_TYPES_BY_CLASS.put(Byte.class, DataType.ByteType);
-        DATA_TYPES_BY_CLASS.put(Short.class, DataType.ShortType);
-        DATA_TYPES_BY_CLASS.put(Integer.class, DataType.IntegerType);
-        DATA_TYPES_BY_CLASS.put(Long.class, DataType.LongType);
-        DATA_TYPES_BY_CLASS.put(Float.class, DataType.FloatType);
-        DATA_TYPES_BY_CLASS.put(Double.class, DataType.DoubleType);
-        DATA_TYPES_BY_CLASS.put(Date.class, DataType.DateType);
-        DATA_TYPES_BY_CLASS.put(String.class, DataType.StringType);
+        DATA_TYPES_BY_CLASS.put(Boolean.class, DataTypes.BooleanType);
+        DATA_TYPES_BY_CLASS.put(Byte.class, DataTypes.ByteType);
+        DATA_TYPES_BY_CLASS.put(Short.class, DataTypes.ShortType);
+        DATA_TYPES_BY_CLASS.put(Integer.class, DataTypes.IntegerType);
+        DATA_TYPES_BY_CLASS.put(Long.class, DataTypes.LongType);
+        DATA_TYPES_BY_CLASS.put(Float.class, DataTypes.FloatType);
+        DATA_TYPES_BY_CLASS.put(Double.class, DataTypes.DoubleType);
+        DATA_TYPES_BY_CLASS.put(Date.class, DataTypes.DateType);
+        DATA_TYPES_BY_CLASS.put(String.class, DataTypes.StringType);
     }
 
     private static final Set<DataType> SUPPORTED_DATA_TYPES;
     static {
         SUPPORTED_DATA_TYPES = new HashSet<>(DATA_TYPES_BY_CLASS.values());
-        SUPPORTED_DATA_TYPES.add(DataType.NullType);
+        SUPPORTED_DATA_TYPES.add(DataTypes.NullType);
     }
 
     @Nullable
     private static final DataType dataTypeForValue(@Nullable final Object value) {
-        return value != null ? DATA_TYPES_BY_CLASS.get(value.getClass()) : DataType.NullType;
+        return value != null ? DATA_TYPES_BY_CLASS.get(value.getClass()) : DataTypes.NullType;
     }
 
     private static class DataTypeDescriptor {
@@ -180,7 +181,7 @@ public class StructTypeBuilder {
             final DataType valueDataType = dataTypeForValue(value);
 
             if (valueDataType != null && canBeGeneralizedTo(valueDataType)) {
-                if (valueDataType != DataType.NullType) {
+                if (valueDataType != DataTypes.NullType) {
                     dataType = valueDataType;
                 }
                 isNullable = isNullable || value == null;
@@ -202,7 +203,7 @@ public class StructTypeBuilder {
         private boolean canBeGeneralizedTo(@Nonnull final DataType otherDataType) {
             assert otherDataType != null;
 
-            return dataType.equals(DataType.NullType) || otherDataType.equals(DataType.NullType)
+            return dataType.equals(DataTypes.NullType) || otherDataType.equals(DataTypes.NullType)
                 || otherDataType.equals(dataType);
         }
 
@@ -210,7 +211,7 @@ public class StructTypeBuilder {
         public StructField toStructField(@Nonnull final String name) {
             assert name != null;
 
-            return DataType.createStructField(name, dataType, isNullable);
+            return DataTypes.createStructField(name, dataType, isNullable);
         }
     }
 
@@ -222,8 +223,8 @@ public class StructTypeBuilder {
         public FieldDescriptor(@Nonnull final StructField structField) {
             assert structField != null;
 
-            name = structField.getName();
-            dataTypeDescriptor = new DataTypeDescriptor(structField.getDataType(), structField.isNullable());
+            name = structField.name();
+            dataTypeDescriptor = new DataTypeDescriptor(structField.dataType(), structField.nullable());
         }
 
         public FieldDescriptor(@Nullable final String aName, @Nonnull final DataTypeDescriptor aDataTypeDescriptor) {
@@ -266,15 +267,15 @@ public class StructTypeBuilder {
     public static StructTypeBuilder fromStructType(@Nonnull final StructType structType) throws InvalidSchemaException {
         Validate.notNull(structType, "Struct type must not be null");
 
-        final StructField[] structFields = structType.getFields();
+        final StructField[] structFields = structType.fields();
         final List<FieldDescriptor> fieldDescriptors = new ArrayList<FieldDescriptor>(structFields.length);
 
         for (final StructField structField : structFields) {
-            final DataType dataType = structField.getDataType();
+            final DataType dataType = structField.dataType();
             if (SUPPORTED_DATA_TYPES.contains(dataType)) {
                 fieldDescriptors.add(new FieldDescriptor(structField));
             } else {
-                throw new InvalidSchemaException("'StructField's '" + structField.getName()
+                throw new InvalidSchemaException("'StructField's '" + structField.name()
                     + "' has unsupported data type " + dataType.getClass().getSimpleName());
             }
         }
@@ -309,7 +310,7 @@ public class StructTypeBuilder {
      * The {@link DataType DataTypes} of the various fields resp. column are inferred from the column values of the
      * given rows. The initial guess is based on the values in the first row, and is made according to the table shown
      * above. If the first row contains a {@code null} value in a given column, it initially assumes the
-     * {@link DataType#NullType} for this column.
+     * {@link DataTypes#NullType} for this column.
      *
      * <p>
      * The initial guesses are subsequently refined based on the values in the other rows:
@@ -431,12 +432,12 @@ public class StructTypeBuilder {
             try {
                 t = DATA_TYPES_BY_CLASS.get(Class.forName(dt.get(1).toString()));
                 fields[f++] =
-                    DataType.createStructField(dt.get(0).toString(), t, Boolean.parseBoolean(dt.get(2).toString()));
+                    DataTypes.createStructField(dt.get(0).toString(), t, Boolean.parseBoolean(dt.get(2).toString()));
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }
-        final StructType resultSchema = DataType.createStructType(fields);
+        final StructType resultSchema = DataTypes.createStructType(fields);
         return resultSchema;
     }
     /**
@@ -455,11 +456,11 @@ public class StructTypeBuilder {
      */
     public static Config toConfig(final StructType schema, final String configName) {
         ArrayList<ArrayList<String>> fields = new ArrayList<>();
-        for (StructField field : schema.getFields()) {
+        for (StructField field : schema.fields()) {
             ArrayList<String> f = new ArrayList<>();
-            f.add(field.getName());
-            f.add(StructTypeBuilder.getJavaTypeFromDataType(field.getDataType()).getCanonicalName());
-            f.add("" + field.isNullable());
+            f.add(field.name());
+            f.add(StructTypeBuilder.getJavaTypeFromDataType(field.dataType()).getCanonicalName());
+            f.add("" + field.nullable());
             fields.add(f);
         }
         final Config config = ConfigFactory.empty().withValue(configName,
@@ -530,7 +531,7 @@ public class StructTypeBuilder {
             structFields.add(fieldDescriptor.toStructField());
         }
 
-        return DataType.createStructType(structFields);
+        return DataTypes.createStructType(structFields);
     }
 
     /**

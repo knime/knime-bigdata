@@ -32,9 +32,7 @@ import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.mllib.feature.IDF;
 import org.apache.spark.mllib.feature.IDFModel;
 import org.apache.spark.mllib.linalg.Vector;
-import org.apache.spark.sql.api.java.Row;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
@@ -43,6 +41,8 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * splits a given string column into a word vector and adds the vector to an RDD
@@ -166,7 +166,7 @@ public class TFIDFJob extends KnimeSparkJob implements Serializable {
         final JavaRDD<Vector> tf = hashingTF.transform(text);
 
         //While applying HashingTF only needs a single pass to the data, applying IDF needs two passes: first to compute the IDF vector and second to scale the term frequencies by IDF.
-        //MLlib’s IDF implementation provides an option for ignoring terms which occur in less than a minimum number of documents.
+        //MLlibï¿½s IDF implementation provides an option for ignoring terms which occur in less than a minimum number of documents.
         // In such cases, the IDF for these terms is set to 0. This feature can be used by passing the minDocFreq value to the IDF constructor.
         tf.cache();
         final IDFModel idf = new IDF(minFrequency).fit(tf);

@@ -32,15 +32,15 @@ import org.knime.core.data.DataType;
 public interface SparkTypeConverter<K extends DataCell, S extends Object> {
 
     /**
-     * @return the preferred Spark {@link org.apache.spark.sql.api.java.DataType} type this converter converts
+     * @return the preferred Spark {@link org.apache.spark.sql.types.DataType} type this converter converts
      * the supported KNIME types to
      */
-    public org.apache.spark.sql.api.java.DataType getSparkSqlType();
+    public org.apache.spark.sql.types.DataType getSparkSqlType();
 
     /**
-     * @return the Spark {@link org.apache.spark.sql.api.java.DataType}s that are supported by this converter
+     * @return the Spark {@link org.apache.spark.sql.types.DataType}s that are supported by this converter
      */
-    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes();
+    public org.apache.spark.sql.types.DataType[] getSparkSqlTypes();
 
     /**
      * @return the preferred KNIME {@link DataType} this converter converts the supported Spark types to

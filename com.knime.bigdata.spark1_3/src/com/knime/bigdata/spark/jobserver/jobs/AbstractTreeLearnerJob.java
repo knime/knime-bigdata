@@ -22,13 +22,13 @@ package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * runs MLlib DecisionTree on a given RDD to create a decision tree, model is returned as result

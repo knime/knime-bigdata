@@ -28,13 +28,13 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * helper job to manage named RDDs on the server side

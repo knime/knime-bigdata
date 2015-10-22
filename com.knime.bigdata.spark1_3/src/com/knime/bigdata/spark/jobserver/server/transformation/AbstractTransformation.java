@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaRDDLike;
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.Row;
 
 /**
  * Interface for transformations of {@link Row}-valued {@link JavaRDD RDDs}.
