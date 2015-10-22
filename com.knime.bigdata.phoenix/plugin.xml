@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+     <extension
+         point="org.knime.workbench.repository.nodes">
+        <node
+              category-path="/database/database-connector"
+              expert-flag="false"
+              factory-class="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory"
+              id="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
+        </node>
+    </extension>
+     <extension
+           point="org.knime.core.DatabaseUtility">
+        <databaseUtility
+              class="com.knime.bigdata.phoenix.utility.PhoenixUtility"
+              database="phoenix">
+        </databaseUtility>
+     </extension>
+     <extension
+           point="org.knime.core.JDBCDriver">
+        <jdbcDriver
+              jarFile="lib/phoenix-4.4.0-HBase-0.98-client.jar">
+        </jdbcDriver>
+     </extension>
+</plugin>
