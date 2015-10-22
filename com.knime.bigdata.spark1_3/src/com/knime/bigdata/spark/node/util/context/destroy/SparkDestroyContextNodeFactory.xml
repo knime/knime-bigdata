@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    type="Other" icon="icon.png">
+    <name>Destroy Spark Context</name>
+    <shortDescription>Destroys the Spark context.</shortDescription>
+    <fullDescription>
+        <intro>
+            Destroys the Spark context and all RDDs that exists within the context.
+            <p>This node will open up a confirmation dialog as a safeguard which can be suppressed with 
+            the 'Hide confirmation dialog' option.</p>
+            <p>
+            <b>Do not use this node if you use a shared context in your company.</b>
+            </p>
+        </intro>
+        <option name="Hide confirmation dialog">Select this option to hide the confirmation dialog which pops up 
+        as a safeguard during execution</option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark context to destroy">The Spark context to destroy.</inPort>
+    </ports>
+</knimeNode>
