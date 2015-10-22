@@ -448,7 +448,7 @@
       </node>
     </extension>
    <extension
-         point="com.knime.bigdata.spark.TemplateRepository">
+         point="com.knime.bigdata.spark1_3.TemplateRepository">
       <template-repository
             id="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetFileTemplateRepositoryProvider"
             provider-class="com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetFileTemplateRepositoryProvider">

@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="com.knime.bigdata.spark1_3" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark" id="SparkTypeConverter" name="SparkTypeConverter"/>
+         <meta.schema plugin="com.knime.bigdata.spark1_3" id="SparkTypeConverter" name="SparkTypeConverter"/>
       </appinfo>
       <documentation>
          Extension point for type converters that can be used for type conversion between KNIME and Spark.

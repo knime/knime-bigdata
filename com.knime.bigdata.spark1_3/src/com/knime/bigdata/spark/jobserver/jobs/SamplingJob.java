@@ -32,10 +32,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.api.java.Row;
-
-import scala.Tuple2;
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.CountMethods;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.SamplingMethods;
@@ -45,6 +42,9 @@ import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import scala.Tuple2;
+import spark.jobserver.SparkJobValidation;
 
 /**
  * samples / splits rdds

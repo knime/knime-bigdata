@@ -30,13 +30,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.api.java.Row;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * applies a compiled pmml model to the input data

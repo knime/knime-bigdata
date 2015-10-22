@@ -202,7 +202,7 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
             //add the default jar files to the class path which are also available on the Spark cluster
             final String root = SparkPlugin.getDefault().getPluginRootPath();
 //            jarFiles.add(new File(root+"/bin/"));
-            jarFiles.add(new File(root+"/lib/jobServerUtilsApi.jar"));
+//            jarFiles.add(new File(root+"/lib/jobServerUtilsApi.jar"));
 //            jarFiles.add(new File(root+"/lib/scala-library.jar"));
 //            jarFiles.add(new File(root+"/lib/scala-reflect.jar"));
 //            jarFiles.add(new File(root+"/lib/spark-core_2.10-1.2.2.jar"));

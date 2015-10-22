@@ -33,9 +33,9 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  */
 public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
 
-    private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-        org.apache.spark.sql.api.java.DataType.IntegerType, org.apache.spark.sql.api.java.DataType.ByteType,
-        org.apache.spark.sql.api.java.DataType.ShortType};
+    private static final org.apache.spark.sql.types.DataType[] SPARK = new org.apache.spark.sql.types.DataType[] {
+        org.apache.spark.sql.types.DataTypes.IntegerType, org.apache.spark.sql.types.DataTypes.ByteType,
+        org.apache.spark.sql.types.DataTypes.ShortType};
 
     private static final DataType[] KNIME = new DataType[] {IntCell.TYPE};
 
@@ -64,7 +64,7 @@ public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType getSparkSqlType() {
+    public org.apache.spark.sql.types.DataType getSparkSqlType() {
         return getSparkSqlTypes()[0];
     }
 
@@ -88,7 +88,7 @@ public class IntegerType implements SparkTypeConverter<IntCell, Integer> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
+    public org.apache.spark.sql.types.DataType[] getSparkSqlTypes() {
         return SPARK;
     }
 

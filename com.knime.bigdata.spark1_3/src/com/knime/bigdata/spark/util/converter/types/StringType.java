@@ -33,8 +33,8 @@ import com.knime.bigdata.spark.util.converter.SparkTypeConverter;
  */
 public class StringType implements SparkTypeConverter<StringCell, String> {
 
-    private static final org.apache.spark.sql.api.java.DataType[] SPARK = new org.apache.spark.sql.api.java.DataType[] {
-            org.apache.spark.sql.api.java.DataType.StringType};
+    private static final org.apache.spark.sql.types.DataType[] SPARK = new org.apache.spark.sql.types.DataType[] {
+            org.apache.spark.sql.types.DataTypes.StringType};
 
     private static final DataType[] KNIME = new DataType[] {StringCell.TYPE};
 
@@ -63,7 +63,7 @@ public class StringType implements SparkTypeConverter<StringCell, String> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType getSparkSqlType() {
+    public org.apache.spark.sql.types.DataType getSparkSqlType() {
         return getSparkSqlTypes()[0];
     }
 
@@ -87,7 +87,7 @@ public class StringType implements SparkTypeConverter<StringCell, String> {
      * {@inheritDoc}
      */
     @Override
-    public org.apache.spark.sql.api.java.DataType[] getSparkSqlTypes() {
+    public org.apache.spark.sql.types.DataType[] getSparkSqlTypes() {
         return SPARK;
     }
 

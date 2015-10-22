@@ -26,12 +26,12 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.api.java.Row;
-
-import scala.Tuple2;
+import org.apache.spark.sql.Row;
 
 import com.google.common.base.Optional;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
+
+import scala.Tuple2;
 
 /**
  * converts various intermediate Java RDD forms to JavaRDD of type JavaRDD[Row] or vice versa

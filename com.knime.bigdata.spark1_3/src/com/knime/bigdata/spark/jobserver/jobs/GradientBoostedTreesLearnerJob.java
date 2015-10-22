@@ -36,9 +36,7 @@ import org.apache.spark.mllib.tree.loss.SquaredError;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.api.java.Row;
-
-import spark.jobserver.SparkJobValidation;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.jobserver.server.EnumContainer;
 import com.knime.bigdata.spark.jobserver.server.EnumContainer.EnsembleLossesType;
@@ -50,6 +48,8 @@ import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * runs MLlib GradientBoostedTrees on a given RDD to create a forest, model is returned as result

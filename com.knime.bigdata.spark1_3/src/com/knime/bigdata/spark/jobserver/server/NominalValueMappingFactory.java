@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
-import org.apache.spark.sql.api.java.Row;
+import org.apache.spark.sql.Row;
 
 /**
  *

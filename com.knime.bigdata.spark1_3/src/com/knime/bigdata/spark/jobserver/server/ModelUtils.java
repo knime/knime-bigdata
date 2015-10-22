@@ -18,11 +18,11 @@ import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
-import org.apache.spark.sql.api.java.Row;
-
-import scala.Tuple2;
+import org.apache.spark.sql.Row;
 
 import com.google.common.base.Optional;
+
+import scala.Tuple2;
 
 /**
  *

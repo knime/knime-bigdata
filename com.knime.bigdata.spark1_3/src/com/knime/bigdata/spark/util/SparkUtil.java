@@ -26,9 +26,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.spark.sql.api.java.DataType;
-import org.apache.spark.sql.api.java.StructField;
-import org.apache.spark.sql.api.java.StructType;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.apache.xmlbeans.XmlObject;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.InlineTableDocument.InlineTable;
@@ -125,10 +125,10 @@ public final class SparkUtil {
         final List<StructField> structFields = new ArrayList<>(spec.getNumColumns());
         for (final DataColumnSpec colSpec : spec) {
             final SparkTypeConverter<?, ?> converter = SparkTypeRegistry.get(colSpec.getType());
-            final StructField field = DataType.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
+            final StructField field = DataTypes.createStructField(colSpec.getName(), converter.getSparkSqlType(), true);
             structFields.add(field);
         }
-        final StructType schema = DataType.createStructType(structFields);
+        final StructType schema = DataTypes.createStructType(structFields);
         return schema;
     }
 
@@ -139,9 +139,9 @@ public final class SparkUtil {
     public static DataTableSpec toTableSpec(final StructType schema) {
         final List<DataColumnSpec> specs = new LinkedList<>();
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", StringCell.TYPE);
-        for (final StructField field : schema.getFields()) {
-            specCreator.setName(field.getName());
-            final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.getDataType());
+        for (final StructField field : schema.fields()) {
+            specCreator.setName(field.name());
+            final SparkTypeConverter<?, ?> typeConverter = SparkTypeRegistry.get(field.dataType());
             specCreator.setType(typeConverter.getKNIMEType());
             specs.add(specCreator.createSpec());
         }
