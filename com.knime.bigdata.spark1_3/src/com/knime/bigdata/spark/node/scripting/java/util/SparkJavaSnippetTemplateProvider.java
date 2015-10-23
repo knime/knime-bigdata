@@ -73,7 +73,7 @@ public final class SparkJavaSnippetTemplateProvider extends AbstractJSnippetTemp
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkJavaSnippetTemplateProvider.class);
 
     private static final Object LOCK = new Object[0];
-    private static final String EXTENSION_POINT_ID = "com.knime.bigdata.spark.TemplateRepository";
+    private static final String EXTENSION_POINT_ID = "com.knime.bigdata.spark1_3.TemplateRepository";
     private static TemplateProvider<SparkJavaSnippetTemplate> provider;
     /**
      * prevent instantiation from outside.

@@ -64,7 +64,7 @@ import org.knime.core.node.NodeSettingsRO;
  implements TemplateRepositoryProvider<SparkJavaSnippetTemplate> {
 
      private static final PluginTemplateRepositoryProvider<SparkJavaSnippetTemplate> PROVIDER =
-             new PluginTemplateRepositoryProvider<>("com.knime.bigdata.spark", "snippetTemplates",
+             new PluginTemplateRepositoryProvider<>("com.knime.bigdata.spark1_3", "snippetTemplates",
                      new SnippetTemplateFactory<SparkJavaSnippetTemplate>() {
          @Override
          public SparkJavaSnippetTemplate create(final NodeSettingsRO settings) {
