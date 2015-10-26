@@ -144,6 +144,18 @@ public class HiveUtility extends DatabaseUtility {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsCase() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsRandomSampling() {
+        return true;
+    }
 
     /**
      * {@inheritDoc}

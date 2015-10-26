@@ -197,4 +197,12 @@ public class PercentileDBAggregationFunction implements DBAggregationFunction {
         return getLabel() + "_" + m_settings.getPercentile();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSQLFragment4SubQuery(final StatementManipulator manipulator, final String tableName, final String subQuery) {
+        return getLabel() + "((" + subQuery + ")," +  m_settings.getPercentile() + ")";
+    }
+
 }
