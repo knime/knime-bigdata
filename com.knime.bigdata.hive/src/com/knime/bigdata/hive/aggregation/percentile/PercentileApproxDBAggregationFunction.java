@@ -194,6 +194,14 @@ public class PercentileApproxDBAggregationFunction implements DBAggregationFunct
      * {@inheritDoc}
      */
     @Override
+    public String getSQLFragment4SubQuery(final StatementManipulator manipulator, final String tableName, final String subQuery) {
+        return getLabel() + "((" + subQuery + ")," +  m_settings.getPercentile() + ", "+ m_settings.getApprox() + ")";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getColumnName() {
         return getLabel() + "_" + m_settings.getPercentile();
     }

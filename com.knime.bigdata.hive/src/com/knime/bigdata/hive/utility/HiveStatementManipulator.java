@@ -21,6 +21,8 @@
 package com.knime.bigdata.hive.utility;
 
 import org.knime.core.node.port.database.StatementManipulator;
+import org.knime.core.node.port.database.binning.CaseBinningStatementGenerator;
+import org.knime.core.node.port.database.pivoting.CasePivotStatementGenerator;
 
 /**
  * Statement manipulator for Hive.
@@ -28,6 +30,14 @@ import org.knime.core.node.port.database.StatementManipulator;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 public class HiveStatementManipulator extends StatementManipulator {
+
+    /**
+     * Constructor of class {@link HiveStatementManipulator}.
+     */
+   public HiveStatementManipulator() {
+       super(CasePivotStatementGenerator.getINSTANCE(), CaseBinningStatementGenerator.getINSTANCE());
+   }
+
     /**
      * {@inheritDoc}
      */
@@ -70,6 +80,12 @@ public class HiveStatementManipulator extends StatementManipulator {
     @Override
     public String forMetadataOnly(final String sql) {
         return limitRows(sql, 0);
+    }
+
+    @Override
+    public String randomRows(final String sql, final long count) {
+        final String tmp = "SELECT * FROM (" + sql + ") " + getTempTableName() + " DISTRIBUTE BY rand() SORT BY rand() LIMIT " + count;
+        return tmp;
     }
 
     /**
