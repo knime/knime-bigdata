@@ -93,7 +93,15 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
         try {
             final HiveContext hiveContext = new HiveContext(sc);
             final DataFrame schemaPredictedData = hiveContext.createDataFrame(rowRDD, resultSchema);
-            schemaPredictedData.saveAsTable(hiveTableName);
+
+            // DataFrame.saveAsTable() creates a table in the Hive Metastore, which is /only/ readable by Spark, but not Hive
+            // itself, due to being parquet-encoded in a way that is incompatible with Hive. This issue has been mentioned on the
+            // Spark mailing list:
+            // http://mail-archives.us.apache.org/mod_mbox/spark-user/201504.mbox/%3cCANpNmWVDpbY_UQQTfYVieDw8yp9q4s_PoOyFzqqSnL__zDO_Rw@mail.gmail.com%3e
+            // The solution is to manually create a Hive table with an SQL statement:
+            schemaPredictedData.registerTempTable(hiveTableName);
+            hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, hiveTableName));
+
         } catch (Exception e) {
             String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";
             //requires import of hadoop stuff
