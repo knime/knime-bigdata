@@ -50,7 +50,7 @@ public class SparkTypeRegistry {
 
     /**The id of the converter extension point.*/
     public static final String EXT_POINT_ID =
-            "com.knime.bigdata.spark.SparkTypeConverter";
+            "com.knime.bigdata.spark1_3.SparkTypeConverter";
 
     /**The attribute of the converter extension point.*/
     public static final String EXT_POINT_ATTR_DF = "SparkTypeConverter";
