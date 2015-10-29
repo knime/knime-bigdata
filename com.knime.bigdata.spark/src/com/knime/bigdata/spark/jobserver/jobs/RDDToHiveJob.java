@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,8 +33,6 @@ import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructType;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
@@ -41,6 +40,8 @@ import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * Converts the given named RDD into a Hive table.
@@ -94,7 +95,16 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
         try {
             final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sc));
             final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, resultSchema);
-            schemaPredictedData.saveAsTable(hiveTableName);
+
+            // DataFrame.saveAsTable() creates a table in the Hive Metastore, which is /only/ readable by Spark, but not Hive
+            // itself, due to being parquet-encoded in a way that is incompatible with Hive. This issue has been mentioned on the
+            // Spark mailing list:
+            // http://mail-archives.us.apache.org/mod_mbox/spark-user/201504.mbox/%3cCANpNmWVDpbY_UQQTfYVieDw8yp9q4s_PoOyFzqqSnL__zDO_Rw@mail.gmail.com%3e
+            // The solution is to manually create a Hive table with an SQL statement:
+            String tmpTable = "tmpTable_" + UUID.randomUUID().toString();
+            schemaPredictedData.registerTempTable(tmpTable);
+            hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
+
         } catch (Exception e) {
             String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";
             //requires import of hadoop stuff
