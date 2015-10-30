@@ -100,10 +100,10 @@ public class RDDToHiveJob extends KnimeSparkJob implements Serializable {
             // Spark mailing list:
             // http://mail-archives.us.apache.org/mod_mbox/spark-user/201504.mbox/%3cCANpNmWVDpbY_UQQTfYVieDw8yp9q4s_PoOyFzqqSnL__zDO_Rw@mail.gmail.com%3e
             // The solution is to manually create a Hive table with an SQL statement:
-            String tmpTable = "tmpTable_" + UUID.randomUUID().toString();
+            String tmpTable = "tmpTable" + UUID.randomUUID().toString().replaceAll("-", "");
             schemaPredictedData.registerTempTable(tmpTable);
             hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
-
+            hiveContext.dropTempTable(tmpTable);
         } catch (Exception e) {
             String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";
             //requires import of hadoop stuff
