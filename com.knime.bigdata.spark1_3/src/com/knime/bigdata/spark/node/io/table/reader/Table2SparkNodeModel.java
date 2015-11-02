@@ -68,7 +68,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
             throw new InvalidSettingsException("Please connect the input port");
         }
         DataTableSpec spec = (DataTableSpec)inSpecs[0];
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs), spec);
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs, false), spec);
         return new PortObjectSpec[]{resultSpec};
     }
 
@@ -100,7 +100,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         }
 
         exec.setMessage("Sending data to Spark...");
-        final SparkDataTable resultTable = new SparkDataTable(getContext(inData), table.getDataTableSpec());
+        final SparkDataTable resultTable = new SparkDataTable(getContext(inData, true), table.getDataTableSpec());
         executeSparkJob(exec, data, resultTable);
         exec.setProgress(1, "Spark data object created");
         return new PortObject[]{new SparkDataPortObject(resultTable)};
