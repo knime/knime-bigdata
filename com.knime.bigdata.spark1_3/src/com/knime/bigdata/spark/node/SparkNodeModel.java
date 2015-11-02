@@ -63,10 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -74,7 +70,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettings;
@@ -431,7 +426,7 @@ public abstract class SparkNodeModel extends NodeModel {
     private void deleteRDDs(final boolean onDispose) {
         if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
             LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
-            Future<?> future = KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
+            SparkPlugin.getDefault().addJob(new Runnable() {
                 @Override
                 public void run() {
                     final long startTime = System.currentTimeMillis();
@@ -452,17 +447,6 @@ public abstract class SparkNodeModel extends NodeModel {
                     m_namedRDDs.clear();
                 }
             });
-            try {
-                //TODO: Find better way to ensure that the delete thread has some time during shutdown of KNIME
-                //give the thread at least 10 milliseconds to start the delete job
-                future.get(50, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                LOGGER.info("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " was interrupted prior completion.");
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " failed. Error: " + e.getMessage(), e);
-            }
         }
     }
 
