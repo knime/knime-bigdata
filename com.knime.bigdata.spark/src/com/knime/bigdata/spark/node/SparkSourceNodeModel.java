@@ -80,16 +80,21 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
 
     /**
      * @param in the {@link PortObjectSpec} array in configure or {@link PortObject} array in execute
+     * @param ensureServersideContext Whether to ensure that the context is opened on the Spark job server
      * @return the {@link KNIMESparkContext} to use
      * @throws InvalidSettingsException
      */
-    public static KNIMESparkContext getContext(final Object[] in) throws InvalidSettingsException {
+    public static KNIMESparkContext getContext(final Object[] in, final boolean ensureServersideContext) throws InvalidSettingsException {
         try {
             if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
                 final KNIMESparkContext context = ((SparkContextProvider)in[in.length - 1]).getContext();
                 return context;
             }
-            return KnimeContext.getSparkContext();
+            KNIMESparkContext sparkContext = new KNIMESparkContext();
+            if (ensureServersideContext) {
+                KnimeContext.openSparkContext(sparkContext);
+            }
+            return sparkContext;
         } catch (Exception e) {
             if (e instanceof ProcessingException) {
                 final Throwable cause = e.getCause();
