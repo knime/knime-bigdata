@@ -115,7 +115,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
     private void executeSparkJob(final ExecutionContext exec, final Object[][] data, final SparkDataTable resultTable)
         throws Exception {
 
-        final UploadUtil util = new UploadUtil(resultTable.getContext(), data, "data-table");
+        final UploadUtil util = new UploadUtil(resultTable.getContext(), data, "dataTable-" + resultTable.getID());
         util.upload();
         try {
             final String params = paramDef(util.getServerFileName(), resultTable.getID());
