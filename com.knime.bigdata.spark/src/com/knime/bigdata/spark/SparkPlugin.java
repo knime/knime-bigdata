@@ -83,7 +83,7 @@ public class SparkPlugin extends AbstractUIPlugin {
         plugin = null;
         super.stop(context);
         m_executor.shutdown();
-        m_executor.awaitTermination(3, TimeUnit.SECONDS);
+        m_executor.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     /**
