@@ -23,7 +23,6 @@ package com.knime.bigdata.phoenix.aggregation;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.def.DoubleCell;
-import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunctionFactory;
 import org.knime.core.node.port.database.aggregation.function.AbstractDistinctDBAggregationFunction;
@@ -77,8 +76,8 @@ public final class SumFloatDistinctDBAggregationFunction extends AbstractDistinc
      * {@inheritDoc}
      */
     @Override
-    public String getSQLFragment(final StatementManipulator manipulator, final String tableName, final String columnName) {
-        return  buildSQLFragment("SUM_FLOAT", manipulator, tableName, columnName);
+    protected String getFunction() {
+        return "SUM_FLOAT";
     }
 
     /**
