@@ -60,7 +60,6 @@ public class SparkModelPMMLPortObjectFactory {
     private SparkModelPMMLPortObjectFactory() {
         //TODO: Use an extension point for model translators to allow users to write their own translators
         registerConverter(new KMeansModelPMMLPortObjectFactory());
-        registerConverter(new SVMModelPMMLPortObjectFactory());
         registerConverter(new LinearRegressionModelPMMLPortObjectFactory());
     }
 
