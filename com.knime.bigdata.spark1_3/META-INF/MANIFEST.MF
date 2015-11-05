@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Big Data Executor for Spark 1.3
 Bundle-SymbolicName: com.knime.bigdata.spark1_3;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.2.qualifier
 Bundle-ClassPath: knime-spark.jar,
  conf/,
  lib/pmml-model-1.1.15.jar,
