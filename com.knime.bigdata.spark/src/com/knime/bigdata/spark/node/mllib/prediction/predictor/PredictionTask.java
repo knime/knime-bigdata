@@ -85,7 +85,7 @@ public class PredictionTask implements Serializable {
     public static void predict(final ExecutionMonitor exec, final KNIMESparkContext aContext, final String inputRDD,
         final Serializable model, final Integer[] colIdxs, final String resultRDD) throws GenericKnimeSparkException,
         CanceledExecutionException {
-        final UploadUtil util = new UploadUtil(aContext, model, "model");
+        final UploadUtil util = new UploadUtil(aContext, model, "model-" + resultRDD);
         util.upload();
         try {
             final String predictorParams = getPredictorDef(util.getServerFileName(), inputRDD, colIdxs, resultRDD);

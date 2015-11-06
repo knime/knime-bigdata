@@ -65,7 +65,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs), spec.getDataTableSpec());
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContext(inSpecs, false), spec.getDataTableSpec());
         return new PortObjectSpec[] {resultSpec};
     }
 
@@ -75,7 +75,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
-        final KNIMESparkContext context = getContext(inData);
+        final KNIMESparkContext context = getContext(inData, true);
         final DatabasePortObject db = (DatabasePortObject)inData[0];
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();

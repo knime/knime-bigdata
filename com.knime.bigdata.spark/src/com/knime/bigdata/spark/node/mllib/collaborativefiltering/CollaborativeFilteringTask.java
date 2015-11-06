@@ -42,7 +42,7 @@ import com.knime.bigdata.spark.port.data.SparkRDD;
 
 /**
  *
- * @author koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class CollaborativeFilteringTask implements Serializable {
 
@@ -82,12 +82,15 @@ public class CollaborativeFilteringTask implements Serializable {
     private Long m_randomSeed = null;
 
     CollaborativeFilteringTask(final SparkRDD inputRDD, final int aUserIdx, final int aProductIdx,
-        final int aRatingIdx, final double aLambda) {
-        this(inputRDD.getContext(), inputRDD.getID(), aUserIdx, aProductIdx, aRatingIdx, aLambda);
+        final int aRatingIdx, final double aLambda, final double aAlpha, final int aIterations, final int aRank,
+        final boolean implicitPrefs, final int noOfBlocks) {
+        this(inputRDD.getContext(), inputRDD.getID(), aUserIdx, aProductIdx, aRatingIdx, aLambda, aAlpha, aIterations,
+            aRank, implicitPrefs, noOfBlocks);
     }
 
     CollaborativeFilteringTask(final KNIMESparkContext aContext, final String aInputRDD, final int aUserIdx,
-        final int aProductIdx, final int aRatingIdx, final Double aLambda) {
+        final int aProductIdx, final int aRatingIdx, final Double aLambda, final Double aAlpha,
+        final Integer aIterations, final Integer aRank, final boolean implicitPrefs, final int noOfBlocks) {
         m_lambda = aLambda;
         m_context = aContext;
         m_inputTableName = aInputRDD;
@@ -98,6 +101,11 @@ public class CollaborativeFilteringTask implements Serializable {
 
         //rating column should be double valued
         m_ratingIdx = aRatingIdx;
+        m_alpha = aAlpha;
+        m_numIterations = aIterations;
+        m_rank = aRank;
+        m_NumBlocks = noOfBlocks;
+        m_IsImplicitPrefs = implicitPrefs;
     }
 
     CollaborativeFilteringModel execute(final ExecutionContext exec, final String aResultTableName) throws GenericKnimeSparkException,
