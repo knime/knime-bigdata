@@ -63,10 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -74,7 +70,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettings;
@@ -251,7 +246,6 @@ public abstract class SparkNodeModel extends NodeModel {
         exec.setMessage("Start execution...");
         final PortObject[] portObjects = executeInternal(inData, exec);
         exec.setMessage("Execution finished.");
-        m_namedRDDs.clear();
         if (portObjects != null && portObjects.length > 0) {
             for (final PortObject portObject : portObjects) {
                 if (portObject instanceof  SparkDataPortObject) {
@@ -412,11 +406,10 @@ public abstract class SparkNodeModel extends NodeModel {
     @Override
     protected final void reset() {
         if (m_deleteOnReset) {
+            LOGGER.debug("In reset() of SparkNodeModel. Calling deleteRDDs.");
             deleteRDDs(false);
-        } else {
-            //if we do not delete the rdds we have to clear at least the rdds list
-            m_namedRDDs.clear();
         }
+        m_namedRDDs.clear();
         resetInternal();
     }
 
@@ -430,38 +423,45 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private void deleteRDDs(final boolean onDispose) {
         if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
-            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds.");
-            Future<?> future = KNIMEConstants.GLOBAL_THREAD_POOL.enqueue(new Runnable() {
-                @Override
-                public void run() {
-                    final long startTime = System.currentTimeMillis();
-                    for (Entry<KNIMESparkContext, List<String>> e : m_namedRDDs.entrySet()) {
-                        try {
-                            final KNIMESparkContext context = e.getKey();
-                            if (!onDispose || context.deleteRDDsOnDispose()) {
-                                KnimeContext.deleteNamedRDDs(context, e.getValue().toArray(new String[0]));
+            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds. On dispose: " + onDispose);
+            if (KNIMEConfigContainer.verboseLogging()) {
+                LOGGER.debug("RDDS in delete queue: " + m_namedRDDs);
+            }
+            //make a copy of the rdds to delete for the deletion thread
+            final Map<KNIMESparkContext, String[]> rdds2delete = new HashMap<>(m_namedRDDs.size());
+            for (Entry<KNIMESparkContext, List<String>> e : m_namedRDDs.entrySet()) {
+                final KNIMESparkContext context = e.getKey();
+                if (!onDispose || context.deleteRDDsOnDispose()) {
+                    rdds2delete.put(context, e.getValue().toArray(new String[0]));
+                }
+            }
+            if (!rdds2delete.isEmpty()) {
+                if (KNIMEConfigContainer.verboseLogging()) {
+                    LOGGER.debug("RDDS to delete: " + rdds2delete);
+                }
+                SparkPlugin.getDefault().addJob(new Runnable() {
+                    @Override
+                    public void run() {
+                        final long startTime = System.currentTimeMillis();
+                        if (KNIMEConfigContainer.verboseLogging()) {
+                            LOGGER.debug("Deleting rdds: " + rdds2delete);
+                        }
+                        for (Entry<KNIMESparkContext, String[]> e : rdds2delete.entrySet()) {
+                            try {
+                                KnimeContext.deleteNamedRDDs(e.getKey(), e.getValue());
+                            } catch (final Throwable ex) {
+                                LOGGER.error("Exception while deleting named RDDs for context: "
+                                       + e.getKey() + " Exception: " + ex.getMessage(), ex);
                             }
-                        } catch (final Throwable ex) {
-                            LOGGER.error("Exception while deleting named RDDs for context: "
-                                   + e.getKey() + " Exception: " + ex.getMessage(), ex);
+                        }
+                        if (KNIMEConfigContainer.verboseLogging()) {
+                            final long endTime = System.currentTimeMillis();
+                                final long durationTime = endTime - startTime;
+                            LOGGER.debug("Time deleting " + rdds2delete.size() + " namedRDD(s): " + durationTime
+                                + " ms");
                         }
                     }
-                    final long endTime = System.currentTimeMillis();
-                        final long durationTime = endTime - startTime;
-                    LOGGER.debug("Time deleting " + m_namedRDDs.size() + " namedRDD(s): " + durationTime + " ms");
-                    m_namedRDDs.clear();
-                }
-            });
-            try {
-                //TODO: Find better way to ensure that the delete thread has some time during shutdown of KNIME
-                //give the thread at least 10 milliseconds to start the delete job
-                future.get(50, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
-                LOGGER.info("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " was interrupted prior completion.");
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.warn("Deleting RDDs on node " + (onDispose ? "dispose" : "reset")
-                    + " failed. Error: " + e.getMessage(), e);
+                });
             }
         }
     }

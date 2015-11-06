@@ -104,7 +104,7 @@ public abstract class PMMLAssignTask implements Serializable {
         final Map<String,byte[]> bytecode, final String mainClass, final Integer[] colIdxs, final String resultRDD)
                 throws GenericKnimeSparkException, CanceledExecutionException {
         final KNIMESparkContext context = inputRDD.getContext();
-        final UploadUtil util = new UploadUtil(context, (Serializable)bytecode, "bytecode");
+        final UploadUtil util = new UploadUtil(context, (Serializable)bytecode, "bytecode-" + resultRDD);
         util.upload();
         try {
             final String predictorParams = predictorDef(inputRDD.getID(), colIdxs, util.getServerFileName(), mainClass, resultRDD);
