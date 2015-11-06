@@ -124,7 +124,7 @@ public class SparkPreferenceInitializer extends
         store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "knime.jobCheckFrequency", 5));
         store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteRDDsOnDispose", true));
         store.setDefault(PREF_VALIDATE_RDDS, getPresetBoolean(config, "knime.validateRDDs", true));
-        store.setDefault(PREF_DELETE_RDDS_ON_DISPOSE, getPresetBoolean(config, "knime.verboseLogging", false));
+        store.setDefault(PREF_VERBOSE_LOGGING, getPresetBoolean(config, "knime.verboseLogging", false));
     }
 
 

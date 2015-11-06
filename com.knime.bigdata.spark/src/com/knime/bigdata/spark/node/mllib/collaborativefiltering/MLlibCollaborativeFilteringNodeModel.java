@@ -21,13 +21,18 @@
 package com.knime.bigdata.spark.node.mllib.collaborativefiltering;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -52,12 +57,15 @@ import com.knime.bigdata.spark.util.SparkIDs;
 public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
 
     private final SettingsModelString m_userCol = createUserColModel();
-
     private final SettingsModelString m_productCol = createProductColModel();
-
     private final SettingsModelString m_ratingCol = createRatingColModel();
-
     private final SettingsModelDouble m_lambda = createLambdaModel();
+    private final SettingsModelDouble m_alpha = createAlphaModel();
+    private final SettingsModelInteger m_rank = createRankModel();
+    private final SettingsModelInteger m_iterations = createIterationsModel();
+    private final SettingsModelInteger m_blocks = createNoOfBlocksModel();
+    private final SettingsModelBoolean m_implicitPrefs = createImplicitPrefsModel();
+
 
     /**
      *
@@ -65,6 +73,24 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
     public MLlibCollaborativeFilteringNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
+    }
+
+    static SettingsModelDouble createAlphaModel() {
+        return new SettingsModelDouble("alpha", 1);
+    }
+
+    /**
+    * @return
+    */
+    static SettingsModelInteger createRankModel() {
+        return new SettingsModelInteger("rank", 10);
+    }
+
+    /**
+    * @return
+    */
+    static SettingsModelInteger createIterationsModel() {
+        return new SettingsModelInteger("iterations", 10);
     }
 
     /**
@@ -93,6 +119,20 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
      */
     static SettingsModelString createRatingColModel() {
         return new SettingsModelString("ratingColumn", null);
+    }
+
+    /**
+     * @return the number of blocks model
+     */
+    static SettingsModelInteger createNoOfBlocksModel() {
+        return new SettingsModelIntegerBounded("numberOfBlocks", -1, -1, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @return the implicit preferences model
+     */
+    static SettingsModelBoolean createImplicitPrefsModel() {
+        return new SettingsModelBoolean("implicitPrefs", false);
     }
 
     /**
@@ -131,8 +171,13 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final int productIdx = settings.getFeatueColIdxs()[1];
         final int ratingIdx = settings.getClassColIdx();
         final double lambda = m_lambda.getDoubleValue();
-        final CollaborativeFilteringTask task =
-                new CollaborativeFilteringTask(data.getData(), userIdx, productIdx, ratingIdx, lambda);
+        final double alpha = m_alpha.getDoubleValue();
+        final int iterations = m_iterations.getIntValue();
+        final int rank = m_rank.getIntValue();
+        final int noOfBlocks = m_blocks.getIntValue();
+        boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
+        final CollaborativeFilteringTask task = new CollaborativeFilteringTask(data.getData(), userIdx, productIdx,
+            ratingIdx, lambda, alpha, iterations, rank, implicitPrefs, noOfBlocks);
         final String predictions = SparkIDs.createRDDID();
         final CollaborativeFilteringModel model = task.execute(exec, predictions);
         exec.setMessage("Collaborative filtering (SPARK) done.");
@@ -147,14 +192,24 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
     }
 
     private MLlibSettings createMLlibSettings(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        Set<String> colNames = new HashSet<>(3);
         final String[] featureColNames = new String[2];
         featureColNames [MatrixFactorizationModelInterpreter.SETTINGS_USER_COL_IDX] = m_userCol.getStringValue();
+        if (!colNames.add(m_userCol.getStringValue())) {
+            throw new InvalidSettingsException("Duplicate column name found");
+        }
         featureColNames [MatrixFactorizationModelInterpreter.SETTINGS_PRODUCT_COL_IDX] = m_productCol.getStringValue();
+        if (!colNames.add(m_productCol.getStringValue())) {
+            throw new InvalidSettingsException("Duplicate column name found");
+        }
         final Integer[] featureColIdxs = new Integer[2];
         featureColIdxs[MatrixFactorizationModelInterpreter.SETTINGS_USER_COL_IDX] =
                 getColumnIndex(tableSpec, m_userCol, "User");
         featureColIdxs[MatrixFactorizationModelInterpreter.SETTINGS_PRODUCT_COL_IDX] =
                 getColumnIndex(tableSpec, m_productCol, "Product");
+        if (!colNames.add(m_ratingCol.getStringValue())) {
+            throw new InvalidSettingsException("Duplicate column name found");
+        }
         return new MLlibSettings(tableSpec, m_ratingCol.getStringValue(),
             getColumnIndex(tableSpec, m_ratingCol, "Ratings"), null, Arrays.asList(featureColNames), featureColIdxs,
             null);
@@ -182,6 +237,11 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_userCol.saveSettingsTo(settings);
         m_lambda.saveSettingsTo(settings);
         m_ratingCol.saveSettingsTo(settings);
+        m_alpha.saveSettingsTo(settings);
+        m_iterations.saveSettingsTo(settings);
+        m_rank.saveSettingsTo(settings);
+        m_blocks.saveSettingsTo(settings);
+        m_implicitPrefs.saveSettingsTo(settings);
     }
 
     /**
@@ -193,6 +253,11 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_userCol.validateSettings(settings);
         m_lambda.validateSettings(settings);
         m_ratingCol.validateSettings(settings);
+        m_alpha.validateSettings(settings);
+        m_iterations.validateSettings(settings);
+        m_rank.validateSettings(settings);
+        m_blocks.validateSettings(settings);
+        m_implicitPrefs.validateSettings(settings);
     }
 
     /**
@@ -204,5 +269,10 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_userCol.loadSettingsFrom(settings);
         m_lambda.loadSettingsFrom(settings);
         m_ratingCol.loadSettingsFrom(settings);
+        m_alpha.loadSettingsFrom(settings);
+        m_iterations.loadSettingsFrom(settings);
+        m_rank.loadSettingsFrom(settings);
+        m_blocks.loadSettingsFrom(settings);
+        m_implicitPrefs.loadSettingsFrom(settings);
     }
 }

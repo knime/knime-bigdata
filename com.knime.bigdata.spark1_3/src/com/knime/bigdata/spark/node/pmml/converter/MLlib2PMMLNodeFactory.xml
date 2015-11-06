@@ -6,7 +6,7 @@
     <shortDescription>Converts supported Spark MLlib models to PMML model.</shortDescription>
     <fullDescription>
         <intro>
-            Converts supported Spark MLlib models to PMML model. Currently the node only supports k-means models.
+            Converts supported Spark MLlib models to PMML model.
         </intro>
     </fullDescription>
 

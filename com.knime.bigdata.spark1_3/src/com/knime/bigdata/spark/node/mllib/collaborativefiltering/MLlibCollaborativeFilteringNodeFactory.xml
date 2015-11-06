@@ -17,18 +17,24 @@
 			</p>
 		</intro>
 
-		<option name="Number of leading singular values">
-			The number of leading singular values to keep (0 &lt; k &lt;= n). It might return less than k if there are 
-			numerically zero singular values or there are not enough Ritz values converged before the maximum number 
-			of Arnoldi update iterations is reached (in case that matrix A is ill-conditioned).
+		<option name="User column">
+			The user column. Supports only integer columns.
 		</option>
-		<option name="Reciprocal condition number">
-		  The reciprocal condition number (rCond). All singular values smaller than rCond * sigma(0) are treated as zero, 
-		  where sigma(0) is the largest singular value.
+		<option name="Product column">
+		  The product column. Supports only integer columns.
 		</option>
-		<option name="Compute U matrix">
-		  Select this option to compute the U matrix (left singular vectors).
+		<option name="Rating column">
+		  The rating column that contains the rating of the user for the given product. Supports only double columns.
 		</option>
+		<option name="Lambda">Specifies the regularization parameter in ALS.</option>
+		<option name="Alpha">Is a parameter applicable to the implicit feedback variant of ALS that governs the 
+		baseline confidence in preference observations.</option>
+		<option name="Rank">The is the number of latent factors in the model.</option>
+		<option name="Iterations">The is the number of iterations to run.</option>
+		<option name="Number of blocks">The number of blocks used to parallelize computation (set to -1 to auto-configure).</option>
+		<option name="Implicit feedback">
+		Select this option to use the ALS variant adapted for implicit feedback data otherwise the explicit feedback ALS 
+		variant is used.</option>
 	</fullDescription>
 
 	<ports>

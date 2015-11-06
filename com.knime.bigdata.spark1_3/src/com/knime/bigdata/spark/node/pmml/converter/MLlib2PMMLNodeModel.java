@@ -21,13 +21,7 @@
 package com.knime.bigdata.spark.node.pmml.converter;
 
 import java.io.File;
-import java.util.LinkedHashSet;
 
-import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
-import org.knime.base.node.mine.cluster.PMMLClusterTranslator;
-import org.knime.base.node.mine.cluster.PMMLClusterTranslator.ComparisonMeasure;
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
@@ -38,9 +32,8 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
-import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
-import com.knime.bigdata.spark.port.model.SparkModel;
+import com.knime.bigdata.spark.node.pmml.converter.impl.SparkModelPMMLPortObjectFactory;
 import com.knime.bigdata.spark.port.model.SparkModelPortObject;
 
 /**
@@ -72,21 +65,8 @@ public class MLlib2PMMLNodeModel extends NodeModel {
      */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final SparkModel<?> model = ((SparkModelPortObject<?>)inObjects[0]).getModel();
-        //TODO: Use an extension point for model translators to allow users to write their own translators
         //TODO: Add also support for preprocessing info e.g. normalization/category to number that is done in Spark
-        final DataTableSpec learnerSpec = model.getTableSpec();
-        final KMeansModel kmeansModel = (KMeansModel) model.getModel();
-        PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(learnerSpec);
-        creator.setLearningCols(learnerSpec);
-        final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
-        Vector[] clusterCenters = kmeansModel.clusterCenters();
-        final double[][] clusters = new double[clusterCenters.length][];
-        for (int i = 0; i < clusterCenters.length; i++) {
-            clusters[i] = clusterCenters[i].toArray();
-        }
-        outPMMLPort.addModelTranslater(new PMMLClusterTranslator(ComparisonMeasure.squaredEuclidean,
-                clusterCenters.length, clusters, null, new LinkedHashSet<>(model.getLearningColumnNames())));
+        PMMLPortObject outPMMLPort = SparkModelPMMLPortObjectFactory.create(inObjects[0]);
         return new PortObject[] {outPMMLPort};
     }
 
