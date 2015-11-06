@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -67,10 +68,7 @@ public class KnimeContext {
         try {
             synchronized (LOGGER) {
                 if (sparkContextExists(context)) {
-                    //TODO: Find a better and faster way to check that the application is available
-                    try {
-                        KnimeContext.listNamedRDDs(context);
-                    } catch (Exception e) {
+                    if (!isJobJarUploaded(context)) {
                         uploadJobJar(context);
                     }
                     return context;
@@ -119,6 +117,26 @@ public class KnimeContext {
         }
         LOGGER.debug("Context does not exists. Name: " + context.getContextName());
         return false;
+    }
+
+    /**
+     * @param context the {@link KNIMESparkContext} to use for checking job jar existence
+     * @return <code>true</code> if the jar is uploaded, false otherwise
+     * @throws GenericKnimeSparkException
+     */
+    public static boolean isJobJarUploaded(final KNIMESparkContext context) throws GenericKnimeSparkException {
+
+        LOGGER.debug("Check if job jar is uploaded.");
+        //query server for existing context so that we can re-use it if there is one
+        final JsonObject jars = context.getREST().toJSONObject(context, "/jars");
+
+        if (jars.containsKey(JobControler.APP_NAME)) {
+            LOGGER.debug("Job jar is uploaded");
+            return true;
+        } else {
+            LOGGER.debug("Job jar is not uploaded");
+            return false;
+        }
     }
 
     /**

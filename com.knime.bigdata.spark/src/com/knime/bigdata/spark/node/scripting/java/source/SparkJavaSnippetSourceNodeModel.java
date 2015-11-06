@@ -63,7 +63,7 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
         if (resultSpec == null) {
             return new PortObjectSpec[] {null};
         }
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(getContext(inSpecs), resultSpec)};
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(SparkSourceNodeModel.getContext(inSpecs, false), resultSpec)};
     }
 
     /**
@@ -71,7 +71,7 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
      */
     @Override
     protected KNIMESparkContext getContext(final Object[] inData) throws InvalidSettingsException {
-        return SparkSourceNodeModel.getContext(inData);
+        return SparkSourceNodeModel.getContext(inData, true);
     }
 
     /**
