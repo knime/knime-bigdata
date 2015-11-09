@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.phoenix.utility;
 
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
@@ -43,8 +45,8 @@ import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggreg
 import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
-
-import com.knime.bigdata.phoenix.aggregation.SumFloatDistinctDBAggregationFunction;
+import org.knime.core.node.port.database.reader.DBReader;
+import org.knime.core.node.port.database.writer.DBWriter;
 
 
 /**
@@ -62,6 +64,7 @@ public class PhoenixUtility extends DatabaseUtility {
      * Constructor.
      */
     public PhoenixUtility() {
+        //TK_TODO: Add appropriate aggregation functions
         super(DATABASE_IDENTIFIER, MANIPULATOR, new AvgDistinctDBAggregationFunction.Factory(),
             new CorrDBAggregationFunction.Factory(), new  CountDistinctDBAggregationFunction.Factory(),
             new CovarPopDBAggregationFunction.Factory(), new CovarSampDBAggregationFunction.Factory(),
@@ -72,8 +75,7 @@ public class PhoenixUtility extends DatabaseUtility {
             new RegrSXXDBAggregationFunction.Factory(), new RegrSXYDBAggregationFunction.Factory(),
             new RegrSYYDBAggregationFunction.Factory(), new StdDevPopDBAggregationFunction.Factory(),
             new StdDevSampDBAggregationFunction.Factory(), new SumDistinctDBAggregationFunction.Factory(),
-            new SumFloatDistinctDBAggregationFunction.Factory(), new VarPopDBAggregationFunction.Factory(),
-            new VarSampDBAggregationFunction.Factory());
+            new VarPopDBAggregationFunction.Factory(), new VarSampDBAggregationFunction.Factory());
     }
 
     /**
@@ -89,7 +91,7 @@ public class PhoenixUtility extends DatabaseUtility {
      */
     @Override
     public boolean supportsUpdate() {
-        return true;
+        return false;
     }
 
     /**
@@ -98,5 +100,21 @@ public class PhoenixUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBReader getReader(final DatabaseQueryConnectionSettings querySettings) {
+        return new PhoenixReader(querySettings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBWriter getWriter(final DatabaseConnectionSettings connSettings) {
+        return new PhoenixWriter(connSettings);
     }
 }

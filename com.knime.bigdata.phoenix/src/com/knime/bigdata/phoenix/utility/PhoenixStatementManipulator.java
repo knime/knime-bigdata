@@ -35,7 +35,6 @@ public class PhoenixStatementManipulator extends StatementManipulator {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
-        // Impala's JDBC drivers always adds the table name to the column names
         if (colName.startsWith("\"") && colName.endsWith("\"")) {
             final String removedQuotes = colName.substring(1, colName.length() - 1);
             //unqoute quotes
@@ -43,6 +42,14 @@ public class PhoenixStatementManipulator extends StatementManipulator {
             return unquotedQuotes;
         }
         return colName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String[] createTableAsSelect(final String tableName, final String query) {
+        return new String[] {"UPSERT INTO TABLE " + tableName + " " + query};
     }
 
     /**
