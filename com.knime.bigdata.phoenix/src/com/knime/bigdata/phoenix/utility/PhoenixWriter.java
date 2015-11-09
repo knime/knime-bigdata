@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Spliterator;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import org.knime.core.data.BooleanValue;
@@ -84,7 +85,7 @@ public class PhoenixWriter extends DBWriterImpl {
      * {@inheritDoc}
      */
     @Override
-    protected void fillArray(final PreparedStatement stmt, final int dbIdx, final DataCell cell) throws SQLException {
+    protected void fillArray(final PreparedStatement stmt, final int dbIdx, final DataCell cell, final TimeZone tz) throws SQLException {
         if (cell.isMissing()) {
             stmt.setNull(dbIdx, Types.ARRAY);
         } else {
@@ -136,6 +137,33 @@ public class PhoenixWriter extends DBWriterImpl {
                 });
             } else if (baseType.isCompatible(DateAndTimeValue.class)) {
                 type = "TIMESTAMP";
+                spliterator.forEachRemaining(new Consumer<DataCell>() {
+                    int idx = 0;
+                    @Override
+                    public void accept(final DataCell t) {
+                        if (t.isMissing()) {
+                            vals[idx++] = null;
+                        } else {
+                            for (Object object : vals) {
+
+                            }
+                            final DateAndTimeValue dateCell = (DateAndTimeValue) t;
+                            final long corrDate = dateCell.getUTCTimeInMillis() - tz.getOffset(dateCell.getUTCTimeInMillis());
+                            Object value;
+//                            if (!dateCell.hasTime() && !dateCell.hasMillis()) {
+//                                java.sql.Date date = new java.sql.Date(corrDate);
+//                                value = date;
+//                            } else if (!dateCell.hasDate()) {
+//                                java.sql.Time time = new java.sql.Time(corrDate);
+//                                value = time;
+//                            } else {
+                                java.sql.Timestamp timestamp = new java.sql.Timestamp(corrDate);
+                                value = timestamp;
+//                            }
+                            vals[idx++] = value;
+                        }
+                    }
+                });
             } else {
                 type = "VARCHAR";
                 spliterator.forEachRemaining(new Consumer<DataCell>() {

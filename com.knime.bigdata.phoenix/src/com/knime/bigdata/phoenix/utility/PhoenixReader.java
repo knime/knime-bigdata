@@ -29,7 +29,12 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.collection.ListCell;
+import org.knime.core.data.date.DateAndTimeCell;
+import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.LongCell;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.reader.DBReaderImpl;
 
@@ -51,7 +56,7 @@ public class PhoenixReader extends DBReaderImpl {
      */
     @Override
     protected RowIterator createDBRowIterator(final boolean useDbRowId, final ResultSet result) throws SQLException {
-        return super.createDBRowIterator(useDbRowId, result);
+        return new PhoenixDBRowIterator(this, result, useDbRowId);
     }
 
     /**
@@ -64,8 +69,18 @@ public class PhoenixReader extends DBReaderImpl {
             //we need to treat arrays special
             final String typeName = meta.getColumnTypeName(dbIdx);
             final DataType elementType;
-            if (typeName.contains("DOUBLE")) {
+            if (typeName.contains("BOOLEAN")) {
+                elementType = BooleanCell.TYPE;
+            } else if (typeName.contains("INTEGER")) {
+                elementType = IntCell.TYPE;
+            } else if (typeName.contains("BIGINT")) {
+                elementType = LongCell.TYPE;
+            } else if (typeName.contains("DOUBLE")) {
                 elementType = DoubleCell.TYPE;
+            } else if (typeName.contains("VARCHAR")) {
+                elementType = StringCell.TYPE;
+            } else if (typeName.contains("TIMESTAMP") || typeName.contains("TIME") || typeName.contains("DATE")) {
+                elementType = DateAndTimeCell.TYPE;
             } else {
                 elementType = DataType.getType(DataCell.class);
             }
