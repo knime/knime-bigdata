@@ -26,8 +26,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.RowIterator;
+import org.knime.core.data.blob.BinaryObjectCellFactory;
 import org.knime.core.data.collection.ListCell;
 import org.knime.core.data.date.DateAndTimeCell;
 import org.knime.core.data.def.BooleanCell;
@@ -55,8 +57,9 @@ public class PhoenixReader extends DBReaderImpl {
      * {@inheritDoc}
      */
     @Override
-    protected RowIterator createDBRowIterator(final boolean useDbRowId, final ResultSet result) throws SQLException {
-        return new PhoenixDBRowIterator(this, result, useDbRowId);
+    protected RowIterator createDBRowIterator(final DataTableSpec spec, final DatabaseQueryConnectionSettings conn,
+        final BinaryObjectCellFactory blobFactory, final boolean useDbRowId, final ResultSet result) throws SQLException {
+        return new PhoenixDBRowIterator(spec, conn, blobFactory, result, useDbRowId);
     }
 
     /**
