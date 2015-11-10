@@ -32,15 +32,16 @@ import java.util.Collection;
 
 import org.apache.phoenix.schema.types.PhoenixArray;
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.blob.BinaryObjectCellFactory;
 import org.knime.core.data.collection.CollectionCellFactory;
-import org.knime.core.data.date.DateAndTimeCell;
 import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.node.port.database.reader.DBReaderImpl;
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.reader.DBRowIteratorImpl;
 
 /**
@@ -50,12 +51,15 @@ import org.knime.core.node.port.database.reader.DBRowIteratorImpl;
 public class PhoenixDBRowIterator extends DBRowIteratorImpl {
 
     /**
-     * @param databaseReaderConnection
-     * @param result
-     * @param useDbRowId
+     * @param spec {@link DataTableSpec}
+     * @param conn {@link DatabaseConnectionSettings}
+     * @param blobFactory {@link BinaryObjectCellFactory}
+     * @param result {@link ResultSet}
+     * @param useDbRowId <code>true</code> if the db row id should be used
      */
-    PhoenixDBRowIterator(final DBReaderImpl databaseReaderConnection, final ResultSet result, final boolean useDbRowId) {
-        super(databaseReaderConnection, result, useDbRowId);
+    protected PhoenixDBRowIterator(final DataTableSpec spec, final DatabaseConnectionSettings conn,
+        final BinaryObjectCellFactory blobFactory, final ResultSet result, final boolean useDbRowId) {
+        super(spec, conn, blobFactory, result, useDbRowId);
     }
 
     /**
@@ -112,12 +116,11 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @throws SQLException
      */
     private Collection<DataCell> getTimestampCells(final PhoenixArray pArray) throws SQLException {
-    	//TODO:ADD TIMEZONE HANDLING
         final Timestamp[] vals = (Timestamp[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Timestamp val : vals) {
             cells.add(val == null ? DataType.getMissingCell() :
-                new DateAndTimeCell(val.getTime(), true, true, true));
+                createDateCell(val, true, true, true));
         }
         return cells;
     }
@@ -128,12 +131,11 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @throws SQLException
      */
     private Collection<DataCell> getTimeCells(final PhoenixArray pArray) throws SQLException {
-        //TODO:ADD TIMEZONE HANDLING
         final Time[] vals = (Time[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Time val : vals) {
             cells.add(val == null ? DataType.getMissingCell() :
-                new DateAndTimeCell(val.getTime(), true, true, false));
+                createDateCell(val, true, true, false));
         }
         return cells;
     }
@@ -144,12 +146,11 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @throws SQLException
      */
     private Collection<DataCell> getDateCells(final PhoenixArray pArray) throws SQLException {
-        //TODO:ADD TIMEZONE HANDLING
         final Date[] vals = (Date[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Date val : vals) {
             cells.add(val == null ? DataType.getMissingCell() :
-                new DateAndTimeCell(val.getTime(), true, false, false));
+                createDateCell(val, true, false, false));
         }
         return cells;
     }
