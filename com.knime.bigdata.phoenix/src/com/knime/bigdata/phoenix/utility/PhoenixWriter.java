@@ -136,7 +136,7 @@ public class PhoenixWriter extends DBWriterImpl {
                     }
                 });
             } else if (baseType.isCompatible(DateAndTimeValue.class)) {
-                type = "TIMESTAMP";
+                final String[] dbType = new String[1];
                 spliterator.forEachRemaining(new Consumer<DataCell>() {
                     int idx = 0;
                     @Override
@@ -145,12 +145,23 @@ public class PhoenixWriter extends DBWriterImpl {
                             vals[idx++] = null;
                         } else {
                             final DateAndTimeValue dateCell = (DateAndTimeValue) t;
-                            final long corrDate =
-                                    dateCell.getUTCTimeInMillis() - tz.getOffset(dateCell.getUTCTimeInMillis());
-                            vals[idx++] = new java.sql.Timestamp(corrDate);
+                            final long corrDate = dateCell.getUTCTimeInMillis() - tz.getOffset(dateCell.getUTCTimeInMillis());
+                            final Object dateVal;
+                            if (!dateCell.hasTime() && !dateCell.hasMillis()) {
+                                dbType[0] = "DATE";
+                                dateVal = new java.sql.Date(corrDate);
+                            } else if (!dateCell.hasDate()) {
+                                dbType[0] = "TIME";
+                                dateVal = new java.sql.Time(corrDate);
+                            } else {
+                                dbType[0] = "TIMESTAMP";
+                                dateVal = new java.sql.Timestamp(corrDate);
+                            }
+                            vals[idx++] = dateVal;
                         }
                     }
                 });
+                type = dbType[0];
             } else {
                 type = "VARCHAR";
                 spliterator.forEachRemaining(new Consumer<DataCell>() {
