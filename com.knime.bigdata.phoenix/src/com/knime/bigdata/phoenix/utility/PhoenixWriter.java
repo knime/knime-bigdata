@@ -150,7 +150,7 @@ public class PhoenixWriter extends DBWriterImpl {
                             if (!dateCell.hasTime() && !dateCell.hasMillis()) {
                                 dbType[0] = "DATE";
                                 dateVal = new java.sql.Date(corrDate);
-                            } else if (!dateCell.hasDate()) {
+                            } else if (!dateCell.hasMillis()) {
                                 dbType[0] = "TIME";
                                 dateVal = new java.sql.Time(corrDate);
                             } else {
