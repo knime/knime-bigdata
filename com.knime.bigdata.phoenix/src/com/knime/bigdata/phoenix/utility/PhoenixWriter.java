@@ -144,23 +144,10 @@ public class PhoenixWriter extends DBWriterImpl {
                         if (t.isMissing()) {
                             vals[idx++] = null;
                         } else {
-                            for (Object object : vals) {
-
-                            }
                             final DateAndTimeValue dateCell = (DateAndTimeValue) t;
-                            final long corrDate = dateCell.getUTCTimeInMillis() - tz.getOffset(dateCell.getUTCTimeInMillis());
-                            Object value;
-//                            if (!dateCell.hasTime() && !dateCell.hasMillis()) {
-//                                java.sql.Date date = new java.sql.Date(corrDate);
-//                                value = date;
-//                            } else if (!dateCell.hasDate()) {
-//                                java.sql.Time time = new java.sql.Time(corrDate);
-//                                value = time;
-//                            } else {
-                                java.sql.Timestamp timestamp = new java.sql.Timestamp(corrDate);
-                                value = timestamp;
-//                            }
-                            vals[idx++] = value;
+                            final long corrDate =
+                                    dateCell.getUTCTimeInMillis() - tz.getOffset(dateCell.getUTCTimeInMillis());
+                            vals[idx++] = new java.sql.Timestamp(corrDate);
                         }
                     }
                 });
