@@ -27,8 +27,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.Date;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -41,11 +45,13 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.IntValue;
+import org.knime.core.data.date.DateAndTimeValue;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -59,6 +65,7 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
+import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.FileUtil;
 
@@ -72,6 +79,7 @@ import com.knime.bigdata.hive.utility.HiveUtility;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 class HiveLoaderNodeModel extends NodeModel {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveLoaderNodeModel.class);
     private final HiveLoaderSettings m_settings = new HiveLoaderSettings();
 
     HiveLoaderNodeModel() {
@@ -157,7 +165,9 @@ class HiveLoaderNodeModel extends NodeModel {
         ConnectionInformation connInfo = ((ConnectionInformationPortObject)inObjects[0]).getConnectionInformation();
         BufferedDataTable table = (BufferedDataTable)inObjects[1];
         DatabaseConnectionPortObject dbObj = (DatabaseConnectionPortObject)inObjects[2];
-        File dataFile = writeDataToFile(table, exec.createSubProgress(0.1));
+        final CredentialsProvider cp = getCredentialsProvider();
+        DatabaseConnectionSettings dbConn = dbObj.getConnectionSettings(cp);
+        File dataFile = writeDataToFile(table, exec.createSubProgress(0.1), dbConn.getTimeZone());
         ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
         RemoteFile<? extends Connection> remoteFile = null;
         try {
@@ -165,13 +175,12 @@ class HiveLoaderNodeModel extends NodeModel {
             remoteFile = hiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor,
                 exec.createSubExecutionContext(0.2), m_settings);
             exec.checkCanceled();
-            final CredentialsProvider cp = getCredentialsProvider();
             final DataTableSpec tableSpec = table.getDataTableSpec();
             final List<String> normalColumns = new ArrayList<>();
             for (final DataColumnSpec cs : tableSpec) {
                 normalColumns.add(cs.getName());
             }
-            hiveLoader.importData(remoteFile, normalColumns, dbObj.getConnectionSettings(cp),
+            hiveLoader.importData(remoteFile, normalColumns, dbConn,
                 exec.createSubExecutionContext(0.5), m_settings, cp);
         } finally {
             Exception er = null;
@@ -193,21 +202,24 @@ class HiveLoaderNodeModel extends NodeModel {
         // create output object
         exec.setProgress(0.8, "Determining table structure");
         DatabaseQueryConnectionSettings querySettings =
-                new DatabaseQueryConnectionSettings(dbObj.getConnectionSettings(getCredentialsProvider()),
-                    "SELECT * FROM " + m_settings.tableName());
+                new DatabaseQueryConnectionSettings(dbConn, "SELECT * FROM " + m_settings.tableName());
         DatabaseReaderConnection conn = new DatabaseReaderConnection(querySettings);
-        DataTableSpec tableSpec = conn.getDataTableSpec(getCredentialsProvider());
+        DataTableSpec tableSpec = conn.getDataTableSpec(cp);
         DatabasePortObjectSpec outSpec = new DatabasePortObjectSpec(tableSpec, querySettings);
         DatabasePortObject retVal = new DatabasePortObject(outSpec);
         return new PortObject[]{retVal};
     }
 
-    private File writeDataToFile(final BufferedDataTable table, final ExecutionMonitor execMon) throws IOException,
-        CanceledExecutionException {
-        File tempFile = FileUtil.createTempFile("hive-import", ".csv");
-
-        double max = table.getRowCount();
+    private File writeDataToFile(final BufferedDataTable table, final ExecutionMonitor execMon, final TimeZone timeZone)
+            throws IOException, CanceledExecutionException {
+        final File tempFile = FileUtil.createTempFile("hive-import", ".csv");
+        LOGGER.debug("Start writing KNIME table to temporary file " + tempFile.getPath());
+        final double max = table.size();
+        LOGGER.debug("Table structure " + table.getSpec());
+        LOGGER.debug("No of rows to write " + max);
         long count = 0;
+        final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyy-MM-dd HH:mm:ss.SSS");
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile),"UTF-8"))) {
             for (DataRow row : table) {
                 execMon.setProgress(count++ / max, "Writing table to temporary file (" + count + " rows)");
@@ -217,15 +229,28 @@ class HiveLoaderNodeModel extends NodeModel {
                     if (c.isMissing()) {
                         out.write("\\N");
                     } else {
-                        String s = row.getCell(i).toString();
+                        final String s;
+                        if (c instanceof DateAndTimeValue) {
+                            final DateAndTimeValue d = (DateAndTimeValue)c;
+                            final long corrDate = d.getUTCTimeInMillis() - timeZone.getOffset(d.getUTCTimeInMillis());
+                            final Date date = new Date(corrDate);
+                            final Format format;
+                            if (d.hasTime()) {
+                                format = dateTimeFormat;
+                            } else {
+                                format = dateFormat;
+                            }
+                            s = format.format(date);
+                        } else {
+                            s = c.toString();
+                        }
                         if (s.indexOf('\n') >= 0) {
                             throw new IOException("Line breaks in cell contents are not supported (row '"
                                 + row.getKey() + "', column '" + table.getDataTableSpec().getColumnSpec(i).getName()
                                 + "')");
                         }
-                        s = s.replace("\t", "\\\t"); // replace column delimiter
-
-                        out.write(s);
+                        final String sr = s.replace("\t", "\\\t"); // replace column delimiter
+                        out.write(sr);
                     }
                     if (i < row.getNumCells() - 1) {
                         out.write('\t');
@@ -235,10 +260,11 @@ class HiveLoaderNodeModel extends NodeModel {
                 }
             }
         } catch (IOException | CanceledExecutionException ex) {
+            LOGGER.debug("Exception while writing to temporary file: " + ex.getMessage());
             Files.deleteIfExists(tempFile.toPath());
             throw ex;
         }
-
+        LOGGER.debug("Temporary file successful created at " + tempFile.getPath());
         return tempFile;
     }
 
