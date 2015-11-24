@@ -149,7 +149,7 @@ public class HDFSConnection extends Connection {
 
     /**
      * @return the {@link FileSystem}
-     * @throws IOException if the {@link FileSystem} can not accessed
+     * @throws IOException if the {@link FileSystem} cannot accessed
      */
     public synchronized FileSystem getFileSystem() throws IOException {
         if (!isOpen()) {

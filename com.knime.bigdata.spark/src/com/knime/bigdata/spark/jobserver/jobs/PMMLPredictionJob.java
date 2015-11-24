@@ -31,11 +31,11 @@ import java.util.logging.Logger;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 
-import spark.jobserver.SparkJobValidation;
-
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 import com.knime.bigdata.spark.jobserver.server.transformation.RowBuilder;
+
+import spark.jobserver.SparkJobValidation;
 
 /**
  * applies a compiled pmml model to the input data
@@ -79,7 +79,7 @@ public class PMMLPredictionJob extends PMMLAsignJob implements Serializable {
         final Function<Row, Row> predict = new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
             final boolean addProbabilites = aConfig.getInputParameter(PARAM_APPEND_PROBABILITIES, Boolean.class);
-            //use transient since a Method can not be serialized
+            //use transient since a Method cannot be serialized
             private transient Method m_evalMethod;
 
             /** {@inheritDoc} */
