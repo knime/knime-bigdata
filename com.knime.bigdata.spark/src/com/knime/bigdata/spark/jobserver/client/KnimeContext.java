@@ -258,7 +258,7 @@ public class KnimeContext {
      *
      * @param aContextContainer context configuration container
      * @return Set of named RDD names
-     * @throws GenericKnimeSparkException if the RDD list can not be fetched
+     * @throws GenericKnimeSparkException if the RDD list cannot be fetched
      */
     public static Set<String> listNamedRDDs(final KNIMESparkContext aContextContainer)
             throws GenericKnimeSparkException {
