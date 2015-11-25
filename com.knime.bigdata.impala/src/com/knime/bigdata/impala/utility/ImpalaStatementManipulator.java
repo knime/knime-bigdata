@@ -27,6 +27,14 @@ import org.knime.core.node.port.database.StatementManipulator;
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public class ImpalaStatementManipulator extends StatementManipulator {
+
+    /**
+     * Constructor.
+     */
+    public ImpalaStatementManipulator() {
+        super(true);
+    }
+
     /**
      * {@inheritDoc}
      */

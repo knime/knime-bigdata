@@ -21,8 +21,6 @@
 package com.knime.bigdata.hive.utility;
 
 import org.knime.core.node.port.database.StatementManipulator;
-import org.knime.core.node.port.database.binning.CaseBinningStatementGenerator;
-import org.knime.core.node.port.database.pivoting.CasePivotStatementGenerator;
 
 /**
  * Statement manipulator for Hive.
@@ -35,7 +33,7 @@ public class HiveStatementManipulator extends StatementManipulator {
      * Constructor of class {@link HiveStatementManipulator}.
      */
    public HiveStatementManipulator() {
-       super(CasePivotStatementGenerator.getINSTANCE(), CaseBinningStatementGenerator.getINSTANCE());
+       super(true);
    }
 
     /**
