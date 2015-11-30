@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Source" icon="icon.png">
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Source" icon="db_hive_loader.png">
     <name>Hive Loader</name>
     <shortDescription>Loads data from KNIME into Hive</shortDescription>
     <fullDescription>
