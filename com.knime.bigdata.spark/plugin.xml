@@ -402,7 +402,6 @@
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
-            deprecated="false"
             factory-class="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory"
             id="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory">
       </node>

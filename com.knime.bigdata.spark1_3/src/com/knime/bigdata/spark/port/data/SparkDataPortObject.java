@@ -47,6 +47,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.workflow.BufferedDataTableView;
 import org.knime.core.node.workflow.DataTableSpecView;
 
@@ -69,40 +70,37 @@ public class SparkDataPortObject extends SparkContextPortObject {
      * Database port type.
      */
     @SuppressWarnings("hiding")
-    public static final PortType TYPE = new PortType(SparkDataPortObject.class);
+    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(SparkDataPortObject.class);
 
     /**
      * Database type for optional ports.
      */
     @SuppressWarnings("hiding")
-    public static final PortType TYPE_OPTIONAL = new PortType(SparkDataPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL =
+        PortTypeRegistry.getInstance().getPortType(SparkDataPortObject.class, true);
 
     /**
      * Serializer used to save {@link SparkDataPortObject}s.
-     *
-     * @return a new serializer
      */
-    public static PortObjectSerializer<SparkContextPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkContextPortObject>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void savePortObject(final SparkContextPortObject portObject,
-                final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
-                CanceledExecutionException {
-                ((SparkDataPortObject)portObject).m_data.save(out);
-            }
+    public static final class Serializer extends PortObjectSerializer<SparkDataPortObject> {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void savePortObject(final SparkDataPortObject portObject,
+            final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+            portObject.m_data.save(out);
+        }
 
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public SparkDataPortObject loadPortObject(final PortObjectZipInputStream in,
-                final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                return new SparkDataPortObject(new SparkDataTable(in));
-            }
-        };
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SparkDataPortObject loadPortObject(final PortObjectZipInputStream in,
+            final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+            return new SparkDataPortObject(new SparkDataTable(in));
+        }
     }
     private final SparkDataTable m_data;
 
