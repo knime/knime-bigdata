@@ -29,6 +29,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 
 /**
  *
@@ -39,12 +40,13 @@ public class SparkContextPortObject extends SparkContextPortObjectHelper impleme
     /**
      * Spark context port type.
      */
-    public static final PortType TYPE = new PortType(SparkContextPortObject.class);
+    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(SparkContextPortObject.class);
 
     /**
      * Spark context type for optional ports.
      */
-    public static final PortType TYPE_OPTIONAL = new PortType(SparkContextPortObject.class, true);
+    public static final PortType TYPE_OPTIONAL =
+        PortTypeRegistry.getInstance().getPortType(SparkContextPortObject.class, true);
 
     /**
      * Creates a Spark context port object.
@@ -64,29 +66,26 @@ public class SparkContextPortObject extends SparkContextPortObjectHelper impleme
 
     /**
      * Serializer used to save {@link SparkContextPortObject}s.
-     *
-     * @return a new serializer
      */
-    public static PortObjectSerializer<SparkContextPortObject> getPortObjectSerializer() {
-        return new PortObjectSerializer<SparkContextPortObject>() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void savePortObject(final SparkContextPortObject portObject,
-                final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
-                CanceledExecutionException {
-                SparkContextPortObjectHelper.save(portObject.getContext(), out);
-            }
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
-                final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-                final KNIMESparkContext context = SparkContextPortObjectHelper.load(in);
-                return new SparkContextPortObject(context);
-            }
-        };
+    public static final class ModelSerializer extends PortObjectSerializer<SparkContextPortObject> {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void savePortObject(final SparkContextPortObject portObject,
+            final PortObjectZipOutputStream out, final ExecutionMonitor exec)
+                    throws IOException, CanceledExecutionException {
+            SparkContextPortObjectHelper.save(portObject.getContext(), out);
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
+            final PortObjectSpec spec, final ExecutionMonitor exec)
+                    throws IOException, CanceledExecutionException {
+            final KNIMESparkContext context = SparkContextPortObjectHelper.load(in);
+            return new SparkContextPortObject(context);
+        }
     }
 }

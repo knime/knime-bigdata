@@ -24,10 +24,6 @@ import java.io.IOException;
 
 import javax.xml.transform.SourceLocator;
 
-import net.sf.saxon.s9api.MessageListener;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
-
 import org.knime.base.pmml.translation.PMMLTranslator;
 import org.knime.base.pmml.translation.TerminatingMessageException;
 import org.knime.core.node.ExecutionMonitor;
@@ -38,10 +34,15 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
+import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
 import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import com.knime.bigdata.spark.port.data.SparkDataPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
+
+import net.sf.saxon.s9api.MessageListener;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNode;
 
 /**
  * The PMML transformation node model.
@@ -103,7 +104,7 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
          }
 
          try {
-             return new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME);
+             return new CompiledModelPortObject(code, PACKAGE_NAME, MODEL_NAME, JavaCodeCompiler.JavaVersion.JAVA_7);
          } catch (CompilationFailedException e) {
              throw new InvalidSettingsException("The compilation of the generated code failed.\n" + e.getMessage());
          }
