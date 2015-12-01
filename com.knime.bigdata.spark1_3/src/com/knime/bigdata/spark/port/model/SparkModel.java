@@ -100,6 +100,9 @@ public class SparkModel <M extends Serializable> {
      */
     public SparkModel(final M model, final SparkModelInterpreter<SparkModel<M>> interperter,
         final DataTableSpec spec, final String classColName) {
+        if (model == null) {
+            throw new IllegalArgumentException("Model must not be null");
+        }
         m_model = model;
         m_interpreter = interperter;
         m_tableSpec = spec;

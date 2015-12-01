@@ -52,7 +52,7 @@ public class MLlibRandomForestNodeModel extends SparkNodeModel {
      * Constructor.
      */
     protected MLlibRandomForestNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE, new PortType(PMMLPortObject.class, true)},
+        super(new PortType[]{SparkDataPortObject.TYPE, PMMLPortObject.TYPE_OPTIONAL},
             new PortType[]{SparkModelPortObject.TYPE});
     }
 

@@ -77,7 +77,7 @@ public class SparkListRDDNodeModel extends SparkNodeModel {
         exec.setMessage("Fetching RDD list...");
         final Set<String> namedRDDs = KnimeContext.listNamedRDDs(provider.getContext());
         final BufferedDataContainer dc = exec.createDataContainer(createSpec());
-        int idx = 0;
+        long idx = 0;
         for (String rdd : namedRDDs) {
             exec.setProgress(idx / (double) namedRDDs.size(), "Writing row " + idx + " of " + namedRDDs.size());
             exec.checkCanceled();

@@ -511,7 +511,8 @@ public class JobControler {
             LOGGER.debug("Job result json:" + json);
         }
         if (json.containsKey("result")) {
-            return JobResult.fromBase64String(json.getString("result"));
+            final JobResult result = JobResult.fromBase64String(json.getString("result"));
+            return result;
         } else {
             return JobResult.emptyJobResult().withMessage("ERROR: no job result in: " + json.toString());
         }
