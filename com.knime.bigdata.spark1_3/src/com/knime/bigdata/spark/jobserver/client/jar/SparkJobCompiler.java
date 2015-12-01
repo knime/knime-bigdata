@@ -352,7 +352,7 @@ final public class SparkJobCompiler {
         }
 
         private void compileCode(final String aClassName) throws CompilationFailedException, ClassNotFoundException {
-            final JavaCodeCompiler compiler = new JavaCodeCompiler();
+            final JavaCodeCompiler compiler = new JavaCodeCompiler(JavaCodeCompiler.JavaVersion.JAVA_7);
 
             final InMemorySourceJavaFileObject sourceContainer =
                 new InMemorySourceJavaFileObject(aClassName, m_javaCode);
