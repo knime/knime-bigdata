@@ -152,7 +152,7 @@ public class JarPacker {
      * @param source1 the path to first jar file to merge
      * @param source2 the path to second jar file to merge
      * @param target the File that should contain the content of both source jars
-     * @throws IOException if the jar file can not be created
+     * @throws IOException if the jar file cannot be created
      */
     public static void mergeJars(final String source1, final String source2, final File target) throws IOException {
         final Set<String> filterEntries = new HashSet<String>(1);

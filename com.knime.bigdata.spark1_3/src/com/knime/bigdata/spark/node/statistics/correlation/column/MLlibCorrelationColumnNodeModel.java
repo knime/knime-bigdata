@@ -113,7 +113,7 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
             method.getMethod(), null, false);
         final HalfDoubleMatrix corr = task.execute(exec);
         final BufferedDataContainer container = exec.createDataContainer(createResultSpec());
-        container.addRowToTable(new DefaultRow(RowKey.createRowKey(0), new DoubleCell(corr.get(0, 0))));
+        container.addRowToTable(new DefaultRow(RowKey.createRowKey(0l), new DoubleCell(corr.get(0, 0))));
         container.close();
         return new PortObject[] {container.getTable()};
     }

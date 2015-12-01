@@ -59,7 +59,7 @@ public class RestClient {
      * @param aJsonParams the {@link JobConfig} of the job
      * @throws GenericKnimeSparkException if the status is not ok
      */
-    public void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
+    public synchronized void checkJobStatus(final Response response, final String jobClassName, final String aJsonParams)
         throws GenericKnimeSparkException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Rest checkJobStatus");
@@ -78,7 +78,7 @@ public class RestClient {
      * @param aStatus array of expected stati that are OK, all other response stati will cause an exception
      * @throws GenericKnimeSparkException
      */
-    public void checkStatus(final Response response, final String aErrorMsg, final Status... aStatus)
+    public synchronized void checkStatus(final Response response, final String aErrorMsg, final Status... aStatus)
         throws GenericKnimeSparkException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Rest checkStatus");
@@ -100,7 +100,7 @@ public class RestClient {
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public <T> Response post(final KNIMESparkContext aContextContainer, final String aPath,
+    public synchronized <T> Response post(final KNIMESparkContext aContextContainer, final String aPath,
         final String[] aArgs, final Entity<T> aEntity) throws GenericKnimeSparkException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Rest post");
@@ -120,7 +120,7 @@ public class RestClient {
      * @return server response
      * @throws GenericKnimeSparkException
      */
-    public Response delete(final KNIMESparkContext aContextContainer, final String aPath)
+    public synchronized Response delete(final KNIMESparkContext aContextContainer, final String aPath)
         throws GenericKnimeSparkException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Rest delete");
@@ -138,7 +138,7 @@ public class RestClient {
      * @return JSonArray with result
      * @throws GenericKnimeSparkException
      */
-    public JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType)
+    public synchronized JsonArray toJSONArray(final KNIMESparkContext aContextContainer, final String aType)
         throws GenericKnimeSparkException {
         return client.toJSONArray(aContextContainer, aType);
     }
@@ -151,7 +151,7 @@ public class RestClient {
      * @return JsonObject with result
      * @throws GenericKnimeSparkException
      */
-    public JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType)
+    public synchronized JsonObject toJSONObject(final KNIMESparkContext aContextContainer, final String aType)
         throws GenericKnimeSparkException {
         return client.toJSONObject(aContextContainer, aType);
     }
@@ -165,7 +165,7 @@ public class RestClient {
      * @return String value
      * @throws GenericKnimeSparkException
      */
-    public String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
+    public synchronized String getJSONFieldFromResponse(final Response response, final String aField, final String aSubField)
         throws GenericKnimeSparkException {
         return client.getJSONFieldFromResponse(response, aField, aSubField);
     }
