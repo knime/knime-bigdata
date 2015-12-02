@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.phoenix.utility;
 
+import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -91,9 +92,11 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
             case Types.REAL:
             case Types.FLOAT:
             case Types.DOUBLE:
-            case Types.DECIMAL:
             case Types.NUMERIC:
                 cells = getDoubleCells(pArray);
+                break;
+            case Types.DECIMAL:
+                cells = getDecimalCells(pArray);
                 break;
             case Types.DATE:
                 cells = getDateCells(pArray);
@@ -193,6 +196,19 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Boolean val : vals) {
             cells.add(val == null ? DataType.getMissingCell() : BooleanCellFactory.create(val));
+        }
+        return cells;
+    }
+    /**
+     * @param vals
+     * @return
+     * @throws SQLException
+     */
+    private Collection<DataCell> getDecimalCells(final PhoenixArray pArray) throws SQLException {
+        final BigDecimal[] vals = (BigDecimal[])pArray.getArray();
+        final Collection<DataCell>cells = new ArrayList<>(vals.length);
+        for (BigDecimal val : vals) {
+            cells.add(val == null ? DataType.getMissingCell() : new DoubleCell(val.doubleValue()));
         }
         return cells;
     }
