@@ -78,7 +78,7 @@ public class PhoenixReader extends DBReaderImpl {
                 elementType = IntCell.TYPE;
             } else if (typeName.contains("BIGINT")) {
                 elementType = LongCell.TYPE;
-            } else if (typeName.contains("DOUBLE")) {
+            } else if (typeName.contains("DOUBLE") || typeName.contains("DECIMAL")) {
                 elementType = DoubleCell.TYPE;
             } else if (typeName.contains("VARCHAR")) {
                 elementType = StringCell.TYPE;
