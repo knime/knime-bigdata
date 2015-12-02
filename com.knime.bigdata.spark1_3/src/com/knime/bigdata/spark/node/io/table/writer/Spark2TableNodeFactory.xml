@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark to Table</name>
+	<shortDescription>Loads the incoming Spark RDD into a KNIME data table.</shortDescription>
+	<fullDescription>
+		<intro>
+			Loads the incoming Spark RDD into a KNIME data table.
+		</intro>
+		<option name="Fetch all">Retrieves all rows from the Spark data object</option>
+		<option name="No of rows to fetch">Returns only the specified number of rows. 
+		Set to 0 to create an empty KNIME table with the column specifications.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Spark RDD">Spark RDD</inPort>
+		<outPort index="0" name="KNIME table">KNIME data table</outPort>
+	</ports>
+</knimeNode>

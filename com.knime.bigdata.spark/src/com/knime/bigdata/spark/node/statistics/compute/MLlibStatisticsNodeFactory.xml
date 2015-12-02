@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    icon="icon.png" type="Visualizer">
+    <name>Spark Statistics</name>
+    <shortDescription>Computes summary statistics for the selected input columns.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node computes summary statistics for the selected input columns using the 
+            <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#summary-statistics">MLlib Statistics</a> 
+            package.
+            <p>
+                Computed statistics:
+                <ul>
+                    <li>Minimum value</li>
+                    <li>Maximum value</li>
+                    <li>Sample mean</li>
+                    <li>Sample variance</li>
+                    <li>L1 norm</li>
+                    <li>L2 norm</li>
+                    <li>Number of nonzero elements</li>
+                    <li>Number of zero elements</li>
+                    <li>Row count</li>
+                </ul>
+            </p>
+		</intro>
+		<option name="Column filter">Select the columns to include in the calculation.</option>
+	</fullDescription>
+    <ports>
+        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute statistics for.</inPort>
+        <outPort index="0" name="Statistics table">Table with numeric values.</outPort>
+	</ports>
+</knimeNode>

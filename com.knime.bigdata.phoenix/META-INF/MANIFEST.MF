@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Phoenix based HBase connector
+Bundle-SymbolicName: com.knime.bigdata.phoenix;singleton:=true
+Bundle-Version: 0.9.0.qualifier
+Bundle-ClassPath: knime-phoenix.jar,
+ conf/,
+ lib/phoenix-4.4.0-HBase-0.98-client.jar,
+ lib/slf4j-api-1.7.5.jar,
+ lib/slf4j-log4j12.jar
+Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Require-Bundle: org.apache.commons.lang3;bundle-version="3.2.1",
+ org.knime.core;bundle-version="2.11.0",
+ org.knime.base;bundle-version="2.11.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

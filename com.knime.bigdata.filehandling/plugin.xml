@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.knime.base.filehandling.RemoteFileHandler">
+      <RemoteFileHandler
+            RemoteFileHandler="com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler">
+      </RemoteFileHandler>
+   </extension>
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/io/filehandling/remote/connections"
+            factory-class="com.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory"
+            id="com.knime.bigdata.hdfs.nodes.connector.HDFSConnectionInformationNodeFactory">
+      </node>
+      <node
+            category-path="/io/filehandling/remote"
+            factory-class="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory"
+            id="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
+      </node>
+   </extension>
+</plugin>

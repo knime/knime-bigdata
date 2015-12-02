@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    icon="icon.png" type="Manipulator">
+    <name>Spark Concatenate</name>
+    <shortDescription>Concatenates Spark RDDs row wise, inputs are optional.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node concatenates Spark RDDs, inputs are optional. 
+			The Spark RDDs need to have the same structure e.q. column names and types in the same order.
+		</intro>
+	</fullDescription>
+    <ports>
+        <inPort index="0" name="First Spark RDD to concatenate">Spark RDD contributing the rows of the first part of the output Spark RDD.</inPort>
+        <inPort index="1" name="Optional second Spark RDD to concatenate">Spark RDD contributing subsequent rows (optional).</inPort>
+        <inPort index="2" name="Optional third Spark RDD to concatenate">Spark RDD contributing subsequent rows (optional).</inPort>
+        <inPort index="3" name="Optional fourth Spark RDD to concatenate">Spark RDD contributing subsequent rows (optional).</inPort>
+        <outPort index="0" name="Concatenated Spark RDDs">Spark RDD with rows from all input Spark RDDs.</outPort>
+	</ports>
+</knimeNode>

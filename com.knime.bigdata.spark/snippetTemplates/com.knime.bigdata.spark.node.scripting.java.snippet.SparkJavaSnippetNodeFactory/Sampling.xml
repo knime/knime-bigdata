@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Sampling.xml">
+<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Sampling"/>
+<entry key="Description" type="xstring" value="Returns a sample of a given size from the input RDD"/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009//*************************************************%%00010%%00009//Specify the fraction of data to sample and if%%00010%%00009//the sampling should be performed with replacement%%00010%%00009//*************************************************%%00010%%00009final double fraction = 0.5;%%00010%%00009final boolean withReplacement = false;%%00009%%00010%%00009//final boolean withReplacement = true;%%00010%%00010%%00009%%00010%%00009//Returns a sample of the incoming RDD%%00010%%00009return rowRDD1.sample(withReplacement, fraction);%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" value="version 1.x"/>
+<entry key="templateUUID" type="xstring" value="844670f3-c4a4-464b-8911-64df91925823"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>

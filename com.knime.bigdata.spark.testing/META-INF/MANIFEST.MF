@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testcases for the Spark integration
+Bundle-SymbolicName: com.knime.bigdata.spark.testing;singleton:=true
+Bundle-Version: 1.0.100.qualifier
+Bundle-ClassPath: .
+Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Fragment-Host: com.knime.bigdata.spark;bundle-version="0.5.0"
+Require-Bundle: com.google.guava,
+ org.apache.commons.math3;bundle-version="3.4.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
