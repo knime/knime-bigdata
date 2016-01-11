@@ -41,5 +41,5 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  com.fifesoft.rstaui;bundle-version="[2.5.7,3.0.0)",
  com.fifesoft.rsyntaxtextarea;bundle-version="[2.5.7,3.0.0)",
  org.knime.core.util;bundle-version="[5.2.1,6.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
