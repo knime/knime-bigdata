@@ -49,6 +49,7 @@ import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.jobserver.server.SupervisedLearnerUtils;
 import com.knime.bigdata.spark.jobserver.server.ValidationResultConverter;
 
+import scala.collection.Map;
 import spark.jobserver.SparkJobValidation;
 
 /**
@@ -143,9 +144,9 @@ public class GradientBoostedTreesLearnerJob extends KnimeSparkJob implements Ser
             final Long numClasses;
             if (aConfig.hasInputParameter(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES)) {
                 numClasses = aConfig.getInputParameter(SupervisedLearnerUtils.PARAM_NO_OF_CLASSES, Long.class);
-            } else if (boostingStrategy.getTreeStrategy().categoricalFeaturesInfo().contains(labelIndex)) {
+            } else if (((Map) boostingStrategy.getTreeStrategy().categoricalFeaturesInfo()).contains(labelIndex)) {
                 numClasses =
-                    ((Number)boostingStrategy.getTreeStrategy().categoricalFeaturesInfo().get(labelIndex).get())
+                    ((Number)((Map) boostingStrategy.getTreeStrategy().categoricalFeaturesInfo()).get(labelIndex).get())
                         .longValue();
             } else {
                 //Get number of classes from the input data
