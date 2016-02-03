@@ -76,10 +76,9 @@ import org.knime.core.util.FileUtil;
 
 import com.knime.bigdata.spark.SparkPlugin;
 import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippet;
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
 
 /**
- * {@link JSnippet} implementation for the SPark Java Snippet nodes.
+ * {@link JSnippet} implementation for the Spark Java Snippet nodes.
  * @author Tobias Koetter, KNIME.com
  */
 @SuppressWarnings("restriction")
@@ -104,10 +103,9 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
 
     private final File m_tempClassPathDir;
 
-//    private NodeLogger m_logger;
-    private String m_className;
-    private Class<? extends KnimeSparkJob> m_abstractClass;
-    private String m_methodSignature;
+    private final String m_className;
+    private final Class<?> m_abstractClass;
+    private final String m_methodSignature;
 
     /**
      * Create a new snippet.
@@ -115,7 +113,7 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
      * @param abstractClass the KNIMESparkJob this class should extend
      * @param methodSignature
      */
-    public SparkJavaSnippet(final String className, final Class<? extends KnimeSparkJob> abstractClass,
+    public SparkJavaSnippet(final String className, final Class<?> abstractClass,
         final String methodSignature) {
         m_className = className;
         m_abstractClass = abstractClass;
@@ -197,45 +195,34 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
                 jSnippetJar = createJSnippetJarFile();
             }
         }
-        //TK_TODO: Get the jar files dynamically
-            final List<File> jarFiles = new ArrayList<>();
-            //add the default jar files to the class path which are also available on the Spark cluster
-            final String root = SparkPlugin.getDefault().getPluginRootPath();
-//            jarFiles.add(new File(root+"/bin/"));
-//            jarFiles.add(new File(root+"/lib/jobServerUtilsApi.jar"));
-//            jarFiles.add(new File(root+"/lib/scala-library.jar"));
-//            jarFiles.add(new File(root+"/lib/scala-reflect.jar"));
-//            jarFiles.add(new File(root+"/lib/spark-core_2.10-1.2.2.jar"));
-//            jarFiles.add(new File(root+"/lib/spark-mllib_2.10-1.2.2.jar"));
-//            jarFiles.add(new File(root+"/lib/spark-sql_2.10-1.2.2.jar"));
-//            jarFiles.add(new File(root+"/lib/spark-sql-api.jar"));
-//            jarFiles.add(new File(root+"/lib/typesafe-config.jar"));
-            final File libDir = new File(root+"/lib");
-            final String[] libJarNames = libDir.list(new FilenameFilter() {
-                @Override
-                public boolean accept(final File dir, final String name) {
-                    return name.endsWith(".jar");
+
+        // add the default jar files to the class path which are also available on the Spark cluster
+        final List<File> jarFiles = new ArrayList<>();
+
+        final String root = SparkPlugin.getDefault().getPluginRootPath();
+        final File libDir = new File(root + "/lib");
+        libDir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(final File dir, final String name) {
+                if (name.endsWith(".jar")) {
+                    jarFiles.add(new File(dir, name));
                 }
-            });
-            for (String jarName : libJarNames) {
-                jarFiles.add(new File(root+"/lib/"+jarName));
+                return name.endsWith(".jar");
             }
-            jarFiles.add(new File(root+"/resources/knimeJobs.jar"));
-            jarFiles.add(jSnippetJar);
-            if (null != m_jarFiles && m_jarFiles.length > 0) {
-                for (int i = 0; i < m_jarFiles.length; i++) {
-                    try {
-                        jarFiles.add(JavaSnippetUtil.toFile(m_jarFiles[i]));
-                    } catch (InvalidSettingsException e) {
-                        // jar file does not exist
-                        // TODO how to react?
-                    }
+        });
+        jarFiles.add(new File(root + "/resources/knimeJobs.jar"));
+        jarFiles.add(jSnippetJar);
+        if (null != m_jarFiles && m_jarFiles.length > 0) {
+            for (int i = 0; i < m_jarFiles.length; i++) {
+                try {
+                    jarFiles.add(JavaSnippetUtil.toFile(m_jarFiles[i]));
+                } catch (InvalidSettingsException e) {
+                    // jar file does not exist
+                    // TODO how to react?
                 }
             }
-            m_jarFileCache = jarFiles.toArray(new File[jarFiles.size()]);
-//        } else {
-//            m_jarFileCache = new File[] {jSnippetJar};
-//        }
+        }
+        m_jarFileCache = jarFiles.toArray(new File[jarFiles.size()]);
         return m_jarFileCache;
     }
 
@@ -326,19 +313,8 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
         File jarFile = FileUtil.createTempFile("sparkjavasnippet", ".jar",
             new File(KNIMEConstants.getKNIMETempDir()), true);
         try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(jarFile));) {
-//TK_TODO: add the required class files to the jar
             Collection<Object> classes = new ArrayList<>();
             classes.add(m_abstractClass);
-
-//            classes.add(Abort.class);
-//            classes.add(Cell.class);
-//            classes.add(ColumnException.class);
-//            classes.add(FlowVariableException.class);
-//            classes.add(Type.class);
-//            classes.add(TypeException.class);
-//            classes.add(NodeLogger.class);
-//            classes.add(KNIMEConstants.class);
-            // create tree structure for classes
             DefaultMutableTreeNode root = createTree(classes);
             try {
                 createJar(root, jar, null);
@@ -430,30 +406,14 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
      * @return the list of default imports
      */
     protected String[] getSystemImports() {
-        //TK_TODO: Check the inports
-//        String pkg = "org.knime.base.node.jsnippet.expression";
-        return new String[] {//AbstractSparkJavaSnippet.class.getName(),
-//                Abort.class.getName()
-//                , Cell.class.getName()
-//                , ColumnException.class.getName()
-//                , TypeException.class.getName()
-//                , "static " + pkg + ".Type.*"
-//                , "java.util.Calendar"
-                 "org.apache.spark.SparkContext"
+        return new String[] {"org.apache.spark.SparkContext"
                 , "org.apache.spark.api.java.JavaSparkContext"
-//                , "spark.jobserver.SparkJobValidation"
-//                , "com.typesafe.config.Config"
-//                , "com.knime.bigdata.spark.jobserver.server.JobResult"
-//                , "com.knime.bigdata.spark.jobserver.server.ParameterConstants"
-//                , "com.knime.bigdata.spark.jobserver.server.RDDUtils"
-//                , "com.knime.bigdata.spark.jobserver.server.ValidationResultConverter"
                 , "org.apache.spark.api.java.*"
                 , "org.apache.spark.api.java.function.*"
                 , "org.apache.spark.sql.*"
                 , "org.apache.spark.sql.types.*"
                 , "com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException"
                 , "com.knime.bigdata.spark.jobserver.server.transformation.*"
-//                , "com.knime.bigdata.spark.node.scripting.util.*"
                 , "java.io.Serializable"
                 , m_abstractClass.getName()};
     }
@@ -534,8 +494,10 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     private String createFieldsSection() {
         StringBuilder out = new StringBuilder();
         out.append("// system variables\n");
-        out.append("public class " + m_className + " extends " + m_abstractClass.getSimpleName()
-            + " implements Serializable {\n\tprivate static final long serialVersionUID = 1L;\n");
+        out.append(String.format(
+            "public class %s extends %s implements Serializable {\n\tprivate static final long serialVersionUID = 1L;\n",
+            m_className, m_abstractClass.getSimpleName()));
+
         if (m_fields.getInColFields().size() > 0) {
             out.append("  // Fields for input columns\n");
             for (InCol field : m_fields.getInColFields()) {
@@ -889,4 +851,13 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     public String getClassName() {
         return m_className;
     }
+
+    /**
+     * @return the abtract class this snippet is extending.
+     */
+    public Class<?> getAbstractClass() {
+        return m_abstractClass;
+    }
+
+
 }

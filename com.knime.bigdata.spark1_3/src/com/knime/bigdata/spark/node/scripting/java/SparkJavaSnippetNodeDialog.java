@@ -111,7 +111,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
+import com.knime.bigdata.spark.jobserver.jobs.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetTemplate;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetTemplateProvider;
@@ -156,7 +156,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 
     private String m_className;
 
-    private Class<? extends KnimeSparkJob> m_abstractClass;
+    private Class<? extends AbstractSparkJavaSnippet> m_abstractClass;
 
     private String m_methodSignature;
 
@@ -170,12 +170,12 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      */
     @SuppressWarnings("rawtypes")
     public SparkJavaSnippetNodeDialog(final Class templateMetaCategory, final String className,
-        final Class<? extends KnimeSparkJob> abstractClass, final String methodSignature) {
+        final Class<? extends AbstractSparkJavaSnippet> abstractClass, final String methodSignature) {
         this(false, templateMetaCategory, className, abstractClass, methodSignature);
     }
 
     private SparkJavaSnippetNodeDialog(final boolean isPreview,
-            final Class<?> templateMetaCategory, final String className, final Class<? extends KnimeSparkJob> abstractClass,
+            final Class<?> templateMetaCategory, final String className, final Class<? extends AbstractSparkJavaSnippet> abstractClass,
             final String methodSignature) {
         m_templateMetaCategory = templateMetaCategory;
         m_className = className;

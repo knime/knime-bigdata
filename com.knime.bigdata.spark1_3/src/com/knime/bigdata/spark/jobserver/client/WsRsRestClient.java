@@ -31,6 +31,7 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.knime.core.node.NodeLogger;
 
+import com.cedarsoftware.util.io.JsonWriter;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
 
@@ -96,13 +97,14 @@ class WsRsRestClient implements IRestClient {
             return;
         }
         final StringBuilder logmsg = new StringBuilder();
-        logmsg.append("Spark job execution failed.");
-        logmsg.append("\tJob class: ").append(jobClassName);
-        logmsg.append("\tJob config: ").append(aJsonParams);
-        logmsg.append("\tStatus code: ").append(s.getStatusCode());
-        logmsg.append("\tStatus family: ").append(s.getFamily().toString());
-        logmsg.append("\tReason: ").append(s.getReasonPhrase());
-        logmsg.append("\t Response:").append(response.toString());
+        logmsg.append("Spark job execution failed.").append('\n');
+        logmsg.append("\tJob class: ").append(jobClassName).append('\n');
+        logmsg.append("\tJob config: ").append(aJsonParams).append('\n');
+        logmsg.append("\tStatus code: ").append(s.getStatusCode()).append('\n');
+        logmsg.append("\tStatus family: ").append(s.getFamily().toString()).append('\n');
+        logmsg.append("\tReason: ").append(s.getReasonPhrase()).append('\n');
+        logmsg.append("\tResponse:").append(JsonWriter.formatJson(responseToString(response)));
+
         LOGGER.error(logmsg.toString());
         final String className;
         if (jobClassName != null) {
