@@ -67,7 +67,7 @@ public class UploadUtil {
     }
 
     /**
-     * @return name of file on server
+     * @return name of file on server (inside its local filesystem)
      */
     public String getServerFileName() {
         return m_serverFileName;

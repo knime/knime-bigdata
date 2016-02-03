@@ -122,7 +122,7 @@ public final class SparkDataTableCreator {
         // now check result:
         final String message = statusWithResult.getMessage();
         //TODO:  Returned message is "OK" and not OK
-        if (!"\"OK\"".equals(message)) {
+        if (!"OK".equals(message)) {
             //fetcher should return OK as result status
             throw new GenericKnimeSparkException(message);
         }

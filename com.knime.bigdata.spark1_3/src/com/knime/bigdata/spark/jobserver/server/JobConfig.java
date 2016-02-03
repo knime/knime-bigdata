@@ -199,7 +199,13 @@ public class JobConfig implements Serializable {
         }
     }
 
-    private static String readFile(final String aPath) throws IOException {
+    /**
+     *
+     * @param aPath path of the the file to read
+     * @return a file contets as a UTF8 string.
+     * @throws IOException
+     */
+    public static String readFile(final String aPath) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(aPath));
         return new String(encoded, StandardCharsets.UTF_8);
     }
@@ -230,7 +236,7 @@ public class JobConfig implements Serializable {
      * @throws GenericKnimeSparkException
      */
     @SuppressWarnings("unchecked")
-    private static <T> T decodeFromBase64(final String aObjectString) throws GenericKnimeSparkException {
+    public static <T> T decodeFromBase64(final String aObjectString) throws GenericKnimeSparkException {
         byte[] data = DatatypeConverter.parseBase64Binary(aObjectString);
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return (T)ois.readObject();
