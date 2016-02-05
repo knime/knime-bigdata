@@ -20,18 +20,15 @@
  */
 package com.knime.bigdata.spark.node.scripting.java;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Position;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.types.StructType;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
-import org.knime.base.node.jsnippet.guarded.GuardedSection;
-import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.util.FlowVariableRepository;
 import org.knime.base.node.jsnippet.util.JavaField.InVar;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
@@ -54,6 +51,7 @@ import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.node.SparkNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetJarCacheInfo;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJavaSnippetTask;
 import com.knime.bigdata.spark.port.SparkContextProvider;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -75,6 +73,11 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
 
     private final SparkJavaSnippet m_snippet;
 
+    private SourceCompiler cachedSnippetCompilation;
+
+    private SparkJavaSnippetJarCacheInfo jarCacheInfo;
+
+    private final UUID nodeModelInstanceUUID = UUID.randomUUID();
 
     /**
      * @param inPortTypes
@@ -84,6 +87,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
      */
     protected AbstractSparkJavaSnippetNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final SparkJavaSnippet snippet, final String defaultContent) {
+
         super(inPortTypes, outPortTypes);
         m_settings = new JavaSnippetSettings(defaultContent);
         m_snippet = snippet;
@@ -137,15 +141,19 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
 
         final KNIMESparkContext context = getContext(inData);
         final String resultRDDName = SparkIDs.createRDDID();
-        final SourceCompiler compiler = compileSnippet();
+
+        final SourceCompiler compiler = compileSnippetCached();
 
         final SparkJavaSnippetTask task = new SparkJavaSnippetTask(context, table1, table2, compiler.getBytecode(),
-            compiler.getClassName(), resultRDDName);
+            compiler.getClassName(), resultRDDName, jarCacheInfo, getRequiredFlowVariables());
 
         //TODO: Provide the input table spec as StructType within the JavaSnippet node see StructTypeBuilder as
         //reference and use the SparkTypeConverter interface for the conversion from spec to struct
 
         JobResult result = task.execute(exec);
+
+        jarCacheInfo = task.getJarCacheInfo();
+
         final StructType tableStructure = result.getTableStructType(resultRDDName);
         if (tableStructure != null) {
             final DataTableSpec resultSpec = SparkUtil.toTableSpec(tableStructure);
@@ -177,63 +185,49 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
         throw new InvalidSettingsException("No input RDD available");
     }
 
-    private SourceCompiler compileSnippet() throws BadLocationException, GenericKnimeSparkException {
-        final String code = insertFieldValues(m_snippet, getAvailableInputFlowVariables());
+    private SourceCompiler compileSnippetCached() throws BadLocationException, GenericKnimeSparkException {
+        final GuardedDocument codeDoc = m_snippet.getDocument();
 
-        final String newClassName = m_snippet.getClassName() + "_" + UUID.randomUUID().toString().replace("-", "");
-        final String newCode = code.replace(String.format("public class %s extends ", m_snippet.getClassName()),
-            String.format("public class %s extends ", newClassName));
+        // adding the UUID to the code (as a comment) makes the code unique to this node model instance
+        // otherwise this can lead to strange side effects between distinct Spark Java snippet nodes that
+        // compile the same code
+        final String code = codeDoc.getText(0, codeDoc.getLength()) + String.format("// %s", nodeModelInstanceUUID.toString());
+        final String newClassName = createClassNameWithHash(code);
 
-        try {
-            return new SourceCompiler(newClassName, newCode);
-        } catch (ClassNotFoundException | CompilationFailedException e) {
-            LOGGER.error(e.getMessage());
-            throw new GenericKnimeSparkException(e);
+        if (cachedSnippetCompilation == null || !cachedSnippetCompilation.getClassName().equals(newClassName)) {
+            final String newCode = code.replace(String.format("public class %s extends ", m_snippet.getClassName()),
+                String.format("public class %s extends ", newClassName));
+
+            try {
+                cachedSnippetCompilation = new SourceCompiler(newClassName, newCode);
+            } catch (ClassNotFoundException | CompilationFailedException e) {
+                LOGGER.error(e.getMessage());
+                throw new GenericKnimeSparkException(e);
+            }
         }
+
+        return cachedSnippetCompilation;
     }
 
-    private static String insertFieldValues(final SparkJavaSnippet snippet, final Map<String, FlowVariable> flowVars)
-            throws BadLocationException {
-        //TODO: Provide the flow variables as key value map in the config and assign the values of the variable to
-        // their corresponding members in the Spark job class
-        final GuardedDocument codeDoc = snippet.getDocument();
-        // populate the system input flow variable fields with data
-        final FlowVariableRepository flowVarRepo = new FlowVariableRepository(flowVars);
-        //get the guarded flow variable fields section
-        final GuardedSection fieldsSection = codeDoc.getGuardedSection(JavaSnippetDocument.GUARDED_FIELDS);
-        String fieldsText = fieldsSection.getText();
-        for (final InVar inCol : snippet.getSystemFields().getInVarFields()) {
-            final Class<?> javaType = inCol.getJavaType();
-            final FlowVariable flowVariable = flowVarRepo.getFlowVariable(inCol.getKnimeName());
-            final Object v = flowVarRepo.getValueOfType(inCol.getKnimeName(), javaType);
-            final String valueString;
-            if (v == null) {
-                valueString = "null";
-            } else {
-                final Type type = flowVariable.getType();
-                switch (type) {
-                    case DOUBLE:
-                        valueString = ((Double)v).toString();
-                        break;
-                    case INTEGER:
-                        valueString = ((Integer)v).toString();
-                        break;
-                    default:
-                        //this is the String and fallback case
-                        valueString = "\"" + StringEscapeUtils.escapeJava(v.toString())  + "\"";
-                        break;
-                }
+    private String createClassNameWithHash(final String code) {
+        return m_snippet.getClassName() + "_" + DigestUtils.sha256Hex(code);
+    }
+
+    private HashMap<String, Object> getRequiredFlowVariables() throws GenericKnimeSparkException {
+
+        final FlowVariableRepository flowVarRepo = new FlowVariableRepository(getAvailableInputFlowVariables());
+        final HashMap<String, Object> requiredFlowVars = new HashMap<String, Object>();
+
+        for (InVar inCol : m_snippet.getSystemFields().getInVarFields()) {
+            String javaFieldName = inCol.getJavaName();
+            Object javaFieldValue = flowVarRepo.getValueOfType(inCol.getKnimeName(), inCol.getJavaType());
+
+            if (javaFieldValue != null) {
+                requiredFlowVars.put(javaFieldName, javaFieldValue);
             }
-            final String fieldName = inCol.getJavaName();
-            fieldsText = fieldsText.replace(fieldName + ";", fieldName + " = " + valueString + ";");
         }
-        final String origCode = codeDoc.getText(0, codeDoc.getLength());
-        final Position start = fieldsSection.getStart();
-        final Position end = fieldsSection.getEnd();
-        final StringBuilder buf = new StringBuilder(origCode.substring(0, start.getOffset()));
-        buf.append(fieldsText);
-        buf.append(origCode.substring(end.getOffset() + 1));
-        return buf.toString();
+
+        return requiredFlowVars;
     }
 
 

@@ -140,7 +140,7 @@ public class JobConfig implements Serializable {
      * @return list of values for the given input parameter
      */
     @SuppressWarnings("unchecked")
-    public <T> List<T> getInputListParameter(final String aParamName, final Class<?> aType) {
+    public <T> List<T> getInputListParameter(final String aParamName, final Class<T> aType) {
         if (aType == Integer.class) {
             return (List<T>)m_config.getIntList(INPUT_PREFIX + aParamName);
         }

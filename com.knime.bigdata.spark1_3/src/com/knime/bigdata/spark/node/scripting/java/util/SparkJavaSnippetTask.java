@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.scripting.java.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.knime.bigdata.spark.jobserver.client.JsonUtils;
 import com.knime.bigdata.spark.jobserver.client.jar.JarPacker;
 import com.knime.bigdata.spark.jobserver.jobs.SparkJavaSnippetJob;
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.ParameterConstants;
 import com.knime.bigdata.spark.port.context.KNIMESparkContext;
@@ -63,6 +65,10 @@ public class SparkJavaSnippetTask implements Serializable {
 
     private final String resultRDD;
 
+    private SparkJavaSnippetJarCacheInfo jarCacheInfo;
+
+    private HashMap<String, Object> flowVariableValues;
+
     /**
      * Creates a new task that handles the execution of a Java snippet in Spark.
      *
@@ -72,18 +78,29 @@ public class SparkJavaSnippetTask implements Serializable {
      * @param bytecode A map of class names to compiled byte code.
      * @param snippetClass The name of the class to run in Spark.
      * @param resultRDDName Name of the resulting RDD (must be null for sink nodes).
+     * @param flowVariableValues Map of java field name to value.
      */
     public SparkJavaSnippetTask(final KNIMESparkContext context, final SparkRDD inputRDD1, final SparkRDD inputRDD2,
-        final Map<String, byte[]> bytecode, final String snippetClass, final String resultRDDName) {
+        final Map<String, byte[]> bytecode, final String snippetClass, final String resultRDDName,
+        final SparkJavaSnippetJarCacheInfo cacheInfo, final HashMap<String, Object> flowVariableValues) {
+
         this.context = context;
         this.inputRDD1 = inputRDD1;
         this.inputRDD2 = inputRDD2;
         this.bytecode = bytecode;
         this.snippetClass = snippetClass;
         this.resultRDD = resultRDDName;
+        this.flowVariableValues = flowVariableValues;
+
+        if (cacheInfo == null) {
+            jarCacheInfo =
+                new SparkJavaSnippetJarCacheInfo(new HashMap<String, String>(), getLocalSnippetJarFileName());
+        } else {
+            jarCacheInfo = cacheInfo;
+        }
     }
 
-    private String params2Json(final String jarFilenameOnJobServer) throws GenericKnimeSparkException {
+    private String params2Json() throws GenericKnimeSparkException {
 
         final List<String> inputParams = new LinkedList<>();
 
@@ -100,11 +117,18 @@ public class SparkJavaSnippetTask implements Serializable {
         inputParams.add(SparkJavaSnippetJob.PARAM_SNIPPET_CLASS);
         inputParams.add(snippetClass);
 
-        inputParams.add(SparkJavaSnippetJob.PARAM_JAR_FILE_TO_ADD);
-        inputParams.add(jarFilenameOnJobServer);
+        inputParams.add(SparkJavaSnippetJob.PARAM_JAR_FILES_TO_ADD);
+        inputParams.add(JsonUtils.toJsonArray(jarCacheInfo.getJarsUploaded().values().toArray()));
+
+        inputParams.add(SparkJavaSnippetJob.PARAM_FLOW_VAR_VALUES);
+        inputParams.add(JobConfig.encodeToBase64(flowVariableValues));
 
         return JsonUtils.asJson(new Object[]{ParameterConstants.PARAM_INPUT, inputParams.toArray(new String[0]),
             ParameterConstants.PARAM_OUTPUT, new String[]{SparkJavaSnippetJob.PARAM_OUTPUT_TABLE_KEY, resultRDD}});
+    }
+
+    private String getLocalSnippetJarFileName() {
+        return snippetClass + ".jar";
     }
 
     /**
@@ -115,8 +139,24 @@ public class SparkJavaSnippetTask implements Serializable {
      * @throws GenericKnimeSparkException
      * @throws CanceledExecutionException
      */
-    public JobResult execute(final ExecutionMonitor exec) throws GenericKnimeSparkException, CanceledExecutionException {
+    public JobResult execute(final ExecutionMonitor exec)
+        throws GenericKnimeSparkException, CanceledExecutionException {
 
+        jarCacheInfo.refreshCacheInfo(context, getLocalSnippetJarFileName());
+
+        if (!jarCacheInfo.isSnippetJarUploaded()) {
+            jarCacheInfo.addUploadedJar(jarCacheInfo.getLocalSnippetJarFileName(),
+                uploadJarFile(createSnippetJarFile(), true));
+        }
+
+        String jsonConfig = params2Json();
+
+        exec.checkCanceled();
+        return JobControler.startJobAndWaitForResult(context, SparkJavaSnippetJob.class.getCanonicalName(), jsonConfig,
+            exec);
+    }
+
+    private File createSnippetJarFile() throws GenericKnimeSparkException {
         final File snippetDir = new File(KNIMEConstants.getKNIMEHomeDir(), "sparkSnippetJars");
         if (!snippetDir.exists()) {
             snippetDir.mkdirs();
@@ -130,15 +170,24 @@ public class SparkJavaSnippetTask implements Serializable {
             throw new GenericKnimeSparkException("Failed to create snippet jar file: " + e.getMessage(), e);
         }
 
-
-        DataUploader uploader = new DataUploader();
-        String jarFilenameOnJobServer = DataUploader.uploadDataFile(context, jarFile.getAbsolutePath(), jarFile.getName());
-        jarFile.delete();
-
-        String jsonConfig = params2Json(jarFilenameOnJobServer);
-
-        exec.checkCanceled();
-        return JobControler.startJobAndWaitForResult(context, SparkJavaSnippetJob.class.getCanonicalName(), jsonConfig, exec);
+        return jarFile;
     }
 
+    private String uploadJarFile(final File jarFile, final boolean deleteAfterUpload)
+        throws GenericKnimeSparkException {
+        String jarFilenameOnJobServer =
+            DataUploader.uploadDataFile(context, jarFile.getAbsolutePath(), jarFile.getName());
+
+        if (deleteAfterUpload) {
+            jarFile.delete();
+        }
+        return jarFilenameOnJobServer;
+    }
+
+    /**
+     * @return the jarCacheInfo
+     */
+    public SparkJavaSnippetJarCacheInfo getJarCacheInfo() {
+        return jarCacheInfo;
+    }
 }
