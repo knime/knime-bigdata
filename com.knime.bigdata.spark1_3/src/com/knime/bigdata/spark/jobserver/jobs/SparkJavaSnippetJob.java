@@ -22,9 +22,8 @@ package com.knime.bigdata.spark.jobserver.jobs;
 
 import java.io.File;
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +34,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.jobserver.server.GenericKnimeSparkException;
+import com.knime.bigdata.spark.jobserver.server.JarRegistry;
 import com.knime.bigdata.spark.jobserver.server.JobConfig;
 import com.knime.bigdata.spark.jobserver.server.JobResult;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJob;
@@ -73,11 +73,15 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
      */
     public static final String PARAM_SNIPPET_CLASS = "snippetClass";
 
-
     /**
      * Path in local filesystem (of jobserver), to jar file with snippet code that needs to be loaded.
      */
-    public static final String PARAM_JAR_FILE_TO_ADD = "jarFileToAdd";
+    public static final String PARAM_JAR_FILES_TO_ADD = "jarFilesToAdd";
+
+    /**
+     * map with flow variable values.
+     */
+    public static final String PARAM_FLOW_VAR_VALUES = "flowVariableValues";
 
     /**
      * {@inheritDoc}
@@ -88,8 +92,12 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
             return ValidationResultConverter.invalid("Input parameter '" + PARAM_SNIPPET_CLASS + "' missing.");
         }
 
-        if (!aConfig.hasInputParameter(PARAM_JAR_FILE_TO_ADD)) {
-            return ValidationResultConverter.invalid("Input parameter '" + PARAM_JAR_FILE_TO_ADD + "' missing.");
+        if (!aConfig.hasInputParameter(PARAM_JAR_FILES_TO_ADD)) {
+            return ValidationResultConverter.invalid("Input parameter '" + PARAM_JAR_FILES_TO_ADD + "' missing.");
+        }
+
+        if (!aConfig.hasInputParameter(PARAM_FLOW_VAR_VALUES)) {
+            return ValidationResultConverter.invalid("Input parameter '" + PARAM_FLOW_VAR_VALUES + "' missing.");
         }
 
         if (!aConfig.hasOutputParameter(PARAM_OUTPUT_TABLE_KEY)) {
@@ -109,10 +117,13 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
         } else if (aConfig.hasInputParameter(PARAM_INPUT_TABLE_KEY2)
             && !validateNamedRdd(aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2))) {
             msg = "Second input data table missing for key: " + aConfig.getInputParameter(PARAM_INPUT_TABLE_KEY2);
-
-        } else if (!new File(aConfig.getInputParameter(PARAM_JAR_FILE_TO_ADD)).canRead()) {
-            msg = String.format("Cannot read jar file %s. Does it exist?",
-                aConfig.getInputParameter(PARAM_JAR_FILE_TO_ADD));
+        } else {
+            for (String jarFileToAdd : aConfig.getInputListParameter(PARAM_JAR_FILES_TO_ADD, String.class)) {
+                if (!new File(jarFileToAdd).canRead()) {
+                    msg = String.format("Cannot read jar file %s. Does it exist?", jarFileToAdd);
+                    break;
+                }
+            }
         }
 
         if (msg != null) {
@@ -134,20 +145,20 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
         JavaRDD<Row> rowRDD1 = getNamedRowRDD(aConfig, PARAM_INPUT_TABLE_KEY1);
         JavaRDD<Row> rowRDD2 = getNamedRowRDD(aConfig, PARAM_INPUT_TABLE_KEY2);
 
-        LOGGER.log(Level.INFO, "Adding jar to workers");
-        sparkContext.addJar(aConfig.getInputParameter(PARAM_JAR_FILE_TO_ADD));
-
-        addToClassLoader(aConfig.getInputParameter(PARAM_JAR_FILE_TO_ADD), (URLClassLoader)getClass().getClassLoader());
+        JarRegistry.getInstance(sparkContext)
+            .ensureJarsAreLoaded(aConfig.getInputListParameter(PARAM_JAR_FILES_TO_ADD, String.class));
 
         final AbstractSparkJavaSnippet snippet;
 
         try {
-            final Class<?> snippetClass = getClass().getClassLoader().loadClass
-                    (aConfig.getInputParameter(PARAM_SNIPPET_CLASS));
+            final Class<?> snippetClass =
+                getClass().getClassLoader().loadClass(aConfig.getInputParameter(PARAM_SNIPPET_CLASS));
             snippet = (AbstractSparkJavaSnippet)snippetClass.newInstance();
         } catch (Exception e) {
             throw new GenericKnimeSparkException("Could not instantiate Java snippet class. Error: " + e, e);
         }
+
+        setFlowVariableValues(snippet, aConfig.<Map<String, Object>>decodeFromInputParameter(PARAM_FLOW_VAR_VALUES));
 
         JavaRDD<Row> resultRDD = snippet.apply(new JavaSparkContext(sparkContext), rowRDD1, rowRDD2);
 
@@ -169,6 +180,21 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
         }
     }
 
+    private void setFlowVariableValues(final AbstractSparkJavaSnippet snippet,
+        final Map<String, Object> decodeFromInputParameter) throws GenericKnimeSparkException {
+        for (String javaFieldName : decodeFromInputParameter.keySet()) {
+
+            try {
+                Field field = snippet.getClass().getDeclaredField(javaFieldName);
+                field.setAccessible(true);
+                field.set(snippet, decodeFromInputParameter.get(javaFieldName));
+            } catch (Exception e) {
+                throw new GenericKnimeSparkException(String.format(
+                    "Error when setting field value %s in Spark java snippet: %s", javaFieldName, e.getMessage()), e);
+            }
+        }
+    }
+
     private JavaRDD<Row> getNamedRowRDD(final JobConfig aConfig, final String inputTableKey) {
         final JavaRDD<Row> rowRDD;
         if (aConfig.hasInputParameter(inputTableKey)) {
@@ -177,35 +203,5 @@ public class SparkJavaSnippetJob extends KnimeSparkJob implements Serializable {
             rowRDD = null;
         }
         return rowRDD;
-    }
-
-
-    private void addToClassLoader(final String filename, final URLClassLoader classLoader) throws GenericKnimeSparkException {
-
-        try {
-            LOGGER.log(Level.INFO, "Searching for addURL method");
-            Method addURLMethod = findMethod(classLoader.getClass(), "addURL", URL.class);
-            addURLMethod.setAccessible(true);
-            LOGGER.log(Level.INFO, "Invoking addURL method");
-            addURLMethod.invoke(classLoader, new URL("file:" + filename));
-        } catch (Exception e) {
-            throw new GenericKnimeSparkException(e.getMessage(), e);
-        }
-    }
-
-    private Method findMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes)
-        throws NoSuchMethodException {
-        Class<?> currClass = clazz;
-
-        while (currClass != null) {
-            try {
-                LOGGER.log(Level.INFO, "Trying to get addURL from " + currClass.getCanonicalName());
-                return currClass.getDeclaredMethod(methodName, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                currClass = clazz.getSuperclass();
-            }
-        }
-
-        throw new NoSuchMethodException("Could not find method: " + methodName);
     }
 }
