@@ -34,6 +34,14 @@ import javax.annotation.Nullable;
 
 import org.apache.spark.sql.types.StructType;
 
+import com.knime.bigdata.spark.jobserver.server.transformation.StructTypeBuilder;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigRenderOptions;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueFactory;
+
 /**
  * immutable container for job results
  *
@@ -44,10 +52,17 @@ import org.apache.spark.sql.types.StructType;
  */
 public class JobResult implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * String constants used during (de)serialization of this class
+     */
+    private static final String MSG_IDENTIFIER = "msg";
+    private static final String TABLES_IDENTIFIER = "tables";
+    private static final String OBJECT_IDENTIFIER = "model";
+    private static final String STATUS_IDENTIFIER = "status";
+    private static final String WARNING_IDENTIFIER = "warn";
+    private static final String ERROR_IDENTIFIER = "error";
 
     /**
      * some String that is (part of) the result
@@ -147,7 +162,43 @@ public class JobResult implements Serializable {
      * @throws GenericKnimeSparkException
      */
     public static JobResult fromBase64String(@Nonnull final String aStringRepresentation) throws GenericKnimeSparkException {
-        return (JobResult) JobConfig.decodeFromBase64(aStringRepresentation);
+        Config config = ConfigFactory.parseString(aStringRepresentation);
+        final String msg = stripQuotes(config.getString(MSG_IDENTIFIER));
+        final boolean isError = config.getBoolean(STATUS_IDENTIFIER);
+
+        final Map<String, StructType> m = new HashMap<>();
+        ConfigObject c = config.getObject(TABLES_IDENTIFIER);
+        for (Map.Entry<String, ConfigValue> entry : c.entrySet()) {
+            final ConfigValue value = entry.getValue();
+            if (value != null && value.unwrapped() instanceof String) {
+                final StructType structType = StructTypeBuilder.fromConfigString((String)value.unwrapped());
+                m.put(stripQuotes(entry.getKey()), structType);
+            } else {
+                m.put(stripQuotes(entry.getKey()), null);
+            }
+        }
+        final List<String[]> warn = new ArrayList<>();
+        final List<String[]> error = new ArrayList<>();
+        try {
+            final JobConfig jobConfig = new JobConfig(config);
+            if (isError) {
+                return new JobResult(msg, Collections.unmodifiableMap(m), null,
+                    (String)(jobConfig.decodeFromParameter(OBJECT_IDENTIFIER)));
+            }
+            if (config.hasPath(OBJECT_IDENTIFIER)) {
+                return new JobResult(msg, Collections.unmodifiableMap(m),
+                    (Serializable)(jobConfig.decodeFromParameter(OBJECT_IDENTIFIER)));
+            }
+            warn.addAll(jobConfig.<List<String[]>>decodeFromParameter(WARNING_IDENTIFIER));
+            error.addAll(jobConfig.<List<String[]>>decodeFromParameter(ERROR_IDENTIFIER));
+
+        } catch (GenericKnimeSparkException e) {
+            return JobResult.emptyJobResult().withMessage(msg).withException(e);
+        }
+        JobResult res = new JobResult(msg, Collections.unmodifiableMap(m), null);
+        res.addErrors(error);
+        res.addWarnings(warn);
+        return res;
     }
 
     /**
@@ -155,14 +206,68 @@ public class JobResult implements Serializable {
      */
     @Override
     public String toString() {
+        Config config = ConfigFactory.empty().withValue(MSG_IDENTIFIER, ConfigValueFactory.fromAnyRef(ensureQuotes(m_msg)));
+
+        final Map<String, String> m = new HashMap<>();
+        for (Map.Entry<String, StructType> entry : m_tables.entrySet()) {
+            final String key = ensureQuotes(entry.getKey());
+            final StructType value = entry.getValue();
+            if (value != null) {
+                final String structConfig = StructTypeBuilder.toConfigString(value);
+                m.put(key, structConfig);
+            } else {
+                m.put(key, null);
+            }
+        }
+        config = config.withValue(TABLES_IDENTIFIER, ConfigValueFactory.fromMap(m));
+        config = config.withValue(STATUS_IDENTIFIER, ConfigValueFactory.fromAnyRef(m_isError));
+        if (m_object != null) {
+            try {
+                config = config.withValue(OBJECT_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_object)));
+            } catch (GenericKnimeSparkException e) {
+                e.printStackTrace();
+                System.err.println("Unable to convert result object to base 64 string. Object will be dropped.");
+            }
+        }
         try {
-            return JobConfig.encodeToBase64(this);
+            config = config.withValue(WARNING_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_warn)));
+            config = config.withValue(ERROR_IDENTIFIER, ConfigValueFactory.fromAnyRef(JobConfig.encodeToBase64(m_error)));
         } catch (GenericKnimeSparkException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            System.err.println("Unable to convert error / warning messages to base 64 string. Messages will be dropped.");
         }
-
+        return config.root().render(ConfigRenderOptions.concise());
     }
+
+    /**
+     * ensure that the given string starts and ends with quotes
+     *
+     * @param aString
+     * @return original string if it is already in quotes, quoted string otherwise
+     */
+    private static String ensureQuotes(final String aString) {
+        if (aString == null) {
+            return "";
+        }
+        if (!aString.startsWith("\"") || !aString.endsWith("\"")) {
+            return "\"" + aString + "\"";
+        }
+        return aString;
+    }
+
+    /**
+     * remove quotes from start/end of given string
+     *
+     * @param aString
+     * @return original string if it is not in quotes, un-quoted string otherwise
+     */
+    private static String stripQuotes(final String aString) {
+        if (aString.startsWith("\"") && aString.endsWith("\"")) {
+            return aString.substring(1, aString.length() - 1);
+        }
+        return aString;
+    }
+
 
     /**
      * @return job result message, may be empty string, but never null
