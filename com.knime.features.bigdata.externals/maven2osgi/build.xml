@@ -1,0 +1,34 @@
+<project name="ModifyManifests" default="build">
+	<!-- This ant build file adds the "Bundle-ActivationPolicy" to all external bundle so that
+	     bundle activators are called by Equinox. Otherwise services may not work as expected. -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${basedir}/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	<target name="build">
+		<foreach target="modify" param="theFile">
+			<path>
+				<fileset dir="${basedir}/target/repository/plugins" casesensitive="yes">
+					<include name="*.jar" />
+					<exclude name="*.source_*.jar" />
+				</fileset>
+			</path>
+		</foreach>
+		<delete>
+			<fileset dir="${basedir}/target/repository">
+				<include name="artifacts.*" />
+				<include name="content.*" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="modify">
+		<jar destfile="${theFile}" update="true">
+			<manifest>
+				<attribute name="Bundle-ActivationPolicy" value="lazy" />
+			</manifest>
+		</jar>
+	</target>
+</project>
