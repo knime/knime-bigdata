@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.knime.update.externals"
+      label="External plug-ins"
+      version="3.1.0.qualifier">
+
+   <includes
+         id="org.knime.features.externals"
+         version="0.0.0"/>
+
+</feature>
