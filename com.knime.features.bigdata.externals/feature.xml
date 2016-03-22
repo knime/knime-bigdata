@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.features.externals"
+      id="com.knime.features.bigdata.externals"
       label="Feature with all external plug-ins for KNIME"
       version="3.1.2.qualifier"
       provider-name="KNIME GmbH, Konstanz, Germany">
