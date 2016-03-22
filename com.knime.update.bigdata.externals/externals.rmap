@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rm:rmap xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0" xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0">
-  <rm:locator searchPathRef="knime-external" failOnError="false"/>
   <rm:locator searchPathRef="external-bundles" failOnError="false"/>
   <rm:locator searchPathRef="local-mirror"/>
-  <rm:searchPath name="knime-external">
-    <rm:provider componentTypes="osgi.bundle,eclipse.feature" readerType="local" mutable="false">
-      <rm:property key="buckminster.mutable" value="false"/>
-      <rm:uri format="file:///{0}/KNIME_External/{1}/">
-        <bc:propertyRef key="workspace.root"/>
-        <bc:propertyRef key="buckminster.component"/>
-      </rm:uri>
-    </rm:provider>
-  </rm:searchPath>
   <rm:searchPath name="local-mirror">
     <rm:provider componentTypes="eclipse.feature,osgi.bundle,buckminster" readerType="p2" source="false" mutable="false">
       <rm:property key="buckminster.source" value="false"/>
@@ -22,7 +12,7 @@
   <rm:searchPath name="external-bundles">
     <rm:provider componentTypes="osgi.bundle" readerType="p2" mutable="false">
       <rm:property key="buckminster.mutable" value="false"/>
-      <rm:uri format="file:///{0}/KNIME_External/org.knime.features.externals/maven2osgi/target/repository">
+      <rm:uri format="file:///{0}/KNIME.COM/store/com.knime.features.bigdata.externals/maven2osgi/target/repository">
         <bc:propertyRef key="workspace.root"/>
       </rm:uri>
     </rm:provider>
