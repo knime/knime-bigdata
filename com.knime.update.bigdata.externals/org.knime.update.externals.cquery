@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><cq:componentQuery xmlns:cq="http://www.eclipse.org/buckminster/CQuery-1.0" resourceMap="externals.rmap">
+    <cq:rootRequest name="org.knime.update.externals" componentType="eclipse.feature" versionDesignator="2.4.0"/>
+    <cq:property key="target.arch" value="*"/>
+    <cq:property key="target.os" value="*"/>
+    <cq:property key="target.ws" value="*"/>
+    <cq:advisorNode namePattern=".+" sourceLevel="DESIRE"/>
+</cq:componentQuery>
