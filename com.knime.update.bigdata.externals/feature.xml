@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.update.externals"
+      id="com.knime.update.bigdata.externals"
       label="External plug-ins"
       version="3.1.0.qualifier">
 

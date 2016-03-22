@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.knime.features.externals</name>
+	<name>com.knime.features.bigdata.externals</name>
 	<comment></comment>
 	<projects>
 	</projects>
