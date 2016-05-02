@@ -27,10 +27,17 @@
 									<id>org.apache.spark:spark-sql_2.10:1.2.2</id>
 									<source>true</source>
 								</artifact>
-                                <artifact>
-                                    <id>org.apache.spark:spark-hive_2.10:1.2.2</id>
-                                    <source>true</source>
-                                </artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:1.2.2</id>
+									<source>true</source>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:1.2.2</id>
+									<source>true</source>
+									<instructions>
+										<Export-Package>org.apache.spark.*</Export-Package>
+									</instructions>
+								</artifact>								
 							</artifacts>
 						</configuration>
 					</execution>
