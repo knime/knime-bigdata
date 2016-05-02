@@ -23,42 +23,56 @@
          id="org.apache.spark.sql_2.10"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
+   <plugin
+         id="org.apache.spark.hive_2.10"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+         
    <plugin
          id="org.apache.spark.core_2.10"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin
          id="org.apache.spark.mllib_2.10"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin
          id="org.apache.spark.core_2.10.source"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin
          id="org.apache.spark.mllib_2.10.source"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin
          id="org.apache.spark.sql_2.10.source"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark.hive_2.10.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
          unpack="false"/>
 
    <plugin

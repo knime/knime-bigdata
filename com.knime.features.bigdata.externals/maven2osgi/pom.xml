@@ -27,6 +27,10 @@
 									<id>org.apache.spark:spark-sql_2.10:1.2.2</id>
 									<source>true</source>
 								</artifact>
+                                <artifact>
+                                    <id>org.apache.spark:spark-hive_2.10:1.2.2</id>
+                                    <source>true</source>
+                                </artifact>
 							</artifacts>
 						</configuration>
 					</execution>
