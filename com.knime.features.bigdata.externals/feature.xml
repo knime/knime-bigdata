@@ -46,6 +46,70 @@
          install-size="0"
          version="1.2.2"
          unpack="false"/>
+         
+   <plugin
+         id="org.jblas"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+         
+   <plugin
+         id="org.scalanlp.breeze_2.10"
+         download-size="0"
+         install-size="0"
+         version="0.10.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.scalanlp.breeze-macros_2.10"
+         download-size="0"
+         install-size="0"
+         version="0.3.1"
+         unpack="false"/>
+         
+   <plugin
+         id="com.github.fommil.netlib.core"
+         download-size="0"
+         install-size="0"
+         version="1.1.2"
+         unpack="false"/>
+
+   <plugin
+         id="net.sourceforge.f2j.arpack_combined_all"
+         download-size="0"
+         install-size="0"
+         version="0.1.0"
+         unpack="false"/>
+
+   <plugin
+         id="net.sf.opencsv"
+         download-size="0"
+         install-size="0"
+         version="2.3.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.rwl.jtransforms"
+         download-size="0"
+         install-size="0"
+         version="2.4.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.spire-math.spire_2.10"
+         download-size="0"
+         install-size="0"
+         version="0.7.4"
+         unpack="false"/>
+
+   <plugin
+         id="org.spire-math.spire-macros_2.10"
+         download-size="0"
+         install-size="0"
+         version="0.7.4"
+         unpack="false"/>
+
 
    <plugin
          id="org.apache.spark.core_2.10.source"
