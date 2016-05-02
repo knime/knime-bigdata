@@ -37,8 +37,38 @@
 									<instructions>
 										<Export-Package>org.apache.spark.*</Export-Package>
 									</instructions>
-								</artifact>								
+								</artifact>
 							</artifacts>
+
+							<!-- the following are spark mllib 1.2.2 dependencies -->
+							<artifact>
+								<id>org.jblas:jblas:1.2.3</id>
+							</artifact>
+							<artifact>
+								<id>org.scalanlp:breeze_2.10:0.10</id>
+							</artifact>
+							<artifact>
+								<id>org.scalanlp:breeze-macros_2.10:0.3.1</id>
+							</artifact>
+							<artifact>
+								<id>com.github.fommil.netlib:core:1.1.2</id>
+							</artifact>
+							<artifact>
+								<id>net.sourceforge.f2j:arpack_combined_all:0.1</id>
+							</artifact>
+							<artifact>
+								<id>net.sf.opencsv:opencsv:2.3</id>
+							</artifact>
+							<artifact>
+								<id>com.github.rwl:jtransforms:2.4.0</id>
+							</artifact>
+							<artifact>
+								<id>org.spire-math:spire_2.10:0.7.4</id>
+							</artifact>
+							<artifact>
+								<id>org.spire-math:spire-macros_2.10:0.7.4</id>
+							</artifact>
+							<!-- end of spark mllib 1.2.2 dependencies -->
 						</configuration>
 					</execution>
 				</executions>
