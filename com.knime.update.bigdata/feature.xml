@@ -23,4 +23,9 @@
    <includes
          id="com.knime.features.pmml.compilation.java.jario"
          version="0.0.0"/>
+
+   <includes
+         id="com.knime.features.bigdata.externals"
+         version="0.0.0"/>
+
 </feature>
