@@ -7,7 +7,7 @@
 	<artifactId>maven-2-osgi</artifactId>
 	<packaging>pom</packaging>
 	<version>2.12.0</version>
-	
+
 	<properties>
 		<hadoop.version>2.7.2</hadoop.version>
 	</properties>
@@ -23,55 +23,172 @@
 						<id>default-cli</id>
 						<configuration>
 							<artifacts>
-								<artifact>
-									<id>org.apache.spark:spark-mllib_2.10:1.2.2</id>
-									<source>true</source>
-									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
-								</artifact>
-								<artifact>
-									<id>org.apache.spark:spark-sql_2.10:1.2.2</id>
-									<source>true</source>
-									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
-								</artifact>
-								<artifact>
-									<id>org.apache.spark:spark-hive_2.10:1.2.2</id>
-									<source>true</source>
-									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
-								</artifact>
-								<artifact>
-									<id>org.apache.spark:spark-core_2.10:1.2.2</id>
-									<source>true</source>
-									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
-									<instructions>
-										<Export-Package>org.apache.spark.*</Export-Package>
-									</instructions>
-								</artifact>
+
+								<!-- BEGIN Common Spark dependencies -->
 								<artifact>
 									<id>org.apache.hadoop:hadoop-common:${hadoop.version}</id>
 									<source>true</source>
 									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
 								</artifact>
 								<artifact>
 									<id>org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop.version}</id>
 									<source>true</source>
 									<excludes>
-        								<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
-    								</excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
 								</artifact>
 								<!-- dependency of the knime-jobserver-utils in Spark 1.2 & 1.3 -->
 								<artifact>
 									<id>org.jpmml:pmml-model:1.1.15</id>
 								</artifact>
+								<!-- END Common Spark dependencies -->
+
+
+
+								<!-- BEGIN Spark 1.2 dependencies -->
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:1.2.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+									<instructions>
+										<Export-Package>org.apache.spark.*</Export-Package>
+									</instructions>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-mllib_2.10:1.2.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-sql_2.10:1.2.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:1.2.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<!-- END Spark 1.2 dependencies -->
+
+
+
+								<!-- BEGIN Spark 1.3 dependencies -->
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:1.3.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+									<instructions>
+										<Export-Package>org.apache.spark.*</Export-Package>
+									</instructions>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-mllib_2.10:1.3.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-sql_2.10:1.3.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:1.3.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<!-- END Spark 1.3 dependencies -->
+								
+								
+								
+								<!-- BEGIN Spark 1.5 dependencies -->
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:1.5.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+									<instructions>
+										<Export-Package>org.apache.spark.*</Export-Package>
+									</instructions>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-mllib_2.10:1.5.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-sql_2.10:1.5.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:1.5.2</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<!-- END Spark 1.5 dependencies -->
+								
+								
+								
+								<!-- BEGIN Spark 1.6 dependencies -->
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:1.6.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+									<instructions>
+										<Export-Package>org.apache.spark.*</Export-Package>
+									</instructions>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-mllib_2.10:1.6.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-sql_2.10:1.6.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:1.6.1</id>
+									<source>true</source>
+									<excludes>
+										<exclude>jdk.tools:jdk.tools</exclude> <!-- workaround for hadoop-annotations -->
+									</excludes>
+								</artifact>
+								<!-- END Spark 1.6 dependencies -->
+								
 							</artifacts>
 						</configuration>
 					</execution>
