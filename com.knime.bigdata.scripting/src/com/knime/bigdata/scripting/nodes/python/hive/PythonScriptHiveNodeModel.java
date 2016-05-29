@@ -48,10 +48,8 @@
 package com.knime.bigdata.scripting.nodes.python.hive;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -71,7 +69,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabaseDriverLoader;
 import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
@@ -122,7 +119,7 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 					getAvailableFlowVariables().values());
 			final CredentialsProvider cp = getCredentialsProvider();
 			final DatabaseQueryConnectionSettings connIn = dbObj.getConnectionSettings(cp);
-			final Collection<String> jars = getJars(connIn.getDriver());
+			final Collection<String> jars = getJars(connIn);
 			final SQLEditorObjectWriter sqlObject = new SQLEditorObjectWriter(
 					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0], connIn, cp, jars);
 			kernel.putGeneralObject(sqlObject);
@@ -145,30 +142,14 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 		}
 	}
 
-    static Collection<String> getJars(final String driver) throws IOException {
-        //locate the jdbc jar files
-                try {
-                    final File driverFile = DatabaseDriverLoader.getDriverFileForDriverClass(driver);
-                    if (driverFile != null) {
-                        final String absolutePath = driverFile.getAbsolutePath();
-                        final File jarFile = new File(absolutePath);
-                        final File folder = jarFile.getParentFile();
-                        final File[] files = folder.listFiles(new FilenameFilter() {
-                            @Override
-                            public boolean accept(final File dir, final String name) {
-                                return name.endsWith(".jar");
-                            }
-                        });
-                        final Collection<String> jars = new ArrayList<>(files.length);
-                        for (File file : files) {
-                            jars.add(file.getAbsolutePath());
-                        }
-                        return jars;
-                    }
-                } catch (final Exception e) {
-                    throw new IOException(e);
-                }
-        return null;
+    static Collection<String> getJars(final DatabaseQueryConnectionSettings connIn) throws IOException {
+        final Collection<File> driverFiles =
+                connIn.getUtility().getConnectionFactory().getDriverFactory().getDriverFiles(connIn);
+        final Collection<String> driverPaths = new LinkedList<>();
+        for (File file : driverFiles) {
+            driverPaths.add(file.getAbsolutePath());
+        }
+        return driverPaths;
     }
 
     @SuppressWarnings("unchecked")

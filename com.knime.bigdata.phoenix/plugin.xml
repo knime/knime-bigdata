@@ -17,10 +17,4 @@
               database="phoenix">
         </databaseUtility>
      </extension>
-     <extension
-           point="org.knime.core.JDBCDriver">
-        <jdbcDriver
-              jarFile="lib/phoenix-4.4.0-HBase-0.98-client.jar">
-        </jdbcDriver>
-     </extension>
 </plugin>
