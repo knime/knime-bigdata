@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -33,6 +34,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -42,6 +44,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.port.database.DatabaseUtility;
 
 import com.knime.bigdata.hive.utility.HiveDriverFactory;
 import com.knime.bigdata.hive.utility.HiveUtility;
@@ -52,7 +55,8 @@ import com.knime.bigdata.hive.utility.HiveUtility;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 class HiveConnectorNodeModel extends NodeModel {
-//    private static final String CLOUDERA_HIVE_DRIVER = "com.cloudera.hive.jdbc41.HS2Driver";
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveConnectorNodeModel.class);
+    private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.hive.jdbc41.HS2Driver";
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
 
     HiveConnectorNodeModel() {
@@ -65,7 +69,14 @@ class HiveConnectorNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-        m_settings.setDriver(HiveDriverFactory.DRIVER);
+        final String driverName;
+        if (clouderaDriverAvailable()) {
+            driverName = CLOUDERA_DRIVER_NAME;
+            LOGGER.debug("Cloudera Hive driver found using driver: " + driverName);
+        } else {
+            driverName = HiveDriverFactory.DRIVER;
+        }
+        m_settings.setDriver(driverName);
 
         if ((m_settings.getCredentialName() == null)
                 && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
@@ -82,19 +93,33 @@ class HiveConnectorNodeModel extends NodeModel {
     private DatabaseConnectionPortObjectSpec createSpec() {
         final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
         //set the jdbc url again in the case that the settings have been changed by variables
-        s.setJDBCUrl(getJDBCURL(m_settings.getHost(), m_settings.getPort(), m_settings.getDatabaseName()));
+        s.setJDBCUrl(getJDBCURL(m_settings));
         final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
     }
 
     /**
-     * @param dbName the db name
-     * @param port the port
-     * @param host the host
-     * @return the jdbc url
+     * @return <code>true</code> if the Cloudera driver has been registered
      */
-    static String getJDBCURL(final String host, final int port, final String dbName) {
-        return "jdbc:hive2://" + host + ":" + port + "/" + dbName;
+    private static boolean clouderaDriverAvailable() {
+        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
+        return externalDriver.contains(CLOUDERA_DRIVER_NAME);
+    }
+
+    static String getJDBCURL(final HiveConnectorSettings settings) {
+        final String host = settings.getHost();
+        final int port = settings.getPort();
+        final String dbName = settings.getDatabaseName();
+        final String url = "jdbc:hive2://" + host + ":" + port + "/" + dbName;
+        final String pwd = settings.getPassword(null);
+        if (clouderaDriverAvailable()) {
+            LOGGER.debug("Cloudera Hive driver found using Cloudera url settings.");
+            if (pwd != null && !pwd.trim().isEmpty()) {
+                //for user name and password authentication
+                return url + ";AuthMech=3";
+            }
+        }
+        return url;
     }
 
     /**
