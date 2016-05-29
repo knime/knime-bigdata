@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -43,6 +44,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.port.database.DatabaseUtility;
 
 import com.knime.bigdata.impala.utility.ImpalaDriverFactory;
 import com.knime.bigdata.impala.utility.ImpalaUtility;
@@ -71,13 +73,12 @@ class ImpalaConnectorNodeModel extends NodeModel {
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
         final String driverName;
-//        if (clouderaDriverAvailable()) {
-//            LOGGER.debug("Cloudera driver found using Impala driver:" + CLOUDERA_DRIVER_NAME);
-//            driverName = CLOUDERA_DRIVER_NAME;
-//        } else {
-            LOGGER.debug("Cloudera driver not found using Hive driver:" + ImpalaDriverFactory.DRIVER);
+        if (clouderaDriverAvailable()) {
+            LOGGER.debug("Cloudera driver found using Impala driver:" + CLOUDERA_DRIVER_NAME);
+            driverName = CLOUDERA_DRIVER_NAME;
+        } else {
             driverName = ImpalaDriverFactory.DRIVER;
-//        }
+        }
         m_settings.setDriver(driverName);
 
         final String userName = m_settings.getUserName(getCredentialsProvider());
@@ -92,13 +93,13 @@ class ImpalaConnectorNodeModel extends NodeModel {
         return new PortObjectSpec[]{createSpec()};
     }
 
-//    /**
-//     * @return <code>true</code> if the Cloudera driver has been registered
-//     */
-//    private static boolean clouderaDriverAvailable() {
-//        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
-//        return externalDriver.contains(CLOUDERA_DRIVER_NAME);
-//    }
+    /**
+     * @return <code>true</code> if the Cloudera driver has been registered
+     */
+    private static boolean clouderaDriverAvailable() {
+        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
+        return externalDriver.contains(CLOUDERA_DRIVER_NAME);
+    }
 
     private DatabaseConnectionPortObjectSpec createSpec() {
         final DatabaseConnectionSettings s = new DatabaseConnectionSettings(m_settings);
@@ -113,21 +114,25 @@ class ImpalaConnectorNodeModel extends NodeModel {
      * @return the jdbc url
      */
     static String getJDBCURL(final ImpalaConnectorSettings settings) {
-        final String protocol;
-//        if (clouderaDriverAvailable()) {
-//            LOGGER.debug("Cloudera driver found using impala url");
-//            protocol = "impala";
-//        } else {
-            LOGGER.debug("Cloudera driver not found using hive2 url");
-            protocol = "hive2";
-//        }
-        final String url = "jdbc:" + protocol + "://" + settings.getHost() + ":" + settings.getPort() + "/"
-                + settings.getDatabaseName();
-        String pwd = settings.getPassword(null);
-        if (pwd == null || pwd.trim().length() == 0) {
-            return url + ";auth=noSasl";
+        final boolean cloudera = clouderaDriverAvailable();
+        final String pwd = settings.getPassword(null);
+        if (cloudera) {
+            LOGGER.debug("Cloudera driver found using impala url");
+            final String url = "jdbc:impala://" + settings.getHost() + ":" + settings.getPort() + "/"
+                    + settings.getDatabaseName();
+            if (pwd != null && !pwd.trim().isEmpty()) {
+                //for user name and password authentication
+                return url + ";AuthMech=3";
+            }
+            return url;
+        } else {
+            final String url = "jdbc:hive2://" + settings.getHost() + ":" + settings.getPort() + "/"
+                    + settings.getDatabaseName();
+            if (pwd == null || pwd.trim().length() == 0) {
+                return url + ";auth=noSasl";
+            }
+            return url;
         }
-        return url;
     }
 
     /**

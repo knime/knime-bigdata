@@ -20,10 +20,6 @@
  */
 package com.knime.bigdata.impala.utility;
 
-import java.sql.Driver;
-
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
-import org.knime.core.node.port.database.RegisteredDriversConnectionFactory;
 import org.knime.core.node.port.database.connection.DefaultDBDriverFactory;
 
 /**
@@ -84,19 +80,5 @@ public class ImpalaDriverFactory extends DefaultDBDriverFactory {
             "lib/libthrift-0.9.0.cloudera.2.jar",
             "lib/libfb303-0.9.0.jar"
         });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Driver getDriver(final DatabaseConnectionSettings settings) throws Exception {
-        final String driver = settings.getDriver();
-        if (DRIVER.equals(driver)) {
-            return super.getDriver(settings);
-        } else {
-            //this must be an external driver that the user has registered
-            return RegisteredDriversConnectionFactory.getInstance().getDriver(settings);
-        }
     }
 }

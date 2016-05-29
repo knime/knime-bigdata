@@ -61,7 +61,7 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
          */
         @Override
         protected String getJDBCURL(final String host, final int port, final String dbName) {
-            return HiveConnectorNodeModel.getJDBCURL(host, port, dbName);
+            return HiveConnectorNodeModel.getJDBCURL(m_settings);
         }
     }
 
