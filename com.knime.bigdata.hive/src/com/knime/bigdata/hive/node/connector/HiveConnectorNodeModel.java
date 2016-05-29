@@ -43,6 +43,7 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
+import com.knime.bigdata.hive.utility.HiveDriverFactory;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -51,6 +52,7 @@ import com.knime.bigdata.hive.utility.HiveUtility;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 class HiveConnectorNodeModel extends NodeModel {
+//    private static final String CLOUDERA_HIVE_DRIVER = "com.cloudera.hive.jdbc41.HS2Driver";
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
 
     HiveConnectorNodeModel() {
@@ -63,7 +65,7 @@ class HiveConnectorNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-        m_settings.setDriver("org.apache.hive.jdbc.HiveDriver");
+        m_settings.setDriver(HiveDriverFactory.DRIVER);
 
         if ((m_settings.getCredentialName() == null)
                 && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(

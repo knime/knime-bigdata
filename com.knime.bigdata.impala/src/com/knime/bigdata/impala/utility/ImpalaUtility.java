@@ -61,7 +61,7 @@ public class ImpalaUtility extends DatabaseUtility {
      * Constructor.
      */
     public ImpalaUtility() {
-        super(DATABASE_IDENTIFIER, new ImpalaStatementManipulator(),
+        super(DATABASE_IDENTIFIER, new ImpalaStatementManipulator(), new ImpalaDriverFactory(),
             new AvgDistinctDBAggregationFunction.Factory(), new CountDistinctDBAggregationFunction.Factory(),
             new GroupConcatDBAggregationFunction.Factory(StringValue.class), new MaxDBAggregationFunction.Factory(),
             new MinDBAggregationFunction.Factory(), new NDVDBAggregationFunction.Factory(),

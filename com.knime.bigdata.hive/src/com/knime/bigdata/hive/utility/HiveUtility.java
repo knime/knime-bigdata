@@ -69,14 +69,15 @@ public class HiveUtility extends DatabaseUtility {
      * @throws LicenseException
      */
     public HiveUtility() throws LicenseException {
-        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new CountDistinctDBAggregationFunction.Factory(),
-            new SumDistinctDBAggregationFunction.Factory(), new AvgDistinctDBAggregationFunction.Factory(),
-            new MinDBAggregationFunction.Factory(), new MaxDBAggregationFunction.Factory(),
-            new VarPopDBAggregationFunction.Factory(), new VarSampDBAggregationFunction.Factory(),
-            new StdDevPopDBAggregationFunction.Factory(), new StdDevSampDBAggregationFunction.Factory(),
-            new CovarPopDBAggregationFunction.Factory(), new CovarSampDBAggregationFunction.Factory(),
-            new CorrDBAggregationFunction.Factory(), new PercentileDBAggregationFunction.Factory(),
-            new PercentileApproxDBAggregationFunction.Factory(),  new CollectSetDBAggregationFunction.Factory());
+        super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new HiveDriverFactory(),
+            new CountDistinctDBAggregationFunction.Factory(), new SumDistinctDBAggregationFunction.Factory(),
+            new AvgDistinctDBAggregationFunction.Factory(), new MinDBAggregationFunction.Factory(),
+            new MaxDBAggregationFunction.Factory(), new VarPopDBAggregationFunction.Factory(),
+            new VarSampDBAggregationFunction.Factory(), new StdDevPopDBAggregationFunction.Factory(),
+            new StdDevSampDBAggregationFunction.Factory(), new CovarPopDBAggregationFunction.Factory(),
+            new CovarSampDBAggregationFunction.Factory(), new CorrDBAggregationFunction.Factory(),
+            new PercentileDBAggregationFunction.Factory(), new PercentileApproxDBAggregationFunction.Factory(),
+            new CollectSetDBAggregationFunction.Factory());
             //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
         LICENSE_CHECKER.checkLicense();
     }

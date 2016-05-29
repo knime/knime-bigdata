@@ -64,18 +64,18 @@ public class PhoenixUtility extends DatabaseUtility {
      * Constructor.
      */
     public PhoenixUtility() {
-        //TK_TODO: Add appropriate aggregation functions
-        super(DATABASE_IDENTIFIER, MANIPULATOR, new AvgDistinctDBAggregationFunction.Factory(),
-            new CorrDBAggregationFunction.Factory(), new  CountDistinctDBAggregationFunction.Factory(),
-            new CovarPopDBAggregationFunction.Factory(), new CovarSampDBAggregationFunction.Factory(),
-            new MaxDBAggregationFunction.Factory(), new MinDBAggregationFunction.Factory(),
-            new RegrAvgXDBAggregationFunction.Factory(), new RegrAvgYDBAggregationFunction.Factory(),
-            new RegrCountDBAggregationFunction.Factory(), new RegrInterceptDBAggregationFunction.Factory(),
-            new RegrR2DBAggregationFunction.Factory(), new RegrSlopeDBAggregationFunction.Factory(),
-            new RegrSXXDBAggregationFunction.Factory(), new RegrSXYDBAggregationFunction.Factory(),
-            new RegrSYYDBAggregationFunction.Factory(), new StdDevPopDBAggregationFunction.Factory(),
-            new StdDevSampDBAggregationFunction.Factory(), new SumDistinctDBAggregationFunction.Factory(),
-            new VarPopDBAggregationFunction.Factory(), new VarSampDBAggregationFunction.Factory());
+        super(DATABASE_IDENTIFIER, MANIPULATOR, new PhoenixDriverFactory(),
+            new AvgDistinctDBAggregationFunction.Factory(), new CorrDBAggregationFunction.Factory(),
+            new  CountDistinctDBAggregationFunction.Factory(), new CovarPopDBAggregationFunction.Factory(),
+            new CovarSampDBAggregationFunction.Factory(), new MaxDBAggregationFunction.Factory(),
+            new MinDBAggregationFunction.Factory(), new RegrAvgXDBAggregationFunction.Factory(),
+            new RegrAvgYDBAggregationFunction.Factory(), new RegrCountDBAggregationFunction.Factory(),
+            new RegrInterceptDBAggregationFunction.Factory(), new RegrR2DBAggregationFunction.Factory(),
+            new RegrSlopeDBAggregationFunction.Factory(), new RegrSXXDBAggregationFunction.Factory(),
+            new RegrSXYDBAggregationFunction.Factory(), new RegrSYYDBAggregationFunction.Factory(),
+            new StdDevPopDBAggregationFunction.Factory(), new StdDevSampDBAggregationFunction.Factory(),
+            new SumDistinctDBAggregationFunction.Factory(), new VarPopDBAggregationFunction.Factory(),
+            new VarSampDBAggregationFunction.Factory());
     }
 
     /**

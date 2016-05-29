@@ -153,7 +153,7 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 		try {
 			final CredentialsProvider cp = getCredentialsProvider();
 			final DatabaseQueryConnectionSettings connInfo = dbSpec.getConnectionSettings(cp);
-			final Collection<String> jars = PythonScriptHiveNodeModel.getJars(connInfo.getDriver());
+			final Collection<String> jars = PythonScriptHiveNodeModel.getJars(connInfo);
             final SQLEditorObjectWriter sqlObject = new SQLEditorObjectWriter(
 					PythonScriptHiveNodeConfig.getVariableNames().getGeneralInputObjects()[0],
 					connInfo, cp, jars);
