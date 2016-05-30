@@ -166,244 +166,242 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/toolintegration/spark/mining/clustering"
-            factory-class="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory">
       </node>
       <node
             category-path="/toolintegration/spark/mining/clustering"
             factory-class="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
             factory-class="com.knime.bigdata.spark.node.pmml.converter.MLlib2PMMLNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.converter.MLlib2PMMLNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
             factory-class="com.knime.bigdata.spark.node.pmml.predictor.compiled.SparkPMMLPredictorNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.predictor.compiled.SparkPMMLPredictorNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io/db"
             factory-class="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
             factory-class="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"
-            id="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io/db"
             factory-class="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory"
-            id="com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
             factory-class="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory"
-            id="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/java"
             factory-class="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"
-            id="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/split"
             factory-class="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io/read"
             factory-class="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io/write"
             factory-class="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory"
-            id="com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.pmml.transformation.compiling.SparkTransformationPMMLApplyNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.transformation.compiling.SparkTransformationPMMLApplyNodeFactory">
+            >
       </node>
 <!--      <node
             category-path="/toolintegration/spark/column/convert"
-            factory-class="com.knime.bigdata.spark.node.pmml.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
+            factory-class="com.knime.bigdata.spark.node.pmml.transformation.compiled.SparkCompiledTransformationPMMLApplyNodeFactory">
       </node>
       -->
       <node
             category-path="/toolintegration/spark/row"
             factory-class="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/row"
             factory-class="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column/convert"
             factory-class="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io"
             factory-class="com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory"
-            id="com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/io"
             factory-class="com.knime.bigdata.spark.node.util.rdd.unpersist.SparkUnpersistNodeFactory"
-            id="com.knime.bigdata.spark.node.util.rdd.unpersist.SparkUnpersistNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/column"
             factory-class="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/row"
             factory-class="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/reduction"
             factory-class="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/reduction"
             factory-class="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining"
             factory-class="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
             factory-class="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory"
-            id="com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
             factory-class="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory"
-            id="com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/scoring"
             factory-class="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory"
-            id="com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory">
+            >
       </node>      
       <node
             category-path="/toolintegration/spark/row"
             factory-class="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory"
-            id="com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory"
-            id="com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory"
-            id="com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
             factory-class="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory"
-            id="com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/statistics"
             factory-class="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory"
-            id="com.knime.bigdata.spark.node.statistics.correlation.filter.MLlibCorrelationFilterNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/management"
             factory-class="com.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNodeFactory"
-            id="com.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/management"
             factory-class="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory"
-            id="com.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory"
-            id="com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/misc/management"
             factory-class="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory"
-            id="com.knime.bigdata.spark.node.util.context.create.SparkContextCreatorNodeFactory">
+            >
       </node>
       <node
             category-path="/toolintegration/spark/mining/pmml"
             factory-class="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory"
-            id="com.knime.bigdata.spark.node.pmml.predictor.compiling.SparkPMMLCompilingPredictorNodeFactory">
+            >
       </node>
     </extension>
    <extension
