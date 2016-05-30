@@ -6,8 +6,7 @@
         <node
               category-path="/database/database-connector"
               expert-flag="false"
-              factory-class="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory"
-              id="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
+              factory-class="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
         </node>
     </extension>
      <extension

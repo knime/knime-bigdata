@@ -11,13 +11,11 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/io/filehandling/remote/connections"
-            factory-class="com.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory"
-            id="com.knime.bigdata.hdfs.nodes.connector.HDFSConnectionInformationNodeFactory">
+            factory-class="com.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote"
-            factory-class="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory"
-            id="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
+            factory-class="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
       </node>
    </extension>
 </plugin>
