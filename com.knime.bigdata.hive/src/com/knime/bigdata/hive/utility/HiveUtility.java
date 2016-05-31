@@ -79,7 +79,6 @@ public class HiveUtility extends DatabaseUtility {
             new PercentileDBAggregationFunction.Factory(), new PercentileApproxDBAggregationFunction.Factory(),
             new CollectSetDBAggregationFunction.Factory());
             //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
-        LICENSE_CHECKER.checkLicense();
     }
 
     /**
