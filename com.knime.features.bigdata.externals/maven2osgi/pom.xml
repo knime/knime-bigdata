@@ -26,6 +26,10 @@
 
 								<!-- BEGIN Common Spark dependencies -->
 								<artifact>
+									<id>com.typesafe:config:1.3.0</id>
+									<source>true</source>
+								</artifact>
+								<artifact>
 									<id>org.apache.hadoop:hadoop-common:${hadoop.version}</id>
 									<source>true</source>
 									<excludes>
