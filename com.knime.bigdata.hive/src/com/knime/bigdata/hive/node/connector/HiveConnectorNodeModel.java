@@ -46,7 +46,6 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 
-import com.knime.bigdata.hive.utility.HiveDriverFactory;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -74,7 +73,7 @@ class HiveConnectorNodeModel extends NodeModel {
             driverName = CLOUDERA_DRIVER_NAME;
             LOGGER.debug("Cloudera Hive driver found using driver: " + driverName);
         } else {
-            driverName = HiveDriverFactory.DRIVER;
+            driverName = HiveUtility.DRIVER;
         }
         m_settings.setDriver(driverName);
 

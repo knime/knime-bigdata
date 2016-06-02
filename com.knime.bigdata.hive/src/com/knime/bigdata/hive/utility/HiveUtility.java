@@ -60,6 +60,12 @@ public class HiveUtility extends DatabaseUtility {
     public static final String DATABASE_IDENTIFIER = "hive2";
 
     /**
+     * The driver's class name.
+     */
+    public static final String DRIVER = HiveDriverFactory.DRIVER;
+
+
+    /**
      * {@link LicenseChecker} to use.
      */
     public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.HiveConnector);

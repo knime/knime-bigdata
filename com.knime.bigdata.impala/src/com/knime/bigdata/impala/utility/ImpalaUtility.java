@@ -52,6 +52,9 @@ public class ImpalaUtility extends DatabaseUtility {
     /**The unique database identifier.*/
     public static final String DATABASE_IDENTIFIER = "impala";
 
+    /** The driver's class name. */
+    public static final String DRIVER = ImpalaDriverFactory.DRIVER;
+
     /**
      * {@link LicenseChecker} to use.
      */

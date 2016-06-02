@@ -58,6 +58,9 @@ public class PhoenixUtility extends DatabaseUtility {
     /**The unique database identifier.*/
     public static final String DATABASE_IDENTIFIER = "phoenix";
 
+    /** The driver's class name. */
+    public static final String DRIVER = PhoenixDriverFactory.DRIVER;
+
     private static final StatementManipulator MANIPULATOR = new PhoenixStatementManipulator();
 
     /**
