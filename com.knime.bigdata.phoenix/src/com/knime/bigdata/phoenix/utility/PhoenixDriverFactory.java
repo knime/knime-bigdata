@@ -33,8 +33,7 @@ public class PhoenixDriverFactory extends DefaultDBDriverFactory {
 
     /**Constructor.*/
     PhoenixDriverFactory() {
-        super(DRIVER, "com.knime.bigdata.phoenix",
-            "lib/phoenix-4.4.0-HBase-0.98-client.jar",
+        super(DRIVER, "lib/phoenix-4.4.0-HBase-0.98-client.jar",
             "lib/slf4j-api-1.7.5.jar",
             "lib/slf4j-log4j12.jar",
             "conf");
