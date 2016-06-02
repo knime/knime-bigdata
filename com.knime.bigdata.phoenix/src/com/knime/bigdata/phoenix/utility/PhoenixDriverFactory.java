@@ -26,10 +26,9 @@ import org.knime.core.node.port.database.connection.DefaultDBDriverFactory;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class PhoenixDriverFactory extends DefaultDBDriverFactory {
-
+class PhoenixDriverFactory extends DefaultDBDriverFactory {
     /**The driver class name.*/
-    public static final String DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
+    static final String DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
 
     /**Constructor.*/
     PhoenixDriverFactory() {

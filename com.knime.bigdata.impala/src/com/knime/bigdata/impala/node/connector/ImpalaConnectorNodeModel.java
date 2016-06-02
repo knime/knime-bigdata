@@ -46,7 +46,6 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 
-import com.knime.bigdata.impala.utility.ImpalaDriverFactory;
 import com.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
@@ -77,7 +76,7 @@ class ImpalaConnectorNodeModel extends NodeModel {
             LOGGER.debug("Cloudera driver found using Impala driver:" + CLOUDERA_DRIVER_NAME);
             driverName = CLOUDERA_DRIVER_NAME;
         } else {
-            driverName = ImpalaDriverFactory.DRIVER;
+            driverName = ImpalaUtility.DRIVER;
         }
         m_settings.setDriver(driverName);
 

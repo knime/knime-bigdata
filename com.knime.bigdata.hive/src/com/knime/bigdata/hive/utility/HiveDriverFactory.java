@@ -27,10 +27,9 @@ import org.knime.core.node.port.database.connection.DefaultDBDriverFactory;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class HiveDriverFactory extends DefaultDBDriverFactory {
-
+class HiveDriverFactory extends DefaultDBDriverFactory {
     /**Hive driver class name.*/
-    public static final String DRIVER = "org.apache.hive.jdbc.HiveDriver";
+    static final String DRIVER = "org.apache.hive.jdbc.HiveDriver";
 
     /**Constructor.*/
     HiveDriverFactory() {

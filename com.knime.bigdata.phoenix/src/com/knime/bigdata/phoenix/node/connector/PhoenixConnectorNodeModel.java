@@ -43,7 +43,7 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
-import com.knime.bigdata.phoenix.utility.PhoenixDriverFactory;
+import com.knime.bigdata.phoenix.utility.PhoenixUtility;
 
 /**
  * Model for the Impala connector node.
@@ -62,7 +62,7 @@ class PhoenixConnectorNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        m_settings.setDriver(PhoenixDriverFactory.DRIVER);
+        m_settings.setDriver(PhoenixUtility.DRIVER);
 
         if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
             throw new InvalidSettingsException("No hostname for database server given");
