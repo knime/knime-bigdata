@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.hive.utility;
 
+import org.eclipse.core.runtime.Platform;
 import org.knime.core.node.port.database.connection.DefaultDBDriverFactory;
 
 /**
@@ -33,7 +34,7 @@ public class HiveDriverFactory extends DefaultDBDriverFactory {
 
     /**Constructor.*/
     HiveDriverFactory() {
-        super(HiveDriverFactory.DRIVER, "com.knime.bigdata.cdh5", new String[] {
+        super(HiveDriverFactory.DRIVER, getBundleFiles(Platform.getBundle("com.knime.bigdata.cdh5"),
             "lib/apacheds-i18n-2.0.0-M15.jar",
             "lib/apacheds-kerberos-codec-2.0.0-M15.jar",
             "lib/api-asn1-api-1.0.0-M20.jar",
@@ -79,6 +80,6 @@ public class HiveDriverFactory extends DefaultDBDriverFactory {
             "lib/hive-service-0.12.0-cdh5.1.0.jar",
             "lib/libthrift-0.9.0.cloudera.2.jar",
             "lib/libfb303-0.9.0.jar"
-        });
+        ));
     }
 }
