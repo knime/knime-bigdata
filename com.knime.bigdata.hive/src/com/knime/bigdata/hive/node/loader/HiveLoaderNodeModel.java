@@ -139,6 +139,11 @@ class HiveLoaderNodeModel extends NodeModel {
                 throw new InvalidSettingsException("Double column '" + colName + "' cannot be used for partitioning");
             }
         }
+
+        // check that at least one non partitioned column exists
+        if (tableSpec.getNumColumns() == m_settings.partitionColumns().size()) {
+            throw new InvalidSettingsException("Cannot use all columns for partitioning.");
+        }
     }
 
     private void checkUploadSettings(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
