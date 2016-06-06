@@ -122,7 +122,7 @@ public final class HiveLoader {
     public void importData(final RemoteFile<? extends Connection> remoteFile, final List<String> columnNames,
         final DatabaseConnectionSettings connSettings, final ExecutionContext exec,
         final HiveLoaderSettings settings, final CredentialsProvider cp) throws Exception {
-        assert columnNames == null || columnNames.isEmpty() : "No columns in input table";
+        assert columnNames != null && !columnNames.isEmpty() : "No columns in input table";
         final DatabaseUtility utility = connSettings.getUtility();
         @SuppressWarnings("resource")
         final Connection conn = connSettings.createConnection(cp);
