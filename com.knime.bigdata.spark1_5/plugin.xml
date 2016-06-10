@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.knime.bigdata.spark.core.SparkJarProvider">
+      <SparkJarProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_JarProvider">
+      </SparkJarProvider>
+   </extension>
+   <extension point="com.knime.bigdata.spark.core.JobRunFactoryProvider">
+      <JobRunFactoryProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_JobRunFactoryProvider">
+      </JobRunFactoryProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.ModelHelperProvider">
+      <ModelHelperProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_ModelHelperProvider">
+      </ModelHelperProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.IntermediateToSparkConverterProvider">
+      <IntermediateToSparkConverterProvider 
+      		ProviderClass="com.knime.bigdata.spark1_5.converter.type.DefaultSpark_1_5_IntermediateToSparkConverterProvider">
+      </IntermediateToSparkConverterProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.node.JavaSnippetHelper">
+      <JavaSnippetHelper
+            HelperClass="com.knime.bigdata.spark1_5.base.Spark_1_5_JavaSnippetHelper">
+      </JavaSnippetHelper>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
+      <JavaSnippetTemplateRepositoryProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_JavaSnippetTemplateRepositoryProvider">
+      </JavaSnippetTemplateRepositoryProvider>
+   </extension>
+   <extension point="com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
+      <PMMLPortObjectFactoryProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_PMMLPortObjectFactoryProvider">
+      </PMMLPortObjectFactoryProvider>
+   </extension>
+</plugin>
