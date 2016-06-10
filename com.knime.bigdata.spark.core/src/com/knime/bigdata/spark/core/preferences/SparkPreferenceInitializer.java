@@ -48,7 +48,6 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
-import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -151,46 +150,57 @@ public class SparkPreferenceInitializer extends
         }
 
         // setup connection defaults
-        store.setDefault(PREF_JOB_SERVER_URL, getPresetString(config, "jobserver.connection.url", "http://localhost:8090"));
-        store.setDefault(PREF_AUTHENTICATION, getPresetBoolean(config, "jobserver.connection.authentication", false));
-        store.setDefault(PREF_USER_NAME, getPresetString(config, "jobserver.connection.userName", "guest"));
+        store.setDefault(PREF_JOB_SERVER_URL, getPresetString(config, "jobserver.connection.url"));
+        store.setDefault(PREF_AUTHENTICATION, getPresetBoolean(config, "jobserver.connection.authentication"));
+        store.setDefault(PREF_USER_NAME, getPresetString(config, "jobserver.connection.userName"));
         store.setDefault(PREF_PWD, getPresetString(config, "jobserver.connection.password"));
 
         // setup jobserver context defaults
-        store.setDefault(PREF_SPARK_VERSION, getPresetString(config, "jobserver.context.sparkVersion", SparkVersion.V_1_2.getLabel()));
-        store.setDefault(PREF_CONTEXT_NAME, getPresetString(config, "jobserver.context.contextName", "knime"));
-        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "jobserver.context.jobTimeout", 7200));
-        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "jobserver.context.jobCheckFrequency", 5));
-        store.setDefault(PREF_OVERRIDE_SPARK_SETTINGS, getPresetBoolean(config, "jobserver.context.overrideSettings", false));
+        store.setDefault(PREF_SPARK_VERSION, getPresetString(config, "jobserver.context.sparkVersion"));
+        store.setDefault(PREF_CONTEXT_NAME, getPresetString(config, "jobserver.context.name"));
+        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "jobserver.context.jobTimeout"));
+        store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "jobserver.context.jobCheckFrequency"));
+        store.setDefault(PREF_OVERRIDE_SPARK_SETTINGS, getPresetBoolean(config, "jobserver.context.overrideSettings"));
         store.setDefault(PREF_CUSTOM_SPARK_SETTINGS, getPresetString(config, "jobserver.context.customSettings"));
 
         // setup general KNIME Spark Executor settings
-        store.setDefault(PREF_DELETE_OBJECTS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteObjectsOnDispose", true));
-        store.setDefault(PREF_JOB_LOG_LEVEL, getPresetString(config, "knime.jobLogLevel", "WARN"));
-        store.setDefault(PREF_VERBOSE_LOGGING, getPresetBoolean(config, "knime.verboseLogging", false));
+        store.setDefault(PREF_DELETE_OBJECTS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteObjectsOnDispose"));
+        store.setDefault(PREF_JOB_LOG_LEVEL, getPresetString(config, "knime.jobLogLevel"));
+        store.setDefault(PREF_VERBOSE_LOGGING, getPresetBoolean(config, "knime.verboseLogging"));
     }
 
-    private String getPresetString(final Config config, final String string) {
-        return getPresetString(config, string, "");
+    private String getPresetString(final Config config, final String settingsPath) {
+        if (!config.hasPath(settingsPath)) {
+            throw new IllegalArgumentException("No default setting for: " + settingsPath);
+        }
+        return config.getString(settingsPath);
     }
 
-    private String getPresetString(final Config config, final String string, final String defaultVal) {
-        if (config.hasPath(string)) {
-            return config.getString(string);
+    private String getPresetString(final Config config, final String settingsPath, final String defaultVal) {
+        if (config.hasPath(settingsPath)) {
+            return config.getString(settingsPath);
         }
         return defaultVal;
     }
 
-    private final int getPresetInt(final Config config, final String string, final int defaultVal) {
-        if (config.hasPath(string)) {
-            return config.getInt(string);
+    private final int getPresetInt(final Config config, final String settingsPath) {
+        if (!config.hasPath(settingsPath)) {
+            throw new IllegalArgumentException("No default setting for: " + settingsPath);
         }
-        return defaultVal;
+
+        return config.getInt(settingsPath);
     }
 
-    private final boolean getPresetBoolean(final Config config, final String string, final boolean defaultVal) {
-        if (config.hasPath(string)) {
-            return config.getBoolean(string);
+    private final boolean getPresetBoolean(final Config config, final String settingsPath) {
+        if (!config.hasPath(settingsPath)) {
+            throw new IllegalArgumentException("No default setting for: " + settingsPath);
+        }
+        return config.getBoolean(settingsPath);
+    }
+
+    private final boolean getPresetBoolean(final Config config, final String settingsPath, final boolean defaultVal) {
+        if (config.hasPath(settingsPath)) {
+            return config.getBoolean(settingsPath);
         }
         return defaultVal;
     }
