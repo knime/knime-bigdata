@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    type="Manipulator" icon="icon.png">
+    <name>Spark Row Sampling</name>
+    <shortDescription>Extracts a sample from the input data.</shortDescription>
+    <fullDescription>
+        <intro>
+            This node extracts a sample from the input data. The dialog enables you to specify the
+            sample size.
+        </intro>
+        <option name="Absolute">
+            Specify the absolute number of rows in the sample. If there are less rows than specified here, all rows are
+            used.
+        </option>
+        <option name="Relative">
+            The percentage of the number of rows in the sample. Must be between 0 and 100, inclusively.
+        </option>
+        <option name="Take from top">This mode selects the top most rows of the input data.</option>
+        <option name="Draw randomly">
+            Random sampling of all rows, you may optionally specify a fixed seed and adapt the sample with replacement setting (see below).
+        </option>
+        <option name="Stratified sampling">
+            Check this button if you want 
+            <a href="https://spark.apache.org/docs/1.2.0/mllib-statistics.html#stratified-sampling">stratified sampling</a>, 
+            i.e. the distribution of values in the selected column is (approximately) retained in the output table. 
+            You may optionally specify a fixed seed and adapt the exact sampling and sample with replacement setting (see below). 
+        </option>
+        <option name="Exact sampling">
+            Exact sampling requires significant more resources than the per-stratum simple random sampling used in 
+            by default, but will provide the exact sampling size with 99.99% confidence. 
+        </option>
+        <option name="Use random seed">
+            If either random or stratified sampling is selected, you may enter a fixed seed here
+            in order to get reproducible results upon re-execution. If you do not specify a seed,
+            a new random seed is taken for each execution. 
+        </option>
+        <option name="Sample with replacement">
+            If selected a row from the input data can be chosen more than once. 
+        </option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark RDD">Spark RDD to take the sample from.</inPort>
+        <outPort index="0" name="Sampled Spark RDD">Sample of the input Spark RDD.</outPort>
+    </ports>
+</knimeNode>
