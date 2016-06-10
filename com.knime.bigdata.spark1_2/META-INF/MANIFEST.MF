@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Spark Executor jobs for Spark 1.2
+Bundle-SymbolicName: com.knime.bigdata.spark1_2;singleton:=true
+Bundle-Version: 1.6.0.qualifier
+Bundle-ClassPath: knime.jar,
+ lib/job-server-api_2.10-0.7.0-SNAPSHOT_spark-1.2.1.jar,
+ lib/knime-jobserver-utils-0.7.0-SNAPSHOT_spark-1.2.1.jar
+Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Require-Bundle: org.knime.core;bundle-version="3.2.0",
+ com.knime.bigdata.spark.core;bundle-version="1.6.0",
+ com.knime.bigdata.spark.node;bundle-version="1.6.0",
+ org.knime.jsnippets;bundle-version="3.2.0",
+ org.apache.log4j,
+ org.apache.commons.lang3,
+ org.apache.spark.core_2.10;bundle-version="[1.2.2,1.2.2]",
+ org.apache.spark.mllib_2.10;bundle-version="[1.2.2,1.2.2]",
+ org.apache.spark.sql_2.10;bundle-version="[1.2.2,1.2.2]",
+ org.apache.spark.hive_2.10;bundle-version="[1.2.2,1.2.2]",
+ org.scala-lang.scala-library;bundle-version="[2.10.0,2.11.0)",
+ org.scala-lang.scala-reflect;bundle-version="[2.10.0,2.11.0)",
+ org.eclipse.osgi,
+ org.jpmml.pmml-model;bundle-version="1.1.15",
+ org.apache.hadoop.common;bundle-version="2.7.2",
+ org.apache.hadoop.mapreduce-client-core;bundle-version="2.7.2",
+ org.scalanlp.breeze_2.10;bundle-version="0.10.0",
+ org.knime.base
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.knime.base.node.jsnippet.guarded,
+ org.knime.base.node.mine.cluster,
+ org.knime.base.node.mine.regression
