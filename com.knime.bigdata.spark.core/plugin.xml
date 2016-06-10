@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="KNIMEToIntermediateConverter" name="KNIMEToIntermediateConverter" schema="schema/KNIMEToIntermediateConverter.exsd"/>
+   <extension-point id="JobRunFactoryProvider" name="JobRunFactoryProvider" schema="schema/JobRunFactoryProvider.exsd"/>
+   <extension-point id="SparkNodeFactoryProvider" name="SparkNodeFactoryProvider" schema="schema/SparkNodeFactoryProvider.exsd"/>
+   <extension-point id="SparkJarProvider" name="SparkJarProvider" schema="schema/SparkJarProvider.exsd"/>
+   <extension-point id="ModelHelperProvider" name="ModelHelperProvider" schema="schema/ModelHelperProvider.exsd"/>
+   <extension-point id="IntermediateToSparkConverterProvider" name="IntermediateToSparkConverterProvider" schema="schema/IntermediateToSparkConverterProvider.exsd"/>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.knime.workbench.ui.preferences"
+            class="com.knime.bigdata.spark.core.preferences.SparkPreferencePage"
+            id="com.knime.bigdata.spark.preferences.SparkPreferencePage"
+            name="Spark">
+      </page>
+   </extension>
+   <extension
+         point="org.knime.core.PortType">
+      <portType
+            hidden="false"
+            name="Spark Context"
+            objectClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObject"
+            objectSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObject$ModelSerializer"
+            specClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec$SpecSerializer">
+      </portType>
+      <portType
+            color="#000000"
+            hidden="false"
+            name="Spark Data"
+            objectClass="com.knime.bigdata.spark.core.port.data.SparkDataPortObject"
+            objectSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec$Serializer">
+      </portType>
+      <portType
+            color="#7DBDFF"
+            hidden="false"
+            name="Spark Model"
+            objectClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObject"
+            objectSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
+      </portType>
+   </extension>
+   <extension
+         point="org.knime.workbench.repository.nodesets">
+      <nodeset
+            default-category-icon="icons/category.png"
+            deprecated="false"
+            factory-class="com.knime.bigdata.spark.core.node.SparkNodeSetFactory"
+            id="com.knime.bigdata.spark.node.SparkNodeSetFactory">
+      </nodeset>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.SparkJarProvider">
+      <SparkJarProvider
+            ProviderClass="com.knime.bigdata.spark.core.SparkCoreJarProvider">
+      </SparkJarProvider>
+   </extension>
+</plugin>
