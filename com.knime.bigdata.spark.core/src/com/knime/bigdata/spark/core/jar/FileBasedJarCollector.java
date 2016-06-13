@@ -78,7 +78,7 @@ public class FileBasedJarCollector implements JarCollector {
         try {
             m_jarFile = File.createTempFile("sparkClasses",  ".jar");
             m_jarFile.deleteOnExit();
-
+            LOGGER.debug("Creating Spark job jar file: " + m_jarFile.getAbsolutePath());
             m_os = new BufferedOutputStream(Files.newOutputStream(m_jarFile.toPath(), StandardOpenOption.CREATE));
             m_jos = new JarOutputStream(m_os, JarPacker.createManifest());
         } catch (IOException e) {
