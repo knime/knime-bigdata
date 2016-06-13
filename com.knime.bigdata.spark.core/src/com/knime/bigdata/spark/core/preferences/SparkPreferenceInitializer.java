@@ -44,10 +44,14 @@
  */
 package com.knime.bigdata.spark.core.preferences;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -55,11 +59,9 @@ import com.typesafe.config.ConfigFactory;
  * @author Tobias Koetter, University of Konstanz
  * @author Sascha Wolke, KNIME.com
  */
-public class SparkPreferenceInitializer extends
-        AbstractPreferenceInitializer {
+public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
-    public static final String ALL_LOG_LEVELS[] = new String[] { "DEBUG", "INFO", "WARN", "ERROR" };
-
+    public static final String ALL_LOG_LEVELS[] = new String[]{"DEBUG", "INFO", "WARN", "ERROR"};
 
     /** Preference key for a Spark jobserver URL. */
     public static final String PREF_JOB_SERVER_URL = "com.knime.bigdata.spark.v1_6.jobserver.connection.url";
@@ -77,12 +79,15 @@ public class SparkPreferenceInitializer extends
     public static final String PREF_SPARK_VERSION = "com.knime.bigdata.spark.v1_6.jobserver.context.sparkVersion";
 
     /** Preference key for enabling custom spark settings. */
-    public static final String PREF_OVERRIDE_SPARK_SETTINGS = "com.knime.bigdata.spark.v1_6.jobserver.context.overrideSparkSetting";
+    public static final String PREF_OVERRIDE_SPARK_SETTINGS =
+        "com.knime.bigdata.spark.v1_6.jobserver.context.overrideSparkSetting";
 
-    public static final String PREF_CUSTOM_SPARK_SETTINGS = "com.knime.bigdata.spark.v1_6.jobserver.context.customSparkSetting";
+    public static final String PREF_CUSTOM_SPARK_SETTINGS =
+        "com.knime.bigdata.spark.v1_6.jobserver.context.customSparkSetting";
 
     /** Preference key for client side job status polling in seconds (integer). */
-    public static final String PREF_JOB_CHECK_FREQUENCY = "com.knime.bigdata.spark.v1_6.jobserver.context.jobCheckFrequency";
+    public static final String PREF_JOB_CHECK_FREQUENCY =
+        "com.knime.bigdata.spark.v1_6.jobserver.context.jobCheckFrequency";
 
     /** Preference key for job timeout in seconds (integer). */
     public static final String PREF_JOB_TIMEOUT = "com.knime.bigdata.spark.v1_6.jobserver.context.jobTimeout";
@@ -95,59 +100,149 @@ public class SparkPreferenceInitializer extends
     /** Preference key for verbose logging on KNIME/client side. */
     public static final String PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.v1_6.verboseLogging";
 
-
     /** All context specific settings requiring context reset on change. */
-    public static final String[] PREF_ALL_CONTEXT_SETTINGS = new String[] {
-        PREF_SPARK_VERSION, PREF_CONTEXT_NAME, PREF_DELETE_OBJECTS_ON_DISPOSE,
-        PREF_JOB_LOG_LEVEL, PREF_OVERRIDE_SPARK_SETTINGS, PREF_CUSTOM_SPARK_SETTINGS
-    };
+    public static final String[] PREF_ALL_CONTEXT_SETTINGS = new String[]{PREF_SPARK_VERSION, PREF_CONTEXT_NAME,
+        PREF_DELETE_OBJECTS_ON_DISPOSE, PREF_JOB_LOG_LEVEL, PREF_OVERRIDE_SPARK_SETTINGS, PREF_CUSTOM_SPARK_SETTINGS};
+
+
+    private static final String LEGACY_SPARK_1_2_PLUGIN = "com.knime.bigdata.spark";
+
+    private static final String LEGACY_SPARK_1_3_PLUGIN = "com.knime.bigdata.spark1_3";
 
     /** @deprecated use PREF_JOB_SERVER_URL instead */
     @Deprecated
     public static final String LEGACY_PREF_JOB_SERVER = "com.knime.bigdata.spark.jobServer";
+
     /** @deprecated use PREF_JOB_SERVER_URL instead */
     @Deprecated
     public static final String LEGACY_PREF_JOB_SERVER_PORT = "com.knime.bigdata.spark.jobServer.port";
+
     /** @deprecated use PREF_JOB_SERVER_URL instead */
     @Deprecated
     public static final String LEGACY_PREF_JOB_SERVER_PROTOCOL = "com.knime.bigdata.spark.jobServer.protocol";
+
+    /** @deprecated use PREF_CONTEXT_NAME instead */
+    @Deprecated
+    public static final String LEGACY_PREF_CONTEXT_NAME = "com.knime.bigdata.spark.context";
+
     /** @deprecated use PREF_DELETE_OBJECTS_ON_DISPOSE instead */
     @Deprecated
     public static final String LEGACY_PREF_DELETE_RDDS_ON_DISPOSE = "com.knime.bigdata.spark.deleteRDDsOnDispose";
+
     /** @deprecated use PREF_CUSTOM_SPARK_SETTINGS instead */
     @Deprecated
     public static final String LEGACY_PREF_MEM_PER_NODE = "com.knime.bigdata.spark.memperNode";
 
+    /** @deprecated use PREF_USER_NAME instead */
+    @Deprecated
+    public static final String LEGACY_PREF_USER_NAME = "com.knime.bigdata.spark.user";
+
+    /** @deprecated use PREF_USER_PWD instead */
+    @Deprecated
+    public static final String LEGACY_PREF_PWD = "com.knime.bigdata.spark.pwd";
+
+    /** @deprecated use PREF_USER_JOB_TIMEOUT instead */
+    @Deprecated
+    public static final String LEGACY_PREF_JOB_TIMEOUT = "com.knime.bigdata.spark.jobTimeout";
+
+    /** @deprecated use PREF_JOB_CHECK_FREQUENCY instead */
+    @Deprecated
+    public static final String LEGACY_PREF_JOB_CHECK_FREQUENCY = "com.knime.bigdata.spark.jobCheckFrequency";
+
+    /** @deprecated use PREF_VERBOSE_LOGGING instead */
+    @Deprecated
+    public static final String LEGACY_PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.verboseLogging";
 
     @Override
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
-        final Config config = ConfigFactory.load();
 
-        // fallback on old protocol/server/port settings if present
-        if (store.contains(LEGACY_PREF_JOB_SERVER_PROTOCOL) && store.contains(LEGACY_PREF_JOB_SERVER)) {
-            String defaultUrl = store.getString(LEGACY_PREF_JOB_SERVER_PROTOCOL) + "://" + store.getString(LEGACY_PREF_JOB_SERVER);
-            if (store.contains(LEGACY_PREF_JOB_SERVER_PORT)) {
-                defaultUrl += ":" + store.getString(LEGACY_PREF_JOB_SERVER_PORT);
-                store.setToDefault(LEGACY_PREF_JOB_SERVER_PORT);
+        // heuristic test if preferences are already initialized (jobserver url must always be set!)
+        final boolean isAlreadyInitialized = store.contains(PREF_JOB_SERVER_URL);
+
+        loadDefaultValues(store);
+        if (!isAlreadyInitialized) {
+            try {
+                if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_3_PLUGIN) != null) {
+                    initializeFromLegacySettings(store, LEGACY_SPARK_1_3_PLUGIN, SparkVersion.V_1_3);
+                } else if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_2_PLUGIN) != null) {
+                    initializeFromLegacySettings(store, LEGACY_SPARK_1_2_PLUGIN, SparkVersion.V_1_2);
+                } // otherwise use the defaults that are already set
+            } catch (Exception e) {
+                Logger.getLogger(SparkPreferenceInitializer.class)
+                    .error("Error when trying to import old Spark Executor preferences. Falling back to defaults.", e);
             }
-            store.setValue(PREF_JOB_SERVER_URL, defaultUrl);
-            store.setToDefault(LEGACY_PREF_JOB_SERVER_PROTOCOL);
-            store.setToDefault(LEGACY_PREF_JOB_SERVER);
+        }
+    }
+
+    /**
+     * Imports existing legacy preferences (from com.knime.bigdata.spark and .spark1_3) into the new format.
+     *
+     * @param store The store for the new preferences.
+     * @param oldPluginId The legacy plugin name.
+     */
+    private void initializeFromLegacySettings(final IPreferenceStore store, final String oldPluginId, final SparkVersion sparkVersion) {
+
+        IEclipsePreferences oldPrefs = InstanceScope.INSTANCE.getNode(oldPluginId);
+
+        final String jobserverProtocol = oldPrefs.get(LEGACY_PREF_JOB_SERVER_PROTOCOL, "http");
+        final String jobserverHost = oldPrefs.get(LEGACY_PREF_JOB_SERVER, "localhost");
+        final int jobserverPort = oldPrefs.getInt(LEGACY_PREF_JOB_SERVER_PORT, 8090);
+
+        final String user = oldPrefs.get(LEGACY_PREF_USER_NAME, "guest");
+        final String password = oldPrefs.get(LEGACY_PREF_PWD, null);
+
+        final String jobserverContextName = oldPrefs.get(LEGACY_PREF_CONTEXT_NAME, "knimeSparkContext");
+        final String memPerNode = oldPrefs.get(LEGACY_PREF_MEM_PER_NODE, "512m");
+
+        final int jobTimeout = oldPrefs.getInt(LEGACY_PREF_JOB_TIMEOUT, -1);
+        final int jobCheckFreq = oldPrefs.getInt(LEGACY_PREF_JOB_CHECK_FREQUENCY, -1);
+
+        final boolean deleteRDDsOnDispose = oldPrefs.getBoolean(LEGACY_PREF_DELETE_RDDS_ON_DISPOSE,
+            store.getDefaultBoolean(PREF_DELETE_OBJECTS_ON_DISPOSE));
+        final boolean verboseLogging =
+            oldPrefs.getBoolean(LEGACY_PREF_VERBOSE_LOGGING, store.getDefaultBoolean(PREF_VERBOSE_LOGGING));
+
+        String jobserverUrl = String.format("%s://%s:%d/", jobserverProtocol, jobserverHost, jobserverPort);
+        if (!jobserverUrl.equals(store.getDefaultString(PREF_JOB_SERVER_URL))) {
+            store.setValue(PREF_JOB_SERVER_URL, jobserverUrl);
         }
 
-        // fallback on renamed delete objects on dispose
-        if (store.contains(LEGACY_PREF_DELETE_RDDS_ON_DISPOSE)) {
-            store.setValue(PREF_DELETE_OBJECTS_ON_DISPOSE, store.getString(LEGACY_PREF_DELETE_RDDS_ON_DISPOSE));
-            store.setToDefault(LEGACY_PREF_DELETE_RDDS_ON_DISPOSE);
+        if (user != null && !user.equals(store.getDefaultString(PREF_USER_NAME)) && password != null) {
+            store.setValue(PREF_AUTHENTICATION, true);
+            store.setValue(PREF_USER_NAME, user);
+            store.setValue(PREF_PWD, password);
         }
 
-        // fallback on memory per node settings
-        if (store.contains(LEGACY_PREF_MEM_PER_NODE)) {
+        if (jobserverContextName != null && !jobserverContextName.equals(store.getDefaultString(PREF_CONTEXT_NAME))) {
+            store.setValue(PREF_CONTEXT_NAME, jobserverContextName);
+        }
+
+        if (jobTimeout != -1 && jobTimeout != store.getDefaultInt(PREF_JOB_TIMEOUT)) {
+            store.setValue(PREF_JOB_TIMEOUT, jobTimeout);
+        }
+
+        if (jobCheckFreq != -1 && jobCheckFreq != 5) {
+            // jobCheckFreq=5 is the old default
+            store.setValue(PREF_JOB_CHECK_FREQUENCY, jobCheckFreq);
+        }
+
+        if (memPerNode != null && !memPerNode.isEmpty() && !memPerNode.equals("512m") ) {
+            // memPerNode=512m is the old default
             store.setValue(PREF_OVERRIDE_SPARK_SETTINGS, true);
-            store.setValue(PREF_CUSTOM_SPARK_SETTINGS, "memory-per-node: " + store.getInt(LEGACY_PREF_MEM_PER_NODE) + "\n");
-            store.setToDefault(LEGACY_PREF_MEM_PER_NODE);
+            store.setValue(PREF_CUSTOM_SPARK_SETTINGS, "memory-per-node: " + memPerNode + "\n");
         }
+
+        if (deleteRDDsOnDispose != store.getDefaultBoolean(PREF_DELETE_OBJECTS_ON_DISPOSE)) {
+            store.setValue(PREF_DELETE_OBJECTS_ON_DISPOSE, deleteRDDsOnDispose);
+        }
+
+        store.setValue(PREF_VERBOSE_LOGGING, verboseLogging);
+        store.setValue(PREF_SPARK_VERSION, sparkVersion.getLabel());
+    }
+
+    private void loadDefaultValues(final IPreferenceStore store) {
+        final Config config = ConfigFactory.load();
 
         // setup connection defaults
         store.setDefault(PREF_JOB_SERVER_URL, getPresetString(config, "jobserver.connection.url"));

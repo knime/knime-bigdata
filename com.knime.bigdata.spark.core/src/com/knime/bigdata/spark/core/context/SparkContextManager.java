@@ -112,10 +112,15 @@ public class SparkContextManager {
         }
     }
 
-    public synchronized static void refreshDefaultContext() throws KNIMESparkException {
+    public synchronized static void refreshDefaultContext(final boolean destroyOldContext) throws KNIMESparkException {
         if (defaultSparkContext != null) {
             sparkContexts.remove(defaultSparkContext.getID());
             sparkContexts.remove(DEFAULT_SPARK_CONTEXT_ID);
+
+            if (destroyOldContext) {
+                defaultSparkContext.ensureDestroyed();
+            }
+
             defaultSparkContext = null;
         }
         createAndConfigureDefaultSparkContext();

@@ -26,22 +26,22 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
- * subclasses must be threadsafe
+ * Superclass for all Spark context implementations.
  *
- * @author bjoern
+ * NOTE: Implementations must be thread-safe.
+ *
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public abstract class SparkContext implements JobController, NamedObjectsController {
 
     public enum SparkContextStatus {
-        NEW,
-        CONFIGURED,
-        OPEN
+            NEW, CONFIGURED, OPEN
     }
 
     public abstract SparkContextStatus getStatus();
 
-    public void ensureOpened() throws KNIMESparkException {
-        switch(getStatus()) {
+    public synchronized void ensureOpened() throws KNIMESparkException {
+        switch (getStatus()) {
             case NEW:
                 throw new KNIMESparkException("Spark context needs to be configured before opening.");
             case CONFIGURED:
@@ -53,8 +53,8 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
         }
     }
 
-    public void ensureDestroyed() throws KNIMESparkException {
-        switch(getStatus()) {
+    public synchronized void ensureDestroyed() throws KNIMESparkException {
+        switch (getStatus()) {
             case CONFIGURED:
             case NEW:
                 // all is good
@@ -66,6 +66,18 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     }
 
     public abstract void configure(SparkContextConfig config);
+
+    /**
+     * Determines whether it is safe to apply the given config to the current context, without destroying it first. Reconfiguring a context is
+     * possible under certain circumstances. It is never possible to change the {@link SparkContextID} of an existing
+     * context, but especially for new/configured contexts, it is still possible to change every other setting. For contexts
+     * that are already open, it depends on the actual settings, e.g. it may not be possible to change the {@link SparkVersion}
+     * without destroying the remote context first, but it may be possible to change the job timeout.
+     *
+     * @param config A new configuration
+     * @return true if it is possible to (re)configure this context with the given config, false otherwise.
+     */
+    public abstract boolean canReconfigure(SparkContextConfig config);
 
     public abstract void open() throws KNIMESparkException;
 
