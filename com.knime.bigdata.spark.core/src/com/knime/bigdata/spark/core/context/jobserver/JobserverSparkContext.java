@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.core.context.jobserver;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.json.JsonArray;
@@ -109,16 +110,55 @@ public class JobserverSparkContext extends SparkContext {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void configure(final SparkContextConfig config) {
-
-        if (getStatus() != SparkContextStatus.NEW && getStatus() != SparkContextStatus.CONFIGURED) {
-            throw new RuntimeException(
-                String.format("Trying to configure Spark context which is in status: %s. This is a bug.", getStatus()));
+    public synchronized boolean canReconfigure(final SparkContextConfig config) {
+        // we can never change the id of an existing context
+        if (!SparkContextID.fromConnectionDetails(config.getJobManagerUrl(), config.getContextName())
+            .equals(m_contextID)) {
+            return false;
         }
 
-        this.m_config = config;
-        this.m_jobJar = SparkJarRegistry.getJobJar(config.getSparkVersion());
-        this.m_status = SparkContextStatus.CONFIGURED;
+        switch (getStatus()) {
+            case NEW:
+            case CONFIGURED:
+                return true;
+            default:
+                return m_config.getSparkVersion().equals(config.getSparkVersion())
+                    && m_config.overrideSparkSettings() == config.overrideSparkSettings()
+                    && (m_config.overrideSparkSettings()) ? Objects.equals(m_config.getCustomSparkSettings(), config.getCustomSparkSettings()) : true;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void configure(final SparkContextConfig config) {
+
+        switch (getStatus()) {
+            case NEW:
+            case CONFIGURED:
+                applyConfig(config);
+                this.m_status = SparkContextStatus.CONFIGURED;
+                break;
+            default:
+                if (canReconfigure(config)) {
+                    applyConfig(config);
+                } else {
+                    throw new RuntimeException(String.format(
+                        "Trying to configure Spark context which is in status: %s. This is a bug.", getStatus()));
+                }
+        }
+    }
+
+    /**
+     * @param config
+     */
+    private void applyConfig(final SparkContextConfig config) {
+        m_config = config;
+        m_jobJar = null;
+        m_restClient = null;
+        m_jobController = null;
+        m_namedObjectsController = null;
     }
 
     private void ensureRestClient() throws KNIMESparkException {
@@ -152,9 +192,12 @@ public class JobserverSparkContext extends SparkContext {
             @Override
             public void run() throws Exception {
                 ensureRestClient();
+                ensureJobJar();
 
                 if (!remoteSparkContextExists()) {
                     createRemoteSparkContext();
+                } else if (m_config.overrideSparkSettings()){
+                    LOGGER.warn("Remote Spark context already exists, cannot apply custom Spark context settings.");
                 }
 
                 // FIXME: make sure not to re-upload job jars if they are already on the server
@@ -166,9 +209,20 @@ public class JobserverSparkContext extends SparkContext {
 
                 validateAndPrepareContext();
             }
+
         });
 
     }
+
+    private void ensureJobJar() throws KNIMESparkException {
+        if (m_jobJar == null) {
+            m_jobJar = SparkJarRegistry.getJobJar(m_config.getSparkVersion());
+            if (m_jobJar == null) {
+                throw new KNIMESparkException(String.format("No Spark jobs for your Spark version %s found.", m_config.getSparkVersion().getLabel()));
+            }
+        }
+    }
+
 
     private void validateAndPrepareContext() throws KNIMESparkException {
         SparkVersion sparkVersion = m_config.getSparkVersion();
@@ -202,7 +256,6 @@ public class JobserverSparkContext extends SparkContext {
         });
     }
 
-
     private void runWithResetOnFailure(final Task task) throws KNIMESparkException {
         try {
             task.run();
@@ -210,13 +263,12 @@ public class JobserverSparkContext extends SparkContext {
             resetToConfigured();
 
             if (e instanceof KNIMESparkException) {
-                throw (KNIMESparkException) e;
+                throw (KNIMESparkException)e;
             } else {
                 throw new KNIMESparkException(e);
             }
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -230,6 +282,8 @@ public class JobserverSparkContext extends SparkContext {
         ensureOpened();
 
         if (m_jobController == null) {
+            ensureRestClient();
+            ensureJobJar();
             m_jobController = new JobserverJobController(m_contextID, m_config, m_restClient,
                 m_jobJar.getDescriptor().getJobserverJobClass());
         }
@@ -340,7 +394,8 @@ public class JobserverSparkContext extends SparkContext {
         StringBuilder buf = new StringBuilder();
         buf.append("<strong>Connection settings</strong><hr/>");
         buf.append("<strong>Url:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobManagerUrl() + "</tt><br/>");
-        buf.append("<strong>Use authentication:</strong>&nbsp;&nbsp;<tt>" + m_config.useAuthentication() + "</tt><br/>");
+        buf.append(
+            "<strong>Use authentication:</strong>&nbsp;&nbsp;<tt>" + m_config.useAuthentication() + "</tt><br/>");
         if (m_config.useAuthentication()) {
             buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + m_config.getUser() + "</tt><br/>");
             buf.append("<strong>Password:</strong>&nbsp;&nbsp;<tt>" + (m_config.getPassword() != null) + "</tt><br/>");
@@ -349,15 +404,17 @@ public class JobserverSparkContext extends SparkContext {
         buf.append("<strong>Job check frequency:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobCheckFrequency()
             + " seconds</tt><br/>");
 
-
         buf.append("<br/>");
         buf.append("<strong>Context settings</strong><hr/>");
         buf.append("<strong>Spark version:</strong>&nbsp;&nbsp;<tt>" + m_config.getSparkVersion() + "</tt><br>");
         buf.append("<strong>Context name:</strong>&nbsp;&nbsp;<tt>" + m_config.getContextName() + "</tt><br>");
-        buf.append("<strong>Delete objects on dispose:</strong>&nbsp;&nbsp;<tt>" + m_config.deleteObjectsOnDispose() + "</tt><br>");
-        buf.append("<strong>Override spark settings:</strong>&nbsp;&nbsp;<tt>" + m_config.overrideSparkSettings() + "</tt><br>");
+        buf.append("<strong>Delete objects on dispose:</strong>&nbsp;&nbsp;<tt>" + m_config.deleteObjectsOnDispose()
+            + "</tt><br>");
+        buf.append("<strong>Override spark settings:</strong>&nbsp;&nbsp;<tt>" + m_config.overrideSparkSettings()
+            + "</tt><br>");
         if (m_config.overrideSparkSettings()) {
-            buf.append("<strong>Custom settings:</strong>&nbsp;&nbsp;<tt>" + m_config.getCustomSparkSettings() + "</tt><br>");
+            buf.append(
+                "<strong>Custom settings:</strong>&nbsp;&nbsp;<tt>" + m_config.getCustomSparkSettings() + "</tt><br>");
         }
 
         return buf.toString();
@@ -458,8 +515,7 @@ public class JobserverSparkContext extends SparkContext {
      * {@inheritDoc}
      */
     @Override
-    public void deleteNamedObjects(final Set<String> namedObjects)
-        throws KNIMESparkException {
+    public void deleteNamedObjects(final Set<String> namedObjects) throws KNIMESparkException {
 
         try {
             getNamedObjectController().deleteNamedObjects(namedObjects);

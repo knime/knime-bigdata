@@ -44,13 +44,9 @@
  */
 package com.knime.bigdata.spark.core.preferences;
 
-import java.util.Arrays;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -67,10 +63,15 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
+import com.knime.bigdata.spark.core.context.SparkContext;
+import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
+import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextManager;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -78,7 +79,9 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  * @author Sascha Wolke, KNIME.com
  */
 public class SparkPreferencePage extends PreferencePage
-        implements IWorkbenchPreferencePage, IPropertyChangeListener, Listener {
+        implements IWorkbenchPreferencePage, Listener {
+
+    private static final NodeLogger LOG = NodeLogger.getLogger(SparkPreferencePage.class);
 
     private Text m_jobServerUrl;
     private Button m_withoutAuthentication;
@@ -97,8 +100,6 @@ public class SparkPreferencePage extends PreferencePage
 
     private Button m_verboseLogging;
 
-    private boolean m_contextResetInfoDisplayed;
-
 
     /**
      * Creates a new spark preference page.
@@ -112,7 +113,6 @@ public class SparkPreferencePage extends PreferencePage
     public void init(final IWorkbench workbench) {
         final IPreferenceStore prefStore = SparkPlugin.getDefault().getPreferenceStore();
         setPreferenceStore(prefStore);
-        prefStore.addPropertyChangeListener(this);
     }
 
     @Override
@@ -248,8 +248,6 @@ public class SparkPreferencePage extends PreferencePage
     private void loadPreferencesIntoFields() {
         IPreferenceStore prefs = getPreferenceStore();
 
-        m_contextResetInfoDisplayed = false;
-
         m_jobServerUrl.setText(prefs.getString(SparkPreferenceInitializer.PREF_JOB_SERVER_URL));
         m_withoutAuthentication.setSelection(!prefs.getBoolean(SparkPreferenceInitializer.PREF_AUTHENTICATION));
         m_withAuthentication.setSelection(prefs.getBoolean(SparkPreferenceInitializer.PREF_AUTHENTICATION));
@@ -262,6 +260,7 @@ public class SparkPreferencePage extends PreferencePage
         setSparkVersionField(prefs.getString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
         m_contextName.setText(prefs.getString(SparkPreferenceInitializer.PREF_CONTEXT_NAME));
         selectSparkJobLogLevelButton(prefs.getString(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL));
+        m_deleteSparkObjectsOnDispose.setSelection(prefs.getBoolean(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE));
         m_overrideSettings.setSelection(prefs.getBoolean(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS));
         m_customSettings.setText(prefs.getString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS));
         m_customSettings.setEnabled(prefs.getBoolean(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS));
@@ -285,6 +284,7 @@ public class SparkPreferencePage extends PreferencePage
         setSparkVersionField(prefs.getDefaultString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
         m_contextName.setText(prefs.getDefaultString(SparkPreferenceInitializer.PREF_CONTEXT_NAME));
         selectSparkJobLogLevelButton(prefs.getDefaultString(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL));
+        m_deleteSparkObjectsOnDispose.setSelection(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE));
         m_overrideSettings.setSelection(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS));
         m_customSettings.setText(prefs.getDefaultString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS));
         m_customSettings.setEnabled(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS));
@@ -311,7 +311,6 @@ public class SparkPreferencePage extends PreferencePage
             prefs.setToDefault(SparkPreferenceInitializer.PREF_SPARK_VERSION);
         }
         prefs.setValue(SparkPreferenceInitializer.PREF_CONTEXT_NAME, m_contextName.getText());
-
         prefs.setValue(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE, m_deleteSparkObjectsOnDispose.getSelection());
 
         String logLevel = null;
@@ -329,10 +328,54 @@ public class SparkPreferencePage extends PreferencePage
 
         prefs.setValue(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS, m_overrideSettings.getSelection());
         prefs.setValue(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS, m_customSettings.getText());
-
         prefs.setValue(SparkPreferenceInitializer.PREF_VERBOSE_LOGGING, m_verboseLogging.getSelection());
 
+        reconfigureDefaultSparkContext();
+
         return true;
+    }
+
+    private void reconfigureDefaultSparkContext() {
+        SparkContextConfig newDefaultConfig = new SparkContextConfig();
+        SparkContextID newContextID = SparkContextID.fromConnectionDetails(newDefaultConfig.getJobManagerUrl(), newDefaultConfig.getContextName());
+
+        SparkContext currentDefaultContext = SparkContextManager.getDefaultSparkContext();
+
+        if (!newContextID.equals(currentDefaultContext.getID())) {
+
+            boolean shouldDestroy = false;
+            if (SparkContextManager.getDefaultSparkContext().getStatus() == SparkContextStatus.OPEN) {
+                shouldDestroy = MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                    "Spark context has changed", "You have configured a new Spark context. Please reset all Spark nodes.\n"
+                    + "Should the old context be destroyed now? WARNING: This deletes all cached data such as RDDs in the context.");
+            }
+
+            try {
+                SparkContextManager.refreshDefaultContext(shouldDestroy);
+            } catch (KNIMESparkException e) {
+                LOG.error(e);
+                MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error while destroying Spark context", e.getMessage());
+            }
+
+        } else if (currentDefaultContext.canReconfigure(newDefaultConfig)) {
+            currentDefaultContext.configure(newDefaultConfig);
+        } else {
+            boolean shouldDestroy = MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                "Spark context settings have changed",
+                "You have changed settings that only become active, after destroying the existing Spark context. Should the existing context be destroyed now?\n"
+                + "WARNING: This deletes all cached data such as RDDs in the context.");
+
+            if (shouldDestroy) {
+                try {
+                    currentDefaultContext.ensureDestroyed();
+                } catch (KNIMESparkException e) {
+                    LOG.error(e);
+                    MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error while destroying Spark context", e.getMessage());
+                }
+
+                currentDefaultContext.configure(newDefaultConfig);
+            }
+        }
     }
 
     @Override
@@ -366,40 +409,6 @@ public class SparkPreferencePage extends PreferencePage
     private void selectSparkJobLogLevelButton(final String level) {
         for (int i = 0; i < SparkPreferenceInitializer.ALL_LOG_LEVELS.length; i++) {
             m_sparkJobLevel[i].setSelection(SparkPreferenceInitializer.ALL_LOG_LEVELS[i].equals(level));
-        }
-    }
-
-    @Override
-    public void propertyChange(final PropertyChangeEvent event) {
-        final String property = event.getProperty();
-        System.out.println("Found change: " + property);
-
-        try {
-            // context id has changed
-            if (property.equals(SparkPreferenceInitializer.PREF_JOB_SERVER_URL) || property.equals(SparkPreferenceInitializer.PREF_CONTEXT_NAME)) {
-                SparkContextManager.getDefaultSparkContext().ensureDestroyed();
-                SparkContextManager.refreshDefaultContext();
-                showContextResetInfo();
-
-            // context setting has changed
-            } else if (Arrays.binarySearch(SparkPreferenceInitializer.PREF_ALL_CONTEXT_SETTINGS, event.getProperty()) >= 0) {
-                SparkContextManager.getDefaultSparkContext().ensureDestroyed();
-                showContextResetInfo();
-            }
-
-        } catch (KNIMESparkException e) {
-            MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Spark context reconfiguration failed",
-                "Failed to reconfigure spark context. New settings require restart to take affect.");
-        }
-    }
-
-    private void showContextResetInfo() {
-        if (!m_contextResetInfoDisplayed) {
-            MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Spark context destroyed.",
-                "Spark context settings change detected. Old context has been destroyed.");
-            m_contextResetInfoDisplayed = true;
         }
     }
 }
