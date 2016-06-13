@@ -190,8 +190,7 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
                         continue;
                     }
                     final String className = JarPacker.getClassName(je);
-                    Class<?> c = cl.loadClass(className);
-                    if (c.isAnnotationPresent(SparkClass.class)) {
+                    if (isSparkClass(cl, className)) {
                         collector.addJarEntry(je, jarFile.getInputStream(je));
                     }
                 }
@@ -210,16 +209,11 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
      * @param dir a {@link File} object that must point to a directory
      */
     protected void scanDirectory(final JarCollector collector, final File dir) {
-        ////TK_TODO: Here we might want to use ASM (http://asm.ow2.org/) or javassist (http://www.javassist.org/)
-        //        collector.addDirectory(dir);
         try (final URLClassLoader cl =
             URLClassLoader.newInstance(new URL[]{dir.toURI().toURL()}, this.getClass().getClassLoader());) {
-
             for (final String fileName : dir.list()) {
-
                 final File file = new File(dir, fileName);
                 final String path = file.getPath();
-
                 if (file.isDirectory() && (path.contains(File.separatorChar + "bin" + File.separatorChar)
                     || path.endsWith(File.separatorChar + "bin"))) {
                     //only look at the bin directories (works for eclipse dev setup)
@@ -229,27 +223,39 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
                     final int endIdx = path.length() - 6;
                     final String classFileName = path.substring(startIdx, endIdx);
                     final String className = classFileName.replace(File.separatorChar, '.');
-
-                    // if this is a nested class, test the outer class
-                    String[] classNameComps = className.split("\\.");
-                    if (classNameComps[classNameComps.length - 1].contains("$")) {
-                        classNameComps[classNameComps.length - 1] = classNameComps[classNameComps.length - 1]
-                            .substring(0, classNameComps[classNameComps.length - 1].indexOf('$'));
-                    }
-
-                    Class<?> c = cl.loadClass(StringUtils.join(classNameComps, '.'));
-                    if (c.isAnnotationPresent(SparkClass.class)) {
-                        //always use / as path separator in the zip entry name!!!
-                        //see https://bugs.openjdk.java.net/browse/JDK-6303716?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
-                        final String zipEntryName = classFileName.replace(File.separatorChar, '/');
-                        collector.addFile(zipEntryName + ".class", file);
+                    if (isSparkClass(cl, className)) {
+                      //always use / as path separator in the zip entry name!!!
+                      //see https://bugs.openjdk.java.net/browse/JDK-6303716?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
+                      final String zipEntryName = classFileName.replace(File.separatorChar, '/');
+                      collector.addFile(zipEntryName + ".class", file);
                     }
                 }
             }
-
         } catch (Exception e) {
             LOGGER.info("Exception checking Spark directory " + dir.getPath() + " Exception: " + e.getMessage());
         }
     }
 
+    /**
+     * THis method is called from the {@link #scanJar(JarCollector, File)} and
+     * {@link #scanDirectory(JarCollector, File)} method to check if the class with the given name is a Spark clas
+     * and thus should be send to the Spark server.
+     * @param cl the {@link ClassLoader} that can load the class with the given className
+     * @param className the name of the class with . as separator
+     * @return <code>true</code> if the class is a Spark class
+     * @throws ClassNotFoundException if the class with the given name could not be faound
+     */
+    protected boolean isSparkClass(final ClassLoader cl, final String className) throws ClassNotFoundException {
+        ////TK_TODO: Here we might want to use ASM (http://asm.ow2.org/) or javassist (http://www.javassist.org/)
+        //        collector.addDirectory(dir);
+        // if this is a nested class, test the outer class
+        final String[] classNameComps = className.split("\\.");
+        if (classNameComps[classNameComps.length - 1].contains("$")) {
+            classNameComps[classNameComps.length - 1] = classNameComps[classNameComps.length - 1]
+                .substring(0, classNameComps[classNameComps.length - 1].indexOf('$'));
+        }
+        final String mainClassName = StringUtils.join(classNameComps, '.');
+        final Class<?> c = cl.loadClass(mainClassName);
+        return c.isAnnotationPresent(SparkClass.class);
+    }
 }
