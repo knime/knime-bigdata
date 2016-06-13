@@ -38,6 +38,7 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.core.version.CompatibilityChecker;
 import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import com.knime.bigdata.spark.core.version.SparkVersion;
@@ -191,6 +192,9 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
                     }
                     final String className = JarPacker.getClassName(je);
                     if (isSparkClass(cl, className)) {
+                        if (KNIMEConfigContainer.verboseLogging()) {
+                            LOGGER.debug("Adding Spark class jar entry: " + className);
+                        }
                         collector.addJarEntry(je, jarFile.getInputStream(je));
                     }
                 }
@@ -227,6 +231,9 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
                       //always use / as path separator in the zip entry name!!!
                       //see https://bugs.openjdk.java.net/browse/JDK-6303716?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
                       final String zipEntryName = classFileName.replace(File.separatorChar, '/');
+                      if (KNIMEConfigContainer.verboseLogging()) {
+                          LOGGER.debug("Adding Spark class file: " + className);
+                      }
                       collector.addFile(zipEntryName + ".class", file);
                     }
                 }
