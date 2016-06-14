@@ -68,16 +68,25 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     public abstract void configure(SparkContextConfig config);
 
     /**
-     * Determines whether it is safe to apply the given config to the current context, without destroying it first. Reconfiguring a context is
-     * possible under certain circumstances. It is never possible to change the {@link SparkContextID} of an existing
-     * context, but especially for new/configured contexts, it is still possible to change every other setting. For contexts
-     * that are already open, it depends on the actual settings, e.g. it may not be possible to change the {@link SparkVersion}
-     * without destroying the remote context first, but it may be possible to change the job timeout.
+     * Tries to reconfigure the context and returns whether this was successful or not. First, it tries to reconfigure
+     * without destroying the remote Spark context, however this is only possible for certain settings (depends on the
+     * context implementation). If settings have changed that require destruction it only destroys the remote context if
+     * destroyIfNecessary is true, otherwise it does nothing and returns false.
      *
-     * @param config A new configuration
-     * @return true if it is possible to (re)configure this context with the given config, false otherwise.
+     * <p>
+     * NOTE: It is never possible to change the {@link SparkContextID} of a context, in this case this method does
+     * nothing and returns false. However, for new/configured contexts, it is still possible to change all other
+     * settings. For contexts that are already open, it depends on the actual setting that has changed, e.g. it may not
+     * be possible to change the {@link SparkVersion} without destroying the remote context first, but it may be
+     * possible to change the job timeout.
+     * </p>
+     *
+     * @param config The new configuration to apply.
+     * @param destroyIfNecessary Wether the remote context shall be destroyed if necessary.
+     * @return true if the context was successfully (re)configured with the given config, false otherwise.
      */
-    public abstract boolean canReconfigure(SparkContextConfig config);
+    public abstract boolean reconfigure(SparkContextConfig config, boolean destroyIfNecessary)
+        throws KNIMESparkException;
 
     public abstract void open() throws KNIMESparkException;
 

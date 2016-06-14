@@ -32,7 +32,8 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
  */
 public class SparkContextManager {
 
-    private final static HashMap<SparkContextID, SparkContext> sparkContexts = new HashMap<SparkContextID, SparkContext>();
+    private final static HashMap<SparkContextID, SparkContext> sparkContexts =
+        new HashMap<SparkContextID, SparkContext>();
 
     private final static SparkContextID DEFAULT_SPARK_CONTEXT_ID = new SparkContextID("default://");
 
@@ -51,7 +52,8 @@ public class SparkContextManager {
 
     private static void createAndConfigureDefaultSparkContext() {
         SparkContextConfig defaultConfig = new SparkContextConfig();
-        SparkContextID actualDefaultContextID = SparkContextID.fromConnectionDetails(defaultConfig.getJobManagerUrl(), defaultConfig.getContextName());
+        SparkContextID actualDefaultContextID =
+            SparkContextID.fromConnectionDetails(defaultConfig.getJobManagerUrl(), defaultConfig.getContextName());
         defaultSparkContext = new JobserverSparkContext(actualDefaultContextID);
         defaultSparkContext.configure(defaultConfig);
         sparkContexts.put(DEFAULT_SPARK_CONTEXT_ID, defaultSparkContext);
@@ -73,13 +75,15 @@ public class SparkContextManager {
         return toReturn;
     }
 
-    public synchronized static void refreshCustomSparkContext(final SparkContext newContext) throws KNIMESparkException {
+    public synchronized static void refreshCustomSparkContext(final SparkContext newContext)
+        throws KNIMESparkException {
         checkDefaultContext(newContext.getID());
         sparkContexts.put(newContext.getID(), newContext);
     }
 
     /**
      * Use with care. This means nodes will not find a context with this ID anymore.
+     *
      * @param contextID
      * @throws KNIMESparkException
      */
@@ -99,8 +103,9 @@ public class SparkContextManager {
     }
 
     /**
-     * Destroys the {@link SparkContext} with the given {@link SparkContextID} and removes the id
-     * from the available contexts. If the context no longer exists the method simply returns.
+     * Destroys the {@link SparkContext} with the given {@link SparkContextID} and removes the id from the available
+     * contexts. If the context no longer exists the method simply returns.
+     *
      * @param contextID the {@link SparkContextID} to destroy
      * @throws KNIMESparkException
      */
@@ -112,17 +117,49 @@ public class SparkContextManager {
         }
     }
 
-    public synchronized static void refreshDefaultContext(final boolean destroyOldContext) throws KNIMESparkException {
-        if (defaultSparkContext != null) {
+    /**
+     * Tries to reconfigures the default Spark context from the default settings.
+     *
+     * @param destroyIfNecessary If set to true, the default context will be destroyed, if necessary, i.e. if a setting
+     *            has changed that can only be changed by restarting the context.
+     * @return true, when reconfiguration was successful, false otherwise.
+     * @throws KNIMESparkException When something went wrong while destroying the default context.
+     */
+    public synchronized static boolean reconfigureDefaultContext(final boolean destroyIfNecessary)
+        throws KNIMESparkException {
+
+        final SparkContextConfig newDefaultConfig = new SparkContextConfig();
+        final SparkContextID newContextID = SparkContextID.fromConnectionDetails(newDefaultConfig.getJobManagerUrl(),
+            newDefaultConfig.getContextName());
+
+        // create an entirely new context when the ID changes
+        if (defaultSparkContext != null && !newContextID.equals(defaultSparkContext.getID())) {
             sparkContexts.remove(defaultSparkContext.getID());
             sparkContexts.remove(DEFAULT_SPARK_CONTEXT_ID);
 
-            if (destroyOldContext) {
-                defaultSparkContext.ensureDestroyed();
-            }
-
             defaultSparkContext = null;
+            createAndConfigureDefaultSparkContext();
+            return true;
+        } else {
+            // otherwise try to reconfigure
+            return reconfigureContext(DEFAULT_SPARK_CONTEXT_ID, newDefaultConfig, destroyIfNecessary);
         }
-        createAndConfigureDefaultSparkContext();
+    }
+
+    /**
+     * Tries to reconfigure the {@link SparkContext} identified by the given ID with the given configuration. Returns
+     * false if reconfiguration could not be performed, e.g. if destroyIfNecessary=false but a setting has changed that
+     * can only be changed by restarting the context.
+     *
+     * @param contextID The id of the context to reconfigure.
+     * @param newConfig
+     * @param destroyIfNecessary When set to true, the context will be destroyed if a setting has changed that can only
+     *            be changed by restarting the context.
+     * @return true, when reconfiguration was successful, false otherwise.
+     * @throws KNIMESparkException When something went wrong while destroying the context.
+     */
+    public synchronized static boolean reconfigureContext(final SparkContextID contextID,
+        final SparkContextConfig newConfig, final boolean destroyIfNecessary) throws KNIMESparkException {
+        return getOrCreateSparkContext(contextID).reconfigure(newConfig, destroyIfNecessary);
     }
 }
