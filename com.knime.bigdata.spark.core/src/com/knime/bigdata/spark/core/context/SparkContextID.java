@@ -27,24 +27,33 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 
+import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+
 /**
+ * Uniquely identifies a {@link SparkContext} in the KNIME Spark Executor extension.
  *
- *
- * @author bjoern
+ * @see SparkContext
+ * @see SparkContextManager
+ * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkContextID {
 
     private final static String CFG_CONTEXT_ID = "sparkContextID";
 
-    private final String stringID;
+    private final String m_stringID;
 
+    /**
+     * Create a new ID backed by the given String.
+     *
+     * @param stringID
+     */
     public SparkContextID(final String stringID) {
-        this.stringID = stringID;
+        m_stringID = stringID;
     }
 
     @Override
     public String toString() {
-        return stringID;
+        return m_stringID;
     }
 
     @Override
@@ -52,7 +61,7 @@ public class SparkContextID {
         if (other.getClass() != getClass()) {
             return false;
         } else {
-            return ((SparkContextID)other).stringID.equals(stringID);
+            return ((SparkContextID)other).m_stringID.equals(m_stringID);
         }
     }
 
@@ -60,7 +69,7 @@ public class SparkContextID {
         if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
             return SparkContextManager.getDefaultSparkContext().getID().toPrettyString();
         } else {
-            URI uri = URI.create(stringID);
+            URI uri = URI.create(m_stringID);
             StringBuilder b = new StringBuilder();
             b.append("Spark Jobserver Context ");
             b.append(String.format("(Host and Port: %s:%d, ", uri.getHost(), uri.getPort()));
@@ -71,9 +80,12 @@ public class SparkContextID {
 
     @Override
     public int hashCode() {
-        return stringID.hashCode();
+        return m_stringID.hashCode();
     }
 
+    public static SparkContextID fromContextConfig(final SparkContextConfig config) {
+        return fromConnectionDetails(config.getJobManagerUrl(), config.getContextName());
+    }
 
     public static SparkContextID fromConnectionDetails(final String jobManagerUrl, final String contextName) {
         try {
@@ -89,6 +101,6 @@ public class SparkContextID {
     }
 
     public void saveToConfigWO(final ConfigWO configWO) {
-        configWO.addString(CFG_CONTEXT_ID, stringID);
+        configWO.addString(CFG_CONTEXT_ID, m_stringID);
     }
 }
