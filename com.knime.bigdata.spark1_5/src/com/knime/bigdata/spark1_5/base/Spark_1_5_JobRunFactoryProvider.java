@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark1_5.base;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider;
+import com.knime.bigdata.spark1_5.api.Spark_1_5_CompatibilityChecker;
 import com.knime.bigdata.spark1_5.jobs.fetchrows.FetchRowsJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Hive2SparkJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Spark2HiveJobRunFactory;

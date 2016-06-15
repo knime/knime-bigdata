@@ -32,7 +32,7 @@ import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.pmml.transformation.PMMLTransformationJobInput;
-import com.knime.bigdata.spark1_3.base.RowBuilder;
+import com.knime.bigdata.spark1_3.api.RowBuilder;
 
 /**
  * applies a compiled pmml model to the input data

@@ -32,8 +32,8 @@ import org.apache.spark.sql.api.java.Row;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.preproc.concatenate.ConcatenateRDDsJobInput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
 
 /**
  * append the given input RDDs and store result in new RDD

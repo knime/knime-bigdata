@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
-import com.knime.bigdata.spark1_5.base.ModelUtils;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SparkJob;
+import com.knime.bigdata.spark1_5.api.ModelUtils;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SparkJob;
 
 /**
  * runs MLlib KMeans on a given RDD, model is returned as result

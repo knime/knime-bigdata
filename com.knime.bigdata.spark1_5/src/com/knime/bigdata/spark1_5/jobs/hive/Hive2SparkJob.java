@@ -34,8 +34,8 @@ import org.apache.spark.sql.types.StructField;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD

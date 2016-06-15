@@ -32,10 +32,10 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.node.preproc.convert.number2category.Number2CategoryJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_5.base.RowBuilder;
-import com.knime.bigdata.spark1_5.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_5.api.RowBuilder;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
 import com.knime.bigdata.spark1_5.jobs.fetchrows.FetchRowsJob;
 
 /**

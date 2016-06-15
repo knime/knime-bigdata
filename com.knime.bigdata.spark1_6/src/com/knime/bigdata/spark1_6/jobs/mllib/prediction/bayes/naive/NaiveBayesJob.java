@@ -34,9 +34,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobInput;
-import com.knime.bigdata.spark1_6.base.NamedObjects;
-import com.knime.bigdata.spark1_6.base.SparkJob;
-import com.knime.bigdata.spark1_6.base.SupervisedLearnerUtils;
+import com.knime.bigdata.spark1_6.api.NamedObjects;
+import com.knime.bigdata.spark1_6.api.SparkJob;
+import com.knime.bigdata.spark1_6.api.SupervisedLearnerUtils;
 
 /**
  * runs MLlib Naive Bayes on a given RDD

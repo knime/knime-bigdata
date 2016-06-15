@@ -48,7 +48,7 @@ import com.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
 @SparkClass
 public class SerializableTypeProxies {
 
-    static class ArrayTypeProxy implements SerializableProxyType<ArrayType> {
+    public static class ArrayTypeProxy implements SerializableProxyType<ArrayType> {
 
         private static final long serialVersionUID = 1L;
 

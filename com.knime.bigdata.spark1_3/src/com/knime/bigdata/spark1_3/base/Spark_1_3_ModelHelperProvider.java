@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark1_3.base;
 
 import com.knime.bigdata.spark.core.model.DefaultModelHelperProvider;
+import com.knime.bigdata.spark1_3.api.Spark_1_3_CompatibilityChecker;
 import com.knime.bigdata.spark1_3.jobs.mllib.clustering.kmeans.KMeansModelHelper;
 import com.knime.bigdata.spark1_3.jobs.mllib.collaborativefiltering.CollaborativeFilteringModelHelper;
 import com.knime.bigdata.spark1_3.jobs.mllib.prediction.bayes.naive.NaiveBayesModelHelper;

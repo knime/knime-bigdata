@@ -36,9 +36,9 @@ import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_2.base.SparkJob;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_2.api.SparkJob;
 
 /**
  * Computes correlation

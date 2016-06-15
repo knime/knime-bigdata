@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark1_3.base;
 
 import com.knime.bigdata.spark.node.pmml.converter.DefaultPMMLPortObjectFactoryProvider;
+import com.knime.bigdata.spark1_3.api.Spark_1_3_CompatibilityChecker;
 import com.knime.bigdata.spark1_3.jobs.mllib.clustering.kmeans.KMeansModelPMMLPortObjectFactory;
 import com.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression.LinearRegressionModelPMMLPortObjectFactory;
 

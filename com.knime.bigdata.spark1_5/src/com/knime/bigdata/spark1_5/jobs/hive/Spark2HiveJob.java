@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SimpleSparkJob;
-import com.knime.bigdata.spark1_5.converter.type.TypeConverters;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.TypeConverters;
 
 /**
  * Converts the given named RDD into a Hive table.

@@ -45,6 +45,7 @@ import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlib
 import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
+import com.knime.bigdata.spark1_5.api.Spark_1_5_ModelHelper;
 import com.knime.bigdata.spark1_5.jobserver.server.CollaborativeFilteringModel;
 
 /**

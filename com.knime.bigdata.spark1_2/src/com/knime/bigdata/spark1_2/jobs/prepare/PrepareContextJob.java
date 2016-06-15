@@ -29,9 +29,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.SimpleSparkJob;
-import com.knime.bigdata.spark1_2.converter.type.TypeConverters;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
+import com.knime.bigdata.spark1_2.api.TypeConverters;
 
 /**
  *

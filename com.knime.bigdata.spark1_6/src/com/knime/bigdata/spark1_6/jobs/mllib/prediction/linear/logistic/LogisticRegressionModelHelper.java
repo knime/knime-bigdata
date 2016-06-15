@@ -22,7 +22,7 @@ package com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.logistic;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
-import com.knime.bigdata.spark1_6.base.Spark_1_6_ModelHelper;
+import com.knime.bigdata.spark1_6.api.Spark_1_6_ModelHelper;
 
 /**
  *

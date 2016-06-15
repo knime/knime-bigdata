@@ -11,9 +11,10 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_2.base.SparkJob;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.NormalizedRDDContainer;
+import com.knime.bigdata.spark1_2.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_2.api.SparkJob;
 
 /**
  * @author dwk

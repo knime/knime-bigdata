@@ -31,8 +31,8 @@ import org.apache.spark.storage.StorageLevel;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
 
 /**
  * (Un)persists the given named RDD using the defined storage level.

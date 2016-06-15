@@ -32,9 +32,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
-import com.knime.bigdata.spark1_2.base.MappedRDDContainer;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.RDDUtilsInJava;
+import com.knime.bigdata.spark1_2.api.MappedRDDContainer;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.RDDUtilsInJava;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns

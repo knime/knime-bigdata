@@ -46,6 +46,7 @@ import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
+import com.knime.bigdata.spark1_5.api.Spark_1_5_CompatibilityChecker;
 import com.knime.bigdata.spark1_5.jobs.scripting.java.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark1_5.jobs.scripting.java.AbstractSparkJavaSnippetSink;
 import com.knime.bigdata.spark1_5.jobs.scripting.java.AbstractSparkJavaSnippetSource;

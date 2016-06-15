@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.MyJoinKey;
 import com.knime.bigdata.spark.node.preproc.joiner.JoinMode;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_2.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
 
 import scala.Tuple2;
 

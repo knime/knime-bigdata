@@ -30,8 +30,8 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.MultiValueSortKey;
 import com.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
-import com.knime.bigdata.spark1_6.base.NamedObjects;
-import com.knime.bigdata.spark1_6.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_6.api.NamedObjects;
+import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
 
 /**
  * sorts input RDD by given indices, in given order

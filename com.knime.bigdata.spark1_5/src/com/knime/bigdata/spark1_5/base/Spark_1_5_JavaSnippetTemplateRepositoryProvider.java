@@ -55,6 +55,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.node.scripting.java.util.template.AbstractJavaSnippetTemplateRepositoryProvider;
 import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
+import com.knime.bigdata.spark1_5.api.Spark_1_5_CompatibilityChecker;
 
 /**
  *

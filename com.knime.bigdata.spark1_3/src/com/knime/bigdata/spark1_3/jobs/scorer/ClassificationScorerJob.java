@@ -32,8 +32,8 @@ import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
-import com.knime.bigdata.spark1_3.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_3.base.SupervisedLearnerUtils;
+import com.knime.bigdata.spark1_3.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_3.api.SupervisedLearnerUtils;
 
 import scala.Tuple2;
 

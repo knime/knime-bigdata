@@ -23,7 +23,7 @@ package com.knime.bigdata.spark1_6.converter.type;
 import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark1_6.base.Spark_1_6_CompatibilityChecker;
+import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.BinaryTypeProxy;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.BooleanTypeProxy;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.ByteTypeProxy;

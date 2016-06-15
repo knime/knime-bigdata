@@ -34,9 +34,9 @@ import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_5.base.SparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_5.api.SparkJob;
 import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
 import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 

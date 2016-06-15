@@ -36,8 +36,8 @@ import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.SparkJob;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.SparkJob;
 
 /**
  * computes multivariate statistics from input RDD and given indices
