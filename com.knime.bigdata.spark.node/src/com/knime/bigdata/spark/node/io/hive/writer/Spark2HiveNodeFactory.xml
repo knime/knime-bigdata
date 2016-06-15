@@ -14,7 +14,8 @@
 
 	<ports>
 		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
-		<inPort index="0" name="Spark data">Spark RDD</inPort>
+		<inPort index="0" name="JDBC connection">JDBC connection</inPort>
+		<inPort index="1" name="Spark data">Spark RDD</inPort>
 		<outPort index="0" name="Hive table">Hive table query</outPort>
 	</ports>
 </knimeNode>
