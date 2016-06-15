@@ -37,8 +37,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.SamplingMethod;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SparkJob;
 
 import scala.Tuple2;
 

@@ -17,9 +17,9 @@ import com.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
 import com.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
 import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.SparkJob;
-import com.knime.bigdata.spark1_2.converter.type.TypeConverters;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.SparkJob;
+import com.knime.bigdata.spark1_2.api.TypeConverters;
 
 /**
  * SparkJob that fetches and serializes a number of rows from the specified RDD (some other job must have previously

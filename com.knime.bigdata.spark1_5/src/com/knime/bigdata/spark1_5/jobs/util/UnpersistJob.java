@@ -28,8 +28,8 @@ import org.apache.spark.sql.Row;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.util.rdd.unpersist.UnpersistJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
 
 /**
  * Unpersists the given named RDD and remove it from the named objects.

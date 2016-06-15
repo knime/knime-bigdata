@@ -31,9 +31,9 @@ import org.apache.spark.sql.Row;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark1_3.base.ModelUtils;
-import com.knime.bigdata.spark1_3.base.NamedObjects;
-import com.knime.bigdata.spark1_3.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_3.api.ModelUtils;
+import com.knime.bigdata.spark1_3.api.NamedObjects;
+import com.knime.bigdata.spark1_3.api.SimpleSparkJob;
 import com.knime.bigdata.spark1_3.jobs.mllib.collaborativefiltering.CollaborativeFilteringJob;
 import com.knime.bigdata.spark1_3.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
 

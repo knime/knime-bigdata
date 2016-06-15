@@ -42,10 +42,10 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
-import com.knime.bigdata.spark1_2.base.NamedObjects;
-import com.knime.bigdata.spark1_2.base.RowBuilder;
-import com.knime.bigdata.spark1_2.base.SparkJobWithFiles;
-import com.knime.bigdata.spark1_2.converter.type.TypeConverters;
+import com.knime.bigdata.spark1_2.api.NamedObjects;
+import com.knime.bigdata.spark1_2.api.RowBuilder;
+import com.knime.bigdata.spark1_2.api.SparkJobWithFiles;
+import com.knime.bigdata.spark1_2.api.TypeConverters;
 
 /**
  *

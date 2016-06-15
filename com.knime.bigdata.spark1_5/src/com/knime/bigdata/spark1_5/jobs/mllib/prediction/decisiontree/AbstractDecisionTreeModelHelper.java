@@ -27,7 +27,7 @@ import java.io.Serializable;
 
 import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMappings;
-import com.knime.bigdata.spark1_5.base.Spark_1_5_ModelHelper;
+import com.knime.bigdata.spark1_5.api.Spark_1_5_ModelHelper;
 
 /**
  * Abstract super class for decision tree model helpers, that handles metadata loading/saving.

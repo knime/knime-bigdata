@@ -22,7 +22,7 @@ package com.knime.bigdata.spark1_2.jobs.mllib.prediction.bayes.naive;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
-import com.knime.bigdata.spark1_2.base.Spark_1_2_ModelHelper;
+import com.knime.bigdata.spark1_2.api.Spark_1_2_ModelHelper;
 
 /**
  *

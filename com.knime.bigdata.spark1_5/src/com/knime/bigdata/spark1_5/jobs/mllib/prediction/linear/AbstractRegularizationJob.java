@@ -24,9 +24,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SparkJob;
-import com.knime.bigdata.spark1_5.base.SupervisedLearnerUtils;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SparkJob;
+import com.knime.bigdata.spark1_5.api.SupervisedLearnerUtils;
 
 /**
  * @author dwk

@@ -33,3 +33,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.knime.base.node.jsnippet.guarded,
  org.knime.base.node.mine.cluster,
  org.knime.base.node.mine.regression
+Export-Package: com.knime.bigdata.spark1_3.api

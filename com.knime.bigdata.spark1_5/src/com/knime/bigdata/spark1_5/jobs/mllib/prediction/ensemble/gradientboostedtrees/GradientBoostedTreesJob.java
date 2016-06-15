@@ -44,9 +44,9 @@ import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobInput;
-import com.knime.bigdata.spark1_5.base.NamedObjects;
-import com.knime.bigdata.spark1_5.base.SparkJob;
-import com.knime.bigdata.spark1_5.base.SupervisedLearnerUtils;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SparkJob;
+import com.knime.bigdata.spark1_5.api.SupervisedLearnerUtils;
 
 import scala.Enumeration.Value;
 

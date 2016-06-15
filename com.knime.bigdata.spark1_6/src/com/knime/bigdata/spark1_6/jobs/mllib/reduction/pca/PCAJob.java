@@ -33,9 +33,9 @@ import org.apache.spark.sql.Row;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
-import com.knime.bigdata.spark1_6.base.NamedObjects;
-import com.knime.bigdata.spark1_6.base.RDDUtilsInJava;
-import com.knime.bigdata.spark1_6.base.SimpleSparkJob;
+import com.knime.bigdata.spark1_6.api.NamedObjects;
+import com.knime.bigdata.spark1_6.api.RDDUtilsInJava;
+import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
 
 import scala.Tuple2;
 

@@ -14,6 +14,10 @@ import com.knime.bigdata.spark.core.jobserver.JobserverJobInput;
 import com.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
 import com.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJobWithNamedRDD;
+import com.knime.bigdata.spark1_5.api.NamedObjects;
+import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.api.SparkJob;
+import com.knime.bigdata.spark1_5.api.SparkJobWithFiles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
 
