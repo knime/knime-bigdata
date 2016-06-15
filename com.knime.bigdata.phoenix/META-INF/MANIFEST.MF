@@ -9,8 +9,8 @@ Bundle-ClassPath: knime-phoenix.jar,
  lib/slf4j-api-1.7.5.jar,
  lib/slf4j-log4j12.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
-Require-Bundle: org.apache.commons.lang3;bundle-version="3.2.1",
- org.knime.core;bundle-version="2.11.0",
- org.knime.base;bundle-version="2.11.0"
+Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
+ org.knime.core;bundle-version="[3.0.0,4.0.0)",
+ org.knime.base;bundle-version="[3.0.0,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
