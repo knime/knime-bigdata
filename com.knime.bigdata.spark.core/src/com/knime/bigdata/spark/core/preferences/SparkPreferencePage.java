@@ -314,7 +314,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         prefs.setValue(SparkPreferenceInitializer.PREF_JOB_TIMEOUT, m_jobTimeout.getSelection());
         prefs.setValue(SparkPreferenceInitializer.PREF_JOB_CHECK_FREQUENCY, m_jobCheckFrequency.getSelection());
 
-        if (m_sparkVersion.getSelectionIndex() > 0) {
+        if (m_sparkVersion.getSelectionIndex() >= 0) {
             prefs.setValue(SparkPreferenceInitializer.PREF_SPARK_VERSION,
                 SparkVersion.getAllVersionLabels()[m_sparkVersion.getSelectionIndex()]);
         } else {
