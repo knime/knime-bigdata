@@ -40,7 +40,7 @@ public class SparkContextConfig implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String m_jobManagerUrl;
+    private final String m_jobServerUrl;
     private final boolean m_authentication;
     private final String m_user;
     private final String m_password;
@@ -67,13 +67,13 @@ public class SparkContextConfig implements Serializable {
     }
 
 
-    public SparkContextConfig(final String jobManagerUrl,
+    public SparkContextConfig(final String jobServerUrl,
         final boolean authentication, final String user, final String password,
         final int jobCheckFrequency, final int jobTimeout,
         final SparkVersion sparkVersion, final String contextName, final boolean deleteObjectsOnDispose,
         final String sparkJobLogLevel, final boolean overrideSparkSettings, final String customSparkSettings) {
 
-        if (jobManagerUrl == null || jobManagerUrl.isEmpty()) {
+        if (jobServerUrl == null || jobServerUrl.isEmpty()) {
             throw new IllegalArgumentException("url must not be empty");
         }
 
@@ -105,7 +105,7 @@ public class SparkContextConfig implements Serializable {
             throw new IllegalArgumentException("Can't override spark settings with empty settings");
         }
 
-        this.m_jobManagerUrl = jobManagerUrl;
+        this.m_jobServerUrl = jobServerUrl;
         this.m_authentication = authentication;
         this.m_user = user;
         this.m_password = password;
@@ -125,7 +125,7 @@ public class SparkContextConfig implements Serializable {
         final int prime = 31;
         int result = 1;
 
-        result = prime * result + m_jobManagerUrl.hashCode();
+        result = prime * result + m_jobServerUrl.hashCode();
         result = prime * result + (m_authentication ? m_user.hashCode() : 0);
         result = prime * result + (m_authentication ? m_password.hashCode() : 0);
         result = prime * result + m_jobCheckFrequency;
@@ -140,8 +140,8 @@ public class SparkContextConfig implements Serializable {
         return result;
     }
 
-    public String getJobManagerUrl() {
-        return m_jobManagerUrl;
+    public String getJobServerUrl() {
+        return m_jobServerUrl;
     }
 
 
@@ -213,7 +213,7 @@ public class SparkContextConfig implements Serializable {
         }
 
         final SparkContextConfig other = (SparkContextConfig)obj;
-        if (!m_jobManagerUrl.equals(other.m_jobManagerUrl)) {
+        if (!m_jobServerUrl.equals(other.m_jobServerUrl)) {
             return false;
         }
         if (m_authentication != other.m_authentication) {

@@ -37,7 +37,7 @@ import com.knime.bigdata.spark.core.context.JobController;
 import com.knime.bigdata.spark.core.context.SparkContext;
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUnavailableException;
+import com.knime.bigdata.spark.core.context.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.context.jobserver.request.CreateContextRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.DestroyContextRequest;
@@ -114,7 +114,7 @@ public class JobserverSparkContext extends SparkContext {
 
     private boolean canReconfigure(final SparkContextConfig config, final boolean destroyIfNecessary) {
         // we can never change the id of an existing context
-        if (!SparkContextID.fromConnectionDetails(config.getJobManagerUrl(), config.getContextName()).equals(m_contextID)) {
+        if (!SparkContextID.fromConnectionDetails(config.getJobServerUrl(), config.getContextName()).equals(m_contextID)) {
             return false;
         }
 
@@ -279,7 +279,11 @@ public class JobserverSparkContext extends SparkContext {
             public void run() throws Exception {
                 ensureRestClient();
                 LOGGER.info("Destroying context " + m_config.getContextName());
-                new DestroyContextRequest(m_contextID, m_config, m_restClient).send();
+                try {
+                    new DestroyContextRequest(m_contextID, m_config, m_restClient).send();
+                } catch (SparkContextNotFoundException e) {
+                    LOGGER.info("Context not found, nothing to destroy: " + m_config.getContextName());
+                }
                 setStatus(SparkContextStatus.CONFIGURED);
             }
         });
@@ -372,7 +376,10 @@ public class JobserverSparkContext extends SparkContext {
             }
         }
 
-        LOGGER.debug("Remote context does not exist. Name: " + m_config.getContextName());
+        if (!toReturn) {
+            LOGGER.debug("Remote context does not exist. Name: " + m_config.getContextName());
+        }
+
         return toReturn;
     }
 
@@ -422,7 +429,7 @@ public class JobserverSparkContext extends SparkContext {
 
         StringBuilder buf = new StringBuilder();
         buf.append("<strong>Connection settings</strong><hr/>");
-        buf.append("<strong>Url:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobManagerUrl() + "</tt><br/>");
+        buf.append("<strong>Url:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobServerUrl() + "</tt><br/>");
         buf.append(
             "<strong>Use authentication:</strong>&nbsp;&nbsp;<tt>" + m_config.useAuthentication() + "</tt><br/>");
         if (m_config.useAuthentication()) {
@@ -456,7 +463,7 @@ public class JobserverSparkContext extends SparkContext {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("KNIMESparkContext [url=");
-        builder.append(m_config.getJobManagerUrl());
+        builder.append(m_config.getJobServerUrl());
         builder.append(", auth=");
         builder.append(m_config.useAuthentication());
         builder.append(", user=");
@@ -492,7 +499,7 @@ public class JobserverSparkContext extends SparkContext {
 
         try {
             return getJobController().startJobAndWaitForResult(fileJob, exec);
-        } catch (SparkContextUnavailableException e) {
+        } catch (SparkContextNotFoundException e) {
             resetToConfigured();
             throw e;
         }
@@ -507,7 +514,7 @@ public class JobserverSparkContext extends SparkContext {
 
         try {
             return getJobController().startJobAndWaitForResult(job, exec);
-        } catch (SparkContextUnavailableException e) {
+        } catch (SparkContextNotFoundException e) {
             resetToConfigured();
             throw e;
         }
@@ -521,7 +528,7 @@ public class JobserverSparkContext extends SparkContext {
         throws KNIMESparkException, CanceledExecutionException {
         try {
             getJobController().startJobAndWaitForResult(job, exec);
-        } catch (SparkContextUnavailableException e) {
+        } catch (SparkContextNotFoundException e) {
             resetToConfigured();
             throw e;
         }
@@ -534,7 +541,7 @@ public class JobserverSparkContext extends SparkContext {
     public Set<String> getNamedObjects() throws KNIMESparkException {
         try {
             return getNamedObjectController().getNamedObjects();
-        } catch (SparkContextUnavailableException e) {
+        } catch (SparkContextNotFoundException e) {
             resetToConfigured();
             throw e;
         }
@@ -548,7 +555,7 @@ public class JobserverSparkContext extends SparkContext {
 
         try {
             getNamedObjectController().deleteNamedObjects(namedObjects);
-        } catch (SparkContextUnavailableException e) {
+        } catch (SparkContextNotFoundException e) {
             resetToConfigured();
             throw e;
         }

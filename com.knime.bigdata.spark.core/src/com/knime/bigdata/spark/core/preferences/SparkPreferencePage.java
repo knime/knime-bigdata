@@ -44,6 +44,9 @@
  */
 package com.knime.bigdata.spark.core.preferences;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -138,6 +141,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         connectionSettings.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
         m_jobServerUrl = createTextWithLabel(connectionSettings, "Job server URL:");
+        m_jobServerUrl.addListener(SWT.CHANGED, this);
 
         Composite credentialsContainer = new Composite(connectionSettings, SWT.NONE);
         credentialsContainer.setLayout(new GridLayout(2, false));
@@ -163,9 +167,9 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_password.setEchoChar('*');
         m_password.getParent().setLayoutData(userPasswordGroupLayoutData);
 
-        m_jobTimeout = createSpinnerWithLabel(connectionSettings, "Job timeout in seconds:", 0, 10);
+        m_jobTimeout = createSpinnerWithLabel(connectionSettings, "Job timeout in seconds:", 1, 10);
 
-        m_jobCheckFrequency = createSpinnerWithLabel(connectionSettings, "Job check frequency in seconds:", 0, 1);
+        m_jobCheckFrequency = createSpinnerWithLabel(connectionSettings, "Job check frequency in seconds:", 1, 1);
 
         /////////////// Context settings ///////////////
         Group contextSettings = new Group(mainContainer, SWT.NONE);
@@ -180,6 +184,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_sparkVersion.setItems(SparkVersion.getAllVersionLabels());
 
         m_contextName = createTextWithLabel(contextSettings, "Context name:");
+        m_contextName.addListener(SWT.CHANGED, this);
 
         m_deleteSparkObjectsOnDispose = new Button(contextSettings, SWT.CHECK);
         m_deleteSparkObjectsOnDispose.setText("Delete Spark objects on dispose.");
@@ -201,6 +206,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         GridData customSettingsLayoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
         customSettingsLayoutData.heightHint = 100;
         m_customSettings.setLayoutData(customSettingsLayoutData);
+        m_customSettings.addListener(SWT.CHANGED, this);
 
         /////////////// KNIME settings ///////////////
         Group knimeSettings = new Group(mainContainer, SWT.NONE);
@@ -300,6 +306,9 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
         m_verboseLogging.setSelection(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_VERBOSE_LOGGING));
 
+        setErrorMessage(null);
+        setValid(true);
+
         super.performDefaults();
     }
 
@@ -378,6 +387,14 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     @Override
     public void handleEvent(final Event event) {
+        if (event.type == SWT.Selection) {
+            handleSelection(event);
+        } else if (event.type == SWT.CHANGED) {
+            validateInputFields(event);
+        }
+    }
+
+    private void handleSelection(final Event event) {
         if (event.widget.equals(m_withoutAuthentication) && m_withoutAuthentication.getSelection()) {
             setUserPasswordFieldEnabled(false);
         } else if (event.widget.equals(m_withAuthentication) && m_withAuthentication.getSelection()) {
@@ -407,6 +424,71 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
     private void selectSparkJobLogLevelButton(final String level) {
         for (int i = 0; i < SparkPreferenceInitializer.ALL_LOG_LEVELS.length; i++) {
             m_sparkJobLevel[i].setSelection(SparkPreferenceInitializer.ALL_LOG_LEVELS[i].equals(level));
+        }
+    }
+
+    /** Validates values in input fields and sets error message. */
+    private void validateInputFields(final Event event) {
+        setErrorMessage(null);
+        setValid(true);
+
+        // Job server URL
+        if (m_jobServerUrl.getText().isEmpty()) {
+            setErrorMessage("Job server url can't be empty.");
+            setValid(false);
+
+        } else {
+            try {
+                URI uri = new URI(m_jobServerUrl.getText());
+
+                if (uri.getScheme() == null || uri.getScheme().isEmpty()) {
+                    setErrorMessage("Protocol in job server URL required (http or https)");
+                    setValid(false);
+                } else if (uri.getHost() == null || uri.getHost().isEmpty()) {
+                    setErrorMessage("Hostname in job server URL required.");
+                    setValid(false);
+                } else if (uri.getPort() < 0) {
+                    setErrorMessage("Port in job server URL required.");
+                    setValid(false);
+                }
+
+            } catch(URISyntaxException e) {
+                setErrorMessage("Invalid job server url: " + e.getMessage());
+                setValid(false);
+            }
+        }
+
+        // Username
+        if (m_withAuthentication.getSelection() && m_username.getText().isEmpty()) {
+            setErrorMessage("Username required with authentication enabled.");
+            setValid(false);
+        }
+
+        // Context name
+        if (m_contextName.getText().isEmpty()) {
+            setErrorMessage("Context name required.");
+            setValid(false);
+        } else if (!m_contextName.getText().matches("^[A-Za-z].*")) {
+            setErrorMessage("Context name must start with letters.");
+            setValid(false);
+        } else if (m_contextName.getText().contains("/")) {
+            setErrorMessage("Slash chararacter is not support in context name.");
+            setValid(false);
+        }
+
+        // Custom spark settings
+        if (m_overrideSettings.getSelection()) {
+            String lines[] = m_customSettings.getText().split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                if (!lines[i].isEmpty() && !lines[i].startsWith("#") && !lines[i].startsWith("//")) {
+                    String kv[] = lines[i].split(": ", 2);
+
+                    if (kv.length != 2 || kv[0].isEmpty() || kv[1].isEmpty()) {
+                        setErrorMessage("Failed to parse custom spark config line " + (i + 1) + ".");
+                        setValid(false);
+                    }
+                }
+            }
         }
     }
 }

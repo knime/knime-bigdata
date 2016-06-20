@@ -32,7 +32,7 @@ import org.apache.log4j.Level;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUnavailableException;
+import com.knime.bigdata.spark.core.context.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -141,7 +141,7 @@ public abstract class AbstractJobserverRequest<T> {
             case THROWABLE:
                 throw new KNIMESparkException(parsedResponse.getThrowable());
             case CONTEXT_NOT_FOUND:
-                throw new SparkContextUnavailableException(m_contextId.toString());
+                throw new SparkContextNotFoundException(m_contextId.toString());
             default:
                 break;
         }
