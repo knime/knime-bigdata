@@ -34,8 +34,8 @@ import java.util.jar.JarEntry;
 public interface JarCollector {
 
     /**
-     * Returns the KNIME job jar file with all added entries.
-     * No more entries can be added to the jar file once this method is called!
+     * Returns the KNIME job jar file with all added entries. No more entries can be added to the jar file once this
+     * method is called!
      *
      * @return the final jar file
      */
@@ -43,24 +43,31 @@ public interface JarCollector {
 
     /**
      * Copies the complete content of the given jar file into the Spark job server jar except for the manifest file.
+     *
      * @param jar the complete jar file to add to the existing jar
      */
     void addJar(File jar);
 
     /**
-     * Copies the content of the given jar file minus the entries that match the given filter predicates into the Spark job server jar.
+     * Copies the content of the given jar file minus the entries that match the given filter predicates into the Spark
+     * job server jar.
+     *
      * @param jar the complete jar file to add to the existing jar
+     * @param filterPredicates Predicates against which each jar entry is tested. Only those entries are copied, where
+     *            {@link Predicate#test(Object)} returns false for all predicates. May be null.
      */
     void addJar(final File jar, Set<Predicate<JarEntry>> filterPredicates);
 
     /**
      * Copies the complete content of the directory to the jar file.
+     *
      * @param dir the directory to copy into the jar file
      */
     void addDirectory(File dir);
 
     /**
      * Adds a single file to the jar.
+     *
      * @param entryName jar file entry name to use for the file
      * @param file the file to add to the jar
      */
@@ -68,6 +75,7 @@ public interface JarCollector {
 
     /**
      * Adds a single {@link JarEntry} to the jar.
+     *
      * @param je the {@link JarEntry} to add
      * @param is the {@link InputStream} to read the content of the {@link JarEntry} from
      */
