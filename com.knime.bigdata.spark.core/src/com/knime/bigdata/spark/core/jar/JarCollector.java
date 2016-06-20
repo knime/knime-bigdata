@@ -22,6 +22,8 @@ package com.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 
 /**
@@ -40,10 +42,16 @@ public interface JarCollector {
     JobJar getJobJar();
 
     /**
-     * Copies the complete content of the given jar file into the Spark job server jar except for th manifest file.
+     * Copies the complete content of the given jar file into the Spark job server jar except for the manifest file.
      * @param jar the complete jar file to add to the existing jar
      */
     void addJar(File jar);
+
+    /**
+     * Copies the content of the given jar file minus the entries that match the given filter predicates into the Spark job server jar.
+     * @param jar the complete jar file to add to the existing jar
+     */
+    void addJar(final File jar, Set<Predicate<JarEntry>> filterPredicates);
 
     /**
      * Copies the complete content of the directory to the jar file.

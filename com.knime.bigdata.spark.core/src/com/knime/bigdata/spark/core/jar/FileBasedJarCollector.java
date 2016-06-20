@@ -34,8 +34,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -152,6 +153,14 @@ public class FileBasedJarCollector implements JarCollector {
      */
     @Override
     public void addJar(final File jar) {
+        addJar(jar, Collections.singleton(JarPacker.MANIFEST_MF_FILTER));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addJar(final File jar, final Set<Predicate<JarEntry>> filterPredicates) {
         if (m_jobJar != null) {
             throw new IllegalStateException("Job jar has already been finalized");
         }
@@ -159,9 +168,7 @@ public class FileBasedJarCollector implements JarCollector {
         addToDigest(jar.getName());
 
         try (final JarFile jarFile = new JarFile(jar)) {
-            final Set<String> filterEntries = new HashSet<>(1);
-            filterEntries.add("META-INF/MANIFEST.MF");
-            JarPacker.copyJarFile(jarFile, m_jos, filterEntries);
+            JarPacker.copyJarFile(jarFile, m_jos, filterPredicates);
         } catch (IOException e) {
             LOGGER.warn("Exception adding jar " + jar.getPath() + " Exception: " + e.getMessage());
         }
