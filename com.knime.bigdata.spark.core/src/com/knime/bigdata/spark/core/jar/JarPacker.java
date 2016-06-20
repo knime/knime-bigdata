@@ -11,15 +11,16 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 
 import org.osgi.framework.FrameworkUtil;
 
@@ -28,6 +29,34 @@ import org.osgi.framework.FrameworkUtil;
  * sources)
  */
 public class JarPacker {
+
+    public static final Predicate<JarEntry> DIRECTORY_FILTER = new Predicate<JarEntry>() {
+        @Override
+        public boolean test(final JarEntry t) {
+            return t.isDirectory();
+        }
+    };
+
+    private final static Predicate<String> META_INF_REGEX_PREDICATE = Pattern.compile("META-INF/.*").asPredicate();
+
+    public static final Predicate<JarEntry> META_INF_FILTER = new Predicate<JarEntry>() {
+        @Override
+        public boolean test(final JarEntry t) {
+            return META_INF_REGEX_PREDICATE.test(t.getName());
+        }
+    };
+
+
+    private final static Predicate<String> MANIFESTMF_REGEX_PREDICATE = Pattern.compile("META-INF/MANIFEST.MF").asPredicate();
+
+    public static final Predicate<JarEntry> MANIFEST_MF_FILTER = new Predicate<JarEntry>() {
+        @Override
+        public boolean test(final JarEntry t) {
+            return MANIFESTMF_REGEX_PREDICATE.test(t.getName());
+        }
+    };
+
+
 
     /**
      * add the given byte code to the given jar and put it into a new jar
@@ -159,8 +188,7 @@ public class JarPacker {
      * @throws IOException if the jar file cannot be created
      */
     public static void mergeJars(final String source1, final String source2, final File target) throws IOException {
-        final Set<String> filterEntries = new HashSet<>(1);
-        filterEntries.add("META-INF/MANIFEST.MF");
+        final Set<Predicate<JarEntry>> filterEntries = Collections.singleton(MANIFEST_MF_FILTER);
         try (final OutputStream os = Files.newOutputStream(target.toPath(), StandardOpenOption.CREATE);
                 final JarOutputStream jos = new JarOutputStream(os, createManifest())) {
             try (final JarFile s1 = new JarFile(source1);
@@ -207,7 +235,7 @@ public class JarPacker {
      */
     private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream)
         throws IOException {
-        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<String> emptySet());
+        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<Predicate<JarEntry>>emptySet());
     }
 
     /**
@@ -217,16 +245,26 @@ public class JarPacker {
      * @throws IOException
      */
     public static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream,
-        final Set<String> entryNames2Filter) throws IOException {
+        final Set<Predicate<JarEntry>> entryNames2Filter) throws IOException {
         Enumeration<JarEntry> entries = aSourceJarFile.entries();
 
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            try(InputStream is = aSourceJarFile.getInputStream(entry);){
-                final String entryName = entry.getName();
-                if (entryNames2Filter == null || !entryNames2Filter.contains(entryName)) {
-                    copyEntry(entryName, is, aTargetOutputStream);
+            final String entryName = entry.getName();
+            if (entryNames2Filter != null) {
+                boolean filterMatched = false;
+                for(Predicate<JarEntry> entryPredicate : entryNames2Filter) {
+                    filterMatched = entryPredicate.test(entry);
+                    if (filterMatched) {
+                        break;
+                    }
                 }
+                if (filterMatched) {
+                    continue;
+                }
+            }
+            try(InputStream is = aSourceJarFile.getInputStream(entry);){
+                copyEntry(entryName, is, aTargetOutputStream);
             }
             aTargetOutputStream.flush();
             aTargetOutputStream.closeEntry();
@@ -241,7 +279,7 @@ public class JarPacker {
      * @param entryNames the names of the jar entries to remove
      * @throws IOException if a new file could not be created
      */
-    public static void removeFromJar(final File jarFile, final Set<String> entryNames) throws IOException {
+    public static void removeFromJar(final File jarFile, final Set<Predicate<JarEntry>> entryNames) throws IOException {
         final File tempFile = File.createTempFile("snippet", ".jar", jarFile.getParentFile());
         final String jarFilePath = jarFile.getPath();
         try (final JarFile source = new JarFile(jarFilePath);
