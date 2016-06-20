@@ -25,6 +25,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import org.knime.base.node.mine.scorer.numeric.NumericScorerDialogComponents;
 import org.knime.base.node.mine.scorer.numeric.NumericScorerSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -49,7 +50,8 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  */
 public class SparkNumericScorerNodeDialog extends NodeDialogPane {
 
-    private final NumericScorerSettings m_numericScorerSettings = new NumericScorerSettings();
+    private final NumericScorerSettings m_settings = new NumericScorerSettings();
+    private final NumericScorerDialogComponents m_numericScorerDialogComponents = new NumericScorerDialogComponents(m_settings);
 
     /**
      * Creates a new dialog.
@@ -57,8 +59,8 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
     public SparkNumericScorerNodeDialog() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-        panel.add(m_numericScorerSettings.getReferenceComponent().getComponentPanel());
-        panel.add(m_numericScorerSettings.getPredictionComponent().getComponentPanel());
+        panel.add(m_numericScorerDialogComponents.getReferenceComponent().getComponentPanel());
+        panel.add(m_numericScorerDialogComponents.getPredictionComponent().getComponentPanel());
 
         JPanel outputPanel = createSubPanel("Output column");
         panel.add(outputPanel);
@@ -67,9 +69,9 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
         box.add(Box.createHorizontalGlue());
         outputPanel.add(box);
 
-        box.add(m_numericScorerSettings.getOverrideComponent().getComponentPanel());
+        box.add(m_numericScorerDialogComponents.getOverrideComponent().getComponentPanel());
         box.add(Box.createHorizontalGlue());
-        box.add(m_numericScorerSettings.getOutputComponent().getComponentPanel());
+        box.add(m_numericScorerDialogComponents.getOutputComponent().getComponentPanel());
         box.add(Box.createHorizontalGlue());
 
         JPanel flowVarPanel = createSubPanel("Provide scores as flow variables");
@@ -79,9 +81,9 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
         box2.add(Box.createHorizontalGlue());
         flowVarPanel.add(box2);
 
-        box2.add(m_numericScorerSettings.getFlowVarComponent().getComponentPanel());
+        box2.add(m_numericScorerDialogComponents.getFlowVarComponent().getComponentPanel());
         box2.add(Box.createHorizontalGlue());
-        box2.add(m_numericScorerSettings.getUseNamePrefixComponent().getComponentPanel());
+        box2.add(m_numericScorerDialogComponents.getUseNamePrefixComponent().getComponentPanel());
         box2.add(Box.createHorizontalGlue());
 
         addTab("Options", panel);
@@ -100,7 +102,7 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
     @Override
     public void onOpen() {
         super.onOpen();
-        m_numericScorerSettings.onOpen();
+        m_settings.onOpen();
     }
 
     /**
@@ -108,7 +110,7 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-       m_numericScorerSettings.saveSettingsTo(settings);
+       m_numericScorerDialogComponents.saveSettingsTo(settings);
     }
 
     /**
@@ -118,6 +120,6 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         final PortObjectSpec[] tableSpec = new PortObjectSpec[]{((SparkDataPortObjectSpec)specs[0]).getTableSpec()};
-        m_numericScorerSettings.loadSettingsFrom(settings, tableSpec);
+        m_numericScorerDialogComponents.loadSettingsFrom(settings, tableSpec);
     }
 }
