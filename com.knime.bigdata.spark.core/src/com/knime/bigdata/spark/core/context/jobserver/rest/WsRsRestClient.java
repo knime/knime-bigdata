@@ -57,7 +57,7 @@ class WsRsRestClient implements IRestClient {
                     String.valueOf(contextConfig.getPassword())));
         }
 
-        baseTarget = client.target(new URI(contextConfig.getJobManagerUrl()));
+        baseTarget = client.target(new URI(contextConfig.getJobServerUrl()));
     }
 
     /**

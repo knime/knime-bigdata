@@ -84,15 +84,15 @@ public class SparkContextID {
     }
 
     public static SparkContextID fromContextConfig(final SparkContextConfig config) {
-        return fromConnectionDetails(config.getJobManagerUrl(), config.getContextName());
+        return fromConnectionDetails(config.getJobServerUrl(), config.getContextName());
     }
 
-    public static SparkContextID fromConnectionDetails(final String jobManagerUrl, final String contextName) {
+    public static SparkContextID fromConnectionDetails(final String jobServerUrl, final String contextName) {
         try {
-            final URI url = new URI(jobManagerUrl);
+            final URI url = new URI(jobServerUrl);
             return new SparkContextID(String.format("jobserver://%s:%d/%s", url.getHost(), url.getPort(), contextName));
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid URL: " + jobManagerUrl);
+            throw new IllegalArgumentException("Invalid URL: " + jobServerUrl);
         }
     }
 

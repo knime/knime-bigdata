@@ -26,7 +26,7 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class SparkContextUnavailableException extends KNIMESparkException {
+public class SparkContextNotFoundException extends KNIMESparkException {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class SparkContextUnavailableException extends KNIMESparkException {
      * Constructor
      * @param contextName Name of the context that does not exist anymore
      */
-    public SparkContextUnavailableException(final String contextName) {
+    public SparkContextNotFoundException(final String contextName) {
         super(String.format("Spark context %s does not exist (anymore). Please reset all preceding nodes.", contextName));
     }
 }

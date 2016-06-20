@@ -24,6 +24,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -46,7 +48,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkContextCreatorNodeDialog extends NodeDialogPane {
+class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
 
     private ContextSettings m_settings = new ContextSettings();
 
@@ -91,10 +93,11 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
 //            .createEtchedBorder(), " Job Server "));
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getJobManagerUrlModel(), "Job manager URL: ", true, 30).getComponentPanel(), gbc);
+        panel.add(new DialogComponentString(m_settings.getJobServerUrlModel(), "Job server URL: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getAuthenticateModel(), "Use authentication").getComponentPanel(), gbc);
+        m_settings.getAuthenticateModel().addChangeListener(this);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentString(m_settings.getUserModel(), "User: ", true, 30).getComponentPanel(), gbc);
@@ -141,6 +144,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getOverrideSparkSettingsModel(),
                 "Override spark settings").getComponentPanel(), gbc);
+        m_settings.getOverrideSparkSettingsModel().addChangeListener(this);
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
@@ -152,11 +156,23 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane {
         return panel;
     }
 
+    @Override
+    public void stateChanged(final ChangeEvent e) {
+        if (e.getSource().equals(m_settings.getAuthenticateModel())) {
+            m_settings.getUserModel().setEnabled(m_settings.getAuthenticateModel().getBooleanValue());
+            m_settings.getPasswordModel().setEnabled(m_settings.getAuthenticateModel().getBooleanValue());
+
+        } else if (e.getSource().equals(m_settings.getOverrideSparkSettingsModel())) {
+            m_settings.getCustomSparkSettingsModel().setEnabled(m_settings.getOverrideSparkSettingsModel().getBooleanValue());
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);
     }
 

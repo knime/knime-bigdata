@@ -18,14 +18,16 @@
  * History
  *   Created on 03.07.2015 by koetter
  *   Changes on 07.06.2016 by Sascha Wolke:
- *     - fields added: jobManagerUrl, authentication, sparkJobLogLevel, overrideSparkSettings, customSparkSettings
- *     - protocol+host+port migrated into jobManagerUrl
+ *     - fields added: jobServerUrl, authentication, sparkJobLogLevel, overrideSparkSettings, customSparkSettings
+ *     - protocol+host+port migrated into jobServerUrl
  *     - authentication flag added
  *     - deleteRDDsOnDispose renamed to deleteObjectsOnDispose
  *     - memPerNode migrated into overrideSparkSettings+customSparkSettings
  */
 package com.knime.bigdata.spark.node.util.context.create;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -45,8 +47,10 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 /**
  * Settings model that transfers Spark context information between the node model and its dialog.
  *
- * FIXME: We have to migrate old data (07.06.2016):
- *   - protocol+host+port -> jobManagerUrl
+ * Changes from initial version to version 1.6:
+ *   - v1_6 prefix added on all config names
+ *   - settings format version added
+ *   - protocol+host+port -> jobServerUrl
  *   - user+pass -> authentication+user+pass
  *   - deleteRDDsOnDispose -> deleteObjectsOnDispose
  *   - memPerNode -> overrideSparkSettings+customSparkSettings
@@ -56,61 +60,83 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  */
 public class ContextSettings {
 
-    private final SettingsModelString m_jobManagerUrl =
-            new SettingsModelString("jobManagerUrl", KNIMEConfigContainer.getJobServerUrl());
+    private final SettingsModelString m_settingsFormatVersion =
+            new SettingsModelString("settingsFormatVersion", "1.6.0");
 
-    // Job manager URL fall back fields
-    @Deprecated private final SettingsModelString oldProtocol = new SettingsModelString("protocol", "http");
-    @Deprecated private final SettingsModelString oldHost = new SettingsModelString("host", "localhost");
-    @Deprecated private final SettingsModelInteger oldPort = new SettingsModelInteger("port", 8090);
+    private final SettingsModelString m_jobServerUrl =
+            new SettingsModelString("v1_6.jobServerUrl", KNIMEConfigContainer.getJobServerUrl());
 
     private final SettingsModelBoolean m_authentication =
-            new SettingsModelBoolean("authentication", KNIMEConfigContainer.useAuthentication());
+            new SettingsModelBoolean("v1_6.authentication", KNIMEConfigContainer.useAuthentication());
 
     private final SettingsModelString m_user =
-            new SettingsModelString("user", KNIMEConfigContainer.getUserName());
+            new SettingsModelString("v1_6.user", KNIMEConfigContainer.getUserName());
 
     private final SettingsModelString m_password =
-            new SettingsModelString("password", KNIMEConfigContainer.getPassword() == null ? null : String.valueOf(KNIMEConfigContainer.getUserName()));
+            new SettingsModelString("v1_6.password", KNIMEConfigContainer.getPassword() == null ? null : String.valueOf(KNIMEConfigContainer.getUserName()));
 
     private final SettingsModelInteger m_jobTimeout =
-            new SettingsModelIntegerBounded("sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
+            new SettingsModelIntegerBounded("v1_6.sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
 
     private final SettingsModelInteger m_jobCheckFrequency =
-            new SettingsModelIntegerBounded("sparkJobCheckFrequency",
-                KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
+            new SettingsModelIntegerBounded("v1_6.sparkJobCheckFrequency", KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
 
     private final SettingsModelString m_sparkVersion =
-            new SettingsModelString("sparkVersion", KNIMEConfigContainer.getSparkVersion().getLabel());
+            new SettingsModelString("v1_6.sparkVersion", KNIMEConfigContainer.getSparkVersion().getLabel());
 
     private final SettingsModelString m_contextName =
-            new SettingsModelString("contextName", KNIMEConfigContainer.getSparkContext());
+            new SettingsModelString("v1_6.contextName", KNIMEConfigContainer.getSparkContext());
 
     private final SettingsModelBoolean m_deleteObjectsOnDispose =
-            new SettingsModelBoolean("deleteObjectsOnDispose", KNIMEConfigContainer.deleteSparkObjectsOnDispose());
-
-    /** @deprecated renamed into deleteObjectsOnDispose */
-    @Deprecated
-    private final SettingsModelBoolean m_LegacyDeleteRDDsOnDispose = new SettingsModelBoolean("deleteRDDsOnDispose", false);
+            new SettingsModelBoolean("v1_6.deleteObjectsOnDispose", KNIMEConfigContainer.deleteSparkObjectsOnDispose());
 
     private final SettingsModelString m_sparkJobLogLevel =
-            new SettingsModelString("sparkJobLogLevel", KNIMEConfigContainer.getSparkJobLogLevel());
+            new SettingsModelString("v1_6.sparkJobLogLevel", KNIMEConfigContainer.getSparkJobLogLevel());
 
     private final SettingsModelBoolean m_overrideSparkSettings =
-            new SettingsModelBoolean("overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
+            new SettingsModelBoolean("v1_6.overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
 
     private final SettingsModelString m_customSparkSettings =
-            new SettingsModelString("customSparkSettings", KNIMEConfigContainer.getCustomSparkSettings());
+            new SettingsModelString("v1_6.customSparkSettings", KNIMEConfigContainer.getCustomSparkSettings());
 
+
+    /** @deprecated use m_jobServerUrl instead */
+    @Deprecated private final SettingsModelString m_legacyProtocol = new SettingsModelString("protocol", "http");
+    /** @deprecated use m_jobServerUrl instead */
+    @Deprecated private final SettingsModelString m_legacyHost = new SettingsModelString("host", "localhost");
+    /** @deprecated use m_jobServerUrl instead */
+    @Deprecated private final SettingsModelInteger m_legacyPort = new SettingsModelInteger("port", 8090);
+    /** @deprecated use m_user instead */
+    @Deprecated private final SettingsModelString m_legacyUser =
+            new SettingsModelString("user", KNIMEConfigContainer.getUserName());
+    /** @deprecated use m_password instead */
+    @Deprecated private final SettingsModelString m_legacyPassword =
+            new SettingsModelString("password", KNIMEConfigContainer.getPassword() == null ? null : String.valueOf(KNIMEConfigContainer.getUserName()));
+    /** @deprecated use m_jobTimeout instead */
+    @Deprecated private final SettingsModelInteger m_legacyJobTimeout =
+            new SettingsModelIntegerBounded("sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
+    /** @deprecated use m_jobCheckFrequency instead */
+    @Deprecated private final SettingsModelInteger m_legacyJobCheckFrequency =
+            new SettingsModelIntegerBounded("sparkJobCheckFrequency", KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
+    /** @deprecated use m_contextName instead */
+    @Deprecated private final SettingsModelString m_legacyContextName =
+            new SettingsModelString("contextName", KNIMEConfigContainer.getSparkContext());
+    /** @deprecated renamed into m_deleteObjectsOnDispose */
+    @Deprecated private final SettingsModelBoolean m_legacyDeleteRDDsOnDispose = new SettingsModelBoolean("deleteRDDsOnDispose", false);
     /** @deprecated merged into customSparkSettings */
-    @Deprecated
-    private final SettingsModelString m_LegacyMemPerNode = new SettingsModelString("memPerNode", null);
+    @Deprecated private final SettingsModelString m_legacyMemPerNode = new SettingsModelString("memPerNode", null);
 
     private static final char[] MY =
             "3O}accA80479[7b@05b9378K}18358QLG32P�92JZW76b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
 
-    protected SettingsModelString getJobManagerUrlModel() {
-        return m_jobManagerUrl;
+    public ContextSettings() {
+        m_user.setEnabled(m_authentication.getBooleanValue());
+        m_password.setEnabled(m_authentication.getBooleanValue());
+        m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
+    }
+
+    protected SettingsModelString getJobServerUrlModel() {
+        return m_jobServerUrl;
     }
 
     protected SettingsModelBoolean getAuthenticateModel() {
@@ -159,8 +185,8 @@ public class ContextSettings {
 
 
 
-    public String getJobManagerUrl() {
-        return m_jobManagerUrl.getStringValue();
+    public String getJobServerUrl() {
+        return m_jobServerUrl.getStringValue();
     }
 
     public boolean useAuthentication() {
@@ -212,7 +238,7 @@ public class ContextSettings {
      * @return the {@link SparkContextID} derived from the configuration settings
      */
     public SparkContextID getSparkContextID() {
-        return SparkContextID.fromConnectionDetails(getJobManagerUrl(), getContextName());
+        return SparkContextID.fromConnectionDetails(getJobServerUrl(), getContextName());
     }
 
     /**
@@ -246,12 +272,14 @@ public class ContextSettings {
      * @param settings the NodeSettingsWO to write to
      */
     public void saveSettingsTo(final NodeSettingsWO settings) {
-        m_jobManagerUrl.saveSettingsTo(settings);
+        m_settingsFormatVersion.saveSettingsTo(settings);
+        m_jobServerUrl.saveSettingsTo(settings);
         m_authentication.saveSettingsTo(settings);
         m_user.saveSettingsTo(settings);
         settings.addPassword(m_password.getKey(), String.valueOf(MY), mix(m_password.getStringValue()));
         m_jobTimeout.saveSettingsTo(settings);
         m_jobCheckFrequency.saveSettingsTo(settings);
+
         m_sparkVersion.saveSettingsTo(settings);
         m_contextName.saveSettingsTo(settings);
         m_deleteObjectsOnDispose.saveSettingsTo(settings);
@@ -261,31 +289,101 @@ public class ContextSettings {
     }
 
     /**
-     * @param settings the NodeSettingsRO to read from
+     * @param settings the NodeSettingsRO to validate
      * @throws InvalidSettingsException if the settings are invalid
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // try to find jobManagerUrl or fall back to protocol+host+port
+        boolean legacy = false;
         try {
-            m_jobManagerUrl.validateSettings(settings);
+            m_settingsFormatVersion.validateSettings(settings);
         } catch(InvalidSettingsException e) {
-            oldProtocol.validateSettings(settings);
-            oldHost.validateSettings(settings);
-            oldPort.validateSettings(settings);
+            legacy = true;
         }
-        // optional: authentication, user, password
+
+        if (legacy) {
+            validateSettingsLegacy(settings);
+        } else {
+            validateSettings_v1_6(settings);
+        }
+    }
+
+    public void validateSettingsLegacy(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_legacyProtocol.validateSettings(settings);
+        m_legacyHost.validateSettings(settings);
+        m_legacyPort.validateSettings(settings);
+        m_legacyUser.validateSettings(settings);
+        m_legacyJobTimeout.validateSettings(settings);
+        m_legacyJobCheckFrequency.validateSettings(settings);
+
+        m_legacyContextName.validateSettings(settings);
+        m_legacyDeleteRDDsOnDispose.validateSettings(settings);
+        m_legacyMemPerNode.validateSettings(settings);
+    }
+
+    public void validateSettings_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_jobServerUrl.validateSettings(settings);
+        m_authentication.validateSettings(settings);
+        if (m_authentication.getBooleanValue()) {
+            m_user.validateSettings(settings);
+        }
         m_jobTimeout.validateSettings(settings);
         m_jobCheckFrequency.validateSettings(settings);
 
-        // optional: sparkVersion
+        m_sparkVersion.validateSettings(settings);
         m_contextName.validateSettings(settings);
-        // try to find deleteObjectsOnDispose or fall back to oldDeleteRDDsOnDispose
-        try {
-            m_deleteObjectsOnDispose.validateSettings(settings);
-        } catch(InvalidSettingsException e) {
-            m_LegacyDeleteRDDsOnDispose.validateSettings(settings);
+        m_deleteObjectsOnDispose.validateSettings(settings);
+        m_sparkJobLogLevel.validateSettings(settings);
+        m_overrideSparkSettings.validateSettings(settings);
+        if (m_overrideSparkSettings.getBooleanValue()) {
+            m_customSparkSettings.validateSettings(settings);
         }
-        // optional: sparkJobLogLevel, overrideSparkSettings, customSparkSettings
+    }
+
+    /** Validate current values of this setting. */
+    public void validateSettings() throws InvalidSettingsException {
+        // Job server URL
+        try {
+            URI uri = new URI(m_jobServerUrl.getStringValue());
+
+            if (uri.getScheme() == null || uri.getScheme().isEmpty()) {
+                throw new InvalidSettingsException("Protocol in job server URL required (http or https)");
+            } else if (uri.getHost() == null || uri.getHost().isEmpty()) {
+                throw new InvalidSettingsException("Hostname in job server URL required.");
+            } else if (uri.getPort() < 0) {
+                throw new InvalidSettingsException("Port in job server URL required.");
+            }
+
+        } catch(URISyntaxException e) {
+            throw new InvalidSettingsException("Invalid job server url: " + e.getMessage());
+        }
+
+        // Username
+        if (m_authentication.getBooleanValue() && (m_user.getStringValue() == null || m_user.getStringValue().isEmpty())) {
+            throw new InvalidSettingsException("Username required with authentication enabled.");
+        }
+
+        // Context name
+        if (m_contextName.getStringValue() == null || m_contextName.getStringValue().isEmpty()) {
+            throw new InvalidSettingsException("Context name required.");
+        } else if (!m_contextName.getStringValue().matches("^[A-Za-z].*")) {
+            throw new InvalidSettingsException("Context name must start with letters.");
+        } else if (m_contextName.getStringValue().contains("/")) {
+            throw new InvalidSettingsException("Slash chararacter is not support in context name.");
+        }
+
+        // Custom spark settings
+        if (m_overrideSparkSettings.getBooleanValue()) {
+            String lines[] = m_customSparkSettings.getStringValue().split("\n");
+            for (int i = 0; i < lines.length; i++) {
+                if (!lines[i].isEmpty() && !lines[i].startsWith("#") && !lines[i].startsWith("//")) {
+                    String kv[] = lines[i].split(": ", 2);
+
+                    if (kv.length != 2 || kv[0].isEmpty() || kv[1].isEmpty()) {
+                        throw new InvalidSettingsException("Failed to parse custom spark config line " + (i + 1) + ".");
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -293,49 +391,75 @@ public class ContextSettings {
      * @throws InvalidSettingsException if the settings are invalid
      */
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        // try to find jobManagerUrl or fall back to protocol+host+port
+        boolean legacy = false;
         try {
-            m_jobManagerUrl.loadSettingsFrom(settings);
+            m_settingsFormatVersion.loadSettingsFrom(settings);
         } catch(InvalidSettingsException e) {
-            oldProtocol.loadSettingsFrom(settings);
-            oldHost.loadSettingsFrom(settings);
-            oldPort.loadSettingsFrom(settings);
-            m_jobManagerUrl.setStringValue(String.format("%s://%s:%d",
-                oldProtocol.getStringValue(),
-                oldHost.getStringValue(),
-                oldPort.getIntValue()));
+            legacy = true;
         }
+
+        if (legacy) {
+            migrateSettingsFromLegacy(settings);
+        } else {
+            loadSettingsFrom_v1_6(settings);
+        }
+    }
+
+    public void migrateSettingsFromLegacy(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_legacyProtocol.loadSettingsFrom(settings);
+        m_legacyHost.loadSettingsFrom(settings);
+        m_legacyPort.loadSettingsFrom(settings);
+        m_legacyUser.loadSettingsFrom(settings);
+        m_legacyPassword.setStringValue(demix(settings.getPassword(m_password.getKey(), String.valueOf(MY), null)));
+        m_legacyJobTimeout.loadSettingsFrom(settings);
+        m_legacyJobCheckFrequency.loadSettingsFrom(settings);
+
+        m_legacyContextName.loadSettingsFrom(settings);
+        m_legacyDeleteRDDsOnDispose.loadSettingsFrom(settings);
+        m_legacyMemPerNode.loadSettingsFrom(settings);
+
+        m_jobServerUrl.setStringValue(String.format("%s://%s:%d",
+            m_legacyProtocol.getStringValue(),
+            m_legacyHost.getStringValue(),
+            m_legacyPort.getIntValue()));
+        m_user.setStringValue(m_legacyUser.getStringValue());
+        m_password.setStringValue(m_legacyPassword.getStringValue());
+        if (m_user.getStringValue() != null && m_user.getStringValue().isEmpty()) {
+            m_authentication.setBooleanValue(true);
+        } else {
+            m_user.setEnabled(false);
+            m_password.setEnabled(false);
+        }
+        m_jobTimeout.setIntValue(m_legacyJobTimeout.getIntValue());
+        m_jobCheckFrequency.setIntValue(m_legacyJobCheckFrequency.getIntValue());
+
+        // use default: m_sparkVersion
+        m_contextName.setStringValue(m_legacyContextName.getStringValue());
+        m_deleteObjectsOnDispose.setBooleanValue(m_legacyDeleteRDDsOnDispose.getBooleanValue());
+        // use default: m_sparkJobLogLevel
+        final String memPerNode = m_legacyMemPerNode.getStringValue();
+        if (memPerNode != null && !memPerNode.isEmpty() && !memPerNode.equals("512m")) {
+            m_overrideSparkSettings.setBooleanValue(true);
+            m_customSparkSettings.setStringValue("memory-per-node: " + memPerNode + "\n");
+        } else {
+            m_overrideSparkSettings.setBooleanValue(false);
+            m_customSparkSettings.setEnabled(false);
+        }
+    }
+
+    public void loadSettingsFrom_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_jobServerUrl.loadSettingsFrom(settings);
+        m_authentication.loadSettingsFrom(settings);
         m_user.loadSettingsFrom(settings);
         m_password.setStringValue(demix(settings.getPassword(m_password.getKey(), String.valueOf(MY), null)));
-        try {
-            m_authentication.loadSettingsFrom(settings);
-        } catch(InvalidSettingsException e) {
-            m_authentication.setBooleanValue(!m_user.getStringValue().isEmpty());
-        }
         m_jobTimeout.loadSettingsFrom(settings);
         m_jobCheckFrequency.loadSettingsFrom(settings);
 
-        try { m_sparkVersion.loadSettingsFrom(settings); } catch (InvalidSettingsException e) {}
+        m_sparkVersion.loadSettingsFrom(settings);
         m_contextName.loadSettingsFrom(settings);
-        try {
-            m_deleteObjectsOnDispose.loadSettingsFrom(settings);
-        } catch (InvalidSettingsException e) {
-            m_LegacyDeleteRDDsOnDispose.loadSettingsFrom(settings);
-            m_deleteObjectsOnDispose.setBooleanValue(m_LegacyDeleteRDDsOnDispose.getBooleanValue());
-        }
-        try { m_sparkJobLogLevel.loadSettingsFrom(settings); } catch (InvalidSettingsException e) {}
-        try {
-            m_overrideSparkSettings.loadSettingsFrom(settings);
-            m_customSparkSettings.loadSettingsFrom(settings);
-        } catch (InvalidSettingsException e) {
-            try {
-                m_LegacyMemPerNode.loadSettingsFrom(settings);
-                m_overrideSparkSettings.setBooleanValue(true);
-                m_customSparkSettings.setStringValue("memory-per-node: " + m_LegacyMemPerNode.getStringValue() + "\n");
-            } catch (InvalidSettingsException e2) {
-                m_overrideSparkSettings.setBooleanValue(false);
-            }
-        }
+        m_deleteObjectsOnDispose.loadSettingsFrom(settings);
+        m_overrideSparkSettings.loadSettingsFrom(settings);
+        m_customSparkSettings.loadSettingsFrom(settings);
     }
 
     /**
@@ -343,7 +467,7 @@ public class ContextSettings {
      */
     public SparkContextConfig createContextConfig() {
         return new SparkContextConfig(
-            getJobManagerUrl(), useAuthentication(), getUser(), getPassword(),
+            getJobServerUrl(), useAuthentication(), getUser(), getPassword(),
             getJobCheckFrequency(), getJobTimeout(),
             getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
             getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
@@ -356,7 +480,7 @@ public class ContextSettings {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("KNIMESparkContext [url=");
-        builder.append(getJobManagerUrl());
+        builder.append(getJobServerUrl());
         builder.append(", auth=");
         builder.append(useAuthentication());
         builder.append(", user=");

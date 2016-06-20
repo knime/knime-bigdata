@@ -53,7 +53,7 @@ public class SparkContextManager {
     private static void createAndConfigureDefaultSparkContext() {
         SparkContextConfig defaultConfig = new SparkContextConfig();
         SparkContextID actualDefaultContextID =
-            SparkContextID.fromConnectionDetails(defaultConfig.getJobManagerUrl(), defaultConfig.getContextName());
+            SparkContextID.fromConnectionDetails(defaultConfig.getJobServerUrl(), defaultConfig.getContextName());
         defaultSparkContext = new JobserverSparkContext(actualDefaultContextID);
         defaultSparkContext.configure(defaultConfig);
         sparkContexts.put(DEFAULT_SPARK_CONTEXT_ID, defaultSparkContext);
@@ -129,7 +129,7 @@ public class SparkContextManager {
         throws KNIMESparkException {
 
         final SparkContextConfig newDefaultConfig = new SparkContextConfig();
-        final SparkContextID newContextID = SparkContextID.fromConnectionDetails(newDefaultConfig.getJobManagerUrl(),
+        final SparkContextID newContextID = SparkContextID.fromConnectionDetails(newDefaultConfig.getJobServerUrl(),
             newDefaultConfig.getContextName());
 
         // create an entirely new context when the ID changes
