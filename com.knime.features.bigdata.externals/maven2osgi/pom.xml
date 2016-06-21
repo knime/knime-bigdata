@@ -9,6 +9,7 @@
 	<version>2.12.0</version>
 
 	<properties>
+		<scalactic.version>2.2.6</scalactic.version>
 		<hadoop.version>2.7.2</hadoop.version>
 		<typesafe.config.version>1.3.0</typesafe.config.version>
 		<guava.version>11.0.2</guava.version>
@@ -83,6 +84,15 @@
 						<id>default-cli</id>
 						<configuration>
 							<artifacts>
+
+								<!-- BEGIN Spark jobserver dependencies -->
+								<artifact>
+									<!-- dependency of Spark jobserver-api since June 2016 -->
+									<id>org.scalactic:scalactic_2.10:${scalactic.version}</id>
+									<transitive>false</transitive>
+									<source>true</source>
+								</artifact>															
+								<!-- END Spark jobserver dependencies -->
 
 								<!-- BEGIN Common Spark dependencies -->
 								<artifact>
@@ -163,7 +173,6 @@
 										<Import-Package>org.netlib.*;version="[${arpack.version},${arpack.version}]";resolution:=optional,*;resolution:=optional</Import-Package>
 									</instructions>
 								</artifact>
-
 								<artifact>
 										<!-- dependency of breeze -->
 									<id>net.sf.opencsv:opencsv:${opencsv.version}</id>
