@@ -414,13 +414,6 @@
       unpack="false"/>
 
    <plugin
-      id="org.scalactic.source"
-      download-size="0"
-      install-size="0"
-      version="2.2.6"
-      unpack="false"/>
-
-   <plugin
       id="org.scala-lang.scala-compiler"
       download-size="0"
       install-size="0"

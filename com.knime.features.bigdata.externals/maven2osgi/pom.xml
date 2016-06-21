@@ -90,7 +90,7 @@
 									<!-- dependency of Spark jobserver-api since June 2016 -->
 									<id>org.scalactic:scalactic_2.10:${scalactic.version}</id>
 									<transitive>false</transitive>
-									<source>true</source>
+									<source>false</source>
 								</artifact>															
 								<!-- END Spark jobserver dependencies -->
 
