@@ -242,7 +242,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     private void loadDefaultValues(final IPreferenceStore store) {
-        final Config config = ConfigFactory.load();
+        final Config config = ConfigFactory.load(getClass().getClassLoader());
 
         // setup connection defaults
         store.setDefault(PREF_JOB_SERVER_URL, getPresetString(config, "jobserver.connection.url"));
