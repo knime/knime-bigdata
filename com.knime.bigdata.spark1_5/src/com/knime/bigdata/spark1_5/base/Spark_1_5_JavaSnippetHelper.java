@@ -269,7 +269,7 @@ public class Spark_1_5_JavaSnippetHelper extends DefaultJavaSnippetHelper {
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
             "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*", "org.apache.spark.sql.types.*","org.apache.spark.sql.*",
             "com.knime.bigdata.spark.core.exception.*",
-            "com.knime.bigdata.spark1_5.base.RowBuilder",
+            "com.knime.bigdata.spark1_5.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
             SOURCE_SNIPPET_SUPERCLASS.getName(), SINK_SNIPPET_SUPERCLASS.getName()};
     }
