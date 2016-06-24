@@ -147,8 +147,11 @@ class HiveLoaderNodeModel extends NodeModel {
     }
 
     private void checkUploadSettings(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        ConnectionInformationPortObjectSpec object = (ConnectionInformationPortObjectSpec)inSpecs[0];
-        ConnectionInformation connInfo = object.getConnectionInformation();
+        ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        ConnectionInformation connInfo = connSpec.getConnectionInformation();
+        final CredentialsProvider cp = getCredentialsProvider();
+        DatabaseConnectionPortObjectSpec dbSpec = (DatabaseConnectionPortObjectSpec) inSpecs[2];
+        DatabaseConnectionSettings dbSettings = dbSpec.getConnectionSettings(cp);
 
         // Check if the port object has connection information
         if (connInfo == null) {
@@ -157,6 +160,14 @@ class HiveLoaderNodeModel extends NodeModel {
 
         if ((m_settings.targetFolder() == null) || m_settings.targetFolder().trim().isEmpty()) {
             throw new InvalidSettingsException("No target folder for data upload provided");
+        }
+
+        if (connInfo.getProtocol().equalsIgnoreCase("hdfs")
+                && connInfo.getUser() != null && !connInfo.getUser().isEmpty()
+                && dbSettings.getUserName(cp) != null && !dbSettings.getUserName(cp).isEmpty()
+                && !connInfo.getUser().equals(dbSettings.getUserName(cp))) {
+
+            setWarningMessage("Different HDSF and Hive user found, this might result in permission problems.");
         }
     }
 
@@ -191,7 +202,7 @@ class HiveLoaderNodeModel extends NodeModel {
             Exception er = null;
             if (remoteFile != null) {
                 try {
-                    if (!remoteFile.delete()) {
+                    if (remoteFile.exists() && !remoteFile.delete()) {
                         setWarningMessage("Could not delete temporary import file on server");
                     }
                 } catch (Exception e) {
