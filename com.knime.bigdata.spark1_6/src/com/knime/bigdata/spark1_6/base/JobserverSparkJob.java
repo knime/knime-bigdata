@@ -70,7 +70,6 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
                 toReturn = JobserverJobOutput.success();
             }
         } catch (Throwable t) {
-            Logger.getLogger(JobserverSparkJob.class).error(t);
             toReturn = JobserverJobOutput.failure(t);
         }
 
