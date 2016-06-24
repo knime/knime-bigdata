@@ -264,7 +264,31 @@ public final class HiveLoader {
 
     private static String buildLoadCommand(final RemoteFile<? extends Connection> remoteFile, final String tableName)
             throws Exception {
-        return "LOAD DATA LOCAL INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
+
+        if (remoteFile.getType().equalsIgnoreCase("hdfs")) {
+            // HIVE does not support usernames in input file URI!
+            URI originalUri = remoteFile.getURI();
+            String cleanUri = removeUsernameFromUri(originalUri);
+            return "LOAD DATA INPATH '" + cleanUri + "' INTO TABLE " + tableName;
+
+        } else {
+            return "LOAD DATA LOCAL INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
+        }
+    }
+
+    /** Removes user info from given URI. */
+    private static String removeUsernameFromUri(final URI originalUri) {
+        StringBuilder uri = new StringBuilder();
+        uri.append(originalUri.getScheme())
+           .append("://")
+           .append(originalUri.getHost());
+        if (originalUri.getPort() > 0) {
+            uri.append(':').append(originalUri.getPort());
+        }
+        if (originalUri.getPath() != null && !originalUri.getPath().isEmpty()) {
+            uri.append(originalUri.getPath());
+        }
+        return uri.toString();
     }
 
     private static String buildInsertCommand(final RemoteFile<? extends Connection> remoteFile, final String sourceTableName,
