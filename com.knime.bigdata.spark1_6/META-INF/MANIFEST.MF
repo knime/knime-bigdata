@@ -27,7 +27,10 @@ Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.apache.hadoop.mapreduce-client-core;bundle-version="[2.7.2,3.0.0)",
  org.scalanlp.breeze_2.10;bundle-version="[0.11.2,1.0.0)",
  com.google.guava;bundle-version="[16.0.1,20.0.0)",
- com.typesafe.config;bundle-version="[1.3.0,2.0.0)"
+ com.typesafe.config;bundle-version="[1.3.0,2.0.0)",
+ org.json4s.ast_2.10;bundle-version="3.2.10",
+ org.json4s.core_2.10;bundle-version="3.2.10",
+ org.json4s.jackson_2.10;bundle-version="3.2.10"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.knime.bigdata.spark1_6.api
