@@ -83,7 +83,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
 
             } else if (m_lastContextID != null && m_lastContextID.equals(newContextID)) {
                 LOGGER.debug("Reconfiguring old context with same ID.");
-                if (!SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(), false)) {
+                if (!SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(getCredentialsProvider()), false)) {
                     final int n = JOptionPane.showConfirmDialog(null,
                         "New settings only become active after destroying the existing remote Spark context. "
                                 + "Should the existing context be destroyed?\n\n"
@@ -92,7 +92,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
 
                     if (n == JOptionPane.OK_OPTION) {
                         LOGGER.info("Destroying remote context and configuring new one.");
-                        SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(), true);
+                        SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(getCredentialsProvider()), true);
                     } else {
                         LOGGER.warn("Context reset aborded, no changes applied.");
                     }
@@ -114,13 +114,13 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_settings.getSparkContextID())};
     }
 
-    private static void configureContextIfPossible(final ContextSettings settings) {
+    private void configureContextIfPossible(final ContextSettings settings) {
         final SparkContextID contextID = settings.getSparkContextID();
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
         if (sparkContext.getStatus() == SparkContextStatus.NEW
             || sparkContext.getStatus() == SparkContextStatus.CONFIGURED) {
-            sparkContext.configure(settings.createContextConfig());
+            sparkContext.configure(settings.createContextConfig(getCredentialsProvider()));
         }
     }
 

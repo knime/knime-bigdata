@@ -32,13 +32,14 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.DialogComponentAuthentication;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer;
@@ -51,6 +52,8 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
 
     private ContextSettings m_settings = new ContextSettings();
+
+    private DialogComponentAuthentication m_authenticationComp;
 
     /**
      * Constructor.
@@ -96,14 +99,10 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         panel.add(new DialogComponentString(m_settings.getJobServerUrlModel(), "Job server URL: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentBoolean(m_settings.getAuthenticateModel(), "Use authentication").getComponentPanel(), gbc);
+        m_authenticationComp = new DialogComponentAuthentication(m_settings.getAuthenticateModel(), "Authentication",
+                        AuthenticationType.NONE, AuthenticationType.CREDENTIALS, AuthenticationType.USER, AuthenticationType.USER_PWD);
+        panel.add(m_authenticationComp.getComponentPanel(), gbc);
         m_settings.getAuthenticateModel().addChangeListener(this);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        panel.add(new DialogComponentString(m_settings.getUserModel(), "User: ", true, 30).getComponentPanel(), gbc);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        panel.add(new DialogComponentPasswordField(m_settings.getPasswordModel(), "Password: ", 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentNumber(m_settings.getJobTimeoutModel(),
@@ -158,11 +157,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
 
     @Override
     public void stateChanged(final ChangeEvent e) {
-        if (e.getSource().equals(m_settings.getAuthenticateModel())) {
-            m_settings.getUserModel().setEnabled(m_settings.getAuthenticateModel().getBooleanValue());
-            m_settings.getPasswordModel().setEnabled(m_settings.getAuthenticateModel().getBooleanValue());
-
-        } else if (e.getSource().equals(m_settings.getOverrideSparkSettingsModel())) {
+        if (e.getSource().equals(m_settings.getOverrideSparkSettingsModel())) {
             m_settings.getCustomSparkSettingsModel().setEnabled(m_settings.getOverrideSparkSettingsModel().getBooleanValue());
         }
     }
@@ -182,6 +177,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         try {
+            m_authenticationComp.loadCredentials(getCredentialsProvider());
             m_settings.loadSettingsFrom(settings);
         } catch (InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());

@@ -27,10 +27,62 @@ import java.util.ArrayList;
 public class SparkPreferenceValidator {
 
     /**
-     * Validates given settings and returns null or error messages.
+     * @returns null or error messages
      */
     public static String validate(final String jobServerUrl,
             final boolean withAuthentication, final String username, final String password,
+            final int jobTimeout, final int jobCheckFrequency,
+            final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
+            final boolean overrideSettings, final String customSettings) {
+
+        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+            sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
+
+        if (withAuthentication && (username == null || username.isEmpty())) {
+            errors.add("Username required with authentication enabled.");
+        } else if (withAuthentication && username.startsWith(" ")) {
+            errors.add("Unsupported leading space in username found." );
+        } else if (withAuthentication && username.endsWith(" ")) {
+            errors.add("Unsupported trailing space in username found.");
+        }
+
+        return mergeMessages(errors);
+    }
+
+    /**
+     * @returns null or error messages
+     */
+    public static String validate(final String jobServerUrl,
+            final String credentials,
+            final int jobTimeout, final int jobCheckFrequency,
+            final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
+            final boolean overrideSettings, final String customSettings) {
+
+        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+            sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
+
+        if (credentials == null || credentials.isEmpty()) {
+            errors.add("Credentials name required.");
+        }
+
+        return mergeMessages(errors);
+    }
+
+    /**
+     * @returns null or error messages
+     */
+    public static String validate(final String jobServerUrl,
+            final int jobTimeout, final int jobCheckFrequency,
+            final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
+            final boolean overrideSettings, final String customSettings) {
+
+        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+            sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
+
+        return mergeMessages(errors);
+    }
+
+    private static ArrayList<String> validateInternal(final String jobServerUrl,
             final int jobTimeout, final int jobCheckFrequency,
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
@@ -60,15 +112,6 @@ public class SparkPreferenceValidator {
             }
         }
 
-        // Username
-        if (withAuthentication && (username == null || username.isEmpty())) {
-            errors.add("Username required with authentication enabled.");
-        } else if (withAuthentication && username.startsWith(" ")) {
-            errors.add("Unsupported leading space in username found." );
-        } else if (withAuthentication && username.endsWith(" ")) {
-            errors.add("Unsupported trailing space in username found.");
-        }
-
         // Context name
         if (contextName == null || contextName.isEmpty()) {
             errors.add("Context name required.");
@@ -92,7 +135,11 @@ public class SparkPreferenceValidator {
             }
         }
 
+        return errors;
+    }
 
+
+    private static String mergeMessages(final ArrayList<String> errors) {
         if (errors.size() > 0) {
             StringBuilder sb = new StringBuilder();
             for (String error : errors) {
@@ -104,4 +151,6 @@ public class SparkPreferenceValidator {
             return null;
         }
     }
+
+
 }

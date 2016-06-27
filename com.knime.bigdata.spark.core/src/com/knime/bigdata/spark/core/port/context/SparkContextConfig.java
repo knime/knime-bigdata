@@ -78,7 +78,7 @@ public class SparkContextConfig implements Serializable {
         }
 
         if (authentication && (user == null || user.isEmpty())) {
-            throw new IllegalArgumentException("can't use authentication with empty user or password");
+            throw new IllegalArgumentException("can't use authentication with empty user");
         }
 
         if (jobCheckFrequency < 0) {
