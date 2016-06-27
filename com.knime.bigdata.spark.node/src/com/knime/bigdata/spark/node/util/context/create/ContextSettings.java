@@ -32,10 +32,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.workflow.CredentialsProvider;
+import org.knime.core.node.workflow.ICredentials;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -65,14 +69,8 @@ public class ContextSettings {
     private final SettingsModelString m_jobServerUrl =
             new SettingsModelString("v1_6.jobServerUrl", KNIMEConfigContainer.getJobServerUrl());
 
-    private final SettingsModelBoolean m_authentication =
-            new SettingsModelBoolean("v1_6.authentication", KNIMEConfigContainer.useAuthentication());
-
-    private final SettingsModelString m_user =
-            new SettingsModelString("v1_6.user", KNIMEConfigContainer.getUserName());
-
-    private final SettingsModelString m_password =
-            new SettingsModelString("v1_6.password", KNIMEConfigContainer.getPassword() == null ? null : String.valueOf(KNIMEConfigContainer.getUserName()));
+    private final SettingsModelAuthentication m_authentication =
+            new SettingsModelAuthentication("v1_6.authentication", AuthenticationType.NONE, null, null, null);
 
     private final SettingsModelInteger m_jobTimeout =
             new SettingsModelIntegerBounded("v1_6.sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
@@ -129,8 +127,6 @@ public class ContextSettings {
             "3O}accA80479[7b@05b9378K}18358QLG32P�92JZW76b76@2eb9$a\\23-c0a397a%ee'e35!89afFfA64#8bB8GRl".toCharArray();
 
     public ContextSettings() {
-        m_user.setEnabled(m_authentication.getBooleanValue());
-        m_password.setEnabled(m_authentication.getBooleanValue());
         m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
     }
 
@@ -138,16 +134,8 @@ public class ContextSettings {
         return m_jobServerUrl;
     }
 
-    protected SettingsModelBoolean getAuthenticateModel() {
+    protected SettingsModelAuthentication getAuthenticateModel() {
         return m_authentication;
-    }
-
-    protected SettingsModelString getUserModel() {
-        return m_user;
-    }
-
-    protected SettingsModelString getPasswordModel() {
-        return m_password;
     }
 
     protected SettingsModelInteger getJobTimeoutModel() {
@@ -186,18 +174,6 @@ public class ContextSettings {
 
     public String getJobServerUrl() {
         return m_jobServerUrl.getStringValue();
-    }
-
-    public boolean useAuthentication() {
-        return m_authentication.getBooleanValue();
-    }
-
-    public String getUser() {
-        return m_user.getStringValue();
-    }
-
-    public String getPassword() {
-        return m_password.getStringValue();
     }
 
     public int getJobTimeout() {
@@ -274,8 +250,6 @@ public class ContextSettings {
         m_settingsFormatVersion.saveSettingsTo(settings);
         m_jobServerUrl.saveSettingsTo(settings);
         m_authentication.saveSettingsTo(settings);
-        m_user.saveSettingsTo(settings);
-        settings.addPassword(m_password.getKey(), String.valueOf(MY), mix(m_password.getStringValue()));
         m_jobTimeout.saveSettingsTo(settings);
         m_jobCheckFrequency.saveSettingsTo(settings);
 
@@ -322,9 +296,6 @@ public class ContextSettings {
     public void validateSettings_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_jobServerUrl.validateSettings(settings);
         m_authentication.validateSettings(settings);
-        if (m_authentication.getBooleanValue()) {
-            m_user.validateSettings(settings);
-        }
         m_jobTimeout.validateSettings(settings);
         m_jobCheckFrequency.validateSettings(settings);
 
@@ -340,12 +311,35 @@ public class ContextSettings {
 
     /** Validate current values of this setting. */
     public void validateSettings() throws InvalidSettingsException {
-        String errors = SparkPreferenceValidator.validate(m_jobServerUrl.getStringValue(),
-            m_authentication.getBooleanValue(), m_user.getStringValue(), m_password.getStringValue(),
-            m_jobTimeout.getIntValue(), m_jobCheckFrequency.getIntValue(),
-            m_sparkVersion.getStringValue(), m_contextName.getStringValue(),
-            m_deleteObjectsOnDispose.getBooleanValue(),
-            m_overrideSparkSettings.getBooleanValue(), m_customSparkSettings.getStringValue());
+        String errors = null;
+
+        if (m_authentication.getAuthenticationType() == AuthenticationType.NONE) {
+            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
+                getJobTimeout(), getJobCheckFrequency(),
+                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
+                overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER) {
+            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
+                true, m_authentication.getUsername(), null,
+                getJobTimeout(), getJobCheckFrequency(),
+                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
+                overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
+                true, m_authentication.getUsername(), m_authentication.getPassword(),
+                getJobTimeout(), getJobCheckFrequency(),
+                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
+                overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
+            SparkPreferenceValidator.validate(getJobServerUrl(),
+                m_authentication.getCredential(),
+                getJobTimeout(), getJobCheckFrequency(),
+                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
+                overrideSparkSettings(), getCustomSparkSettings());
+        }
 
         if (errors != null && !errors.isEmpty()) {
             throw new InvalidSettingsException(errors);
@@ -376,7 +370,7 @@ public class ContextSettings {
         m_legacyHost.loadSettingsFrom(settings);
         m_legacyPort.loadSettingsFrom(settings);
         m_legacyUser.loadSettingsFrom(settings);
-        m_legacyPassword.setStringValue(demix(settings.getPassword(m_password.getKey(), String.valueOf(MY), null)));
+        m_legacyPassword.setStringValue(demix(settings.getPassword(m_legacyPassword.getKey(), String.valueOf(MY), null)));
         m_legacyJobTimeout.loadSettingsFrom(settings);
         m_legacyJobCheckFrequency.loadSettingsFrom(settings);
 
@@ -388,13 +382,14 @@ public class ContextSettings {
             m_legacyProtocol.getStringValue(),
             m_legacyHost.getStringValue(),
             m_legacyPort.getIntValue()));
-        m_user.setStringValue(m_legacyUser.getStringValue());
-        m_password.setStringValue(m_legacyPassword.getStringValue());
-        if (m_user.getStringValue() != null && m_user.getStringValue().isEmpty()) {
-            m_authentication.setBooleanValue(true);
+        if (m_legacyUser.getStringValue() != null && !m_legacyUser.getStringValue().isEmpty()) {
+            if (m_legacyPassword.getStringValue() != null && !m_legacyPassword.getStringValue().isEmpty()) {
+                m_authentication.setValues(AuthenticationType.USER_PWD, null, m_legacyUser.getStringValue(), m_legacyPassword.getStringValue());
+            } else {
+                m_authentication.setValues(AuthenticationType.USER, null, m_legacyUser.getStringValue(), null);
+            }
         } else {
-            m_user.setEnabled(false);
-            m_password.setEnabled(false);
+            m_authentication.setValues(AuthenticationType.NONE, null, null, null);
         }
         m_jobTimeout.setIntValue(m_legacyJobTimeout.getIntValue());
         m_jobCheckFrequency.setIntValue(m_legacyJobCheckFrequency.getIntValue());
@@ -416,8 +411,6 @@ public class ContextSettings {
     public void loadSettingsFrom_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_jobServerUrl.loadSettingsFrom(settings);
         m_authentication.loadSettingsFrom(settings);
-        m_user.loadSettingsFrom(settings);
-        m_password.setStringValue(demix(settings.getPassword(m_password.getKey(), String.valueOf(MY), null)));
         m_jobTimeout.loadSettingsFrom(settings);
         m_jobCheckFrequency.loadSettingsFrom(settings);
 
@@ -431,12 +424,42 @@ public class ContextSettings {
     /**
      * @return the KNIMESparkContext object with the specified settings
      */
-    public SparkContextConfig createContextConfig() {
-        return new SparkContextConfig(
-            getJobServerUrl(), useAuthentication(), getUser(), getPassword(),
-            getJobCheckFrequency(), getJobTimeout(),
-            getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
-            getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+    public SparkContextConfig createContextConfig(final CredentialsProvider cp) {
+        AuthenticationType authType = m_authentication.getAuthenticationType();
+
+        if (authType == AuthenticationType.NONE) {
+            return new SparkContextConfig(
+                getJobServerUrl(), false, null, null,
+                getJobCheckFrequency(), getJobTimeout(),
+                getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
+                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (authType == AuthenticationType.USER) {
+            return new SparkContextConfig(
+                getJobServerUrl(), true, m_authentication.getUsername(), "",
+                getJobCheckFrequency(), getJobTimeout(),
+                getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
+                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (authType == AuthenticationType.USER_PWD) {
+            return new SparkContextConfig(
+                getJobServerUrl(), true, m_authentication.getUsername(), m_authentication.getPassword(),
+                getJobCheckFrequency(), getJobTimeout(),
+                getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
+                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+
+        } else if (authType == AuthenticationType.CREDENTIALS) {
+            ICredentials cred = cp.get(m_authentication.getCredential());
+
+            return new SparkContextConfig(
+                getJobServerUrl(), true, cred.getLogin(), cred.getPassword(),
+                getJobCheckFrequency(), getJobTimeout(),
+                getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
+                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+
+        } else {
+            throw new RuntimeException("Unsupported authentication method: " + authType);
+        }
     }
 
     /**
@@ -448,11 +471,19 @@ public class ContextSettings {
         builder.append("KNIMESparkContext [url=");
         builder.append(getJobServerUrl());
         builder.append(", auth=");
-        builder.append(useAuthentication());
-        builder.append(", user=");
-        builder.append(getUser());
-        builder.append(", password set=");
-        builder.append(getPassword() != null);
+        if (m_authentication.getAuthenticationType() == AuthenticationType.USER) {
+            builder.append("true, user=");
+            builder.append(m_authentication.getUsername());
+            builder.append(", password set=false");
+        } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
+            builder.append("true, user=");
+            builder.append(m_authentication.getUsername());
+            builder.append(", password set=");
+            builder.append(m_authentication.getPassword() != null);
+        } else if (m_authentication.useCredential()) {
+            builder.append("true, credentials=");
+            builder.append(m_authentication.getCredential());
+        }
         builder.append(", jobCheckFrequency=");
         builder.append(getJobCheckFrequency());
         builder.append(", jobTimeout=");
