@@ -44,9 +44,6 @@
  */
 package com.knime.bigdata.spark.core.preferences;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -164,10 +161,12 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         new Label(credentialsContainer, SWT.NONE); // dummy
         m_username = createTextWithLabel(credentialsContainer, "Username:");
         m_username.getParent().setLayoutData(userPasswordGroupLayoutData);
+        m_username.addListener(SWT.CHANGED,  this);
         new Label(credentialsContainer, SWT.NONE); // dummy
         m_password = createTextWithLabel(credentialsContainer, "Password:");
         m_password.setEchoChar('*');
         m_password.getParent().setLayoutData(userPasswordGroupLayoutData);
+        m_password.addListener(SWT.CHANGED, this);
 
         m_jobTimeout = createSpinnerWithLabel(connectionSettings, "Job timeout in seconds:", 1, 10);
 
@@ -220,6 +219,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_verboseLogging.setText("Enable verbose logging.");
 
         loadPreferencesIntoFields();
+        validateInputFields();
 
         return mainContainer;
     }
@@ -391,9 +391,9 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
     public void handleEvent(final Event event) {
         if (event.type == SWT.Selection) {
             handleSelection(event);
-        } else if (event.type == SWT.CHANGED) {
-            validateInputFields(event);
         }
+
+        validateInputFields();
     }
 
     private void handleSelection(final Event event) {
@@ -430,67 +430,19 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
     }
 
     /** Validates values in input fields and sets error message. */
-    private void validateInputFields(final Event event) {
-        setErrorMessage(null);
-        setValid(true);
+    private void validateInputFields() {
+        String errors = SparkPreferenceValidator.validate(m_jobServerUrl.getText(),
+            m_withAuthentication.getSelection(), m_username.getText(), m_password.getText(),
+            m_jobTimeout.getSelection(), m_jobCheckFrequency.getSelection(),
+            m_sparkVersion.getText(), m_contextName.getText(), m_deleteSparkObjectsOnDispose.getSelection(),
+            m_overrideSettings.getSelection(), m_customSettings.getText());
 
-        // Job server URL
-        if (m_jobServerUrl.getText().isEmpty()) {
-            setErrorMessage("Job server url can't be empty.");
+        if (errors != null && !errors.isEmpty()) {
+            setErrorMessage(errors);
             setValid(false);
-
         } else {
-            try {
-                URI uri = new URI(m_jobServerUrl.getText());
-
-                if (uri.getScheme() == null || uri.getScheme().isEmpty()) {
-                    setErrorMessage("Protocol in job server URL required (http or https)");
-                    setValid(false);
-                } else if (uri.getHost() == null || uri.getHost().isEmpty()) {
-                    setErrorMessage("Hostname in job server URL required.");
-                    setValid(false);
-                } else if (uri.getPort() < 0) {
-                    setErrorMessage("Port in job server URL required.");
-                    setValid(false);
-                }
-
-            } catch(URISyntaxException e) {
-                setErrorMessage("Invalid job server url: " + e.getMessage());
-                setValid(false);
-            }
-        }
-
-        // Username
-        if (m_withAuthentication.getSelection() && m_username.getText().isEmpty()) {
-            setErrorMessage("Username required with authentication enabled.");
-            setValid(false);
-        }
-
-        // Context name
-        if (m_contextName.getText().isEmpty()) {
-            setErrorMessage("Context name required.");
-            setValid(false);
-        } else if (!m_contextName.getText().matches("^[A-Za-z].*")) {
-            setErrorMessage("Context name must start with letters.");
-            setValid(false);
-        } else if (m_contextName.getText().contains("/")) {
-            setErrorMessage("Slash chararacter is not support in context name.");
-            setValid(false);
-        }
-
-        // Custom spark settings
-        if (m_overrideSettings.getSelection()) {
-            String lines[] = m_customSettings.getText().split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                if (!lines[i].isEmpty() && !lines[i].startsWith("#") && !lines[i].startsWith("//")) {
-                    String kv[] = lines[i].split(": ", 2);
-
-                    if (kv.length != 2 || kv[0].isEmpty() || kv[1].isEmpty()) {
-                        setErrorMessage("Failed to parse custom spark config line " + (i + 1) + ".");
-                        setValid(false);
-                    }
-                }
-            }
+            setErrorMessage(null);
+            setValid(true);
         }
     }
 }

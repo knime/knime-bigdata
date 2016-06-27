@@ -26,8 +26,6 @@
  */
 package com.knime.bigdata.spark.node.util.context.create;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import com.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -341,48 +340,15 @@ public class ContextSettings {
 
     /** Validate current values of this setting. */
     public void validateSettings() throws InvalidSettingsException {
-        // Job server URL
-        try {
-            URI uri = new URI(m_jobServerUrl.getStringValue());
+        String errors = SparkPreferenceValidator.validate(m_jobServerUrl.getStringValue(),
+            m_authentication.getBooleanValue(), m_user.getStringValue(), m_password.getStringValue(),
+            m_jobTimeout.getIntValue(), m_jobCheckFrequency.getIntValue(),
+            m_sparkVersion.getStringValue(), m_contextName.getStringValue(),
+            m_deleteObjectsOnDispose.getBooleanValue(),
+            m_overrideSparkSettings.getBooleanValue(), m_customSparkSettings.getStringValue());
 
-            if (uri.getScheme() == null || uri.getScheme().isEmpty()) {
-                throw new InvalidSettingsException("Protocol in job server URL required (http or https)");
-            } else if (uri.getHost() == null || uri.getHost().isEmpty()) {
-                throw new InvalidSettingsException("Hostname in job server URL required.");
-            } else if (uri.getPort() < 0) {
-                throw new InvalidSettingsException("Port in job server URL required.");
-            }
-
-        } catch(URISyntaxException e) {
-            throw new InvalidSettingsException("Invalid job server url: " + e.getMessage());
-        }
-
-        // Username
-        if (m_authentication.getBooleanValue() && (m_user.getStringValue() == null || m_user.getStringValue().isEmpty())) {
-            throw new InvalidSettingsException("Username required with authentication enabled.");
-        }
-
-        // Context name
-        if (m_contextName.getStringValue() == null || m_contextName.getStringValue().isEmpty()) {
-            throw new InvalidSettingsException("Context name required.");
-        } else if (!m_contextName.getStringValue().matches("^[A-Za-z].*")) {
-            throw new InvalidSettingsException("Context name must start with letters.");
-        } else if (m_contextName.getStringValue().contains("/")) {
-            throw new InvalidSettingsException("Slash chararacter is not support in context name.");
-        }
-
-        // Custom spark settings
-        if (m_overrideSparkSettings.getBooleanValue()) {
-            String lines[] = m_customSparkSettings.getStringValue().split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                if (!lines[i].isEmpty() && !lines[i].startsWith("#") && !lines[i].startsWith("//")) {
-                    String kv[] = lines[i].split(": ", 2);
-
-                    if (kv.length != 2 || kv[0].isEmpty() || kv[1].isEmpty()) {
-                        throw new InvalidSettingsException("Failed to parse custom spark config line " + (i + 1) + ".");
-                    }
-                }
-            }
+        if (errors != null && !errors.isEmpty()) {
+            throw new InvalidSettingsException(errors);
         }
     }
 
