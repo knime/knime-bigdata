@@ -61,8 +61,7 @@ public abstract class SparkProviderRegistry<P extends SparkProvider> {
             }
             for (final IConfigurationElement elem : point.getConfigurationElements()) {
                 final String helperClass = elem.getAttribute(extPointAttrDf);
-                final String decl = elem.getDeclaringExtension().getUniqueIdentifier();
-
+                final String decl = elem.getDeclaringExtension().getNamespaceIdentifier();
                 if (helperClass == null || helperClass.isEmpty()) {
                     LOGGER.error("The extension '" + decl + "' doesn't provide the required attribute '"
                             + extPointAttrDf + "'");
@@ -70,6 +69,7 @@ public abstract class SparkProviderRegistry<P extends SparkProvider> {
                     continue;
                 }
                 try {
+                    LOGGER.debug("Registering Spark provider class: " + helperClass + " from extension: " + decl);
                     @SuppressWarnings("unchecked")
                     final P provider = (P)elem.createExecutableExtension(extPointAttrDf);
                     addProvider(provider);
