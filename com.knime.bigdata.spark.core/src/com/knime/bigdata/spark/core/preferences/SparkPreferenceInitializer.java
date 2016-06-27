@@ -56,7 +56,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
- * @author Tobias Koetter, University of Konstanz
+ * @author Tobias Koetter, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
 public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {

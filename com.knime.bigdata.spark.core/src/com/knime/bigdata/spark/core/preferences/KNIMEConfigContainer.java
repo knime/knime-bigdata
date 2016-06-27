@@ -6,7 +6,7 @@ import com.knime.bigdata.spark.core.SparkPlugin;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
- * @author Tobias Koetter
+ * @author Tobias Koetter, KNIME.com
  */
 public class KNIMEConfigContainer {
 

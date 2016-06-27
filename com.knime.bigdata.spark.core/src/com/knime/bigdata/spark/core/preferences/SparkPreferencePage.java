@@ -76,10 +76,12 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
- * @author Tobias Koetter, University of Konstanz
+ * @author Tobias Koetter, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
 public class SparkPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, Listener {
+    
+    //TODO: Use the Big Data Extensions preference page in com.knime.bigdata.commons as parent for this page
 
     private static final NodeLogger LOG = NodeLogger.getLogger(SparkPreferencePage.class);
 
