@@ -20,18 +20,10 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
@@ -59,17 +51,6 @@ public class GradientBoostedTreesSettings extends DecisionTreeSettings {
 
     private final SettingsModel[] m_models =  new SettingsModel[] {m_noOfIterations, m_lossFunction, m_learningRate};
 
-    private final DialogComponent m_noOfIterationsComponent =
-            new DialogComponentNumber(getNoOfIterationsModel(), "Number of iterations", 5, 5);
-
-    private final DialogComponent m_lossFunctionComponent = new DialogComponentStringSelection(
-        getLossFunctionModel(), "Loss function", EnumContainer.getNames(EnumContainer.LossFunction.values()));
-
-    private final DialogComponent m_learningRateComponent =
-            new DialogComponentNumber(getLearningRateModel(), "Learning rate", 0.01);
-
-    private final DialogComponent[] m_components =  new DialogComponent[] {m_noOfIterationsComponent,
-        m_lossFunctionComponent, m_learningRateComponent};
 
     /**
      * {@inheritDoc}
@@ -127,19 +108,7 @@ public class GradientBoostedTreesSettings extends DecisionTreeSettings {
         }
     }
 
-    /**
-     * @param settings the {@link NodeSettingsRO} to read from
-     * @param tableSpec input {@link DataTableSpec}
-     * @throws NotConfigurableException if the settings are invalid
-     */
-    @Override
-    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpec)
-            throws NotConfigurableException {
-        super.loadSettingsFrom(settings, tableSpec);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, new DataTableSpec[] {tableSpec});
-        }
-    }
+
 
     /**
      * @param settings the {@link NodeSettingsRO} to read from
@@ -182,46 +151,5 @@ public class GradientBoostedTreesSettings extends DecisionTreeSettings {
      */
     public SettingsModelDouble getLearningRateModel() {
         return m_learningRate;
-    }
-
-    /**
-     * @return the noOfIterationsComponent
-     */
-    public DialogComponent getNoOfIterationsComponent() {
-        return m_noOfIterationsComponent;
-    }
-
-    /**
-     * @return the lossFunctionComponent
-     */
-    public DialogComponent getLossFunctionComponent() {
-        return m_lossFunctionComponent;
-    }
-
-    /**
-     * @return the learningRateComponent
-     */
-    public DialogComponent getLearningRateComponent() {
-        return m_learningRateComponent;
-    }
-
-    /**
-     * @return the models
-     */
-    @Override
-    protected Collection<SettingsModel> getModels() {
-        final List<SettingsModel> modelList = Arrays.asList(m_models);
-        modelList.addAll(super.getModels());
-        return modelList;
-    }
-
-    /**
-     * @return the components
-     */
-    @Override
-    protected Collection<DialogComponent> getComponents() {
-        final List<DialogComponent> list = Arrays.asList(m_components);
-        list.addAll(super.getComponents());
-        return list;
     }
 }

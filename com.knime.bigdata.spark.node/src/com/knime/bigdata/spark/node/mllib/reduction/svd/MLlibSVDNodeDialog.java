@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
@@ -48,7 +49,10 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
             new DialogComponentNumber(MLlibSVDNodeModel.createReciprocalConditionModel(), "Reciprocal condition number: ", 1e-9, 15);
     private final DialogComponentBoolean m_computeU =
             new DialogComponentBoolean(MLlibSVDNodeModel.createComputeUModel(), "Compute U matrix");
+
     private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
+    private final MLlibNodeComponents<MLlibNodeSettings> m_components =
+            new MLlibNodeComponents<>(m_settings);
 
     /**
      *
@@ -73,7 +77,7 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        panel.add(m_settings.getFeatureColsComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getFeatureColsComponent().getComponentPanel(), gbc);
         addTab("Settings", panel);
     }
 
@@ -85,7 +89,7 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
         m_noOfSingularValues.saveSettingsTo(settings);
         m_reciprocalCondition.saveSettingsTo(settings);
         m_computeU.saveSettingsTo(settings);
-        m_settings.saveSettingsTo(settings);
+        m_components.saveSettingsTo(settings);
     }
 
     /**
@@ -97,6 +101,6 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
         m_noOfSingularValues.loadSettingsFrom(settings, tableSpecs);
         m_reciprocalCondition.loadSettingsFrom(settings, tableSpecs);
         m_computeU.loadSettingsFrom(settings, tableSpecs);
-        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
+        m_components.loadSettingsFrom(settings, tableSpecs[0]);
     }
 }

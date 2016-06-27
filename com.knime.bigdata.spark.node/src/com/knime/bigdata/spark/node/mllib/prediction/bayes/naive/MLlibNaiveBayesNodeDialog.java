@@ -35,6 +35,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
@@ -46,6 +47,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
             new DialogComponentNumber(MLlibNaiveBayesNodeModel.createLambdaModel(), "Lambda: ", 0.05);
 
     private final MLlibNodeSettings m_settings = new MLlibNodeSettings(true);
+    private final MLlibNodeComponents<MLlibNodeSettings> m_components = new MLlibNodeComponents<>(m_settings);
 
     /**
      *
@@ -60,7 +62,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
         panel.add(m_lambda.getComponentPanel(), gbc);
         gbc.gridx++;
         // class column selection
-        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
@@ -68,7 +70,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
+        final JPanel colsPanel = m_components.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
 
@@ -79,20 +81,21 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
-            final PortObjectSpec[] ports) throws NotConfigurableException {
-        final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        m_lambda.loadSettingsFrom(settings, tableSpecs);
-        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
+    protected void saveSettingsTo(final NodeSettingsWO settings)
+            throws InvalidSettingsException {
+        m_lambda.saveSettingsTo(settings);
+        m_components.saveSettingsTo(settings);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
-            throws InvalidSettingsException {
-        m_lambda.saveSettingsTo(settings);
-        m_settings.saveSettingsTo(settings);
+    protected void loadSettingsFrom(final NodeSettingsRO settings,
+            final PortObjectSpec[] ports) throws NotConfigurableException {
+        final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
+        m_lambda.loadSettingsFrom(settings, tableSpecs);
+        m_components.loadSettingsFrom(settings, tableSpecs[0]);
     }
+
 }

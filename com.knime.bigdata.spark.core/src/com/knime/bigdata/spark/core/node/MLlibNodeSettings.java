@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark.core.node;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +35,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
@@ -56,6 +51,7 @@ import com.knime.bigdata.spark.core.util.SparkUtil;
  * Settings class that contains commonly used settings required to learn a Spark MLlib model such as
  * class column and feature columns. It also provides helper method to be used in the NodeModel and NodeDialog.
  * @author Tobias Koetter, KNIME.com
+ * @author Ole Ostergaard, KNIME.com
  */
 public class MLlibNodeSettings {
     private final SettingsModelString m_classColModel = new SettingsModelString("classColumn", null);
@@ -63,14 +59,6 @@ public class MLlibNodeSettings {
     @SuppressWarnings("unchecked")
     private final SettingsModelColumnFilter2 m_featureColsModel =
             new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
-
-    @SuppressWarnings("unchecked")
-    private final DialogComponent m_classColComponent = new DialogComponentColumnNameSelection(m_classColModel,
-        "Class column ", 0, DoubleValue.class);
-
-    /*Access the feature columns component only via the getter method since it is generated only when necessary
-     * to prevent NullPointerExceptions in loadSettingsFrom method due to change listener and missing table spec.*/
-    private DialogComponent m_featureColsComponent;
 
     private boolean m_requiresClassCol;
 
@@ -109,23 +97,6 @@ public class MLlibNodeSettings {
      */
     public SettingsModelColumnFilter2 getFeatureColsModel() {
         return m_featureColsModel;
-    }
-
-    /**
-     * @return the classColComponent
-     */
-    public DialogComponent getClassColComponent() {
-        return m_classColComponent;
-    }
-
-    /**
-     * @return the colsComponent
-     */
-    public DialogComponent getFeatureColsComponent() {
-        if (m_featureColsComponent == null) {
-            m_featureColsComponent = new DialogComponentColumnFilter2(m_featureColsModel, 0);
-        }
-        return m_featureColsComponent;
     }
 
     /**
@@ -182,19 +153,6 @@ public class MLlibNodeSettings {
 
     /**
      * @param settings the {@link NodeSettingsRO} to read from
-     * @param tableSpecs input {@link DataTableSpec}
-     * @throws NotConfigurableException if the settings are invalid
-     */
-    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
-            throws NotConfigurableException {
-        if (m_requiresClassCol) {
-            m_classColComponent.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
-        }
-        getFeatureColsComponent().loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
-    }
-
-    /**
-     * @param settings the {@link NodeSettingsRO} to read from
      * @throws InvalidSettingsException if the settings are invalid
      */
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -202,30 +160,6 @@ public class MLlibNodeSettings {
             m_classColModel.loadSettingsFrom(settings);
         }
         m_featureColsModel.loadSettingsFrom(settings);
-    }
-
-    /**
-     * @return the models
-     */
-    protected Collection<SettingsModel> getModels() {
-        final Collection<SettingsModel> models = new LinkedList<>();
-        if (m_requiresClassCol) {
-            models.add(m_classColModel);
-        }
-        models.add(m_featureColsModel);
-        return models;
-    }
-
-    /**
-     * @return the components
-     */
-    protected Collection<DialogComponent> getComponents() {
-        final Collection<DialogComponent> models = new LinkedList<>();
-        if (m_requiresClassCol) {
-            models.add(m_classColComponent);
-        }
-        models.add(getFeatureColsComponent());
-        return models;
     }
 
     /**

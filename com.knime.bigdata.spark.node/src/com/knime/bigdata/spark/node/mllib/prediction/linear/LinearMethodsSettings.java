@@ -20,12 +20,6 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.linear;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -33,11 +27,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
@@ -46,7 +35,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
@@ -54,6 +42,7 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 /**
  *
  * @author Tobias Koetter, KNIME.com
+ * @author Ole Ostergaard, KNIME.com
  */
 public class LinearMethodsSettings extends MLlibNodeSettings {
 
@@ -104,54 +93,14 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
         m_optimizationMethodModel, m_regularizationModel, m_regularizerTypeModel, m_validateDataModel, m_addInterceptModel,
         m_useFeatureScalingModel, m_lossFunctionTypeModel, m_stepSizeModel, m_fractionModel};
 
-    private final DialogComponentNumber m_noOfCorrectionsComponent =
-            new DialogComponentNumber(m_noOfCorrectionsModel, "Number of corrections: ", 5, 5);
 
-    private final DialogComponentNumber m_toleranceComponent =
-            new DialogComponentNumber(m_toleranceModel, "Tolerance: ", 0.001, 5);
-
-    private final DialogComponentNumber m_noOfIterationsComponent = new DialogComponentNumber(m_noOfIterationsModel,
-        "Number of iterations: ", 10, 5);
-
-    private final DialogComponentStringSelection m_optimizationMethodComponent =
-            new DialogComponentStringSelection(m_optimizationMethodModel, "Optimization method",
-                OPTIMIZATION_METHODS);
-
-    private final DialogComponentNumber m_regularizationComponent =
-            new DialogComponentNumber(m_regularizationModel, "Regularization: ", 0.005, 5);
-
-    private final DialogComponentStringSelection m_updaterTypeComponent = new DialogComponentStringSelection(
-        m_regularizerTypeModel, "Regularizer", EnumContainer.getNames(LinearRegularizer.values()));
-
-    private final DialogComponentBoolean m_validateDataComponent =
-            new DialogComponentBoolean(m_validateDataModel, "Validate data");
-
-    private final DialogComponentBoolean m_addInterceptComponent =
-            new DialogComponentBoolean(m_addInterceptModel, "Add intercept");
-
-    private final DialogComponentBoolean m_useFeatureScalingComponent =
-            new DialogComponentBoolean(m_useFeatureScalingModel, "Use feature scaling");
-
-    private final DialogComponentStringSelection m_gradientTypeComponent = new DialogComponentStringSelection(
-        m_lossFunctionTypeModel, "Loss function", EnumContainer.getNames(LinearLossFunction.values()));
-
-    private final DialogComponentNumber m_stepSizeComponent =
-            new DialogComponentNumber(m_stepSizeModel, "Step size: ", 0.001, 5);
-
-    private final DialogComponentNumber m_fractionComponent =
-            new DialogComponentNumber(m_fractionModel, "Fraction: ", 0.001, 5);
-
-    private final DialogComponent[] m_components =  new DialogComponent[] {m_noOfCorrectionsComponent,
-        m_toleranceComponent, m_noOfIterationsComponent, m_optimizationMethodComponent, m_regularizationComponent,
-        m_updaterTypeComponent, m_validateDataComponent, m_addInterceptComponent, m_useFeatureScalingComponent,
-        m_gradientTypeComponent, m_stepSizeComponent, m_fractionComponent};
 
     /**
      * Constructor.
      */
     public LinearMethodsSettings() {
         super(true);
-        sanityChecks();
+
         final boolean useSGD = getUseSGD();
         m_stepSizeModel.setEnabled(useSGD);
         m_fractionModel.setEnabled(useSGD);
@@ -170,18 +119,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
         });
     }
 
-    private void sanityChecks() {
-        if (m_models.length != m_components.length) {
-            //sanity checks
-            throw new IllegalStateException("Unequal models and components");
-        }
-        Set<Object> o = new HashSet<>();
-        for (DialogComponent m : m_components) {
-            if (!o.add(m.getModel())) {
-                throw new IllegalStateException("Duplicate model usage");
-            }
-        }
-    }
+
 
     /**
      * @param settings the {@link NodeSettingsWO} to write to
@@ -241,20 +179,6 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
 
     /**
      * @param settings the {@link NodeSettingsRO} to read from
-     * @param tableSpecs input {@link DataTableSpec}
-     * @throws NotConfigurableException if the settings are invalid
-     */
-    @Override
-    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
-            throws NotConfigurableException {
-        super.loadSettingsFrom(settings, tableSpecs);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
-        }
-    }
-
-    /**
-     * @param settings the {@link NodeSettingsRO} to read from
      * @throws InvalidSettingsException if the settings are invalid
      */
     @Override
@@ -263,26 +187,6 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
         for (SettingsModel m : m_models) {
             m.loadSettingsFrom(settings);
         }
-    }
-
-    /**
-     * @return the models
-     */
-    @Override
-    protected Collection<SettingsModel> getModels() {
-        final List<SettingsModel> modelList = Arrays.asList(m_models);
-        modelList.addAll(super.getModels());
-        return modelList;
-    }
-
-    /**
-     * @return the components
-     */
-    @Override
-    protected Collection<DialogComponent> getComponents() {
-        final List<DialogComponent> list = Arrays.asList(m_components);
-        list.addAll(super.getComponents());
-        return list;
     }
 
     /**
@@ -385,13 +289,6 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     }
 
     /**
-     * @return the toleranceModel
-     */
-    public SettingsModelDouble getToleranceModel() {
-        return m_toleranceModel;
-    }
-
-    /**
      * @return the optimizationMethodModel
      */
     public SettingsModelString getOptimizationMethodModel() {
@@ -408,14 +305,14 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     /**
      * @return the regularizationModel
      */
-    public SettingsModelDouble getRegularizationModel() {
+    public SettingsModelDouble getToleranceModel() {
         return m_toleranceModel;
     }
 
     /**
      * @return the updaterTypeModel
      */
-    public SettingsModelString getUpdaterTypeModel() {
+    public SettingsModelString getRegularizerTypeModel() {
         return m_regularizerTypeModel;
     }
 
@@ -443,7 +340,7 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     /**
      * @return the gradientTypeModel
      */
-    public SettingsModelString getGradientTypeModel() {
+    public SettingsModelString getLossFunctionTypeModel() {
         return m_lossFunctionTypeModel;
     }
 
@@ -462,87 +359,16 @@ public class LinearMethodsSettings extends MLlibNodeSettings {
     }
 
     /**
-     * @return the noOfCorrectionsComponent
+     * @return the regularizationModel
      */
-    public DialogComponent getNoOfCorrectionsComponent() {
-        return m_noOfCorrectionsComponent;
+    public SettingsModelDouble getRegularizationModel() {
+        return m_regularizationModel;
     }
 
     /**
-     * @return the toleranceComponent
+     * @return The optimization methods.
      */
-    public DialogComponent getToleranceComponent() {
-        return m_toleranceComponent;
+    public String[] getOptimizationMethods() {
+        return OPTIMIZATION_METHODS;
     }
-
-    /**
-     * @return the optimizationMethodComponent
-     */
-    public DialogComponent getOptimizationMethodComponent() {
-        return m_optimizationMethodComponent;
-    }
-
-    /**
-     * @return the noOfIterationsComponent
-     */
-    public DialogComponent getNoOfIterationsComponent() {
-        return m_noOfIterationsComponent;
-    }
-
-    /**
-     * @return the regularizationComponent
-     */
-    public DialogComponent getRegularizationComponent() {
-        return m_regularizationComponent;
-    }
-
-    /**
-     * @return the updaterTypeComponent
-     */
-    public DialogComponent getUpdaterTypeComponent() {
-        return m_updaterTypeComponent;
-    }
-
-    /**
-     * @return the validateDataComponent
-     */
-    public DialogComponent getValidateDataComponent() {
-        return m_validateDataComponent;
-    }
-
-    /**
-     * @return the addInterceptComponent
-     */
-    public DialogComponent getAddInterceptComponent() {
-        return m_addInterceptComponent;
-    }
-
-    /**
-     * @return the useFeatureScalingComponent
-     */
-    public DialogComponent getUseFeatureScalingComponent() {
-        return m_useFeatureScalingComponent;
-    }
-
-    /**
-     * @return the gradientTypeComponent
-     */
-    public DialogComponent getGradientTypeComponent() {
-        return m_gradientTypeComponent;
-    }
-
-    /**
-     * @return the stepSizeComponent
-     */
-    public DialogComponent getStepSizeComponent() {
-        return m_stepSizeComponent;
-    }
-
-    /**
-     * @return the fractionComponent
-     */
-    public DialogComponent getFractionComponent() {
-        return m_fractionComponent;
-    }
-
 }
