@@ -44,6 +44,7 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 public class LinearMethodsNodeDialog extends NodeDialogPane {
 
     private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
+    private final LinearMethodsComponents m_components = new LinearMethodsComponents(m_settings);
 
     /**
      * @param supportsLBFGS
@@ -65,14 +66,14 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.weightx = 1;
-        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
+        final JPanel colsPanel = m_components.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
 
@@ -88,29 +89,29 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.EAST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(m_settings.getUpdaterTypeComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getUpdaterTypeComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getRegularizationComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getRegularizationComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getNoOfIterationsComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getNoOfIterationsComponent().getComponentPanel(), gbc);
 
         if (supportsLBFGS) {
             gbc.gridy++;
             gbc.gridx = 0;
-            panel.add(m_settings.getOptimizationMethodComponent().getComponentPanel(), gbc);
+            panel.add(m_components.getOptimizationMethodComponent().getComponentPanel(), gbc);
             gbc.gridx++;
-            panel.add(m_settings.getNoOfCorrectionsComponent().getComponentPanel(), gbc);
+            panel.add(m_components.getNoOfCorrectionsComponent().getComponentPanel(), gbc);
             gbc.gridx++;
-            panel.add(m_settings.getToleranceComponent().getComponentPanel(), gbc);
+            panel.add(m_components.getToleranceComponent().getComponentPanel(), gbc);
         }
 
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(m_settings.getGradientTypeComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getGradientTypeComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getStepSizeComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getStepSizeComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getFractionComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getFractionComponent().getComponentPanel(), gbc);
         return panel;
     }
 
@@ -124,11 +125,11 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridy++;
-        panel.add(m_settings.getUseFeatureScalingComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getUseFeatureScalingComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getAddInterceptComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getAddInterceptComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getValidateDataComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getValidateDataComponent().getComponentPanel(), gbc);
         return panel;
     }
 
@@ -139,7 +140,7 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] specs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        m_settings.loadSettingsFrom(settings, specs[0]);
+        m_components.loadSettingsFrom(settings, specs[0]);
     }
 
     /**
@@ -148,6 +149,6 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        m_settings.saveSettingsTo(settings);
+        m_components.saveSettingsTo(settings);
     }
 }

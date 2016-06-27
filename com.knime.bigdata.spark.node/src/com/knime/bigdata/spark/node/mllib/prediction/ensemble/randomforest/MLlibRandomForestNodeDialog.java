@@ -45,8 +45,9 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
  */
 public class MLlibRandomForestNodeDialog extends NodeDialogPane {
 
-    private final RandomForestSettings m_settings = new RandomForestSettings();
 
+    private final RandomForestSettings m_settings = new RandomForestSettings();
+    private final RandomForestComponents m_components = new RandomForestComponents(m_settings);
     /**
      *
      */
@@ -57,19 +58,19 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.EAST;
         gbc.gridy = 0;
         gbc.gridx = 0;
-        panel.add(m_settings.getNoOfTreesComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getNoOfTreesComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getMaxDepthComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getMaxDepthComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
-        panel.add(m_settings.getFeatureSubsetStrategyComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getFeatureSubsetStrategyComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getIsClassificationComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getIsClassificationComponent().getComponentPanel(), gbc);
         gbc.gridx++;
-        panel.add(m_settings.getQualityMeasureComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getQualityMeasureComponent().getComponentPanel(), gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
@@ -77,11 +78,11 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         seedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                m_settings.nextSeed();
+                m_components.getSettings().nextSeed();
             }
         });
         final JPanel seedPanel = new JPanel();
-        seedPanel.add(m_settings.getSeedComponent().getComponentPanel());
+        seedPanel.add(m_components.getSeedComponent().getComponentPanel());
         seedPanel.add(seedButton);
         panel.add(seedPanel, gbc);
         gbc.gridx++;
@@ -90,7 +91,7 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridwidth = 2;
         // class column selection
-        panel.add(m_settings.getClassColComponent().getComponentPanel(), gbc);
+        panel.add(m_components.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridwidth=3;
         gbc.gridx = 0;
@@ -98,7 +99,7 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        final JPanel colsPanel = m_settings.getFeatureColsComponent().getComponentPanel();
+        final JPanel colsPanel = m_components.getFeatureColsComponent().getComponentPanel();
         colsPanel.setBorder(BorderFactory.createTitledBorder(" Feature Columns "));
         panel.add(colsPanel, gbc);
 
@@ -112,7 +113,7 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
-        m_settings.loadSettingsFrom(settings, tableSpecs[0]);
+        m_components.loadSettingsFrom(settings, tableSpecs[0]);
     }
 
     /**
@@ -121,6 +122,6 @@ public class MLlibRandomForestNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
-        m_settings.saveSettingsTo(settings);
+        m_components.saveSettingsTo(settings);
     }
 }

@@ -20,10 +20,6 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,11 +27,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponent;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -49,6 +40,7 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 /**
  *
  * @author Tobias Koetter, KNIME.com
+ * @author Ole Ostergaard, KNIME.com
  */
 public class DecisionTreeSettings extends MLlibNodeSettings {
 
@@ -61,18 +53,6 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
     private final SettingsModelBoolean m_isClassificationModel = new SettingsModelBoolean("isClassification", true);
     private final SettingsModel[] m_models =
             new SettingsModel[] {m_maxDepthModel, m_maxNoOfBinsModel, m_qualityMeasure, m_isClassificationModel};
-
-    private final DialogComponentNumber m_maxDepthComponent =
-            new DialogComponentNumber(getMaxDepthModel(), "Max depth: ", 5, 5);
-    private final DialogComponentNumber m_maxNoOfBinsComponent = new DialogComponentNumber(getMaxNoOfBinsModel(),
-        "Max number of bins: ", 5, 5);
-    private final DialogComponentStringSelection m_qualityMeasureComponent = new DialogComponentStringSelection(
-        getQualityMeasureModel(), "Quality measure: ",
-        EnumContainer.getNames(InformationGain.gini, InformationGain.entropy));
-    private final DialogComponent m_isClassificationComponent = new DialogComponentBoolean(getIsClassificationModel(),
-            "Is classification");
-    private final DialogComponent[] m_components =  new DialogComponent[] {m_maxDepthComponent,
-        m_maxNoOfBinsComponent, m_qualityMeasureComponent, m_isClassificationComponent};
 
     /**
      * Constructor
@@ -143,20 +123,6 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
 
     /**
      * @param settings the {@link NodeSettingsRO} to read from
-     * @param tableSpecs input {@link DataTableSpec}
-     * @throws NotConfigurableException if the settings are invalid
-     */
-    @Override
-    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
-            throws NotConfigurableException {
-        super.loadSettingsFrom(settings, tableSpecs);
-        for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
-        }
-    }
-
-    /**
-     * @param settings the {@link NodeSettingsRO} to read from
      * @throws InvalidSettingsException if the settings are invalid
      */
     @Override
@@ -188,26 +154,6 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
         return m_qualityMeasure;
     }
 
-    /**
-     * @return the maxDepthComponent
-     */
-    public DialogComponentNumber getMaxDepthComponent() {
-        return m_maxDepthComponent;
-    }
-
-    /**
-     * @return the maxNoOfBinsComponent
-     */
-    public DialogComponentNumber getMaxNoOfBinsComponent() {
-        return m_maxNoOfBinsComponent;
-    }
-
-    /**
-     * @return the qualityMeasureComponent
-     */
-    public DialogComponentStringSelection getQualityMeasureComponent() {
-        return m_qualityMeasureComponent;
-    }
 
     /**
      * @return the isClassification
@@ -221,32 +167,5 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
      */
     public SettingsModelBoolean getIsClassificationModel() {
         return m_isClassificationModel;
-    }
-
-    /**
-     * @return the isClassificationComponent
-     */
-    public DialogComponent getIsClassificationComponent() {
-        return m_isClassificationComponent;
-    }
-
-    /**
-     * @return the models
-     */
-    @Override
-    protected Collection<SettingsModel> getModels() {
-        final List<SettingsModel> modelList = Arrays.asList(m_models);
-        modelList.addAll(super.getModels());
-        return modelList;
-    }
-
-    /**
-     * @return the components
-     */
-    @Override
-    protected Collection<DialogComponent> getComponents() {
-        final List<DialogComponent> list = Arrays.asList(m_components);
-        list.addAll(super.getComponents());
-        return list;
     }
 }
