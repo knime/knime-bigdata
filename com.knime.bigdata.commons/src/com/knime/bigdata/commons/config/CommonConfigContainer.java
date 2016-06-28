@@ -62,7 +62,7 @@ public class CommonConfigContainer {
      */
     public InputStream getCoreSiteConfig() {
         try {
-            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_CORE_SITE_CONF));
+            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_CORE_SITE_FILE));
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Can't find custom core-site.xml file: " + e);
         }
@@ -72,7 +72,7 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a core-site.xml is available
      */
     public boolean hasCoreSiteConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_CORE_SITE_CONF);
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_CORE_SITE_FILE);
     }
 
     /**
@@ -80,7 +80,7 @@ public class CommonConfigContainer {
      */
     public InputStream getHdfsSiteConfig() {
         try {
-            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_HDFS_SITE_CONF));
+            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE));
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Can't find custom hdfs-site.xml file: " + e);
         }
@@ -90,7 +90,39 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a hdfs-site.xml is available
      */
     public boolean hasHdfsSiteConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_HDFS_SITE_CONF);
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE);
+    }
+
+    /**
+     * @return custom kerberos user as String or <code>null</code> if the default should be used
+     */
+    public String getKerberosUserConfig() {
+        return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER);
+    }
+
+    /**
+     * @return <code>true</code> if a kerberos keytab file is available
+     */
+    public boolean hasKerberosUserConfig() {
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_KERBEROS_USER);
+    }
+
+    /**
+     * @return an {@link InputStream} with the custom kerberos keytab or <code>null</code> if the default should be used
+     */
+    public InputStream getKerberosKeytabConfig() {
+        try {
+            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Can't find custom kerberos keytab file: " + e);
+        }
+    }
+
+    /**
+     * @return <code>true</code> if a kerberos keytab file is available
+     */
+    public boolean hasKerberosKeytabConfig() {
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE);
     }
 
     /**
