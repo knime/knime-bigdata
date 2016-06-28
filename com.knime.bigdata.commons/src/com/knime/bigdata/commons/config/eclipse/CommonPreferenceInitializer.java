@@ -52,10 +52,13 @@ import com.knime.bigdata.commons.CommonsPlugin;
 /**
  * @author Tobias Koetter, KNIME.com
  */
-public class HadoopPreferenceInitializer extends AbstractPreferenceInitializer {
+public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
 
-    /** Preference key for the hadoop-site.xml. */
-    public static final String PREF_HADOOP_CONF = "com.knime.bigdata.config.hadoop";
+    /** Preference key for the core-site.xml. */
+    public static final String PREF_CORE_SITE_CONF = "com.knime.bigdata.config.coreSiteConf";
+
+    /** Preference key for the hdfs-site.xml. */
+    public static final String PREF_HDFS_SITE_CONF = "com.knime.bigdata.config.hdfsSiteConf";
 
     @Override
     public void initializeDefaultPreferences() {
@@ -64,6 +67,7 @@ public class HadoopPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     private void loadDefaultValues(final IPreferenceStore store) {
-        store.setDefault(PREF_HADOOP_CONF, null);
+        store.setDefault(PREF_CORE_SITE_CONF, null);
+        store.setDefault(PREF_HDFS_SITE_CONF, null);
     }
 }

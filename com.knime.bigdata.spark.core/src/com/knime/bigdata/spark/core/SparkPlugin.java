@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.bigdata.commons.config.HadoopConfigContainer;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseFeatures;
 import com.knime.licenses.LicenseUtil;
@@ -59,7 +59,7 @@ public class SparkPlugin extends AbstractUIPlugin {
      */
     public SparkPlugin() {
         plugin = this;
-        HadoopConfigContainer.getInstance().sparkSupported();
+        CommonConfigContainer.getInstance().sparkSupported();
     }
 
     /**

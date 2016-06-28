@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.bigdata.commons.config.HadoopConfigContainer;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 
 
 /**
@@ -46,7 +46,7 @@ public class HivePlugin extends AbstractUIPlugin {
      */
     public HivePlugin() {
         plugin = this;
-        HadoopConfigContainer.getInstance().hiveSupported();
+        CommonConfigContainer.getInstance().hiveSupported();
     }
 
     /**

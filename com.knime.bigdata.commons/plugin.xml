@@ -5,8 +5,8 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.knime.workbench.ui.preferences"
-            class="com.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
-            id="com.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
+            class="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            id="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
             name="KNIME Big Data Extensions">
       </page>
    </extension>

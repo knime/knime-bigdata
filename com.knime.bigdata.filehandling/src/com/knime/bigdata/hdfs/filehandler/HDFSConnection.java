@@ -44,7 +44,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.core.util.MutableInteger;
 
-import com.knime.bigdata.commons.config.HadoopConfigContainer;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import com.knime.licenses.LicenseException;
 
@@ -88,9 +88,13 @@ public class HDFSConnection extends Connection {
             //or simple which is the default
             m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.SIMPLE.name());
         }
-        if (HadoopConfigContainer.getInstance().hasHadoopConfig()) {
-            //use the user defined hadoop-site.xml file
-            m_conf.addResource(HadoopConfigContainer.getInstance().getHadoopConfig());
+
+        CommonConfigContainer configContainer = CommonConfigContainer.getInstance();
+        if (configContainer.hasCoreSiteConfig()) {
+            m_conf.addResource(configContainer.getCoreSiteConfig());
+        }
+        if (configContainer.hasHdfsSiteConfig()) {
+            m_conf.addResource(configContainer.getHdfsSiteConfig());
         }
     }
 
