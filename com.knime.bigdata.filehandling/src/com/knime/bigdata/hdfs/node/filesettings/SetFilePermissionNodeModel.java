@@ -94,8 +94,9 @@ public class SetFilePermissionNodeModel extends NodeModel {
         if (connInfo == null) {
             throw new InvalidSettingsException("No connection information available");
         }
-        if (!HDFSRemoteFileHandler.PROTOCOL.getName().equals(connInfo.getProtocol())) {
-            throw new InvalidSettingsException("HDFS connection required");
+        if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol()) 
+        		&& !HDFSRemoteFileHandler.WEBHDFS_PROTOCOL.getName().equals(connInfo.getProtocol())) {
+            throw new InvalidSettingsException("HDFS/webHDFS connection required");
         }
         final DataTableSpec tableSpec = (DataTableSpec) inSpecs[1];
         if (m_col.getStringValue() == null) {
