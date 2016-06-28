@@ -63,14 +63,14 @@ import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-public class HDFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
+public class WebHDFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
     public ConnectionInformationNodeModel createNodeModel() {
-        return new HDFSConnectionInformationNodeModel(HDFSRemoteFileHandler.HDFS_PROTOCOL);
+        return new HDFSConnectionInformationNodeModel(HDFSRemoteFileHandler.WEBHDFS_PROTOCOL);
     }
 
     /**
@@ -103,7 +103,7 @@ public class HDFSConnectionInformationNodeFactory extends NodeFactory<Connection
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new ConnectionInformationNodeDialog(HDFSRemoteFileHandler.HDFS_PROTOCOL);
+        return new ConnectionInformationNodeDialog(HDFSRemoteFileHandler.WEBHDFS_PROTOCOL);
     }
 
 }

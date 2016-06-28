@@ -81,7 +81,7 @@ public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
      */
     @Override
     public String getType() {
-        return HDFSRemoteFileHandler.PROTOCOL.getName();
+        return super.getConnectionInformation().getProtocol();
     }
 
     /**

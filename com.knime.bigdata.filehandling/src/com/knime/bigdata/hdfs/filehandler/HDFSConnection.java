@@ -25,6 +25,7 @@ package com.knime.bigdata.hdfs.filehandler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,11 +38,14 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.core.util.MutableInteger;
 
+import com.knime.bigdata.commons.config.HadoopConfigContainer;
+import com.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import com.knime.licenses.LicenseException;
 
 /**
@@ -71,6 +75,23 @@ public class HDFSConnection extends Connection {
         m_conf = new Configuration();
         m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, createDefaultName(connectionInformation));
         m_conf.setBoolean(CommonConfigurationKeysPublic.FS_AUTOMATIC_CLOSE_KEY, true);
+        if (m_connectionInformation.useKerberos()) {
+            //use Kerberos based authentication
+            m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
+            //http://stackoverflow.com/questions/37050626/java-failed-to-specify-servers-kerberos-principal-name
+            //For Hadoop version less than 2.6.2 the default pattern property is not available in hdfs-site.xml file
+            //so we need to specify pattern property manually
+            m_conf.set("dfs.namenode.kerberos.principal.pattern", "*");
+//        System.setProperty("java.security.krb5.realm", "EXAMPLE.COM");
+//        System.setProperty("java.security.krb5.kdc", "sandbox.example.com");
+        } else {
+            //or simple which is the default
+            m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.SIMPLE.name());
+        }
+        if (HadoopConfigContainer.getInstance().hasHadoopConfig()) {
+            //use the user defined hadoop-site.xml file
+            m_conf.addResource(HadoopConfigContainer.getInstance().getHadoopConfig());
+        }
     }
 
     private static String createDefaultName(final ConnectionInformation conInfo) {
@@ -169,6 +190,7 @@ public class HDFSConnection extends Connection {
      */
     public synchronized void copyFromLocalFile(final boolean delSrc, final boolean overwrite, final URI src,
         final URI dst) throws IOException {
+        @SuppressWarnings("resource")
         final FileSystem fs = getFileSystem();
         fs.copyFromLocalFile(delSrc, overwrite, new Path(src), getHDFSPath4URI(dst));
     }
@@ -188,6 +210,7 @@ public class HDFSConnection extends Connection {
      */
     public synchronized void copyToLocalFile(final boolean delSrc, final URI src, final URI dst,
         final boolean useRawLocalFileSystem) throws IOException {
+        @SuppressWarnings("resource")
         final FileSystem fs = getFileSystem();
         fs.copyToLocalFile(delSrc, getHDFSPath4URI(src), new Path(dst), useRawLocalFileSystem);
     }
@@ -201,6 +224,7 @@ public class HDFSConnection extends Connection {
     * @return  true if delete is successful else false.
     * @throws IOException
     */
+    @SuppressWarnings("resource")
     public synchronized boolean delete(final URI f, final boolean recursive) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.delete(getHDFSPath4URI(f), recursive);
@@ -213,22 +237,27 @@ public class HDFSConnection extends Connection {
     public synchronized void open() throws IOException {
         if (m_fs == null) {
             synchronized (CONNECTION_COUNT) {
-                //ensure that the current login user is the right
                 final String userName = m_connectionInformation.getUser();
-                final UserGroupInformation user = UserGroupInformation.getLoginUser();
-                if (user == null || !user.getUserName().equals(userName)) {
-                    UserGroupInformation newUser = UserGroupInformation.createRemoteUser(userName);
-                    UserGroupInformation.setLoginUser(newUser);
+                try {
+                    final UserGroupInformation user = UserGroupUtil.getUser(m_conf, userName);
+                    m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
+                        @Override
+                        public FileSystem run() throws Exception {
+                        //the hdfs connections are cached in the FileSystem class based on the uri (which is always
+                        //the default one in our case) and the user name which we therefore use as the key for the MAP
+                            final FileSystem fs = FileSystem.get(m_conf);
+                            final MutableInteger count = CONNECTION_COUNT.get(userName);
+                            if (count == null) {
+                                CONNECTION_COUNT.put(userName, new MutableInteger(1));
+                            } else {
+                                count.inc();
+                            }
+                            return fs;
+                        }
+                    });
+                } catch (Exception e) {
+                    throw new IOException(e);
                 }
-                //the hdfs connections are cached in the FileSystem class based on the uri (which is always the default
-                //one in our case) and the user name which we therefore use as the key for the MAP
-                final MutableInteger count = CONNECTION_COUNT.get(userName);
-                if (count == null) {
-                    CONNECTION_COUNT.put(userName, new MutableInteger(1));
-                } else {
-                    count.inc();
-                }
-                m_fs = FileSystem.get(m_conf);
             }
         }
     }
@@ -267,6 +296,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the directory was successfully created
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized boolean mkDir(final URI dir) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.mkdirs(getHDFSPath4URI(dir));
@@ -277,6 +307,7 @@ public class HDFSConnection extends Connection {
      * @return {@link FSDataInputStream} to read from
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized FSDataInputStream open(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.open(getHDFSPath4URI(uri));
@@ -290,6 +321,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link FSDataOutputStream} to write to
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized FSDataOutputStream create(final URI f, final boolean overwrite)
         throws IOException {
         final FileSystem fs = getFileSystem();
@@ -301,6 +333,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the path exists
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized boolean exists(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.exists(getHDFSPath4URI(uri));
@@ -311,6 +344,7 @@ public class HDFSConnection extends Connection {
      * @return <code>true</code> if the {@link URI} belongs to a directory
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized boolean isDirectory(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         return fs.isDirectory(getHDFSPath4URI(uri));
@@ -321,6 +355,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link FileStatus} for the given {@link URI}
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized FileStatus getFileStatus(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         final FileStatus fileStatus = fs.getFileStatus(getHDFSPath4URI(uri));
@@ -335,6 +370,7 @@ public class HDFSConnection extends Connection {
      * @throws IOException if an exception occurred
      * @throws FileNotFoundException
      */
+    @SuppressWarnings("resource")
     public synchronized FileStatus[] listFiles(final URI uri) throws FileNotFoundException, IOException {
         final FileSystem fs = getFileSystem();
         return fs.listStatus(getHDFSPath4URI(uri));
@@ -345,6 +381,7 @@ public class HDFSConnection extends Connection {
      * @return the {@link ContentSummary} of the given URI
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized ContentSummary getContentSummary(final URI uri) throws IOException {
         final FileSystem fs = getFileSystem();
         //returns the size of the file or the length of all files within the directory
@@ -357,6 +394,7 @@ public class HDFSConnection extends Connection {
      * @param unixSymbolicPermission  a Unix symbolic permission string e.g. "-rw-rw-rw-"
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public synchronized void setPermission(final URI uri, final String unixSymbolicPermission) throws IOException {
         final FileSystem fs = getFileSystem();
         fs.setPermission(getHDFSPath4URI(uri), FsPermission.valueOf(unixSymbolicPermission));

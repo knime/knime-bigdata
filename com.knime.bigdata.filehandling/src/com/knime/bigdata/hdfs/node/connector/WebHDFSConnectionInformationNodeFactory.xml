@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
-    icon="./hdfsconnection16x16.png" type="Source">
-    <name>HDFS Connection</name>
+    icon="./webhdfsconnection16x16.png" type="Source">
+    <name>webHDFS Connection</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
@@ -33,7 +33,7 @@
             Use existing Kerberos ticket for authentication.
         </option>
         <option name="Workflow credentials">
-            Use workflow credentials to determine user.
+           Use workflow credentials to determine user.
         </option>
         <option name="User">
             Name of the user. Optional for Kerberos authentication.
@@ -44,8 +44,8 @@
     </fullDescription>
 
     <ports>
-        <outPort name="HDFS Connection information port" index="0">
-            Port object containing the HDFS connection information.
+        <outPort name="WebHDFS Connection information port" index="0">
+            Port object containing the WebHDFS connection information.
         </outPort>
     </ports>
 </knimeNode>
