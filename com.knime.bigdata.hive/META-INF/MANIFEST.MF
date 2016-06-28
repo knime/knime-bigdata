@@ -10,6 +10,9 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
  com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
- com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)"
+ com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
+ org.eclipse.ui.workbench,
+ com.knime.bigdata.commons;bundle-version="3.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.knime.bigdata.hive.HivePlugin
