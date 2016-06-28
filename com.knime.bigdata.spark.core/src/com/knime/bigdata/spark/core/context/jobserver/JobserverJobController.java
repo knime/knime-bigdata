@@ -62,10 +62,13 @@ class JobserverJobController implements JobController {
 
     private final String m_jobserverJobClass;
 
-    JobserverJobController(final SparkContextID contextId, final SparkContextConfig contextConfig,
+    private final String m_jobserverAppName;
+
+    JobserverJobController(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName,
         final RestClient restClient, final String jobserverJobClass) {
         m_contextId = contextId;
         m_contextConfig = contextConfig;
+        m_jobserverAppName = jobserverAppName;
         m_restClient = restClient;
         m_jobserverJobClass = jobserverJobClass;
     }
@@ -207,7 +210,7 @@ class JobserverJobController implements JobController {
         final String jobClassName = job.getJobClass().getCanonicalName();
 
         LOGGER.debug("Submitting Spark job: " + jobClassName);
-        JsonObject jsonResponse = new StartJobRequest(m_contextId, m_contextConfig, m_restClient, m_jobserverJobClass,
+        JsonObject jsonResponse = new StartJobRequest(m_contextId, m_contextConfig, m_jobserverAppName, m_restClient, m_jobserverJobClass,
             jobClassName, job.getInput(), inputFilesOnServer).send();
 
         return jsonResponse.getJsonObject("result").getString("jobId");

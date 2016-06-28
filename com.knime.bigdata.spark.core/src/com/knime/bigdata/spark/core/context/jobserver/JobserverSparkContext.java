@@ -31,6 +31,7 @@ import javax.json.JsonObject;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.context.JobController;
@@ -78,6 +79,8 @@ public class JobserverSparkContext extends SparkContext {
     private SparkContextStatus m_status;
 
     private JobJar m_jobJar;
+
+    private String m_jobserverAppName;
 
     private JobserverJobController m_jobController;
 
@@ -247,10 +250,20 @@ public class JobserverSparkContext extends SparkContext {
         if (m_jobJar == null) {
             m_jobJar = SparkJarRegistry.getJobJar(m_config.getSparkVersion());
             if (m_jobJar == null) {
-                throw new KNIMESparkException(String.format("No Spark jobs for your Spark version %s found.",
+                throw new KNIMESparkException(String.format("No Spark jobs for Spark version %s found.",
                     m_config.getSparkVersion().getLabel()));
             }
+
+            m_jobserverAppName = createJobserverAppname(m_config.getSparkVersion());
         }
+    }
+
+    /**
+     * @return the "app name" for the jobserver, which is an identifier for the uploaded job jar, that has to be specified with each job.
+     */
+    private String createJobserverAppname(final SparkVersion sparkVersion) {
+        final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
+        return String.format("knimeJobs_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1), m_config.getSparkVersion().getLabel());
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
@@ -317,7 +330,7 @@ public class JobserverSparkContext extends SparkContext {
         if (m_jobController == null) {
             ensureRestClient();
             ensureJobJar();
-            m_jobController = new JobserverJobController(m_contextID, m_config, m_restClient,
+            m_jobController = new JobserverJobController(m_contextID, m_config, m_jobserverAppName, m_restClient,
                 m_jobJar.getDescriptor().getJobserverJobClass());
         }
 
@@ -393,7 +406,7 @@ public class JobserverSparkContext extends SparkContext {
         LOGGER.debug("Checking if job jar is uploaded.");
         final JsonObject jars = new GetJarsRequest(m_contextID, m_config, m_restClient).send();
 
-        if (jars.containsKey(JobserverConstants.APP_NAME)) {
+        if (jars.containsKey(m_jobserverAppName)) {
             LOGGER.debug("Job jar is uploaded");
             return true;
         } else {
@@ -406,7 +419,7 @@ public class JobserverSparkContext extends SparkContext {
         LOGGER.debug(String.format("Uploading job jar: %s", m_jobJar.getJarFile().getAbsolutePath()));
         // uploads or overwrites any existing jar file uploaded from this workspace
         new UploadFileRequest(m_contextID, m_config, m_restClient, m_jobJar.getJarFile(),
-            JobserverConstants.buildJarPath()).send();
+            JobserverConstants.buildJarPath(m_jobserverAppName)).send();
     }
 
     private void createRemoteSparkContext() throws KNIMESparkException {
