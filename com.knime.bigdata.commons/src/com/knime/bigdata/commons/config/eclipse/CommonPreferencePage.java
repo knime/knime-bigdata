@@ -47,6 +47,7 @@ package com.knime.bigdata.commons.config.eclipse;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -73,18 +74,28 @@ public class CommonPreferencePage extends FieldEditorPreferencePage implements I
 
     @Override
     protected void createFieldEditors() {
+        // HDFS settings
         if (CommonConfigContainer.getInstance().isHdfsSupported()) {
             FileFieldEditor coreSiteConf = new FileFieldEditor(
-                CommonPreferenceInitializer.PREF_CORE_SITE_CONF,
+                CommonPreferenceInitializer.PREF_CORE_SITE_FILE,
                 "Custom core-site.xml file:", true, getFieldEditorParent());
             coreSiteConf.setFileExtensions(new String[] { "*.xml" });
             addField(coreSiteConf);
 
             FileFieldEditor hdfsSiteConf = new FileFieldEditor(
-                CommonPreferenceInitializer.PREF_HDFS_SITE_CONF,
+                CommonPreferenceInitializer.PREF_HDFS_SITE_FILE,
                 "Custom hdfs-site.xml file:", true, getFieldEditorParent());
             hdfsSiteConf.setFileExtensions(new String[] { "*.xml" });
             addField(hdfsSiteConf);
         }
+
+        // Kerberos settings
+        StringFieldEditor kerberosUser = new StringFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_USER, "Custom kerberos user:", getFieldEditorParent());
+        addField(kerberosUser);
+
+        FileFieldEditor kerberosKeytabFile = new FileFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE, "Custom Kerberos keytab:", getFieldEditorParent());
+        addField(kerberosKeytabFile);
     }
 }

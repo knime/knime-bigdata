@@ -55,10 +55,16 @@ import com.knime.bigdata.commons.CommonsPlugin;
 public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
 
     /** Preference key for the core-site.xml. */
-    public static final String PREF_CORE_SITE_CONF = "com.knime.bigdata.config.coreSiteConf";
+    public static final String PREF_CORE_SITE_FILE = "com.knime.bigdata.config.core-site.file";
 
     /** Preference key for the hdfs-site.xml. */
-    public static final String PREF_HDFS_SITE_CONF = "com.knime.bigdata.config.hdfsSiteConf";
+    public static final String PREF_HDFS_SITE_FILE = "com.knime.bigdata.config.hdfs-site.file";
+
+    /** Preference key for custom kerberos user. */
+    public static final String PREF_KERBEROS_USER = "com.knime.bigdata.config.kerberos.user";
+
+    /** Preference key for custom kerberos keytab file. */
+    public static final String PREF_KERBEROS_KEYTAB_FILE = "com.knime.bigdata.config.kerberos.keytab.file";
 
     @Override
     public void initializeDefaultPreferences() {
@@ -67,7 +73,9 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     private void loadDefaultValues(final IPreferenceStore store) {
-        store.setDefault(PREF_CORE_SITE_CONF, null);
-        store.setDefault(PREF_HDFS_SITE_CONF, null);
+        store.setDefault(PREF_CORE_SITE_FILE, null);
+        store.setDefault(PREF_HDFS_SITE_FILE, null);
+        store.setDefault(PREF_KERBEROS_USER, null);
+        store.setDefault(PREF_KERBEROS_KEYTAB_FILE, null);
     }
 }
