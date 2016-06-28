@@ -167,7 +167,7 @@ class HiveLoaderNodeModel extends NodeModel {
                 && dbSettings.getUserName(cp) != null && !dbSettings.getUserName(cp).isEmpty()
                 && !connInfo.getUser().equals(dbSettings.getUserName(cp))) {
 
-            setWarningMessage("Different HDSF and Hive user found, this might result in permission problems.");
+            setWarningMessage("Different HDFS and Hive user found, this might result in permission problems.");
         }
     }
 
