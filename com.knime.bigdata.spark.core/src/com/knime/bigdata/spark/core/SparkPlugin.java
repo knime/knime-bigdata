@@ -31,11 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.bigdata.spark.core.jar.SparkJarRegistry;
-import com.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
-import com.knime.bigdata.spark.core.node.SparkNodeFactoryRegistry;
-import com.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
+import com.knime.bigdata.commons.config.HadoopConfigContainer;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseFeatures;
 import com.knime.licenses.LicenseUtil;
@@ -63,6 +59,7 @@ public class SparkPlugin extends AbstractUIPlugin {
      */
     public SparkPlugin() {
         plugin = this;
+        HadoopConfigContainer.getInstance().sparkSupported();
     }
 
     /**
@@ -76,14 +73,6 @@ public class SparkPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
-
-        // FIXME
-        //TK_TODO: Test the extension point registration
-        IntermediateToSparkConverterRegistry.getInstance();
-        SparkJarRegistry.getInstance();
-        JobRunFactoryRegistry.getInstance();
-        ModelHelperRegistry.getInstance();
-        SparkNodeFactoryRegistry.getInstance();
     }
 
     /**
