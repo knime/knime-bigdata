@@ -70,6 +70,8 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         final List<String> warnings = new ArrayList<>();
         final SparkContextID newContextID = m_settings.getSparkContextID();
 
+        m_settings.validateSettings();
+
         if (newContextID.equals(SparkContextManager.getDefaultSparkContext().getID())) {
             warnings.add("Context is the same as in the Spark preferences (see File > Preferences > KNIME > Spark)");
         }

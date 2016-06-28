@@ -107,7 +107,7 @@ public class SparkPreferenceValidator {
                     errors.add("Port in job server URL required.");
                 }
 
-            } catch(URISyntaxException e) {
+            } catch(URISyntaxException | IllegalArgumentException e) {
                 errors.add("Invalid job server url: " + e.getMessage());
             }
         }
