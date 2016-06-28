@@ -16,7 +16,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.knime.workbench.ui.preferences"
+            category="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
             class="com.knime.bigdata.spark.core.preferences.SparkPreferencePage"
             id="com.knime.bigdata.spark.preferences.SparkPreferencePage"
             name="Spark">

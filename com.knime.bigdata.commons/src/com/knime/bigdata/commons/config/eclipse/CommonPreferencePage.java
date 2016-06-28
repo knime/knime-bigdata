@@ -44,35 +44,25 @@
  */
 package com.knime.bigdata.commons.config.eclipse;
 
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.knime.bigdata.commons.CommonsPlugin;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 
 /**
  * @author Tobias Koetter, KNIME.com
  */
-public class HadoopPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-
-    //TODO: Use this preference page as parent for all other big data preference pages e.g. Spark
-
-    private Text m_hadoopFile;
+public class CommonPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     /**
-     * Creates a new spark preference page.
+     * Creates a new big data common preference page.
      */
-    public HadoopPreferencePage() {
-        super();
-        setDescription("KNIME Big Data Extensions");
+    public CommonPreferencePage() {
+        super(FieldEditorPreferencePage.GRID);
     }
 
     @Override
@@ -82,55 +72,19 @@ public class HadoopPreferencePage extends PreferencePage implements IWorkbenchPr
     }
 
     @Override
-    protected Control createContents(final Composite parent) {
-        Composite mainContainer = new Composite(parent, SWT.NONE);
-        GridLayout gl = new GridLayout(1, true);
-        mainContainer.setLayout(gl);
-        GridData mainContainerLayoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        mainContainerLayoutData.widthHint = 300;
-        mainContainer.setLayoutData(mainContainerLayoutData);
-        m_hadoopFile = createTextWithLabel(mainContainer, "Hadoop config file:");
-        //TODO:  Show the hadoop config file option only if the hdfs file handling is enable?
-//        HadoopConfigContainer.getInstance().isHdfsSupported()
+    protected void createFieldEditors() {
+        if (CommonConfigContainer.getInstance().isHdfsSupported()) {
+            FileFieldEditor coreSiteConf = new FileFieldEditor(
+                CommonPreferenceInitializer.PREF_CORE_SITE_CONF,
+                "Custom core-site.xml file:", true, getFieldEditorParent());
+            coreSiteConf.setFileExtensions(new String[] { "*.xml" });
+            addField(coreSiteConf);
 
-        loadPreferencesIntoFields();
-
-        return mainContainer;
-    }
-
-    /** Load preferences from store into fields. */
-    private void loadPreferencesIntoFields() {
-        IPreferenceStore prefs = getPreferenceStore();
-        m_hadoopFile.setText(prefs.getString(HadoopPreferenceInitializer.PREF_HADOOP_CONF));
-    }
-
-    @Override
-    protected void performDefaults() {
-        IPreferenceStore prefs = getPreferenceStore();
-
-        m_hadoopFile.setText(prefs.getDefaultString(HadoopPreferenceInitializer.PREF_HADOOP_CONF));
-        setErrorMessage(null);
-        setValid(true);
-
-        super.performDefaults();
-    }
-
-    @Override
-    public boolean performOk() {
-        IPreferenceStore prefs = getPreferenceStore();
-
-        prefs.setValue(HadoopPreferenceInitializer.PREF_HADOOP_CONF, m_hadoopFile.getText());
-        return true;
-    }
-
-    private Text createTextWithLabel(final Composite parent, final String description) {
-        Composite group = new Composite(parent, SWT.NONE);
-        group.setLayout(new GridLayout(2, false));
-        group.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-        Label label = new Label(group, SWT.LEFT);
-        label.setText(description);
-        Text text = new Text(group, SWT.BORDER);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-        return text;
+            FileFieldEditor hdfsSiteConf = new FileFieldEditor(
+                CommonPreferenceInitializer.PREF_HDFS_SITE_CONF,
+                "Custom hdfs-site.xml file:", true, getFieldEditorParent());
+            hdfsSiteConf.setFileExtensions(new String[] { "*.xml" });
+            addField(hdfsSiteConf);
+        }
     }
 }

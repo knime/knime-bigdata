@@ -20,15 +20,24 @@
  */
 package com.knime.bigdata.commons.config;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import com.knime.bigdata.commons.CommonsPlugin;
+import com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 
 /**
  * Container class that holds configuration information for the different Big Data Extensions.
  * @author Tobias Koetter, KNIME.com
  */
-public class HadoopConfigContainer {
+public class CommonConfigContainer {
 
-    private static final HadoopConfigContainer instance = new HadoopConfigContainer();
+    private static final CommonConfigContainer instance = new CommonConfigContainer();
+
+    private static IPreferenceStore PREFERENCE_STORE = CommonsPlugin.getDefault().getPreferenceStore();
 
     private boolean m_hdfsSupported = false;
 
@@ -36,7 +45,7 @@ public class HadoopConfigContainer {
 
     private boolean m_sparkSupported = false;
 
-    private HadoopConfigContainer() {
+    private CommonConfigContainer() {
         //avoid object creation
     }
 
@@ -44,23 +53,44 @@ public class HadoopConfigContainer {
      * Returns the only instance of this class.
      * @return the only instance
     */
-    public static HadoopConfigContainer getInstance() {
+    public static CommonConfigContainer getInstance() {
         return instance;
     }
 
     /**
-     * @return an {@link InputStream} with the hadoop-site.xml or <code>null</code> if the default should be used
+     * @return an {@link InputStream} with the core-site.xml or <code>null</code> if the default should be used
      */
-    public InputStream getHadoopConfig() {
-        //TODO: Get the file from the preference page
-        return null;
+    public InputStream getCoreSiteConfig() {
+        try {
+            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_CORE_SITE_CONF));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Can't find custom core-site.xml file: " + e);
+        }
     }
 
     /**
-     * @return <code>true</code> if a hadoop-site.xml is available
+     * @return <code>true</code> if a core-site.xml is available
      */
-    public boolean hasHadoopConfig() {
-        return getHadoopConfig() != null;
+    public boolean hasCoreSiteConfig() {
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_CORE_SITE_CONF);
+    }
+
+    /**
+     * @return an {@link InputStream} with the hdfs-site.xml or <code>null</code> if the default should be used
+     */
+    public InputStream getHdfsSiteConfig() {
+        try {
+            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_HDFS_SITE_CONF));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Can't find custom hdfs-site.xml file: " + e);
+        }
+    }
+
+    /**
+     * @return <code>true</code> if a hdfs-site.xml is available
+     */
+    public boolean hasHdfsSiteConfig() {
+        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_HDFS_SITE_CONF);
     }
 
     /**
