@@ -20,19 +20,11 @@
  */
 package com.knime.bigdata.spark.core.context.jobserver;
 
-import com.knime.bigdata.spark.core.util.SparkIDs;
-
 /**
  *
  * @author Bjoern Lohrmann, KNIME.COM
  */
 public class JobserverConstants {
-
-
-    /**
-     * We use the Spark application ID which is based on the KNIME id which is unique per workspace.
-     */
-    public final static String APP_NAME = SparkIDs.getSparkApplicationID();
 
 
     /**
@@ -71,8 +63,8 @@ public class JobserverConstants {
         return String.format("%s/%s", CONTEXTS_PATH, contextName);
     }
 
-    public static String buildJarPath() {
-        return String.format("%s/%s", JARS_PATH, APP_NAME);
+    public static String buildJarPath(final String jobJarId) {
+        return String.format("%s/%s", JARS_PATH, jobJarId);
     }
 
     public static String buildDataPath(final String prefixOrFile) {

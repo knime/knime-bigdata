@@ -22,8 +22,6 @@ package com.knime.bigdata.spark.core.util;
 
 import java.util.UUID;
 
-import org.knime.core.node.KNIMEConstants;
-
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -35,14 +33,5 @@ public final class SparkIDs {
      */
     public static String createRDDID() {
         return UUID.randomUUID().toString();
-    }
-
-    /**
-     * @return the unique Spark id for this user used as the application id
-     */
-    public static String getSparkApplicationID() {
-        final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
-        //strip the first part of the id that contains the -
-        return knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1);
     }
 }
