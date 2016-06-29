@@ -113,25 +113,30 @@ class ImpalaConnectorNodeModel extends NodeModel {
      * @return the jdbc url
      */
     static String getJDBCURL(final ImpalaConnectorSettings settings) {
-        final boolean cloudera = clouderaDriverAvailable();
         final String pwd = settings.getPassword(null);
-        if (cloudera) {
-            LOGGER.debug("Cloudera driver found using impala url");
-            final String url = "jdbc:impala://" + settings.getHost() + ":" + settings.getPort() + "/"
-                    + settings.getDatabaseName();
-            if (pwd != null && !pwd.trim().isEmpty()) {
-                //for user name and password authentication
-                return url + ";AuthMech=3";
-            }
-            return url;
+        final StringBuilder buf = new StringBuilder();
+        if (clouderaDriverAvailable()) {
+            buf.append("jdbc:impala://" + settings.getHost() + ":" + settings.getPort());
+            //append database
+            buf.append("/" + settings.getDatabaseName());
         } else {
-            final String url = "jdbc:hive2://" + settings.getHost() + ":" + settings.getPort() + "/"
-                    + settings.getDatabaseName();
+            buf.append("jdbc:hive2://" + settings.getHost() + ":" + settings.getPort());
+            //append database
+            buf.append("/" + settings.getDatabaseName());
             if (pwd == null || pwd.trim().length() == 0) {
-                return url + ";auth=noSasl";
+                buf.append(";auth=noSasl");
             }
-            return url;
         }
+        final String parameter = settings.getParameter();
+        if (parameter != null && !parameter.trim().isEmpty()) {
+            if (!parameter.startsWith(";")) {
+                buf.append(";");
+            }
+            buf.append(parameter);
+        }
+        final String jdbcUrl = buf.toString();
+        LOGGER.debug("Using jdbc url: " + jdbcUrl);
+        return jdbcUrl;
     }
 
     /**

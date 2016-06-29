@@ -24,6 +24,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.knime.base.node.io.database.connection.util.DBAuthenticationPanel;
@@ -37,6 +38,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.util.StringHistoryPanel;
 
 import com.knime.bigdata.hive.utility.HiveUtility;
 
@@ -46,14 +48,19 @@ import com.knime.bigdata.hive.utility.HiveUtility;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 class HiveConnectorNodeDialog extends NodeDialogPane {
-    private static class HiveConnectionPanel extends DBConnectionPanel<HiveConnectorSettings> {
+    private class HiveConnectionPanel extends DBConnectionPanel<HiveConnectorSettings> {
         private static final long serialVersionUID = 8294604980299992419L;
 
         HiveConnectionPanel(final HiveConnectorSettings settings) {
             super(settings, HiveConnectorNodeDialog.class.getName());
-
             m_c.gridx = 0;
             m_c.gridy++;
+            add(new JLabel("Parameter "), m_c);
+
+            m_c.gridy++;
+            m_c.fill = GridBagConstraints.HORIZONTAL;
+            m_c.weightx = 1;
+            add(m_parameter, m_c);
         }
 
         /**
@@ -66,6 +73,8 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
     }
 
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
+
+    private final StringHistoryPanel m_parameter = new StringHistoryPanel(getClass().getName() + "_parameter    ");
 
     private final HiveConnectionPanel m_connectionPanel = new HiveConnectionPanel(m_settings);
 
@@ -116,6 +125,9 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
         m_authPanel.loadSettings(specs, getCredentialsProvider());
         m_tzPanel.loadSettings(specs);
         m_miscPanel.loadSettings(specs);
+        m_parameter.setSelectedString(m_settings.getParameter());
+        m_parameter.commitSelectedToHistory();
+        m_parameter.updateHistory();
     }
 
     /**
@@ -127,7 +139,8 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
         m_authPanel.saveSettings();
         m_tzPanel.saveSettings();
         m_miscPanel.saveSettings(getCredentialsProvider());
-
+        m_settings.setParameter(m_parameter.getSelectedString());
+        m_parameter.commitSelectedToHistory();
         m_settings.saveConnection(settings);
     }
 }

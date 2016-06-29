@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.impala.node.connector;
 
-import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
+import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
 
 import com.knime.bigdata.impala.utility.ImpalaUtility;
 
@@ -29,9 +29,7 @@ import com.knime.bigdata.impala.utility.ImpalaUtility;
  *
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
-class ImpalaConnectorSettings extends DefaultDatabaseConnectionSettings {
-
-//    private static final String CFG_IMPALA = "impala-connection";
+class ImpalaConnectorSettings extends ParameterizedDatabaseConnectionSettings {
 
     ImpalaConnectorSettings() {
         setPort(21050);
