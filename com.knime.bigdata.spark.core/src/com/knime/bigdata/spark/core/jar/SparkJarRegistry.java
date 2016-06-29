@@ -93,14 +93,10 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
      *
      * @return the only instance
      */
-    public static SparkJarRegistry getInstance() {
+    public synchronized static SparkJarRegistry getInstance() {
         if (instance == null) {
-            synchronized (SparkJarRegistry.class) {
-                if (instance == null) {
-                    instance = new SparkJarRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+                instance = new SparkJarRegistry();
+                instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }
@@ -134,7 +130,7 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
      * @param sparkVersion the Spark version to get the jar files for e.g. 1.2, 1.3, etc
      * @return the corresponding jar file or <code>null</code> if none exists
      */
-    public static JobJar getJobJar(final SparkVersion sparkVersion) {
+    public synchronized static JobJar getJobJar(final SparkVersion sparkVersion) {
         LazyCollector collector = getInstance().m_jar.get(sparkVersion);
         if (collector != null) {
             return collector.getCollector().getJobJar();
