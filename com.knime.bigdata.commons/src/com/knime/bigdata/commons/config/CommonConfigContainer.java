@@ -108,14 +108,10 @@ public class CommonConfigContainer {
     }
 
     /**
-     * @return an {@link InputStream} with the custom kerberos keytab or <code>null</code> if the default should be used
+     * @return the file path to the custom kerberos keytab or <code>null</code> if the default should be used
      */
-    public InputStream getKerberosKeytabConfig() {
-        try {
-            return new FileInputStream(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Can't find custom kerberos keytab file: " + e);
-        }
+    public String getKerberosKeytabConfig() {
+        return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE);
     }
 
     /**
