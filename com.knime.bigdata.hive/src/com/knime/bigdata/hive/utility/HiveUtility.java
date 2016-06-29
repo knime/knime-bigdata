@@ -40,7 +40,10 @@ import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggreg
 import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
+import org.knime.core.node.port.database.connection.DBConnectionFactory;
+import org.knime.core.node.port.database.connection.DBDriverFactory;
 
+import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
 import com.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
 import com.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
@@ -85,6 +88,14 @@ public class HiveUtility extends DatabaseUtility {
             new PercentileDBAggregationFunction.Factory(), new PercentileApproxDBAggregationFunction.Factory(),
             new CollectSetDBAggregationFunction.Factory());
             //CollectListDBAggregationFunction.getInstance() supported by Hive 0.13.0
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DBConnectionFactory createConnectionFactory(final DBDriverFactory df) {
+        return new KerberosConnectionFactory(df);
     }
 
     /**

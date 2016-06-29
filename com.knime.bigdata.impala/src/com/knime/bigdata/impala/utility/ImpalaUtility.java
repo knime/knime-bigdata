@@ -36,7 +36,10 @@ import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggreg
 import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VariancePopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarianceSampDBAggregationFunction;
+import org.knime.core.node.port.database.connection.DBConnectionFactory;
+import org.knime.core.node.port.database.connection.DBDriverFactory;
 
+import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import com.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
@@ -71,6 +74,14 @@ public class ImpalaUtility extends DatabaseUtility {
             new StdDevSampDBAggregationFunction.Factory(), new StdDevPopDBAggregationFunction.Factory(),
             new SumDistinctDBAggregationFunction.Factory(), new VarianceSampDBAggregationFunction.Factory(),
             new VariancePopDBAggregationFunction.Factory());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DBConnectionFactory createConnectionFactory(final DBDriverFactory df) {
+        return new KerberosConnectionFactory(df);
     }
 
     /**

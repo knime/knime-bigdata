@@ -78,7 +78,7 @@ class ImpalaConnectorNodeDialog extends NodeDialogPane {
     private final ImpalaConnectionPanel m_connectionPanel = new ImpalaConnectionPanel(m_settings);
 
     private final DBAuthenticationPanel<DatabaseConnectionSettings> m_authPanel =
-        new DBAuthenticationPanel<>(m_settings);
+        new DBAuthenticationPanel<>(m_settings, true);
 
     private final DBTimezonePanel<DatabaseConnectionSettings> m_tzPanel =
         new DBTimezonePanel<>(m_settings);
