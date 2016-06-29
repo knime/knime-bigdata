@@ -100,7 +100,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridx = 0;
         gbc.gridy++;
         m_authenticationComp = new DialogComponentAuthentication(m_settings.getAuthenticateModel(), "Authentication",
-                        AuthenticationType.NONE, AuthenticationType.CREDENTIALS, AuthenticationType.USER, AuthenticationType.USER_PWD);
+                        AuthenticationType.NONE, AuthenticationType.CREDENTIALS, AuthenticationType.USER_PWD);
         panel.add(m_authenticationComp.getComponentPanel(), gbc);
         m_settings.getAuthenticateModel().addChangeListener(this);
         gbc.gridx = 0;
