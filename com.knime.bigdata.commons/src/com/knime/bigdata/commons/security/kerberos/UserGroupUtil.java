@@ -27,8 +27,8 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.node.workflow.WorkflowContext;
 import org.knime.core.node.workflow.WorkflowManager;
-import org.knime.kerberos.config.KerberosConfigContainer;
 
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.License;
 
 /**
@@ -86,11 +86,11 @@ public class UserGroupUtil {
         if (wfUser != null && !wfUser.isEmpty()) {
             //we should do this on the server to get the kerberos tgt via the keytab
             //when the workflow is executed on the server always use the user id from the workflow context!
-            if (KerberosConfigContainer.getInstance().hasKeytabFile()) {
-                String keytabUser = KerberosConfigContainer.getInstance().getKeytabUser();
-                LOGGER.debug("Using keytab file to create user: " + keytabUser);
-                realUser = UserGroupInformation.loginUserFromKeytabAndReturnUGI(keytabUser,
-                    KerberosConfigContainer.getInstance().getKeytabFile().getAbsolutePath());
+            if (CommonConfigContainer.getInstance().hasKerberosKeytabConfig()) {
+                final String keytabFile = CommonConfigContainer.getInstance().getKerberosKeytabConfig();
+                final String keytabUser = CommonConfigContainer.getInstance().getKerberosUserConfig();
+                LOGGER.debug("Using keytab file " + keytabFile + " to create user: " + keytabUser);
+                realUser = UserGroupInformation.loginUserFromKeytabAndReturnUGI(keytabUser, keytabFile);
             } else {
                 throw new Exception("No keytab information available in preferences.");
             }
