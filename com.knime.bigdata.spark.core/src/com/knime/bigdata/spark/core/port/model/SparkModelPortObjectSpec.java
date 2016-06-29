@@ -41,6 +41,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkModelPortObjectSpec implements PortObjectSpec {
+
     /**
      * A serializer for {@link SparkModelPortObjectSpec}s.
      *
@@ -88,29 +89,26 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
         }
     }
 
-    /**
-     *
-     */
     private static final String SPARK_VERSION = "version";
-    /**
-     *
-     */
+
     private static final String MODEL_NAME = "type";
+
     private static final String SPARK_MODEL = "spark_model";
+
     private final ModelContentRO m_model;
 
     /**
      * Creates a new spec for a Spark model port.
-     * @param version the {@link SparkVersion}
      *
-     * @param type connection model
+     * @param version the {@link SparkVersion}
+     * @param modelName a name describing the model type
      */
-    public SparkModelPortObjectSpec(final SparkVersion version, final String type) {
-        if (type == null) {
+    public SparkModelPortObjectSpec(final SparkVersion version, final String modelName) {
+        if (modelName == null) {
             throw new IllegalArgumentException("Spark model must not be null.");
         }
         final ModelContent content = new ModelContent("SparkModel");
-        content.addString(MODEL_NAME, type);
+        content.addString(MODEL_NAME, modelName);
         content.addString(SPARK_VERSION, version.getLabel());
         m_model = content;
     }

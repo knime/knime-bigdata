@@ -20,9 +20,12 @@
  */
 package com.knime.bigdata.spark1_2.base;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
@@ -32,6 +35,9 @@ import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.core.jobserver.CustomClassLoadingObjectInputStream;
 import com.knime.bigdata.spark.core.model.LegacyModelHelper;
@@ -49,11 +55,13 @@ import com.knime.bigdata.spark1_2.api.Spark_1_2_ModelHelper;
 import com.knime.bigdata.spark1_2.jobserver.server.CollaborativeFilteringModel;
 
 /**
+ * Class that helps with loading serialized Spark models from legacy workflows.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 public class Spark_1_2_LegacyModelHelper extends Spark_1_2_ModelHelper implements LegacyModelHelper {
 
+    /** Zero parameter constructor */
     public Spark_1_2_LegacyModelHelper() {
         super(LEGACY_MODEL_NAME);
     }
@@ -99,6 +107,11 @@ public class Spark_1_2_LegacyModelHelper extends Spark_1_2_ModelHelper implement
      */
     @Override
     public ObjectInputStream getObjectInputStream(final InputStream in) throws IOException {
-        return new CustomClassLoadingObjectInputStream(in, this.getClass().getClassLoader());
+        final URL pluginURL = FileLocator.resolve(FileLocator.find(FrameworkUtil.getBundle(this.getClass()), new Path(""), null));
+        final URL legacySparkUrl = new File(new File(pluginURL.getPath(), "lib"), "legacy-knime-spark-1.2.jar").toURI().toURL();
+        System.out.println(legacySparkUrl.toString());
+
+        final URLClassLoader legacyClassLoader = new URLClassLoader(new URL[] {legacySparkUrl}, this.getClass().getClassLoader());
+        return new CustomClassLoadingObjectInputStream(in, legacyClassLoader);
     }
 }

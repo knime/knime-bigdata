@@ -77,7 +77,7 @@ public class SparkContextPortObject extends SparkContextPortObjectHelper impleme
         public void savePortObject(final SparkContextPortObject portObject,
             final PortObjectZipOutputStream out, final ExecutionMonitor exec)
                     throws IOException, CanceledExecutionException {
-            SparkContextPortObjectHelper.save(portObject.getContextID(), out);
+            save(portObject.getContextID(), out);
         }
         /**
          * {@inheritDoc}
