@@ -24,4 +24,10 @@
          id="com.knime.features.bigdata.externals"
          version="0.0.0"/>
 
+   <plugin
+         id="com.knime.bigdata.commons"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
 </feature>
