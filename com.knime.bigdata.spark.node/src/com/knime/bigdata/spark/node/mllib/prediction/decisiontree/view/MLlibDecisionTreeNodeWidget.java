@@ -57,8 +57,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Paint;
 import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -361,30 +359,48 @@ public final class MLlibDecisionTreeNodeWidget
         TreeNode node = getUserObject();
         if (!node.equals(m_rootNode) ) {
             if (node.isCategorical()) {
-                final String continuous = convertCount(node.getThreshold());
-                if (node.isLeftChild()) {
-                    return "\u2264 " + continuous;
-                } else {
-                    return "> " + continuous;
-                }
+                return getCategoricalSplitLabel(node);
             } else {
-                final List<Object> list = node.getCategories();
-                StringBuilder category = new StringBuilder("{");
-                Iterator<Object> iter = list.iterator();
-                while (iter.hasNext()) {
-                    category.append(m_metaData.map(node.getParentSplitFeature(), iter.next()));
-                    category.append(", ");
-                }
-                category.delete(category.length()-2,category.length()-1);
-                category.append("}");
-                if (node.isLeftChild()) {
-                    return "=" + category.toString();
-                } else {
-                    return "\u2260" + category.toString();
-                }
+                return getContinuousSplitLabel(node);
             }
         } else {
             return null;
+        }
+    }
+
+    /**
+     * @param node
+     * @return
+     */
+    private String getCategoricalSplitLabel(final TreeNode node) {
+        StringBuilder category = new StringBuilder("{");
+        for(Object categoryValue : node.getCategories()) {
+            if (m_metaData != null) {
+                category.append(m_metaData.map(node.getParentSplitFeature(), categoryValue));
+            } else {
+                category.append(categoryValue.toString());
+            }
+            category.append(", ");
+        }
+        category.delete(category.length()-2,category.length()-1);
+        category.append("}");
+        if (node.isLeftChild()) {
+            return "=" + category.toString();
+        } else {
+            return "\u2260" + category.toString();
+        }
+    }
+
+    /**
+     * @param node
+     * @return
+     */
+    private String getContinuousSplitLabel(final TreeNode node) {
+        final String continuous = convertCount(node.getThreshold());
+        if (node.isLeftChild()) {
+            return "\u2264 " + continuous;
+        } else {
+            return "> " + continuous;
         }
     }
 

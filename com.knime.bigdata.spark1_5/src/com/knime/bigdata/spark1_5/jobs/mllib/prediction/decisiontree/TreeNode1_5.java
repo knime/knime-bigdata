@@ -133,7 +133,7 @@ public class TreeNode1_5 implements TreeNode {
      */
     @Override
     public boolean isCategorical() {
-        return m_parentNode.split().get().featureType().toString().equalsIgnoreCase("continuous") ? true : false;
+        return m_parentNode.split().get().featureType().toString().equalsIgnoreCase("continuous") ? false : true;
     }
 
     /**
