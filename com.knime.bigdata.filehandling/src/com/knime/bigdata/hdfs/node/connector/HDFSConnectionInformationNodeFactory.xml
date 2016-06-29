@@ -30,7 +30,7 @@
             <br />
             <b>Kerberos</b>
             <br />
-            Use existing Kerberos ticket for authentication.
+            Experimental option that enables Kerberos ticket based authentication.
         </option>
         <option name="Workflow credentials">
             Use workflow credentials to determine user.
