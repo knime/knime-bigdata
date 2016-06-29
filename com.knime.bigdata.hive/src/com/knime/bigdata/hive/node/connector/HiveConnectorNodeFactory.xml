@@ -22,10 +22,8 @@
         <option name="Database name">
             The name of the database you want to connect to.
         </option>
-        <option name="Enable http mode">
-            Check this option if you want to connect to the Hive server via http and not the native
-            binary protocol.
-            The server must configured accordingly.
+        <option name="Parameter">
+            Optional connection parameter such as ssl or authentication options.
         </option>
         <option name="Use credentials">
             Selection this option if you want to provide authentication data via workflow credentials.

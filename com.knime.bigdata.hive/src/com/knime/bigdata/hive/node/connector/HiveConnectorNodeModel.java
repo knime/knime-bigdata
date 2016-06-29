@@ -109,16 +109,19 @@ class HiveConnectorNodeModel extends NodeModel {
         final String host = settings.getHost();
         final int port = settings.getPort();
         final String dbName = settings.getDatabaseName();
-        final String url = "jdbc:hive2://" + host + ":" + port + "/" + dbName;
-        final String pwd = settings.getPassword(null);
-        if (clouderaDriverAvailable()) {
-            LOGGER.debug("Cloudera Hive driver found using Cloudera url settings.");
-            if (pwd != null && !pwd.trim().isEmpty()) {
-                //for user name and password authentication
-                return url + ";AuthMech=3";
+        final StringBuilder buf = new StringBuilder("jdbc:hive2://" + host + ":" + port);
+        //append database
+        buf.append("/" + dbName);
+        final String parameter = settings.getParameter();
+        if (parameter != null && !parameter.trim().isEmpty()) {
+            if (!parameter.startsWith(";")) {
+                buf.append(";");
             }
+            buf.append(parameter);
         }
-        return url;
+        final String jdbcUrl = buf.toString();
+        LOGGER.debug("Using jdbc url: " + jdbcUrl);
+        return jdbcUrl;
     }
 
     /**
