@@ -69,7 +69,7 @@ public class SparkDataTable extends AbstractSparkRDD {
     /**
      * @param in
      */
-    SparkDataTable(final ZipInputStream in) throws IOException {
+    public SparkDataTable(final ZipInputStream in) throws IOException {
         super(in);
         try {
             ZipEntry ze = in.getNextEntry();
@@ -89,7 +89,7 @@ public class SparkDataTable extends AbstractSparkRDD {
      * @throws IOException
      */
     @Override
-    protected void save(final ZipOutputStream out) throws IOException {
+    public void save(final ZipOutputStream out) throws IOException {
         super.save(out);
         final ModelContent specModel = new ModelContent(TABLE_SPEC);
         m_spec.save(specModel);

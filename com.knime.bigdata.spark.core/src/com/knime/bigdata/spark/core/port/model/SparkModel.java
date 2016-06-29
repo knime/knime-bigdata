@@ -238,12 +238,12 @@ public class SparkModel {
      */
     public static SparkModel load(final ExecutionMonitor exec, final PortObjectZipInputStream in) throws IOException {
 
-        final ZipEntry headerOderLegacyModelEntry = in.getNextEntry();
+        final ZipEntry headerOrLegacyModelEntry = in.getNextEntry();
 
         try {
-            if (headerOderLegacyModelEntry.getName().equals(LEGACY_MODEL_ENTRY)) {
+            if (headerOrLegacyModelEntry.getName().equals(LEGACY_MODEL_ENTRY)) {
                 return loadLegacySparkModel(in);
-            } else if (headerOderLegacyModelEntry.getName().equals(ZIP_KEY_MODEL_1_6_HEADER)) {
+            } else if (headerOrLegacyModelEntry.getName().equals(ZIP_KEY_MODEL_1_6_HEADER)) {
                 return load_v1_6_model(in);
             }
         } catch (InvalidSettingsException | ClassNotFoundException | MissingSparkModelHelperException e) {

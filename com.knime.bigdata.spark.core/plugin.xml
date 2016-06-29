@@ -42,6 +42,15 @@
             specSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec$Serializer">
       </portType>
       <portType
+            color="#000000"
+            hidden="false"
+            name="Spark Data Legacy"
+            objectClass="com.knime.bigdata.spark.port.data.SparkDataPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec$Serializer">
+      </portType>
+      <portType
             color="#7DBDFF"
             hidden="false"
             name="Spark Model"
@@ -49,6 +58,23 @@
             objectSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
             specClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
             specSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
+      </portType>
+      <portType
+            color="#7DBDFF"
+            hidden="false"
+            name="Spark Model Legacy"
+            objectClass="com.knime.bigdata.spark.port.model.SparkModelPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec$Serializer">
+      </portType>
+      <portType
+            hidden="false"
+            name="Spark Context Legacy"
+            objectClass="com.knime.bigdata.spark.port.context.SparkContextPortObject"
+            objectSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObject$Serializer"
+            specClass="com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec"
+            specSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec$Serializer">
       </portType>
    </extension>
    <extension

@@ -24,8 +24,6 @@ import java.io.Serializable;
 
 /**
  * THIS CLASS NEEDS TO STAY HERE, OTHERWISE LEGACY MODEL DESERIALIZATION WILL NOT WORK.
- * THERE IS A FIXME in SparkModel that proposes a solution
- *
  *
  * @author dwk
  */

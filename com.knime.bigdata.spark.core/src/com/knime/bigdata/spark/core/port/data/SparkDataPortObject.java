@@ -61,7 +61,6 @@ import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
  */
 public class SparkDataPortObject extends SparkContextPortObject {
 
-    //TODO: Should extendSparkContextPortObject
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkDataPortObject.class);
 

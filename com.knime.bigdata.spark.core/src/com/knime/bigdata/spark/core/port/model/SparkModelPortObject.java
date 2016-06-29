@@ -58,20 +58,20 @@ public class SparkModelPortObject implements PortObject {
     private final SparkModel m_model;
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SparkModelPortObjectSpec getSpec() {
-        return m_spec;
-    }
-
-    /**
      * Creates a new database port object.
      * @param model
      */
     public SparkModelPortObject(final SparkModel model) {
         m_model = model;
         m_spec = model.getSpec();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparkModelPortObjectSpec getSpec() {
+        return m_spec;
     }
 
     /**
