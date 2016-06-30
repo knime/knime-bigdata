@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-deprecated"/>
 	<classpathentry exported="true" kind="lib" path="conf" sourcepath="conf"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-media-multipart-2.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-client-2.17.jar"/>

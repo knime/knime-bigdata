@@ -18,13 +18,12 @@
  * History
  *   Created on 23.09.2015 by dwk
  */
-package com.knime.bigdata.spark1_6.jobserver.server;
+package com.knime.bigdata.spark.jobserver.server;
 
 import java.io.Serializable;
 
 /**
  * THIS CLASS NEEDS TO STAY HERE, OTHERWISE LEGACY MODEL DESERIALIZATION WILL NOT WORK.
- * THERE IS A FIXME in SparkModel that proposes a solution
  *
  *
  * @author dwk

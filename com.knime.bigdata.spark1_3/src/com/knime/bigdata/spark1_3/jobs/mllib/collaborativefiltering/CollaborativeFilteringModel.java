@@ -43,7 +43,7 @@ public class CollaborativeFilteringModel implements Serializable {
      * @param userFeaturesRDDName
      * @param productFeaturesRDDName
      */
-    CollaborativeFilteringModel(final int rank, final String userFeaturesRDDName, final String productFeaturesRDDName) {
+    public CollaborativeFilteringModel(final int rank, final String userFeaturesRDDName, final String productFeaturesRDDName) {
         m_rank = rank;
         m_userFeatures = userFeaturesRDDName;
         m_productFeatures = productFeaturesRDDName;
