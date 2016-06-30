@@ -63,6 +63,9 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
     public static final String ALL_LOG_LEVELS[] = new String[]{"DEBUG", "INFO", "WARN", "ERROR"};
 
+    /** Preference key to determine whether Spark preferences have already been initialized */
+    public static final String PREF_SPARK_PREFERENCES_INITIALIZED = "com.knime.bigdata.spark.v1_6.initialized";
+
     /** Preference key for a Spark jobserver URL. */
     public static final String PREF_JOB_SERVER_URL = "com.knime.bigdata.spark.v1_6.jobserver.connection.url";
 
@@ -157,10 +160,10 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
 
-        // heuristic test if preferences are already initialized (jobserver url must always be set!)
-        final boolean isAlreadyInitialized = store.contains(PREF_JOB_SERVER_URL);
-
         loadDefaultValues(store);
+
+        // heuristic test if preferences are already initialized (jobserver url must always be set!)
+        final boolean isAlreadyInitialized = store.getBoolean(PREF_SPARK_PREFERENCES_INITIALIZED);
         if (!isAlreadyInitialized) {
             try {
                 if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_3_PLUGIN) != null) {
@@ -168,6 +171,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
                 } else if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_2_PLUGIN) != null) {
                     initializeFromLegacySettings(store, LEGACY_SPARK_1_2_PLUGIN, SparkVersion.V_1_2);
                 } // otherwise use the defaults that are already set
+                store.setValue(PREF_SPARK_PREFERENCES_INITIALIZED, true);
             } catch (Exception e) {
                 Logger.getLogger(SparkPreferenceInitializer.class)
                     .error("Error when trying to import old Spark Executor preferences. Falling back to defaults.", e);
@@ -245,6 +249,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         final Config config = ConfigFactory.load(getClass().getClassLoader());
 
         // setup connection defaults
+        store.setDefault(PREF_SPARK_PREFERENCES_INITIALIZED, false);
         store.setDefault(PREF_JOB_SERVER_URL, getPresetString(config, "jobserver.connection.url"));
         store.setDefault(PREF_AUTHENTICATION, getPresetBoolean(config, "jobserver.connection.authentication"));
         store.setDefault(PREF_USER_NAME, getPresetString(config, "jobserver.connection.userName"));
