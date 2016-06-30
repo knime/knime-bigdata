@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
-    icon="./webhdfsconnection16x16.png" type="Source">
-    <name>webHDFS Connection</name>
+    icon="./httpfsconnection16x16.png" type="Source">
+    <name>HttpFS Connection</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
-        a Hadoop Distributed File System (HDFS) via WebHDFS.
+        a Hadoop Distributed File System (HDFS) via HttpFS.
     </shortDescription>
 
     <fullDescription>
@@ -44,8 +44,8 @@
     </fullDescription>
 
     <ports>
-        <outPort name="WebHDFS Connection information port" index="0">
-            Port object containing the WebHDFS connection information.
+        <outPort name="HttpFS Connection information port" index="0">
+            Port object containing the HttpFS connection information.
         </outPort>
     </ports>
 </knimeNode>
