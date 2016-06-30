@@ -17,13 +17,11 @@
             category-path="/io/filehandling/remote"
             factory-class="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
       </node>
-      <!-- Requires hadoop 2.6?
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
             factory-class="com.knime.bigdata.hdfs.node.connector.HttpFSConnectionInformationNodeFactory">
       </node>
-      -->
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"

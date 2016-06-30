@@ -56,7 +56,7 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
     public static final Protocol HTTPFS_PROTOCOL =
-            new Protocol("httpfs", 11000, false, false, false, true, true, true, false, true);
+            new Protocol("webhdfs", 14000, false, false, false, true, true, true, false, true);
 
     public static final Protocol SUPPORTED_PROTOCOLS[] =
             new Protocol[] { HDFS_PROTOCOL, WEBHDFS_PROTOCOL, HTTPFS_PROTOCOL };
