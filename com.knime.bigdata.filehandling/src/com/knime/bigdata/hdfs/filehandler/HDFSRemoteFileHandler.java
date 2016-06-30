@@ -54,12 +54,27 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
     public static final Protocol WEBHDFS_PROTOCOL =
             new Protocol("webhdfs", 50070, false, false, false, true, true, true, false, true);
 
+    public static final Protocol SUPPORTED_PROTOCOLS[] = new Protocol[] { HDFS_PROTOCOL, WEBHDFS_PROTOCOL };
+
     /**
      * {@inheritDoc}
      */
     @Override
     public Protocol[] getSupportedProtocols() {
-        return new Protocol[] {HDFS_PROTOCOL, WEBHDFS_PROTOCOL};
+        return SUPPORTED_PROTOCOLS;
+    }
+
+    /** @return true if this handler supports given connection. */
+    public static boolean isSupportedConnection(final ConnectionInformation connectionInformation) {
+        String protocol = connectionInformation.getProtocol();
+
+        for (Protocol current : SUPPORTED_PROTOCOLS) {
+            if (current.getName().equals(protocol)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
