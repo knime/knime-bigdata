@@ -102,7 +102,7 @@ public class UserGroupUtil {
 //          realUser = UserGroupInformation.getBestUGI(null, null);
             LOGGER.debug("Current user: " + realUser.getUserName());
             //use the OS user if the given userName is null or empty
-            loginUser = userName != null && userName.trim().isEmpty() ? userName : realUser.getUserName();
+            loginUser = userName != null && !userName.trim().isEmpty() ? userName : realUser.getUserName();
         }
         final UserGroupInformation user;
         if (!realUser.getUserName().equals(loginUser) && !realUser.getShortUserName().equals(loginUser)) {
