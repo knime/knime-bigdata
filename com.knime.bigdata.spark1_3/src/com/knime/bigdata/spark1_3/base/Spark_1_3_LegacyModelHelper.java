@@ -27,7 +27,7 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.mllib.classification.LogisticRegressionModel;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -58,10 +58,12 @@ import com.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
+@SuppressWarnings("deprecation")
 public class Spark_1_3_LegacyModelHelper extends Spark_1_3_ModelHelper implements LegacyModelHelper {
 
     private static final String LEGACY_KNIME_SPARK_JAR = "legacy-knime-spark-1.3.jar";
 
+    /** Zero parameter constructor */
     public Spark_1_3_LegacyModelHelper() {
         super(LEGACY_MODEL_NAME);
     }
