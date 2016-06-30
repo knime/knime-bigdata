@@ -65,10 +65,10 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
-import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.FileUtil;
 
+import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.bigdata.hive.utility.HiveLoader;
 import com.knime.bigdata.hive.utility.HiveLoaderSettings;
 import com.knime.bigdata.hive.utility.HiveUtility;
@@ -162,7 +162,8 @@ class HiveLoaderNodeModel extends NodeModel {
             throw new InvalidSettingsException("No target folder for data upload provided");
         }
 
-        if (connInfo.getProtocol().equalsIgnoreCase("hdfs")
+        if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+                && !connInfo.useKerberos()
                 && connInfo.getUser() != null && !connInfo.getUser().isEmpty()
                 && dbSettings.getUserName(cp) != null && !dbSettings.getUserName(cp).isEmpty()
                 && !connInfo.getUser().equals(dbSettings.getUserName(cp))) {

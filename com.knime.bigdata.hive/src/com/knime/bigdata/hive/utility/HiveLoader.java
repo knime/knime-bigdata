@@ -42,6 +42,7 @@ import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
+import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.licenses.LicenseException;
 
 /**
@@ -265,30 +266,13 @@ public final class HiveLoader {
     private static String buildLoadCommand(final RemoteFile<? extends Connection> remoteFile, final String tableName)
             throws Exception {
 
-        if (remoteFile.getType().equalsIgnoreCase("hdfs")) {
-            // HIVE does not support usernames in input file URI!
-            URI originalUri = remoteFile.getURI();
-            String cleanUri = removeUsernameFromUri(originalUri);
-            return "LOAD DATA INPATH '" + cleanUri + "' INTO TABLE " + tableName;
+        if (HDFSRemoteFileHandler.isSupportedConnection(remoteFile.getConnectionInformation())) {
+            // Hive handles load via move, use Hive default FS URI and provide only input file path
+            return "LOAD DATA INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
 
         } else {
             return "LOAD DATA LOCAL INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
         }
-    }
-
-    /** Removes user info from given URI. */
-    private static String removeUsernameFromUri(final URI originalUri) {
-        StringBuilder uri = new StringBuilder();
-        uri.append(originalUri.getScheme())
-           .append("://")
-           .append(originalUri.getHost());
-        if (originalUri.getPort() > 0) {
-            uri.append(':').append(originalUri.getPort());
-        }
-        if (originalUri.getPath() != null && !originalUri.getPath().isEmpty()) {
-            uri.append(originalUri.getPath());
-        }
-        return uri.toString();
     }
 
     private static String buildInsertCommand(final RemoteFile<? extends Connection> remoteFile, final String sourceTableName,
