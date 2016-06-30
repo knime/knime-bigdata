@@ -20,9 +20,12 @@
  */
 package com.knime.bigdata.spark1_3.base;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
@@ -32,10 +35,14 @@ import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.core.jobserver.CustomClassLoadingObjectInputStream;
 import com.knime.bigdata.spark.core.model.LegacyModelHelper;
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
@@ -46,13 +53,14 @@ import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.M
 import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
 import com.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
-import com.knime.bigdata.spark1_3.jobserver.server.CollaborativeFilteringModel;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 public class Spark_1_3_LegacyModelHelper extends Spark_1_3_ModelHelper implements LegacyModelHelper {
+
+    private static final String LEGACY_KNIME_SPARK_JAR = "legacy-knime-spark-1.3.jar";
 
     public Spark_1_3_LegacyModelHelper() {
         super(LEGACY_MODEL_NAME);
@@ -99,6 +107,23 @@ public class Spark_1_3_LegacyModelHelper extends Spark_1_3_ModelHelper implement
      */
     @Override
     public ObjectInputStream getObjectInputStream(final InputStream in) throws IOException {
-        return new CustomClassLoadingObjectInputStream(in, this.getClass().getClassLoader());
+        final URL pluginURL = FileLocator.resolve(FileLocator.find(FrameworkUtil.getBundle(this.getClass()), new Path(""), null));
+        final URL legacySparkUrl = new File(new File(pluginURL.getPath(), "lib"), LEGACY_KNIME_SPARK_JAR).toURI().toURL();
+
+        final URLClassLoader legacyClassLoader = new URLClassLoader(new URL[] {legacySparkUrl}, this.getClass().getClassLoader());
+        return new CustomClassLoadingObjectInputStream(in, legacyClassLoader);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object convertLegacyToNewModel(final Object legacyModelInstance) {
+        if (legacyModelInstance instanceof CollaborativeFilteringModel) {
+            CollaborativeFilteringModel toConvert = (CollaborativeFilteringModel) legacyModelInstance;
+            return new com.knime.bigdata.spark1_3.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel(toConvert.getRank(), toConvert.getUserFeaturesRDDID(), toConvert.getProductFeaturesRDDID());
+        } else {
+            return legacyModelInstance;
+        }
     }
 }

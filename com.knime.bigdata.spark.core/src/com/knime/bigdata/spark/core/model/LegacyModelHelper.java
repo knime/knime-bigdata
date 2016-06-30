@@ -33,9 +33,8 @@ public interface LegacyModelHelper extends ModelHelper {
     public final static String LEGACY_MODEL_NAME = "legacy";
 
     /**
-     * Inspects the given model instance and tries to guess the unique model name under which a real
-     * {@link ModelHelper} is available. This is used when loading old workflows that did not save the model name,
-     * just the model instance.
+     * Inspects the given model instance and tries to guess the unique model name under which a real {@link ModelHelper}
+     * is available. This is used when loading old workflows that did not save the model name, just the model instance.
      *
      * @param modelInstance
      * @return the guessed model name, or null, if no plausible model name could be determined.
@@ -43,12 +42,21 @@ public interface LegacyModelHelper extends ModelHelper {
     String tryToGuessModelName(final Object modelInstance);
 
     /**
-     * Returns a "magic" object input stream that has all the required classes in its classpath that are required
-     * to load legacy workflows (classes from the Spark API, classes that were removed/changed in KNIME).
+     * Returns a "magic" object input stream that has all the required classes in its classpath that are required to
+     * load legacy workflows (classes from the Spark API, classes that were removed/changed in KNIME).
      *
      * @param in An input stream
      * @return an {@link ObjectInputStream} with a special classpath that allows to load legacy workflows
      * @throws IOException if something went wrong while creating the stream
      */
     ObjectInputStream getObjectInputStream(InputStream in) throws IOException;
+
+    /**
+     * Inspects the given model instance and, if necessary, converts it into the current model. If the given model
+     * instance does not need to be converted, this method does nothing.
+     * 
+     * Converting legacy models may be necessary when loading KNIME workflows with Spark nodes, that were saved before
+     * KNIME Spark Executor 1.6.0 (an example would be the collaborative filtering models).
+     */
+    Object convertLegacyToNewModel(final Object modelInstance);
 }

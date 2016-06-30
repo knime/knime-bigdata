@@ -45,6 +45,7 @@ import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import com.knime.bigdata.spark.core.job.util.MLlibSettings;
 import com.knime.bigdata.spark.core.model.LegacyModelHelper;
 import com.knime.bigdata.spark.core.model.ModelHelper;
+import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -283,15 +284,19 @@ public class SparkModel {
     private static SparkModel loadLegacySparkModel(final PortObjectZipInputStream in)
         throws IOException, MissingSparkModelHelperException, ClassNotFoundException, InvalidSettingsException {
 
-        // FIXME: need to determine the Spark version of the legacy workflow somehow
-        final SparkVersion sparkVersion = SparkVersion.V_1_2;
+        final SparkVersion sparkVersion;
+        if (KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_2) || KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_3)) {
+            sparkVersion = KNIMEConfigContainer.getSparkVersion();
+        } else {
+            sparkVersion = SparkVersion.V_1_2;
+        }
 
         final LegacyModelHelper legacySparkModelHelper =
             (LegacyModelHelper)ModelHelperRegistry.getModelHelper(LegacyModelHelper.LEGACY_MODEL_NAME, sparkVersion);
 
         try (final ObjectInputStream os = legacySparkModelHelper.getObjectInputStream(in)) {
             final String classColumnName = (String)os.readObject();
-            final Serializable model = (Serializable)os.readObject();
+            final Serializable legacyModel = (Serializable)os.readObject();
 
             // FIXME modularization: this tries to read an model interpreter. this will not work because model interpreter class have been changed and moved during refactoring.
             // we need to package all old model interpreter classes (including SparkModel and all the crap it depends on) into a jar file and put it
@@ -299,14 +304,16 @@ public class SparkModel {
             // Then we can read the object (and throw it away because we don't need it).
             os.readObject();
 
-            final String modelName = legacySparkModelHelper.tryToGuessModelName(model);
+            final String modelName = legacySparkModelHelper.tryToGuessModelName(legacyModel);
             if (modelName == null) {
-                throw new IOException("Failed to guess model name of model instance: " + model.getClass().getName());
+                throw new IOException("Failed to guess model name of model instance: " + legacyModel.getClass().getName());
             }
+
+            final Serializable convertedModel = (Serializable) legacySparkModelHelper.convertLegacyToNewModel(legacyModel);
 
             final DataTableSpec tableSpec = DataTableSpec.load((NodeSettings)os.readObject());
 
-            return new SparkModel(sparkVersion, modelName, model, tableSpec, classColumnName, (Serializable)null);
+            return new SparkModel(sparkVersion, modelName, convertedModel, tableSpec, classColumnName, (Serializable)null);
         }
     }
 

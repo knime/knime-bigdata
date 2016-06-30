@@ -43,7 +43,6 @@ public class Spark_1_5_ModelHelperProvider extends DefaultModelHelperProvider {
      */
     public Spark_1_5_ModelHelperProvider() {
         super(Spark_1_5_CompatibilityChecker.INSTANCE,
-            new Spark_1_5_LegacyModelHelper(),
             new KMeansModelHelper(),
             new CollaborativeFilteringModelHelper(),
             new LinearRegressionModelHelper(),
