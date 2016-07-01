@@ -40,7 +40,9 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *
@@ -74,7 +76,19 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         if (inSpecs == null || inSpecs.length != 2 || inSpecs[0] == null || inSpecs[1] == null) {
             throw new InvalidSettingsException("Input missing");
         }
+
+        final SparkModelPortObjectSpec inputModel = (SparkModelPortObjectSpec)inSpecs[0];
         final SparkDataPortObjectSpec inputRDD = (SparkDataPortObjectSpec)inSpecs[1];
+
+        final SparkVersion modelSparkVersion = inputModel.getSparkVersion();
+        final SparkVersion rddSparkVersion = SparkContextUtil.getSparkVersion(inputRDD.getContextID());
+        if (!modelSparkVersion.equals(rddSparkVersion)) {
+            setWarningMessage(
+                String.format("Spark MLlib model was computed with Spark %s, but ingoing RDD belongs to a Spark %s context.\n"
+                    + "Applying the model may therefore cause errors.",
+                    modelSparkVersion.getLabel(), rddSparkVersion.getLabel()));
+        }
+
         final DataTableSpec resultTableSpec = createSpec(inputRDD.getTableSpec());
         return new PortObjectSpec[]{new SparkDataPortObjectSpec(inputRDD.getContextID(), resultTableSpec)};
     }

@@ -44,10 +44,14 @@ public class SparkContextManager {
     }
 
     public synchronized static SparkContext getDefaultSparkContext() {
+        ensureDefaultContext();
+        return defaultSparkContext;
+    }
+
+    private static void ensureDefaultContext() {
         if (defaultSparkContext == null) {
             createAndConfigureDefaultSparkContext();
         }
-        return defaultSparkContext;
     }
 
     private static void createAndConfigureDefaultSparkContext() {
@@ -61,24 +65,14 @@ public class SparkContextManager {
     }
 
     public synchronized static SparkContext getOrCreateSparkContext(final SparkContextID contextID) {
+        ensureDefaultContext();
         SparkContext toReturn = sparkContexts.get(contextID);
         if (toReturn == null) {
-            if (contextID.equals(DEFAULT_SPARK_CONTEXT_ID)) {
-                createAndConfigureDefaultSparkContext();
-                toReturn = defaultSparkContext;
-            } else {
-                toReturn = new JobserverSparkContext(contextID);
-                sparkContexts.put(contextID, toReturn);
-            }
+            toReturn = new JobserverSparkContext(contextID);
+            sparkContexts.put(contextID, toReturn);
         }
 
         return toReturn;
-    }
-
-    public synchronized static void refreshCustomSparkContext(final SparkContext newContext)
-        throws KNIMESparkException {
-        checkDefaultContext(newContext.getID());
-        sparkContexts.put(newContext.getID(), newContext);
     }
 
     /**
@@ -97,6 +91,7 @@ public class SparkContextManager {
      * @throws KNIMESparkException if the given {@link SparkContextID} is the default {@link SparkContextID}
      */
     private static void checkDefaultContext(final SparkContextID contextID) throws KNIMESparkException {
+        ensureDefaultContext();
         if (contextID.equals(getDefaultSparkContext().getID()) || DEFAULT_SPARK_CONTEXT_ID.equals(contextID)) {
             throw new KNIMESparkException("Cannot modify default Spark context (from KNIME preferences).");
         }
@@ -129,8 +124,8 @@ public class SparkContextManager {
         throws KNIMESparkException {
 
         final SparkContextConfig newDefaultConfig = new SparkContextConfig();
-        final SparkContextID newContextID = SparkContextID.fromConnectionDetails(newDefaultConfig.getJobServerUrl(),
-            newDefaultConfig.getContextName());
+        final SparkContextID newContextID =
+            SparkContextID.fromConnectionDetails(newDefaultConfig.getJobServerUrl(), newDefaultConfig.getContextName());
 
         // create an entirely new context when the ID changes
         if (defaultSparkContext != null && !newContextID.equals(defaultSparkContext.getID())) {

@@ -89,4 +89,8 @@ public class SparkContextUtil {
 
         return (SimpleJobRunFactory<I>)JobRunFactoryRegistry.<I, EmptyJobOutput> getFactory(jobId, contextSparkVersion);
     }
+
+    public static SparkVersion getSparkVersion(final SparkContextID contextID) {
+        return SparkContextManager.getOrCreateSparkContext(contextID).getSparkVersion();
+    }
 }
