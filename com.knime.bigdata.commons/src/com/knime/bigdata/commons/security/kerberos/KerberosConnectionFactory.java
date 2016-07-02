@@ -55,7 +55,8 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
      * {@inheritDoc}
      */
     @Override
-    protected Connection createConnection(final String jdbcUrl, final String user, final String pass, final boolean useKerberos, final Driver d)
+    protected Connection createConnection(final String jdbcUrl, final String user, final String pass,
+        final boolean useKerberos, final Driver d)
         throws SQLException {
         if (!useKerberos) {
             return super.createConnection(jdbcUrl, user, pass, useKerberos, d);
