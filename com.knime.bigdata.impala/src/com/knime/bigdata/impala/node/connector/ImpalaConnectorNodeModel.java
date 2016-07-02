@@ -81,7 +81,7 @@ class ImpalaConnectorNodeModel extends NodeModel {
         m_settings.setDriver(driverName);
 
         final String userName = m_settings.getUserName(getCredentialsProvider());
-        if ((m_settings.getCredentialName() == null)
+        if (!m_settings.useKerberos() && (m_settings.getCredentialName() == null)
                 && ((userName == null) || userName.isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
         }

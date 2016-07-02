@@ -77,7 +77,7 @@ class HiveConnectorNodeModel extends NodeModel {
         }
         m_settings.setDriver(driverName);
 
-        if ((m_settings.getCredentialName() == null)
+        if (!m_settings.useKerberos() && (m_settings.getCredentialName() == null)
                 && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
                     getCredentialsProvider()).isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
