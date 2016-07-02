@@ -241,7 +241,14 @@ public class HDFSConnection extends Connection {
     public synchronized void open() throws IOException {
         if (m_fs == null) {
             synchronized (CONNECTION_COUNT) {
-                final String userName = m_connectionInformation.getUser();
+                final String userName;
+                if (m_connectionInformation.useKerberos()) {
+                    //ensure that no user name is used if Kerberos is enabled since the panel also reports the
+                    //user name if the field is disabled
+                    userName = null;
+                } else {
+                    userName = m_connectionInformation.getUser();
+                }
                 try {
                     final UserGroupInformation user = UserGroupUtil.getUser(m_conf, userName);
                     m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
