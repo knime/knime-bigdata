@@ -243,7 +243,7 @@ public class HDFSConnection extends Connection {
     public synchronized void open() throws IOException {
         if (m_fs == null) {
             synchronized (CONNECTION_COUNT) {
-            	final String userName;
+                final String userName;
                 if (m_connectionInformation.useKerberos()) {
                     //ensure that no user name is used if Kerberos is enabled since the panel also reports the
                     //user name if the field is disabled
@@ -254,8 +254,8 @@ public class HDFSConnection extends Connection {
                 try {
                     final UserGroupInformation user = UserGroupUtil.getUser(m_conf, userName);
                     if (m_connectionInformation.useKerberos()) {
-                        //use the short Kerberos user name without the real information as user for the 
-                    	//connection information which is used to create the hdfs path
+                        //use the short Kerberos user name without the real information as user for the
+                        //connection information which is used to create the hdfs path
                         m_connectionInformation.setUser(user.getShortUserName());
                     }
                     m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
