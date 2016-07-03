@@ -123,7 +123,7 @@ class ImpalaConnectorNodeModel extends NodeModel {
             buf.append("jdbc:hive2://" + settings.getHost() + ":" + settings.getPort());
             //append database
             buf.append("/" + settings.getDatabaseName());
-            if (pwd == null || pwd.trim().length() == 0) {
+            if (!settings.useKerberos() && (pwd == null || pwd.trim().length() == 0)) {
                 buf.append(";auth=noSasl");
             }
         }
