@@ -96,7 +96,7 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @throws KNIMESparkException
      */
     public static void ensureContextIsOpen(final SparkContextID contextID) throws KNIMESparkException {
-        SparkContextManager.getOrCreateSparkContext(contextID).ensureOpened();
+        SparkContextManager.getOrCreateSparkContext(contextID).ensureOpened(true);
     }
 
     private static SparkContextID tryGetContextFromInputs(final Object[] in) {
