@@ -11,6 +11,12 @@
             (or IP address), the port, and a database name. Login credentials can
             either be provided directly in
             the configuration or via credentials set on the workflow.
+            <p>
+            The node supports the usage of the Cloudera JDBC drivers which are available for download from the 
+            <a href="http://www.cloudera.com/downloads/connectors/hive/jdbc.html">Cloudera homepage</a>.
+            To register the driver follow the instructions on the 
+            <a href="https://tech.knime.org/database-documentation">database documentation</a>.
+            </p>
         </intro>
 
         <option name="Hostname">
@@ -23,7 +29,12 @@
             The name of the database you want to connect to.
         </option>
         <option name="Parameter">
-            Optional connection parameter such as ssl or authentication options.
+            Optional connection parameter such as ssl or authentication options. 
+            See <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-ConnectionURLs">HiveServer2 Client documentation</a> for details. 
+            <p>
+            For Cloudera driver specific settings see the 
+            <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>.
+            </p>
         </option>
         <option name="Use credentials">
             Selection this option if you want to provide authentication data via workflow credentials.
@@ -32,6 +43,13 @@
         <option name="Use username &amp; password">
             Provide a username and a password for authentication. The password may be optional if the
             server is configured accordingly.
+        </option>
+        <option name="Use Kerberos">
+            Uses an existing Kerberos ticket for authentication. When connecting to HiveServer2 the principal of the 
+            HiveServer2 user needs to be added in the Parameter field e.g. principal=hive/hive2_host@YOUR-REALM.COM
+            The principal must be the same user principal you used when starting the HiveServer2. For details see the 
+            <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-JDBCClientSetupforaSecureCluster">Hive documentation</a>
+            or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>. 
         </option>
         <option name="Timezone correction">
             Select the TimeZone to convert the date, time or timestamp field into. The current implementation can't
