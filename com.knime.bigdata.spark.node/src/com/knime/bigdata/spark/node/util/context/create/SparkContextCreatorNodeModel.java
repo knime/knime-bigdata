@@ -152,7 +152,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
                     "Context is in unexpected state %s. Possible reason: Parallel changes are being made to it by another KNIME workflow.",
                     sparkContext.getStatus().toString()));
             case CONFIGURED:
-                sparkContext.ensureOpened();
+                sparkContext.ensureOpened(true);
                 break;
             case OPEN:
                 warnings.add("Spark context exists already. Doing nothing and ignoring settings.");

@@ -40,12 +40,21 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
 
     public abstract SparkContextStatus getStatus();
 
-    public synchronized void ensureOpened() throws KNIMESparkException {
+    /**
+     * Ensures that the Spark context is open, creating a context if necessary and createRemoteContext is true.
+     *
+     * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
+     *            context leads to a {@link KNIMESparkException}.
+     *
+     * @throws KNIMESparkException Thrown if Spar context was non-existent and createRemoteContext=false, or if
+     *             something went wrong while creating a Spark context, or if context was not in state configured.
+     */
+    public synchronized void ensureOpened(final boolean createRemoteContext) throws KNIMESparkException {
         switch (getStatus()) {
             case NEW:
                 throw new KNIMESparkException("Spark context needs to be configured before opening.");
             case CONFIGURED:
-                open();
+                open(createRemoteContext);
                 break;
             case OPEN:
                 // all is good
@@ -88,7 +97,16 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     public abstract boolean reconfigure(SparkContextConfig config, boolean destroyIfNecessary)
         throws KNIMESparkException;
 
-    public abstract void open() throws KNIMESparkException;
+    /**
+     * Opens the Spark context, creating a context if necessary and createRemoteContext is true.
+     *
+     * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
+     *            context leads to a {@link KNIMESparkException}.
+     *
+     * @throws KNIMESparkException Thrown if Spar context was non-existent and createRemoteContext=false, or if
+     *             something went wrong while creating a Spark context, or if context was not in state configured.
+     */
+    public abstract void open(final boolean createRemoteContext) throws KNIMESparkException;
 
     public abstract void destroy() throws KNIMESparkException;
 

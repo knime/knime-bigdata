@@ -28,27 +28,26 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class JobRunFactoryRegistry extends DefaultSparkProviderRegistry<String, JobRunFactory<?, ?>, JobRunFactoryProvider> {
+public class JobRunFactoryRegistry
+    extends DefaultSparkProviderRegistry<String, JobRunFactory<?, ?>, JobRunFactoryProvider> {
 
-    /**The id of the converter extension point.*/
+    /** The id of the converter extension point. */
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.JobRunFactoryProvider";
 
     private static volatile JobRunFactoryRegistry instance;
 
-    private JobRunFactoryRegistry() {}
+    private JobRunFactoryRegistry() {
+    }
 
     /**
      * Returns the only instance of this class.
+     *
      * @return the only instance
      */
-    public static JobRunFactoryRegistry getInstance() {
+    public synchronized static JobRunFactoryRegistry getInstance() {
         if (instance == null) {
-            synchronized (JobRunFactoryRegistry.class) {
-                if (instance == null) {
-                    instance = new JobRunFactoryRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+            instance = new JobRunFactoryRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }
@@ -68,8 +67,8 @@ public class JobRunFactoryRegistry extends DefaultSparkProviderRegistry<String, 
      * @throws MissingJobException if no compatible job could be found
      */
     @SuppressWarnings("unchecked")
-    public static <I extends JobInput, O extends JobOutput> JobRunFactory<I, O> getFactory(
-        final String jobId, final SparkVersion sparkVersion) throws MissingJobException {
+    public static <I extends JobInput, O extends JobOutput> JobRunFactory<I, O> getFactory(final String jobId,
+        final SparkVersion sparkVersion) throws MissingJobException {
 
         final JobRunFactory<?, ?> factory = getInstance().get(jobId, sparkVersion);
         if (factory == null) {

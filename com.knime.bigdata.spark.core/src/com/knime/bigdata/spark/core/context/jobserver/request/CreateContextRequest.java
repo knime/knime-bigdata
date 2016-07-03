@@ -34,20 +34,22 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
+ * Request to create a new Spark context. The return value of {@link #send()} is true if the context was created
+ * successfully, false if the context existed already. The method throws an exception if something else went wrong.
  *
  * @author Bjoern Lohrmann, KNIME.COM
  */
-public class CreateContextRequest extends AbstractJobserverRequest<Void> {
+public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
 
     private final static NodeLogger LOGGER = NodeLogger.getLogger(CreateContextRequest.class);
 
     /**
      * @param contextConfig
-     * @param restClient        // TODO Auto-generated method stub
-        return null;
-
+     * @param restClient // TODO Auto-generated method stub return null;
+     *
      */
-    public CreateContextRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient) {
+    public CreateContextRequest(final SparkContextID contextId, final SparkContextConfig contextConfig,
+        final RestClient restClient) {
         super(contextId, contextConfig, restClient);
     }
 
@@ -55,8 +57,7 @@ public class CreateContextRequest extends AbstractJobserverRequest<Void> {
      * {@inheritDoc}
      */
     @Override
-    protected Void sendInternal() throws KNIMESparkException {
-
+    protected Boolean sendInternal() throws KNIMESparkException {
 
         final Response response = m_client.post(JobserverConstants.buildContextPath(m_config.getContextName()),
             getCustomSettings(), Entity.text(""));
@@ -64,7 +65,11 @@ public class CreateContextRequest extends AbstractJobserverRequest<Void> {
         final ParsedResponse parsedResponse =
             JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
 
+        boolean contextWasCreatedSuccessfully = true;
+
         if (parsedResponse.isFailure()) {
+            contextWasCreatedSuccessfully = false;
+
             // throws exception if it handles the error
             handleGeneralFailures(parsedResponse);
 
@@ -72,11 +77,12 @@ public class CreateContextRequest extends AbstractJobserverRequest<Void> {
             handleRequestSpecificFailures(parsedResponse);
         }
 
-        return null;
+        return contextWasCreatedSuccessfully;
     }
 
     private String[] getCustomSettings() {
-        if (m_config.overrideSparkSettings() && m_config.getCustomSparkSettings() != null && !m_config.getCustomSparkSettings().isEmpty()) {
+        if (m_config.overrideSparkSettings() && m_config.getCustomSparkSettings() != null
+            && !m_config.getCustomSparkSettings().isEmpty()) {
             ArrayList<String> elements = new ArrayList<String>();
             for (String line : m_config.getCustomSparkSettings().split("\n")) {
                 line = line.trim();
@@ -88,7 +94,7 @@ public class CreateContextRequest extends AbstractJobserverRequest<Void> {
             return elements.toArray(new String[]{});
 
         } else {
-            return new String[] {};
+            return new String[]{};
         }
     }
 
@@ -109,7 +115,9 @@ public class CreateContextRequest extends AbstractJobserverRequest<Void> {
                     m_config.getContextName()));
                 break;
             case CONTEXT_INIT_FAILED:
-                throw new KNIMESparkException("Failed to initialize Spark context " + KNIMESparkException.SEE_LOG_SNIPPET, parsedResponse.getThrowable());
+                throw new KNIMESparkException(
+                    "Failed to initialize Spark context " + KNIMESparkException.SEE_LOG_SNIPPET,
+                    parsedResponse.getThrowable());
             default:
                 throw createUnexpectedResponseException(parsedResponse);
         }

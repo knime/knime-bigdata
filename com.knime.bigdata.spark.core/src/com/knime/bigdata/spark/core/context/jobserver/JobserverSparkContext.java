@@ -117,7 +117,8 @@ public class JobserverSparkContext extends SparkContext {
 
     private boolean canReconfigure(final SparkContextConfig config, final boolean destroyIfNecessary) {
         // we can never change the id of an existing context
-        if (!SparkContextID.fromConnectionDetails(config.getJobServerUrl(), config.getContextName()).equals(m_contextID)) {
+        if (!SparkContextID.fromConnectionDetails(config.getJobServerUrl(), config.getContextName())
+            .equals(m_contextID)) {
             return false;
         }
 
@@ -136,7 +137,8 @@ public class JobserverSparkContext extends SparkContext {
      * @param newStatus the new status of the context
      */
     protected void setStatus(final SparkContextStatus newStatus) {
-        LOGGER.info(String.format("Spark context %s changed status from %s to %s", getID().toString(), m_status.toString(), newStatus.toString()));
+        LOGGER.info(String.format("Spark context %s changed status from %s to %s", getID().toString(),
+            m_status.toString(), newStatus.toString()));
         m_status = newStatus;
     }
 
@@ -210,11 +212,12 @@ public class JobserverSparkContext extends SparkContext {
         m_namedObjectsController = null;
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void open() throws KNIMESparkException {
+    public synchronized void open(final boolean createRemoteContext) throws KNIMESparkException {
         if (getStatus() != SparkContextStatus.CONFIGURED) {
             throw new RuntimeException(
                 String.format("Trying to open Spark context which is in status: %s. This is a bug.", getStatus()));
@@ -223,35 +226,50 @@ public class JobserverSparkContext extends SparkContext {
         runWithResetOnFailure(new Task() {
             @Override
             public void run() throws Exception {
-                ensureRestClient();
-                ensureJobJar();
 
-                if (!remoteSparkContextExists()) {
-                    createRemoteSparkContext();
-                } else if (m_config.overrideSparkSettings()) {
-                    LOGGER.warn("Remote Spark context already exists, cannot apply custom Spark context settings.");
+                boolean contextWasCreated = false;
+
+                try {
+                    ensureRestClient();
+                    ensureJobJar();
+
+                    if (!remoteSparkContextExists()) {
+                        if (createRemoteContext) {
+                            contextWasCreated = createRemoteSparkContext();
+                        } else {
+                            throw new KNIMESparkException("No Spark context on Spark jobserver.");
+                        }
+                    } else if (m_config.overrideSparkSettings()) {
+                        LOGGER.warn("Remote Spark context already exists, cannot apply custom Spark context settings.");
+                    }
+                    // regardless of of contextWasCreated is true or not we can assume that the context exists now
+                    // (somebody else may have created it before us)
+                    if (!isJobJarUploaded()) {
+                        uploadJobJar();
+                    }
+
+                    setStatus(SparkContextStatus.OPEN);
+                    validateAndPrepareContext();
+                } catch (KNIMESparkException e) {
+                    if (contextWasCreated) {
+                        try {
+                            doDestroy();
+                        } catch (KNIMESparkException toIgnore) {
+                            // ignore
+                        }
+                    }
+                    throw e;
                 }
-
-                // FIXME: make sure not to re-upload job jars if they are already on the server
-                if (!isJobJarUploaded()) {
-                    uploadJobJar();
-                }
-
-                setStatus(SparkContextStatus.OPEN);
-
-                validateAndPrepareContext();
             }
-
         });
-
     }
 
     private void ensureJobJar() throws KNIMESparkException {
         if (m_jobJar == null) {
             m_jobJar = SparkJarRegistry.getJobJar(m_config.getSparkVersion());
             if (m_jobJar == null) {
-                throw new KNIMESparkException(String.format("No Spark jobs for Spark version %s found.",
-                    m_config.getSparkVersion().getLabel()));
+                throw new KNIMESparkException(
+                    String.format("No Spark jobs for Spark version %s found.", m_config.getSparkVersion().getLabel()));
             }
 
             m_jobserverAppName = createJobserverAppname(m_config.getSparkVersion());
@@ -259,11 +277,13 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     /**
-     * @return the "app name" for the jobserver, which is an identifier for the uploaded job jar, that has to be specified with each job.
+     * @return the "app name" for the jobserver, which is an identifier for the uploaded job jar, that has to be
+     *         specified with each job.
      */
     private String createJobserverAppname(final SparkVersion sparkVersion) {
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
-        return String.format("knimeJobs_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1), m_config.getSparkVersion().getLabel());
+        return String.format("knimeJobs_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
+            m_config.getSparkVersion().getLabel());
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
@@ -287,6 +307,10 @@ public class JobserverSparkContext extends SparkContext {
                 String.format("Trying to destroy Spark context which is in status: %s. This is a bug.", getStatus()));
         }
 
+        doDestroy();
+    }
+
+    private void doDestroy() throws KNIMESparkException {
         runWithResetOnFailure(new Task() {
             @Override
             public void run() throws Exception {
@@ -325,7 +349,7 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     private synchronized JobController getJobController() throws KNIMESparkException {
-        ensureOpened();
+        ensureOpened(true);
 
         if (m_jobController == null) {
             ensureRestClient();
@@ -338,7 +362,7 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     private synchronized NamedObjectsController getNamedObjectController() throws KNIMESparkException {
-        ensureOpened();
+        ensureOpened(false);
 
         if (m_namedObjectsController == null) {
             m_namedObjectsController = new JobBasedNamedObjectsController(m_contextID);
@@ -422,13 +446,13 @@ public class JobserverSparkContext extends SparkContext {
             JobserverConstants.buildJarPath(m_jobserverAppName)).send();
     }
 
-    private void createRemoteSparkContext() throws KNIMESparkException {
+    private boolean createRemoteSparkContext() throws KNIMESparkException {
         LOGGER.debug("Creating new remote Spark context. Name: " + m_config.getContextName());
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Context settings: " + m_config);
         }
 
-        new CreateContextRequest(m_contextID, m_config, m_restClient).send();
+        return new CreateContextRequest(m_contextID, m_config, m_restClient).send();
     }
 
     /**
