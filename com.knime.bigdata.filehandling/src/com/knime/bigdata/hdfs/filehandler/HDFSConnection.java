@@ -42,6 +42,7 @@ import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
 import com.knime.bigdata.commons.config.CommonConfigContainer;
@@ -53,6 +54,7 @@ import com.knime.licenses.LicenseException;
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 public class HDFSConnection extends Connection {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(HDFSConnection.class);
     private FileSystem m_fs = null;
     private final Configuration m_conf;
     private final ConnectionInformation m_connectionInformation;
@@ -241,7 +243,7 @@ public class HDFSConnection extends Connection {
     public synchronized void open() throws IOException {
         if (m_fs == null) {
             synchronized (CONNECTION_COUNT) {
-                final String userName;
+            	final String userName;
                 if (m_connectionInformation.useKerberos()) {
                     //ensure that no user name is used if Kerberos is enabled since the panel also reports the
                     //user name if the field is disabled
@@ -251,6 +253,11 @@ public class HDFSConnection extends Connection {
                 }
                 try {
                     final UserGroupInformation user = UserGroupUtil.getUser(m_conf, userName);
+                    if (m_connectionInformation.useKerberos()) {
+                        //use the short Kerberos user name without the real information as user for the 
+                    	//connection information which is used to create the hdfs path
+                        m_connectionInformation.setUser(user.getShortUserName());
+                    }
                     m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
                         @Override
                         public FileSystem run() throws Exception {
@@ -267,7 +274,8 @@ public class HDFSConnection extends Connection {
                         }
                     });
                 } catch (Exception e) {
-                    throw new IOException(e);
+                    LOGGER.debug("Exception while opening HDFS conection: " + e.getMessage(), e);
+                    throw new IOException(e.getMessage(), e.getCause());
                 }
             }
         }
