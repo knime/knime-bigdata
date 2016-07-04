@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.io.hive.writer;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -66,7 +67,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
     /**
      * Constructor.
      */
-    Spark2HiveNodeModel() {
+    public Spark2HiveNodeModel() {
         super(new PortType[] {DatabaseConnectionPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[] {DatabasePortObject.TYPE});
     }
@@ -95,12 +96,21 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         }
 
         final DatabaseConnectionPortObjectSpec spec = (DatabaseConnectionPortObjectSpec)inSpecs[0];
-        if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
-            throw new InvalidSettingsException("Input must be a Hive connection");
-        }
+        checkDatabaseIdentifier(spec);
         final DataTableSpec tableSpec = ((SparkDataPortObjectSpec)inSpecs[1]).getTableSpec();
         final DatabasePortObjectSpec resultSpec = createResultSpec(spec, tableSpec);
         return new PortObjectSpec[] {resultSpec};
+    }
+
+    /**
+     * Checks whether the input Database is compatible.
+     * @param spec the {@link DatabaseConnectionPortObjectSpec} from the input port
+     * @throws InvalidSettingsException If the wrong database is connected
+     */
+    protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec) throws InvalidSettingsException {
+        if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
+            throw new InvalidSettingsException("Input must be a Hive connection");
+        }
     }
 
     private DatabasePortObjectSpec createResultSpec(final DatabaseConnectionPortObjectSpec spec, final DataTableSpec tableSpec)
@@ -138,8 +148,24 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
         final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema);
         runFactory.createRun(jobInput).run(rdd.getContextID());
+        try (final Connection connection = settings.createConnection(getCredentialsProvider());) {
+            postProcessing(connection, tableName, exec);
+        } catch (SQLException e) {
+            throw new InvalidSettingsException("During PostProcessing: " + e.getMessage());
+        }
         final DatabasePortObjectSpec resultSpec = createResultSpec(con.getSpec(), rdd.getTableSpec());
         return new PortObject[] {new DatabasePortObject(resultSpec)};
+    }
+
+    /**
+     *  Do whatever post processing is necessary.
+     * @param connection the database connection settings
+     * @param tableName the created table's name
+     * @param exec the execution environment
+     * @throws SQLException
+     */
+    protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec) throws SQLException {
+        // do nothing
     }
 
     /**

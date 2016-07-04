@@ -70,12 +70,24 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
             throw new InvalidSettingsException("No input Hive query found");
         }
         final DatabasePortObjectSpec spec = (DatabasePortObjectSpec)inSpecs[0];
-        if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
-            throw new InvalidSettingsException("Input must be a Hive connection");
-        }
+
+        checkDatabaseIdentifier(spec);
+
         final SparkDataPortObjectSpec resultSpec =
                 new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec());
         return new PortObjectSpec[] {resultSpec};
+    }
+
+
+    /**
+     * Checks whether the input Database is compatible.
+     * @param spec the {@link DatabasePortObjectSpec} from the input port
+     * @throws InvalidSettingsException If the wrong database is connected
+     */
+    protected void checkDatabaseIdentifier(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
+        if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
+            throw new InvalidSettingsException("Input must be an Hive connection");
+        }
     }
 
     /**

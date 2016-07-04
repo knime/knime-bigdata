@@ -130,6 +130,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkEntropyScorerNodeFactory(),
             new SparkNumericScorerNodeFactory(),
             new SparkContextCreatorNodeFactory());
+            //new Spark2ImpalaNodeFactory(),
+            //new Impala2SparkNodeFactory());
     }
 
 }
