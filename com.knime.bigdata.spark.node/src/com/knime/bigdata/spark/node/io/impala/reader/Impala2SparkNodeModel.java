@@ -16,27 +16,26 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 07.06.2015 by koetter
+ *   Created on 24.06.2016 by oole
  */
-package com.knime.bigdata.spark.node.io.hive.writer;
+package com.knime.bigdata.spark.node.io.impala.reader;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.database.DatabasePortObjectSpec;
+
+import com.knime.bigdata.impala.utility.ImpalaUtility;
+import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
 
 /**
  *
- * @author koetter
+ * @author Ole Ostergaard, KNIME.com
  */
-public class Spark2HiveNodeDialog extends DefaultNodeSettingsPane {
+public class Impala2SparkNodeModel extends Hive2SparkNodeModel {
 
-    /**
-     *
-     */
-    public Spark2HiveNodeDialog() {
-        addDialogComponent(new DialogComponentString(Spark2HiveNodeModel.createTableNameModel(),
-            "Table name: ", true, 20));
-        addDialogComponent(new DialogComponentBoolean(Spark2HiveNodeModel.createDropExistingModel(),
-            "Drop existing table"));
+    @Override
+    protected void checkDatabaseIdentifier(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
+        if (!ImpalaUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
+            throw new InvalidSettingsException("Input must be an Impala connection");
+        }
     }
 }
