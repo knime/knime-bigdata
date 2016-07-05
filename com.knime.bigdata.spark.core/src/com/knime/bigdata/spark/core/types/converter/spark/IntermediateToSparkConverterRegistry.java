@@ -41,7 +41,7 @@ public class IntermediateToSparkConverterRegistry extends SparkProviderRegistry<
     /**The id of the converter extension point.*/
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.IntermediateToSparkConverterProvider";
 
-    private static volatile IntermediateToSparkConverterRegistry instance;
+    private static IntermediateToSparkConverterRegistry instance;
 
     private final Map<SparkVersion, Map<IntermediateDataType, IntermediateToSparkConverter<?>>> m_converters =
             new LinkedHashMap<>();
@@ -52,14 +52,10 @@ public class IntermediateToSparkConverterRegistry extends SparkProviderRegistry<
      * Returns the only instance of this class.
      * @return the only instance
      */
-    public static IntermediateToSparkConverterRegistry getInstance() {
+    public synchronized static IntermediateToSparkConverterRegistry getInstance() {
         if (instance == null) {
-            synchronized (IntermediateToSparkConverterRegistry.class) {
-                if (instance == null) {
-                    instance = new IntermediateToSparkConverterRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+            instance = new IntermediateToSparkConverterRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }
@@ -107,7 +103,7 @@ public class IntermediateToSparkConverterRegistry extends SparkProviderRegistry<
      * @param sparkVersion the {@link SparkVersion}
      * @return all registered type converters as a list
      */
-    public static List<IntermediateToSparkConverter<?>> getConverters(final SparkVersion sparkVersion) {
+    public synchronized static List<IntermediateToSparkConverter<?>> getConverters(final SparkVersion sparkVersion) {
         return new LinkedList<>(getInstance().m_converters.get(sparkVersion).values());
     }
 }

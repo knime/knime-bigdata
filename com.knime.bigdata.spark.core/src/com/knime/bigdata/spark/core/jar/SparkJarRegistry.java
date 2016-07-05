@@ -79,7 +79,7 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
     /** The id of the converter extension point. */
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.SparkJarProvider";
 
-    private static volatile SparkJarRegistry instance;
+    private static SparkJarRegistry instance;
 
     private final Map<SparkVersion, LazyCollector> m_jar = new HashMap<>();
 
@@ -95,8 +95,8 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
      */
     public synchronized static SparkJarRegistry getInstance() {
         if (instance == null) {
-                instance = new SparkJarRegistry();
-                instance.registerExtensions(EXT_POINT_ID);
+            instance = new SparkJarRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }

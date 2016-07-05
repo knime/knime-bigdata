@@ -65,7 +65,7 @@ extends SparkProviderRegistry<P> {
      * @param e
      * @throws DuplicateElementException if the element id is not unique
      */
-    protected void addElement(final SparkVersion sparkVersion, final E e) throws DuplicateElementException {
+    protected synchronized void addElement(final SparkVersion sparkVersion, final E e) throws DuplicateElementException {
         final I id = getElementID(e);
         final Pair<SparkVersion, I> providerKey = new Pair<>(sparkVersion, id);
         if (m_elementsByKey.containsKey(providerKey)) {
@@ -88,7 +88,7 @@ extends SparkProviderRegistry<P> {
      * @param sparkVersion Spark version
      * @return the corresponding element or <code>null</code> if none exists
      */
-    protected E get(final I id, final SparkVersion sparkVersion) {
+    protected synchronized E get(final I id, final SparkVersion sparkVersion) {
         return m_elementsByKey.get(new Pair<>(sparkVersion, id));
     }
 }

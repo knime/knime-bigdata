@@ -33,25 +33,22 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  */
 public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, ModelHelper, ModelHelperProvider> {
 
-    /**The id of the extension point.*/
+    /** The id of the extension point. */
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.ModelHelperProvider";
 
-    private static volatile ModelHelperRegistry instance;
+    private static ModelHelperRegistry instance;
 
     private ModelHelperRegistry() {}
 
     /**
      * Returns the only instance of this class.
+     *
      * @return the only instance
      */
-    public static ModelHelperRegistry getInstance() {
+    public synchronized static ModelHelperRegistry getInstance() {
         if (instance == null) {
-            synchronized (ModelHelperRegistry.class) {
-                if (instance == null) {
-                    instance = new ModelHelperRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+            instance = new ModelHelperRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }
@@ -64,7 +61,6 @@ public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, Mo
         return e.getModelName();
     }
 
-
     /**
      * @param modelName the unique model name
      * @param sparkVersion Spark version
@@ -72,12 +68,12 @@ public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, Mo
      * @throws MissingSparkModelHelperException if no compatible Spark model helper could be found
      */
     public static ModelHelper getModelHelper(final String modelName, final SparkVersion sparkVersion)
-            throws MissingSparkModelHelperException {
+        throws MissingSparkModelHelperException {
         final ModelHelper modelHelper = getInstance().get(modelName, sparkVersion);
         if (modelHelper == null) {
-            throw new MissingSparkModelHelperException(String.format(
-                "No Spark model helper found for model type \"%s\" and Spark version %s", modelName,
-                sparkVersion.getLabel()));
+            throw new MissingSparkModelHelperException(
+                String.format("No Spark model helper found for model type \"%s\" and Spark version %s", modelName,
+                    sparkVersion.getLabel()));
         } else {
             return modelHelper;
         }

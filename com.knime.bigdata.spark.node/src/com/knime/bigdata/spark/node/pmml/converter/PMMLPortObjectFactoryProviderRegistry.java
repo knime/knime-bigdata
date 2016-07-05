@@ -30,28 +30,26 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry of all {@link PMMLPortObjectFactory} converter implementations across all {@link SparkVersion}s.
+ *
  * @author Tobias Koetter, KNIME.com
  */
 public class PMMLPortObjectFactoryProviderRegistry
     extends DefaultSparkProviderRegistry<String, PMMLPortObjectFactory, PMMLPortObjectFactoryProvider> {
 
-    /**The id of the converter extension point.*/
+    /** The id of the converter extension point. */
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider";
 
-    private static volatile PMMLPortObjectFactoryProviderRegistry instance;
+    private static PMMLPortObjectFactoryProviderRegistry instance;
 
     /**
      * Returns the only instance of this class.
+     *
      * @return the only instance
      */
-    public static PMMLPortObjectFactoryProviderRegistry getInstance() {
+    public synchronized static PMMLPortObjectFactoryProviderRegistry getInstance() {
         if (instance == null) {
-            synchronized (PMMLPortObjectFactoryProviderRegistry.class) {
-                if (instance == null) {
-                    instance = new PMMLPortObjectFactoryProviderRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+            instance = new PMMLPortObjectFactoryProviderRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }

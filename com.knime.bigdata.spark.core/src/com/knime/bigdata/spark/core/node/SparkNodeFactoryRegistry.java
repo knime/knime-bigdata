@@ -34,16 +34,17 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry that stores all {@link SparkNodeFactory}.
+ *
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFactoryProvider> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkNodeFactoryRegistry.class);
 
-    /**The id of the converter extension point.*/
+    /** The id of the converter extension point. */
     public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.SparkNodeFactoryProvider";
 
-    private static volatile SparkNodeFactoryRegistry instance;
+    private static SparkNodeFactoryRegistry instance;
 
     private final Map<String, SparkNodeFactory<?>> m_factory = new LinkedHashMap<>();
 
@@ -53,16 +54,13 @@ public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFac
 
     /**
      * Returns the only instance of this class.
+     *
      * @return the only instance
      */
-    public static SparkNodeFactoryRegistry getInstance() {
+    public synchronized static SparkNodeFactoryRegistry getInstance() {
         if (instance == null) {
-            synchronized (SparkNodeFactoryRegistry.class) {
-                if (instance == null) {
-                    instance = new SparkNodeFactoryRegistry();
-                    instance.registerExtensions(EXT_POINT_ID);
-                }
-            }
+            instance = new SparkNodeFactoryRegistry();
+            instance.registerExtensions(EXT_POINT_ID);
         }
         return instance;
     }
@@ -76,8 +74,8 @@ public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFac
             final SparkNodeFactory<?> old = m_factory.get(id);
             if (old != null) {
                 final String msg = "Duplicate Spark node factory provider detected for id: " + id;
-                        LOGGER.warn(msg + "Class name 1: " + old.getClass().getName()
-                            + " Class name 2: " + factory.getClass().getName());
+                LOGGER.warn(msg + "Class name 1: " + old.getClass().getName() + " Class name 2: "
+                    + factory.getClass().getName());
                 throw new IllegalStateException(msg);
             }
             m_factory.put(id, factory);
@@ -94,7 +92,7 @@ public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFac
      * @return the corresponding {@link SparkNodeFactory} or <code>null</code> if none compatible exists
      */
     @SuppressWarnings("unchecked")
-    public static <T extends SparkNodeModel> SparkNodeFactory<T> get(final String nodeId) {
+    public synchronized static <T extends SparkNodeModel> SparkNodeFactory<T> get(final String nodeId) {
         final SparkNodeFactory<T> provider = (SparkNodeFactory<T>)getInstance().m_factory.get(nodeId);
         return provider;
     }
@@ -103,17 +101,17 @@ public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFac
      * @param sparkVersion Spark version
      * @return the ids of all compatible {@link SparkNodeFactory}
      * @see #get(String) to get the provider for the given id or an empty {@link Set} if no node is compatible with the
-     * given SparkVersion
+     *      given SparkVersion
      */
-    public static Collection<String> getNodeIds(final SparkVersion sparkVersion) {
+    public synchronized static Collection<String> getNodeIds(final SparkVersion sparkVersion) {
         final Set<String> idSet = m_idsPerVersion.get(sparkVersion);
-        return idSet != null ? idSet : Collections.<String>emptyList();
+        return idSet != null ? idSet : Collections.<String> emptyList();
     }
 
     /**
      * @return all available {@link SparkNodeFactory} ids
      */
-    public static Collection<String> getNodeIds() {
+    public synchronized static Collection<String> getNodeIds() {
         return Collections.unmodifiableCollection(getInstance().m_factory.keySet());
     }
 }
