@@ -162,8 +162,8 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
         loadDefaultValues(store);
 
-        // heuristic test if preferences are already initialized (jobserver url must always be set!)
         final boolean isAlreadyInitialized = store.getBoolean(PREF_SPARK_PREFERENCES_INITIALIZED);
+
         if (!isAlreadyInitialized) {
             try {
                 if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_3_PLUGIN) != null) {
