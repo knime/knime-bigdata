@@ -41,7 +41,7 @@ public class JavaSnippetHelperRegistry extends SparkProviderRegistry<JavaSnippet
 
     private static JavaSnippetHelperRegistry instance;
 
-    private final Map<SparkVersion, JavaSnippetHelper> helperMap = new HashMap<>();
+    private final Map<SparkVersion, JavaSnippetHelper> m_helperMap = new HashMap<>();
 
     private JavaSnippetHelperRegistry() {
     }
@@ -66,14 +66,14 @@ public class JavaSnippetHelperRegistry extends SparkProviderRegistry<JavaSnippet
     protected void addProvider(final JavaSnippetHelper sparkProvider) {
 
         for (SparkVersion sparkVersion : sparkProvider.getSupportedSparkVersions()) {
-            if (helperMap.containsKey(sparkVersion)) {
+            if (m_helperMap.containsKey(sparkVersion)) {
                 throw new IllegalArgumentException(String.format("Extension %s is already registered as %s for Spark version %s",
-                    helperMap.get(sparkVersion).getClass().getName(),
+                    m_helperMap.get(sparkVersion).getClass().getName(),
                     JavaSnippetHelper.class.getSimpleName(),
                     sparkVersion.getLabel()));
             }
 
-            helperMap.put(sparkVersion, sparkProvider);
+            m_helperMap.put(sparkVersion, sparkProvider);
         }
     }
 
@@ -81,7 +81,7 @@ public class JavaSnippetHelperRegistry extends SparkProviderRegistry<JavaSnippet
      * @param sparkVersion
      * @return the {@link JavaSnippetHelper} registered for the given Spark version.
      */
-    public JavaSnippetHelper getHelper(final SparkVersion sparkVersion) {
-        return helperMap.get(sparkVersion);
+    public synchronized JavaSnippetHelper getHelper(final SparkVersion sparkVersion) {
+        return m_helperMap.get(sparkVersion);
     }
 }

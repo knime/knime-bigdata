@@ -59,7 +59,7 @@ public class JavaSnippetTemplateProviderRegistry extends SparkProviderRegistry<J
 
     private static JavaSnippetTemplateProviderRegistry instance;
 
-    private final Map<SparkVersion, AggregateTemplateRepository> repositoryMap = new HashMap<>();
+    private final Map<SparkVersion, AggregateTemplateRepository> m_repositoryMap = new HashMap<>();
 
     private JavaSnippetTemplateProviderRegistry() {
     }
@@ -84,11 +84,11 @@ public class JavaSnippetTemplateProviderRegistry extends SparkProviderRegistry<J
     protected void addProvider(final JavaSnippetTemplateRepositoryProvider sparkProvider) {
 
         for (SparkVersion sparkVersion : sparkProvider.getSupportedSparkVersions()) {
-            AggregateTemplateRepository repositoryForVersion = repositoryMap.get(sparkVersion);
+            AggregateTemplateRepository repositoryForVersion = m_repositoryMap.get(sparkVersion);
 
             if (repositoryForVersion == null) {
                 repositoryForVersion = new AggregateTemplateRepository();
-                repositoryMap.put(sparkVersion, repositoryForVersion);
+                m_repositoryMap.put(sparkVersion, repositoryForVersion);
             }
 
             repositoryForVersion.addRepository(sparkProvider.getRepository());
@@ -100,7 +100,7 @@ public class JavaSnippetTemplateProviderRegistry extends SparkProviderRegistry<J
      * @return a {@link TemplateRepository}s that aggregates all snippet templates registered for the given Spark
      *         version.
      */
-    public TemplateProvider<SparkJavaSnippetTemplate> getTemplateProvider(final SparkVersion sparkVersion) {
-        return repositoryMap.get(sparkVersion);
+    public synchronized TemplateProvider<SparkJavaSnippetTemplate> getTemplateProvider(final SparkVersion sparkVersion) {
+        return m_repositoryMap.get(sparkVersion);
     }
 }
