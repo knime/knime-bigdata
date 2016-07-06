@@ -65,10 +65,11 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
                     jobJarInfo.getPluginVersion(), input.getKNIMEPluginVersion()));
             }
 
-            if (!input.getJobJarHash().equals(jobJarInfo.getHash())) {
-                throw new KNIMESparkException(
-                    "Spark context was created by a KNIME Spark Executor that has incompatible community extensions. Please destroy and reopen this Spark context or use a different one.");
-            }
+            // FIXME Deactivated hash check, as this was causing trouble with win+lin on the same context.
+            //            if (!input.getJobJarHash().equals(jobJarInfo.getHash())) {
+            //                throw new KNIMESparkException(
+            //                    "Spark context was created by a KNIME Spark Executor that has incompatible community extensions. Please destroy and reopen this Spark context or use a different one.");
+            //            }
 
         } catch (IOException e) {
             throw new KNIMESparkException("Spark context was probably not created with KNIME Spark Executor (or an old version of it).  Please destroy and reopen this Spark context or use a different one.",
