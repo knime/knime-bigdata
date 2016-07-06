@@ -45,7 +45,9 @@
 package com.knime.bigdata.commons.config.eclipse;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -54,13 +56,14 @@ import com.knime.bigdata.commons.CommonsPlugin;
 /**
  * @author Tobias Koetter, KNIME.com
  */
-public class CommonPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class KerberosPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     /**
-     * Creates a new big data common preference page.
+     * Creates a new kerberos preference page.
      */
-    public CommonPreferencePage() {
+    public KerberosPreferencePage() {
         super(FieldEditorPreferencePage.GRID);
+        setDescription("Kerberos Configuration");
     }
 
     @Override
@@ -71,6 +74,12 @@ public class CommonPreferencePage extends FieldEditorPreferencePage implements I
 
     @Override
     protected void createFieldEditors() {
-        // See Hadoop and Kerberos preference pages
+        StringFieldEditor kerberosUser = new StringFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_USER, "Keytab user:", getFieldEditorParent());
+        addField(kerberosUser);
+
+        FileFieldEditor kerberosKeytabFile = new FileFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE, "Keytab file:", getFieldEditorParent());
+        addField(kerberosKeytabFile);
     }
 }
