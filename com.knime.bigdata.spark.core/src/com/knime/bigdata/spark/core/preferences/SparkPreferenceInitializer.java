@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
 import com.knime.bigdata.spark.core.version.SparkVersion;
@@ -166,9 +167,9 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
         if (!isAlreadyInitialized) {
             try {
-                if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_3_PLUGIN) != null) {
+                if (hasPreferences(LEGACY_SPARK_1_3_PLUGIN)) {
                     initializeFromLegacySettings(store, LEGACY_SPARK_1_3_PLUGIN, SparkVersion.V_1_3);
-                } else if (InstanceScope.INSTANCE.getNode(LEGACY_SPARK_1_2_PLUGIN) != null) {
+                } else if (hasPreferences(LEGACY_SPARK_1_2_PLUGIN)) {
                     initializeFromLegacySettings(store, LEGACY_SPARK_1_2_PLUGIN, SparkVersion.V_1_2);
                 } // otherwise use the defaults that are already set
                 store.setValue(PREF_SPARK_PREFERENCES_INITIALIZED, true);
@@ -176,6 +177,17 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
                 Logger.getLogger(SparkPreferenceInitializer.class)
                     .error("Error when trying to import old Spark Executor preferences. Falling back to defaults.", e);
             }
+        }
+    }
+
+    /** @return true if given plugin has at least one preference key set. */
+    private boolean hasPreferences(final String oldPluginId) {
+        IEclipsePreferences oldPrefs = InstanceScope.INSTANCE.getNode(oldPluginId);
+
+        try {
+            return oldPrefs != null && oldPrefs.keys().length > 0;
+        } catch (BackingStoreException e) {
+            return false;
         }
     }
 
