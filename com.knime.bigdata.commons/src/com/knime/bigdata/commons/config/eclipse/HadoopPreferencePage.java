@@ -45,22 +45,30 @@
 package com.knime.bigdata.commons.config.eclipse;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.knime.bigdata.commons.CommonsPlugin;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
 
 /**
  * @author Tobias Koetter, KNIME.com
  */
-public class CommonPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class HadoopPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
     /**
-     * Creates a new big data common preference page.
+     * Creates a new hadoop preference page.
      */
-    public CommonPreferencePage() {
+    public HadoopPreferencePage() {
         super(FieldEditorPreferencePage.GRID);
+
+        if (CommonConfigContainer.getInstance().isHdfsSupported()) {
+            setDescription("Hadoop Configuration");
+        } else {
+            setDescription("No Hadoop configuration available.");
+        }
     }
 
     @Override
@@ -71,6 +79,18 @@ public class CommonPreferencePage extends FieldEditorPreferencePage implements I
 
     @Override
     protected void createFieldEditors() {
-        // See Hadoop and Kerberos preference pages
+        if (CommonConfigContainer.getInstance().isHdfsSupported()) {
+            FileFieldEditor coreSiteConf = new FileFieldEditor(
+                CommonPreferenceInitializer.PREF_CORE_SITE_FILE,
+                "Custom core-site.xml file:", true, getFieldEditorParent());
+            coreSiteConf.setFileExtensions(new String[] { "*.xml" });
+            addField(coreSiteConf);
+
+            FileFieldEditor hdfsSiteConf = new FileFieldEditor(
+                CommonPreferenceInitializer.PREF_HDFS_SITE_FILE,
+                "Custom hdfs-site.xml file:", true, getFieldEditorParent());
+            hdfsSiteConf.setFileExtensions(new String[] { "*.xml" });
+            addField(hdfsSiteConf);
+        }
     }
 }
