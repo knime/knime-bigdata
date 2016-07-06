@@ -155,7 +155,8 @@ class ImpalaLoaderNodeModel extends NodeModel {
         if ((m_settings.targetFolder() == null) || m_settings.targetFolder().trim().isEmpty()) {
             throw new InvalidSettingsException("No target folder for data upload provided");
         }
-        if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol())) {
+
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
             throw new InvalidSettingsException("HDFS connection required");
         }
     }
