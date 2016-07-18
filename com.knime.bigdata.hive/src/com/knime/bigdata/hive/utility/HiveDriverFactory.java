@@ -77,6 +77,9 @@ class HiveDriverFactory extends DefaultDBDriverFactory {
             "lib/hive-common-0.12.0-cdh5.1.0.jar",
             "lib/hive-metastore-0.12.0-cdh5.1.0.jar",
             "lib/hive-service-0.12.0-cdh5.1.0.jar",
+            "lib/hive-shims-0.23-0.12.0-cdh5.1.0.jar",
+            "lib/hive-shims-common-0.12.0-cdh5.1.0.jar",
+            "lib/hive-shims-common-secure-0.12.0-cdh5.1.0.jar",
             "lib/libthrift-0.9.0.cloudera.2.jar",
             "lib/libfb303-0.9.0.jar"
         ));
