@@ -113,7 +113,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.context.SparkContextManager;
+import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.port.SparkContextProvider;
+import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.core.version.SparkVersion;
@@ -576,9 +578,15 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
             tableSpec = new DataTableSpec();
             m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
         } else {
-            SparkDataPortObjectSpec rddSpec = (SparkDataPortObjectSpec)specs[0];
-            tableSpec = rddSpec.getTableSpec();
-            m_sparkVersion = SparkContextManager.getOrCreateSparkContext(rddSpec.getContextID()).getSparkVersion();
+            m_sparkVersion = SparkContextUtil.getSparkVersion(((SparkContextProvider)specs[0]).getContextID());
+
+            if (specs[0] instanceof SparkContextPortObjectSpec) {
+                // this is a Spark Java Snipppet Source node which does not have an input table spec
+                tableSpec = new DataTableSpec();
+            } else {
+                SparkDataPortObjectSpec rddSpec = (SparkDataPortObjectSpec)specs[0];
+                tableSpec = rddSpec.getTableSpec();
+            }
         }
 
         if (m_snippet == null) {
