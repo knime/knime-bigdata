@@ -7,6 +7,7 @@ Bundle-ClassPath: knime.jar,
  lib/job-server-api_2.10-0.6.2-KNIME_spark-1.6.1.jar,
  lib/knime-jobserver-utils-0.6.2-KNIME_spark-1.6.1.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Export-Package: com.knime.bigdata.spark1_6.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",
  com.knime.bigdata.spark.core;bundle-version="[1.6.0,2.0.0)",
@@ -33,4 +34,3 @@ Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.json4s.jackson_2.10;bundle-version="3.2.10"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.knime.bigdata.spark1_6.api
