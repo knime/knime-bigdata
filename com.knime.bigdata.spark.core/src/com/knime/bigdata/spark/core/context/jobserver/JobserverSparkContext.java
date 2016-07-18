@@ -293,6 +293,12 @@ public class JobserverSparkContext extends SparkContext {
             sparkVersion.getLabel(), m_jobJar.getDescriptor().getPluginVersion(),
             IntermediateToSparkConverterRegistry.getConverters(sparkVersion));
 
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+        }
+
         SparkContextUtil.getSimpleRunFactory(m_contextID, SparkContextConstants.PREPARE_CONTEXT_JOB_ID)
             .createRun(prepInput).run(m_contextID);
     }
