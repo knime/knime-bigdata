@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Hive Connector
 Bundle-SymbolicName: com.knime.bigdata.hive;singleton:=true
 Bundle-Version: 3.2.0.qualifier
+Bundle-Activator: com.knime.bigdata.hive.HivePlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.hive.utility
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
@@ -16,4 +17,3 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  com.knime.bigdata.commons;bundle-version="3.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: com.knime.bigdata.hive.HivePlugin

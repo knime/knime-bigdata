@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data File Handling
 Bundle-SymbolicName: com.knime.bigdata.filehandling;singleton:=true
 Bundle-Version: 3.2.0.qualifier
+Bundle-Activator: com.knime.bigdata.hdfs.FileHandlingPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.hdfs.filehandler
 Require-Bundle: com.knime.bigdata.cdh5;bundle-version="5.1.100",
@@ -17,4 +18,3 @@ Require-Bundle: com.knime.bigdata.cdh5;bundle-version="5.1.100",
  org.eclipse.ui.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: com.knime.bigdata.hdfs.FileHandlingPlugin

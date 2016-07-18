@@ -26,7 +26,7 @@ by the copyright owner.
 In case of any questions, please contact KNIME.com at contact@knime.com
    </license>
 
-     <plugin
+   <plugin
          id="com.knime.bigdata.spark.core"
          download-size="0"
          install-size="0"
