@@ -15,6 +15,7 @@ import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.context.JobController;
 import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.context.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.GetJobStatusRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.JobAlreadyFinishedException;
@@ -64,6 +65,18 @@ class JobserverJobController implements JobController {
 
     private final String m_jobserverAppName;
 
+    /**
+     * Starting with pull request 469, Spark jobserver has a configuration flag
+     * shiro.use-as-proxy-user. If it is on /and/ authentication is on, then
+     * all contexts an authenticated user 'joe' creates will impersonate this user (Hadoop impersonation)
+     * AND will have a different name, e.g. joe~myContextName (instead of just myContextName).
+     *
+     * This name needs to be specified for each job user joe executes. If this variable is true
+     * and authentication is on, then job submission will use a context name of the form userName~contextName
+     * instead of just contextName.
+     */
+    private boolean m_prependUserToContextName;
+
     JobserverJobController(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName,
         final RestClient restClient, final String jobserverJobClass) {
         m_contextId = contextId;
@@ -71,6 +84,7 @@ class JobserverJobController implements JobController {
         m_jobserverAppName = jobserverAppName;
         m_restClient = restClient;
         m_jobserverJobClass = jobserverJobClass;
+        m_prependUserToContextName = false;
     }
 
     /**
@@ -210,8 +224,45 @@ class JobserverJobController implements JobController {
         final String jobClassName = job.getJobClass().getCanonicalName();
 
         LOGGER.debug("Submitting Spark job: " + jobClassName);
-        JsonObject jsonResponse = new StartJobRequest(m_contextId, m_contextConfig, m_jobserverAppName, m_restClient, m_jobserverJobClass,
-            jobClassName, job.getInput(), inputFilesOnServer).send();
+
+        JsonObject jsonResponse;
+
+        try {
+            jsonResponse =
+                new StartJobRequest(m_contextId,
+                    m_contextConfig,
+                    m_jobserverAppName,
+                    m_prependUserToContextName,
+                    m_restClient,
+                    m_jobserverJobClass,
+                    jobClassName,
+                    job.getInput(),
+                    inputFilesOnServer).send();
+        } catch (SparkContextNotFoundException e) {
+            if (!m_contextConfig.useAuthentication()) {
+                throw e;
+            }
+            // if authentication is on, then first we try to toggle m_prependUserToContextName,
+            // because we do not know whether jobserver has shiro.use-as-proxy-user on or off.
+            try {
+                jsonResponse = new StartJobRequest(m_contextId,
+                    m_contextConfig,
+                    m_jobserverAppName,
+                    !m_prependUserToContextName,
+                    m_restClient,
+                    m_jobserverJobClass,
+                    jobClassName,
+                    job.getInput(),
+                    inputFilesOnServer).send();
+
+                // if we are here, toggling m_prependUserToContextName worked, so we memorize that
+                m_prependUserToContextName = !m_prependUserToContextName;
+            } catch (SparkContextNotFoundException toIgnore) {
+                // if we are here, toggling m_prependUserToContextName did NOT work.
+                // The context apparently does not exist anymore, hence we rethrow the original exception
+                throw e;
+            }
+        }
 
         return jsonResponse.getJsonObject("result").getString("jobId");
     }
