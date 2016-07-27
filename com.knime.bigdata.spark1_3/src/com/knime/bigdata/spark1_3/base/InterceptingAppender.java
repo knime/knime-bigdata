@@ -86,7 +86,6 @@ public class InterceptingAppender implements Appender {
 
     @Override
     public void doAppend(final LoggingEvent event) {
-    	System.out.println("event: "  + event.getLevel().toInt() + " threhold: " +  m_log4jLogLevelThreshold);
         if (event != null && event.getLevel().toInt() >= m_log4jLogLevelThreshold && m_logMessages.size() <= 100) {
             m_logMessages.add(new LogMessage(event.getLevel().toInt(), event.getTimeStamp(), event.getLoggerName(),
                 event.getRenderedMessage()));
