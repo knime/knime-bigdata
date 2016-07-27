@@ -4,6 +4,7 @@ Bundle-Name: KNIME Cloudera Impala Connector
 Bundle-SymbolicName: com.knime.bigdata.impala;singleton:=true
 Bundle-Version: 3.2.0.qualifier
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Export-Package: com.knime.bigdata.impala.utility
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  org.knime.core;bundle-version="[3.0.0,4.0.0)",
  org.knime.base;bundle-version="[3.0.0,4.0.0)",
@@ -12,6 +13,5 @@ Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  com.knime.bigdata.filehandling;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
  com.knime.bigdata.commons
-Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.knime.bigdata.impala.utility
+Bundle-ActivationPolicy: lazy
