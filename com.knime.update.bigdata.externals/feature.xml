@@ -2,7 +2,7 @@
 <feature
       id="com.knime.update.bigdata.externals"
       label="External plug-ins"
-      version="3.2.0.qualifier">
+      version="1.6.0.qualifier">
 
    <includes
          id="com.knime.features.bigdata.externals"
