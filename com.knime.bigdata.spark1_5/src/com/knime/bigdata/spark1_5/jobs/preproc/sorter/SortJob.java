@@ -54,7 +54,7 @@ public class SortJob implements SimpleSparkJob<SortJobInput> {
         final Integer[] colIdxs = input.getFeatureColIdxs();
         final Boolean[] sortOrders = input.isSortDirectionAscending();
         final Boolean missingToEnd = input.missingToEnd();
-        System.out.println("Missing to end? " + missingToEnd);
+        LOGGER.debug("Missing to end? " + missingToEnd);
         final JavaRDD<Row> res = execute(sparkContext.defaultMinPartitions(), rowRDD, colIdxs, sortOrders, missingToEnd);
         namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), res);
 
