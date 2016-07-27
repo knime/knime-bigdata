@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.knime.features.testing.bigdata"
+      label="KNIME.com bigdata testing"
+      version="3.3.0.qualifier"
+      provider-name="KNIME.com, Zurich, Switzerland">
+</feature>
