@@ -209,11 +209,13 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
     }
 
     private String getRDDFromPortObjects(final PortObject[] inData, final int index) {
-        if (inData == null || index >= inData.length || inData[index] == null) {
-            return null;
-        } else {
-            return ((SparkDataPortObject)inData[index]).getTableName();
+        String rddIDToReturn = null;
+
+        if (inData != null && index < inData.length && inData[index] instanceof SparkDataPortObject) {
+            rddIDToReturn = ((SparkDataPortObject)inData[index]).getTableName();
         }
+
+        return rddIDToReturn;
     }
 
     /**
@@ -222,7 +224,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
      * @throws InvalidSettingsException
      */
     protected SparkVersion getSparkVersion(final Object[] inData) throws InvalidSettingsException {
-        return SparkContextManager.getOrCreateSparkContext(getContextID(inData)).getSparkVersion();
+        return SparkContextUtil.getSparkVersion(getContextID(inData));
     }
 
     /**

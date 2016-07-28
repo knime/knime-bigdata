@@ -37,15 +37,11 @@ public class NormalizeColumnsJob implements SparkJob<NormalizeJobInput, Normaliz
         LOGGER.info("starting normalization job...");
 
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        System.out.println("Prior execute");
         final Integer[] cols = input.getIncludeColIdxs();
         final NormalizedRDDContainer normalizeContainer = RDDUtilsInJava.normalize(rowRDD, Arrays.asList(cols), input.getNormalizationSettings());
         JavaRDD<Row> normalizedRDD = normalizeContainer.normalizeRDD(rowRDD, Arrays.asList(cols));
-        System.out.println("After execute");
         namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), normalizedRDD);
-        System.out.println("Prior output");
         final NormalizeJobOutput output = new NormalizeJobOutput(normalizeContainer.getScales(), normalizeContainer.getTranslations());
-        System.out.println("After output");
         LOGGER.info("done");
         return output;
     }

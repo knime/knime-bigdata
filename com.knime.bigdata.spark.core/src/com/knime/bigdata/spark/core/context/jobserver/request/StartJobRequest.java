@@ -46,7 +46,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
 
     private final static NodeLogger LOGGER = NodeLogger.getLogger(StartJobRequest.class);
 
-    private String m_jobserverAppName;
+    private final String m_jobserverAppName;
 
     private final String m_jobserverJobClass;
 
@@ -56,36 +56,55 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
 
     private final String m_sparkJobClass;
 
-    /**
-     * @param contextId
-     * @param contextConfig
-     * @param jobserverAppName
-     * @param restClient
-     * @param jobserverJobClass
-     * @param sparkJobClass
-     * @param jobInput Job configuration rendered as HOCON
-     */
-    public StartJobRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName, final RestClient restClient,
-        final String jobserverJobClass, final String sparkJobClass, final JobInput jobInput) {
-        this(contextId, contextConfig, jobserverAppName, restClient, jobserverJobClass, sparkJobClass, jobInput, null);
-    }
+    private final boolean m_prependUserToContextName;
 
     /**
      * @param contextId
      * @param contextConfig
      * @param jobserverAppName
+     * @param prependUserToContextName
      * @param restClient
      * @param jobserverJobClass
      * @param sparkJobClass
      * @param jobInput Job configuration rendered as HOCON
      * @param inputFilesOnServer
      */
-    public StartJobRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName, final RestClient restClient,
-        final String jobserverJobClass, final String sparkJobClass, final JobInput jobInput,
+    public StartJobRequest(final SparkContextID contextId,
+        final SparkContextConfig contextConfig,
+        final String jobserverAppName,
+        final boolean prependUserToContextName,
+        final RestClient restClient,
+        final String jobserverJobClass,
+        final String sparkJobClass,
+        final JobInput jobInput) {
+
+        this(contextId, contextConfig, jobserverAppName, prependUserToContextName, restClient, jobserverJobClass, sparkJobClass, jobInput, null);
+    }
+
+    /**
+     * @param contextId
+     * @param contextConfig
+     * @param jobserverAppName
+     * @param prependUserToContextName
+     * @param restClient
+     * @param jobserverJobClass
+     * @param sparkJobClass
+     * @param jobInput Job configuration rendered as HOCON
+     * @param inputFilesOnServer
+     */
+    public StartJobRequest(final SparkContextID contextId,
+        final SparkContextConfig contextConfig,
+        final String jobserverAppName,
+        final boolean prependUserToContextName,
+        final RestClient restClient,
+        final String jobserverJobClass,
+        final String sparkJobClass,
+        final JobInput jobInput,
         final List<String> inputFilesOnServer) {
 
         super(contextId, contextConfig, restClient, JobserverConstants.MAX_REQUEST_ATTEMTPS);
         m_jobserverAppName = jobserverAppName;
+        m_prependUserToContextName = prependUserToContextName;
         m_jobserverJobClass = jobserverJobClass;
         m_sparkJobClass = sparkJobClass;
         m_jobInput = jobInput;
@@ -109,9 +128,14 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
         final String serializedjsInput = TypesafeConfigSerializationUtils
             .serializeToTypesafeConfig(jsInput.getInternalMap()).root().render(ConfigRenderOptions.concise());
 
+        String contextName = m_config.getContextName();
+        if (m_prependUserToContextName) {
+            contextName = m_config.getUser() + "~" + contextName;
+        }
+
         final Response response =
             m_client.post(JobserverConstants.JOBS_PATH, new String[]{"appName", m_jobserverAppName, "context",
-                m_config.getContextName(), "classPath", m_jobserverJobClass}, Entity.text(serializedjsInput));
+                contextName, "classPath", m_jobserverJobClass}, Entity.text(serializedjsInput));
 
         final ParsedResponse parsedResponse =
             JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
