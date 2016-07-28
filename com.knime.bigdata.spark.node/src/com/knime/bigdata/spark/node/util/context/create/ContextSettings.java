@@ -278,6 +278,11 @@ public class ContextSettings {
         } else {
             validateSettings_v1_6(settings);
         }
+
+        // Load settings into a temporary object + migrate data if required and validate it
+        ContextSettings contextSettings = new ContextSettings();
+        contextSettings.loadSettingsFrom(settings);
+        contextSettings.validateSettings();
     }
 
     public void validateSettingsLegacy(final NodeSettingsRO settings) throws InvalidSettingsException {
