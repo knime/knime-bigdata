@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Priority;
-
 import com.knime.bigdata.spark.core.job.JobData;
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;

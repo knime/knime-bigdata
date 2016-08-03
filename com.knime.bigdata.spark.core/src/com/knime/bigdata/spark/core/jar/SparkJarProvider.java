@@ -36,4 +36,13 @@ public interface SparkJarProvider extends SparkProvider {
      * @param collector the {@link JarCollector} that collects all java classes that should be send to the Spark cluster
      */
     void collect(final JarCollector collector);
+
+    /**
+     * Invoked to build the job jar descriptor, that lists all the providers. A provider is usually an
+     * OSGI bundle. The provider ID must also contain version information. An example provider ID
+     * would be: com.knime.bigdata.spark.core_1.6.0.v201607081132
+     *
+     * @return the provider ID as a String.
+     */
+    String getProviderID();
 }

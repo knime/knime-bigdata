@@ -36,6 +36,8 @@ import org.eclipse.osgi.internal.loader.EquinoxClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.knime.core.node.NodeLogger;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
@@ -48,6 +50,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
+@SuppressWarnings("restriction")
 public class DefaultSparkJarProvider implements SparkJarProvider {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(DefaultSparkJarProvider.class);
@@ -119,7 +122,6 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
      * @param collector the {@link JarCollector} that collects all java classes that should be send to the Spark cluster
      */
     @Override
-    @SuppressWarnings("restriction")
     public void collect(final JarCollector collector) {
         final long startTime = System.currentTimeMillis();
 
@@ -142,6 +144,16 @@ public class DefaultSparkJarProvider implements SparkJarProvider {
         }
 
         LOGGER.debugWithFormat("Time for for collecting classes: %d millis", System.currentTimeMillis() - startTime);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getProviderID() {
+        // this also works (and *must* work) for subclasses of DefaultSparkJarProvider that are not in spark.core
+        final Bundle bundle = FrameworkUtil.getBundle(getClass());
+        return String.format("%s:%s", bundle.getSymbolicName(), bundle.getVersion().toString());
     }
 
     /**
