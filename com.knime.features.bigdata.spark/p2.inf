@@ -1,2 +1,2 @@
-update.matchExp = providedCapabilities.exists(pc | pc.namespace == 'org.eclipse.equinox.p2.iu' && (pc.name == 'com.knime.features.bigdata.spark.feature.group' || pc.name == 'com.knime.features.bigdata.spark1_3.feature.group') && pc.version < '1.6.0.v201607290000')
+update.matchExp = providedCapabilities.exists(pc | pc.namespace == 'org.eclipse.equinox.p2.iu' && (pc.name == 'com.knime.features.bigdata.spark.feature.group' || pc.name == 'com.knime.features.bigdata.spark1_3.feature.group') && pc.version < '1.6.0.v201608030000')
 update.severity = 1
