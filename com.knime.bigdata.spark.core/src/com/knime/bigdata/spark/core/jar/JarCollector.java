@@ -81,5 +81,19 @@ public interface JarCollector {
      */
     void addJarEntry(JarEntry je, InputStream is);
 
+    /**
+     * Sets the class that is used on Spark jobserver to run Spark jobs.
+     *
+     * @param jobserverJobClass
+     */
     void setJobserverJobClass(String jobserverJobClass);
+
+
+    /**
+     * Adds the ID of a jar provider to the job jar descriptor.
+     *
+     * @since 1.6.0.20160803 (i.e. added as part of issue BD-175 *after* the July 2016 release)
+     * @param providerID
+     */
+    void addProviderID(final String providerID);
 }

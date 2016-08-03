@@ -35,6 +35,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -67,6 +68,8 @@ public class FileBasedJarCollector implements JarCollector {
 
     private final MessageDigest m_digest;
 
+    private final Set<String> m_providerIDs;
+
     private JobJar m_jobJar;
 
     private String m_jobserverJobClass;
@@ -92,6 +95,8 @@ public class FileBasedJarCollector implements JarCollector {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Could not create SHA-1 hash of job jar", e);
         }
+
+        m_providerIDs = new HashSet<String>();
     }
 
     /**
@@ -135,7 +140,7 @@ public class FileBasedJarCollector implements JarCollector {
         final Version sparkCorePluginVersion = FrameworkUtil.getBundle(JarPacker.class).getVersion();
 
         final JobJarDescriptor jarInfo = new JobJarDescriptor(sparkCorePluginVersion.toString(),
-            m_sparkVersion.toString(), sha1Hex, m_jobserverJobClass);
+            m_sparkVersion.toString(), sha1Hex, m_jobserverJobClass, m_providerIDs);
 
         return jarInfo;
     }
@@ -164,8 +169,6 @@ public class FileBasedJarCollector implements JarCollector {
         if (m_jobJar != null) {
             throw new IllegalStateException("Job jar has already been finalized");
         }
-
-        addToDigest(jar.getName());
 
         try (final JarFile jarFile = new JarFile(jar)) {
             JarPacker.copyJarFile(jarFile, m_jos, filterPredicates);
@@ -205,8 +208,6 @@ public class FileBasedJarCollector implements JarCollector {
             throw new IllegalStateException("Job jar has already been finalized");
         }
 
-        addToDigest(entryName);
-
         try (final BufferedInputStream is = new BufferedInputStream(new FileInputStream(file))) {
             JarPacker.copyEntry(entryName, is, m_jos);
         } catch (Exception e) {
@@ -223,7 +224,6 @@ public class FileBasedJarCollector implements JarCollector {
             throw new IllegalStateException("Job jar has already been finalized");
         }
 
-        addToDigest(je.getName());
         try {
             JarPacker.copyEntry(je.getName(), is, m_jos);
         } catch (IOException e) {
@@ -249,5 +249,15 @@ public class FileBasedJarCollector implements JarCollector {
     @Override
     public void setJobserverJobClass(final String jobserverJobClass) {
         m_jobserverJobClass = jobserverJobClass;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addProviderID(final String providerID) {
+        if (m_providerIDs.add(providerID)) {
+            addToDigest(providerID);
+        }
     }
 }

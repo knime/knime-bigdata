@@ -272,7 +272,7 @@ public class JobserverSparkContext extends SparkContext {
                     String.format("No Spark jobs for Spark version %s found.", m_config.getSparkVersion().getLabel()));
             }
 
-            m_jobserverAppName = createJobserverAppname(m_config.getSparkVersion());
+            m_jobserverAppName = createJobserverAppname(m_config.getSparkVersion(), m_jobJar.getDescriptor().getHash());
         }
     }
 
@@ -280,9 +280,10 @@ public class JobserverSparkContext extends SparkContext {
      * @return the "app name" for the jobserver, which is an identifier for the uploaded job jar, that has to be
      *         specified with each job.
      */
-    private String createJobserverAppname(final SparkVersion sparkVersion) {
+    private String createJobserverAppname(final SparkVersion sparkVersion, final String jobJarHash) {
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
-        return String.format("knimeJobs_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
+        return String.format("knimeJobs_%s_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
+            jobJarHash,
             m_config.getSparkVersion().getLabel());
     }
 
