@@ -23,7 +23,10 @@ package com.knime.bigdata.spark.core.jar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
@@ -42,27 +45,47 @@ public class JobJarDescriptor {
 
     private static final String KEY_JOBSERVER_JOB_CLASS = "jobserverJobClass";
 
-    /**The file name of the job jar info object.*/
+    private static final String KEY_PROVIDER_IDS = "providerIDs";
+
+    /** The file name of the job jar info object. */
     public static final String FILE_NAME = "KNIMEJobJarDescriptor.properties";
 
+    private final String m_hash;
 
-    private String m_hash;
+    private final String m_pluginVersion;
 
-    private String m_pluginVersion;
+    private final String m_sparkVersion;
 
-    private String m_sparkVersion;
+    private final String m_jobserverJobClass;
 
-    private String m_jobserverJobClass;
+    /**
+     * A set of provider IDs that have contributed
+     *
+     * @since 1.6.0.20160803 (i.e. added as part of issue BD-175 *after* the July 2016 release)
+     */
+    private final Set<String> m_providerIDs;
 
-    public JobJarDescriptor(final String pluginVersion, final String sparkVersion, final String hash, final String jobserverJobClass) {
+    /**
+     * Creates a new job jar descriptor.
+     *
+     * @param pluginVersion
+     * @param sparkVersion
+     * @param hash
+     * @param jobserverJobClass
+     * @param providerIDs
+     */
+    public JobJarDescriptor(final String pluginVersion, final String sparkVersion, final String hash,
+        final String jobserverJobClass, final Set<String> providerIDs) {
         m_pluginVersion = pluginVersion;
         m_sparkVersion = sparkVersion;
         m_hash = hash;
         m_jobserverJobClass = jobserverJobClass;
+        m_providerIDs = providerIDs;
     }
 
     /**
-     * @return the hash
+     * @return a hash that is computed over the contents of the jar file (or other information that uniquely identifies
+     *         the contents of the file).
      */
     public String getHash() {
         return m_hash;
@@ -83,6 +106,14 @@ public class JobJarDescriptor {
     }
 
     /**
+     *
+     * @return the IDs (including version strings) of plugins that have contributed classes to the jar file
+     */
+    public Set<String> getProviderIDs() {
+        return m_providerIDs;
+    }
+
+    /**
      * @return the Spark Jobserver job class, or null, if no class has been registered.
      */
     public String getJobserverJobClass() {
@@ -97,8 +128,35 @@ public class JobJarDescriptor {
     public static JobJarDescriptor load(final InputStream is) throws IOException {
         Properties prop = new Properties();
         prop.load(is);
+
         return new JobJarDescriptor(prop.getProperty(KEY_PLUGIN_VERSION), prop.getProperty(KEY_SPARK_VERSION),
-            prop.getProperty(KEY_JOB_JAR_HASH), prop.getProperty(KEY_JOBSERVER_JOB_CLASS));
+            prop.getProperty(KEY_JOB_JAR_HASH), prop.getProperty(KEY_JOBSERVER_JOB_CLASS),
+            parseProviderIDs(prop.getProperty(KEY_PROVIDER_IDS)));
+    }
+
+    private static Set<String> parseProviderIDs(final String providerIds) {
+        final Set<String> providerIDs = new HashSet<String>();
+
+        if (providerIds != null) {
+            providerIDs.addAll(Arrays.asList(providerIds.split(",")));
+        }
+
+        return providerIDs;
+    }
+
+    private String serializeProviderIDs(final Set<String> providerIDs) {
+        final StringBuilder buf = new StringBuilder();
+
+        for(String providerID : providerIDs) {
+            buf.append(providerID);
+            buf.append(",");
+        }
+
+        if (!providerIDs.isEmpty()) {
+            buf.deleteCharAt(buf.length() -1);
+        }
+
+        return buf.toString();
     }
 
     /**
@@ -113,6 +171,7 @@ public class JobJarDescriptor {
         if (getJobserverJobClass() != null) {
             prop.setProperty(KEY_JOBSERVER_JOB_CLASS, getJobserverJobClass());
         }
+        prop.setProperty(KEY_PROVIDER_IDS, serializeProviderIDs(getProviderIDs()));
         prop.store(os, "KNIME Job jar information");
     }
 }

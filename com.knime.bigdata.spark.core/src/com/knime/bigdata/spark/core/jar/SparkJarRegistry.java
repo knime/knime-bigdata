@@ -59,10 +59,12 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
                 m_collector = new FileBasedJarCollector(m_version);
 
                 for (final BaseSparkJarProvider baseProvider : m_baseProviders) {
+                    m_collector.addProviderID(baseProvider.getProviderID());
                     baseProvider.collect(m_collector);
                 }
 
                 for (final SparkJarProvider provider : m_registeredJarProviders) {
+                    m_collector.addProviderID(provider.getProviderID());
                     provider.collect(m_collector);
                 }
 
