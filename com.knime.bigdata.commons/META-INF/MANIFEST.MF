@@ -3,7 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Commons
 Bundle-SymbolicName: com.knime.bigdata.commons;singleton:=true
 Bundle-Version: 3.2.0.qualifier
+Bundle-ClassPath: knime_bd_commons.jar
+Bundle-Activator: com.knime.bigdata.commons.CommonsPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Export-Package: com.knime.bigdata.commons.config,
+ com.knime.bigdata.commons.security.kerberos
 Require-Bundle: com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
  org.eclipse.jface,
  org.eclipse.ui.workbench,
@@ -12,7 +16,3 @@ Require-Bundle: com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
  com.knime.bigdata.cdh5;bundle-version="5.1.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: knime_bd_commons.jar
-Export-Package: com.knime.bigdata.commons.config,
- com.knime.bigdata.commons.security.kerberos
-Bundle-Activator: com.knime.bigdata.commons.CommonsPlugin
