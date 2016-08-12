@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Testing support for Hive nodes
 Bundle-SymbolicName: com.knime.bigdata.hive.testing;singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-Vendor: KNIME
 Fragment-Host: com.knime.bigdata.hive;bundle-version="[3.2.0,4.0.0)"
 Require-Bundle: org.knime.testing;bundle-version="[3.0.0,4.0.0)"
