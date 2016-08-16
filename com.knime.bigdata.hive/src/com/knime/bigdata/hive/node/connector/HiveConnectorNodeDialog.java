@@ -40,6 +40,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.util.StringHistoryPanel;
 
+import com.knime.bigdata.commons.icons.BigDataIcons;
+import com.knime.bigdata.hive.utility.HiveDriverDetector;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -61,6 +63,15 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
             m_c.fill = GridBagConstraints.HORIZONTAL;
             m_c.weightx = 1;
             add(m_parameter, m_c);
+
+            m_c.gridx = 0;
+            m_c.gridy++;
+            add(new JLabel("Driver "), m_c);
+
+            m_c.gridy++;
+            m_c.fill = GridBagConstraints.HORIZONTAL;
+            m_c.weightx = 1;
+            add(m_driver, m_c);
         }
 
         /**
@@ -75,6 +86,8 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
 
     private final StringHistoryPanel m_parameter = new StringHistoryPanel(getClass().getName() + "_parameter    ");
+
+    private final JLabel m_driver = new JLabel();
 
     private final HiveConnectionPanel m_connectionPanel = new HiveConnectionPanel(m_settings);
 
@@ -126,6 +139,18 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
         m_parameter.setSelectedString(m_settings.getParameter());
         m_parameter.commitSelectedToHistory();
         m_parameter.updateHistory();
+
+        if (!HiveDriverDetector.getDriverName().equals(m_settings.getDriver())) {
+            m_driver.setIcon(BigDataIcons.WARNING_ICON);
+            m_driver.setToolTipText(String.format(
+                "Clicking 'OK' or 'Apply' will change the driver to the one displayed and the node will be reset.",
+                m_settings.getDriver()));
+            m_driver.setText(HiveDriverDetector.mapToPrettyDriverName(HiveDriverDetector.getDriverName()));
+        } else {
+            m_driver.setIcon(null);
+            m_driver.setToolTipText(null);
+            m_driver.setText(HiveDriverDetector.mapToPrettyDriverName(m_settings.getDriver()));
+        }
     }
 
     /**
@@ -138,6 +163,7 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
         m_tzPanel.saveSettings();
         m_miscPanel.saveSettings(getCredentialsProvider());
         m_settings.setParameter(m_parameter.getSelectedString());
+        m_settings.setDriver(HiveDriverDetector.getDriverName());
         m_parameter.commitSelectedToHistory();
         m_settings.saveConnection(settings);
     }

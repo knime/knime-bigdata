@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.sql.SQLException;
-import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -44,8 +43,8 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
-import org.knime.core.node.port.database.DatabaseUtility;
 
+import com.knime.bigdata.impala.utility.ImpalaDriverDetector;
 import com.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
@@ -56,8 +55,6 @@ import com.knime.bigdata.impala.utility.ImpalaUtility;
 class ImpalaConnectorNodeModel extends NodeModel {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ImpalaConnectorNodeModel.class);
-
-    private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.impala.jdbc41.Driver";
 
     private final ImpalaConnectorSettings m_settings = new ImpalaConnectorSettings();
 
@@ -71,33 +68,25 @@ class ImpalaConnectorNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
-        final String driverName;
-        if (clouderaDriverAvailable()) {
-            LOGGER.debug("Cloudera driver found using Impala driver:" + CLOUDERA_DRIVER_NAME);
-            driverName = CLOUDERA_DRIVER_NAME;
-        } else {
-            driverName = ImpalaUtility.DRIVER;
+
+        if (!ImpalaDriverDetector.getDriverName().equals(m_settings.getDriver())) {
+            setWarningMessage(String.format("Using %s\ninstead of %s",
+                ImpalaDriverDetector.mapToPrettyDriverName(ImpalaDriverDetector.getDriverName()),
+                ImpalaDriverDetector.mapToPrettyDriverName(m_settings.getDriver())));
+            m_settings.setDriver(ImpalaDriverDetector.getDriverName());
         }
-        m_settings.setDriver(driverName);
+
+        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
+            throw new InvalidSettingsException("No hostname for database server given");
+        }
 
         final String userName = m_settings.getUserName(getCredentialsProvider());
         if (!m_settings.useKerberos() && (m_settings.getCredentialName() == null)
                 && ((userName == null) || userName.isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
         }
-        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
-            throw new InvalidSettingsException("No hostname for database server given");
-        }
 
         return new PortObjectSpec[]{createSpec()};
-    }
-
-    /**
-     * @return <code>true</code> if the Cloudera driver has been registered
-     */
-    private static boolean clouderaDriverAvailable() {
-        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
-        return externalDriver.contains(CLOUDERA_DRIVER_NAME);
     }
 
     private DatabaseConnectionPortObjectSpec createSpec() {
@@ -115,7 +104,7 @@ class ImpalaConnectorNodeModel extends NodeModel {
     static String getJDBCURL(final ImpalaConnectorSettings settings) {
         final String pwd = settings.getPassword(null);
         final StringBuilder buf = new StringBuilder();
-        if (clouderaDriverAvailable()) {
+        if (ImpalaDriverDetector.clouderaDriverAvailable()) {
             buf.append("jdbc:impala://" + settings.getHost() + ":" + settings.getPort());
             //append database
             buf.append("/" + settings.getDatabaseName());

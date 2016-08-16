@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.sql.SQLException;
-import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -44,8 +43,8 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
-import org.knime.core.node.port.database.DatabaseUtility;
 
+import com.knime.bigdata.hive.utility.HiveDriverDetector;
 import com.knime.bigdata.hive.utility.HiveUtility;
 
 /**
@@ -55,7 +54,6 @@ import com.knime.bigdata.hive.utility.HiveUtility;
  */
 class HiveConnectorNodeModel extends NodeModel {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveConnectorNodeModel.class);
-    private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.hive.jdbc41.HS2Driver";
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
 
     HiveConnectorNodeModel() {
@@ -68,22 +66,23 @@ class HiveConnectorNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-        final String driverName;
-        if (clouderaDriverAvailable()) {
-            driverName = CLOUDERA_DRIVER_NAME;
-            LOGGER.debug("Cloudera Hive driver found using driver: " + driverName);
-        } else {
-            driverName = HiveUtility.DRIVER;
+
+        if (!HiveDriverDetector.getDriverName().equals(m_settings.getDriver())) {
+            setWarningMessage(String.format("Using %s\ninstead of %s",
+                HiveDriverDetector.mapToPrettyDriverName(HiveDriverDetector.getDriverName()),
+                HiveDriverDetector.mapToPrettyDriverName(m_settings.getDriver())));
+            m_settings.setDriver(HiveDriverDetector.getDriverName());
         }
-        m_settings.setDriver(driverName);
+
+
+        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
+            throw new InvalidSettingsException("No hostname for database server given");
+        }
 
         if (!m_settings.useKerberos() && (m_settings.getCredentialName() == null)
                 && ((m_settings.getUserName(getCredentialsProvider()) == null) || m_settings.getUserName(
                     getCredentialsProvider()).isEmpty())) {
             throw new InvalidSettingsException("No credentials or username for authentication given");
-        }
-        if ((m_settings.getHost() == null) || m_settings.getHost().isEmpty()) {
-            throw new InvalidSettingsException("No hostname for database server given");
         }
 
         return new PortObjectSpec[]{createSpec()};
@@ -95,14 +94,6 @@ class HiveConnectorNodeModel extends NodeModel {
         s.setJDBCUrl(getJDBCURL(m_settings));
         final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(s);
         return spec;
-    }
-
-    /**
-     * @return <code>true</code> if the Cloudera driver has been registered
-     */
-    private static boolean clouderaDriverAvailable() {
-        final Set<String> externalDriver = DatabaseUtility.getJDBCDriverClasses();
-        return externalDriver.contains(CLOUDERA_DRIVER_NAME);
     }
 
     static String getJDBCURL(final HiveConnectorSettings settings) {
