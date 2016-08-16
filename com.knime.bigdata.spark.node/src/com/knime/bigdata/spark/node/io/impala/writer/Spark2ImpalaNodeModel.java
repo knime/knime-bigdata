@@ -25,6 +25,7 @@ import java.sql.SQLException;
 
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 
 import com.knime.bigdata.impala.utility.ImpalaUtility;
@@ -36,6 +37,8 @@ import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
  */
 public class Spark2ImpalaNodeModel extends Spark2HiveNodeModel {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark2ImpalaNodeModel.class);
+
     @Override
     protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec) throws InvalidSettingsException {
         if (!ImpalaUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
@@ -44,13 +47,19 @@ public class Spark2ImpalaNodeModel extends Spark2HiveNodeModel {
     }
 
     /**
-     * Metadata is held in memory, thus after creation of the impala table a REFRESH table_name statement has to
+     * Metadata is held in memory, thus after creation of the impala table an "INVALIDATE METADATA table_name" statement has to
      * to be issued to make the table visible in Impala.
      * @throws SQLException
      */
     @Override
     protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec) throws SQLException {
-        exec.setMessage("Issuing statement: REFRESH" + tableName);
-        connection.createStatement().execute("REFRESH " + tableName);
+
+        exec.setMessage("Invalidating impala metadata");
+        final String invalidateStatement = "INVALIDATE METADATA " + tableName;
+        LOGGER.info("Executing: \"" + invalidateStatement + "\"");
+        connection.createStatement().execute(invalidateStatement);
+        final String describeStatement = "DESCRIBE " + tableName;
+        LOGGER.info("Executing: \"" + describeStatement + "\"");
+        connection.createStatement().execute(describeStatement);
     }
 }

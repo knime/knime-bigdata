@@ -24,6 +24,8 @@ import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory;
+import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
@@ -129,9 +131,9 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkAccuracyScorerNodeFactory(),
             new SparkEntropyScorerNodeFactory(),
             new SparkNumericScorerNodeFactory(),
-            new SparkContextCreatorNodeFactory());
-            //new Spark2ImpalaNodeFactory(),
-            //new Impala2SparkNodeFactory());
+            new SparkContextCreatorNodeFactory(),
+            new Spark2ImpalaNodeFactory(),
+            new Impala2SparkNodeFactory());
     }
 
 }
