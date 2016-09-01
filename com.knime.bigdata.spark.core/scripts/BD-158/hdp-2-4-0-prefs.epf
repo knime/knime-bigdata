@@ -1,0 +1,23 @@
+#Thu Jul 21 17:55:09 CEST 2016
+/instance/org.eclipse.ui.browser/internalWebBrowserHistory=file\:/tmp/intro3381301326288749693.html|*|file\:/tmp/intro7581631439870102894.html|*|
+@org.knime.workbench.core=3.2.0.v201606131354
+/instance/org.knime.workbench.core/knime.askedToSendStatistics=true
+\!/=
+@org.eclipse.core.net=1.2.300.v20141118-1725
+/configuration/org.eclipse.ui.ide/SHOW_WORKSPACE_SELECTION_DIALOG=true
+@com.knime.bigdata.spark.core=1.6.0.v201607061823
+/instance/org.eclipse.core.resources/version=1
+@org.eclipse.ui.browser=3.4.300.v20150429-0602
+/instance/org.eclipse.ui.workbench//org.eclipse.ui.commands/state/org.eclipse.ui.navigator.resources.nested.changeProjectPresentation/org.eclipse.ui.commands.radioState=false
+/instance/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
+/instance/com.knime.bigdata.spark.core/com.knime.bigdata.spark.v1_6.jobserver.context.sparkVersion=1.6
+@org.eclipse.core.resources=3.10.0.v20150423-0755
+@org.eclipse.ui.workbench=3.107.0.v20150510-1732
+/instance/com.knime.bigdata.spark.core/com.knime.bigdata.spark.v1_6.jobserver.connection.url=http\://vmhostname\:8090/
+/instance/com.knime.bigdata.spark.core/com.knime.bigdata.spark.v1_6.initialized=true
+/configuration/org.eclipse.ui.ide/RECENT_WORKSPACES_PROTOCOL=3
+/configuration/org.eclipse.ui.ide/MAX_RECENT_WORKSPACES=5
+/configuration/org.eclipse.ui.ide/RECENT_WORKSPACES=/home/oole/sparkspace\n/home/oole/knime-workspace
+/instance/org.knime.workbench.core/database_timeout=2000
+/configuration/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
+file_export_version=3.0
