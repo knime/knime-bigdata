@@ -71,8 +71,8 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             if (configContainer.hasHdfsSiteConfig()) {
                 conf.addResource(configContainer.getHdfsSiteConfig());
             }
-            final UserGroupInformation ugi = UserGroupUtil.getUser(conf, user);
-            final Properties props = createConnectionProperties(user, pass);
+            final UserGroupInformation ugi = UserGroupUtil.getKerberosUser(conf);
+            final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
             final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
                 @Override
                 public Connection run() throws Exception {
@@ -85,8 +85,8 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             });
             return con;
         } catch (Exception e) {
-            LOGGER.error("Exception creating Kerberos based Hive connection: " + e.getMessage(), e);
-            throw new SQLException("Kerberos based authentication failed. Error: " + e.getMessage(), e);
+            LOGGER.error("Exception creating Kerberos based jdbc connection: " + e.getMessage(), e);
+            throw new SQLException("Exception creating Kerberos based jdbc connection. Error: " + e.getMessage(), e);
         }
     }
 }
