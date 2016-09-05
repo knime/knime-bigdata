@@ -75,17 +75,18 @@ public class HDFSConnection extends Connection {
         }
         m_connectionInformation = connectionInformation;
         m_conf = new Configuration();
-        m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, createDefaultName(connectionInformation));
+        final String defaultName = createDefaultName(connectionInformation);
+        LOGGER.debug("Adding " + CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY + " to config: " + defaultName);
+        m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, defaultName);
         m_conf.setBoolean(CommonConfigurationKeysPublic.FS_AUTOMATIC_CLOSE_KEY, true);
         if (m_connectionInformation.useKerberos()) {
+            LOGGER.debug("Adding Kerberos settings to configuration");
             //use Kerberos based authentication
             m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
             //http://stackoverflow.com/questions/37050626/java-failed-to-specify-servers-kerberos-principal-name
             //For Hadoop version less than 2.6.2 the default pattern property is not available in hdfs-site.xml file
             //so we need to specify pattern property manually
             m_conf.set("dfs.namenode.kerberos.principal.pattern", "*");
-//        System.setProperty("java.security.krb5.realm", "EXAMPLE.COM");
-//        System.setProperty("java.security.krb5.kdc", "sandbox.example.com");
         } else {
             //or simple which is the default
             m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.SIMPLE.name());
@@ -243,20 +244,20 @@ public class HDFSConnection extends Connection {
     public synchronized void open() throws IOException {
         if (m_fs == null) {
             synchronized (CONNECTION_COUNT) {
-                final String userName;
-                if (m_connectionInformation.useKerberos()) {
-                    //ensure that no user name is used if Kerberos is enabled since the panel also reports the
-                    //user name if the field is disabled
-                    userName = null;
-                } else {
-                    userName = m_connectionInformation.getUser();
-                }
                 try {
-                    final UserGroupInformation user = UserGroupUtil.getUser(m_conf, userName);
+                    final String userName;
+                    final UserGroupInformation user;
                     if (m_connectionInformation.useKerberos()) {
+                        //ensure that no user name is used if Kerberos is enabled since the panel also reports the
+                        //user name if the field is disabled
+                        user = UserGroupUtil.getKerberosUser(m_conf);
                         //use the short Kerberos user name without the real information as user for the
                         //connection information which is used to create the hdfs path
-                        m_connectionInformation.setUser(user.getShortUserName());
+                        userName = user.getShortUserName();
+                        m_connectionInformation.setUser(userName);
+                    } else {
+                        userName = m_connectionInformation.getUser();
+                        user = UserGroupUtil.getUser(m_conf, userName);
                     }
                     m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
                         @Override
