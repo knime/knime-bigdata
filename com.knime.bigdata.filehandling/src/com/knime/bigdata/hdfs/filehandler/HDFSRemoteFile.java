@@ -54,16 +54,6 @@ public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
      * {@inheritDoc}
      */
     @Override
-    public String getPath() throws Exception {
-        //always ensure that the full hdfs path is returned
-        final String path = HDFSConnection.getAbsoluteHadoopPath(super.getPath(), getConnectionInformation().getUser());
-        return path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected boolean usesConnection() {
         return true;
     }
@@ -166,16 +156,21 @@ public class HDFSRemoteFile extends RemoteFile<HDFSConnection> {
      */
     @Override
     public HDFSRemoteFile[] listFiles() throws Exception {
-        final FileStatus[] listStatus = getOpenedConnection().listFiles(getURI());
-        if (listStatus == null) {
-            return new HDFSRemoteFile[0];
+        try {
+            final FileStatus[] listStatus = getOpenedConnection().listFiles(getURI());
+            if (listStatus == null) {
+                return new HDFSRemoteFile[0];
+            }
+            final HDFSRemoteFile[] files = new HDFSRemoteFile[listStatus.length];
+            for (int i = 0, length = listStatus.length; i < length; i++) {
+                files[i] = new HDFSRemoteFile(listStatus[i].getPath().toUri(), getConnectionInformation(),
+                    getConnectionMonitor());
+            }
+            return files;
+
+        } catch (org.apache.hadoop.security.AccessControlException e) {
+            throw new RemoteFile.AccessControlException(e);
         }
-        final HDFSRemoteFile[] files = new HDFSRemoteFile[listStatus.length];
-        for (int i = 0, length = listStatus.length; i < length; i++) {
-            files[i] = new HDFSRemoteFile(listStatus[i].getPath().toUri(), getConnectionInformation(),
-                getConnectionMonitor());
-        }
-        return files;
     }
 
     /**

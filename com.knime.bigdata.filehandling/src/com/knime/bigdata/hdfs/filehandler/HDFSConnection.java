@@ -102,9 +102,7 @@ public class HDFSConnection extends Connection {
     }
 
     private static String createDefaultName(final ConnectionInformation conInfo) {
-        final String defaultName = conInfo.getProtocol() + "://" + conInfo.getHost() + ":" + conInfo.getPort()
-                + getHadoopDefaultPath(conInfo.getUser());
-        return defaultName;
+        return conInfo.getProtocol() + "://" + conInfo.getHost() + ":" + conInfo.getPort() + "/";
     }
 
     /**
@@ -139,40 +137,12 @@ public class HDFSConnection extends Connection {
         } else {
             hdfsPath.append(connectionInformation.getPort());
         }
-        String userInfo = uri.getUserInfo();
-        if (userInfo == null) {
-            userInfo = connectionInformation.getUser();
+        if (uri.getPath() == null || uri.getPath().trim().isEmpty()) {
+            hdfsPath.append("/");
+        } else {
+            hdfsPath.append(uri.getPath());
         }
-        hdfsPath.append(getAbsoluteHadoopPath(uri.getPath(), userInfo));
         return new Path(hdfsPath.toString());
-    }
-
-    /**
-     * @param path the path to convert into an absolute hadoop path
-     * @param user the name of the user to access the file
-     * @return the absolute hdfs path
-     */
-    public static String getAbsoluteHadoopPath(final String path, final String user) {
-        final String hadoopDefaultPath = getHadoopDefaultPath(user);
-        if (path == null || path.trim().isEmpty()) {
-            //add the root path to the uri if it does not exist
-            return hadoopDefaultPath;
-        } else if (!path.startsWith("/")) {
-//            if (path.startsWith("/")) {
-//                return hadoopDefaultPath + path;
-//            }
-            return hadoopDefaultPath + "/" + path;
-        }
-        return path;
-    }
-
-    /**
-     * @param user the hadoop user
-     * @return the default hadoop path for the given user
-     */
-    public static String getHadoopDefaultPath(final String user) {
-        final String getHadoopDefaultPath = "/user/" + user;
-        return getHadoopDefaultPath;
     }
 
     /**
