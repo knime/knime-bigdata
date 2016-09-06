@@ -102,7 +102,9 @@ public class HDFSConnection extends Connection {
     }
 
     private static String createDefaultName(final ConnectionInformation conInfo) {
-        return conInfo.getProtocol() + "://" + conInfo.getHost() + ":" + conInfo.getPort() + "/";
+        final String defaultName = HDFSRemoteFileHandler.mapScheme(conInfo.getProtocol())
+                + "://" + conInfo.getHost() + ":" + conInfo.getPort() + "/";
+        return defaultName;
     }
 
     /**
@@ -121,9 +123,9 @@ public class HDFSConnection extends Connection {
     public static Path getHDFSPath4URI(final ConnectionInformation connectionInformation, final URI uri) {
         final StringBuilder hdfsPath = new StringBuilder();
         if (uri.getScheme() != null) {
-            hdfsPath.append(uri.getScheme());
+            hdfsPath.append(HDFSRemoteFileHandler.mapScheme(uri.getScheme()));
         } else {
-            hdfsPath.append(connectionInformation.getProtocol());
+            hdfsPath.append(HDFSRemoteFileHandler.mapScheme(connectionInformation.getProtocol()));
         }
         hdfsPath.append("://");
         if (uri.getHost() != null) {
