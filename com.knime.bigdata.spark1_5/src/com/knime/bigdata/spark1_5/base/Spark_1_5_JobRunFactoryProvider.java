@@ -38,6 +38,8 @@ import com.knime.bigdata.spark1_5.jobs.mllib.prediction.predictor.PredictorSpark
 import com.knime.bigdata.spark1_5.jobs.mllib.reduction.pca.PCAJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.mllib.reduction.svd.SVDJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.namedobjects.NamedObjectsJobRunFactory;
+import com.knime.bigdata.spark1_5.jobs.parquet.Parquet2SparkJobRunFactory;
+import com.knime.bigdata.spark1_5.jobs.parquet.Spark2ParquetJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.pmml.PMMLPredictionJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.pmml.PMMLTransformationJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.prepare.PrepareContextJobRunFactory;
@@ -74,6 +76,8 @@ public class Spark_1_5_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new FetchRowsJobRunFactory(),
             new Hive2SparkJobRunFactory(),
             new Spark2HiveJobRunFactory(),
+            new Parquet2SparkJobRunFactory(),
+            new Spark2ParquetJobRunFactory(),
             new KMeansJobRunFactory(),
             new CollaborativeFilteringJobRunFactory(),
             new NaiveBayesJobRunFactory(),

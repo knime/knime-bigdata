@@ -25,6 +25,8 @@ import java.io.Serializable;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 
+import scala.collection.mutable.WrappedArray;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -69,8 +71,10 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
                 result[i] = m_elementConverter.convert(objectArray[i]);
             }
             return result;
+
+        } else {
+            return super.convert(sparkObject);
         }
-        return super.convert(sparkObject);
     }
 
     /**
@@ -84,9 +88,12 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             for (int i = 0, length = objectArray.length; i < length; i++) {
                 result[i] = m_elementConverter.convert(objectArray[i]);
             }
-            return result;
+
+          return WrappedArray.make(result);
+
+        } else {
+            return super.convert(intermediateTypeValue);
         }
-        return super.convert(intermediateTypeValue);
     }
 
 }

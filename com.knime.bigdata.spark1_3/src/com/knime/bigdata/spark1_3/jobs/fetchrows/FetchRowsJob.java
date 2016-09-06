@@ -16,6 +16,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
 import com.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
 import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark1_3.api.NamedObjects;
 import com.knime.bigdata.spark1_3.api.SparkJob;
@@ -58,12 +60,17 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
 
         final int numFields = spec.getNoOfFields();
         final IntermediateToSparkConverter<DataType>[] converters = TypeConverters.getConverters(spec);
+        final IntermediateField fieldSpecs[] = spec.getFields();
 
         List<List<Serializable>> rows = new ArrayList<>(aRows.size());
         for (Row row : aRows) {
             final List<Serializable> convertedRow = new ArrayList<>(numFields);
             for (int j = 0; j < numFields; j++) {
-                convertedRow.add(converters[j].convert(row.get(j)));
+                if (fieldSpecs[j].getType() instanceof IntermediateArrayDataType) {
+                    convertedRow.add(converters[j].convert((Object) row.getList(j).toArray()));
+                } else {
+                    convertedRow.add(converters[j].convert(row.get(j)));
+                }
             }
             rows.add(convertedRow);
         }

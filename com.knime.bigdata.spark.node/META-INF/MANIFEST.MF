@@ -8,6 +8,8 @@ Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.node.io.hive.reader,
  com.knime.bigdata.spark.node.io.hive.writer,
  com.knime.bigdata.spark.node.io.impala.writer,
+ com.knime.bigdata.spark.node.io.parquet.reader,
+ com.knime.bigdata.spark.node.io.parquet.writer,
  com.knime.bigdata.spark.node.io.table.reader,
  com.knime.bigdata.spark.node.mllib.clustering.kmeans,
  com.knime.bigdata.spark.node.mllib.collaborativefiltering,
@@ -53,6 +55,8 @@ Export-Package: com.knime.bigdata.spark.node.io.hive.reader,
 Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  com.knime.bigdata.spark.core;bundle-version="[1.6.0,2.0.0)",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
+ org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
+ com.knime.bigdata.filehandling;bundle-version="[3.0.0,4.0.0)",
  com.knime.bigdata.hive;bundle-version="[3.2.0,4.0.0)",
  com.knime.bigdata.impala;bundle-version="[3.2.0,4.0.0)",
  org.knime.ext.sun;bundle-version="[3.0.0,4.0.0)",
@@ -70,3 +74,4 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.codec;bundle-version="[1.6.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Import-Package: org.knime.base.filehandling.remote.connectioninformation.port

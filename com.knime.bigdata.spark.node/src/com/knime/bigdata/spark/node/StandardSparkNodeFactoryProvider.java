@@ -26,6 +26,8 @@ import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
+import com.knime.bigdata.spark.node.io.parquet.reader.Parquet2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.parquet.writer.Spark2ParquetNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
@@ -88,6 +90,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Spark2HiveNodeFactory(),
             new Table2SparkNodeFactory(),
             new Spark2TableNodeFactory(),
+            new Parquet2SparkNodeFactory(),
+            new Spark2ParquetNodeFactory(),
             new MLlibClusterAssignerNodeFactory(),
             new MLlibKMeansNodeFactory(),
             new MLlibCollaborativeFilteringNodeFactory(),
