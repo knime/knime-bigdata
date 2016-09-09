@@ -75,6 +75,7 @@ public class UserGroupUtil {
      */
     public static synchronized UserGroupInformation getUser(final Configuration conf, final String userName)
             throws Exception {
+
         LOGGER.debug("Retrieving user for simple authentication");
         UserGroupInformation.setConfiguration(conf);
         //The OS user should be a user with simple authentication
@@ -90,11 +91,12 @@ public class UserGroupUtil {
         //use the OS user if the given userName is null or empty
         final String loginUser = userName != null && !userName.trim().isEmpty() ? userName : currentUser.getUserName();
         LOGGER.debug("Login user: " + loginUser);
+
         //this is the user that is returned to executed the operation with
         final UserGroupInformation user;
         if (currentUser.hasKerberosCredentials()) {
             //always create a new remote user if the currentUser is a Kerberos user even if their names are equal!!!
-            LOGGER.debug("Creating remote user " + loginUser + " using Kerberos user " + currentUser.toString());
+            LOGGER.debug("Creating remote user " + loginUser + " using Kerberos TGT user " + currentUser.toString());
             user = UserGroupInformation.createRemoteUser(loginUser);
         } else if (!currentUser.getUserName().equals(loginUser) && !currentUser.getShortUserName().equals(loginUser)) {
             //the real user differs from the login user so we have to impersonate it
@@ -126,29 +128,31 @@ public class UserGroupUtil {
      */
     public static synchronized UserGroupInformation getKerberosUser(final Configuration conf)
             throws Exception {
-        LOGGER.debug("Retrieving Kerberos user");
+
+        LOGGER.debug("Retrieving user for Kerberos authentication");
         UserGroupInformation.setConfiguration(conf);
         //Get the user with the Kerberos TGT
-        final UserGroupInformation kerberosUser = getKerberosUser();
+        final UserGroupInformation kerberosTGTUser = getKerberosTGTUser();
+
         final UserGroupInformation user;
         if (License.runningInServerContext()) {
             //Always use the workflow user on the server in Kerberos mode because of security reasons!!!
             final String wfUser = getWFUser();
-            if (wfUser != null && !kerberosUser.getUserName().equals(wfUser)
-                    && !kerberosUser.getShortUserName().equals(wfUser)) {
+            if (wfUser != null && !kerberosTGTUser.getUserName().equals(wfUser)
+                    && !kerberosTGTUser.getShortUserName().equals(wfUser)) {
                 LOGGER.debug("Creating proxy user for workflow user " + wfUser
-                    + " using Kerberos user " + kerberosUser.getUserName() + " on server");
+                    + " using Kerberos TGT user " + kerberosTGTUser.getUserName() + " on server");
                 //the Kerberos user differs from the workflow user so we have to impersonate it
-                user = UserGroupInformation.createProxyUser(wfUser, kerberosUser);
+                user = UserGroupInformation.createProxyUser(wfUser, kerberosTGTUser);
             } else {
-                LOGGER.debug("Using Kerberos user: " + kerberosUser.getUserName() + " as login user on the server.");
-                user = kerberosUser;
+                LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the server.");
+                user = kerberosTGTUser;
             }
         } else {
             //use the Kerberos user as login user on the client
-            LOGGER.debug("Using Kerberos user: " + kerberosUser.getUserName() + " as login user on the client.");
+            LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the client.");
             //the real user is the same as the login user so we can simply use the real user
-            user = kerberosUser;
+            user = kerberosTGTUser;
         }
         LOGGER.debug("Returning Kerberos user: " + user.toString());
         return user;
@@ -161,7 +165,7 @@ public class UserGroupUtil {
      * @return the Kerberos user
      * @throws Exception if no Kerberos user could be obtained
      */
-    private static UserGroupInformation getKerberosUser() throws Exception {
+    private static UserGroupInformation getKerberosTGTUser() throws Exception {
         if (!UserGroupInformation.isSecurityEnabled()) {
             throw new Exception("Kerberos authentication not enabled in configuration.");
         }
@@ -169,21 +173,21 @@ public class UserGroupUtil {
         if (CommonConfigContainer.getInstance().hasKerberosKeytabConfig()) {
             final String keytabFile = CommonConfigContainer.getInstance().getKerberosKeytabConfig();
             final String keytabUser = CommonConfigContainer.getInstance().getKerberosUserConfig();
-            LOGGER.debug("Using keytab file " + keytabFile + " to get keytab user " + keytabUser);
+            LOGGER.debug(String.format("Determining Kerberos TGT user based on keytab settings (keytab file: %s / keytab user: %s).", keytabFile, keytabUser));
             UserGroupInformation.loginUserFromKeytab(keytabUser, keytabFile);
             user = UserGroupInformation.getLoginUser();
         } else {
-            LOGGER.debug("Retrieving Kerberos user from ticket cache.");
+            LOGGER.debug("Determining Kerberos TGT user based on ticket cache.");
             //we do not have any keytab information so we use ticket cache user instead.
             //We can not use the getCurrentUser() method since it will return the OS user if the authentication method
             //was simple before!!!
             user = UserGroupInformation.getUGIFromTicketCache(null, null);
         }
         if (!user.hasKerberosCredentials()) {
-            throw new IllegalStateException("Retrieved Kerberos user has no Kerberos information available."
+            throw new IllegalStateException("Retrieved Kerberos TGT user has no Kerberos information available."
                     + user.toString());
         }
-        LOGGER.debug("Kerberos user found: " + user.getUserName());
+        LOGGER.debug("Kerberos TGT user found: " + user.getUserName());
         return user;
     }
 }
