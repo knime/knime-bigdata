@@ -20,6 +20,9 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
+import java.io.File;
+import java.util.Collections;
+
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -35,7 +38,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
+import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
@@ -106,8 +109,8 @@ public class MLlibClusterAssignerNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkModel model = ((SparkModelPortObject)inObjects[0]).getModel();
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
-        final JobRunFactory<PredictionJobInput, EmptyJobOutput> jobProvider =
-                SparkContextUtil.getJobRunFactory(data.getContextID(), MLlibPredictorNodeModel.JOB_ID);
+        final JobWithFilesRunFactory<PredictionJobInput, EmptyJobOutput> jobProvider =
+                SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), MLlibPredictorNodeModel.JOB_ID);
         exec.checkCanceled();
         exec.setMessage("Starting Spark predictor");
         final DataTableSpec inputSpec = data.getTableSpec();
@@ -115,8 +118,11 @@ public class MLlibClusterAssignerNodeModel extends SparkNodeModel {
         final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContextID(), aOutputTableName, resultSpec);
-        final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), model.getModel(), colIdxs, resultRDD.getID());
-        jobProvider.createRun(jobInput).run(data.getContextID(), exec);
+        final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), colIdxs, resultRDD.getID());
+        final File modelFile = jobInput.writeModelIntoTemporaryFile(model.getModel());
+        addFileToDeleteAfterExecute(modelFile);
+
+        jobProvider.createRun(jobInput, Collections.singletonList(modelFile)).run(data.getContextID(), exec);
         exec.setMessage("Spark prediction done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
 

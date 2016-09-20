@@ -20,10 +20,19 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 
@@ -34,7 +43,6 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 @SparkClass
 public class PredictionJobInput extends JobInput {
 
-    private static final String KEY_MODEL = "model";
     private final static String KEY_INCLUDE_COLUMN_INDICES = "includeColIdxs";
 
     /**
@@ -49,17 +57,13 @@ public class PredictionJobInput extends JobInput {
      * @param colIdxs the column indices to us for prediction
      * @param namedOutputObject the unique name of the output object
      */
-    public PredictionJobInput(final String namedInputObject, final Serializable model,
+    public PredictionJobInput(final String namedInputObject,
         final Integer[] colIdxs, final String namedOutputObject) {
-        if (model == null) {
-            throw new IllegalArgumentException("Prediction model must not be null");
-        }
         if (colIdxs == null || colIdxs.length < 1) {
             throw new IllegalArgumentException("Prediction columns must not be null or empty");
         }
         addNamedInputObject(namedInputObject);
         addNamedOutputObject(namedOutputObject);
-        set(KEY_MODEL, model);
         set(KEY_INCLUDE_COLUMN_INDICES, Arrays.asList(colIdxs));
     }
 
@@ -72,10 +76,32 @@ public class PredictionJobInput extends JobInput {
     }
 
     /**
-     * @return the Spark MLlib model
+     * @return temporary file contains serializable model
      */
-    public Serializable getModel() {
-        return get(KEY_MODEL);
+    public File writeModelIntoTemporaryFile(final Serializable model) throws KNIMESparkException {
+        try {
+            File outFile = File.createTempFile("knime-sparkModel", ".tmp");
+            ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
+            out.writeObject(model);
+            out.close();
+
+            return outFile;
+        } catch(IOException e) {
+            throw new KNIMESparkException("Failed to write model into temporary file.", e);
+        }
     }
 
+    /**
+     * @param inFile file contains serializable model
+     */
+    public Serializable readModelFromTemporaryFile(final File inFile) throws KNIMESparkException {
+        try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inFile)))) {
+            Serializable model = (Serializable) in.readObject();
+            in.close();
+            return model;
+
+        } catch(IOException|ClassNotFoundException e) {
+            throw new KNIMESparkException("Failed to read model from " + inFile.getAbsolutePath(), e);
+        }
+    }
 }

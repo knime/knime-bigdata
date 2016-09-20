@@ -20,9 +20,14 @@
  */
 package com.knime.bigdata.spark1_5.jobs.mllib.prediction.predictor;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
+import java.io.File;
+import java.util.List;
+
+import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
+import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import com.knime.bigdata.spark.core.job.EmptyJobOutput;
+import com.knime.bigdata.spark.core.job.JobWithFilesRun;
+import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
 
@@ -30,7 +35,7 @@ import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInpu
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class PredictorSparkJobRunFactory extends DefaultSimpleJobRunFactory<PredictionJobInput> {
+public class PredictorSparkJobRunFactory extends DefaultJobWithFilesRunFactory<PredictionJobInput, EmptyJobOutput> {
 
     /**
      * Constructor
@@ -43,8 +48,7 @@ public class PredictorSparkJobRunFactory extends DefaultSimpleJobRunFactory<Pred
      * {@inheritDoc}
      */
     @Override
-    public SimpleJobRun<PredictionJobInput> createRun(final PredictionJobInput input) {
-        return new DefaultSimpleJobRun<>(input, PredictionJob.class);
+    public JobWithFilesRun<PredictionJobInput, EmptyJobOutput> createRun(final PredictionJobInput input, final List<File> localFiles) {
+        return new DefaultJobWithFilesRun<PredictionJobInput, EmptyJobOutput>(input, PredictionJob.class, EmptyJobOutput.class, localFiles, FileLifetime.JOB);
     }
-
 }

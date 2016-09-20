@@ -20,6 +20,9 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
+import java.io.File;
+import java.util.Collections;
+
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -107,9 +110,15 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         final DataTableSpec resultSpec = createSpec(inputSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContextID(), aOutputTableName, resultSpec);
-        final PredictionJobInput jobInput =
-                new PredictionJobInput(data.getTableName(), model.getModel(), colIdxs, resultRDD.getID());
-        SparkContextUtil.getSimpleRunFactory(data.getContextID(), JOB_ID).createRun(jobInput).run(data.getContextID());
+        final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), colIdxs, resultRDD.getID());
+
+        final File modelFile = jobInput.writeModelIntoTemporaryFile(model.getModel());
+        addFileToDeleteAfterExecute(modelFile);
+
+        SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID)
+            .createRun(jobInput, Collections.singletonList(modelFile))
+            .run(data.getContextID(), exec);
+
         exec.setMessage("Spark prediction done.");
         return new PortObject[]{new SparkDataPortObject(resultRDD)};
     }

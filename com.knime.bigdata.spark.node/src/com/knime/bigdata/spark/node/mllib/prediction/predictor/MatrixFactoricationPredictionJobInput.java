@@ -20,8 +20,6 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
-import java.io.Serializable;
-
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -35,9 +33,8 @@ public class MatrixFactoricationPredictionJobInput extends PredictionJobInput {
 
     }
 
-    public MatrixFactoricationPredictionJobInput(final String namedInputObject, final Serializable model,
-        final Integer[] colIdxs, final String namedOutputObject) {
-        super(namedInputObject, model, colIdxs, namedOutputObject);
+    public MatrixFactoricationPredictionJobInput(final String namedInputObject, final Integer[] colIdxs, final String namedOutputObject) {
+        super(namedInputObject, colIdxs, namedOutputObject);
     }
 
 }
