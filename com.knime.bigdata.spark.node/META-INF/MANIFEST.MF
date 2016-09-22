@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor Nodes
 Bundle-SymbolicName: com.knime.bigdata.spark.node;singleton:=true
-Bundle-Version: 1.6.0.qualifier
+Bundle-Version: 1.6.1.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.node.io.hive.reader,

@@ -133,7 +133,7 @@ class HiveConnectorNodeModel extends NodeModel {
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidSettingsException
                 | SQLException | IOException ex) {
             Throwable cause = ExceptionUtils.getRootCause(ex);
-            if (cause == null) {
+            if (cause == null || cause.getMessage() == null) {
                 cause = ex;
             }
 
