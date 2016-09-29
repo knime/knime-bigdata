@@ -52,7 +52,7 @@ public class Parquet2SparkNodeDialog extends NodeDialogPane {
     private final FlowVariableModel m_filenameFlowVariable;
     private final RemoteFileChooserPanel m_filenameChooser;
 
-    public Parquet2SparkNodeDialog() {
+    Parquet2SparkNodeDialog() {
         m_info = new JLabel();
         m_filenameFlowVariable = createFlowVariableModel("sourceFilename", FlowVariable.Type.STRING);
         m_filenameChooser = new RemoteFileChooserPanel(getPanel(), "Source file", false,
@@ -92,13 +92,14 @@ public class Parquet2SparkNodeDialog extends NodeDialogPane {
         m_filenameChooser.setConnectionInformation(connectionInformation);
         m_info.setText("Using filesystem: " + connectionInformation.toURI());
 
-        m_settings.loadSettingsForDialog(settings);
+        m_settings.loadSettings(settings);
         m_filenameChooser.setSelection(m_settings.getInputPath());
     }
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setInputPath(m_filenameChooser.getSelection());
+        m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);
     }
 }

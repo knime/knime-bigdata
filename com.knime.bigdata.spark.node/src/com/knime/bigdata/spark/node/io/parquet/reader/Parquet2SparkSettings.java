@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.io.parquet.reader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -29,40 +30,43 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author Sascha Wolke, KNIME.com
  */
+@SuppressWarnings("javadoc")
 public class Parquet2SparkSettings {
 
+    /** Required input path. */
     private final String CFG_INPUT_PATH = "inputPath";
+    private final String DEFAULT_INPUT_PATH = "";
+    private String m_path = DEFAULT_INPUT_PATH;
 
-    private String m_path;
+    public String getInputPath() { return m_path; }
+    public void setInputPath(final String path) { m_path = path; }
 
-    public String getInputPath() {
-        return m_path;
-    }
-
-    public void setInputPath(final String path) {
-        m_path = path;
-    }
 
     public void saveSettingsTo(final NodeSettingsWO settings) {
         settings.addString(CFG_INPUT_PATH, m_path);
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        final String filename = settings.getString(CFG_INPUT_PATH, null);
-        if (filename == null || filename.trim().isEmpty()) {
-            throw new InvalidSettingsException("No parquet table path provided.");
+        Parquet2SparkSettings tmp = new Parquet2SparkSettings();
+        tmp.loadSettings(settings);
+        tmp.validateSettings();
+    }
+
+    public void validateSettings() throws InvalidSettingsException {
+        if (StringUtils.isBlank(m_path)) {
+            throw new InvalidSettingsException("No parquet input table path provided.");
         }
     }
 
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_path = settings.getString(CFG_INPUT_PATH);
+        loadSettings(settings);
     }
 
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
      */
-    public void loadSettingsForDialog(final NodeSettingsRO settings) {
-        m_path = settings.getString(CFG_INPUT_PATH, "");
+    public void loadSettings(final NodeSettingsRO settings) {
+        m_path = settings.getString(CFG_INPUT_PATH, DEFAULT_INPUT_PATH);
     }
 
 }

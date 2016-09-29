@@ -49,6 +49,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.workflow.FlowVariable;
 
+import com.knime.bigdata.spark.node.SparkSaveMode;
+
 /**
  * @author Sascha Wolke, KNIME.com
  */
@@ -65,10 +67,9 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
     private final FlowVariableModel m_outputNameFlowVariable;
     private final FlowVariableModelButton m_outputNameFlowVariableButton;
 
-    private final JComboBox<String> m_saveModeComboBox;
+    private final JComboBox<SparkSaveMode> m_saveModeComboBox;
 
-
-    public Spark2ParquetNodeDialog() {
+    Spark2ParquetNodeDialog() {
         m_fsInfo = new JLabel();
         m_directoryFlowVariable = createFlowVariableModel("targetDir", FlowVariable.Type.STRING);
         m_directoryChooser = new RemoteFileChooserPanel(getPanel(), "Target dir", false,
@@ -84,7 +85,7 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
         });
         m_outputNameFlowVariableButton = new FlowVariableModelButton(m_outputNameFlowVariable);
 
-        m_saveModeComboBox = new JComboBox<String>(new String[] { "ErrorIfExists", "Append", "Overwrite", "Ignore" });
+        m_saveModeComboBox = new JComboBox<SparkSaveMode>(SparkSaveMode.ALL);
         m_saveModeComboBox.setEditable(false);
 
         addTab("Options", initLayout());
@@ -161,13 +162,12 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
         return panel;
     }
 
-
     private String getFilenameSelection() {
-        return m_outputNameComboBox.getEditor().getItem().toString();
+        return (String) m_outputNameComboBox.getEditor().getItem();
     }
 
-    private String getSaveModeSelection() {
-        return m_saveModeComboBox.getSelectedItem().toString();
+    private SparkSaveMode getSaveModeSelection() {
+        return (SparkSaveMode) m_saveModeComboBox.getEditor().getItem();
     }
 
     @Override
@@ -186,13 +186,11 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
         m_directoryChooser.setConnectionInformation(connectionInformation);
         m_fsInfo.setText(connectionInformation.toURI().toString());
 
-        m_settings.loadSettingsForDialog(settings);
+        m_settings.loadSettings(settings);
         m_directoryChooser.setSelection(m_settings.getDirectory());
 
         updateHistory(m_outputNameComboBox, "filenameHistory");
         m_outputNameComboBox.setSelectedItem(m_settings.getTableName());
-
-        System.err.println("Found " + m_settings.getSaveMode());
         m_saveModeComboBox.setSelectedItem(m_settings.getSaveMode());
     }
 
@@ -201,6 +199,8 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
         m_settings.setDirectory(m_directoryChooser.getSelection());
         m_settings.setTableName(getFilenameSelection());
         m_settings.setSaveMode(getSaveModeSelection());
+
+        m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);
         updateHistory(m_outputNameComboBox, "filenameHistory");
     }
@@ -219,7 +219,7 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
             set.add(string);
         }
         // Remove old elements
-        final DefaultComboBoxModel model = (DefaultComboBoxModel) comboBox.getModel();
+        final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
         model.removeAllElements();
         // Add new elements
         for (final String string : set) {

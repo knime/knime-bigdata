@@ -33,7 +33,6 @@ public class Spark2ParquetJobInput extends JobInput {
 
     private static final String KEY_OUTPUT_PATH = "outputPath";
     private static final String KEY_SAVE_MODE = "saveMode";
-    private static final String KEY_IS_HDFS_PATH = "isHDFSPath";
 
     /**
      * Paramless constructor for automatic deserialization.
@@ -43,15 +42,13 @@ public class Spark2ParquetJobInput extends JobInput {
     /**
      * @param namedObject the name of the input object (e.g. RDD)
      * @param outputPath the name of the parquet dir to be created
-     * @param isHDFSPath true if output path is in HDFS
      * @param spec the {@link IntermediateSpec} of the table
      * @param saveMode Spark save mode (error, append, overwrite or ignore)
      */
-    public Spark2ParquetJobInput(final String namedObject, final String outputPath, final boolean isHDFSPath, final IntermediateSpec spec, final String saveMode) {
+    public Spark2ParquetJobInput(final String namedObject, final String outputPath, final IntermediateSpec spec, final String saveMode) {
         addNamedInputObject(namedObject);
         withSpec(namedObject, spec);
         set(KEY_OUTPUT_PATH, outputPath);
-        set(KEY_IS_HDFS_PATH, isHDFSPath);
         set(KEY_SAVE_MODE, saveMode);
     }
 
@@ -60,13 +57,6 @@ public class Spark2ParquetJobInput extends JobInput {
      */
     public String getOutputPath() {
         return get(KEY_OUTPUT_PATH);
-    }
-
-    /**
-     * @return true if output path is in HDFS
-     */
-    public boolean isHDFSPath() {
-        return get(KEY_IS_HDFS_PATH);
     }
 
     /**

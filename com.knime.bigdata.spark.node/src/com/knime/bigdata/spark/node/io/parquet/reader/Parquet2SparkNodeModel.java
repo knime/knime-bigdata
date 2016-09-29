@@ -23,7 +23,6 @@ package com.knime.bigdata.spark.node.io.parquet.reader;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.base.filehandling.remote.files.SSHRemoteFileHandler;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -74,13 +73,11 @@ public class Parquet2SparkNodeModel extends SparkSourceNodeModel {
             throw new InvalidSettingsException("No connection information available");
         }
 
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo) && !connInfo.getProtocol().equals(SSHRemoteFileHandler.PROTOCOL.getName())) {
-            throw new InvalidSettingsException("HDFS or SSH connection required");
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
+            throw new InvalidSettingsException("HDFS connection required");
         }
 
-        if (m_settings.getInputPath() == null || m_settings.getInputPath().trim().isEmpty()) {
-            throw new InvalidSettingsException("No input filename provided");
-        }
+        m_settings.validateSettings();
 
         // We cannot provide a spec because it's not clear yet what the file contains
         return new PortObjectSpec[] { null };
@@ -91,7 +88,6 @@ public class Parquet2SparkNodeModel extends SparkSourceNodeModel {
         exec.setMessage("Starting spark job");
         final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
         final ConnectionInformation connInfo = object.getConnectionInformation();
-        final boolean isHDFSPath = HDFSRemoteFileHandler.isSupportedConnection(connInfo);
         final String inputPath = m_settings.getInputPath();
 
         final SparkContextID contextID = getContextID(inData);
@@ -100,7 +96,7 @@ public class Parquet2SparkNodeModel extends SparkSourceNodeModel {
 
         final String namedOutputObject = SparkIDs.createRDDID();
         LOGGER.info("Loading " + inputPath + " into " + namedOutputObject + " rdd");
-        final Parquet2SparkJobInput jobInput = new Parquet2SparkJobInput(namedOutputObject, inputPath, isHDFSPath);
+        final Parquet2SparkJobInput jobInput = new Parquet2SparkJobInput(namedOutputObject, inputPath);
         final Parquet2SparkJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
         final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));

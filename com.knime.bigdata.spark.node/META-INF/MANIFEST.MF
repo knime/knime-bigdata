@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.knime.bigdata.spark.node;singleton:=true
 Bundle-Version: 1.6.1.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
-Export-Package: com.knime.bigdata.spark.node.io.hive.reader,
+Export-Package: com.knime.bigdata.spark.node.io.database.reader,
+ com.knime.bigdata.spark.node.io.database.writer,
+ com.knime.bigdata.spark.node.io.hive.reader,
  com.knime.bigdata.spark.node.io.hive.writer,
  com.knime.bigdata.spark.node.io.impala.writer,
  com.knime.bigdata.spark.node.io.parquet.reader,

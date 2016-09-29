@@ -22,6 +22,8 @@ package com.knime.bigdata.spark1_5.base;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider;
 import com.knime.bigdata.spark1_5.api.Spark_1_5_CompatibilityChecker;
+import com.knime.bigdata.spark1_5.jobs.database.Database2SparkJobRunFactory;
+import com.knime.bigdata.spark1_5.jobs.database.Spark2DatabaseJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.fetchrows.FetchRowsJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Hive2SparkJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Spark2HiveJobRunFactory;
@@ -74,6 +76,8 @@ public class Spark_1_5_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
     public Spark_1_5_JobRunFactoryProvider() {
         super(Spark_1_5_CompatibilityChecker.INSTANCE,
             new FetchRowsJobRunFactory(),
+            new Database2SparkJobRunFactory(),
+            new Spark2DatabaseJobRunFactory(),
             new Hive2SparkJobRunFactory(),
             new Spark2HiveJobRunFactory(),
             new Parquet2SparkJobRunFactory(),

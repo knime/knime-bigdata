@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
-import org.knime.base.filehandling.remote.files.SSHRemoteFileHandler;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -79,21 +78,11 @@ public class Spark2ParquetNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("No connection information available");
         }
 
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo) && !connInfo.getProtocol().equals(SSHRemoteFileHandler.PROTOCOL.getName())) {
-            throw new InvalidSettingsException("HDFS or SSH connection required");
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
+            throw new InvalidSettingsException("HDFS connection required");
         }
 
-        if (m_settings.getDirectory() == null || m_settings.getDirectory().trim().isEmpty()) {
-            throw new InvalidSettingsException("No output directory provided");
-        }
-
-        if (m_settings.getTableName() == null || m_settings.getTableName().trim().isEmpty()) {
-            throw new InvalidSettingsException("No output table name provided");
-        }
-
-        if (m_settings.getSaveMode() == null || m_settings.getSaveMode().trim().isEmpty()) {
-            throw new InvalidSettingsException("No save mode provided");
-        }
+        m_settings.validateSettings();
 
         return new PortObjectSpec[0];
     }
@@ -101,12 +90,9 @@ public class Spark2ParquetNodeModel extends SparkNodeModel {
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
-        final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
-        final ConnectionInformation connInfo = object.getConnectionInformation();
 
         final String outputPath = m_settings.getDirectory() + "/" + m_settings.getTableName();
         final String saveMode = m_settings.getSaveMode();
-        final boolean isHDFSPath = HDFSRemoteFileHandler.isSupportedConnection(connInfo);
 
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[1];
         final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
@@ -131,7 +117,7 @@ public class Spark2ParquetNodeModel extends SparkNodeModel {
 
         LOGGER.info("Writing " + rdd.getData().getID() + " rdd into " + outputPath);
         final SimpleJobRunFactory<JobInput> runFactory = SparkContextUtil.getSimpleRunFactory(rdd.getContextID(), JOB_ID);
-        final Spark2ParquetJobInput jobInput = new Spark2ParquetJobInput(rdd.getData().getID(), outputPath, isHDFSPath, schema, saveMode);
+        final Spark2ParquetJobInput jobInput = new Spark2ParquetJobInput(rdd.getData().getID(), outputPath, schema, saveMode);
         runFactory.createRun(jobInput).run(rdd.getContextID(), exec);
 
         return new PortObject[0];

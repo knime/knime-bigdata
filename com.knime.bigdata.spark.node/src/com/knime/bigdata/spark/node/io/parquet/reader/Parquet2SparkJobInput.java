@@ -29,8 +29,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
  */
 @SparkClass
 public class Parquet2SparkJobInput extends JobInput {
+
     private final static String KEY_INPUT_PATH = "inputPath";
-    private final static String KEY_IS_HDFS_PATH = "isHDFSPath";
 
     /**
      * Paramless constructor for automatic deserialization.
@@ -41,12 +41,10 @@ public class Parquet2SparkJobInput extends JobInput {
      * constructor - simply stores parameters
      * @param namedOutputObject - the name of the output object to generate
      * @param inputPath - the input parquet dir or file
-     * @param isHDFSPath true if input path is in HDFS
      */
-    public Parquet2SparkJobInput(final String namedOutputObject, final String inputPath, final boolean isHDFSpath) {
+    public Parquet2SparkJobInput(final String namedOutputObject, final String inputPath) {
         addNamedOutputObject(namedOutputObject);
         set(KEY_INPUT_PATH, inputPath);
-        set(KEY_IS_HDFS_PATH, isHDFSpath);
     }
 
     /**
@@ -54,12 +52,5 @@ public class Parquet2SparkJobInput extends JobInput {
      */
     public String getInputPath() {
         return get(KEY_INPUT_PATH);
-    }
-
-    /**
-     * @return true if input path is in HDFS
-     */
-    public boolean isHDFSPath() {
-        return get(KEY_IS_HDFS_PATH);
     }
 }

@@ -59,7 +59,7 @@ public class Spark2ParquetJob implements SimpleSparkJob<Spark2ParquetJobInput> {
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(namedObject);
         final IntermediateSpec resultSchema = input.getSpec(namedObject);
         StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
-        final String parquetPath = getOutputPath(input);
+        final String parquetPath = FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
 
         LOGGER.info("Writing parquet table into " + parquetPath);
         try {
@@ -73,18 +73,5 @@ public class Spark2ParquetJob implements SimpleSparkJob<Spark2ParquetJobInput> {
         }
 
         LOGGER.info("Parquet table in " + parquetPath +  " created");
-    }
-
-    private String getOutputPath(final Spark2ParquetJobInput input) throws KNIMESparkException {
-        try {
-            if (input.isHDFSPath()) {
-                return FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
-            } else {
-                return "file://" + input.getOutputPath();
-            }
-        } catch (IllegalArgumentException e) {
-            throw new KNIMESparkException(
-                String.format("Unable to construct output path '%s'. Reason: %s", input.getOutputPath(), e.getMessage()));
-        }
     }
 }

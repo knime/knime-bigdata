@@ -22,6 +22,8 @@ package com.knime.bigdata.spark.node;
 
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
+import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory;
@@ -86,6 +88,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
      */
     public StandardSparkNodeFactoryProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE,
+            new Database2SparkNodeFactory(),
+            new Spark2DatabaseNodeFactory(),
             new Hive2SparkNodeFactory(),
             new Spark2HiveNodeFactory(),
             new Table2SparkNodeFactory(),

@@ -8,21 +8,12 @@
 		<intro>
 			Converts an incoming Spark RDD into a parquet table.
 		</intro>
-        <option name="Save mode">
-        	<ul>
-        		<li>Error (default): When saving a Spark RDD to a parquet table, if data/table already exists, an exception is expected to be thrown.</li>
-        		<li>Append: When saving a DataFrame to a parquet table, if data/table already exists, contents of the RDD are expected to be appended to existing data.</li>
-        		<li>Overwrite: Overwrite mode means that when saving a RDD to a parquet table, if data/table already exists, existing data is expected to be overwritten by the contents of the RDD.</li>
-        		<li>Ignore: Ignore mode means that when saving a RDD to a parquet table, if data/table already exists, the save operation is expected to not save the contents of the RDD and to not change the existing data. This is similar to a CREATE TABLE IF NOT EXISTS in SQL.</li>
-        	</ul>
-        	
-        	See also <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#save-modes">save modes section</a> spark documentation.
-       	</option>
 		
+        <option name="Save mode">How to handle existing data.</option>
 	</fullDescription>
 
 	<ports>
-	    <inPort index="0" name="HDFS or SSH connection">A HDFS or SSH connection to the remote spark cluster</inPort>
+	    <inPort index="0" name="HDFS connection">A HDFS compatible connection to the remote cluster (HDFS, WebHDFS or HttpFS)</inPort>
 		<inPort index="1" name="Spark data">Spark RDD</inPort>
 	</ports>
 </knimeNode>

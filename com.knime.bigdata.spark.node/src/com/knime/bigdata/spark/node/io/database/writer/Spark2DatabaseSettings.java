@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Aug 10, 2016 by sascha
+ *   Created on Sep 06, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.parquet.writer;
+package com.knime.bigdata.spark.node.io.database.writer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
@@ -28,33 +28,33 @@ import org.knime.core.node.NodeSettingsWO;
 import com.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
- * Settings for the spark to parquet node.
+ * Settings for the Spark to JDBC node.
  *
  * @author Sascha Wolke, KNIME.com
  */
 @SuppressWarnings("javadoc")
-public class Spark2ParquetSettings {
+public class Spark2DatabaseSettings {
 
-    /** Required output directory. */
-    private final String CFG_DIRECTORY = "directory";
-    private final String DEFAULT_DIRECTORY = "/";
-    private String m_directory = DEFAULT_DIRECTORY;
+    /** Required destination table name. */
+    private final String CFG_TABLE = "table";
+    private final String DEFAULT_TABLE = "";
+    private String m_table = DEFAULT_TABLE;
 
-    /** Required output table name. */
-    private final String CFG_TABLE_NAME = "tableName";
-    private final String DEFAULT_TABLE_NAME = "";
-    private String m_tableName = DEFAULT_TABLE_NAME;
+    /** Optional driver class to load. */
+    private final String CFG_UPLOAD_DRIVER = "uploadDriver";
+    private final boolean DEFAULT_UPLOAD_DRIVER = true;
+    private boolean m_uploadDriver = DEFAULT_UPLOAD_DRIVER;
 
-    /** Required output save mode. */
+    /** Required save mode. */
     private final String CFG_SAVE_MODE = "saveMode";
     private final SparkSaveMode DEFAULT_SAVE_MODE = SparkSaveMode.DEFAULT;
     private SparkSaveMode m_saveMode = DEFAULT_SAVE_MODE;
 
-    public String getDirectory() { return m_directory; }
-    public void setDirectory(final String directory) { m_directory = directory; }
+    public boolean uploadDriver() { return m_uploadDriver; }
+    public void setUploadDriver(final boolean uploadDriver) { m_uploadDriver = uploadDriver; }
 
-    public String getTableName() { return m_tableName; }
-    public void setTableName(final String filename) { m_tableName = filename; }
+    public String getTable() { return m_table; }
+    public void setTable(final String table) { m_table = table; }
 
     public String getSaveMode() { return m_saveMode.toSparkKey(); }
     public SparkSaveMode getSparkSaveMode() { return m_saveMode; }
@@ -62,24 +62,24 @@ public class Spark2ParquetSettings {
 
 
     public void saveSettingsTo(final NodeSettingsWO settings) {
-        settings.addString(CFG_DIRECTORY, m_directory);
-        settings.addString(CFG_TABLE_NAME, m_tableName);
+        settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
+        settings.addString(CFG_TABLE, m_table);
         settings.addString(CFG_SAVE_MODE, m_saveMode.toSparkKey());
     }
 
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        Spark2ParquetSettings tmp = new Spark2ParquetSettings();
+        Spark2DatabaseSettings tmp = new Spark2DatabaseSettings();
         tmp.loadSettings(settings);
         tmp.validateSettings();
     }
 
     public void validateSettings() throws InvalidSettingsException {
-        if (StringUtils.isBlank(m_directory)) {
-            throw new InvalidSettingsException("Output directory name required.");
+        if (StringUtils.isBlank(m_table)) {
+            throw new InvalidSettingsException("Table name required.");
         }
 
-        if (StringUtils.isBlank(m_tableName)) {
-            throw new InvalidSettingsException("Output table name required.");
+        if (m_saveMode == null) {
+            throw new InvalidSettingsException("Save mode required.");
         }
     }
 
@@ -91,8 +91,8 @@ public class Spark2ParquetSettings {
      * Loads the settings from the given settings object using default values for invalid or missing settings.
      */
     public void loadSettings(final NodeSettingsRO settings) {
-        m_directory = settings.getString(CFG_DIRECTORY, DEFAULT_DIRECTORY);
-        m_tableName = settings.getString(CFG_TABLE_NAME, DEFAULT_TABLE_NAME);
+        m_uploadDriver = settings.getBoolean(CFG_UPLOAD_DRIVER, DEFAULT_UPLOAD_DRIVER);
+        m_table = settings.getString(CFG_TABLE, DEFAULT_TABLE);
         m_saveMode = SparkSaveMode.fromSparkKey(settings.getString(CFG_SAVE_MODE, DEFAULT_SAVE_MODE.toSparkKey()));
     }
 }

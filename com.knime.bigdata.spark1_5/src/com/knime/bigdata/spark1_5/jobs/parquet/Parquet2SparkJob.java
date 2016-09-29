@@ -54,7 +54,7 @@ public class Parquet2SparkJob implements SparkJob<Parquet2SparkJobInput, Parquet
             final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         final SQLContext sqlContext = new SQLContext(sparkContext);
-        final String parquetFile = getInputPath(input);
+        final String parquetFile = FileSystem.getDefaultUri(new Configuration()).resolve(input.getInputPath()).toString();
 
         LOGGER.info("Reading parquet file: " + parquetFile);
         final DataFrame dataFrame = sqlContext.read().parquet(parquetFile);
@@ -70,18 +70,5 @@ public class Parquet2SparkJob implements SparkJob<Parquet2SparkJobInput, Parquet
         LOGGER.info("done");
 
         return new Parquet2SparkJobOutput(input.getFirstNamedOutputObject(), spec);
-    }
-
-    private String getInputPath(final Parquet2SparkJobInput input) throws KNIMESparkException {
-        try {
-            if (input.isHDFSPath()) {
-                return FileSystem.getDefaultUri(new Configuration()).resolve(input.getInputPath()).toString();
-            } else {
-                return "file://" + input.getInputPath();
-            }
-        } catch (IllegalArgumentException e) {
-            throw new KNIMESparkException(
-                String.format("Unable to construct output path '%s'. Reason: %s", input.getInputPath(), e.getMessage()));
-        }
     }
 }
