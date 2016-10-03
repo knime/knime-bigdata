@@ -8,7 +8,7 @@ Export-Package: com.knime.bigdata.impala.utility
 Require-Bundle: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
  org.knime.core;bundle-version="[3.0.0,4.0.0)",
  org.knime.base;bundle-version="[3.0.0,4.0.0)",
- com.knime.licenses;bundle-version="[5.0.0,6.0.0)",
+ com.knime.licenses;bundle-version="[5.4.2,6.0.0)",
  com.knime.bigdata.cdh5;bundle-version="[5.0.0,6.0.0)",
  com.knime.bigdata.filehandling;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
