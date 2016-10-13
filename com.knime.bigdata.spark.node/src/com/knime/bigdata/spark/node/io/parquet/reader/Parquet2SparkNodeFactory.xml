@@ -3,15 +3,15 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Parquet to Spark</name>
-	<shortDescription>Creates a Spark RDD from given parquet file.</shortDescription>
+	<shortDescription>Creates a Spark RDD from a given Parquet file.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from given parquet file.
+			Creates a Spark RDD from a given <a href="https://parquet.apache.org/">Parquet</a> file.
 		</intro>
 	</fullDescription>
 
 	<ports>
-        <inPort index="0" name="HDFS or SSH connection">A HDFS or SSH connection to the remote spark cluster</inPort>
+        <inPort index="0" name="HDFS connection">A HDFS compatible connection to the remote cluster (HDFS, WebHDFS or HttpFS)</inPort>
 		<inPort index="1" name="Spark context">
         Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
         </inPort>

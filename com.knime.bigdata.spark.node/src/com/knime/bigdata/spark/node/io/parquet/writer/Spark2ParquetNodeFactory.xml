@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Spark to Parquet</name>
-	<shortDescription>Converts an incoming Spark RDD into a parquet table</shortDescription>
+	<shortDescription>Converts an incoming Spark RDD into a Parquet file</shortDescription>
 	<fullDescription>
 		<intro>
-			Converts an incoming Spark RDD into a parquet table.
+			Converts an incoming Spark RDD into a <a href="https://parquet.apache.org/">Parquet</a> file.
 		</intro>
 		
         <option name="Save mode">How to handle existing data.</option>
