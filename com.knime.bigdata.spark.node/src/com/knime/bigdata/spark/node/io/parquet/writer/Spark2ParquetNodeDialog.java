@@ -167,7 +167,7 @@ public class Spark2ParquetNodeDialog extends NodeDialogPane {
     }
 
     private SparkSaveMode getSaveModeSelection() {
-        return (SparkSaveMode) m_saveModeComboBox.getEditor().getItem();
+        return (SparkSaveMode)m_saveModeComboBox.getSelectedItem();
     }
 
     @Override
