@@ -155,7 +155,9 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
                 sparkContext.ensureOpened(true);
                 break;
             case OPEN:
-                warnings.add("Spark context exists already. Doing nothing and ignoring settings.");
+                if (!m_settings.hideExistsWarning()) {
+                    warnings.add("Spark context exists already. Doing nothing and ignoring settings.");
+                }
                 break;
         }
 

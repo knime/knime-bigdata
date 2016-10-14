@@ -96,6 +96,8 @@ public class ContextSettings {
     private final SettingsModelString m_customSparkSettings =
             new SettingsModelString("v1_6.customSparkSettings", KNIMEConfigContainer.getCustomSparkSettings());
 
+    private final SettingsModelBoolean m_hideExistsWarning =
+            new SettingsModelBoolean("v1_6.hideExistsWarning", false);
 
     /** @deprecated use m_jobServerUrl instead */
     @Deprecated private final SettingsModelString m_legacyProtocol = new SettingsModelString("protocol", "http");
@@ -170,6 +172,10 @@ public class ContextSettings {
         return m_customSparkSettings;
     }
 
+    protected SettingsModelBoolean getHideExistsWarningModel() {
+        return m_hideExistsWarning;
+    }
+
 
 
     public String getJobServerUrl() {
@@ -208,6 +214,9 @@ public class ContextSettings {
         return m_customSparkSettings.getStringValue();
     }
 
+    public boolean hideExistsWarning() {
+        return m_hideExistsWarning.getBooleanValue();
+    }
 
     /**
      * @return the {@link SparkContextID} derived from the configuration settings
@@ -259,6 +268,8 @@ public class ContextSettings {
         m_sparkJobLogLevel.saveSettingsTo(settings);
         m_overrideSparkSettings.saveSettingsTo(settings);
         m_customSparkSettings.saveSettingsTo(settings);
+
+        m_hideExistsWarning.saveSettingsTo(settings);
     }
 
     /**
@@ -424,6 +435,12 @@ public class ContextSettings {
         m_deleteObjectsOnDispose.loadSettingsFrom(settings);
         m_overrideSparkSettings.loadSettingsFrom(settings);
         m_customSparkSettings.loadSettingsFrom(settings);
+
+        try {
+            m_hideExistsWarning.loadSettingsFrom(settings);
+        } catch(InvalidSettingsException e) {
+            // optional setting, nothing to do if it does not exists in given settings
+        }
     }
 
     /**
@@ -505,6 +522,8 @@ public class ContextSettings {
         builder.append(overrideSparkSettings());
         builder.append(", customSparkSettings=");
         builder.append(getCustomSparkSettings());
+        builder.append(", hideExistsWarning=");
+        builder.append(hideExistsWarning());
         builder.append("]");
         return builder.toString();
     }
