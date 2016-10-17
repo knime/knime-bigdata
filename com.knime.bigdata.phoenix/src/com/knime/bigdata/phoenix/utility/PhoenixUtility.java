@@ -45,8 +45,13 @@ import org.knime.core.node.port.database.aggregation.function.StdDevSampDBAggreg
 import org.knime.core.node.port.database.aggregation.function.SumDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
+import org.knime.core.node.port.database.connection.DBConnectionFactory;
+import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.reader.DBReader;
+import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 import org.knime.core.node.port.database.writer.DBWriter;
+
+import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 
 
 /**
@@ -85,6 +90,14 @@ public class PhoenixUtility extends DatabaseUtility {
      * {@inheritDoc}
      */
     @Override
+    protected DBConnectionFactory createConnectionFactory(final DBDriverFactory df) {
+        return new KerberosConnectionFactory(df);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean supportsDelete() {
         return true;
     }
@@ -103,6 +116,15 @@ public class PhoenixUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBTableCreator getTableCreator(final DatabaseConnectionSettings connSettings, final String schema,
+        final String tableName, final boolean isTempTable) {
+        return new PhoenixTableCreator(connSettings, schema, tableName, isTempTable);
     }
 
     /**

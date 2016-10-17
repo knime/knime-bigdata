@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
@@ -42,6 +43,7 @@ import org.knime.core.node.port.database.aggregation.function.VarPopDBAggregatio
 import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregationFunction;
 import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
+import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
 import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
@@ -159,6 +161,15 @@ public class HiveUtility extends DatabaseUtility {
     @Override
     public boolean supportsInsert() {
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DBTableCreator getTableCreator(final DatabaseConnectionSettings connSettings, final String schema,
+        final String tableName, final boolean isTempTable) {
+        return new HiveTableCreator(connSettings, schema, tableName, isTempTable);
     }
 
     /**
