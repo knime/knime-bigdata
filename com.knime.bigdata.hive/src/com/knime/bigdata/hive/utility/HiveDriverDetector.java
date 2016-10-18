@@ -20,9 +20,11 @@
  */
 package com.knime.bigdata.hive.utility;
 
+import java.sql.Driver;
 import java.util.Set;
 
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 
 /**
@@ -66,12 +68,21 @@ public class HiveDriverDetector {
      * @return a pretty driver name for display purposes
      */
     public static String mapToPrettyDriverName(final String driverName) {
+        String versionInfo = "";
+        try {
+            final DatabaseConnectionSettings settings = new DatabaseConnectionSettings();
+            settings.setDriver(driverName);
+            final Driver driver = DatabaseUtility.getUtility(HiveUtility.DATABASE_IDENTIFIER).getConnectionFactory().getDriverFactory().getDriver(settings);
+            versionInfo = String.format(", version: %d.%d", driver.getMajorVersion(), driver.getMinorVersion());
+        } catch(Exception e) {
+        }
+
         if (driverName.equals(CLOUDERA_DRIVER_NAME)) {
-            return String.format("Cloudera Hive Driver (%s)", driverName);
+            return String.format("Cloudera Hive Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.matches(AMAZON_EMR_DRIVER_NAME_REGEX)) {
-            return String.format("Amazon EMR Hive Driver (%s)", driverName);
+            return String.format("Amazon EMR Hive Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.equals(HiveUtility.DRIVER)) {
-            return String.format("Open-Source Hive Driver (%s)", driverName);
+            return String.format("Open-Source Hive Driver (%s%s)", driverName, versionInfo);
         } else {
             return driverName;
         }

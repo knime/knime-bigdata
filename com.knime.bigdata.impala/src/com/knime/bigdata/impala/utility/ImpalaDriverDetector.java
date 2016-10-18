@@ -20,7 +20,10 @@
  */
 package com.knime.bigdata.impala.utility;
 
+import java.sql.Driver;
+
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 
 /**
@@ -58,10 +61,19 @@ public class ImpalaDriverDetector {
      * @return a pretty driver name for display purposes
      */
     public static String mapToPrettyDriverName(final String driverName) {
+        String versionInfo = "";
+        try {
+            final DatabaseConnectionSettings settings = new DatabaseConnectionSettings();
+            settings.setDriver(driverName);
+            final Driver driver = DatabaseUtility.getUtility(ImpalaUtility.DATABASE_IDENTIFIER).getConnectionFactory().getDriverFactory().getDriver(settings);
+            versionInfo = String.format(", version: %d.%d", driver.getMajorVersion(), driver.getMinorVersion());
+        } catch(Exception e) {
+        }
+
         if (driverName.equals(CLOUDERA_DRIVER_NAME)) {
-            return String.format("Cloudera Impala Driver (%s)", driverName);
+            return String.format("Cloudera Impala Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.equals(ImpalaUtility.DRIVER)) {
-            return String.format("Open-Source Impala Driver (%s)", driverName);
+            return String.format("Open-Source Impala Driver (%s%s)", driverName, versionInfo);
         } else {
             return driverName;
         }
