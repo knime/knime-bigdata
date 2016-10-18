@@ -319,6 +319,11 @@ public class JobserverSparkContext extends SparkContext {
                 LOGGER.info("Destroying context " + m_config.getContextName());
                 try {
                     new DestroyContextRequest(m_contextID, m_config, m_restClient).send();
+
+                    // wait up to 10s until context is removed from running list
+                    for (int i = 0; i < 50 && remoteSparkContextExists(); i++) {
+                        try { Thread.sleep(200); } catch (InterruptedException e) {}
+                    }
                 } catch (SparkContextNotFoundException e) {
                     LOGGER.info("Context not found, nothing to destroy: " + m_config.getContextName());
                 }
