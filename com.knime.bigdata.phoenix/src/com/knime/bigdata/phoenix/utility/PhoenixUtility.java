@@ -122,9 +122,8 @@ public class PhoenixUtility extends DatabaseUtility {
      * {@inheritDoc}
      */
     @Override
-    public DBTableCreator getTableCreator(final DatabaseConnectionSettings connSettings, final String schema,
-        final String tableName, final boolean isTempTable) {
-        return new PhoenixTableCreator(connSettings, schema, tableName, isTempTable);
+    public DBTableCreator getTableCreator(final String schema, final String tableName, final boolean isTempTable) {
+        return new PhoenixTableCreator(getStatementManipulator(), schema, tableName, isTempTable);
     }
 
     /**

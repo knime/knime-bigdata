@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.hive.utility;
 
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsImpl;
 
 /**
@@ -30,14 +30,14 @@ import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsI
 public class HiveTableCreator extends DBTableCreatorIfNotExistsImpl {
 
     /**
-     * @param conn a database connection settings object
+     * @param sm {@link StatementManipulator}
      * @param schema schema of the table to create
      * @param tableName name of the table to create
      * @param isTempTable <code>true</code> if the table is a temporary table, otherwise <code>false</code>
      */
-    protected HiveTableCreator(final DatabaseConnectionSettings conn, final String schema, final String tableName,
+    protected HiveTableCreator(final StatementManipulator sm, final String schema, final String tableName,
         final boolean isTempTable) {
-        super(conn, schema, tableName, isTempTable);
+        super(sm, schema, tableName, isTempTable);
     }
 
     /**
@@ -52,17 +52,17 @@ public class HiveTableCreator extends DBTableCreatorIfNotExistsImpl {
      * {@inheritDoc}
      */
     @Override
-    protected String getPrimaryKeyFragment(final boolean isPrimaryKey) {
-        throw new RuntimeException("Hive does not support key constraints.");
+    protected String getKeyConstraintFragment(final boolean isPrimaryKey) throws Exception {
+        throw new Exception("Hive does not support key constraints.");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected String getNotNullFragment(final boolean isNotNull) {
+    protected String getNotNullFragment(final boolean isNotNull) throws Exception {
         if(isNotNull) {
-            throw new RuntimeException("Hive does not support NOT NULL option");
+            throw new Exception("Hive does not support NOT NULL option");
         }
         return super.getNotNullFragment(isNotNull);
     }

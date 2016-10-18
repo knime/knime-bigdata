@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.phoenix.utility;
 
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
+import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsImpl;
 
 /**
@@ -30,14 +30,14 @@ import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsI
 public class PhoenixTableCreator extends DBTableCreatorIfNotExistsImpl {
 
     /**
-     * @param conn a database connection settings object
+     * @param sm {@link StatementManipulator}
      * @param schema schema of the table to create
      * @param tableName name of the table to create
      * @param isTempTable <code>true</code> if the table is a temporary table, otherwise <code>false</code>
      */
-    protected PhoenixTableCreator(final DatabaseConnectionSettings conn, final String schema, final String tableName,
+    protected PhoenixTableCreator(final StatementManipulator sm, final String schema, final String tableName,
         final boolean isTempTable) {
-        super(conn, schema, tableName, isTempTable);
+        super(sm, schema, tableName, isTempTable);
     }
 
     /**
@@ -52,9 +52,9 @@ public class PhoenixTableCreator extends DBTableCreatorIfNotExistsImpl {
      * {@inheritDoc}
      */
     @Override
-    protected String getTempFragment(final boolean isTempTable) {
+    protected String getTempFragment(final boolean isTempTable) throws Exception {
         if(isTempTable) {
-            throw new RuntimeException("Phoenix does not support temporary tables.");
+            throw new Exception("Phoenix does not support temporary tables.");
         }
         return super.getTempFragment(isTempTable);
     }
@@ -63,10 +63,10 @@ public class PhoenixTableCreator extends DBTableCreatorIfNotExistsImpl {
      * {@inheritDoc}
      */
     @Override
-    protected String getPrimaryKeyFragment(final boolean isPrimaryKey) {
+    protected String getKeyConstraintFragment(final boolean isPrimaryKey) throws Exception {
         if(!isPrimaryKey) {
-            throw new RuntimeException("Phoenix only supports primary keys.");
+            throw new Exception("Phoenix only supports primary keys.");
         }
-        return super.getPrimaryKeyFragment(isPrimaryKey);
+        return super.getKeyConstraintFragment(isPrimaryKey);
     }
 }

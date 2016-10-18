@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
@@ -167,9 +166,8 @@ public class HiveUtility extends DatabaseUtility {
      * {@inheritDoc}
      */
     @Override
-    public DBTableCreator getTableCreator(final DatabaseConnectionSettings connSettings, final String schema,
-        final String tableName, final boolean isTempTable) {
-        return new HiveTableCreator(connSettings, schema, tableName, isTempTable);
+    public DBTableCreator getTableCreator(final String schema, final String tableName, final boolean isTempTable) {
+        return new HiveTableCreator(getStatementManipulator(), schema, tableName, isTempTable);
     }
 
     /**
