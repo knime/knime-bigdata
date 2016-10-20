@@ -31,7 +31,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.phoenix.schema.types.PhoenixArray;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -73,42 +72,41 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
         if (wasNull() || array == null) {
             return DataType.getMissingCell();
         }
-        final PhoenixArray pArray = (PhoenixArray)array;
-        final int baseType = pArray.getBaseType();
+        final int baseType = array.getBaseType();
         final Collection<DataCell> cells;
         switch (baseType) {
             case Types.BIT:
             case Types.BOOLEAN:
-                cells = getBooleanCells(pArray);
+                cells = getBooleanCells(array);
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
             case Types.INTEGER:
-                cells = getIntegerCells(pArray);
+                cells = getIntegerCells(array);
                 break;
             case Types.BIGINT:
-                cells = getLongCells(pArray);
+                cells = getLongCells(array);
                 break;
             case Types.REAL:
             case Types.FLOAT:
             case Types.DOUBLE:
             case Types.NUMERIC:
-                cells = getDoubleCells(pArray);
+                cells = getDoubleCells(array);
                 break;
             case Types.DECIMAL:
-                cells = getDecimalCells(pArray);
+                cells = getDecimalCells(array);
                 break;
             case Types.DATE:
-                cells = getDateCells(pArray);
+                cells = getDateCells(array);
                 break;
             case Types.TIME:
-                cells = getTimeCells(pArray);
+                cells = getTimeCells(array);
                 break;
             case Types.TIMESTAMP:
-                cells = getTimestampCells(pArray);
+                cells = getTimestampCells(array);
                 break;
             default:
-                cells = getStringCells(pArray);
+                cells = getStringCells(array);
         }
         return CollectionCellFactory.createListCell(cells);
     }
@@ -118,7 +116,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getTimestampCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getTimestampCells(final Array pArray) throws SQLException {
         final Timestamp[] vals = (Timestamp[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Timestamp val : vals) {
@@ -133,7 +131,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getTimeCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getTimeCells(final Array pArray) throws SQLException {
         final Time[] vals = (Time[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Time val : vals) {
@@ -148,7 +146,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getDateCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getDateCells(final Array pArray) throws SQLException {
         final Date[] vals = (Date[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Date val : vals) {
@@ -163,7 +161,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getLongCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getLongCells(final Array pArray) throws SQLException {
         final long[] vals = (long[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Long val : vals) {
@@ -177,7 +175,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getIntegerCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getIntegerCells(final Array pArray) throws SQLException {
         final int[] vals = (int[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Integer val : vals) {
@@ -191,7 +189,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getBooleanCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getBooleanCells(final Array pArray) throws SQLException {
         final boolean[] vals = (boolean[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Boolean val : vals) {
@@ -204,7 +202,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getDecimalCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getDecimalCells(final Array pArray) throws SQLException {
         final BigDecimal[] vals = (BigDecimal[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (BigDecimal val : vals) {
@@ -218,7 +216,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
-    private Collection<DataCell> getDoubleCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getDoubleCells(final Array pArray) throws SQLException {
         final double[] vals = (double[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Double val : vals) {
@@ -231,7 +229,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @param vals
      * @return
      */
-    private Collection<DataCell> getStringCells(final PhoenixArray pArray) throws SQLException {
+    private Collection<DataCell> getStringCells(final Array pArray) throws SQLException {
         final Object[] vals = (Object[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Object val : vals) {
