@@ -5,7 +5,6 @@
          point="org.knime.workbench.repository.nodes">
         <node
               category-path="/database/database-connector"
-              expert-flag="false"
               factory-class="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
         </node>
     </extension>
