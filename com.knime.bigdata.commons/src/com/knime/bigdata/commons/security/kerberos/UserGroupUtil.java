@@ -50,11 +50,8 @@ public class UserGroupUtil {
             if (workflowManager != null) {
                 final WorkflowContext workflowContext = workflowManager.getContext();
                 if (workflowContext != null) {
-                    final String userid = workflowContext.getUserid();
-                    if (userid != null && !userid.isEmpty()) {
-                        LOGGER.debug("Workflow user found: " + userid);
-                        return userid;
-                    } else {LOGGER.warn("Workflow user id not available");}
+                    LOGGER.debug("Workflow user found: " + workflowContext.getUserid());
+                    return workflowContext.getUserid();
                 } else {LOGGER.warn("Workflow context not available");}
             } else {LOGGER.warn("Workflow manager not available");}
         } else {LOGGER.warn("Node context not available");}
