@@ -20,12 +20,12 @@
  */
 package com.knime.bigdata.commons.security.kerberos;
 
+import java.util.Optional;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
-import org.knime.core.node.workflow.WorkflowContext;
-import org.knime.core.node.workflow.WorkflowManager;
 
 import com.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.License;
@@ -37,27 +37,6 @@ import com.knime.licenses.License;
 public class UserGroupUtil {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(UserGroupUtil.class);
-
-    /**
-     * @return the user id of the user the workflow should be executed with
-     */
-    private static String getWFUser() {
-        LOGGER.debug("Retrieving workflow user");
-        //return only a user if the workflow runs on the server
-        final NodeContext context = NodeContext.getContext();
-        if (context != null) {
-            final WorkflowManager workflowManager = context.getWorkflowManager();
-            if (workflowManager != null) {
-                final WorkflowContext workflowContext = workflowManager.getContext();
-                if (workflowContext != null) {
-                    LOGGER.debug("Workflow user found: " + workflowContext.getUserid());
-                    return workflowContext.getUserid();
-                } else {LOGGER.warn("Workflow context not available");}
-            } else {LOGGER.warn("Workflow manager not available");}
-        } else {LOGGER.warn("Node context not available");}
-        return null;
-    }
-
 
     /**
      * This method returns the {@link UserGroupInformation} of the OS user or the given userName with authentication
@@ -134,13 +113,13 @@ public class UserGroupUtil {
         final UserGroupInformation user;
         if (License.runningInServerContext()) {
             //Always use the workflow user on the server in Kerberos mode because of security reasons!!!
-            final String wfUser = getWFUser();
-            if (wfUser != null && !kerberosTGTUser.getUserName().equals(wfUser)
-                    && !kerberosTGTUser.getShortUserName().equals(wfUser)) {
+            Optional<String> wfUser = NodeContext.getWorkflowUser();
+            if (wfUser.isPresent() && !kerberosTGTUser.getUserName().equals(wfUser.get())
+                    && !kerberosTGTUser.getShortUserName().equals(wfUser.get())) {
                 LOGGER.debug("Creating proxy user for workflow user " + wfUser
                     + " using Kerberos TGT user " + kerberosTGTUser.getUserName() + " on server");
                 //the Kerberos user differs from the workflow user so we have to impersonate it
-                user = UserGroupInformation.createProxyUser(wfUser, kerberosTGTUser);
+                user = UserGroupInformation.createProxyUser(wfUser.get(), kerberosTGTUser);
             } else {
                 LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the server.");
                 user = kerberosTGTUser;
