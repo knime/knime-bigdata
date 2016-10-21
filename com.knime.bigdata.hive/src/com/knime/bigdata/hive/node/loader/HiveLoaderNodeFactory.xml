@@ -34,8 +34,9 @@
             partitioned table requires a two-step import via a temporary table and therefore is much slower than
             import
             into an unpartitioned table.
-            <br>NULL values or empty strings in string partition columns are placed into a special partition and
-            returned as __HIVE_DEFAULT_PARTITION__ instead of NULL.</br>
+            <br />
+            NULL values or empty strings in string partition columns are placed into a special partition and
+            returned as __HIVE_DEFAULT_PARTITION__ instead of NULL.
         </option>
     </fullDescription>
 
