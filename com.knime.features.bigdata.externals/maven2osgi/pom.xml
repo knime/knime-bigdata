@@ -303,7 +303,7 @@
 									<transitive>false</transitive>
 									<source>true</source>
 									<instructions>
-										<Import-Package>${imports-1.2}</Import-Package>
+										<Import-Package>${imports-1.2},com.google.common.base;version="16.0.0"</Import-Package>
 										<Export-Package>${exports-1.2}</Export-Package>
 									</instructions>
 								</artifact>
