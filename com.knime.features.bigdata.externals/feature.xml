@@ -86,7 +86,7 @@
          id="org.apache.spark.catalyst_2.10"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -114,7 +114,7 @@
          id="org.apache.spark.catalyst_2.10.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -142,7 +142,7 @@
          id="org.apache.spark.core_2.10"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -170,7 +170,7 @@
          id="org.apache.spark.core_2.10.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -198,7 +198,7 @@
          id="org.apache.spark.hive_2.10"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -226,7 +226,7 @@
          id="org.apache.spark.hive_2.10.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -254,7 +254,7 @@
          id="org.apache.spark.mllib_2.10"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -282,7 +282,7 @@
          id="org.apache.spark.mllib_2.10.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -310,7 +310,7 @@
          id="org.apache.spark.sql_2.10"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
@@ -338,7 +338,7 @@
          id="org.apache.spark.sql_2.10.source"
          download-size="0"
          install-size="0"
-         version="1.2.2"
+         version="1.2.2.knime-20161024"
          unpack="false"/>
 
    <plugin
