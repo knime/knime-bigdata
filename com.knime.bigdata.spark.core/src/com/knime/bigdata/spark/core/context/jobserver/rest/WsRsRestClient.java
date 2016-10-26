@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.core.context.jobserver.rest;
 
+import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,8 +15,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.apache.cxf.common.util.Base64Utility;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -44,20 +44,31 @@ class WsRsRestClient implements IRestClient {
     }
 
 
-    public final Client client;
+    public final Client m_client;
 
-    public final WebTarget baseTarget;
+    public final WebTarget m_baseTarget;
 
-    public WsRsRestClient(final SparkContextConfig contextConfig) throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException {
-        client = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
-        .hostnameVerifier(getHostnameVerifier()).build();
-        client.register(MultiPartFeature.class);
-        if (contextConfig.useAuthentication() && contextConfig.getUser() != null && contextConfig.getPassword() != null) {
-            client.register(HttpAuthenticationFeature.basic(contextConfig.getUser(),
-                    String.valueOf(contextConfig.getPassword())));
+    public WsRsRestClient(final SparkContextConfig contextConfig)
+        throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException {
+        // The JAX-RS interface is in a different plug-in than the CXF implementation. Therefore the interface classes
+        // won't find the implementation via the default ContextFinder classloader. We set the current classes's
+        // classloader as context classloader and then it will find the service definition from this plug-in.
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            m_client = ClientBuilder.newBuilder().sslContext(SSLProvider.setupSSLContext())
+                    .hostnameVerifier(getHostnameVerifier()).build();
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
 
-        baseTarget = client.target(new URI(contextConfig.getJobServerUrl()));
+        if (contextConfig.useAuthentication() && (contextConfig.getUser() != null)
+            && (contextConfig.getPassword() != null)) {
+            m_client.property("Authorization", "Basic " + Base64Utility
+                .encode((contextConfig.getUser() + ":" + contextConfig.getPassword()).getBytes("UTF-8")));
+        }
+
+        m_baseTarget = m_client.target(new URI(contextConfig.getJobServerUrl()));
     }
 
     /**
@@ -73,7 +84,7 @@ class WsRsRestClient implements IRestClient {
      */
     private Invocation.Builder getInvocationBuilder(final String aPath, final String[] aParams) {
 
-        WebTarget target = baseTarget.path(aPath);
+        WebTarget target = m_baseTarget.path(aPath);
         if (aParams != null) {
             for (int p = 0; p < aParams.length; p = p + 2) {
                 target = target.queryParam(aParams[p], aParams[p + 1]);

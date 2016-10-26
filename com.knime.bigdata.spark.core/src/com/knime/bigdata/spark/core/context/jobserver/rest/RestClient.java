@@ -1,5 +1,6 @@
 package com.knime.bigdata.spark.core.context.jobserver.rest;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -33,8 +34,10 @@ public class RestClient {
      * @throws URISyntaxException
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
+     * @throws UnsupportedEncodingException
      */
-    public RestClient(final SparkContextConfig contextConfig) throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException {
+    public RestClient(final SparkContextConfig contextConfig)
+        throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Create RestClient");
             LOGGER.debug("Config: " + contextConfig);

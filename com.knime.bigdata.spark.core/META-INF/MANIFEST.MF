@@ -3,19 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor core infrastructure
 Bundle-SymbolicName: com.knime.bigdata.spark.core;singleton:=true
 Bundle-Version: 1.6.1.qualifier
-Bundle-ClassPath: knime.jar,
- conf/,
- lib/jersey-media-multipart-2.17.jar,
- lib/jersey-client-2.17.jar,
- lib/jersey-common-2.17.jar,
- lib/jersey-guava-2.17.jar,
- lib/hk2-api-2.4.0-b10.jar,
- lib/hk2-locator-2.4.0-b10.jar,
- lib/hk2-utils-2.4.0-b10.jar,
- lib/javax.inject-2.4.0-b10.jar,
- lib/mimepull-1.9.3.jar,
- lib/osgi-resource-locator-1.0.1.jar,
- lib/javax.ws.rs-api-2.0.1.jar
+Bundle-ClassPath: conf/,
+ knime-spark-core.jar
 Bundle-Activator: com.knime.bigdata.spark.core.SparkPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.core.context,
@@ -55,6 +44,12 @@ Require-Bundle: com.knime.bigdata.commons;bundle-version="[3.2.0,4.0.0)",
  com.knime.pmml.compilation.java;bundle-version="[3.0.0,4.0.0)",
  org.apache.commons.codec;bundle-version="[1.6.0,2.0.0)",
  com.typesafe.config;bundle-version="1.3.0";visibility:=reexport,
- org.knime.core.pmml;bundle-version="[3.2.0,4.0.0)"
+ org.knime.core.pmml;bundle-version="[3.2.0,4.0.0)",
+ javax.ws.rs-api;bundle-version="[2.0.1,3.0.0)",
+ org.apache.cxf.cxf-core;bundle-version="[3.0.7,4.0.0)",
+ org.apache.cxf.cxf-rt-frontend-jaxrs;bundle-version="[3.0.7,4.0.0)",
+ org.apache.cxf.cxf-rt-rs-client;bundle-version="[3.0.7,4.0.0)",
+ org.apache.cxf.cxf-rt-rs-extension-providers;bundle-version="[3.0.7,4.0.0)",
+ org.apache.cxf.cxf-rt-transports-http;bundle-version="[3.0.7,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

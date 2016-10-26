@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.core.context.jobserver;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -199,7 +200,8 @@ public class JobserverSparkContext extends SparkContext {
         if (m_restClient == null) {
             try {
                 m_restClient = new RestClient(m_config);
-            } catch (KeyManagementException | NoSuchAlgorithmException | URISyntaxException e) {
+            } catch (KeyManagementException | NoSuchAlgorithmException | URISyntaxException
+                    | UnsupportedEncodingException e) {
                 throw new KNIMESparkException(e);
             }
         }
