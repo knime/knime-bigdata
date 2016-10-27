@@ -25,6 +25,8 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.ext.RuntimeDelegate;
 
@@ -98,6 +100,8 @@ public class SparkPlugin extends AbstractUIPlugin {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            // silence the missing Aries Blueprint warnings
+            Logger.getLogger("org.apache.cxf.bus.blueprint.NamespaceHandlerRegisterer").setLevel(Level.SEVERE);
             RuntimeDelegate.getInstance();
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
