@@ -60,7 +60,7 @@ public class Spark2DatabaseJob implements SparkJobWithFiles<Spark2DatabaseJobInp
 
         try {
             final String namedInputObject = input.getFirstNamedInputObject();
-            final SQLContext sqlContext = new SQLContext(sparkContext);
+            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
             final RDD<Row> rowRdd = namedObjects.getRdd(namedInputObject);
             final IntermediateSpec resultSchema = input.getSpec(namedInputObject);
             final StructType sparkSchema = TypeConverters.convertSpec(resultSchema);

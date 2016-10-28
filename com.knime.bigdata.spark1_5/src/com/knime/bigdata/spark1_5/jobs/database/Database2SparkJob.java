@@ -30,11 +30,12 @@ import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.StructField;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
+import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
 import com.knime.bigdata.spark1_5.api.NamedObjects;
 import com.knime.bigdata.spark1_5.api.SparkJobWithFiles;
+import com.knime.bigdata.spark1_5.api.TypeConverters;
 import com.knime.bigdata.spark1_5.jobs.scripting.java.JarRegistry;
 
 /**
@@ -43,20 +44,20 @@ import com.knime.bigdata.spark1_5.jobs.scripting.java.JarRegistry;
  * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
-public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInput, EmptyJobOutput> {
+public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInput, Database2SparkJobOutput> {
     private static final long serialVersionUID = 1L;
 
     private final static Logger LOGGER = Logger.getLogger(Database2SparkJob.class.getName());
 
     @Override
-    public EmptyJobOutput runJob(final SparkContext sparkContext, final Database2SparkJobInput input,
+    public Database2SparkJobOutput runJob(final SparkContext sparkContext, final Database2SparkJobInput input,
             final List<File> jarFiles, final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(jarFiles);
 
         try {
             final String namedOutputObject = input.getFirstNamedOutputObject();
-            final SQLContext sqlContext = new SQLContext(sparkContext);
+            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
             final DataFrame dataFrame;
 
             LOGGER.info("Reading jdbc table into spark rdd " + namedOutputObject);
@@ -77,10 +78,10 @@ public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInp
             namedObjects.addRdd(namedOutputObject, dataFrame.rdd());
             LOGGER.info("Loading JDBC table into " + namedOutputObject + " done.");
 
+            return new Database2SparkJobOutput(namedOutputObject, TypeConverters.convertSpec(dataFrame.schema()));
+
         } catch(Exception e) {
             throw new KNIMESparkException("Failed to load JDBC data: " + e.getMessage(), e);
         }
-
-        return EmptyJobOutput.getInstance();
     }
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark to CSV</name>
+	<shortDescription>Writes a Spark RDD into a CSV file</shortDescription>
+	<fullDescription>
+		<intro>
+			Writes a Spark RDD into a CSV file.
+			See <a href="https://github.com/databricks/spark-csv">CSV Data Source documentation</a> for more information.
+			
+			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
+		</intro>
+
+		<option name="Save mode">How to handle existing data.</option>
+        <option name="Driver">Upload bundled driver or depend on cluster side provided driver.</option>
+        <option name="Partitions">
+        	Overwrite default partition count. This can be useful to reduce output file count to e.g. one file.
+        	<br />
+        	<b>Warning:</b> This might result in serious performance issues on huge data sets. Use with caution!
+        	<br />
+        	See <a href="http://spark.apache.org/docs/1.5.0/api/java/org/apache/spark/sql/DataFrame.html#coalesce(int)">Spark documentation</a> for more informations.	
+       	</option>
+		<option name="Header">The header will be written at the first line.</option>
+		<option name="Delimiter">Character used as delimiter between columns.</option>
+		<option name="Quote character">Quote character (delimiters inside quotes are ignored).</option>
+		<option name="Escape character">Escape character (escaped quote characters are ignored).</option>
+		<option name="Null value">Specifies a string that indicates a null value, nulls in the DataFrame will be written as this string.</option>
+		<option name="Date format">
+			Specifies a string that indicates the date format to use when reading dates or timestamps. Custom date formats follow the formats at <a href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">java.text.SimpleDateFormat</a>. This applies to both DateType and TimestampType. By default, it is null which means trying to parse times and date by java.sql.Timestamp.valueOf() and java.sql.Date.valueOf().
+		</option>
+		<option name="codec">Compression codec to use when saving to file.</option>
+		<option name="Quote mode">When to quote fields (ALL, MINIMAL (default), NON_NUMERIC, NONE), see <a href="https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/QuoteMode.html">Quote Modes</a>.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="HDFS connection">A HDFS compatible connection to the remote cluster (HDFS, WebHDFS or HttpFS)</inPort>
+		<inPort index="1" name="Spark data">Spark RDD</inPort>
+	</ports>
+</knimeNode>

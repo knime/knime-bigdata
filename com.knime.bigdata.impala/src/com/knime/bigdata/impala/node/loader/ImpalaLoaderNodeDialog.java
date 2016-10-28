@@ -22,7 +22,6 @@ package com.knime.bigdata.impala.node.loader;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -30,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
@@ -59,8 +59,6 @@ class ImpalaLoaderNodeDialog extends NodeDialogPane {
 
     private final DBSQLTypesPanel m_typeMappingPanel = new DBSQLTypesPanel();
 
-    private final JLabel m_info = new JLabel();
-
     private final RemoteFileChooserPanel m_target;
 
     private final JTextField m_tableName = new JTextField();
@@ -78,21 +76,13 @@ class ImpalaLoaderNodeDialog extends NodeDialogPane {
                 createFlowVariableModel("target", FlowVariable.Type.STRING), null);
 
         GridBagConstraints c = new GridBagConstraints();
-
-        c.gridx = 0;
-        c.gridy++;
-        c.insets = new Insets(2, 2, 2, 2);
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1;
-        c.gridwidth = 2;
-        p.add(m_info, c);
+        NodeUtils.resetGBC(c);
 
         c.gridy++;
         c.gridwidth = 1;
         c.fill = GridBagConstraints.NONE;
         c.weightx = 0;
-        p.add(new JLabel("Target folder   "), c);
+        p.add(new JLabel("Target folder: "), c);
         c.gridx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
@@ -102,7 +92,7 @@ class ImpalaLoaderNodeDialog extends NodeDialogPane {
         c.gridy++;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
-        p.add(new JLabel("Table name   "), c);
+        p.add(new JLabel("Table name: "), c);
         c.gridx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
@@ -134,11 +124,14 @@ class ImpalaLoaderNodeDialog extends NodeDialogPane {
             // does not happen
         }
 
-        ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
+        if (specs.length > 0 && specs[0] != null) {
+            ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
+            m_target.setConnectionInformation(connInfo);
+        } else {
+            m_target.setConnectionInformation(null);
+        }
 
-        m_target.setConnectionInformation(connInfo);
         m_target.setSelection(m_settings.targetFolder());
-        m_info.setText("Upload to " + connInfo.toURI());
         m_tableName.setText(m_settings.tableName());
         m_dropTableIfExists.setSelected(m_settings.dropTableIfExists());
         m_partitionColumns.update((DataTableSpec)specs[1], false, m_settings.partitionColumns());

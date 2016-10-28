@@ -32,7 +32,6 @@ import com.knime.bigdata.spark.node.SparkSaveMode;
  *
  * @author Sascha Wolke, KNIME.com
  */
-@SuppressWarnings("javadoc")
 public class Spark2DatabaseSettings {
 
     /** Required destination table name. */
@@ -50,29 +49,44 @@ public class Spark2DatabaseSettings {
     private final SparkSaveMode DEFAULT_SAVE_MODE = SparkSaveMode.DEFAULT;
     private SparkSaveMode m_saveMode = DEFAULT_SAVE_MODE;
 
+    /** @return True if bundled jar should be uploaded */
     public boolean uploadDriver() { return m_uploadDriver; }
+    /** @param uploadDriver - True if bundled jars should be uploaded */
     public void setUploadDriver(final boolean uploadDriver) { m_uploadDriver = uploadDriver; }
 
+    /** @return Destination table name */
     public String getTable() { return m_table; }
+    /** @param table - Destination table name */
     public void setTable(final String table) { m_table = table; }
 
+    /** @return Spark save mode as string */
     public String getSaveMode() { return m_saveMode.toSparkKey(); }
+    /** @return Spark save mode */
     public SparkSaveMode getSparkSaveMode() { return m_saveMode; }
+    /** @param saveMode - Spark save mode (see {@link SparkSaveMode}) */
     public void setSaveMode(final SparkSaveMode saveMode) { m_saveMode = saveMode; }
 
-
+    /** @param settings - Settings to save current settings in */
     public void saveSettingsTo(final NodeSettingsWO settings) {
         settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
         settings.addString(CFG_TABLE, m_table);
         settings.addString(CFG_SAVE_MODE, m_saveMode.toSparkKey());
     }
 
+    /**
+     * @param settings - Settings to validate and not load
+     * @throws InvalidSettingsException
+     */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         Spark2DatabaseSettings tmp = new Spark2DatabaseSettings();
         tmp.loadSettings(settings);
         tmp.validateSettings();
     }
 
+    /**
+     * Validate current settings
+     * @throws InvalidSettingsException
+     */
     public void validateSettings() throws InvalidSettingsException {
         if (StringUtils.isBlank(m_table)) {
             throw new InvalidSettingsException("Table name required.");
@@ -83,12 +97,17 @@ public class Spark2DatabaseSettings {
         }
     }
 
+    /**
+     * @param settings - Already validated settings to load
+     * @throws InvalidSettingsException
+     */
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         loadSettings(settings);
     }
 
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
+     * @param settings - Settings to load
      */
     public void loadSettings(final NodeSettingsRO settings) {
         m_uploadDriver = settings.getBoolean(CFG_UPLOAD_DRIVER, DEFAULT_UPLOAD_DRIVER);

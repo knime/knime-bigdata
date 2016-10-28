@@ -101,7 +101,6 @@ class Spark2DatabaseNodeDialog extends NodeDialogPane {
         m_settings.loadSettings(settings);
         m_uploadDriver.setSelected(m_settings.uploadDriver());
         m_table.setText(m_settings.getTable());
-        System.err.println("Loading " + m_settings.getSparkSaveMode());
         m_saveMode.setSelectedItem(m_settings.getSparkSaveMode());
     }
 
@@ -110,7 +109,6 @@ class Spark2DatabaseNodeDialog extends NodeDialogPane {
         m_settings.setUploadDriver(m_uploadDriver.isSelected());
         m_settings.setTable(m_table.getText());
         m_settings.setSaveMode(getSaveModeSelection());
-        System.err.println("Saving " + getSaveModeSelection());
 
         m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);

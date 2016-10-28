@@ -24,12 +24,22 @@ import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.csv.CSV2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.json.Json2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.orc.Orc2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.text.Text2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.avro.Spark2AvroNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.csv.Spark2CSVNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.json.Spark2JsonNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.orc.Spark2OrcNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2ParquetNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.writer.text.Spark2TextNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
-import com.knime.bigdata.spark.node.io.parquet.reader.Parquet2SparkNodeFactory;
-import com.knime.bigdata.spark.node.io.parquet.writer.Spark2ParquetNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
@@ -88,12 +98,22 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
      */
     public StandardSparkNodeFactoryProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE,
+            new Avro2SparkNodeFactory(),
+            new Spark2AvroNodeFactory(),
+            new CSV2SparkNodeFactory(),
+            new Spark2CSVNodeFactory(),
             new Database2SparkNodeFactory(),
             new Spark2DatabaseNodeFactory(),
             new Hive2SparkNodeFactory(),
             new Spark2HiveNodeFactory(),
+            new Json2SparkNodeFactory(),
+            new Spark2JsonNodeFactory(),
             new Table2SparkNodeFactory(),
             new Spark2TableNodeFactory(),
+            new Text2SparkNodeFactory(),
+            new Spark2TextNodeFactory(),
+            new Orc2SparkNodeFactory(),
+            new Spark2OrcNodeFactory(),
             new Parquet2SparkNodeFactory(),
             new Spark2ParquetNodeFactory(),
             new MLlibClusterAssignerNodeFactory(),

@@ -25,6 +25,8 @@ import com.knime.bigdata.spark1_5.api.Spark_1_5_CompatibilityChecker;
 import com.knime.bigdata.spark1_5.jobs.database.Database2SparkJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.database.Spark2DatabaseJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.fetchrows.FetchRowsJobRunFactory;
+import com.knime.bigdata.spark1_5.jobs.genericdatasource.GenericDataSource2SparkJobRunFactory;
+import com.knime.bigdata.spark1_5.jobs.genericdatasource.Spark2GenericDataSourceJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Hive2SparkJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.hive.Spark2HiveJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
@@ -40,8 +42,6 @@ import com.knime.bigdata.spark1_5.jobs.mllib.prediction.predictor.PredictorSpark
 import com.knime.bigdata.spark1_5.jobs.mllib.reduction.pca.PCAJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.mllib.reduction.svd.SVDJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.namedobjects.NamedObjectsJobRunFactory;
-import com.knime.bigdata.spark1_5.jobs.parquet.Parquet2SparkJobRunFactory;
-import com.knime.bigdata.spark1_5.jobs.parquet.Spark2ParquetJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.pmml.PMMLPredictionJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.pmml.PMMLTransformationJobRunFactory;
 import com.knime.bigdata.spark1_5.jobs.prepare.PrepareContextJobRunFactory;
@@ -78,10 +78,10 @@ public class Spark_1_5_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new FetchRowsJobRunFactory(),
             new Database2SparkJobRunFactory(),
             new Spark2DatabaseJobRunFactory(),
+            new GenericDataSource2SparkJobRunFactory(),
+            new Spark2GenericDataSourceJobRunFactory(),
             new Hive2SparkJobRunFactory(),
             new Spark2HiveJobRunFactory(),
-            new Parquet2SparkJobRunFactory(),
-            new Spark2ParquetJobRunFactory(),
             new KMeansJobRunFactory(),
             new CollaborativeFilteringJobRunFactory(),
             new NaiveBayesJobRunFactory(),

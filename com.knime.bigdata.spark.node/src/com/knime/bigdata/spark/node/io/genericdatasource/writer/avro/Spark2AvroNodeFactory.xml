@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark to Avro</name>
+	<shortDescription>Converts an incoming Spark RDD into an Avro file</shortDescription>
+	<fullDescription>
+		<intro>
+			Converts an incoming Spark RDD into a Avro file.
+			
+			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>		
+		</intro>
+		
+        <option name="Save mode">How to handle existing data.</option>
+        <option name="Driver">Upload bundled driver or depend on cluster side provided driver.</option>
+        <option name="Partitions">
+        	Overwrite default partition count. This can be useful to reduce output file count to e.g. one file.
+        	<br />
+        	<b>Warning:</b> This might result in serious performance issues on huge data sets. Use with caution!
+        	<br />
+        	See <a href="http://spark.apache.org/docs/1.5.0/api/java/org/apache/spark/sql/DataFrame.html#coalesce(int)">Spark documentation</a> for more informations.	
+       	</option>
+	</fullDescription>
+
+	<ports>
+	    <inPort index="0" name="HDFS connection">A HDFS compatible connection to the remote cluster (HDFS, WebHDFS or HttpFS)</inPort>
+		<inPort index="1" name="Spark data">Spark RDD</inPort>
+	</ports>
+</knimeNode>

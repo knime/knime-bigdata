@@ -30,7 +30,6 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author Sascha Wolke, KNIME.com
  */
-@SuppressWarnings("javadoc")
 public class Database2SparkSettings {
 
     /** Optional driver class to load. */
@@ -69,31 +68,49 @@ public class Database2SparkSettings {
     private int m_fetchSize = DEFAULT_FETCH_SIZE;
 
 
+    /** @return True if bundled jar should be uploaded */
     public boolean uploadDriver() { return m_uploadDriver; }
+    /** @param uploadDriver - True if bundled jars should be uploaded */
     public void setUploadDriver(final boolean uploadDriver) { m_uploadDriver = uploadDriver; }
 
+    /** @return True if partitioning should be used */
     public boolean usePartitioning() { return !StringUtils.isBlank(m_partitionCol); }
 
+    /** @return Name of column to partition on */
     public String getPartitionColumn() { return m_partitionCol; }
+    /** @param partitionCol - Name of column to partition on (only numeric columns supported) */
     public void setPartitionColumn(final String partitionCol) { m_partitionCol = partitionCol; }
 
+    /** @return True if lower and upper partition bounds should auto detected */
     public boolean useAutoBounds() { return m_autoBounds; }
+    /** @param autoBounds - True if lower and upper partition bounds should auto detected */
     public void setAutoBounds(final boolean autoBounds) { m_autoBounds = autoBounds; }
 
+    /** @return Lower partition bound */
     public long getLowerBound() { return m_lowerBound; }
+    /** @param lowerBound - Lower partition bound */
     public void setLowerBound(final long lowerBound) { m_lowerBound = lowerBound; }
 
+    /** @return Upper partition bound */
     public long getUpperBound() { return m_upperBound; }
+    /** @param upperBound - Upper partition bound */
     public void setUpperBound(final long upperBound) { m_upperBound = upperBound; }
 
+    /** @return Input partition count */
     public int getNumPartitions() { return m_numPartitions; }
+    /** @param numPartitions - Input partition count */
     public void setNumPartitions(final int numPartitions) { m_numPartitions = numPartitions; }
 
+    /** @return True if default fetch size should be used */
     public boolean useDefaultFetchSize() { return m_useDefaultFetchSize; }
+    /** @param useDefaultFetchSize - True if default fetch size should be used */
     public void setUseDefaultFetchSize(final boolean useDefaultFetchSize) {  m_useDefaultFetchSize = useDefaultFetchSize; }
+    /** @return Fetch size to use (see {@link #setUseDefaultFetchSize(boolean)}) */
     public int getFetchSize() { return m_fetchSize; }
+    /** @param fetchSize - Fetch size to use (see {@link #setUseDefaultFetchSize(boolean)}) */
     public void setFetchSize(final int fetchSize) { this.m_fetchSize = fetchSize; }
 
+    /** @param settings - Settings to save current settings in */
     public void saveSettingsTo(final NodeSettingsWO settings) {
         settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
         settings.addString(CFG_PARTITION_COL, m_partitionCol);
@@ -105,12 +122,20 @@ public class Database2SparkSettings {
         settings.addInt(CFG_FETCH_SIZE, m_fetchSize);
     }
 
+    /**
+     * @param settings - Settings to validate and not load
+     * @throws InvalidSettingsException
+     */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         Database2SparkSettings tmp = new Database2SparkSettings();
         tmp.loadSettingsFrom(settings);
         tmp.validateSettings();
     }
 
+    /**
+     * Validate current settings
+     * @throws InvalidSettingsException
+     */
     public void validateSettings() throws InvalidSettingsException {
         if (!StringUtils.isBlank(m_partitionCol)) {
             if (!m_autoBounds && m_lowerBound > m_upperBound) {
@@ -127,12 +152,17 @@ public class Database2SparkSettings {
         }
     }
 
+    /**
+     * @param settings - Already validated settings to load
+     * @throws InvalidSettingsException
+     */
     public void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         loadSettingsFrom(settings);
     }
 
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
+     * @param settings - Settings to load
      */
     public void loadSettingsFrom(final NodeSettingsRO settings) {
         m_uploadDriver = settings.getBoolean(CFG_UPLOAD_DRIVER, DEFAULT_UPLOAD_DRIVER);

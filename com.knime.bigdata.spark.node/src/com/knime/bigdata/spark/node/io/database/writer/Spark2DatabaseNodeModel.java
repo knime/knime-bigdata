@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.io.database.writer;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -41,13 +42,13 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
+import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
@@ -77,9 +78,8 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
         final DatabaseConnectionPortObjectSpec spec = (DatabaseConnectionPortObjectSpec)inSpecs[0];
         checkDatabaseIdentifier(spec);
 
-        final DataTableSpec tableSpec = ((SparkDataPortObjectSpec)inSpecs[1]).getTableSpec();
-        final DatabasePortObjectSpec resultSpec = createResultSpec(spec, tableSpec);
-        return new PortObjectSpec[] {resultSpec};
+        // Do not use the table spec here, final SQL table might use different data types!
+        return new PortObjectSpec[] { null };
     }
 
     /**
@@ -118,8 +118,7 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
             .createRun(jobInput, jarFiles)
             .run(contextID, exec);
 
-        final DatabasePortObjectSpec resultSpec = createResultSpec(dbPort.getSpec(), rdd.getTableSpec());
-        return new PortObject[] {new DatabasePortObject(resultSpec)};
+        return new PortObject[] { new DatabasePortObject(createResultSpec(dbPort.getSpec())) };
     }
 
     private Spark2DatabaseJobInput createJobInput(final SparkDataPortObject rdd, final DatabaseConnectionSettings settings) {
@@ -143,13 +142,21 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
         return input;
     }
 
-    private DatabasePortObjectSpec createResultSpec(final DatabaseConnectionPortObjectSpec spec, final DataTableSpec tableSpec)
+    /** @return Output spec, based on table spec from database. */
+    private DatabasePortObjectSpec createResultSpec(final DatabaseConnectionPortObjectSpec spec)
             throws InvalidSettingsException {
 
-        final String query = "SELECT * FROM " + m_settings.getTable();
-        DatabasePortObjectSpec resultSpec = new DatabasePortObjectSpec(tableSpec,
-            new DatabaseQueryConnectionSettings(spec.getConnectionSettings(getCredentialsProvider()), query));
-        return resultSpec;
+        try {
+            String query = "SELECT * FROM " + m_settings.getTable();
+            DatabaseConnectionSettings settings = spec.getConnectionSettings(getCredentialsProvider());
+            DatabaseQueryConnectionSettings querySettings = new DatabaseQueryConnectionSettings(settings, query);
+            DBReader conn = querySettings.getUtility().getReader(querySettings);
+            DataTableSpec tableSpec = conn.getDataTableSpec(getCredentialsProvider());
+            return new DatabasePortObjectSpec(tableSpec, querySettings);
+
+        } catch (SQLException e) {
+            throw new InvalidSettingsException("Unable to fetch result table spec from database: " + e.getMessage());
+        }
     }
 
     @Override

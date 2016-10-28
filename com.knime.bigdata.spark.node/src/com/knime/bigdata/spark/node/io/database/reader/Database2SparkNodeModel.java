@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
@@ -48,10 +47,12 @@ import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
+import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import com.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * @author Sascha Wolke, KNIME.com
@@ -79,9 +80,8 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         final DatabasePortObjectSpec spec = (DatabasePortObjectSpec)inSpecs[0];
         checkDatabaseIdentifier(spec);
 
-        final SparkDataPortObjectSpec resultSpec =
-                new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec());
-        return new PortObjectSpec[] { resultSpec };
+        // Do not use the database spec here! Use the spark dataframe schema at execution instead.
+        return new PortObjectSpec[] { null };
     }
 
     /**
@@ -106,10 +106,9 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         final SparkContextID contextID = getContextID(inData);
         ensureContextIsOpen(contextID);
 
-        final DataTableSpec resultTableSpec = dbPort.getSpec().getDataTableSpec();
-        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableSpec);
+        final String namedOutputObject = SparkIDs.createRDDID();
         final ArrayList<File> jarFiles = new ArrayList<>();
-        final Database2SparkJobInput jobInput = createJobInput(resultTable.getID(), dbSettings);
+        final Database2SparkJobInput jobInput = createJobInput(namedOutputObject, dbSettings);
         LOGGER.debug("Using JDBC Url: " + jobInput.getUrl());
 
         if (m_settings.uploadDriver()) {
@@ -118,19 +117,21 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
             jobInput.setDriver(dbSettings.getDriver());
         }
 
-        SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
+        final JobOutput jobOutput = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
             .createRun(jobInput, jarFiles)
             .run(contextID, exec);
 
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
+        final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, outputSpec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
-        return new PortObject[] {sparkObject};
+
+        return new PortObject[] { sparkObject };
     }
 
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DatabaseQueryConnectionSettings settings) throws InvalidSettingsException {
         final CredentialsProvider cp = getCredentialsProvider();
         final String url = settings.getJDBCUrl();
-        final String tempTable = "DATABASE2KNIME_" + Long.toHexString(Math.abs(new Random().nextLong()));
-        final String query = "(" + settings.getQuery() + ") as " + tempTable;
+        final String query =  String.format("(%s)", settings.getQuery());
         final Properties conProperties = new Properties();
         final Database2SparkJobInput input = new Database2SparkJobInput(namedOutputObject, url, query, conProperties);
 
