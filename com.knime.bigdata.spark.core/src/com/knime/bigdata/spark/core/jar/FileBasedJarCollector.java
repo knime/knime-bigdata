@@ -96,7 +96,7 @@ public class FileBasedJarCollector implements JarCollector {
             throw new IllegalArgumentException("Could not create SHA-1 hash of job jar", e);
         }
 
-        m_providerIDs = new HashSet<String>();
+        m_providerIDs = new HashSet<>();
     }
 
     /**
