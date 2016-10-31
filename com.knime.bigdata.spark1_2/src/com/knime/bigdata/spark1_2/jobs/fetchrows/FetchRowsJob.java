@@ -68,7 +68,9 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
         for (Row row : aRows) {
             final List<Serializable> convertedRow = new ArrayList<>(numFields);
             for (int j = 0; j < numFields; j++) {
-                if (fieldSpecs[j].getType() instanceof IntermediateArrayDataType) {
+                if (row.isNullAt(j)) {
+                    convertedRow.add(null);
+                } else if (fieldSpecs[j].getType() instanceof IntermediateArrayDataType) {
                     convertedRow.add(converters[j].convert((Object) ((SeqWrapper<?>) row.get(j)).toArray()));
                 } else {
                     convertedRow.add(converters[j].convert(row.get(j)));
