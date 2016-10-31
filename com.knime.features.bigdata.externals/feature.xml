@@ -495,4 +495,17 @@
          version="0.7.4"
          unpack="false"/>
 
+   <plugin
+         id="databricks.spark-avro"
+         download-size="0"
+         install-size="0"
+         version="2.0.1.s_2_10"
+         unpack="false"/>
+
+   <plugin
+         id="databricks.spark-csv"
+         download-size="0"
+         install-size="0"
+         version="1.5.0.s_2_10"
+         unpack="false"/>
 </feature>

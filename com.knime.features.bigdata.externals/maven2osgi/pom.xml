@@ -508,6 +508,21 @@
 								</artifact>
 								<!-- END Spark 1.6 dependencies -->
 								
+								<!-- BEGIN Additional Spark bundles -->
+                                <artifact>
+                                    <id>databricks:spark-avro:2.0.1-s_2.10</id>
+                                    <source>true</source>
+                                </artifact>
+                                <artifact>
+                                    <id>databricks:spark-csv:1.5.0-s_2.10</id>
+                                    <source>true</source>
+                                </artifact>
+                                <artifact>
+                                    <id>databricks:spark-csv:1.5.0-s_2.10</id>
+                                    <source>true</source>
+                                </artifact>								
+								
+								<!-- BEGIN Additional Spark bundles -->
 							</artifacts>
 						</configuration>
 					</execution>
