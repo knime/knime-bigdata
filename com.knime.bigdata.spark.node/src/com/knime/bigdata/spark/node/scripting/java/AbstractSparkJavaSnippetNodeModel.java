@@ -292,7 +292,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
     private HashMap<String, Object> getRequiredFlowVariables() {
 
         final FlowVariableRepository flowVarRepo = new FlowVariableRepository(getAvailableInputFlowVariables());
-        final HashMap<String, Object> requiredFlowVars = new HashMap<String, Object>();
+        final HashMap<String, Object> requiredFlowVars = new HashMap<>();
 
         // use settings directly
         for (InVar inCol : m_sparkJavaSnippet.getSettings().getJavaSnippetFields().getInVarFields()) {

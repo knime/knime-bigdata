@@ -40,11 +40,11 @@ public class Spark2AvroNodeFactory extends Spark2GenericDataSourceNodeFactory<Sp
 
     @Override
     public Spark2GenericDataSourceNodeModel<Spark2GenericDataSourceSettings> createNodeModel() {
-        return new Spark2GenericDataSourceNodeModel<Spark2GenericDataSourceSettings>(getSettings());
+        return new Spark2GenericDataSourceNodeModel<>(getSettings());
     }
 
     @Override
     protected Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings> createNodeDialogPane() {
-        return new Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings>(getSettings());
+        return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }

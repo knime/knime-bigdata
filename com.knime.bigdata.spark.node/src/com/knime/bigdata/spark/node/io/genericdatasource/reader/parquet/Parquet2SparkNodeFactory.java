@@ -41,11 +41,11 @@ public class Parquet2SparkNodeFactory extends GenericDataSource2SparkNodeFactory
 
     @Override
     public GenericDataSource2SparkNodeModel<GenericDataSource2SparkSettings> createNodeModel() {
-        return new GenericDataSource2SparkNodeModel<GenericDataSource2SparkSettings>(getSettings());
+        return new GenericDataSource2SparkNodeModel<>(getSettings());
     }
 
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new GenericDataSource2SparkNodeDialog<GenericDataSource2SparkSettings>(getSettings());
+        return new GenericDataSource2SparkNodeDialog<>(getSettings());
     }
 }

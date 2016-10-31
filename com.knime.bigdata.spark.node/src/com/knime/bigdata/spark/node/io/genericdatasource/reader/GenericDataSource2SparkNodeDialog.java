@@ -194,7 +194,7 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
      */
     protected void updateHistory(final String id, final JComboBox<String> comboBox) {
         final StringHistory history = StringHistory.getInstance(id);
-        final Set<String> set = new LinkedHashSet<String>();
+        final Set<String> set = new LinkedHashSet<>();
         Collections.addAll(set, history.getHistory());
         final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
         model.removeAllElements();

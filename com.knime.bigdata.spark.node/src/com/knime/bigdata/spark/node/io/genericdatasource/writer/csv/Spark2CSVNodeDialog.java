@@ -58,12 +58,12 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
         addToOptionsPanel("Escape character", m_escape);
         m_nullValue = new JTextField();
         addToOptionsPanel("Null value", m_nullValue);
-        m_dateFormat = new JComboBox<String>();
+        m_dateFormat = new JComboBox<>();
         m_dateFormat.setEditable(true);
-        addToOptionsPanel("Date formart", m_dateFormat);
-        m_compressionCodec = new JComboBox<String>(Spark2CSVSettings.COMPRESSION_CODECS);
+        addToOptionsPanel("Date format", m_dateFormat);
+        m_compressionCodec = new JComboBox<>(Spark2CSVSettings.COMPRESSION_CODECS);
         addToOptionsPanel("Compression", m_compressionCodec);
-        m_quoteMode = new JComboBox<String>(Spark2CSVSettings.QUOTE_MODES);
+        m_quoteMode = new JComboBox<>(Spark2CSVSettings.QUOTE_MODES);
         addToOptionsPanel("Quote mode", m_quoteMode);
     }
 

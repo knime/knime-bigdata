@@ -54,7 +54,7 @@ class Spark2DatabaseNodeDialog extends NodeDialogPane {
     Spark2DatabaseNodeDialog() {
         m_uploadDriver = new JCheckBox("Upload local JDBC driver.");
         m_table = new JTextField();
-        m_saveMode = new JComboBox<SparkSaveMode>(SparkSaveMode.ALL);
+        m_saveMode = new JComboBox<>(SparkSaveMode.ALL);
         m_saveMode.setEditable(false);
 
         addTab("Destination settings", initLayout());

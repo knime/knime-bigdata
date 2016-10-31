@@ -39,7 +39,7 @@ public class Json2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Ge
 
     @Override
     public GenericDataSource2SparkNodeModel<Json2SparkSettings> createNodeModel() {
-        return new GenericDataSource2SparkNodeModel<Json2SparkSettings>(getSettings());
+        return new GenericDataSource2SparkNodeModel<>(getSettings());
     }
 
     @Override

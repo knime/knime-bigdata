@@ -39,7 +39,7 @@ public class CSV2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Gen
 
     @Override
     public GenericDataSource2SparkNodeModel<CSV2SparkSettings> createNodeModel() {
-        return new GenericDataSource2SparkNodeModel<CSV2SparkSettings>(getSettings());
+        return new GenericDataSource2SparkNodeModel<>(getSettings());
     }
 
     @Override

@@ -40,7 +40,7 @@ public class Spark2CSVNodeFactory extends Spark2GenericDataSourceNodeFactory<Spa
 
     @Override
     public Spark2GenericDataSourceNodeModel<Spark2CSVSettings> createNodeModel() {
-        return new Spark2GenericDataSourceNodeModel<Spark2CSVSettings>(getSettings());
+        return new Spark2GenericDataSourceNodeModel<>(getSettings());
     }
 
     @Override

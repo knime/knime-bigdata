@@ -112,7 +112,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
             RemoteFileChooser.SELECT_DIR, m_directoryFlowVariable, null);
         addToOptionsPanel("Target folder" , m_directoryChooser.getPanel());
 
-        m_outputName = new JComboBox<String>();
+        m_outputName = new JComboBox<>();
         m_outputName.setEditable(true);
         m_outputNameFlowVariable = createFlowVariableModel("targetFilename", FlowVariable.Type.STRING);
         m_outputNameFlowVariable.addChangeListener( new ChangeListener() {
@@ -124,7 +124,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
         m_outputNameFlowVariableButton = new FlowVariableModelButton(m_outputNameFlowVariable);
         addToOptionsPanel("Target name", outputNamePanel());
 
-        m_saveMode = new JComboBox<SparkSaveMode>(SparkSaveMode.ALL);
+        m_saveMode = new JComboBox<>(SparkSaveMode.ALL);
         m_saveMode.setEditable(false);
         addToOptionsPanel("Save mode", m_saveMode);
 
@@ -283,7 +283,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
      */
     protected void updateHistory(final String id, final JComboBox<String> comboBox) {
         final StringHistory history = StringHistory.getInstance(id, 15);
-        final Set<String> set = new LinkedHashSet<String>();
+        final Set<String> set = new LinkedHashSet<>();
         Collections.addAll(set, history.getHistory());
         final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
         model.removeAllElements();

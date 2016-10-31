@@ -67,7 +67,7 @@ class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener 
         m_useDefaultFetchSize = new JCheckBox("Use driver default fetch size.");
         m_useDefaultFetchSize.addActionListener(this);
         m_fetchSize = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 10));
-        m_partitionColumn = new JComboBox<String>();
+        m_partitionColumn = new JComboBox<>();
         m_partitionColumn.addActionListener(this);
         m_partitionColumn.setEditable(false);
         m_autoBounds = new JCheckBox("Query DB for lower and upper bound.");

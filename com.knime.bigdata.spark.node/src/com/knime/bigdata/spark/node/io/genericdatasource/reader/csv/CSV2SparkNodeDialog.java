@@ -61,9 +61,9 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
         addToOptionsPanel("Quote character", m_quote);
         m_escape = new JTextField();
         addToOptionsPanel("Escape character", m_escape);
-        m_mode = new JComboBox<String>(CSV2SparkSettings.MODES);
+        m_mode = new JComboBox<>(CSV2SparkSettings.MODES);
         addToOptionsPanel("Mode", m_mode);
-        m_charset = new JComboBox<String>();
+        m_charset = new JComboBox<>();
         m_charset.setEditable(true);
         addToOptionsPanel("Charset", m_charset);
         m_inferSchema = new JCheckBox("Infer (requires one extra pass over the data)");
@@ -72,9 +72,9 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
         addToOptionsPanel("Comments", m_comment);
         m_nullValue = new JTextField();
         addToOptionsPanel("Null value", m_nullValue);
-        m_dateFormat = new JComboBox<String>();
+        m_dateFormat = new JComboBox<>();
         m_dateFormat.setEditable(true);
-        addToOptionsPanel("Date formart", m_dateFormat);
+        addToOptionsPanel("Date format", m_dateFormat);
     }
 
     @Override

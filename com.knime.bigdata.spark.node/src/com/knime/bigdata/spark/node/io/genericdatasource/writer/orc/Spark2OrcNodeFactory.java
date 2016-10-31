@@ -41,11 +41,11 @@ public class Spark2OrcNodeFactory extends Spark2GenericDataSourceNodeFactory<Spa
 
     @Override
     public Spark2GenericDataSourceNodeModel<Spark2OrcSettings> createNodeModel() {
-        return new Spark2GenericDataSourceNodeModel<Spark2OrcSettings>(getSettings());
+        return new Spark2GenericDataSourceNodeModel<>(getSettings());
     }
 
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new Spark2GenericDataSourceNodeDialog<Spark2OrcSettings>(getSettings());
+        return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }
