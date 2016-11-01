@@ -27,6 +27,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
 
@@ -86,13 +87,13 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     private String m_quoteMode = DEFAULT_QUOTE_MODE;
 
     /** @see Spark2GenericDataSourceSettings#Spark2GenericDataSourceSettings(String, boolean, boolean) */
-    public Spark2CSVSettings(final String format, final boolean supportsPartitioning, final boolean hasDriver) {
-        super(format, supportsPartitioning, hasDriver);
+    public Spark2CSVSettings(final String format, final SparkVersion minSparkVersion, final boolean supportsPartitioning, final boolean hasDriver) {
+        super(format, minSparkVersion, supportsPartitioning, hasDriver);
     }
 
     @Override
     protected Spark2GenericDataSourceSettings newInstance() {
-        return new Spark2CSVSettings(getFormat(), supportsPartitioning(), hasDriver());
+        return new Spark2CSVSettings(getFormat(), getMinSparkVersion(), supportsPartitioning(), hasDriver());
     }
 
     /** @return true if first line contains column names */

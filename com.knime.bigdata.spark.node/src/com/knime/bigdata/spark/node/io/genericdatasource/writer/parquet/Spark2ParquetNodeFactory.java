@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.io.genericdatasource.writer.parquet;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
@@ -35,7 +36,7 @@ public class Spark2ParquetNodeFactory extends Spark2GenericDataSourceNodeFactory
 
     @Override
     public Spark2GenericDataSourceSettings getSettings() {
-        return new Spark2GenericDataSourceSettings(FORMAT, HAS_PARTITIONING, HAS_DRIVER);
+        return new Spark2GenericDataSourceSettings(FORMAT, SparkVersion.V_1_5, HAS_PARTITIONING, HAS_DRIVER);
     }
 
     @Override

@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader.orc;
 
 import org.knime.core.node.NodeDialogPane;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel;
@@ -35,7 +36,7 @@ public class Orc2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Gen
 
     @Override
     public Orc2SparkSettings getSettings() {
-        return new Orc2SparkSettings(FORMAT, HAS_DRIVER);
+        return new Orc2SparkSettings(FORMAT, SparkVersion.V_1_5, HAS_DRIVER);
     }
 
     @Override

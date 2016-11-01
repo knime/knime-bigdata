@@ -46,6 +46,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import com.knime.bigdata.spark.core.util.SparkIDs;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * @author Sascha Wolke, KNIME.com
@@ -88,6 +89,11 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
         }
 
         m_settings.validateSettings();
+
+        final SparkVersion version = SparkContextUtil.getSparkVersion(getContextID(inSpecs));
+        if (!m_settings.isCompatibleSparkVersion(version)) {
+            throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark " + m_settings.getMinSparkVersion() + ".");
+        }
 
         // We cannot provide a spec because it's not clear yet what the file contains
         return new PortObjectSpec[] { null };

@@ -27,6 +27,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
@@ -38,6 +39,9 @@ public class Spark2GenericDataSourceSettings {
 
     /** Short or long format name in spark. */
     private final String m_format;
+
+    /** Required spark version. */
+    private final SparkVersion m_minSparkVersion;
 
     /** This settings support partitioning over columns. */
     private final boolean m_supportsPartitioning;
@@ -83,22 +87,35 @@ public class Spark2GenericDataSourceSettings {
      * Default construct.
      * Custom constructors should overwrite {@link #newInstance()} too.
      * @param format - Short or long format name in spark.
+     * @param minSparkVersion - Minimum spark version.
      * @param supportsPartitioning - True if this format has partition by column support.
      * @param hasDriver - True if this data source has a driver jar.
      */
-    public Spark2GenericDataSourceSettings(final String format, final boolean supportsPartitioning, final boolean hasDriver) {
+    public Spark2GenericDataSourceSettings(final String format, final SparkVersion minSparkVersion, final boolean supportsPartitioning, final boolean hasDriver) {
         m_format = format;
+        m_minSparkVersion = minSparkVersion;
         m_supportsPartitioning = supportsPartitioning;
         m_hasDriver = hasDriver;
     }
 
     /** @return New instance of this settings (overwrite this in custom settings) */
     protected Spark2GenericDataSourceSettings newInstance() {
-        return new Spark2GenericDataSourceSettings(m_format, m_supportsPartitioning, m_hasDriver);
+        return new Spark2GenericDataSourceSettings(m_format, m_minSparkVersion, m_supportsPartitioning, m_hasDriver);
     }
 
     /** @return Spark format name */
     public String getFormat() { return m_format; }
+
+    /**
+     * @param otherVersion - Version to check
+     * @return <code>true</code> if version is compatible
+     */
+    public boolean isCompatibleSparkVersion(final SparkVersion otherVersion) {
+        return m_minSparkVersion.compareTo(otherVersion) <= 0;
+    }
+
+    /** @return Minimum required spark version */
+    public SparkVersion getMinSparkVersion() { return m_minSparkVersion; }
 
     /** @return True if this data source requires additional jar files */
     public boolean hasDriver() { return m_hasDriver; }
@@ -147,7 +164,7 @@ public class Spark2GenericDataSourceSettings {
         settings.addString(CFG_SAVE_MODE, m_saveMode.toSparkKey());
         settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
 
-        if (m_supportsPartitioning) {
+        if (m_supportsPartitioning && m_partitionBy != null) {
             m_partitionBy.saveConfiguration(settings);
         }
 
@@ -171,11 +188,11 @@ public class Spark2GenericDataSourceSettings {
      */
     public void validateSettings() throws InvalidSettingsException {
         if (StringUtils.isBlank(m_directory)) {
-            throw new InvalidSettingsException("Output directory name required.");
+            throw new InvalidSettingsException("Target folder required.");
         }
 
         if (StringUtils.isBlank(m_name)) {
-            throw new InvalidSettingsException("Output name required.");
+            throw new InvalidSettingsException("Target name required.");
         }
 
         if (m_overwriteNumPartitions && m_numPartitions <= 0) {

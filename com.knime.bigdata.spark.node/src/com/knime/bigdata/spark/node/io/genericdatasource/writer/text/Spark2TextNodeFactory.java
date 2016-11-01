@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.writer.text;
 
 import org.knime.core.node.NodeDialogPane;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
@@ -37,7 +38,7 @@ public class Spark2TextNodeFactory extends Spark2GenericDataSourceNodeFactory<Sp
 
     @Override
     public Spark2GenericDataSourceSettings getSettings() {
-        return new Spark2GenericDataSourceSettings(FORMAT, HAS_PARTITIONING, HAS_DRIVER);
+        return new Spark2GenericDataSourceSettings(FORMAT, SparkVersion.V_1_6, HAS_PARTITIONING, HAS_DRIVER);
     }
 
     @Override

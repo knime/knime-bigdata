@@ -25,6 +25,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
+
 /**
  * Settings for the generic to spark node.
  *
@@ -34,6 +36,9 @@ public class GenericDataSource2SparkSettings {
 
     /** Short or long format name in spark. */
     private final String m_format;
+
+    /** Required spark version. */
+    private final SparkVersion m_minSparkVersion;
 
     /** This data source has needs an additional driver jar. */
     private final boolean m_hasDriver;
@@ -52,20 +57,33 @@ public class GenericDataSource2SparkSettings {
      * Default constructor.
      * Custom constructors should overwrite {@link #newInstance()} too.
      * @param format - Short or long format name in spark.
+     * @param minSparkVersion - Minimum spark version.
      * @param hasDriver - True if this data source has a driver jar.
      */
-    public GenericDataSource2SparkSettings(final String format, final boolean hasDriver) {
+    public GenericDataSource2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver) {
         m_format = format;
+        m_minSparkVersion = minSparkVersion;
         m_hasDriver = hasDriver;
     }
 
     /** @return New instance of this settings (overwrite this in custom settings) */
     protected GenericDataSource2SparkSettings newInstance() {
-        return new GenericDataSource2SparkSettings(m_format, m_hasDriver);
+        return new GenericDataSource2SparkSettings(m_format, m_minSparkVersion, m_hasDriver);
     }
 
     /** @return Spark format name */
     public String getFormat() { return m_format;  }
+
+    /**
+     * @param otherVersion - Version to check
+     * @return <code>true</code> if version is compatible
+     */
+    public boolean isCompatibleSparkVersion(final SparkVersion otherVersion) {
+        return m_minSparkVersion.compareTo(otherVersion) <= 0;
+    }
+
+    /** @return Minimum required spark version */
+    public SparkVersion getMinSparkVersion() { return m_minSparkVersion; }
 
     /** @return True if this data source requires additional jar files */
     public boolean hasDriver() { return m_hasDriver; }
@@ -102,7 +120,7 @@ public class GenericDataSource2SparkSettings {
      */
     public void validateSettings() throws InvalidSettingsException {
         if (StringUtils.isBlank(m_path)) {
-            throw new InvalidSettingsException("No input path provided.");
+            throw new InvalidSettingsException("Source path required.");
         }
     }
 

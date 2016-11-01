@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark.node.io.genericdatasource.writer.orc;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
 
@@ -30,13 +31,13 @@ import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDat
 public class Spark2OrcSettings extends Spark2GenericDataSourceSettings {
 
     /** @see Spark2GenericDataSourceSettings#Spark2GenericDataSourceSettings(String, boolean, boolean) */
-    public Spark2OrcSettings(final String format, final boolean supportsPartitioning, final boolean hasDriver) {
-        super(format, supportsPartitioning, hasDriver);
+    public Spark2OrcSettings(final String format, final SparkVersion minSparkVersion, final boolean supportsPartitioning, final boolean hasDriver) {
+        super(format, minSparkVersion, supportsPartitioning, hasDriver);
     }
 
     @Override
     protected Spark2GenericDataSourceSettings newInstance() {
-        return new Spark2OrcSettings(getFormat(), supportsPartitioning(), hasDriver());
+        return new Spark2OrcSettings(getFormat(), getMinSparkVersion(), supportsPartitioning(), hasDriver());
     }
 
     @Override

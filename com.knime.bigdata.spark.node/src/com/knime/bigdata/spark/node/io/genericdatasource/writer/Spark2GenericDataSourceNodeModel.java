@@ -45,6 +45,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * @author Sascha Wolke, KNIME.com
@@ -92,6 +93,11 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
 
         m_settings.loadDefault(tableSpec);
         m_settings.validateSettings();
+
+        final SparkVersion version = SparkContextUtil.getSparkVersion(dataPortObjectSpec.getContextID());
+        if (!m_settings.isCompatibleSparkVersion(version)) {
+            throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark " + m_settings.getMinSparkVersion() + ".");
+        }
 
         if (m_settings.supportsPartitioning()) {
             String partitions[] = m_settings.getPartitionBy().applyTo(tableSpec).getIncludes();

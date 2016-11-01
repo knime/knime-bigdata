@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
 
 import org.knime.core.node.NodeDialogPane;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
 
@@ -35,7 +36,7 @@ public class Spark2CSVNodeFactory extends Spark2GenericDataSourceNodeFactory<Spa
 
     @Override
     public Spark2CSVSettings getSettings() {
-        return new Spark2CSVSettings(FORMAT, HAS_PARTITIONING, HAS_DRIVER);
+        return new Spark2CSVSettings(FORMAT, SparkVersion.V_1_5, HAS_PARTITIONING, HAS_DRIVER);
     }
 
     @Override

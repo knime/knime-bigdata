@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.writer.orc;
 
 import org.knime.core.node.NodeDialogPane;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
@@ -36,7 +37,7 @@ public class Spark2OrcNodeFactory extends Spark2GenericDataSourceNodeFactory<Spa
 
     @Override
     public Spark2OrcSettings getSettings() {
-        return new Spark2OrcSettings(FORMAT, HAS_PARTITIONING, HAS_DRIVER);
+        return new Spark2OrcSettings(FORMAT, SparkVersion.V_1_5, HAS_PARTITIONING, HAS_DRIVER);
     }
 
     @Override
