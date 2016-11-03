@@ -80,16 +80,24 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
                 cells = getBooleanCells(array);
                 break;
             case Types.TINYINT:
+                cells = getTinyIntegerCells(array);
+                break;
             case Types.SMALLINT:
+                cells = getSmallIntegerCells(array);
+                break;
             case Types.INTEGER:
                 cells = getIntegerCells(array);
                 break;
             case Types.BIGINT:
                 cells = getLongCells(array);
                 break;
-            case Types.REAL:
             case Types.FLOAT:
+                cells = getFloatCells(array);
+                break;
+            case Types.REAL:
             case Types.DOUBLE:
+                cells = getDoubleCells(array);
+                break;
             case Types.NUMERIC:
                 cells = getDoubleCells(array);
                 break;
@@ -175,6 +183,34 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
      * @return
      * @throws SQLException
      */
+    private Collection<DataCell> getTinyIntegerCells(final Array pArray) throws SQLException {
+        final byte[] vals = (byte[])pArray.getArray();
+        final Collection<DataCell>cells = new ArrayList<>(vals.length);
+        for (Byte val : vals) {
+            cells.add(val == null ? DataType.getMissingCell() : new IntCell(val));
+        }
+        return cells;
+    }
+
+    /**
+     * @param pArray
+     * @return
+     * @throws SQLException
+     */
+    private Collection<DataCell> getSmallIntegerCells(final Array pArray) throws SQLException {
+        final short[] vals = (short[])pArray.getArray();
+        final Collection<DataCell>cells = new ArrayList<>(vals.length);
+        for (Short val : vals) {
+            cells.add(val == null ? DataType.getMissingCell() : new IntCell(val));
+        }
+        return cells;
+    }
+
+    /**
+     * @param pArray
+     * @return
+     * @throws SQLException
+     */
     private Collection<DataCell> getIntegerCells(final Array pArray) throws SQLException {
         final int[] vals = (int[])pArray.getArray();
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
@@ -207,6 +243,20 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (BigDecimal val : vals) {
             cells.add(val == null ? DataType.getMissingCell() : new DoubleCell(val.doubleValue()));
+        }
+        return cells;
+    }
+
+    /**
+     * @param vals
+     * @return
+     * @throws SQLException
+     */
+    private Collection<DataCell> getFloatCells(final Array pArray) throws SQLException {
+        final float[] vals = (float[])pArray.getArray();
+        final Collection<DataCell>cells = new ArrayList<>(vals.length);
+        for (Float val : vals) {
+            cells.add(val == null ? DataType.getMissingCell() : new DoubleCell(val));
         }
         return cells;
     }
