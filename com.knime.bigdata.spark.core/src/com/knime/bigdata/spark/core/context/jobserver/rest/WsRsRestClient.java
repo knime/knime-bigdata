@@ -16,6 +16,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.common.util.Base64Utility;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
@@ -27,6 +29,12 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
  *
  */
 class WsRsRestClient implements IRestClient {
+
+    /** Chunk threshold in bytes. */
+    private static final int CHUNK_THRESHOLD = 10*1024*1024; // 10MB
+
+    /** Length in bytes of each chunk. */
+    private static final int CHUNK_LENGTH = 1*1024*1024; // 1MB
 
     private static HostnameVerifier getHostnameVerifier() {
         return new HostnameVerifier() {
@@ -97,6 +105,7 @@ class WsRsRestClient implements IRestClient {
     @Override
     public <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) {
         Invocation.Builder builder = getInvocationBuilder(aPath, aArgs);
+        configureChunkTransfer(builder);
         return builder.post(aEntity);
     }
 
@@ -113,5 +122,18 @@ class WsRsRestClient implements IRestClient {
     public Response get(final String aPath) {
         final Invocation.Builder builder = getInvocationBuilder(aPath, null);
         return builder.get();
+    }
+
+    /**
+     * Configures chunk transfer threshold and length.
+     * See {@link #CHUNK_THRESHOLD} and {@link #CHUNK_LENGTH}.
+     */
+    private void configureChunkTransfer(final Invocation.Builder builder) {
+        HTTPConduit http = org.apache.cxf.jaxrs.client.WebClient.getConfig(builder).getHttpConduit();
+        HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
+        httpClientPolicy.setAllowChunking(true);
+        httpClientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
+        httpClientPolicy.setChunkLength(CHUNK_LENGTH);
+        http.setClient(httpClientPolicy);
     }
 }
