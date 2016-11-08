@@ -43,7 +43,7 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
 
         private final LinkedList<SparkJarProvider> m_registeredJarProviders = new LinkedList<>();
 
-        private JarCollector m_collector = null;
+        private JobJar m_jobJar = null;
 
         private LazyCollector(final SparkVersion version) {
             m_version = version;
@@ -53,26 +53,30 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
             m_registeredJarProviders.add(provider);
         }
 
-        private JarCollector getCollector() {
+        private JobJar getJobJar() {
             final long startTime = System.currentTimeMillis();
-            if (m_collector == null) {
-                m_collector = new FileBasedJarCollector(m_version);
+
+            if (m_jobJar == null || !m_jobJar.getJarFile().exists()) {
+                JarCollector collector = new FileBasedJarCollector(m_version);
 
                 for (final BaseSparkJarProvider baseProvider : m_baseProviders) {
-                    m_collector.addProviderID(baseProvider.getProviderID());
-                    baseProvider.collect(m_collector);
+                    collector.addProviderID(baseProvider.getProviderID());
+                    baseProvider.collect(collector);
                 }
 
                 for (final SparkJarProvider provider : m_registeredJarProviders) {
-                    m_collector.addProviderID(provider.getProviderID());
-                    provider.collect(m_collector);
+                    collector.addProviderID(provider.getProviderID());
+                    provider.collect(collector);
                 }
+
+                m_jobJar = collector.getJobJar();
 
                 final long durationTime = System.currentTimeMillis() - startTime;
                 LOGGER.debug(
                     "Time to collect all jars for Spark version " + m_version.toString() + ": " + durationTime + " ms");
             }
-            return m_collector;
+
+            return m_jobJar;
         }
     }
 
@@ -135,7 +139,7 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
     public synchronized static JobJar getJobJar(final SparkVersion sparkVersion) {
         LazyCollector collector = getInstance().m_jar.get(sparkVersion);
         if (collector != null) {
-            return collector.getCollector().getJobJar();
+            return collector.getJobJar();
         }
         return null;
     }
