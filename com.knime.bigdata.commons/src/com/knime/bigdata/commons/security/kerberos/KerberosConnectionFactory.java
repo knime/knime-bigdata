@@ -66,9 +66,11 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
             final CommonConfigContainer configContainer = CommonConfigContainer.getInstance();
             if (configContainer.hasCoreSiteConfig()) {
+                LOGGER.debug("Adding core site from config");
                 conf.addResource(configContainer.getCoreSiteConfig());
             }
             if (configContainer.hasHdfsSiteConfig()) {
+                LOGGER.debug("Adding hdfs site from config");
                 conf.addResource(configContainer.getHdfsSiteConfig());
             }
             final UserGroupInformation ugi = UserGroupUtil.getKerberosUser(conf);
@@ -85,8 +87,9 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             });
             return con;
         } catch (Exception e) {
-            LOGGER.error("Exception creating Kerberos based jdbc connection: " + e.getMessage(), e);
-            throw new SQLException("Exception creating Kerberos based jdbc connection. Error: " + e.getMessage(), e);
+            final String errMsg = "Exception creating Kerberos based jdbc connection. Error: " + e.getMessage();
+            LOGGER.error(errMsg, e);
+            throw new SQLException(errMsg, e);
         }
     }
 }
