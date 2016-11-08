@@ -4,13 +4,14 @@ Bundle-Name: KNIME Spark Executor core infrastructure
 Bundle-SymbolicName: com.knime.bigdata.spark.core;singleton:=true
 Bundle-Version: 1.6.1.qualifier
 Bundle-ClassPath: conf/,
- knime.jar
+ knime-spark-core.jar
 Bundle-Activator: com.knime.bigdata.spark.core.SparkPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.core.context,
  com.knime.bigdata.spark.core.context.namedobjects,
  com.knime.bigdata.spark.core.exception,
  com.knime.bigdata.spark.core.jar,
+ com.knime.bigdata.spark.core.jar.bundle,
  com.knime.bigdata.spark.core.job,
  com.knime.bigdata.spark.core.job.util,
  com.knime.bigdata.spark.core.jobserver,

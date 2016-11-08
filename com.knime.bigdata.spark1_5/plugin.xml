@@ -24,6 +24,11 @@
       		ProviderClass="com.knime.bigdata.spark1_5.converter.type.DefaultSpark_1_5_IntermediateToSparkConverterProvider">
       </IntermediateToSparkConverterProvider>
    </extension>
+   <extension point="com.knime.bigdata.spark.core.BundleGroupSparkJarProvider">
+      <BundleGroupSparkJarProvider
+            ProviderClass="com.knime.bigdata.spark1_5.base.Spark_1_5_BundleGroupSparkJarProvider">
+      </BundleGroupSparkJarProvider>
+   </extension>
    <extension
          point="com.knime.bigdata.spark.node.JavaSnippetHelper">
       <JavaSnippetHelper

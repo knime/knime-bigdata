@@ -7,6 +7,7 @@
    <extension-point id="SparkJarProvider" name="SparkJarProvider" schema="schema/SparkJarProvider.exsd"/>
    <extension-point id="ModelHelperProvider" name="ModelHelperProvider" schema="schema/ModelHelperProvider.exsd"/>
    <extension-point id="IntermediateToSparkConverterProvider" name="IntermediateToSparkConverterProvider" schema="schema/IntermediateToSparkConverterProvider.exsd"/>
+   <extension-point id="BundleGroupSparkJarProvider" name="BundleGroupSparkJarProvider" schema="schema/BundleGroupSparkJarProvider.exsd"/>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
@@ -82,8 +83,7 @@
       <nodeset
             default-category-icon="icons/category.png"
             deprecated="false"
-            factory-class="com.knime.bigdata.spark.core.node.SparkNodeSetFactory"
-            id="com.knime.bigdata.spark.node.SparkNodeSetFactory">
+            factory-class="com.knime.bigdata.spark.core.node.SparkNodeSetFactory">
       </nodeset>
    </extension>
    <extension
