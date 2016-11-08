@@ -30,15 +30,9 @@ import org.osgi.framework.FrameworkUtil;
  */
 public class JarPacker {
 
-    public static final Predicate<JarEntry> DIRECTORY_FILTER = new Predicate<JarEntry>() {
-        @Override
-        public boolean test(final JarEntry t) {
-            return t.isDirectory();
-        }
-    };
-
     private final static Predicate<String> META_INF_REGEX_PREDICATE = Pattern.compile("META-INF/.*").asPredicate();
 
+    /** Filters the META-INF folder and content. Useful when adding jars from an eclipse bundle. */
     public static final Predicate<JarEntry> META_INF_FILTER = new Predicate<JarEntry>() {
         @Override
         public boolean test(final JarEntry t) {
@@ -46,17 +40,16 @@ public class JarPacker {
         }
     };
 
+    private final static Predicate<String> MANIFESTMF_REGEX_PREDICATE =
+        Pattern.compile("META-INF/MANIFEST.MF").asPredicate();
 
-    private final static Predicate<String> MANIFESTMF_REGEX_PREDICATE = Pattern.compile("META-INF/MANIFEST.MF").asPredicate();
-
+    /** Filters the MANIFEST.MF file. */
     public static final Predicate<JarEntry> MANIFEST_MF_FILTER = new Predicate<JarEntry>() {
         @Override
         public boolean test(final JarEntry t) {
             return MANIFESTMF_REGEX_PREDICATE.test(t.getName());
         }
     };
-
-
 
     /**
      * add the given byte code to the given jar and put it into a new jar
@@ -74,7 +67,7 @@ public class JarPacker {
         if (!f.exists()) {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
         }
-        try(final JarFile source = new JarFile(aSourceJarPath);
+        try (final JarFile source = new JarFile(aSourceJarPath);
                 final FileOutputStream fos = new FileOutputStream(aTargetJarPath);
                 final JarOutputStream target = new JarOutputStream(fos);) {
             final String packagePath;
@@ -106,8 +99,9 @@ public class JarPacker {
         if (!f.exists()) {
             throw new IOException("Error: input jar file " + f.getAbsolutePath() + " does not exist!");
         }
-        final JarFile source = new JarFile(aSourceJarPath);
-        try (final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
+
+        try (final JarFile source = new JarFile(aSourceJarPath);
+                final JarOutputStream target = new JarOutputStream(new FileOutputStream(aTargetJarPath))) {
             copyJarFile(source, target);
 
             final String path = aClassPath.replaceAll("\\.", "/");
@@ -123,6 +117,7 @@ public class JarPacker {
             for (String cp : classPath) {
                 final String prefix = "/" + cp;
                 {
+                    @SuppressWarnings("resource")
                     final InputStream is = c.getResourceAsStream(prefix + ".class");
                     if (is != null) {
                         copyEntry(cp + ".class", is, target);
@@ -133,6 +128,7 @@ public class JarPacker {
                 do {
                     //now try anonymous inner classes with '$ix.class'
                     final String name = "$" + ix + ".class";
+                    @SuppressWarnings("resource")
                     final InputStream is = c.getResourceAsStream(prefix + name);
                     if (is == null) {
                         break;
@@ -143,7 +139,6 @@ public class JarPacker {
                 } while (true);
             }
         }
-        source.close();
     }
 
     /**
@@ -153,7 +148,7 @@ public class JarPacker {
      * @throws IOException if the jar could not be created
      */
     public static void createJar(final File jarFile, final String aPackagePath, final Map<String, byte[]> aByteCode)
-            throws IOException {
+        throws IOException {
         final String packagePath;
         if (aPackagePath.length() > 0) {
             packagePath = aPackagePath.replaceAll("\\.", "/") + "/";
@@ -191,8 +186,7 @@ public class JarPacker {
         final Set<Predicate<JarEntry>> filterEntries = Collections.singleton(MANIFEST_MF_FILTER);
         try (final OutputStream os = Files.newOutputStream(target.toPath(), StandardOpenOption.CREATE);
                 final JarOutputStream jos = new JarOutputStream(os, createManifest())) {
-            try (final JarFile s1 = new JarFile(source1);
-                    final JarFile s2 = new JarFile(source2);) {
+            try (final JarFile s1 = new JarFile(source1); final JarFile s2 = new JarFile(source2);) {
                 copyJarFile(s1, jos, filterEntries);
                 copyJarFile(s2, jos, filterEntries);
             }
@@ -229,13 +223,14 @@ public class JarPacker {
 
     /**
      * Copies the complete content of the source jar file into the target jar file.
+     *
      * @param aSourceJarFile source jar file
      * @param aTargetOutputStream target jar file
      * @throws IOException
      */
     private static void copyJarFile(final JarFile aSourceJarFile, final JarOutputStream aTargetOutputStream)
         throws IOException {
-        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<Predicate<JarEntry>>emptySet());
+        copyJarFile(aSourceJarFile, aTargetOutputStream, Collections.<Predicate<JarEntry>> emptySet());
     }
 
     /**
@@ -253,7 +248,7 @@ public class JarPacker {
             final String entryName = entry.getName();
             if (entryNames2Filter != null) {
                 boolean filterMatched = false;
-                for(Predicate<JarEntry> entryPredicate : entryNames2Filter) {
+                for (Predicate<JarEntry> entryPredicate : entryNames2Filter) {
                     filterMatched = entryPredicate.test(entry);
                     if (filterMatched) {
                         break;
@@ -263,8 +258,11 @@ public class JarPacker {
                     continue;
                 }
             }
-            try(InputStream is = aSourceJarFile.getInputStream(entry);){
-                copyEntry(entryName, is, aTargetOutputStream);
+
+            try (InputStream is = aSourceJarFile.getInputStream(entry)) {
+                if (!entry.isDirectory()) {
+                    copyEntry(entryName, is, aTargetOutputStream);
+                }
             }
             aTargetOutputStream.flush();
             aTargetOutputStream.closeEntry();
