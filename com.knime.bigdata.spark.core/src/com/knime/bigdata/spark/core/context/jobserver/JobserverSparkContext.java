@@ -110,6 +110,9 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     private boolean canReconfigureWithoutDestroy(final SparkContextConfig config) {
+        if (m_config == null) {
+            return true;
+        }
         return m_config.getSparkVersion().equals(config.getSparkVersion())
             && (m_config.overrideSparkSettings() == config.overrideSparkSettings())
             && ((m_config.overrideSparkSettings())
