@@ -44,6 +44,7 @@ public interface KNIMEPluginScanPredicates {
     public static final Predicate<String> KNIME_JOBS_PLUGIN_PREDICATE =
         Pattern.compile("com\\.knime\\.bigdata\\.spark[0-9_]*+").asPredicate();
 
+    //The knime.jar predicate that is used to identify the knime.jar to search for Spark classes
     public static final Predicate<String> KNIME_JAR_PREDICATE = Pattern.compile("knime\\.jar").asPredicate();
 
     public static final Predicate<String> KNIME_JOBSERVER_UTILS_JAR_PREDICATE =
