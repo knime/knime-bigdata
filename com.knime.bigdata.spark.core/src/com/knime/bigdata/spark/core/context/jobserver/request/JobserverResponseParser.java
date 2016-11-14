@@ -36,9 +36,11 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
+import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
 
 import com.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
+import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 
 /**
  * The Spark jobserver reports errors quite inconsistently (different ways of indicating failure cause, in some failure
@@ -49,6 +51,7 @@ import com.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.Fai
  */
 public class JobserverResponseParser {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(JobserverResponseParser.class);
 
     /**
      * Tries to parse the jobserver response into a meaningful result.
@@ -59,7 +62,9 @@ public class JobserverResponseParser {
      */
     public static ParsedResponse parseResponse(final int httpStatusCode,
         final String stringResponse) {
-
+        if (KNIMEConfigContainer.verboseLogging()) {
+            LOGGER.debug("Rest response code:" + httpStatusCode + " value:" + stringResponse);
+        }
         final JsonStructure jsonResponse = tryToParseAsJson(stringResponse);
 
         if (isDefinitelyFailure(httpStatusCode, jsonResponse)) {
