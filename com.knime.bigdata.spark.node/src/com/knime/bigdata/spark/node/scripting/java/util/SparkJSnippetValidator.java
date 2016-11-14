@@ -26,8 +26,8 @@ import java.util.List;
 import javax.swing.text.Document;
 
 import org.knime.base.node.jsnippet.util.FlowVariableRepository;
-import org.knime.base.node.jsnippet.util.JavaField.InVar;
 import org.knime.base.node.jsnippet.util.ValidationReport;
+import org.knime.base.node.jsnippet.util.field.InVar;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
@@ -54,7 +54,7 @@ public class SparkJSnippetValidator {
         for (InVar field : snippet.getSettings().getJavaSnippetFields().getInVarFields()) {
             FlowVariable var = flowVariableRepository.getFlowVariable(field.getKnimeName());
             if (var != null) {
-                if (!var.getType().equals(field.getKnimeType())) {
+                if (!var.getType().equals(field.getFlowVarType())) {
                     errors.add("The type of the flow variable \"" + field.getKnimeName() + "\" has changed.");
                 }
             } else {

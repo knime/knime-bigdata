@@ -56,16 +56,16 @@ import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.ui.JSnippetParser;
 import org.knime.base.node.jsnippet.util.FlowVariableRepository;
 import org.knime.base.node.jsnippet.util.JSnippet;
-import org.knime.base.node.jsnippet.util.JavaField;
-import org.knime.base.node.jsnippet.util.JavaField.InCol;
-import org.knime.base.node.jsnippet.util.JavaField.InVar;
-import org.knime.base.node.jsnippet.util.JavaField.OutCol;
-import org.knime.base.node.jsnippet.util.JavaField.OutVar;
 import org.knime.base.node.jsnippet.util.JavaSnippetCompiler;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.base.node.jsnippet.util.JavaSnippetUtil;
 import org.knime.base.node.jsnippet.util.ValidationReport;
+import org.knime.base.node.jsnippet.util.field.InCol;
+import org.knime.base.node.jsnippet.util.field.InVar;
+import org.knime.base.node.jsnippet.util.field.JavaField;
+import org.knime.base.node.jsnippet.util.field.OutCol;
+import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.KNIMEConstants;
@@ -662,7 +662,7 @@ public class SparkJavaSnippet implements JSnippet<SparkJavaSnippetTemplate> {
         for (InVar field : m_fields.getInVarFields()) {
             FlowVariable var = flowVariableRepository.getFlowVariable(field.getKnimeName());
             if (var != null) {
-                if (!var.getType().equals(field.getKnimeType())) {
+                if (!var.getType().equals(field.getFlowVarType())) {
                     errors.add("The type of the flow variable \""
                                 + field.getKnimeName()
                                 + "\" has changed.");

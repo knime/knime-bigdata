@@ -36,13 +36,13 @@ import org.eclipse.osgi.internal.loader.sources.SingleSourcePackage;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.guarded.GuardedSection;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
-import org.knime.base.node.jsnippet.util.JavaField;
-import org.knime.base.node.jsnippet.util.JavaField.InCol;
-import org.knime.base.node.jsnippet.util.JavaField.InVar;
-import org.knime.base.node.jsnippet.util.JavaField.OutCol;
-import org.knime.base.node.jsnippet.util.JavaField.OutVar;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
+import org.knime.base.node.jsnippet.util.field.InCol;
+import org.knime.base.node.jsnippet.util.field.InVar;
+import org.knime.base.node.jsnippet.util.field.JavaField;
+import org.knime.base.node.jsnippet.util.field.OutCol;
+import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
