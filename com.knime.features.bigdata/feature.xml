@@ -58,25 +58,4 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="databricks.spark-avro"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="databricks.spark-csv"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.csv"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 </feature>
