@@ -44,6 +44,7 @@
  */
 package com.knime.bigdata.commons.config.eclipse;
 
+import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -60,6 +61,30 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for the hdfs-site.xml. */
     public static final String PREF_HDFS_SITE_FILE = "com.knime.bigdata.config.hdfs-site.file";
 
+    /** Enable SSL trust store configuration (verify server). */
+    public static final String PREF_TRUSTSTORE_ENABLE = "com.knime.bigdata.config.truststore.enable";
+    /** Preference key for hostname verifier */
+    public static final String PREF_TRUSTSTORE_HOSTNAME_VERIFIER = "com.knime.bigdata.config.truststore.hostname-verifier";
+    /** Preference key for truststore location */
+    public static final String PREF_TRUSTSTORE_LOCATION = "com.knime.bigdata.config.truststore.location";
+    /** Preference key for truststore password */
+    public static final String PREF_TRUSTSTORE_PASSWORD = "com.knime.bigdata.config.truststore.password";
+    /** Preference key for truststore type */
+    public static final String PREF_TRUSTSTORE_TYPE = "com.knime.bigdata.config.truststore.type";
+    /** Preference key for truststore reload interval */
+    public static final String PREF_TRUSTSTORE_RELOAD_INTERVAL = "com.knime.bigdata.config.truststore.reload-interval";
+
+    /** Enable client SSL certificates (verify client). */
+    public static final String PREF_KEYSTORE_ENABLE = "com.knime.bigdata.config.keystore.enable";
+    /** Preference key for keystore location */
+    public static final String PREF_KEYSTORE_LOCATION = "com.knime.bigdata.config.keystore.location";
+    /** Preference key for keystore password */
+    public static final String PREF_KEYSTORE_PASSWORD = "com.knime.bigdata.config.keystore.password";
+    /** Preference key for keystore key password */
+    public static final String PREF_KEYSTORE_KEYPASSWORD = "com.knime.bigdata.config.keystore.keypassword";
+    /** Preference key for keystore type */
+    public static final String PREF_KEYSTORE_TYPE = "com.knime.bigdata.config.keystore.type";
+
     /** Preference key for custom kerberos user. */
     public static final String PREF_KERBEROS_USER = "com.knime.bigdata.config.kerberos.user";
 
@@ -75,6 +100,20 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     private void loadDefaultValues(final IPreferenceStore store) {
         store.setDefault(PREF_CORE_SITE_FILE, null);
         store.setDefault(PREF_HDFS_SITE_FILE, null);
+
+        store.setDefault(PREF_TRUSTSTORE_ENABLE, false);
+        store.setDefault(PREF_TRUSTSTORE_HOSTNAME_VERIFIER, "DEFAULT");
+        store.setDefault(PREF_TRUSTSTORE_LOCATION, "");
+        store.setDefault(PREF_TRUSTSTORE_PASSWORD, "");
+        store.setDefault(PREF_TRUSTSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
+        store.setDefault(PREF_TRUSTSTORE_RELOAD_INTERVAL, FileBasedKeyStoresFactory.DEFAULT_SSL_TRUSTSTORE_RELOAD_INTERVAL);
+
+        store.setDefault(PREF_KEYSTORE_ENABLE, false);
+        store.setDefault(PREF_KEYSTORE_LOCATION, "");
+        store.setDefault(PREF_KEYSTORE_PASSWORD, "");
+        store.setDefault(PREF_KEYSTORE_KEYPASSWORD, "");
+        store.setDefault(PREF_KEYSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
+
         store.setDefault(PREF_KERBEROS_USER, null);
         store.setDefault(PREF_KERBEROS_KEYTAB_FILE, null);
     }

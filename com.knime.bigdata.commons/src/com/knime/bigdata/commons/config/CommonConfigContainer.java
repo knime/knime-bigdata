@@ -24,6 +24,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
+import org.apache.hadoop.security.ssl.SSLFactory;
+import org.apache.hadoop.security.ssl.SSLFactory.Mode;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.knime.bigdata.commons.CommonsPlugin;
@@ -91,6 +95,54 @@ public class CommonConfigContainer {
      */
     public boolean hasHdfsSiteConfig() {
         return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE);
+    }
+
+    /** @return <code>true</code> if trust store configuration is available */
+    public boolean hasSSLConfig() {
+        return hasSSLTruststoreConfig() || hasSSLKeystoreConfig();
+    }
+
+    /** @return <code>true</code> if trust store configuration is available */
+    public boolean hasSSLTruststoreConfig() {
+        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_TRUSTSTORE_ENABLE);
+    }
+
+    /** @return <code>true</code> if trust store configuration is available */
+    public boolean hasSSLKeystoreConfig() {
+        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KEYSTORE_ENABLE);
+    }
+
+    /** @param conf - Hadoop configuration to add SSL configuration. */
+    public void addSSLConfig(final Configuration conf) {
+        if (PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_TRUSTSTORE_ENABLE)) {
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_TRUSTSTORE_HOSTNAME_VERIFIER, SSLFactory.SSL_HOSTNAME_VERIFIER_KEY);
+        }
+
+        if (PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KEYSTORE_ENABLE)) {
+            conf.setBoolean(SSLFactory.SSL_REQUIRE_CLIENT_CERT_KEY, true);
+        }
+    }
+
+    /** @param conf - Hadoop configuration to add SSL client configuration. */
+    public void addSSLClientConfig(final Configuration conf) {
+        if (PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_TRUSTSTORE_ENABLE)) {
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_TRUSTSTORE_LOCATION, FileBasedKeyStoresFactory.SSL_TRUSTSTORE_LOCATION_TPL_KEY);
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_TRUSTSTORE_PASSWORD, FileBasedKeyStoresFactory.SSL_TRUSTSTORE_PASSWORD_TPL_KEY);
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_TRUSTSTORE_TYPE, FileBasedKeyStoresFactory.SSL_TRUSTSTORE_TYPE_TPL_KEY);
+            conf.setLong(FileBasedKeyStoresFactory.resolvePropertyName(Mode.CLIENT, CommonPreferenceInitializer.PREF_TRUSTSTORE_RELOAD_INTERVAL),
+                PREFERENCE_STORE.getLong(CommonPreferenceInitializer.PREF_TRUSTSTORE_RELOAD_INTERVAL));
+        }
+
+        if (PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KEYSTORE_ENABLE)) {
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_KEYSTORE_LOCATION, FileBasedKeyStoresFactory.SSL_KEYSTORE_LOCATION_TPL_KEY);
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_KEYSTORE_PASSWORD, FileBasedKeyStoresFactory.SSL_KEYSTORE_PASSWORD_TPL_KEY);
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_KEYSTORE_KEYPASSWORD, FileBasedKeyStoresFactory.SSL_KEYSTORE_KEYPASSWORD_TPL_KEY);
+            addSSLConfig(conf, CommonPreferenceInitializer.PREF_KEYSTORE_TYPE, FileBasedKeyStoresFactory.SSL_KEYSTORE_TYPE_TPL_KEY);
+        }
+    }
+
+    private void addSSLConfig(final Configuration conf, final String inputKey, final String outputKey) {
+        conf.set(FileBasedKeyStoresFactory.resolvePropertyName(Mode.CLIENT, outputKey), PREFERENCE_STORE.getString(inputKey));
     }
 
     /**

@@ -2,17 +2,19 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
     icon="./webhdfsconnection16x16.png" type="Source">
-    <name>WebHDFS Connection</name>
+    <name>SSL Encrypted WebHDFS Connection</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
-        a Hadoop Distributed File System (HDFS) via WebHDFS.
+        a Hadoop Distributed File System (HDFS) via encrypted WebHDFS.
     </shortDescription>
 
     <fullDescription>
         <intro>
             This node configures the connection information that will be used to
-            connect to a remote host.
+            connect encrypted to a remote host.
+            
+            <p>SSL configurations can be done in global preferences (KNIME > Big Data Extension > Hadoop)</p>
         </intro>
 
         <option name="Host">
@@ -44,8 +46,8 @@
     </fullDescription>
 
     <ports>
-        <outPort name="WebHDFS Connection information port" index="0">
-            Port object containing the WebHDFS connection information.
+        <outPort name="SWebHDFS Connection information port" index="0">
+            Port object containing the SWebHDFS connection information.
         </outPort>
     </ports>
 </knimeNode>

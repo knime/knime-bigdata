@@ -55,37 +55,56 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
             new Protocol("webhdfs", 50070, false, false, false, true, true, true, false, true);
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
+    public static final Protocol SWEBHDFS_PROTOCOL =
+            new Protocol("swebhdfs", 50470, false, false, false, true, true, true, false, true);
+
+    /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
     public static final Protocol HTTPFS_PROTOCOL =
             new Protocol("httpfs", 14000, false, false, false, true, true, true, false, true);
 
-    public static final Protocol SUPPORTED_PROTOCOLS[] =
-            new Protocol[] { HDFS_PROTOCOL, WEBHDFS_PROTOCOL, HTTPFS_PROTOCOL };
+    /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
+    public static final Protocol HTTPSFS_PROTOCOL =
+            new Protocol("httpsfs", 14000, false, false, false, true, true, true, false, true);
 
-    /**
-     * {@inheritDoc}
-     */
+    /** All supported {@link Protocol}s of this {@link RemoteFileHandler}. */
+    public static final Protocol SUPPORTED_PROTOCOLS[] =
+            new Protocol[] { HDFS_PROTOCOL, WEBHDFS_PROTOCOL, SWEBHDFS_PROTOCOL, HTTPFS_PROTOCOL, HTTPSFS_PROTOCOL };
+
+    /** All encrypted {@link Protocol}s of this {@link RemoteFileHandler}. */
+    public static final Protocol ENCRYPTED_PROTOCOLS[] =
+            new Protocol[] { SWEBHDFS_PROTOCOL, HTTPSFS_PROTOCOL };
+
     @Override
     public Protocol[] getSupportedProtocols() {
         return SUPPORTED_PROTOCOLS;
     }
 
-    /** @return true if this handler supports given connection. */
+    /**
+     * @param connectionInformation - Connection to check
+     * @return <code>true</code> if this handler supports given connection.
+     */
     public static boolean isSupportedConnection(final ConnectionInformation connectionInformation) {
-        String protocol = connectionInformation.getProtocol();
-
-        for (Protocol current : SUPPORTED_PROTOCOLS) {
-            if (current.getName().equals(protocol)) {
-                return true;
-            }
-        }
-
-        return false;
+        return containsScheme(SUPPORTED_PROTOCOLS, connectionInformation.getProtocol());
     }
 
-    /** Maps HttpFS into WebHDFS scheme. */
+    /**
+     * @param connectionInformation - Connection to check
+     * @return <code>true</code> if this protocol use encryption
+     */
+    public static boolean isEncryptedConnection(final ConnectionInformation connectionInformation) {
+        return containsScheme(ENCRYPTED_PROTOCOLS, connectionInformation.getProtocol());
+    }
+
+    /**
+     * Maps HttpFS into WebHDFS scheme.
+     * @param scheme - Input scheme
+     * @return Mapped scheme if required, input scheme otherwise.
+     */
     public static String mapScheme(final String scheme) {
-        if (scheme.equals("httpfs")) {
-            return "webhdfs";
+        if (scheme.equalsIgnoreCase(HTTPFS_PROTOCOL.getName())) {
+            return WEBHDFS_PROTOCOL.getName();
+        } else if (scheme.equalsIgnoreCase(HTTPSFS_PROTOCOL.getName())) {
+            return SWEBHDFS_PROTOCOL.getName();
         } else {
             return scheme;
         }
@@ -102,4 +121,16 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
         return remoteFile;
     }
 
+    /**
+     * @return <code>true</code> if protocols contains protocol with given name
+     */
+    private static boolean containsScheme(final Protocol protocols[], final String name) {
+        for (Protocol current : protocols) {
+            if (current.getName().equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

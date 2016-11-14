@@ -25,7 +25,17 @@
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
+            factory-class="com.knime.bigdata.hdfs.node.connector.HttpsFSConnectionInformationNodeFactory">
+      </node>
+      <node
+            category-path="/io/filehandling/remote/connections"
+            deprecated="false"
             factory-class="com.knime.bigdata.hdfs.node.connector.WebHDFSConnectionInformationNodeFactory">
+      </node>
+      <node
+            category-path="/io/filehandling/remote/connections"
+            deprecated="false"
+            factory-class="com.knime.bigdata.hdfs.node.connector.SWebHDFSConnectionInformationNodeFactory">
       </node>
    </extension>
 </plugin>

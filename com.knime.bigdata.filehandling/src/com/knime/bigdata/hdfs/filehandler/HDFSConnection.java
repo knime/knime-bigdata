@@ -40,6 +40,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.hadoop.security.ssl.SSLFactory;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.core.node.NodeLogger;
@@ -98,6 +99,17 @@ public class HDFSConnection extends Connection {
         }
         if (configContainer.hasHdfsSiteConfig()) {
             m_conf.addResource(configContainer.getHdfsSiteConfig());
+        }
+
+        // Add SSL configuration, wrapper and current class loader
+        if (HDFSRemoteFileHandler.isEncryptedConnection(connectionInformation)) {
+            if (configContainer.hasSSLConfig()) {
+                configContainer.addSSLConfig(m_conf);
+                m_conf.set(SSLFactory.KEYSTORES_FACTORY_CLASS_KEY, KeyStoreFactoryWrapper.class.getCanonicalName());
+                m_conf.setClassLoader(getClass().getClassLoader());
+            } else {
+                throw new RuntimeException("HDFS SSL settings required by connection settings, but not set in preferences (See KNIME > Big Data Extension > Hadoop)!");
+            }
         }
     }
 
