@@ -218,6 +218,9 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
         jobInput.setOption(CFG_HEADER, Boolean.toString(m_header));
         jobInput.setOption(CFG_DELIMITER, m_delimiter);
         jobInput.setOption(CFG_QUOTE, m_quote);
+        if (!StringUtils.isBlank(m_escape)) {
+            jobInput.setOption(CFG_ESCAPE, m_escape);
+        }
         jobInput.setOption(CFG_MODE, m_mode);
         jobInput.setOption(CFG_CHARSET, m_charset);
         jobInput.setOption(CFG_INFER_SCHEMA, Boolean.toString(m_inferSchema));

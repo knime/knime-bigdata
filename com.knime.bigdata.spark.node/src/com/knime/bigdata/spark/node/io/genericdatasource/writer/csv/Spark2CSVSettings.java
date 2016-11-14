@@ -188,6 +188,9 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
         jobInput.setOption(CFG_HEADER, Boolean.toString(m_header));
         jobInput.setOption(CFG_DELIMITER, m_delimiter);
         jobInput.setOption(CFG_QUOTE, m_quote);
+        if (!StringUtils.isBlank(m_escape)) {
+            jobInput.setOption(CFG_ESCAPE, m_escape);
+        }
         jobInput.setOption(CFG_NULL_VALUE, m_nullValue);
 
         if (!StringUtils.isBlank(m_dateFormat)) {
