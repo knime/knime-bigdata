@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
@@ -64,6 +65,8 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
     public static final String JOB_ID = Database2SparkNodeModel.class.getCanonicalName();
 
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
+
+    private final Random m_rand = new Random();
 
     /** Constructor. */
     public Database2SparkNodeModel() {
@@ -131,7 +134,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DatabaseQueryConnectionSettings settings) throws InvalidSettingsException {
         final CredentialsProvider cp = getCredentialsProvider();
         final String url = settings.getJDBCUrl();
-        final String query =  String.format("(%s)", settings.getQuery());
+        final String query =  String.format("(%s) %s", settings.getQuery(), getTempTableName());
         final Properties conProperties = new Properties();
         final Database2SparkJobInput input = new Database2SparkJobInput(namedOutputObject, url, query, conProperties);
 
@@ -172,7 +175,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         String partCol = utility.getStatementManipulator().quoteIdentifier(m_settings.getPartitionColumn());
         DBAggregationFunction minFunction = utility.getAggregationFunction("MIN");
         DBAggregationFunction maxFunction = utility.getAggregationFunction("MAX");
-        String table = "(" + settings.getQuery() + ")";
+        String table = "(" + settings.getQuery() + ") " + getTempTableName();
         String newQuery = "SELECT "
                 + minFunction.getSQLFragment4SubQuery(statementManipulator, table, partCol)
                 + ", "
@@ -192,6 +195,15 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         } catch(Exception e) {
             throw new InvalidSettingsException("Unable to fetch lower and upper partition bounds.", e);
         }
+    }
+
+    /**
+     * Returns a random name for a temporary table.
+     *
+     * @return a random table name
+     */
+    private final String getTempTableName() {
+        return "tempTable_" + Math.abs(m_rand.nextLong());
     }
 
     @Override
