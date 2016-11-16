@@ -40,7 +40,10 @@ public class SparkEntropyScorerNodeView extends AbstractEntropyNodeView<SparkEnt
     @Override
     protected void modelChanged() {
         final SparkEntropyScorerViewData viewData = getNodeModel().getViewData();
-        getEntropyView().update(viewData.getScoreTable(), viewData.getNrClusters(), viewData.getOverallSize(),
-            viewData.getNrReferenceClusters(), viewData.getOverallSize(), viewData.getOverallEntropy(), viewData.getOverallQuality());
+        if (viewData != null) {
+            getEntropyView().update(viewData.getScoreTable(), viewData.getNrClusters(), viewData.getOverallSize(),
+                viewData.getNrReferenceClusters(), viewData.getOverallSize(), viewData.getOverallEntropy(),
+                viewData.getOverallQuality());
+        }
     }
 }
