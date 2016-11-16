@@ -137,7 +137,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
             out.writeLong(rowCount);
             out.writeInt(spec.getNumColumns());
-            int rowIdx = 0;
+            long rowIdx = 0;
             for (final DataRow row : inputTable) {
 
                 if (rowIdx % 100 == 0) {
@@ -150,8 +150,11 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
                     out.writeObject(converters[colIdx].convert(cell));
                     colIdx++;
                 }
+                rowIdx++;
             }
         }
+
+        exec.setProgress(1);
 
         return outFile;
     }
