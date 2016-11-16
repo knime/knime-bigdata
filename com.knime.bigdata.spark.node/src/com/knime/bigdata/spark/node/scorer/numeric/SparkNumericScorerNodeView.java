@@ -1,7 +1,5 @@
 package com.knime.bigdata.spark.node.scorer.numeric;
 
-import org.knime.base.node.mine.scorer.accuracy.AbstractAccuracyScorerNodeView;
-import org.knime.base.node.mine.scorer.accuracy.AccuracyScorerNodeModel;
 import org.knime.base.node.mine.scorer.numeric.AbstractNumericScorerNodeView;
 
 /**
