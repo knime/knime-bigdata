@@ -2,7 +2,7 @@
 <feature
       id="com.knime.features.bigdata.externals"
       label="Feature with all external plug-ins for the KNIME Big Data Extension"
-      version="1.6.1.qualifier"
+      version="1.7.0.qualifier"
       provider-name="KNIME GmbH, Konstanz, Germany">
 
    <plugin
@@ -508,4 +508,5 @@
          install-size="0"
          version="1.5.0.s_2_10"
          unpack="false"/>
+
 </feature>

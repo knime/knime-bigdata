@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor core infrastructure
 Bundle-SymbolicName: com.knime.bigdata.spark.core;singleton:=true
-Bundle-Version: 1.6.1.qualifier
+Bundle-Version: 1.7.0.qualifier
 Bundle-ClassPath: conf/,
  knime.jar
 Bundle-Activator: com.knime.bigdata.spark.core.SparkPlugin

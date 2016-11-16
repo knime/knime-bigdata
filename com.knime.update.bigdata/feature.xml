@@ -2,7 +2,7 @@
 <feature
       id="com.knime.update.bigdata"
       label="KNIME Big Data Extensions Update Site"
-      version="1.6.1.qualifier">
+      version="1.7.0.qualifier">
 
    <includes
          id="com.knime.features.bigdata"
