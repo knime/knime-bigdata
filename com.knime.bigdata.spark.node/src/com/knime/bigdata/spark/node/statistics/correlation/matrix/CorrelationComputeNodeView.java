@@ -52,11 +52,9 @@ import org.knime.core.data.DataTable;
 import org.knime.core.node.BufferedDataTableHolder;
 import org.knime.core.node.NodeModel;
 
-import com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeModel;
-
 /**
  * Implements the {@link AbstractCorrelationComputeNodeView} for correlation compute models
- * 
+ *
  * @author Ole Ostergaard
  */
 final class CorrelationComputeNodeView<M extends NodeModel> extends AbstractCorrelationComputeNodeView<M> {
