@@ -47,6 +47,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
@@ -113,10 +114,19 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
             jarFiles.addAll(dbDriverFactory.getDriverFiles(dbSettings));
             jobInput.setDriver(dbSettings.getDriver());
         }
-
-        SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
-            .createRun(jobInput, jarFiles)
-            .run(contextID, exec);
+        try {
+            SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
+                .createRun(jobInput, jarFiles)
+                .run(contextID, exec);
+        } catch (KNIMESparkException e) {
+            final String message = e.getMessage();
+            if (message != null && message.contains("Failed to load JDBC data: No suitable driver found for")) {
+                LOGGER.debug("Required JDBC driver not found in cluster. Original error message: " + e.getMessage());
+                throw new InvalidSettingsException("Required JDBC driver not found. Enable the 'Upload local JDBC driver' "
+                    + "option in the node dialog to upload the required driver files to the cluster.");
+            }
+            throw e;
+        }
 
         return new PortObject[] { new DatabasePortObject(createResultSpec(dbPort.getSpec())) };
     }

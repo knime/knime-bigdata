@@ -66,7 +66,7 @@ public class Spark2GenericDataSourceSettings {
 
     /** Upload bundled jar. */
     private static final String CFG_UPLOAD_DRIVER = "uploadDriver";
-    private static final boolean DEFAULT_UPLOAD_DRIVER = true;
+    private static final boolean DEFAULT_UPLOAD_DRIVER = false;
     private boolean m_uploadDriver = DEFAULT_UPLOAD_DRIVER;
 
     /** Partition data by columns */

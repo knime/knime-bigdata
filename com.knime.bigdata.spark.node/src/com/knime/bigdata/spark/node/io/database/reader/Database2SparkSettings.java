@@ -34,7 +34,7 @@ public class Database2SparkSettings {
 
     /** Optional driver class to load. */
     private final String CFG_UPLOAD_DRIVER = "uploadDriver";
-    private final boolean DEFAULT_UPLOAD_DRIVER = true;
+    private final boolean DEFAULT_UPLOAD_DRIVER = false;
     private boolean m_uploadDriver = DEFAULT_UPLOAD_DRIVER;
 
     /** Optional partition hints (partitionColumn, lowerBound, upperBound, numPartitions). */

@@ -48,6 +48,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -120,15 +121,23 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
             jobInput.setDriver(dbSettings.getDriver());
         }
 
-        final JobOutput jobOutput = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
-            .createRun(jobInput, jarFiles)
-            .run(contextID, exec);
-
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
-        final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, outputSpec);
-        final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
-
-        return new PortObject[] { sparkObject };
+        try {
+            final JobOutput jobOutput = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
+                .createRun(jobInput, jarFiles)
+                .run(contextID, exec);
+            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
+            final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, outputSpec);
+            final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
+            return new PortObject[] { sparkObject };
+        } catch (KNIMESparkException e) {
+            final String message = e.getMessage();
+            if (message != null && message.contains("Failed to load JDBC data: No suitable driver found for")) {
+                LOGGER.debug("Required JDBC driver not found in cluster. Original error message: " + e.getMessage());
+                throw new InvalidSettingsException("Required JDBC driver not found. Enable the 'Upload local JDBC driver' "
+                    + "option in the node dialog to upload the required driver files to the cluster.");
+            }
+            throw e;
+        }
     }
 
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DatabaseQueryConnectionSettings settings) throws InvalidSettingsException {

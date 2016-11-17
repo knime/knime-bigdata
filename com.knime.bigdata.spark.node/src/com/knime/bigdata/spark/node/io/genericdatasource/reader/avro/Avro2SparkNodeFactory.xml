@@ -11,7 +11,7 @@
 			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>		
 		</intro>
 		
-        <option name="Driver">Upload bundled driver or depend on cluster side provided driver.</option>
+        <option name="Driver">Upload data source driver or depend on cluster side provided driver.</option>
 	</fullDescription>
 
 	<ports>

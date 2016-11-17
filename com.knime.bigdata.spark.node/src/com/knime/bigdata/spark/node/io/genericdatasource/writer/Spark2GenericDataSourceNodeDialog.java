@@ -129,7 +129,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
         addToOptionsPanel("Save mode", m_saveMode);
 
         if (m_settings.hasDriver()) {
-            m_uploadDriver = new JCheckBox("Upload bundled driver");
+            m_uploadDriver = new JCheckBox("Upload data source driver");
             addToOptionsPanel("Driver", m_uploadDriver);
         } else {
             m_uploadDriver = null;

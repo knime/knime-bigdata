@@ -98,7 +98,7 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
         addToOptionsPanel("Source", m_filenameChooser.getPanel());
 
         if (m_settings.hasDriver()) {
-            m_uploadDriver = new JCheckBox("Upload bundled driver");
+            m_uploadDriver = new JCheckBox("Upload data source driver");
             addToOptionsPanel("Driver", m_uploadDriver);
         } else {
             m_uploadDriver = null;

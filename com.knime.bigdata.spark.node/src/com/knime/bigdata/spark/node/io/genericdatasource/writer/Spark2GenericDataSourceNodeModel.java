@@ -38,6 +38,7 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -137,7 +138,18 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         addPartitioning(rdd.getTableSpec(), jobInput);
         m_settings.addWriterOptions(jobInput);
 
-        runFactory.createRun(jobInput, new ArrayList<File>()).run(rdd.getContextID(), exec);
+        try {
+            runFactory.createRun(jobInput, new ArrayList<File>()).run(rdd.getContextID(), exec);
+        } catch (KNIMESparkException e) {
+            final String message = e.getMessage();
+            if (message != null && message.contains("Reason: Failed to find data source:")) {
+                LOGGER.debug("Required data source driver not found in cluster. Original error message: "
+            + e.getMessage());
+                throw new InvalidSettingsException("Required datas source driver not found. Enable the 'Upload data source driver' "
+                    + "option in the node dialog to upload the required driver files to the cluster.");
+            }
+            throw e;
+        }
 
         return new PortObject[0];
     }

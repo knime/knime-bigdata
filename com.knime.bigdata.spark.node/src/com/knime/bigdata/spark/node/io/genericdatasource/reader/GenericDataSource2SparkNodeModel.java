@@ -40,6 +40,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -134,15 +135,26 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
         final GenericDataSource2SparkJobInput jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath);
         settings.addReaderOptions(jobInput);
 
-        final GenericDataSource2SparkJobOutput jobOutput;
-        if (exec != null) {
-            jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID, exec);
-        } else {
-            jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID);
-        }
+        try {
+            final GenericDataSource2SparkJobOutput jobOutput;
+            if (exec != null) {
+                jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID, exec);
+            } else {
+                jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID);
+            }
 
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
-        return new SparkDataTable(contextID, namedOutputObject, outputSpec);
+            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
+            return new SparkDataTable(contextID, namedOutputObject, outputSpec);
+        } catch (KNIMESparkException e) {
+            final String message = e.getMessage();
+            if (message != null && message.contains("Reason: Failed to find data source:")) {
+                LOGGER.debug("Required data source driver not found in cluster. Original error message: "
+            + e.getMessage());
+                throw new InvalidSettingsException("Required datas source driver not found. Enable the 'Upload data source driver' "
+                    + "option in the node dialog to upload the required driver files to the cluster.");
+            }
+            throw e;
+        }
     }
 
     @Override
