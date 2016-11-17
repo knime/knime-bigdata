@@ -81,10 +81,11 @@ public class PredictionJobInput extends JobInput {
      */
     public File writeModelIntoTemporaryFile(final Serializable model) throws KNIMESparkException {
         try {
-            File outFile = File.createTempFile("knime-sparkModel", ".tmp");
+            final File outFile = File.createTempFile("knime-sparkModel", ".tmp");
             try (final ObjectOutputStream out
                     = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));){
                 out.writeObject(model);
+                out.close();
             }
             return outFile;
         } catch(IOException e) {
