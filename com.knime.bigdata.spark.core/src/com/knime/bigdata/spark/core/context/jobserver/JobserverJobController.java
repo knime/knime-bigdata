@@ -324,6 +324,11 @@ class JobserverJobController implements JobController {
                 case DONE:
                 case FINISHED:
                 case OK:
+                    if (!jobData.containsKey("result")) {
+                        throw new KNIMESparkException("Unable to fetch job result, might be removed from result cache."
+                            + " See spark.jobserver.job-result-cache-size in environment.conf to increase cache size.");
+                    }
+
                     try {
                         final Config typesafeConfig = ConfigFactory.parseString(jobData.getString("result"));
                         return JobserverJobOutput
