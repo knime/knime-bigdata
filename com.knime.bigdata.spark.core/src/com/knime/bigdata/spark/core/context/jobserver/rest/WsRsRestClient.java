@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.cxf.common.util.Base64Utility;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transport.http.auth.HttpAuthSupplier;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -56,6 +57,10 @@ class WsRsRestClient implements IRestClient {
 
     public final WebTarget m_baseTarget;
 
+    private final HTTPClientPolicy m_clientPolicy;
+
+    private final HttpAuthSupplier m_clientAuthSupplier;
+
     public WsRsRestClient(final SparkContextConfig contextConfig)
         throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException {
         // The JAX-RS interface is in a different plug-in than the CXF implementation. Therefore the interface classes
@@ -71,12 +76,21 @@ class WsRsRestClient implements IRestClient {
         }
 
         if (contextConfig.useAuthentication() && (contextConfig.getUser() != null)
-            && (contextConfig.getPassword() != null)) {
+                && (contextConfig.getPassword() != null)) {
             m_client.property("Authorization", "Basic " + Base64Utility
                 .encode((contextConfig.getUser() + ":" + contextConfig.getPassword()).getBytes("UTF-8")));
+            m_clientAuthSupplier = new WsRsRestClientAuthSupplier(contextConfig.getUser(), contextConfig.getPassword());
+        } else {
+            m_clientAuthSupplier = null;
         }
 
         m_baseTarget = m_client.target(new URI(contextConfig.getJobServerUrl()));
+
+        // Chunk transfer policy
+        m_clientPolicy = new HTTPClientPolicy();
+        m_clientPolicy.setAllowChunking(true);
+        m_clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
+        m_clientPolicy.setChunkLength(CHUNK_LENGTH);
     }
 
     /**
@@ -98,14 +112,20 @@ class WsRsRestClient implements IRestClient {
                 target = target.queryParam(aParams[p], aParams[p + 1]);
             }
         }
+
         Invocation.Builder builder = target.request();
+        HTTPConduit conduit = org.apache.cxf.jaxrs.client.WebClient.getConfig(builder).getHttpConduit();
+        conduit.setClient(m_clientPolicy);
+        if (m_clientAuthSupplier != null) {
+            conduit.setAuthSupplier(m_clientAuthSupplier);
+        }
+
         return builder;
     }
 
     @Override
     public <T> Response post(final String aPath, final String[] aArgs, final Entity<T> aEntity) {
         Invocation.Builder builder = getInvocationBuilder(aPath, aArgs);
-        configureChunkTransfer(builder);
         return builder.post(aEntity);
     }
 
@@ -122,18 +142,5 @@ class WsRsRestClient implements IRestClient {
     public Response get(final String aPath) {
         final Invocation.Builder builder = getInvocationBuilder(aPath, null);
         return builder.get();
-    }
-
-    /**
-     * Configures chunk transfer threshold and length.
-     * See {@link #CHUNK_THRESHOLD} and {@link #CHUNK_LENGTH}.
-     */
-    private void configureChunkTransfer(final Invocation.Builder builder) {
-        HTTPConduit http = org.apache.cxf.jaxrs.client.WebClient.getConfig(builder).getHttpConduit();
-        HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
-        httpClientPolicy.setAllowChunking(true);
-        httpClientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
-        httpClientPolicy.setChunkLength(CHUNK_LENGTH);
-        http.setClient(httpClientPolicy);
     }
 }
