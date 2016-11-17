@@ -53,7 +53,6 @@ public class PredictionJobInput extends JobInput {
 
     /**
      * @param namedInputObject the unique name of the input object
-     * @param model the MLlib model to use for prediction
      * @param colIdxs the column indices to us for prediction
      * @param namedOutputObject the unique name of the output object
      */
@@ -76,15 +75,17 @@ public class PredictionJobInput extends JobInput {
     }
 
     /**
+     * @param model the {@link Serializable} model
      * @return temporary file contains serializable model
+     * @throws KNIMESparkException
      */
     public File writeModelIntoTemporaryFile(final Serializable model) throws KNIMESparkException {
         try {
             File outFile = File.createTempFile("knime-sparkModel", ".tmp");
-            ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
-            out.writeObject(model);
-            out.close();
-
+            try (final ObjectOutputStream out
+                    = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));){
+                out.writeObject(model);
+            }
             return outFile;
         } catch(IOException e) {
             throw new KNIMESparkException("Failed to write model into temporary file.", e);
@@ -93,6 +94,8 @@ public class PredictionJobInput extends JobInput {
 
     /**
      * @param inFile file contains serializable model
+     * @return the {@link Serializable} that represents the Spark model
+     * @throws KNIMESparkException
      */
     public Serializable readModelFromTemporaryFile(final File inFile) throws KNIMESparkException {
         try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inFile)))) {
