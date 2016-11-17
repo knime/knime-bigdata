@@ -94,7 +94,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         }
 
         exec.setMessage("Converting data table...");
-        final ExecutionMonitor subExec = exec.createSubProgress(0.5);
+        final ExecutionMonitor subExec = exec.createSubProgress(0.9);
         final BufferedDataTable table = (BufferedDataTable)inData[0];
         final File convertedInputTable = writeBufferedDataTable(table, subExec);
 
@@ -126,7 +126,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         final KNIMEToIntermediateConverter[] converters = KNIMEToIntermediateConverterRegistry.getConverter(inputTable.getDataTableSpec());
 
-        File outFile = File.createTempFile("knime-table2spark", ".tmp");
+        final File outFile = File.createTempFile("knime-table2spark", ".tmp");
         addFileToDeleteAfterExecute(outFile);
 
         LOGGER.debugWithFormat("Serializing data table to file %s", outFile.getAbsolutePath());
@@ -140,7 +140,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
             long rowIdx = 0;
             for (final DataRow row : inputTable) {
 
-                if (rowIdx % 100 == 0) {
+                if (rowIdx % 10 == 0) {
                     exec.checkCanceled();
                     exec.setProgress(rowIdx / (double)rowCount, "Processing row " + rowIdx + " of " + rowCount);
                 }
