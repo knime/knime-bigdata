@@ -131,7 +131,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
             return new PortObject[] { sparkObject };
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
-            if (message != null && message.contains("Failed to load JDBC data: No suitable driver found for")) {
+            if (message != null && message.contains("Failed to load JDBC data: No suitable driver")) {
                 LOGGER.debug("Required JDBC driver not found in cluster. Original error message: " + e.getMessage());
                 throw new InvalidSettingsException("Required JDBC driver not found. Enable the 'Upload local JDBC driver' "
                     + "option in the node dialog to upload the required driver files to the cluster.");
