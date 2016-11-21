@@ -32,7 +32,7 @@ public class Table2SparkNodeFactory extends DefaultSparkNodeFactory<Table2SparkN
      * Constructor.
      */
     public Table2SparkNodeFactory() {
-        super("io/write");
+        super("io/read");
     }
 
     /**

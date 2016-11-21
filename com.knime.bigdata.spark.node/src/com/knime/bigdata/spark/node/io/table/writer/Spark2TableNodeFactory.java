@@ -34,7 +34,7 @@ public class Spark2TableNodeFactory extends DefaultSparkNodeFactory<Spark2TableN
      * Constructor.
      */
     public Spark2TableNodeFactory() {
-        super("io/read");
+        super("io/write");
     }
 
     /**
