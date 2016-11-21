@@ -108,7 +108,9 @@ public class HDFSConnection extends Connection {
                 m_conf.set(SSLFactory.KEYSTORES_FACTORY_CLASS_KEY, KeyStoreFactoryWrapper.class.getCanonicalName());
                 m_conf.setClassLoader(getClass().getClassLoader());
             } else {
-                throw new RuntimeException("HDFS SSL settings required by connection settings, but not set in preferences (See KNIME > Big Data Extension > Hadoop)!");
+                final String msg = "HDFS SSL settings required by connection settings, but not set in preferences (See KNIME > Big Data Extension > Hadoop)!";
+                LOGGER.warn(msg);
+                throw new RuntimeException(msg);
             }
         }
     }
