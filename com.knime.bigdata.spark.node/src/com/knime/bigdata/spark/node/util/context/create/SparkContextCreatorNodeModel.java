@@ -205,7 +205,5 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
-        configureContextIfPossible(m_settings);
     }
-
 }
