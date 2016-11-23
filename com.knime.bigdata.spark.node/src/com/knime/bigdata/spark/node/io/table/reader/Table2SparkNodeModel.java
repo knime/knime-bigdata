@@ -92,6 +92,9 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         if (inData == null || inData.length < 1 || inData[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
+        //Check that the context is available before doing all the work
+        final SparkContextID contextID = getContextID(inData);
+        ensureContextIsOpen(contextID);
 
         exec.setMessage("Converting data table...");
         final ExecutionMonitor subExec = exec.createSubProgress(0.9);
@@ -99,8 +102,6 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         final File convertedInputTable = writeBufferedDataTable(table, subExec);
 
         exec.setMessage("Importing data into Spark...");
-        final SparkContextID contextID = getContextID(inData);
-        ensureContextIsOpen(contextID);
         final SparkDataTable resultTable = new SparkDataTable(contextID, table.getDataTableSpec());
         executeSparkJob(contextID, exec, convertedInputTable, resultTable);
 
