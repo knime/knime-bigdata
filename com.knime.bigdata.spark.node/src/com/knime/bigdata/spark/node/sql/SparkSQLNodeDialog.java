@@ -20,6 +20,7 @@ package com.knime.bigdata.spark.node.sql;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,11 +35,13 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EtchedBorder;
 
 import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.knime.base.node.util.KnimeSyntaxTextArea;
 import org.knime.base.util.flowvariable.FlowVariableResolver;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -61,12 +64,14 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  * @author Sascha Wolke, KNIME.com
  */
 class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
+
+    private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(200, 10);
+
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkSQLNodeDialog.class);
 
     private final SparkSQLSettings m_settings = new SparkSQLSettings();
 
     private final RSyntaxTextArea m_query;
-    private final DefaultCompletionProvider m_queryCompletition;
 
     private final JScrollPane m_columnsPanel;
     private final DefaultListModel<DataColumnSpec> m_columnsModel;
@@ -84,9 +89,6 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     SparkSQLNodeDialog() {
         // Query
         m_query = createEditor();
-        m_queryCompletition = new DefaultCompletionProvider();
-        final AutoCompletion queryAc = new AutoCompletion(m_queryCompletition);
-        queryAc.install(m_query);
         final RTextScrollPane queryPane = new RTextScrollPane(m_query);
         queryPane.setPreferredSize(new Dimension(850, 400));
         queryPane.setFoldIndicatorEnabled(true);
@@ -99,6 +101,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_columns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_columns.setCellRenderer(new DataColumnSpecListCellRenderer());
         m_columns.addMouseListener(this);
+        m_columns.setMinimumSize(MINIMUM_PANEL_SIZE);
         m_columnsPanel = new JScrollPane(m_columns,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -110,6 +113,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_variables.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_variables.setCellRenderer(new FlowVariableListCellRenderer());
         m_variables.addMouseListener(this);
+        m_variables.setMinimumSize(MINIMUM_PANEL_SIZE);
         final JScrollPane variablesPanel = new JScrollPane(m_variables,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -121,15 +125,16 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_functions = new JList<>(m_functionsModel);
         m_functions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_functions.addMouseListener(this);
+        m_functions.setMinimumSize(MINIMUM_PANEL_SIZE);
         m_functionsPanel = new JScrollPane(m_functions,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         m_functionsPanel.setBorder(BorderFactory.createTitledBorder(" Functions "));
 
         // Split panes
-        final JSplitPane leftPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_columnsPanel, variablesPanel);
-        leftPane.setResizeWeight(0.5);
-        final JSplitPane bottomPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPane, m_functionsPanel);
+        final JSplitPane rightPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, variablesPanel, m_functionsPanel);
+        rightPane.setResizeWeight(0.5);
+        final JSplitPane bottomPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_columnsPanel, rightPane);
         bottomPane.setResizeWeight(0.66);
         final JSplitPane mainPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, queryPane, bottomPane);
         mainPane.setResizeWeight(0.6);
@@ -143,7 +148,8 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
 
         m_settings.loadSettingsFrom(settings);
         m_query.setText(m_settings.getQuery());
-        m_queryCompletition.clear();
+        final DefaultCompletionProvider queryCompletition = new DefaultCompletionProvider();
+        final List<Completion> completions = new LinkedList<>();
 
         m_columnsModel.removeAllElements();
         if (specs != null && specs.length > 0 && specs[0] != null) {
@@ -153,7 +159,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
             for(DataColumnSpec col : spec.getTableSpec()) {
                 m_columnsModel.addElement(col);
                 final String desc = "Column (" + col.getType().toPrettyString() + ")";
-                m_queryCompletition.addCompletion(new ShorthandCompletion(m_queryCompletition, col.getName(), "`" + col.getName() + "`", desc));
+                completions.add(new ShorthandCompletion(queryCompletition, col.getName(), "`" + col.getName() + "`", desc));
             }
             m_columnsPanel.setViewportView(m_columns);
             m_columnsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -165,7 +171,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
                     m_functionsModel.removeAllElements();
                     for (String function : functions) {
                         m_functionsModel.addElement(function);
-                        m_queryCompletition.addCompletion(new ShorthandCompletion(m_queryCompletition, function, function + "()", "function"));
+                        completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "function"));
                     }
                     m_functionsPanel.setViewportView(m_functions);
                     m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -191,8 +197,15 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
             m_variablesModel.addElement(var);
             final String repl = FlowVariableResolver.getPlaceHolderForVariable(var);
             final String desc = "Flow Variable (" + var.getType() + ")";
-            m_queryCompletition.addCompletion(new ShorthandCompletion(m_queryCompletition, var.getName(), repl, desc));
+            completions.add(new ShorthandCompletion(queryCompletition, var.getName(), repl, desc));
         }
+
+        completions.add(new ShorthandCompletion(queryCompletition, SparkSQLJobInput.TABLE_PLACEHOLDER,
+            SparkSQLJobInput.TABLE_PLACEHOLDER, " Table placeholder (" + SparkSQLJobInput.TABLE_PLACEHOLDER + ")"));
+
+        queryCompletition.addCompletions(completions);
+        final AutoCompletion queryAc = new AutoCompletion(queryCompletition);
+        queryAc.install(m_query);
     }
 
     @Override
@@ -241,7 +254,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     public void mouseExited(final MouseEvent e) {}
 
     private static RSyntaxTextArea createEditor(){
-        final RSyntaxTextArea editor = new RSyntaxTextArea();
+        final RSyntaxTextArea editor = new KnimeSyntaxTextArea();
         editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SQL);
         editor.setCodeFoldingEnabled(true);
         editor.setAntiAliasingEnabled(true);
