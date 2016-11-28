@@ -141,9 +141,12 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
             long rowIdx = 0;
             for (final DataRow row : inputTable) {
 
-                if (rowIdx % 10 == 0) {
+                if (rowIdx % 100 == 0) {
                     exec.checkCanceled();
                     exec.setProgress(rowIdx / (double)rowCount, "Processing row " + rowIdx + " of " + rowCount);
+                    //call reset to clear the object cache periodically which otherwise would result in high memory 
+                    //consumption since each object is kept in memory to prevent duplicate serialization
+                    out.reset();
                 }
 
                 int colIdx = 0;
