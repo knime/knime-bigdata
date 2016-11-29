@@ -55,7 +55,6 @@ import org.knime.core.node.util.DataColumnSpecListCellRenderer;
 import org.knime.core.node.util.FlowVariableListCellRenderer;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -171,15 +170,21 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
                     m_functionsModel.removeAllElements();
                     for (String function : functions) {
                         m_functionsModel.addElement(function);
-                        completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "function"));
+                        completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "Function"));
                     }
                     m_functionsPanel.setViewportView(m_functions);
                     m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-                } catch (KNIMESparkException e) {
+                } catch (Exception e) {
                     LOGGER.warn("Unable to fetch SQL functions list: " + e.getMessage(), e);
                     m_functionsPanel.setViewportView(m_functionsError);
                     m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                }
+            } else {
+                //fill the completion with the elements from the function model
+                for (int i = 0; i < m_functionsModel.size(); i++) {
+                    final String function = m_functionsModel.get(i);
+                    completions.add(new ShorthandCompletion(queryCompletition, function, function + "()", "Function"));
                 }
             }
 
@@ -200,6 +205,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
             completions.add(new ShorthandCompletion(queryCompletition, var.getName(), repl, desc));
         }
 
+        // Table placeholder
         completions.add(new ShorthandCompletion(queryCompletition, SparkSQLJobInput.TABLE_PLACEHOLDER,
             SparkSQLJobInput.TABLE_PLACEHOLDER, " Table placeholder (" + SparkSQLJobInput.TABLE_PLACEHOLDER + ")"));
 
