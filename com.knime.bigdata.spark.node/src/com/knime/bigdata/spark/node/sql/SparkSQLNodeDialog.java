@@ -64,7 +64,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  */
 class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
 
-    private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(200, 10);
+    private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(100, 100);
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkSQLNodeDialog.class);
 
@@ -100,11 +100,11 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_columns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_columns.setCellRenderer(new DataColumnSpecListCellRenderer());
         m_columns.addMouseListener(this);
-        m_columns.setMinimumSize(MINIMUM_PANEL_SIZE);
         m_columnsPanel = new JScrollPane(m_columns,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         m_columnsPanel.setBorder(BorderFactory.createTitledBorder(" Column "));
+        m_columnsPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
         // Flow variables
         m_variablesModel = new DefaultListModel<>();
@@ -112,11 +112,11 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_variables.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_variables.setCellRenderer(new FlowVariableListCellRenderer());
         m_variables.addMouseListener(this);
-        m_variables.setMinimumSize(MINIMUM_PANEL_SIZE);
         final JScrollPane variablesPanel = new JScrollPane(m_variables,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         variablesPanel.setBorder(BorderFactory.createTitledBorder(" Flow Variable "));
+        variablesPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
         // Functions
         m_functionsError = new JLabel("<html><center>No<br/>function<br/>information<br/>available</center></html>");
@@ -124,19 +124,21 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
         m_functions = new JList<>(m_functionsModel);
         m_functions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_functions.addMouseListener(this);
-        m_functions.setMinimumSize(MINIMUM_PANEL_SIZE);
         m_functionsPanel = new JScrollPane(m_functions,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         m_functionsPanel.setBorder(BorderFactory.createTitledBorder(" Functions "));
+        m_functionsPanel.setMinimumSize(MINIMUM_PANEL_SIZE);
 
-        // Split panes
-        final JSplitPane rightPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, variablesPanel, m_functionsPanel);
-        rightPane.setResizeWeight(0.5);
-        final JSplitPane bottomPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_columnsPanel, rightPane);
-        bottomPane.setResizeWeight(0.66);
-        final JSplitPane mainPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, queryPane, bottomPane);
-        mainPane.setResizeWeight(0.6);
+        final JSplitPane columnVarPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_columnsPanel, variablesPanel);
+        columnVarPane.setResizeWeight(0.7);
+        columnVarPane.setOneTouchExpandable(true);
+        final JSplitPane inputPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, columnVarPane, m_functionsPanel);
+        inputPane.setResizeWeight(0.8);
+        inputPane.setOneTouchExpandable(true);
+        final JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inputPane, queryPane);
+        mainPane.setResizeWeight(0.4);
+        mainPane.setOneTouchExpandable(true);
 
         addTab("Query", mainPane, false);
     }
