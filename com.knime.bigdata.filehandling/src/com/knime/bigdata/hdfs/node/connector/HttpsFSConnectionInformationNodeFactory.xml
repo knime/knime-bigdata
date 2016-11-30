@@ -2,10 +2,10 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
     icon="./httpfsconnection16x16.png" type="Source">
-    <name>SSL Encrypted HttpFS Connection</name>
+    <name>Secured HttpFS Connection</name>
 
     <shortDescription>
-        Configures the connection information used to connect encrypted to 
+        Configures the connection information used to connect SSL encrypted to 
         a Hadoop Distributed File System (HDFS) via HttpFS.
     </shortDescription>
 

@@ -2,11 +2,11 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
     icon="./webhdfsconnection16x16.png" type="Source">
-    <name>SSL Encrypted WebHDFS Connection</name>
+    <name>Secure WebHDFS Connection</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
-        a Hadoop Distributed File System (HDFS) via encrypted WebHDFS.
+        a Hadoop Distributed File System (HDFS) via SSL encrypted WebHDFS.
     </shortDescription>
 
     <fullDescription>
