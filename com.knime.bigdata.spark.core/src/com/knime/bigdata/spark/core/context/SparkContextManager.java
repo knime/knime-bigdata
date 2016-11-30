@@ -33,16 +33,24 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 public class SparkContextManager {
 
     private final static HashMap<SparkContextID, SparkContext> sparkContexts =
-        new HashMap<SparkContextID, SparkContext>();
+        new HashMap<>();
 
     private final static SparkContextID DEFAULT_SPARK_CONTEXT_ID = new SparkContextID("default://");
 
     private static SparkContext defaultSparkContext;
 
+    /**
+     * @return the default Spark context id
+     */
     public static SparkContextID getDefaultSparkContextID() {
         return DEFAULT_SPARK_CONTEXT_ID;
     }
 
+    /**
+     * @return the default Spark context. Creates a new Spark context with the default context id and the settings
+     * from the KNIME preferences page if it does not exists.
+     * @see #getDefaultSparkContextID()
+     */
     public synchronized static SparkContext getDefaultSparkContext() {
         ensureDefaultContext();
         return defaultSparkContext;
@@ -64,6 +72,10 @@ public class SparkContextManager {
         sparkContexts.put(actualDefaultContextID, defaultSparkContext);
     }
 
+    /**
+     * @param contextID the id of the context
+     * @return an existing Spark context or creates a new one with the given id
+     */
     public synchronized static SparkContext getOrCreateSparkContext(final SparkContextID contextID) {
         ensureDefaultContext();
         SparkContext toReturn = sparkContexts.get(contextID);
@@ -98,15 +110,18 @@ public class SparkContextManager {
     }
 
     /**
-     * Destroys the {@link SparkContext} with the given {@link SparkContextID} and removes the id from the available
-     * contexts. If the context no longer exists the method simply returns.
+     * Destroys the {@link SparkContext} with the given {@link SparkContextID}.
+     * If the context does not exists the method simply returns. The method does not remove the context and the 
+     * context id from the list of available contexts but simply destroys the context which changes its state to 
+     * configured. To also remove the id and the context from the list call 
+     * {@link #disposeCustomContext(SparkContextID)}.
      *
      * @param contextID the {@link SparkContextID} to destroy
      * @throws KNIMESparkException
      */
     public static void destroyCustomContext(final SparkContextID contextID) throws KNIMESparkException {
         checkDefaultContext(contextID);
-        final SparkContext context = sparkContexts.remove(contextID);
+        final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.destroy();
         }
