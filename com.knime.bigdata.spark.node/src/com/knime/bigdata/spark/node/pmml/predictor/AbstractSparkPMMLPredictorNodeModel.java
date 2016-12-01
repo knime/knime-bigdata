@@ -98,7 +98,8 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
-        final DataTableSpec resultSpec = getResultSpec(inSpecs[0], sparkSpec, m_predColName.getStringValue(),
+        final String predColName = m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
+        final DataTableSpec resultSpec = getResultSpec(inSpecs[0], sparkSpec, predColName,
             m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
         if (resultSpec == null) {
             return new PortObjectSpec[] {null};
@@ -124,8 +125,9 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final CompiledModelPortObject pmml = getCompiledModel(inObjects[0]);
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
+        final String predColName = m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
         final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
-            m_predColName.getStringValue(), m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
+            predColName, m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
         final String aOutputTableName = SparkIDs.createRDDID();
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
         final File jobFile = createJobFile(pmml);

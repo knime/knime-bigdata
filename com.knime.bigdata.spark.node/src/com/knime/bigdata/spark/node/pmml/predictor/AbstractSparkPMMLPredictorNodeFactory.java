@@ -32,6 +32,7 @@ import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -69,14 +70,21 @@ public abstract class AbstractSparkPMMLPredictorNodeFactory<M extends SparkNodeM
 
             @Override
             protected void extractTargetColumn(final PortObjectSpec[] specs) {
-                final CompiledModelPortObjectSpec cmpos = ((CompiledModelPortObjectSpec)specs[0]);
-                if (cmpos == null) {
+                if (specs.length < 1 || specs[0] == null) {
                     return;
                 }
-                final String outName = cmpos.getOutputFields()[0];
-                final DataType cellType = cmpos.getMiningFunction() == MiningFunction.REGRESSION
-                        ? DoubleCell.TYPE : StringCell.TYPE;
-                setLastTargetColumn(new DataColumnSpecCreator(outName, cellType).createSpec());
+
+                if (specs[0] instanceof CompiledModelPortObjectSpec) {
+                    final CompiledModelPortObjectSpec cmpos = ((CompiledModelPortObjectSpec)specs[0]);
+                    final String outName = cmpos.getOutputFields()[0];
+                    final DataType cellType = cmpos.getMiningFunction() == MiningFunction.REGRESSION
+                            ? DoubleCell.TYPE : StringCell.TYPE;
+                    setLastTargetColumn(new DataColumnSpecCreator(outName, cellType).createSpec());
+
+                } else if (specs[0] instanceof PMMLPortObjectSpec) {
+                    final PMMLPortObjectSpec pmmlSpec = ((PMMLPortObjectSpec) specs[0]);
+                    setLastTargetColumn(pmmlSpec.getTargetCols().iterator().next());
+                }
             }
 
             /**
