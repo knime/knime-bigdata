@@ -15,7 +15,6 @@ import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.core.context.JobController;
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.GetJobStatusRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.JobAlreadyFinishedException;
@@ -23,6 +22,7 @@ import com.knime.bigdata.spark.core.context.jobserver.request.KillJobRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.StartJobRequest;
 import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun;

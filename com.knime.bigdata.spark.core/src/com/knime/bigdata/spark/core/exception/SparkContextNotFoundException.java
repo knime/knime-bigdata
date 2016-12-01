@@ -18,23 +18,35 @@
  * History
  *   Created on May 3, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context;
+package com.knime.bigdata.spark.core.exception;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.context.SparkContextID;
 
 /**
+ * This exception indicates that the Job Server is still running fine but the Spark context no longer exists.
+ * This might happen for example if the context has been destroyed or the Job Server has been restarted.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 public class SparkContextNotFoundException extends KNIMESparkException {
 
     private static final long serialVersionUID = 1L;
+    private final SparkContextID m_contextID;
 
     /**
      * Constructor
-     * @param contextName Name of the context that does not exist anymore
+     * @param contextID the {@link SparkContextID} that does not exist anymore
      */
-    public SparkContextNotFoundException(final String contextName) {
-        super(String.format("Spark context %s does not exist (anymore). Please reset all preceding nodes.", contextName));
+    public SparkContextNotFoundException(final SparkContextID contextID) {
+        super(String.format("Spark context %s does not exist (anymore). Please reset all preceding nodes.",
+            contextID.toString()));
+        m_contextID = contextID;
+    }
+
+    /**
+     * @return the {@link SparkContextID} that no longer exists
+     */
+    public SparkContextID getSparkContextID() {
+        return m_contextID;
     }
 }

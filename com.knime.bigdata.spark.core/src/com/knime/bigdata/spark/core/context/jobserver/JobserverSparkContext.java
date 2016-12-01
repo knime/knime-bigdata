@@ -39,7 +39,6 @@ import com.knime.bigdata.spark.core.context.JobController;
 import com.knime.bigdata.spark.core.context.SparkContext;
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.context.jobserver.request.CreateContextRequest;
 import com.knime.bigdata.spark.core.context.jobserver.request.DestroyContextRequest;
@@ -50,6 +49,7 @@ import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import com.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.jar.JobJar;
 import com.knime.bigdata.spark.core.jar.SparkJarRegistry;
 import com.knime.bigdata.spark.core.job.JobOutput;
@@ -242,7 +242,7 @@ public class JobserverSparkContext extends SparkContext {
                         if (createRemoteContext) {
                             contextWasCreated = createRemoteSparkContext();
                         } else {
-                            throw new KNIMESparkException("No Spark context on Spark jobserver.");
+                            throw new SparkContextNotFoundException(m_contextID);
                         }
                     } else if (m_config.overrideSparkSettings()) {
                         LOGGER.warn("Remote Spark context already exists, cannot apply custom Spark context settings.");

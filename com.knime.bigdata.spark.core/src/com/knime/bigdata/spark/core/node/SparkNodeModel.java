@@ -85,6 +85,7 @@ import com.knime.bigdata.spark.core.context.SparkContextManager;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.exception.MissingJobException;
 import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.JobRunFactory;
@@ -162,6 +163,10 @@ public abstract class SparkNodeModel extends NodeModel {
         m_deleteOnReset = deleteOnReset;
     }
 
+    /**
+     * This method is called in the finally block of the {@link #execute(PortObject[], ExecutionContext)} method to
+     * delete all files that have been registered with the {@link #addFileToDeleteAfterExecute(File)}.
+     */
     protected void deleteFilesAfterExecute() {
         for (File toDelete : filesToDeleteAfterExecute) {
             try {
@@ -174,6 +179,10 @@ public abstract class SparkNodeModel extends NodeModel {
         filesToDeleteAfterExecute.clear();
     }
 
+    /**
+     * @param toDelete {@link File} that should be deleted once the node is executed.
+     * @see #deleteFilesAfterExecute()
+     */
     protected void addFileToDeleteAfterExecute(final File toDelete) {
         filesToDeleteAfterExecute.add(toDelete);
     }
@@ -445,10 +454,13 @@ public abstract class SparkNodeModel extends NodeModel {
                         if (KNIMEConfigContainer.verboseLogging()) {
                             LOGGER.debug("Deleting rdds: " + rdds2delete);
                         }
-                        for (Entry<SparkContextID, String[]> e : rdds2delete.entrySet()) {
+                        for (final Entry<SparkContextID, String[]> e : rdds2delete.entrySet()) {
                             try {
-                                SparkContext context = SparkContextManager.getOrCreateSparkContext(e.getKey());
+                                final SparkContext context = SparkContextManager.getOrCreateSparkContext(e.getKey());
                                 context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
+                            } catch (final SparkContextNotFoundException ex) {
+                                // ignore this exception since the context is either removed or the job server restarted
+                            	//in both cases we no longer need to delete the rdds
                             } catch (final Throwable ex) {
                                 LOGGER.error("Exception while deleting named RDDs for context: " + e.getKey()
                                     + " Exception: " + ex.getMessage(), ex);

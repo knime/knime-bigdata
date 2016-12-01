@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.core.context;
 
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -101,12 +102,14 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * Opens the Spark context, creating a context if necessary and createRemoteContext is true.
      *
      * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
-     *            context leads to a {@link KNIMESparkException}.
+     *            context leads to a {@link SparkContextNotFoundException}.
      *
-     * @throws KNIMESparkException Thrown if Spar context was non-existent and createRemoteContext=false, or if
-     *             something went wrong while creating a Spark context, or if context was not in state configured.
+     * @throws KNIMESparkException Thrown if something went wrong while creating a Spark context, or if context was
+     * not in state configured.
+     * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
-    public abstract void open(final boolean createRemoteContext) throws KNIMESparkException;
+    public abstract void open(final boolean createRemoteContext) throws KNIMESparkException,
+    SparkContextNotFoundException;
 
     public abstract void destroy() throws KNIMESparkException;
 
