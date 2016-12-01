@@ -592,7 +592,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         if (m_snippet == null) {
             m_snippet = new SparkJSnippet(m_sparkVersion, m_snippetType, m_settings);
         } else {
-            m_snippet.updateDocumentFromSettings();
+            m_snippet.updateDocumentFromSettings(m_sparkVersion, m_snippetType, m_settings);
         }
 
         initTabs();
@@ -642,7 +642,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
             LOGGER.error("Cannot apply template.", e);
         }
 
-        m_snippet.updateDocumentFromSettings();
+        m_snippet.updateDocumentFromSettings(m_sparkVersion, m_snippetType, m_settings);
 
         //        m_colList.setSpec(spec);
         m_flowVarsList.setFlowVariables(flowVariables.values());

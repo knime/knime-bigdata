@@ -128,7 +128,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
             }
         }
 
-        SparkVersion sparkVersion = getSparkVersion(inSpecs);
+        final SparkVersion sparkVersion = getSparkVersion(inSpecs);
 
         if (m_loadedSettings != null) {
             m_sparkJavaSnippet = new SparkJSnippet(sparkVersion, m_snippetType, m_loadedSettings);
@@ -137,8 +137,9 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
         } else if (m_sparkJavaSnippet == null) {
             // initialize with default content
             m_sparkJavaSnippet = new SparkJSnippet(sparkVersion, m_snippetType);
+        } else {
+            m_sparkJavaSnippet.setSparkVersion(sparkVersion); // reinitialise (possible changed spark version)
         }
-
         validateSparkJavaSnippet();
 
         return null; // dummy value
@@ -245,15 +246,17 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends SparkNodeModel {
     }
 
     private Pair<String, File> compileSnippetCached(final SparkVersion sparkVersion)
-        throws BadLocationException, ClassNotFoundException, CompilationFailedException, IOException {
+            throws BadLocationException, ClassNotFoundException, CompilationFailedException, IOException {
+
+        m_sparkJavaSnippet.setSparkVersion(sparkVersion); // reinitialise (possible changed spark version)
         final String classHash = createClassHash();
 
         if (!m_compilationCache.isCached(classHash)) {
             final JavaSnippetSettings settings = m_sparkJavaSnippet.getSettings();
 
             final JavaSnippetHelper helper = JavaSnippetHelperRegistry.getInstance().getHelper(sparkVersion);
-            // create a copy of the actual document so that we can insert the hash as classname suffix without
-            // changing the classname in the user visible editor
+            // create a copy of the actual document so that we can insert the hash as class name suffix without
+            // changing the class name in the user visible editor
             final GuardedDocument docClone =
                 helper.createGuardedSnippetDocument(m_snippetType, settings);
             helper.updateGuardedClassnameSuffix(m_snippetType, docClone, settings.getJavaSnippetFields(), classHash);

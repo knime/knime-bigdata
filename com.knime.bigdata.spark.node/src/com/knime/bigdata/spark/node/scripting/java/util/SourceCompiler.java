@@ -47,6 +47,7 @@ public class SourceCompiler {
      *
      * @param aClassName The name of the class to compile
      * @param javaCode the code
+     * @param classpath the class path entries
      * @throws CompilationFailedException when the code cannot be compiled
      * @throws ClassNotFoundException when the code has dependencies that cannot be resolved
      */

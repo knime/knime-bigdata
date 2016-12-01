@@ -62,11 +62,11 @@ import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippe
 @SuppressWarnings("restriction")
 public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
 
-    private final SnippetType m_snippetType;
+    private SnippetType m_snippetType;
 
-    private final JavaSnippetHelper m_helper;
+    private JavaSnippetHelper m_helper;
 
-    private final JavaSnippetSettings m_settings;
+    private JavaSnippetSettings m_settings;
 
     private final GuardedDocument m_document;
 
@@ -165,11 +165,32 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     }
 
     /**
-     * Completely reinitializaes the internal {@link GuardedDocument} from the given settings, overwriting
-     * any changes that may or may not have accumulated in the {@link GuardedDocument}.
+     * @param sparkVersion the possibly new Spark version
      */
-    public void updateDocumentFromSettings() {
-            m_helper.updateAllSections(m_snippetType, m_document, m_settings);
+    public void setSparkVersion(final SparkVersion sparkVersion) {
+        if (!m_helper.supportSpark(sparkVersion)) {
+            updateDocumentFromSettings(sparkVersion, m_snippetType, getSettings());
+        }
+    }
+
+    /**
+     * Completely reinitialises the internal {@link GuardedDocument} from the given settings, overwriting
+     * any changes that may or may not have accumulated in the {@link GuardedDocument}.
+     * @param sparkVersion the possibly new Spark version
+     * @param settings the new {@link JavaSnippetSettings}
+     * @param snippetType the {@link SnippetType}
+     */
+    public void updateDocumentFromSettings(final SparkVersion sparkVersion, final SnippetType snippetType,
+        final JavaSnippetSettings settings) {
+        if (!m_helper.supportSpark(sparkVersion)) {
+            //update the helper if the spark version has changed
+            m_helper = JavaSnippetHelperRegistry.getInstance().getHelper(sparkVersion);
+            //invalidate the class path as well when the Spark version changes
+            invalidateClasspath();
+        }
+        m_snippetType = snippetType;
+        m_settings = settings;
+        m_helper.updateAllSections(m_snippetType, m_document, m_settings);
     }
 
     private void initializeSnippetDirectory() {
