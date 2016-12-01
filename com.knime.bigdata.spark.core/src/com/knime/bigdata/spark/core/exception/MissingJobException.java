@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.core.exception;
 
+import com.knime.bigdata.spark.core.version.SparkVersion;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -27,8 +29,33 @@ package com.knime.bigdata.spark.core.exception;
 public class MissingJobException extends KNIMESparkException {
 
     private static final long serialVersionUID = 1L;
+    private final SparkVersion m_sparkVersion;
+    private final String m_jobId;
 
-    public MissingJobException() {
-        super("Could not find required Spark jobs. Possible reason: The extension that provides the KNIME Spark Executor jobs for your Spark version is not installed.");
+    /**
+     * Constructor.
+     * @param jobId the unique job id
+     * @param sparkVersion the {@link SparkVersion} the job isn't available for
+     */
+    public MissingJobException(final String jobId, final SparkVersion sparkVersion) {
+        super("Could not find required Spark job for Spark version: " + sparkVersion.getLabel()
+            +". Possible reason: The extension that provides the KNIME Spark Executor jobs for your Spark version is not installed."
+            + " Job id: " + jobId);
+        m_jobId = jobId;
+        m_sparkVersion = sparkVersion;
+    }
+
+    /**
+     * @return the {@link SparkVersion} the job couldn't be found for
+     */
+    public SparkVersion getSparkVersion() {
+        return m_sparkVersion;
+    }
+
+    /**
+     * @return the jobId
+     */
+    public String getJobId() {
+        return m_jobId;
     }
 }

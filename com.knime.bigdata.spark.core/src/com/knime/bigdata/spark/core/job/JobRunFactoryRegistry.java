@@ -72,7 +72,7 @@ public class JobRunFactoryRegistry
 
         final JobRunFactory<?, ?> factory = getInstance().get(jobId, sparkVersion);
         if (factory == null) {
-            throw new MissingJobException();
+            throw new MissingJobException(jobId, sparkVersion);
         } else {
             return (JobRunFactory<I, O>)factory;
         }
