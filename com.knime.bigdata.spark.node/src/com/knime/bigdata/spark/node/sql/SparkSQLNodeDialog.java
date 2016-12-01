@@ -55,6 +55,7 @@ import org.knime.core.node.util.DataColumnSpecListCellRenderer;
 import org.knime.core.node.util.FlowVariableListCellRenderer;
 import org.knime.core.node.workflow.FlowVariable;
 
+import com.knime.bigdata.spark.core.exception.MissingJobException;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -176,6 +177,11 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
                     }
                     m_functionsPanel.setViewportView(m_functions);
                     m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+                } catch(MissingJobException e) {
+                    LOGGER.info("Spark SQL function listing not supported by this Spark version.");
+                    m_functionsPanel.setViewportView(m_functionsError);
+                    m_functionsPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
                 } catch (Exception e) {
                     LOGGER.warn("Unable to fetch SQL functions list: " + e.getMessage(), e);
