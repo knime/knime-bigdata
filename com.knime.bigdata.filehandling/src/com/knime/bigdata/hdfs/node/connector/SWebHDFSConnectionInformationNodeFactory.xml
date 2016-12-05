@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
     icon="./webhdfsconnection16x16.png" type="Source">
-    <name>Secure WebHDFS Connection</name>
+    <name>Secured WebHDFS Connection</name>
 
     <shortDescription>
         Configures the connection information used to connect to 
