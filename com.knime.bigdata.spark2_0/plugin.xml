@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.knime.bigdata.spark.core.SparkJarProvider">
+      <SparkJarProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_JarProvider">
+      </SparkJarProvider>
+   </extension>
+   <extension point="com.knime.bigdata.spark.core.JobRunFactoryProvider">
+      <JobRunFactoryProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_JobRunFactoryProvider">
+      </JobRunFactoryProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.ModelHelperProvider">
+      <ModelHelperProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_ModelHelperProvider">
+      </ModelHelperProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.IntermediateToSparkConverterProvider">
+      <IntermediateToSparkConverterProvider 
+      		ProviderClass="com.knime.bigdata.spark1_6.converter.type.DefaultSpark_1_6_IntermediateToSparkConverterProvider">
+      </IntermediateToSparkConverterProvider>
+   </extension>
+   <extension point="com.knime.bigdata.spark.core.BundleGroupSparkJarProvider">
+      <BundleGroupSparkJarProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_BundleGroupSparkJarProvider">
+      </BundleGroupSparkJarProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.node.JavaSnippetHelper">
+      <JavaSnippetHelper
+            HelperClass="com.knime.bigdata.spark1_6.base.Spark_1_6_JavaSnippetHelper">
+      </JavaSnippetHelper>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
+      <JavaSnippetTemplateRepositoryProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_JavaSnippetTemplateRepositoryProvider">
+      </JavaSnippetTemplateRepositoryProvider>
+   </extension>
+   <extension point="com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
+      <PMMLPortObjectFactoryProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_PMMLPortObjectFactoryProvider">
+      </PMMLPortObjectFactoryProvider>
+   </extension>
+</plugin>
