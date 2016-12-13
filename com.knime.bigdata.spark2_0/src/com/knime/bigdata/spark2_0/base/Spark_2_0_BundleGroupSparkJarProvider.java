@@ -16,22 +16,27 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Apr 13, 2016 by bjoern
+ *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.base;
 
-import com.knime.bigdata.spark.core.model.DefaultModelHelper;
+import org.osgi.framework.Bundle;
+
+import com.google.common.collect.ImmutableMap;
+import com.knime.bigdata.spark.core.jar.bundle.DefaultBundleGroupSparkJarProvider;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
+ * Spark 2.0 driver bundle provider.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
-public abstract class Spark_1_6_ModelHelper extends DefaultModelHelper {
+public class Spark_2_0_BundleGroupSparkJarProvider extends DefaultBundleGroupSparkJarProvider {
 
-    /**
-     * @param modelName
-     */
-    public Spark_1_6_ModelHelper(final String modelName) {
-        super(modelName);
+    /** Default constructor. */
+    public Spark_2_0_BundleGroupSparkJarProvider() {
+        super(SparkVersion.V_2_0, ImmutableMap.of(
+            "com.databricks.spark.avro", new Bundle[] {
+                    getBundle("com.databricks.spark-avro_2.10", "2.0.0", "3.0.0") }));
     }
 }

@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 26, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,8 +42,8 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies;
-import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.ArrayTypeProxy;
+import com.knime.bigdata.spark2_0.converter.type.SerializableTypeProxies;
+import com.knime.bigdata.spark2_0.converter.type.SerializableTypeProxies.ArrayTypeProxy;
 
 /**
  *

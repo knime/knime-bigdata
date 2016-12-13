@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.clustering.kmeans;
+package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
-import com.knime.bigdata.spark1_6.api.ModelUtils;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJob;
+import com.knime.bigdata.spark2_0.api.ModelUtils;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
  * runs MLlib KMeans on a given RDD, model is returned as result

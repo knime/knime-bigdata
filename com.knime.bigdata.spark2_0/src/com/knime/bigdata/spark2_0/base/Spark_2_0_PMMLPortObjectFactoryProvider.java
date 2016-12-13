@@ -16,25 +16,25 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 04.03.2016 by koetter
+ *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.base;
+package com.knime.bigdata.spark2_0.base;
 
-import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
-import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import com.knime.bigdata.spark.node.pmml.converter.DefaultPMMLPortObjectFactoryProvider;
+import com.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
+import com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans.KMeansModelPMMLPortObjectFactory;
+import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression.LinearRegressionModelPMMLPortObjectFactory;
 
 /**
- * Implementation of the {@link DefaultSparkJarProvider} for Spark 1.6.
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_1_6_JarProvider extends JobsPluginJarProvider {
+public class Spark_2_0_PMMLPortObjectFactoryProvider extends DefaultPMMLPortObjectFactoryProvider {
 
-    /**
-     * Default constructor.
-     */
-    public Spark_1_6_JarProvider() {
-        super(SparkVersion.V_1_6, JobserverSparkJob.class);
+    /**Constructor.*/
+    public Spark_2_0_PMMLPortObjectFactoryProvider() {
+        super(Spark_2_0_CompatibilityChecker.INSTANCE,
+            new KMeansModelPMMLPortObjectFactory(),
+            new LinearRegressionModelPMMLPortObjectFactory());
     }
 }

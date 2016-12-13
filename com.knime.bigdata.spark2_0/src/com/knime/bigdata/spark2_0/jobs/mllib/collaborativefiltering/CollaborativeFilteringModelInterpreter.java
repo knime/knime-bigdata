@@ -18,7 +18,7 @@
  * History
  *   Created on 17.09.2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering;
+package com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
 
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;

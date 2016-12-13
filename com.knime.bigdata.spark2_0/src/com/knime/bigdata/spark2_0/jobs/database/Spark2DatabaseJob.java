@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by sascha
  */
-package com.knime.bigdata.spark1_6.jobs.database;
+package com.knime.bigdata.spark2_0.jobs.database;
 
 import java.io.File;
 import java.util.List;
@@ -36,10 +36,10 @@ import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
-import com.knime.bigdata.spark1_6.api.TypeConverters;
-import com.knime.bigdata.spark1_6.jobs.scripting.java.JarRegistry;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_0.api.TypeConverters;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
 
 /**
  * Write given (named) RDD into JDBC table.

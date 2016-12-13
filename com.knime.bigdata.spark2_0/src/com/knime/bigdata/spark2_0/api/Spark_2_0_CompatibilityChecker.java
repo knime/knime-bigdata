@@ -16,25 +16,23 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 16.05.2016 by koetter
+ *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.base;
+package com.knime.bigdata.spark2_0.api;
 
-import com.knime.bigdata.spark.node.pmml.converter.DefaultPMMLPortObjectFactoryProvider;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
-import com.knime.bigdata.spark1_6.jobs.mllib.clustering.kmeans.KMeansModelPMMLPortObjectFactory;
-import com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.regression.LinearRegressionModelPMMLPortObjectFactory;
+import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_1_6_PMMLPortObjectFactoryProvider extends DefaultPMMLPortObjectFactoryProvider {
+public class Spark_2_0_CompatibilityChecker extends FixedVersionCompatibilityChecker {
 
-    /**Constructor.*/
-    public Spark_1_6_PMMLPortObjectFactoryProvider() {
-        super(Spark_1_6_CompatibilityChecker.INSTANCE,
-            new KMeansModelPMMLPortObjectFactory(),
-            new LinearRegressionModelPMMLPortObjectFactory());
+    /**The only instance.*/
+    public static final Spark_2_0_CompatibilityChecker INSTANCE = new Spark_2_0_CompatibilityChecker();
+
+    private Spark_2_0_CompatibilityChecker() {
+        super(SparkVersion.V_2_0);
     }
 }

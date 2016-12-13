@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.scorer;
+package com.knime.bigdata.spark2_0.jobs.scorer;
 
 import java.util.logging.Logger;
 

@@ -18,18 +18,18 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.apache.spark.mllib.tree.model.Node;
 
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
-import com.knime.bigdata.spark1_6.jobs.mllib.prediction.decisiontree.TreeNode1_6;
+import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.TreeNode2_0;
 
 /**
  * TreeNodes have to be handled differently for Gradiend Boosted Trees since their prediction output needs to be interpreted differently
  * @author Ole Ostergaard
  */
-public class GradientTreeNode1_6 extends TreeNode1_6 {
+public class GradientTreeNode2_0 extends TreeNode2_0 {
 
     private boolean m_isClassification;
 
@@ -37,7 +37,7 @@ public class GradientTreeNode1_6 extends TreeNode1_6 {
      * @param rootNode
      * @param isClassification
      */
-    public GradientTreeNode1_6(final Node rootNode, final boolean isClassification) {
+    public GradientTreeNode2_0(final Node rootNode, final boolean isClassification) {
         super(rootNode);
         m_isClassification = isClassification;
 
@@ -48,7 +48,7 @@ public class GradientTreeNode1_6 extends TreeNode1_6 {
      * @param rootNode
      * @param isClassification
      */
-    public GradientTreeNode1_6(final Node node, final Node rootNode, final boolean isClassification) {
+    public GradientTreeNode2_0(final Node node, final Node rootNode, final boolean isClassification) {
         super(node, rootNode);
         m_isClassification = isClassification;
     }
@@ -73,7 +73,7 @@ public class GradientTreeNode1_6 extends TreeNode1_6 {
     @Override
     public TreeNode getLeftNode() {
         if (getNode().leftNode().isDefined()) {
-            return new GradientTreeNode1_6(getNode().leftNode().get(), getRootNode(), m_isClassification);
+            return new GradientTreeNode2_0(getNode().leftNode().get(), getRootNode(), m_isClassification);
         } else {
             return null;
         }
@@ -85,7 +85,7 @@ public class GradientTreeNode1_6 extends TreeNode1_6 {
     @Override
     public TreeNode getRightNode() {
         if (getNode().rightNode().isDefined()) {
-            return new GradientTreeNode1_6(getNode().rightNode().get(), getRootNode(), m_isClassification);
+            return new GradientTreeNode2_0(getNode().rightNode().get(), getRootNode(), m_isClassification);
         } else {
             return null;
         }

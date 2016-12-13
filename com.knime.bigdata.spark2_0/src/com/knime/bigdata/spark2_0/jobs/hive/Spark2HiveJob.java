@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.hive;
+package com.knime.bigdata.spark2_0.jobs.hive;
 
 import java.util.UUID;
 import java.util.logging.Level;
@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
-import com.knime.bigdata.spark1_6.api.TypeConverters;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
  * Converts the given named RDD into a Hive table.

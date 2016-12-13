@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.logistic;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.logistic;
 
 import java.util.logging.Logger;
 
@@ -32,7 +32,7 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.AbstractRegularizationJob;
+import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.AbstractRegularizationJob;
 
 /**
  * runs MLlib logistic regression on a given RDD to create a classification model

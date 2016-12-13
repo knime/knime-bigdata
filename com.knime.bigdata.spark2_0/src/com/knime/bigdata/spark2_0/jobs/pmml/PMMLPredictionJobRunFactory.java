@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.pmml;
+package com.knime.bigdata.spark2_0.jobs.pmml;
 
 import java.io.File;
 import java.util.List;

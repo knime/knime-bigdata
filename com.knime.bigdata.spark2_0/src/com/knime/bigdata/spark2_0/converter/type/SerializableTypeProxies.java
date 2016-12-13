@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 29, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.converter.type;
+package com.knime.bigdata.spark2_0.converter.type;
 
 import java.io.Serializable;
 

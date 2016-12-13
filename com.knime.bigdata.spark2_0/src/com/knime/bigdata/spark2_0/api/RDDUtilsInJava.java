@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.api;
 
 import java.util.ArrayList;
 import java.util.Collection;

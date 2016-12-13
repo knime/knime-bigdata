@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -24,9 +24,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJob;
-import com.knime.bigdata.spark1_6.api.SupervisedLearnerUtils;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
 
 /**
  * @author dwk

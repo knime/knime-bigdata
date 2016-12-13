@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by sascha
  */
-package com.knime.bigdata.spark1_6.jobs.database;
+package com.knime.bigdata.spark2_0.jobs.database;
 
 import java.io.File;
 import java.util.List;

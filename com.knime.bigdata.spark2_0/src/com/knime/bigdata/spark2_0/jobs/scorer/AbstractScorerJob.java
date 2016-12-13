@@ -18,7 +18,7 @@
  * History
  *   Created on May 17, 2016 by oole
  */
-package com.knime.bigdata.spark1_6.jobs.scorer;
+package com.knime.bigdata.spark2_0.jobs.scorer;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +31,8 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJob;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
  *

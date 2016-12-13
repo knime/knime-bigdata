@@ -18,7 +18,7 @@
  * History
  *   Created on 12.08.2015 by dwk
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.reduction.pca;
+package com.knime.bigdata.spark2_0.jobs.mllib.reduction.pca;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,9 +33,9 @@ import org.apache.spark.sql.Row;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
+import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 import scala.Tuple2;
 

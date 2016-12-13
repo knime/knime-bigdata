@@ -18,7 +18,7 @@
  * History
  *   Created on 24.07.2015 by dwk
  */
-package com.knime.bigdata.spark1_6.jobs.table2spark;
+package com.knime.bigdata.spark2_0.jobs.table2spark;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -42,10 +42,10 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.RowBuilder;
-import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
-import com.knime.bigdata.spark1_6.api.TypeConverters;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.RowBuilder;
+import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
  *

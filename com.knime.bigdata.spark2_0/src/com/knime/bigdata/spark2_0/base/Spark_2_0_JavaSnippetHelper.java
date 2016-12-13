@@ -18,7 +18,7 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.base;
+package com.knime.bigdata.spark2_0.base;
 
 import java.io.File;
 import java.util.HashSet;
@@ -46,18 +46,18 @@ import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
-import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippet;
-import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippetSink;
-import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippetSource;
+import com.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippet;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSink;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSource;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class Spark_1_6_JavaSnippetHelper extends DefaultJavaSnippetHelper {
+public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark_1_6_JavaSnippetHelper.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark_2_0_JavaSnippetHelper.class);
 
     private static final Class<?> INNER_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippet.class;
 
@@ -92,8 +92,8 @@ public class Spark_1_6_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     /**
      * Constructor.
      */
-    public Spark_1_6_JavaSnippetHelper() {
-        super(Spark_1_6_CompatibilityChecker.INSTANCE);
+    public Spark_2_0_JavaSnippetHelper() {
+        super(Spark_2_0_CompatibilityChecker.INSTANCE);
     }
 
     /**
@@ -269,7 +269,7 @@ public class Spark_1_6_JavaSnippetHelper extends DefaultJavaSnippetHelper {
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
             "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*", "org.apache.spark.sql.types.*","org.apache.spark.sql.*",
             "com.knime.bigdata.spark.core.exception.*",
-            "com.knime.bigdata.spark1_6.api.RowBuilder",
+            "com.knime.bigdata.spark2_0.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
             SOURCE_SNIPPET_SUPERCLASS.getName(), SINK_SNIPPET_SUPERCLASS.getName()};
     }
@@ -301,7 +301,7 @@ public class Spark_1_6_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     @SuppressWarnings("restriction")
     private void initSnippetClasspath() {
 
-        // Each of these packages is accessible from spark1_6 plugin
+        // Each of these packages is accessible from spark2_0 plugin
         // but comes from a different plugin dependency.
         // Below we use these packages to locate their physical
         // location, i.e. their jar files and class folders to build the classpath

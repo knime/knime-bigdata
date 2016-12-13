@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.hive;
+package com.knime.bigdata.spark2_0.jobs.hive;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,8 +34,8 @@ import org.apache.spark.sql.types.StructField;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD

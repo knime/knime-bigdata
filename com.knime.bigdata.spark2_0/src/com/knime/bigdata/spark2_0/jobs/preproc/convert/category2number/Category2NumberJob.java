@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.preproc.convert.category2number;
+package com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number;
 
 import java.util.Map;
 
@@ -32,9 +32,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
-import com.knime.bigdata.spark1_6.api.MappedRDDContainer;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.RDDUtilsInJava;
+import com.knime.bigdata.spark2_0.api.MappedRDDContainer;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns

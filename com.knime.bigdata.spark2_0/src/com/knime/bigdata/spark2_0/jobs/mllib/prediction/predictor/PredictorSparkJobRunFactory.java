@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.predictor;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.predictor;
 
 import java.io.File;
 import java.util.List;

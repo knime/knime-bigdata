@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.predictor;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.predictor;
 
 import java.io.File;
 import java.io.Serializable;
@@ -34,11 +34,11 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark1_6.api.ModelUtils;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
-import com.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering.CollaborativeFilteringJob;
-import com.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
+import com.knime.bigdata.spark2_0.api.ModelUtils;
+import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering.CollaborativeFilteringJob;
+import com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
 
 /**
  * applies previously learned MLlib model to given RDD, predictions are inserted into a new RDD and (temporarily)

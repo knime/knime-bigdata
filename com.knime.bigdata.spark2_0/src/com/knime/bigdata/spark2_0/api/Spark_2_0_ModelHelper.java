@@ -16,23 +16,22 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.04.2016 by koetter
+ *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.api;
 
-import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import com.knime.bigdata.spark.core.model.DefaultModelHelper;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME.com
  */
-public class Spark_1_6_CompatibilityChecker extends FixedVersionCompatibilityChecker {
+public abstract class Spark_2_0_ModelHelper extends DefaultModelHelper {
 
-    /**The only instance.*/
-    public static final Spark_1_6_CompatibilityChecker INSTANCE = new Spark_1_6_CompatibilityChecker();
-
-    private Spark_1_6_CompatibilityChecker() {
-        super(SparkVersion.V_1_6);
+    /**
+     * @param modelName
+     */
+    public Spark_2_0_ModelHelper(final String modelName) {
+        super(modelName);
     }
 }

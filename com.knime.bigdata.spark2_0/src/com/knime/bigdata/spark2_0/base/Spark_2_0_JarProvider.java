@@ -16,30 +16,25 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Apr 13, 2016 by bjoern
+ *   Created on 04.03.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package com.knime.bigdata.spark2_0.base;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.AbstractDecisionTreeModelHelper;
+import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
+import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
+ * Implementation of the {@link DefaultSparkJarProvider} for Spark 2.0.
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class GradientBoostedTreesModelHelper extends AbstractDecisionTreeModelHelper {
-
-    /**Constructor.*/
-    public GradientBoostedTreesModelHelper() {
-        super(MLlibGradientBoostedTreeNodeModel.MODEL_NAME);
-    }
+public class Spark_2_0_JarProvider extends JobsPluginJarProvider {
 
     /**
-     * {@inheritDoc}
+     * Default constructor.
      */
-    @Override
-    public ModelInterpreter getModelInterpreter() {
-        return GradientBoostedTreeInterpreter.getInstance();
+    public Spark_2_0_JarProvider() {
+        super(SparkVersion.V_2_0, JobserverSparkJob.class);
     }
 }

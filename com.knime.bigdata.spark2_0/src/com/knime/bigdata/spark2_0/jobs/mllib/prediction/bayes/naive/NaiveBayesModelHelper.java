@@ -18,17 +18,17 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.bayes.naive;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_ModelHelper;
+import com.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class NaiveBayesModelHelper extends Spark_1_6_ModelHelper {
+public class NaiveBayesModelHelper extends Spark_2_0_ModelHelper {
 
     /**Constructor.*/
     public NaiveBayesModelHelper() {

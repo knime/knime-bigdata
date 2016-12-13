@@ -18,17 +18,17 @@
  * History
  *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.logistic;
+package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.logistic;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_ModelHelper;
+import com.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LogisticRegressionModelHelper extends Spark_1_6_ModelHelper {
+public class LogisticRegressionModelHelper extends Spark_2_0_ModelHelper {
 
     /**
      * Constructor.

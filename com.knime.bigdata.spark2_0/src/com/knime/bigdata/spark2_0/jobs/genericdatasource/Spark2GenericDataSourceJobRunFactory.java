@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 11, 2016 by sascha
  */
-package com.knime.bigdata.spark1_6.jobs.genericdatasource;
+package com.knime.bigdata.spark2_0.jobs.genericdatasource;
 
 import java.io.File;
 import java.util.List;
@@ -49,7 +49,7 @@ public class Spark2GenericDataSourceJobRunFactory extends DefaultJobWithFilesRun
             final List<File> localFiles) {
 
         if (input.uploadDriver()) {
-            localFiles.addAll(BundleGroupSparkJarRegistry.getBundledDriverJars(SparkVersion.V_1_6, input.getFormat()));
+            localFiles.addAll(BundleGroupSparkJarRegistry.getBundledDriverJars(SparkVersion.V_2_0, input.getFormat()));
         }
 
         return new DefaultJobWithFilesRun<>(input, Spark2GenericDataSourceJob.class, EmptyJobOutput.class,

@@ -7,7 +7,7 @@
  * questions please contact the copyright holder: website: www.knime.com email: contact@knime.com
  * --------------------------------------------------------------------- History Created on 04.06.2015 by dwk
  */
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.api;
 
 
 import org.apache.spark.api.java.JavaRDD;

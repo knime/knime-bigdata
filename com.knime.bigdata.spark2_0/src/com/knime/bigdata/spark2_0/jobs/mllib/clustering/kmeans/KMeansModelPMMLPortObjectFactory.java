@@ -18,7 +18,7 @@
  * History
  *   Created on 16 ott 2015 by Stefano
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.clustering.kmeans;
+package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
 import java.util.LinkedHashSet;
 
