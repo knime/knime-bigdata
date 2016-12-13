@@ -271,6 +271,7 @@
 										<!-- dependency of json4s -->
 									<id>com.thoughtworks.paranamer:paranamer:${paranamer.version}</id>
 									<transitive>false</transitive>
+									<source>true</source>
 									<instructions>
 										<Export-Package>com.thoughtworks.paranamer.*;version=${paranamer.version}</Export-Package>
 									</instructions>
