@@ -2,7 +2,7 @@
 <feature
       id="com.knime.features.bigdata.spark"
       label="KNIME Spark Executor"
-      version="1.7.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
@@ -61,7 +61,7 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
+         
    <plugin
          id="com.databricks.spark-avro_2.10"
          download-size="0"
