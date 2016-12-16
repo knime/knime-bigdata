@@ -144,7 +144,7 @@ public class PhoenixDBRowIterator extends DBRowIteratorImpl {
         final Collection<DataCell>cells = new ArrayList<>(vals.length);
         for (Time val : vals) {
             cells.add(val == null ? DataType.getMissingCell() :
-                createDateCell(val, true, true, false));
+                createDateCell(val, false, true, false));
         }
         return cells;
     }
