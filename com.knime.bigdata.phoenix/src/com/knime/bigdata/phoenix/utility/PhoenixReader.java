@@ -37,6 +37,7 @@ import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.reader.DBReaderImpl;
 
@@ -45,6 +46,8 @@ import org.knime.core.node.port.database.reader.DBReaderImpl;
  * @author Tobias Koetter, KNIME.com
  */
 public class PhoenixReader extends DBReaderImpl {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(PhoenixReader.class);
 
     /**
      * @param conn
@@ -70,22 +73,40 @@ public class PhoenixReader extends DBReaderImpl {
     protected DataType getKNIMEType(final int type, final ResultSetMetaData meta, final int dbIdx) throws SQLException {
         if (Types.ARRAY == type) {
             //we need to treat arrays special
-            final String typeName = meta.getColumnTypeName(dbIdx);
+            final String typeName = meta.getColumnTypeName(dbIdx).toUpperCase();
             final DataType elementType;
-            if (typeName.contains("BOOLEAN")) {
-                elementType = BooleanCell.TYPE;
-            } else if (typeName.contains("INTEGER")) {
-                elementType = IntCell.TYPE;
-            } else if (typeName.contains("BIGINT")) {
-                elementType = LongCell.TYPE;
-            } else if (typeName.contains("DOUBLE") || typeName.contains("DECIMAL")) {
-                elementType = DoubleCell.TYPE;
-            } else if (typeName.contains("VARCHAR")) {
-                elementType = StringCell.TYPE;
-            } else if (typeName.contains("TIMESTAMP") || typeName.contains("TIME") || typeName.contains("DATE")) {
-                elementType = DateAndTimeCell.TYPE;
-            } else {
-                elementType = DataType.getType(DataCell.class);
+            switch (typeName.replaceAll("\\s*ARRAY\\s*", "")) {
+                case "INTEGER":
+                case "TINYINT":
+                case "SMALLINT":
+                case "UNSIGNED_INT":
+                case "UNSIGNED_TINYINT":
+                case "UNSIGNED_SMALLINT":
+                    elementType = IntCell.TYPE; break;
+                case "BIGINT":
+                case "UNSIGNED_LONG":
+                    elementType = LongCell.TYPE; break;
+                case "FLOAT":
+                case "DOUBLE":
+                case "DECIMAL":
+                case "UNSIGNED_FLOAT":
+                case "UNSIGNED_DOUBLE":
+                    elementType = DoubleCell.TYPE; break;
+                case "BOOLEAN":
+                    elementType = BooleanCell.TYPE; break;
+                case "TIME":
+                case "DATE":
+                case "TIMESTAMP":
+                case "UNSIGNED_TIME":
+                case "UNSIGNED_DATE":
+                case "UNSIGNED_TIMESTAMP":
+                    elementType = DateAndTimeCell.TYPE; break;
+                case "VARCHAR":
+                case "CHAR":
+                    elementType = StringCell.TYPE; break;
+                default:
+                    LOGGER.debug("Using generic DataCell type for Phoenix type name: " + typeName);
+                    elementType = DataType.getType(DataCell.class);
             }
             return ListCell.getCollectionType(elementType);
         }
