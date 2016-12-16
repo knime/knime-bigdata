@@ -74,7 +74,17 @@
 		<exports-1.6>org.apache.spark.*;version=${spark-1.6.version},org.spark-project.*;version=${spark-1.6.version}</exports-1.6>
 		
 		<spark-2.0.version>2.0.2</spark-2.0.version>
-		<imports-2.0>org.apache.spark.*;version="[${spark-2.0.version},${spark-2.0.version}]";resolution:=optional,
+		<requires-2.0.version> org.apache.spark.core_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.mllib_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.mllib-local_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.catalyst_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.sql_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.sketch_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.tags_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.unsafe_2.10;bundle-version="[2.0.0,2.1.0)",
+			org.apache.spark.hive_2.10;bundle-version="[2.0.0,2.1.0)"	
+		</requires-2.0.version>
+		<imports-2.0>!org.apache.spark.*,
 			org.spark-project.*;version="[${spark-2.0.version},${spark-2.0.version}]";resolution:=optional,
 			scala.*;version="[2.10.0,2.11.0)";resolution:=optional,
 			org.json4s.*;version=${json4s.version};resolution:=optional,
@@ -530,6 +540,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -540,6 +551,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -550,6 +562,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -560,6 +573,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -570,6 +584,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -580,6 +595,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -590,6 +606,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -600,6 +617,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<artifact>
@@ -610,6 +628,7 @@
 									<instructions>
 										<Import-Package>${imports-2.0}</Import-Package>
 										<Export-Package>${exports-2.0}</Export-Package>
+										<Require-Bundle>${requires-2.0.version}</Require-Bundle>
 									</instructions>		
 								</artifact>
 								<!-- END Spark 2.0 dependencies -->
