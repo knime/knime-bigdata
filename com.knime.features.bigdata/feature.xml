@@ -2,7 +2,7 @@
 <feature
       id="com.knime.features.bigdata"
       label="KNIME Big Data Connectors"
-      version="3.2.1.qualifier"
+      version="3.2.2.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
