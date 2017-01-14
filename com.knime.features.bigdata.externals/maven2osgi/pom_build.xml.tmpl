@@ -1,0 +1,32 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.knime.bigdata</groupId>
+  <artifactId>targetplatform</artifactId>
+  <version>###VERSION###</version>
+  <packaging>bundle</packaging>
+
+  <dependencies>
+    ###DEPS###
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>3.2.0</version>
+        <extensions>true</extensions>
+        
+        <configuration>
+          <instructions>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Bundle-SymbolicName>###BSN###</Bundle-SymbolicName>
+            <Require-Bundle>###REQUIRES###</Require-Bundle>
+            <Export-Package>*</Export-Package>
+            <Import-Package></Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
