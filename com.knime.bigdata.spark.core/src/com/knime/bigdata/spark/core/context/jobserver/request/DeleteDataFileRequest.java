@@ -20,8 +20,6 @@
  */
 package com.knime.bigdata.spark.core.context.jobserver.request;
 
-import java.io.File;
-
 import javax.ws.rs.core.Response;
 
 import org.knime.core.node.NodeLogger;
@@ -57,7 +55,7 @@ public class DeleteDataFileRequest extends AbstractJobserverRequest<Void> {
      */
     @Override
     protected Void sendInternal() throws KNIMESparkException {
-        Response response = m_client.delete(JobserverConstants.buildDataPath(new File(m_serverFilePath).getName()));
+        Response response = m_client.delete(JobserverConstants.buildDataPath(m_serverFilePath));
 
         final ParsedResponse parsedResponse =
                 JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
