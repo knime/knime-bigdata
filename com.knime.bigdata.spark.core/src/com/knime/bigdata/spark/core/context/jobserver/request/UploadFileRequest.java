@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.core.context.jobserver.request;
 import java.io.File;
 
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -84,9 +85,16 @@ public class UploadFileRequest extends AbstractJobserverRequest<String> {
     private String handleSuccess(final ParsedResponse parsedResponse) {
         // when uploading to /data we get the server-local filename
         if (parsedResponse.hasJsonObjectBody()) {
-            return ((JsonObject) parsedResponse.getJsonBody()).getJsonObject("result").getString("filename");
+            final JsonValue result = ((JsonObject) parsedResponse.getJsonBody()).get("result");
+
+            if (result instanceof JsonObject && ((JsonObject) result).containsKey("filename")) {
+                return ((JsonObject) result).getString("filename");
+            } else {
+                // uploading to /jar only returns ,,result: jar'' in SJS >= 0.7.0
+                return null;
+            }
         } else {
-            // uploading to /jar only returns "OK"
+            // uploading to /jar only returns "OK" in SJS <= 0.6.2
             return null;
         }
     }
