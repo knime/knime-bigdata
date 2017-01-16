@@ -20,6 +20,11 @@
  */
 package com.knime.bigdata.spark.core.context.jobserver;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+
 /**
  *
  * @author Bjoern Lohrmann, KNIME.COM
@@ -67,8 +72,12 @@ public class JobserverConstants {
         return String.format("%s/%s", JARS_PATH, jobJarId);
     }
 
-    public static String buildDataPath(final String prefixOrFile) {
-        return String.format("%s/%s", DATA_PATH, prefixOrFile);
+    public static String buildDataPath(final String prefixOrFile) throws KNIMESparkException {
+        try {
+            return String.format("%s/%s", DATA_PATH, URLEncoder.encode(prefixOrFile, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Unknown encoding UTF-8", e);
+        }
     }
 
 }
