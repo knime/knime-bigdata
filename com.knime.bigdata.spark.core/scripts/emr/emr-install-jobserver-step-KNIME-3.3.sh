@@ -14,7 +14,7 @@ command -v jq >/dev/null 2>&1 || { sudo yum install jq ; }
 
 if [ "$(jq '.isMaster' < ${INFO_DIR}/instance.json)" = "true" ]; then
   echo "Found master node, running job server install script..."
-  curl -s "${INSTALL_SCRIPT_URL}" | sudo /bin/sh
+  curl -s "${INSTALL_SCRIPT_URL}" | sudo "KNIME_VERSION=$KNIME_VERSION" "JS_VERSION=$JS_VERSION" /bin/sh
 else
   echo "Found slave node, no job server installation required."
 fi
