@@ -2,7 +2,7 @@
 #
 # Versions are auto detected if not defined in ENV.
 # Run installer with custom versions:
-#   KNIME_VERSION="3.2" SPARK_VERSION="1.6" JS_VERSION="0.6.2" sh install-jobserver-emr.sh
+#   KNIME_VERSION="3.3" SPARK_VERSION="1.6" JS_VERSION="0.6.2.1" sh install-jobserver-emr.sh
 #
 
 if [ "$UID" != "0" ] ; then
@@ -16,7 +16,18 @@ USAGE="Usage: $(basename $0) [--clear-tmp] [--clear-log] [jobserver-tar-gz]
   --clear-tmp         Whether to delete /tmp/spark-jobserver*
   --clear-log         Whether to delete /var/log/spark-jobserver*
   --help              Print this help.
-Script must be run as root user."
+
+Script must be run as root user.
+
+If you do not specify <jobserver-tar-gz> then this script will download
+a jobserver build from the KNIME website. This requires at least two environment variables to
+construct the download URL:
+ - JS_VERSION must be set to a version string of a jobserver build, e.g. JS_VERSION=0.6.2.1
+ - KNIME_VERSION must be set to a KNIME release version, e.g. KNIME_VERSION=3.3
+For the download, this script will try to autodetect the Spark version. You can overwrite the
+autodetectiom by setting an environment variable SPARK_VERSION to a Spark release, e.g.
+SPARK_VERSION=1.6
+"
 
 [ $# -lt "$MIN_ARGS" ] && { echo "${USAGE}" ; exit 1 ; }
 [ $# -gt "$MAX_ARGS" ] && { echo "${USAGE}" ; exit 1 ; }
@@ -42,6 +53,9 @@ done
 
 # Identify spark version and download job server
 if [ -n "$DOWNLOAD" ] ; then
+  [ -z "$JS_VERSION" ] && { echo "Environment variable JS_VERSION not set." ; echo "${USAGE}" ; exit 1 ; }
+  [ -z "$KNIME_VERSION" ] && { echo "Environment variable KNIME_VERSION not set." ; echo "${USAGE}" ; exit 1 ; }
+
 
   if [ -z "$SPARK_VERSION" ] ; then
     [ -d "/home/hadoop/spark/bin" ] && export PATH=/home/hadoop/spark/bin:$PATH
@@ -60,8 +74,6 @@ if [ -n "$DOWNLOAD" ] ; then
 
   JSBUILD="/tmp/spark-job-server.tar.gz"
   ENV_CONF="/tmp/spark-job-server-environment.conf"
-  [ -z "$JS_VERSION" ] && JS_VERSION="0.6.2"
-  [ -z "$KNIME_VERSION" ] && KNIME_VERSION="3.2"
   BASE_URL="https://download.knime.org/store/$KNIME_VERSION/spark-job-server-$JS_VERSION-KNIME"
   JOB_SERVER_URL="${BASE_URL}_spark-${SPARK_VERSION}.tar.gz"
   ENV_CONF_URL="${BASE_URL}_emr_environment.conf"
@@ -116,8 +128,9 @@ cat - >> $JSDIR/settings.sh <<[SETTINGS]
 SPARK_HOME="/usr/lib/spark"
 SPARK_CONF_DIR="/usr/lib/spark/conf"
 LOG_DIR="${INSTDIR}/${JSDIR}/log"
-SPARK_SUBMIT_OPTIONS="--conf spark.sql.hive.metastore.jars=/usr/lib/hive/conf:/usr/lib/hive/lib/* --conf spark.sql.hive.metastore.version=1.0.0 --conf spark.driver.extraClassPath=/usr/lib/hive/lib/guava-11.0.2.jar:/usr/lib/hadoop-lzo/lib/hadoop-lzo.jar:/usr/lib/hadoop-lzo/lib/native/"
+SPARK_SUBMIT_OPTIONS="--conf spark.sql.hive.metastore.jars=/usr/lib/hive/conf:/usr/lib/hive/lib/* --conf spark.sql.hive.metastore.version=1.0.0"
 [SETTINGS]
+sed -i '/^spark.driver.extraClassPath/ s/$/:\/usr\/lib\/hive\/lib\/guava-11.0.2.jar/' /usr/lib/spark/conf/spark-defaults.conf
 
 cat - > /usr/lib/spark/conf/hive-site.xml <<[HIVESETTINGS]
 <?xml version="1.0"?>
