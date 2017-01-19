@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Refresh AWS instance metadata for a cluster.
+#
+
+get_abs_script_dir() {
+  pushd . >/dev/null
+  cd "$(dirname $0)"
+  local abs_script_dir="$(pwd)"
+  popd  >/dev/null
+  echo "${abs_script_dir}"
+}
+SCRIPT_DIR="$(get_abs_script_dir)"
+
+source "${SCRIPT_DIR}/common/common-argparse.sh"
+
+mkdir -p "$METADIR"
+
+# ##############################
+# Create json documents for all, cluster and manager instances
+# ##############################
+if ! aws ec2 describe-instances --dry-run 2>&1 | grep -q DryRunOperation ; then 
+	echo "Error: Either youy AWS credentials are not configured (try: aws configure) or you do not have the necessary AWS permission to do describeInstances."
+	exit 1
+fi
+
+echo "Requesting instance metadata from aws"
+aws ec2 describe-instances --output json | jq ".Reservations[].Instances[] | select(contains({ Tags : [{ Key : \"Owner\", Value : \"${COWNER}\"}] }))" >"${ALL_JSON}"
+
+jq "select(contains({ Tags : [ { Key : \"Cluster-Env\",  Value : \"${CENV}\" } ] }))" "${ALL_JSON}" >"${ENV_JSON}"
+
+CLUSTER_TAGS="{ Key : \"Cluster-Env\",  Value : \"${CENV}\" }, \
+       	      { Key : \"Cluster-Name\", Value : \"${CNAME}\" }"
+
+jq "select(contains({ Tags : [ ${CLUSTER_TAGS} ] }))" "${ALL_JSON}" >"${CLUSTER_JSON}"
+
+jq "select(contains({ Tags : [ ${CLUSTER_TAGS}, \
+        { Key : \"Cluster-Role\", Value : \"worker\"} ] }))" "${ALL_JSON}" >"${WORKER_JSON}"
+
+jq "select(contains({ Tags : [ ${CLUSTER_TAGS}, \
+        { Key : \"Cluster-Role\", Value : \"master\"} ] }))" "${ALL_JSON}" >"${MASTER_JSON}"
+
+jq "select(contains({ Tags : [ \
+        { Key : \"Owner\", Value : \"${COWNER}\" }, \
+        { Key : \"Cluster-Env\", Value : \"${CENV}\"}, \
+        { Key : \"Cluster-Role\", Value : \"manager\"} ] }))" "${ALL_JSON}" >"${MANAGER_JSON}"
+
+echo "Refreshed cluster metadata in ${METADIR}"

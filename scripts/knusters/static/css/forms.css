@@ -1,0 +1,21 @@
+﻿/* forms */
+ol.forms { float:left; list-style: none; width: 100%; text-align:left;margin:0px;padding:0px;}
+
+ol.forms li { clear: both; float: left; margin: 0 0 10px; width: 100%; }
+ol.forms li.buttons { float: none; margin-left: 144px; width: auto; }
+ol.forms li.buttons input { width: auto; padding:4px; }
+
+ol.forms label { cursor: pointer; display: block; float: left; font-weight: bold; margin: 0px 8px 0 0; width: 10em; text-align:right; padding: 4px;}
+ol.forms input, ol.forms textarea { font: inherit; padding: 2px; width: 340px; }
+
+ol.forms textarea { height: 150px; }
+ol.forms textarea.short { height: 100px; }
+ol.forms input.small {width: 100px;}
+ol.forms input.med {width: 200px;}
+
+ol.forms input[type=checkbox] {margin:6px 6px 0px 0px;}
+
+ol.forms input[type=radio],
+ol.forms input[type=checkbox],
+ol.forms input[type=file] {width:auto;}
+

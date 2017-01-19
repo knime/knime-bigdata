@@ -1,0 +1,45 @@
+[hdp_berlin]
+# sandbox ansible_host=sandbox js_env=0.6.2-KNIME_hdp-2.3.0
+# hdp-2-2 ansible_host=hdp-2-2.ber.knime.com js_env=0.6.2-KNIME_hdp-2.2
+# hdp-2-3-0 ansible_host=hdp-2-3-0.ber.knime.com js_env=0.6.2-KNIME_hdp-2.3.0
+# hdp-2-3-4 ansible_host=hdp-2-3-4.ber.knime.com js_env=0.6.2-KNIME_hdp-2.3.4
+# hdp-2-4-0 ansible_host=hdp-2-4-0.ber.knime.com js_env=0.6.2-KNIME_hdp-2.4.0
+
+[hdp_aws]
+# hdp-2-4-0-secured ansible_host=hdpmaster js_env=0.6.2-KNIME_hdp-2.4.0
+# hdp-2-4-2-secured ansible_host=hdp24master js_env=0.6.2-KNIME_hdp-2.4.0
+
+[cdh_aws]
+master-5.3 ansible_host=54.171.193.206 js_env=0.6.2-KNIME_cdh-5.3
+master-5.4 ansible_host=54.194.55.175 js_env=0.6.2-KNIME_cdh-5.4
+master-5.5 ansible_host=54.246.172.73 js_env=0.6.2-KNIME_cdh-5.5
+master-5.6 ansible_host=54.171.144.75 js_env=0.6.2-KNIME_cdh-5.6
+# master-5.7 ansible_host=54.171.189.179 js_env=0.6.2-KNIME_cdh-5.7
+# master-5.7-secured ansible_host=54.194.231.194 js_env=0.6.2-KNIME_cdh-5.7
+
+[js_hosts:children]
+# hdp_berlin
+cdh_aws
+# hdp_aws
+
+[hdp_berlin:vars]
+ansible_user=root
+js_conf="install_js_files/js_hdp_berlin.conf"
+
+[cdh_aws:vars]
+ansible_user=ec2-user
+ansible_ssh_private_key_file=/home/bjoern/.ssh/cloudera.pem
+ansible_become=true
+ansible_become_user=root
+js_conf="install_js_files/js_cdh_aws.conf"
+
+[hdp_aws:vars]
+ansible_user=root
+# js_conf="install_js_files/js_cdh_aws.conf"
+js_conf="install_js_files/js_cdh_aws_secured.conf"
+
+[js_hosts:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+# js_build_dir='/run/user/1000/gvfs/smb-share:server=wdnas,share=public/spark_jobserver/0.6.2-KNIME/'
+js_build_dir='/home/bjoern/knime/bigdata/scripts/spark-jobserver-buildscripts/target/'
+js_build_file=spark-job-server-%ENV%.tar.gz

@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Matt Willsher
+  description: User and group creation role
+  company: Willsher Systems
+  license: MIT 
+  min_ansible_version: 1.8
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
+  - name: EL
+    versions:
+    - all
+  categories:
+  - system
+allow_duplicates: yes
+dependencies: []

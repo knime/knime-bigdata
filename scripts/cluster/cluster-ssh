@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Execute command on all hosts of a cluster.
+#
+
+get_abs_script_dir() {
+  pushd . >/dev/null
+  cd "$(dirname $0)"
+  local abs_script_dir="$(pwd)"
+  popd  >/dev/null
+  echo "${abs_script_dir}"
+}
+SCRIPT_DIR="$(get_abs_script_dir)"
+
+source "${SCRIPT_DIR}/common/common.sh"
+
+USAGE="Usage: $(basename $0) <command> [<command> [...]]
+  <command>      Command to execute on cluster.
+  
+  Command is executed on all nodes of default cluster, which is currently  ${DEFAULT_CENV}-${DEFAULT_CNAME} with owner ${DEFAULT_COWNER}.
+  To change default settings, please invoke as:
+  \$ CNAME=mycname CENV=mycenv COWNER=myowner cluster-ssh <command>
+"
+
+MIN_ARGS=1  # Min number of args
+if [ $# -lt "$MIN_ARGS" ]
+then
+  echo "${USAGE}"
+  exit 1
+fi
+
+
+CNAME=${CNAME-$DEFAULT_CNAME}
+CENV=${CENV-$DEFAULT_CENV}
+COWNER=${COWNER-$DEFAULT_COWNER}
+
+define_locations "${CNAME}" "${CENV}" "${COWNER}"
+
+[ -f "${CLUSTER_HOSTS}" ] || { echo "${CLUSTER_HOSTS} does not exist. Exiting." ; exit 1; }
+
+SSH_OPTS="-O UserKnownHostsFile=/dev/null \
+ -O StrictHostKeyChecking=no \
+ -O IdentityFile=~/.ssh/cloudera.pem \
+ -O RequestTTY=force"
+
+pssh -h "${CLUSTER_HOSTS}" -l ec2-user ${SSH_OPTS} $@
+

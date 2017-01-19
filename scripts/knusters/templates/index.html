@@ -1,0 +1,49 @@
+$def with (clusters)
+<html> 
+<head> 
+  <meta charset="utf-8" /> 
+  <title>KNusters - KNIME's Hadoop clusters on AWS</title>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">	
+      
+  <link rel="stylesheet" href="static/css/site.css" media="screen" />
+  <link href="http://fonts.googleapis.com/css?family=Droid+Sans:regular,bold" rel="stylesheet" type="text/css">
+</head>    
+<body> 
+
+<header class="clearfix">
+  <a href="/" id="logo"><div><img border="10" src="static/logo.png"><h1>KNusters - KNIME's Hadoop clusters on AWS</h1></div></a>
+  <nav>
+    <ul>
+      <li><a href="/" class="selected">Normal View</a></li>
+      <li><a href="/ansible">Ansible View</a></li>
+      <li><a href="/refresh">Refresh Cluster List (needs a few seconds)</a></li>
+    </ul>
+  </nav>
+</header>
+<section>
+  $if len(clusters) > 0:
+    $for cluster in clusters:
+      <h2>${cluster['name']}</h2>
+      <p>
+      <ul>
+        <li><b>Master:</b> ${cluster['master']} (<a href="http://${cluster['master']}:8088/cluster/">ResourceManager</a> 
+          | <a href="http://${cluster['master']}:50070/">NameNode</a> 
+          | <a href="http://${cluster['master']}:8090/">Spark Jobserver</a> 
+          | <a href="http://${cluster['master']}:8888/">Hue</a>)</li>
+        <li><b>Workers</b>:</li>
+        <ul>
+      $if len(cluster['workers']) == 0:
+            <li><em>Nothing to display</em></li>
+      $for worker in cluster['workers']:
+            <li>$worker (<a href="http://$worker:8042/">NodeManager</a> | <a href="http://$worker:1006/">DataNode</a>)</li>
+        </ul>
+      </ul>
+      </p>
+  $else:
+      <p><em>Nothing to display</em></p>
+</section>
+</body> 
+</html> 
+

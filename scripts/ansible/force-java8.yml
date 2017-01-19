@@ -1,0 +1,17 @@
+# NOTE: all hadoop services need to be stopped beforehand
+
+- hosts: hadoop-hosts:master-cdh-*
+  tasks:
+    - name: stop jobserver
+      service: name=spark-job-server state=stopped
+
+- hosts: hadoop-hosts:&*-cdh-*
+  tasks:
+    - name: stop cloudera agent
+      service: name=cloudera-scm-agent state=stopped
+    - name: uninstall java 1.6
+      package: name=jdk.x86_64 state=absent
+    - name: uninstall java 1.7
+      package: name=oracle-j2sdk1.7 state=absent
+    - name: start cloudera agent
+      service: name=cloudera-scm-agent state=started

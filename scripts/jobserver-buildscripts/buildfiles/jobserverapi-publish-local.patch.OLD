@@ -1,0 +1,86 @@
+From 558b7ac801effbc87352ed490c8ece9c558a0a9f Mon Sep 17 00:00:00 2001
+From: Bjoern Lohrmann <bjoern.lohrmann@knime.com>
+Date: Fri, 20 May 2016 11:00:31 +0200
+Subject: [PATCH] temp
+
+---
+ project/Build.scala | 21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
+
+diff --git a/project/Build.scala b/project/Build.scala
+index e6a7c87..4cbc38e 100644
+--- a/project/Build.scala
++++ b/project/Build.scala
+@@ -7,7 +7,7 @@ import sbtassembly.AssemblyPlugin.autoImport._
+ import spray.revolver.RevolverPlugin._
+ import com.typesafe.sbt.SbtScalariform._
+ import scalariform.formatter.preferences._
+-import bintray.Plugin.bintrayPublishSettings
++//import bintray.Plugin.bintrayPublishSettings
+ import scoverage.ScoverageKeys._
+ 
+ // There are advantages to using real Scala build files with SBT:
+@@ -28,7 +28,7 @@ object JobServerBuild extends Build {
+     settings = commonSettings ++ Seq(
+       description := "Common Akka application stack: metrics, tracing, logging, and more.",
+       libraryDependencies ++= coreTestDeps ++ akkaDeps
+-    ) ++ publishSettings
++    )// ++ publishSettings
+   )
+ 
+   lazy val jobServer = Project(id = "job-server", base = file("job-server"),
+@@ -55,7 +55,7 @@ object JobServerBuild extends Build {
+       // TODO: Remove this once we upgrade to Spark 1.4 ... see resolution of SPARK-5281.
+       // Also: note that fork won't work when VPN is on or other funny networking
+       fork in Test := true
+-      ) ++ publishSettings
++    )// ++ publishSettings
+   ) dependsOn(akkaApp, jobServerApi)
+ 
+   lazy val jobServerTestJar = Project(id = "job-server-tests", base = file("job-server-tests"),
+@@ -64,7 +64,7 @@ object JobServerBuild extends Build {
+ 
+   lazy val jobServerApi = Project(id = "job-server-api",
+                                   base = file("job-server-api"),
+-                                  settings = commonSettings ++ publishSettings)
++                                  settings = commonSettings) // ++ publishSettings)
+ 
+   lazy val jobServerExtras = Project(id = "job-server-extras",
+                                      base = file("job-server-extras"),
+@@ -81,7 +81,7 @@ object JobServerBuild extends Build {
+                   ).aggregate(jobServer, jobServerApi, jobServerTestJar, akkaApp, jobServerExtras).
+                    dependsOn(jobServer, jobServerExtras)
+ 
+-  lazy val jobServerExtrasSettings = revolverSettings ++ Assembly.settings ++ publishSettings ++ Seq(
++  lazy val jobServerExtrasSettings = revolverSettings ++ Assembly.settings ++ Seq( //++ publishSettings ++ Seq(
+     libraryDependencies ++= sparkExtraDeps,
+     // Extras packages up its own jar for testing itself
+     test in Test <<= (test in Test).dependsOn(packageBin in Compile)
+@@ -186,7 +186,8 @@ object JobServerBuild extends Build {
+     crossPaths   := true,
+     crossScalaVersions := Seq("2.10.6","2.11.8"),
+     scalaVersion := "2.10.6",
+-    publishTo    := Some(Resolver.file("Unused repo", file("target/unusedrepo"))),
++    // publishTo    := Some(Resolver.file("Unused repo", file("target/unusedrepo"))),
++    publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))),
+ 
+     // scalastyleFailOnError := true,
+     runScalaStyle := {
+@@ -217,10 +218,10 @@ object JobServerBuild extends Build {
+     coverageExcludedPackages := ".+Benchmark.*"
+   }
+ 
+-  lazy val publishSettings = bintrayPublishSettings ++ Seq(
+-    licenses += ("Apache-2.0", url("http://choosealicense.com/licenses/apache/")),
+-    bintray.Keys.bintrayOrganization in bintray.Keys.bintray := Some("spark-jobserver")
+-  )
++  // lazy val publishSettings = bintrayPublishSettings ++ Seq(
++  //   licenses += ("Apache-2.0", url("http://choosealicense.com/licenses/apache/")),
++  //   bintray.Keys.bintrayOrganization in bintray.Keys.bintray := Some("spark-jobserver")
++  // )
+ 
+   // change to scalariformSettings for auto format on compile; defaultScalariformSettings to disable
+   // See https://github.com/mdr/scalariform for formatting options
+-- 
+2.4.3
+

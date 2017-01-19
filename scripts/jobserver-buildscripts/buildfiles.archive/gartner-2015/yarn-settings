@@ -1,0 +1,3 @@
+yarn.nodemanager.resource.memory-mb = 61000 MiB
+yarn.scheduler.increment-allocation-mb = 100 MiB
+yarn.scheduler.maximum-allocation-mb = 61000 MiB

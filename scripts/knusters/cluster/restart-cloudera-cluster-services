@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# Restart all the services in a cloudera cluster (Cloudera Management services +  CDH services)
+#
+
+get_abs_script_dir() {
+  pushd . >/dev/null
+  cd "$(dirname $0)"
+  local abs_script_dir="$(pwd)"
+  popd  >/dev/null
+  echo "${abs_script_dir}"
+}
+SCRIPT_DIR="$(get_abs_script_dir)"
+
+source "${SCRIPT_DIR}/common/common-argparse.sh"
+
+# ##############################
+# Refresh cluster json metadata
+# ##############################
+
+"${SCRIPT_DIR}"/refresh-cluster-public-ips "${CNAME}" "${CENV}" "${COWNER}" || exit 1
+
+# ##############################
+# Restart Cloudera Manager Services
+# ##############################
+
+# determine cloudera manager ip 
+MANAGER_IP=$( head -1 ${MANAGER_HOSTS} )
+[ -z "${MANAGER_IP}" ] && { echo "Could not determine manager IP"; exit 1; }
+
+# determine cluster name in cloudera manager
+get_cluster_cm_name() {
+	local MOD_CNAME=$(echo $CNAME | sed "s/\./-/" )
+	curl -s -u 'admin:admin' "http://${MANAGER_IP}:7180/api/v10/clusters" | jq -r '.items[].name' | while read CN ; do
+		if [ "$CN" = "$CENV $CNAME" ] || [ "$CN" = "$CENV $MOD_CNAME" ]; then
+			python -c "import urllib; print urllib.quote('''$CN''')"
+			break
+		fi
+	done	
+}
+CLUSTER_NAME="$(get_cluster_cm_name)"
+[ -z "${CLUSTER_NAME}" ] && {  echo "Could not determine cluster with correct name"; exit 1; }
+
+echo "Restarting management services..."
+curl -X POST -u 'admin:admin' "http://${MANAGER_IP}:7180/api/v10/cm/service/commands/restart"
+	
+echo "Restarting all cluster services"
+curl -X POST \
+ -u 'admin:admin' \
+ -H "Content-Type:application/json" \
+ -d '{ "restartOnlyStaleServices" : false , "redeployClientConfiguration" : true }' \
+ "http://${MANAGER_IP}:7180/api/v10/clusters/${CLUSTER_NAME}/commands/restart" 
+
