@@ -122,16 +122,19 @@ pushd "$INSTDIR" > /dev/null
 [ -n "$ENV_CONF" ] && mv $ENV_CONF $JSDIR/environment.conf
 ### EMR image version ###
 if [ -d "/usr/lib/spark" ] ; then
-JOBSERVER_USER=spark-job-server
+JOBSERVER_USER=hadoop
 cat - >> $JSDIR/settings.sh <<[SETTINGS]
 # EMR settings
 SPARK_HOME="/usr/lib/spark"
 SPARK_CONF_DIR="/usr/lib/spark/conf"
 LOG_DIR="${INSTDIR}/${JSDIR}/log"
-SPARK_SUBMIT_OPTIONS="--conf spark.sql.hive.metastore.jars=/usr/lib/hive/conf:/usr/lib/hive/lib/* --conf spark.sql.hive.metastore.version=1.0.0"
+SPARK_SUBMIT_OPTIONS="--conf spark.sql.hive.metastore.jars=/usr/lib/hive/lib/* --conf spark.sql.hive.metastore.version=1.0.0"
 [SETTINGS]
-sed -i '/^spark.driver.extraClassPath/ s/$/:\/usr\/lib\/hive\/lib\/guava-11.0.2.jar/' /usr/lib/spark/conf/spark-defaults.conf
 
+
+# write a hive-site.xml specifically for Spark which fixes the following issue that may appear
+# during Spark2Hive jobs:
+# https://issues.apache.org/jira/browse/SPARK-11021 (can happen )
 cat - > /usr/lib/spark/conf/hive-site.xml <<[HIVESETTINGS]
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -140,8 +143,20 @@ cat - > /usr/lib/spark/conf/hive-site.xml <<[HIVESETTINGS]
     <name>hive.exec.stagingdir</name>
     <value>/tmp/hive/spark-\${user.name}</value>
   </property>
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>$(grep -o 'thrift://[^<]*' /etc/hive/conf/hive-site.xml)</value>
+  <description>JDBC connect string for a JDBC metastore</description>
+</property>
 </configuration>
 [HIVESETTINGS]
+
+# this line removes /etc/hive/conf/hive-site.xml from the classpath (see above, we created a hive-site.xml specifically for Spark)
+sed -i '/^spark.driver.extraClassPath/ s/\/etc\/hive\/conf://' /usr/lib/spark/conf/spark-defaults.conf
+# this line adds the guava libs to the driver classpath, otherwise instantiating a Hive client fails with ClassNotFoundException
+sed -i '/^spark.driver.extraClassPath/ s/$/:\/usr\/lib\/hive\/lib\/guava-11.0.2.jar/' /usr/lib/spark/conf/spark-defaults.conf
+
+# make HDFS homedir
 su -c "hadoop fs -mkdir /user/$JOBSERVER_USER" hadoop
 su -c "hadoop fs -chown $JOBSERVER_USER /user/$JOBSERVER_USER" hadoop
 
@@ -164,6 +179,7 @@ id $JOBSERVER_USER >/dev/null 2>&1 || { useradd -U -M -s /bin/false -d ${INSTDIR
 chown -R $JOBSERVER_USER "$JSDIR"
 sed -r "s#^JSDIR=.*\$#JSDIR=${INSTDIR}/${JSDIR}#" -i $JSDIR/spark-job-server-init.d
 sed -r "s#^LOGDIR=.*\$#LOGDIR=${INSTDIR}/${JSDIR}/log#" -i $JSDIR/spark-job-server-init.d
+sed -r "s#^USER=.*\$#USER=${JOBSERVER_USER}#" -i $JSDIR/spark-job-server-init.d
 
 if [ -L "$INSTDIR/spark-job-server" ] ; then
   rm "$INSTDIR/spark-job-server"
