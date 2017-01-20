@@ -64,20 +64,15 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
         final String hiveTableName = input.getHiveTableName();
         LOGGER.log(Level.INFO, "Writing hive table: " + hiveTableName);
-        try {
-        	final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sparkContext));
-            final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, sparkSchema);
+    	final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sparkContext));
+        final JavaSchemaRDD schemaPredictedData = hiveContext.applySchema(rowRDD, sparkSchema);
 
-            // JavaSchemaRDD.saveAsTable() creates a table in the Hive Metastore, which may not be Hive
-            // readable. The solution is to register a temp table and manually create a Hive table with an SQL statement:
-            String tmpTable = "tmpTable" + UUID.randomUUID().toString().replaceAll("-", "");
-            schemaPredictedData.registerTempTable(tmpTable);
-            hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
-            hiveContext.sqlContext().dropTempTable(tmpTable);
-        } catch (Exception e) {
-            String msg = "Failed to create hive table with name '" + hiveTableName + "'. Exception: ";
-            throw new KNIMESparkException(msg + e.getMessage());
-        }
+        // JavaSchemaRDD.saveAsTable() creates a table in the Hive Metastore, which may not be Hive
+        // readable. The solution is to register a temp table and manually create a Hive table with an SQL statement:
+        String tmpTable = "tmpTable" + UUID.randomUUID().toString().replaceAll("-", "");
+        schemaPredictedData.registerTempTable(tmpTable);
+        hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
+        hiveContext.sqlContext().dropTempTable(tmpTable);
         LOGGER.log(Level.INFO, "Hive table: " + hiveTableName +  " created");
     }
 }

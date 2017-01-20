@@ -66,23 +66,18 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
 
 
         LOGGER.log(Level.INFO, "Writing hive table: " + hiveTableName);
-        try {
             final HiveContext hiveContext = new HiveContext(sparkContext);
             final DataFrame schemaPredictedData = hiveContext.createDataFrame(rowRDD, sparkSchema);
 
-            // DataFrame.saveAsTable() creates a table in the Hive Metastore, which is /only/ readable by Spark, but not Hive
-            // itself, due to being parquet-encoded in a way that is incompatible with Hive. This issue has been mentioned on the
-            // Spark mailing list:
-            // http://mail-archives.us.apache.org/mod_mbox/spark-user/201504.mbox/%3cCANpNmWVDpbY_UQQTfYVieDw8yp9q4s_PoOyFzqqSnL__zDO_Rw@mail.gmail.com%3e
-            // The solution is to manually create a Hive table with an SQL statement:
-            String tmpTable = "tmpTable" + UUID.randomUUID().toString().replaceAll("-", "");
-            schemaPredictedData.registerTempTable(tmpTable);
-            hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
-            hiveContext.dropTempTable(tmpTable);
-        } catch (Exception e) {
-            throw new KNIMESparkException(
-                String.format("Failed to create hive table with name '%s'. Reason: %s", hiveTableName, e.getMessage()));
-        }
+        // DataFrame.saveAsTable() creates a table in the Hive Metastore, which is /only/ readable by Spark, but not Hive
+        // itself, due to being parquet-encoded in a way that is incompatible with Hive. This issue has been mentioned on the
+        // Spark mailing list:
+        // http://mail-archives.us.apache.org/mod_mbox/spark-user/201504.mbox/%3cCANpNmWVDpbY_UQQTfYVieDw8yp9q4s_PoOyFzqqSnL__zDO_Rw@mail.gmail.com%3e
+        // The solution is to manually create a Hive table with an SQL statement:
+        String tmpTable = "tmpTable" + UUID.randomUUID().toString().replaceAll("-", "");
+        schemaPredictedData.registerTempTable(tmpTable);
+        hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
+        hiveContext.dropTempTable(tmpTable);
         LOGGER.log(Level.INFO, "Hive table: " + hiveTableName +  " created");
     }
 }
