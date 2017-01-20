@@ -64,9 +64,7 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
         final String hiveTableName = input.getHiveTableName();
 
-
         LOGGER.log(Level.INFO, "Writing hive table: " + hiveTableName);
-        try {
             final HiveContext hiveContext = new HiveContext(sparkContext);
             final DataFrame schemaPredictedData = hiveContext.createDataFrame(rowRDD, sparkSchema);
 
@@ -79,10 +77,6 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
             schemaPredictedData.registerTempTable(tmpTable);
             hiveContext.sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", hiveTableName, tmpTable));
             hiveContext.dropTempTable(tmpTable);
-        } catch (Exception e) {
-            throw new KNIMESparkException(
-                String.format("Failed to create hive table with name '%s'. Reason: %s", hiveTableName, e.getMessage()));
-        }
         LOGGER.log(Level.INFO, "Hive table: " + hiveTableName +  " created");
     }
 }
