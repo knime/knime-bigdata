@@ -20,8 +20,6 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.category2number;
 
-import java.util.Map;
-
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
@@ -33,35 +31,35 @@ import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 @SparkClass
 public class Category2NumberJobOutput extends JobOutput {
 
-    private static final String COL_NAMES = "colNames";
-    private static final String MAPPINGS = "mappings";
+    private static final String KEY_APPENDED_COL_NAMES = "appendedColNames";
+    private static final String KEY_MAPPINGS = "mappings";
 
     /**
      * Paramless constructor for automatic deserialization.
      */
     public Category2NumberJobOutput(){}
-    
+
     /**
-     * @param colNames the column names with mapping information
+     * @param appendedColNames the appended column names
      * @param mappings the {@link NominalValueMapping}
      */
-    public Category2NumberJobOutput( final Map<Integer, String> colNames, final NominalValueMapping mappings) {
-        set(COL_NAMES, colNames);
-        set(MAPPINGS, mappings);
+    public Category2NumberJobOutput(final String appendedColNames[], final NominalValueMapping mappings) {
+        set(KEY_APPENDED_COL_NAMES, appendedColNames);
+        set(KEY_MAPPINGS, mappings);
     }
 
     /**
-     * @return the column names map
+     * @return appended column names (mapped columns)
      */
-    public Map<Integer, String> getColumnsNames(){
-        return get(COL_NAMES);
+    public String[] getAppendedColumnsNames(){
+        return get(KEY_APPENDED_COL_NAMES);
     }
 
     /**
      * @return the {@link NominalValueMapping}
      */
     public NominalValueMapping getMappings() {
-        return get(MAPPINGS);
+        return get(KEY_MAPPINGS);
     }
 
 }

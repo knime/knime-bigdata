@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.preproc.convert.category2number;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
@@ -61,11 +63,12 @@ public class Category2NumberJobInput extends JobInput {
      * @param namedOutputObject - table identifier (output data)
      */
     public Category2NumberJobInput(final String namedInputObject, final Integer[] includeColIdxs,
-        final String[] includedColsNames, final MappingType mappingType, final boolean keepOriginalColumns,
-        final String colSuffix, final String namedOutputObject) {
+            final String[] includedColsNames, final MappingType mappingType, final boolean keepOriginalColumns,
+            final String colSuffix, final String namedOutputObject) {
+
         addNamedInputObject(namedInputObject);
         addNamedOutputObject(namedOutputObject);
-        set(INCLUDE_COL_IDXS, includeColIdxs);
+        set(INCLUDE_COL_IDXS, ArrayUtils.toPrimitive(includeColIdxs));
         set(INCLUDE_COL_NAMES, includedColsNames);
         set(MAPPING_TYPE, mappingType.name());
         set(KEEP_ORIGINAL, keepOriginalColumns);
@@ -75,7 +78,7 @@ public class Category2NumberJobInput extends JobInput {
     /**
      * @return the indices of the columns to include
      */
-    public Integer[] getIncludeColIdxs() {
+    public int[] getIncludeColIdxs() {
         return get(INCLUDE_COL_IDXS);
     }
 

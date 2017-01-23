@@ -20,8 +20,6 @@
  */
 package com.knime.bigdata.spark1_5.jobs.preproc.convert.category2number;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -43,31 +41,22 @@ import com.knime.bigdata.spark1_5.api.RDDUtilsInJava;
  */
 @SparkClass
 public class Category2NumberJob extends AbstractStringMapperJob {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(Category2NumberJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(Category2NumberJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected Category2NumberJobOutput execute(final SparkContext aContext, final Category2NumberJobInput input, final NamedObjects namedObjects,
-        final JavaRDD<Row> rowRDD, final int[] colIds, final Map<Integer, String> colNameForIndex) throws KNIMESparkException {
-        final MappingType mappingType = input.getMappingType();
+    protected Category2NumberJobOutput execute(final SparkContext context, final Category2NumberJobInput input,
+            final NamedObjects namedObjects, final JavaRDD<Row> rowRDD, final int[] colIds, final String[] colNames)
+            throws KNIMESparkException {
 
-        //use only the column indices when converting
-        final MappedRDDContainer mappedData =
-            RDDUtilsInJava.convertNominalValuesForSelectedIndices(rowRDD, colIds, mappingType, input.keepOriginalCols());
+        final MappingType mappingType = input.getMappingType();
+        final MappedRDDContainer mappedData = RDDUtilsInJava.convertNominalValuesForSelectedIndices(rowRDD, colIds,
+            colNames, mappingType, input.keepOriginalCols());
 
         final String outputName = input.getFirstNamedOutputObject();
         LOGGER.info("Storing mapped data under key: " + outputName);
-        namedObjects.addJavaRdd(outputName, mappedData.m_RddWithConvertedValues);
+        namedObjects.addJavaRdd(outputName, mappedData.getRddWithConvertedValues());
 
-        //number of all (!)  columns in input data table
-        //TODO: get number of all columns from input
-        int offset = rowRDD.take(1).get(0).length();
-        mappedData.createMappingTable(colNameForIndex, offset);
-        return new Category2NumberJobOutput(mappedData.getColumnNames(), mappedData.m_Mappings);
+        return new Category2NumberJobOutput(mappedData.getAppendedColumnNames(), mappedData.getMappings());
     }
 }

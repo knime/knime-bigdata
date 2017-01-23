@@ -18,15 +18,23 @@
  * History
  *   Created on 17.07.2015 by dwk
  */
-package com.knime.bigdata.spark1_6.api;
+package com.knime.bigdata.spark2_0.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
@@ -34,17 +42,18 @@ import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
 import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
+ *
  * @author dwk
- * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
-public class MappedRDDContainer implements Serializable {
+public class MappedDatasetContainer implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     /**
      * mapped data (original + converted data)
      */
-    private transient final JavaRDD<Row> m_rddWithConvertedValues;
+    private transient final Dataset<Row> m_datasetWithConvertedValues;
 
     /**
      * the mappings of nominal values to numbers
@@ -57,23 +66,23 @@ public class MappedRDDContainer implements Serializable {
     private final String m_appendedColNames[];
 
     /**
-     * @param rddWithConvertedValues - rdd with mapped values
+     * @param datasetWithConvertedValues - mapped dataset
      * @param mappings - mapping of this container
      * @param appendedColumns - appended column names
      */
-    public MappedRDDContainer(final JavaRDD<Row> rddWithConvertedValues, final NominalValueMapping mappings,
-            final String appendedColumns[]) {
+    public MappedDatasetContainer(final Dataset<Row> datasetWithConvertedValues,
+            final NominalValueMapping mappings, final String appendedColumns[]) {
 
-        m_rddWithConvertedValues = rddWithConvertedValues;
+        m_datasetWithConvertedValues = datasetWithConvertedValues;
         m_mappings = mappings;
         m_appendedColNames = appendedColumns;
     }
 
     /**
-     * @return the rddWithConvertedValues
+     * @return the datasetWithConvertedValues
      */
-    public JavaRDD<Row> getRddWithConvertedValues() {
-        return m_rddWithConvertedValues;
+    public Dataset<Row> getDatasetWithConvertedValues() {
+        return m_datasetWithConvertedValues;
     }
 
     /**
@@ -93,43 +102,57 @@ public class MappedRDDContainer implements Serializable {
     /**
      * Creates a new container and generates appended column names array.
      *
+     * @param dataset - original dataset
      * @param mappedRdd - rdd with mapped data
      * @param columnIds - included (mapped) column indices
-     * @param columnNames - included (mapped) column names
      * @param mappings - mapping of this container
      * @param keepOriginalColumns - keep original columns or not
      * @return new container
      */
-    public static MappedRDDContainer createContainer(final JavaRDD<Row> mappedRdd,
-            final int[] columnIds, final String[] columnNames,
-            final NominalValueMapping mappings, final boolean keepOriginalColumns) {
+    public static MappedDatasetContainer createContainer(final Dataset<Row> dataset, final JavaRDD<Row> mappedRdd,
+            final int[] columnIds, final NominalValueMapping mappings, final boolean keepOriginalColumns) {
 
+        SparkSession spark = SparkSession.builder().getOrCreate();
+        List<Integer> columnIdsList = Arrays.asList(ArrayUtils.toObject(columnIds));
+        Collections.sort(columnIdsList);
+        List<StructField> fields = new ArrayList<>();
         List<String> appendedColumns = new ArrayList<>();
+        StructField oldFields[] = dataset.schema().fields();
+
+        for (int i = 0; i < oldFields.length; i++) {
+            if (keepOriginalColumns || !columnIdsList.contains(i)) {
+                fields.add(oldFields[i]);
+            }
+        }
 
         if (mappings.getType() == MappingType.BINARY) {
             // ordered by column index and mapped value index:
             final Iterator<MyRecord> mappingIter = mappings.iterator();
             MyRecord currentMapping = null;
-            for (int i : columnIds) {
+            for (int i = 0; i < oldFields.length; i++) {
                 if (mappings.hasMappingForColumn(i)) {
                     int numValues = mappings.getNumberOfValues(i);
                     for (int j = 0; j < numValues; j++) {
                         currentMapping = mappingIter.next();
-                        String name = columnNames[i] + "_" + currentMapping.m_nominalValue;
+                        String name = oldFields[i].name() + "_" + currentMapping.m_nominalValue;
+                        fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, false));
                         appendedColumns.add(name);
                     }
                 }
             }
 
         } else {
-            for (int i : columnIds) {
+            for (int i = 0; i < oldFields.length; i++) {
                 if (mappings.hasMappingForColumn(i)) {
-                    String name = columnNames[i] + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+                    String name = oldFields[i].name() + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+                    fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, false));
                     appendedColumns.add(name);
                 }
             }
         }
 
-        return new MappedRDDContainer(mappedRdd, mappings, appendedColumns.toArray(new String[0]));
+        StructType outputSchema = DataTypes.createStructType(fields);
+        Dataset<Row> mappedDataset = spark.createDataFrame(mappedRdd, outputSchema);
+        return new MappedDatasetContainer(mappedDataset, mappings, appendedColumns.toArray(new String[0]));
     }
 }
