@@ -33,6 +33,7 @@ public class Number2CategoryJobInput extends JobInput {
 
     private static final String MAPPING = "mapping";
     private static final String KEEP_ORIGINAL = "keepOriginal";
+    private static final String COL_SUFFIX = "colSuffix";
 
     /**
      * Paramless constructor for automatic deserialization
@@ -44,14 +45,16 @@ public class Number2CategoryJobInput extends JobInput {
      * @param namedInputObject
      * @param map
      * @param keepOriginalColumns
+     * @param colSuffix
      * @param namedOutputObject
      */
     public Number2CategoryJobInput(final String namedInputObject, final ColumnBasedValueMapping map,
-        final boolean keepOriginalColumns, final String namedOutputObject) {
+            final boolean keepOriginalColumns, final String colSuffix, final String namedOutputObject) {
         addNamedInputObject(namedInputObject);
         addNamedOutputObject(namedOutputObject);
         set(MAPPING, map);
         set(KEEP_ORIGINAL,keepOriginalColumns);
+        set(COL_SUFFIX, colSuffix);
     }
 
 
@@ -68,5 +71,12 @@ public class Number2CategoryJobInput extends JobInput {
      */
     public boolean keepOriginalColumns() {
         return get(KEEP_ORIGINAL);
+    }
+
+    /**
+     * @return column suffix
+     */
+    public String getColSuffix() {
+        return get(COL_SUFFIX);
     }
 }
