@@ -75,4 +75,19 @@ public enum JoinMode {
         }
         return valueOf(aString);
     }
+
+    /**
+     * Convert this join mode into a Spark join type (see Sparks JoinTypes.scala).
+     *
+     * @return Spark join type
+     */
+    public String toSparkJoinType() {
+        switch(this) {
+            case InnerJoin: return "inner";
+            case LeftOuterJoin: return "left_outer";
+            case RightOuterJoin: return "right_outer";
+            case FullOuterJoin: return "outer";
+            default: throw new RuntimeException("Unsupported spark join type: " + this);
+        }
+    }
 }

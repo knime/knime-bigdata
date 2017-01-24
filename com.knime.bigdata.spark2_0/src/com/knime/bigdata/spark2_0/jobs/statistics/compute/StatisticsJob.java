@@ -40,25 +40,21 @@ import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
- * computes multivariate statistics from input RDD and given indices
+ * computes multivariate statistics from input data frame and given indices
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
 @SparkClass
 public class StatisticsJob implements SparkJob<ColumnsJobInput, StatisticsJobOutput> {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(StatisticsJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(StatisticsJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StatisticsJobOutput runJob(final SparkContext sparkContext, final ColumnsJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
-        LOGGER.info("starting Multivariate Statistics job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+
+        LOGGER.info("Starting Multivariate Statistics job...");
+        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
         final List<Integer> colIdxs = input.getColumnIdxs();
         final JavaRDD<Vector> data = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
         MultivariateStatisticalSummary stats = Statistics.colStats(data.rdd());

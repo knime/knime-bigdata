@@ -24,13 +24,15 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -46,18 +48,14 @@ import com.knime.bigdata.spark2_0.api.TypeConverters;
  */
 @SparkClass
 public class JavaSnippetJob implements SparkJobWithFiles<JavaSnippetJobInput, JavaSnippetJobOutput> {
-
     private static final long serialVersionUID = 6708769732202293469L;
+    private static final Logger LOGGER = Logger.getLogger(JavaSnippetJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(JavaSnippetJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JavaSnippetJobOutput runJob(final SparkContext sparkContext, final JavaSnippetJobInput input,
         final List<File> jarFiles, final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         JavaRDD<Row> rowRDD1 = getRowRDD(namedObjects, input.getNamedInputObjects(), 0);
         JavaRDD<Row> rowRDD2 = getRowRDD(namedObjects, input.getNamedInputObjects(), 1);
 
@@ -80,14 +78,16 @@ public class JavaSnippetJob implements SparkJobWithFiles<JavaSnippetJobInput, Ja
             throw new KNIMESparkException("Snippet must not return a null reference!");
         }
 
-        LOGGER.log(Level.INFO, "Completed execution of Java snippet code");
+        LOGGER.info("Completed execution of Java snippet code");
 
         if (!input.getNamedOutputObjects().isEmpty()) {
             if (resultRDD != null) {
-                namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), resultRDD);
-                LOGGER.log(Level.INFO, "Getting schema for result RDD");
+                final StructType schema = snippet.getSchema(resultRDD);
+                final Dataset<Row> resultDataset = spark.createDataFrame(resultRDD, schema);
+                namedObjects.addDataFrame(input.getFirstNamedOutputObject(), resultDataset);
+                LOGGER.info("Getting schema for result data frame");
                 return new JavaSnippetJobOutput(input.getFirstNamedOutputObject(),
-                    TypeConverters.convertSpec(snippet.getSchema(resultRDD)));
+                    TypeConverters.convertSpec(schema));
             } else {
                 // this is most likely an error in the snippet code, hence we use a KNIMESparkException
                 throw new KNIMESparkException("Snippet must return an RDD");
@@ -100,7 +100,7 @@ public class JavaSnippetJob implements SparkJobWithFiles<JavaSnippetJobInput, Ja
 
     private JavaRDD<Row> getRowRDD(final NamedObjects namedObjects, final List<String> namedObjectsList, final int i) {
         if (namedObjectsList.size() > i) {
-            return namedObjects.getJavaRdd(namedObjectsList.get(i));
+            return namedObjects.getDataFrame(namedObjectsList.get(i)).javaRDD();
         } else {
             return null;
         }

@@ -22,7 +22,7 @@ package com.knime.bigdata.spark2_0.jobs.util;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -38,21 +38,18 @@ import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
  */
 @SparkClass
 public class UnpersistJob implements SimpleSparkJob<UnpersistJobInput> {
-
     private static final long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(UnpersistJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(UnpersistJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final UnpersistJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException, Exception {
-        final String name = input.getFirstNamedInputObject();
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(name);
-        LOGGER.info("Unpersisting: " + name);
-        rowRDD.unpersist();
-        namedObjects.deleteNamedObject(name);
-        LOGGER.info(name + " successful unpersisted");
+            throws KNIMESparkException, Exception {
+
+        final String key = input.getFirstNamedInputObject();
+        final Dataset<Row> dataFrame = namedObjects.getDataFrame(key);
+        LOGGER.info("Unpersisting: " + key);
+        dataFrame.unpersist();
+        namedObjects.deleteNamedDataFrame(key);
+        LOGGER.info(key + " successful unpersisted");
     }
 }

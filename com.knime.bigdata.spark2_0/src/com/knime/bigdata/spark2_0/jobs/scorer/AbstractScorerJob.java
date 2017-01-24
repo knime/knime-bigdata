@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.scorer;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
@@ -40,46 +38,32 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
  */
 @SparkClass
 public abstract class AbstractScorerJob implements SparkJob<ScorerJobInput, JobOutput>{
-
     private static final long serialVersionUID = 1L;
 
-    protected static final Logger LOGGER = Logger.getLogger(AbstractScorerJob.class.getName());
+    /** @return local logger instance */
+    protected abstract Logger getLogger();
 
-    /**
-     *
-     */
-    public AbstractScorerJob() {
-        super();
-    }
-
-    Logger getLogger() {
-        return LOGGER;
-    }
-
-    String getAlgName() {
-        return "Scorer";
-    }
+    /** @return Name of this scorer */
+    protected abstract String getScorerName();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public JobOutput runJob(final SparkContext sparkContext, final ScorerJobInput input, final NamedObjects namedObjects) throws KNIMESparkException {
-        getLogger().log(Level.INFO, "START " + getAlgName() + " job...");
+        getLogger().info("Starting " + getScorerName() + " scorer job...");
 
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
         JobOutput res = doScoring(input,rowRDD);
 
-        getLogger().log(Level.INFO, "DONE " + getAlgName() + " job...");
+        getLogger().info(getScorerName() + " scorer job done.");
         return res;
     }
-
 
     /**
      * @param input
      * @param rowRDD
-     * @return
+     * @return Scorer result
      */
     protected abstract JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD);
-
 }

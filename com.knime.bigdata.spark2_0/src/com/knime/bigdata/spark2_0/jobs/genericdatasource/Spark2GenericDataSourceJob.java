@@ -27,36 +27,28 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.DataFrameWriter;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.hive.HiveContext;
-import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
 import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
 
 /**
- * Stores the given named RDD into a path.
+ * Stores the given named data frame into a path.
  *
  * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2GenericDataSourceJobInput, EmptyJobOutput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(Spark2GenericDataSourceJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Spark2GenericDataSourceJob.class.getName());
 
     @Override
     public EmptyJobOutput runJob(final SparkContext sparkContext, final Spark2GenericDataSourceJobInput input, final List<File> inputFiles,
@@ -65,24 +57,20 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
         final String namedObject = input.getFirstNamedInputObject();
         final String outputPath = FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
 
-        LOGGER.info("Writing rdd " + namedObject + " into " + outputPath);
+        LOGGER.info("Writing data frame " + namedObject + " into " + outputPath);
 
         try {
             if (!inputFiles.isEmpty()) {
                 JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(inputFiles);
             }
 
-            final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(namedObject);
-            final IntermediateSpec resultSchema = input.getSpec(namedObject);
-            StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
-            final SQLContext sqlContext = getContext(sparkContext, input);
-            final DataFrame schemaPredictedData = sqlContext.createDataFrame(rowRDD, sparkSchema);
+            final Dataset<Row> dataFrame = namedObjects.getDataFrame(namedObject);
+            final DataFrameWriter<Row> writer;
 
-            final DataFrameWriter writer;
             if (input.overwriteNumPartitons()) {
-                writer = schemaPredictedData.coalesce(input.getNumPartitions()).write();
+                writer = dataFrame.coalesce(input.getNumPartitions()).write();
             } else {
-                writer = schemaPredictedData.write();
+                writer = dataFrame.write();
             }
 
             writer.format(input.getFormat());
@@ -98,21 +86,12 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
 
             writer.save(outputPath);
 
+            LOGGER.info("Writing data frame " + namedObject + " into " + outputPath +  " done.");
+            return new EmptyJobOutput();
+
         } catch (Exception e) {
             throw new KNIMESparkException(
                 String.format("Failed to create output path with name '%s'. Reason: %s", outputPath, e.getMessage()));
-        }
-
-        LOGGER.info("Writing rdd " + namedObject + " into " + outputPath +  " done.");
-
-        return new EmptyJobOutput();
-    }
-
-    private SQLContext getContext(final SparkContext sparkContext, final Spark2GenericDataSourceJobInput jobInput) {
-        if (jobInput.useHiveContext()) {
-            return new HiveContext(sparkContext);
-        } else {
-            return SQLContext.getOrCreate(sparkContext);
         }
     }
 }

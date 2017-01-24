@@ -25,8 +25,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructField;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -39,15 +40,14 @@ import com.knime.bigdata.spark2_0.api.TypeConverters;
 import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
 
 /**
- * Executes given SQL statement and puts result into a (named) RDD.
+ * Executes given SQL statement and puts result into a (named) data frame.
  *
  * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInput, Database2SparkJobOutput> {
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(Database2SparkJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Database2SparkJob.class.getName());
 
     @Override
     public Database2SparkJobOutput runJob(final SparkContext sparkContext, final Database2SparkJobInput input,
@@ -57,17 +57,17 @@ public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInp
 
         try {
             final String namedOutputObject = input.getFirstNamedOutputObject();
-            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
-            final DataFrame dataFrame;
+            final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+            final Dataset<Row> dataFrame;
 
-            LOGGER.info("Reading jdbc table into spark rdd " + namedOutputObject);
+            LOGGER.info("Reading jdbc table into spark data frame " + namedOutputObject);
 
             if (input.hasPartitioning()) {
-                dataFrame = sqlContext.read().jdbc(input.getUrl(), input.getTable(),
+                dataFrame = sparkSession.read().jdbc(input.getUrl(), input.getTable(),
                     input.getPartitionColumn(), input.getLowerBound(), input.getUpperBound(),
                     input.getNumPartitions(), input.getConnectionProperties());
             } else {
-                dataFrame = sqlContext.read().jdbc(input.getUrl(), input.getTable(),
+                dataFrame = sparkSession.read().jdbc(input.getUrl(), input.getTable(),
                     input.getConnectionProperties());
             }
 
@@ -75,9 +75,9 @@ public class Database2SparkJob implements SparkJobWithFiles<Database2SparkJobInp
                 LOGGER.debug("Field '" + field.name() + "' of type '" + field.dataType() + "'");
             }
 
-            namedObjects.addRdd(namedOutputObject, dataFrame.rdd());
-            LOGGER.info("Loading JDBC table into " + namedOutputObject + " done.");
+            namedObjects.addDataFrame(namedOutputObject, dataFrame);
 
+            LOGGER.info("Loading JDBC table into data frame " + namedOutputObject + " done.");
             return new Database2SparkJobOutput(namedOutputObject, TypeConverters.convertSpec(dataFrame.schema()));
 
         } catch(Exception e) {

@@ -27,9 +27,13 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.Optional;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructType;
 
-import com.google.common.base.Optional;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.MyJoinKey;
@@ -42,30 +46,23 @@ import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 import scala.Tuple2;
 
 /**
- * executes join of two JavaRDD<Row> and puts result into a JavaRDD<Row>
+ * Joins two data frames and into a new one.
  *
  * @author dwk
  */
 @SparkClass
 public class JoinJob implements SimpleSparkJob<SparkJoinerJobInput> {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(JoinJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(JoinJob.class.getName());
-
-
-    /**
-     * run the actual job, the result is serialized back to the client the true result is stored in the map of named
-     * RDDs
-     *
-     * @throws KNIMESparkException
-     */
     @Override
-    public void runJob(final SparkContext sparkcontext, final SparkJoinerJobInput input, final NamedObjects namedObjects)
+    public void runJob(final SparkContext sparkContext, final SparkJoinerJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
-        final JoinMode mode = input.getJoineMode();
-        LOGGER.info("computing " + mode.toString() + " of two RDDs...");
 
+        final JoinMode mode = input.getJoineMode();
+        LOGGER.info("Joining via " + mode.toString() + " two data frames...");
+
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final List<Integer> joinIdxLeft = Arrays.asList(input.getJoinColIdxsLeft());
         JavaPairRDD<MyJoinKey, Row> leftRdd =
             RDDUtilsInJava.extractKeys(namedObjects.getJavaRdd(input.getLeftInputObject()),
@@ -78,8 +75,6 @@ public class JoinJob implements SimpleSparkJob<SparkJoinerJobInput> {
         final List<Integer> colIdxLeft = Arrays.asList(input.getSelectColIdxsLeft());
         final List<Integer> colIdxRight = Arrays.asList(input.getSelectColIdxsRight());
 
-        //printRDD(leftRdd.collect(), "Left table:");
-        //printRDD(rightRdd.collect(), "Right table:");
         final JavaRDD<Row> resultRdd;
         switch (mode) {
             case InnerJoin: {
@@ -107,52 +102,11 @@ public class JoinJob implements SimpleSparkJob<SparkJoinerJobInput> {
             }
         }
 
-        //printJoinedRDD(joinedRdd.collect(), "Joined table:");
-
-        //printSelectedRDD(resultRdd.collect(), "Result table:");
-
-        LOGGER.info("done");
-
         LOGGER.info("Storing join result under key: " + input.getFirstNamedOutputObject());
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), resultRdd);
+        final StructType schema = DataTypes.createStructType(RDDUtilsInJava.getFields(
+            namedObjects.getDataFrame(input.getLeftInputObject()), colIdxLeft,
+            namedObjects.getDataFrame(input.getRightNamedObject()), colIdxRight));
+        final Dataset<Row> result = spark.createDataFrame(resultRdd, schema);
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
     }
-
-//    /**
-//     * @param collect
-//     * @param string
-//     */
-//    @SuppressWarnings("unused")
-//    private void printSelectedRDD(final List<Row> aRdd, final String aMsg) {
-//        LOGGER.log(Level.INFO, aMsg);
-//        for (Row tuple : aRdd) {
-//            LOGGER.log(Level.INFO, tuple.toString());
-//        }
-//        LOGGER.log(Level.INFO, "<---- END OF TABLE");
-//    }
-//
-//    /**
-//     * @param collect
-//     * @param aMsg
-//     */
-//    @SuppressWarnings("unused")
-//    private void printJoinedRDD(final List<Tuple2<String, Tuple2<Row, Row>>> aRdd, final String aMsg) {
-//        LOGGER.log(Level.INFO, aMsg);
-//        for (Tuple2<String, Tuple2<Row, Row>> tuple : aRdd) {
-//            LOGGER.log(Level.INFO, "keys:\t" + (tuple._1) + "\tvalues: " + tuple._2);
-//        }
-//        LOGGER.log(Level.INFO, "<---- END OF TABLE");
-//    }
-//
-//    /**
-//     * @param collect
-//     */
-//    @SuppressWarnings("unused")
-//    private void printRDD(final List<Tuple2<String, Row>> aRdd, final String aMsg) {
-//        LOGGER.log(Level.INFO, aMsg);
-//        for (Tuple2<String, Row> tuple : aRdd) {
-//            LOGGER.log(Level.INFO, "keys:\t" + (tuple._1) + "\tvalues: " + tuple._2);
-//        }
-//        LOGGER.log(Level.INFO, "<---- END OF TABLE");
-//    }
-
 }

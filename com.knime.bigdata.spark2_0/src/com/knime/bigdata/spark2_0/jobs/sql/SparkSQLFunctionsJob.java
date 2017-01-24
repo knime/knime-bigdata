@@ -17,8 +17,12 @@
  */
 package com.knime.bigdata.spark2_0.jobs.sql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.spark.SparkContext;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobInput;
@@ -26,8 +30,6 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.sql.SparkSQLFunctionsJobOutput;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SparkJob;
-
-import scala.collection.Seq;
 
 /**
  * Returns Spark SQL function names.
@@ -42,8 +44,13 @@ public class SparkSQLFunctionsJob implements SparkJob<EmptyJobInput, SparkSQLFun
     public SparkSQLFunctionsJobOutput runJob(final SparkContext sparkContext, final EmptyJobInput input, final NamedObjects namedObjects)
             throws KNIMESparkException, Exception {
 
-        final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
-        final Seq<String> functions = sqlContext.functionRegistry().listFunction();
-        return new SparkSQLFunctionsJobOutput(scala.collection.JavaConversions.seqAsJavaList(functions));
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        final List<Row> functionRows = spark.sql("SHOW ALL FUNCTIONS").collectAsList();
+        final List<String> functions = new ArrayList<>(functionRows.size());
+        for (Row row : functionRows) {
+            functions.add(row.getString(0));
+        }
+
+        return new SparkSQLFunctionsJobOutput(functions);
     }
 }

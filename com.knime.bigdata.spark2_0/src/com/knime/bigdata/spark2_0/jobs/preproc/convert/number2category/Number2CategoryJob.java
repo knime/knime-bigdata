@@ -24,9 +24,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -44,25 +46,18 @@ import com.knime.bigdata.spark2_0.jobs.fetchrows.FetchRowsJob;
  */
 @SparkClass
 public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInput>{
-
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(FetchRowsJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FetchRowsJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext SparkContext, final Number2CategoryJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException {
+            throws KNIMESparkException {
         LOGGER.info("Start column mapping job");
-        final JavaRDD<Row> inputRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final ColumnBasedValueMapping map = input.getMapping();
-        final JavaRDD<Row> mappedRDD = execute(inputRDD, map, input.keepOriginalColumns());
+        final Dataset<Row> mappedDataset = execute(inputDataset, map, input.keepOriginalColumns(), input.getColSuffix());
         LOGGER.info("Mapping done");
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), mappedRDD);
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), mappedDataset);
     }
 
     /**
@@ -70,27 +65,34 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
      * @param map
      * @return
      */
-    private static JavaRDD<Row> execute(final JavaRDD<Row> inputRDD, final ColumnBasedValueMapping map, final boolean keepOriginalColumns) {
+    private static Dataset<Row> execute(final Dataset<Row> input, final ColumnBasedValueMapping map,
+            final boolean keepOriginalColumns, final String colSuffix) {
+        final SparkSession spark = SparkSession.builder().getOrCreate();
         final List<Integer> idxs = map.getColumnIndices();
         final Function<Row, Row> function = new Function<Row, Row>(){
             private static final long serialVersionUID = 1L;
+
             @Override
             public Row call(final Row r) throws Exception {
                 final RowBuilder rowBuilder;
+
                 if (keepOriginalColumns) {
                     rowBuilder = RowBuilder.fromRow(r);
                 } else {
                     rowBuilder = RDDUtilsInJava.dropColumnsFromRow(idxs,  r);
                 }
+
                 for (final Integer idx : idxs) {
                     final Object object = r.get(idx);
                     final Object mapVal = map.map(idx, object);
                     rowBuilder.add(mapVal);
                 }
+
                 return rowBuilder.build();
             }
         };
-        return inputRDD.map(function);
-    }
+        final StructType schema = RDDUtilsInJava.createSchema(input, map, keepOriginalColumns, colSuffix);
 
+        return spark.createDataFrame(input.javaRDD().map(function), schema);
+    }
 }

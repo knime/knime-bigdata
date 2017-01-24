@@ -20,44 +20,44 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.filter.column;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * select given columns from input table and store result in new RDD
+ * Select given columns from input table and store result in new data frame.
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
 @SparkClass
 public class ColumnFilterJob implements SimpleSparkJob<ColumnsJobInput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(ColumnFilterJob.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(ColumnFilterJob.class.getName());
 
     @Override
     public void runJob(final SparkContext sparkContext, final ColumnsJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException {
-        LOGGER.info("starting Column Selection job...");
-        final List<String> rddNames = input.getNamedInputObjects();
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(rddNames.get(0));
-        final List<Integer> colIdxs = input.getColumnIdxs();
+            throws KNIMESparkException {
 
-        //use only the column indices when converting to vector
-        final JavaRDD<Row> res = RDDUtilsInJava.selectColumnsFromRDD(rowRDD, colIdxs);
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), res);
+        LOGGER.info("Starting Column Selection job...");
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final String allColumns[] = inputDataset.columns();
+        final String selectedColumnNames[] = input.getColumnNames(allColumns);
+        final Column selectedColumns[] = new Column[selectedColumnNames.length];
+
+        for (int i = 0; i < selectedColumnNames.length; i++) {
+            selectedColumns[i] = inputDataset.col(selectedColumnNames[i]);
+        }
+
+        final Dataset<Row> result = inputDataset.select(selectedColumns);
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
 
         LOGGER.info("Column Selection done");
     }

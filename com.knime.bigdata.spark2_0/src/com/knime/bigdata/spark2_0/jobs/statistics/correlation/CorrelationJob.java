@@ -29,6 +29,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.Statistics;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -48,27 +49,24 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
  */
 @SparkClass
 public abstract class CorrelationJob<O extends JobOutput> implements SparkJob<CorrelationJobInput, O> {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(CorrelationJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(CorrelationJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public O runJob(final SparkContext sparkContext, final CorrelationJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
+
         LOGGER.info("starting Correlation Computation job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
         final List<Integer> colIdxs = input.getColumnIdxs();
         final JavaRDD<Vector> data = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
         final Matrix mat = Statistics.corr(data.rdd(), input.getMethod().toString().toLowerCase());
         final O output = createJobOutput(mat);
         if (input.hasFirstNamedOutputObject()) {
-            final JavaRDD<Row> outputRdd = RDDUtilsInJava.fromMatrix(JavaSparkContext.fromSparkContext(sparkContext), mat);
-            namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), outputRdd);
+            final Dataset<Row> outputRdd = RDDUtilsInJava.fromMatrix(JavaSparkContext.fromSparkContext(sparkContext), mat);
+            namedObjects.addDataFrame(input.getFirstNamedOutputObject(), outputRdd);
         }
+
         LOGGER.info("Correlation Computation done");
         return output;
     }
@@ -77,4 +75,5 @@ public abstract class CorrelationJob<O extends JobOutput> implements SparkJob<Co
      * @param mat the computed correlation {@link Matrix}
      * @return the {@link JobOutput}
      */
-    protected abstract O createJobOutput(final Matrix mat);}
+    protected abstract O createJobOutput(final Matrix mat);
+}

@@ -30,7 +30,9 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -43,48 +45,51 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
 import scala.Tuple2;
 
 /**
- * samples / splits rdds
+ * samples / splits data frames
  *
  * @author dwk
  */
 @SparkClass
 public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(SamplingJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SamplingJob.class.getName());
 
     /**
-     * run the actual job,result(s) are stored in named RDDs
+     * run the actual job and store result(s) in a named data frame
      *
      * @throws KNIMESparkException if something goes wrong
      */
     @Override
     public SamplingJobOutput runJob(final SparkContext sparkContext, final SamplingJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
-        LOGGER.info("starting sampling / splitting job...");
-        final List<String> rddOutNames = input.getNamedOutputObjects();
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
 
-        final JavaRDD<Row> samples = sampleRdd(sparkContext, input, rowRDD);
+        LOGGER.info("starting sampling / splitting job...");
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        final List<String> rddOutNames = input.getNamedOutputObjects();
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<Row> inputRdd = inputDataset.javaRDD();
+        final JavaRDD<Row> samplesRdd = sampleRdd(sparkContext, input, inputRdd);
+        final Dataset<Row> samples = spark.createDataFrame(samplesRdd, inputDataset.schema());
 
         if (input.isSplit()) {
-            final JavaRDD<Row> remainder = rowRDD.subtract(samples);
+            final Dataset<Row> remainder = inputDataset.except(samples);
             LOGGER.info("Storing sample / split result data under key(s): "
                     + rddOutNames.get(0) + ", "
                     + rddOutNames.get(1));
-            namedObjects.addJavaRdd(rddOutNames.get(1), remainder);
+            namedObjects.addDataFrame(rddOutNames.get(1), remainder);
         } else {
             LOGGER.info("Storing sample result data under key: " + rddOutNames.get(0));
         }
-        final boolean successfull = !samples.equals(rowRDD);
+
+        final boolean successfull = !samplesRdd.equals(inputRdd);
         final SamplingJobOutput jobOutput = new SamplingJobOutput(successfull);
         if (successfull) {
-            //only if the sampling succeeded add the result rdd to the named objects map
-            namedObjects.addJavaRdd(rddOutNames.get(0), samples);
+            //only if the sampling succeeded add the result data set to the named objects map
+            namedObjects.addDataFrame(rddOutNames.get(0), samples);
         } else {
             LOGGER.info("Return input RDD as sample RDD.");
         }
+
         return jobOutput;
     }
 
@@ -95,9 +100,9 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
      * @return
      * @throws KNIMESparkException
      */
-    private JavaRDD<Row>
-        sampleRdd(final SparkContext aContext, final SamplingJobInput input, final JavaRDD<Row> rdd2Sample)
-            throws KNIMESparkException {
+    private JavaRDD<Row> sampleRdd(final SparkContext aContext, final SamplingJobInput input,
+            final JavaRDD<Row> rdd2Sample) throws KNIMESparkException {
+
         final SamplingMethod samplingMethod = input.getSamplingMethod();
         final JavaRDD<Row> samples;
         switch (samplingMethod) {
@@ -135,6 +140,7 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
      */
     private JavaRDD<Row> stratifiedSample(final SparkContext aContext, final SamplingJobInput input,
         final JavaRDD<Row> aRDD2Sample) {
+
         final int classColIx = input.getClassColIx();
         final boolean exact = input.getExact();
 
@@ -164,7 +170,7 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
         final long seed = input.getSeed();
         final double fraction = getFractionToSample(input, aRDD2Sample);
 
-        Map<String, Object> fractions = new HashMap<>();
+        Map<String, Double> fractions = new HashMap<>();
         for (String key : keys) {
             fractions.put(key, fraction);
         }
@@ -177,6 +183,7 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
             LOGGER.info("Using approximate stratified sampling, fraction: " + fraction);
             sampledRdd = keyedRdd.sampleByKey(withReplacement, fractions, seed);
         }
+
         return sampledRdd.map(new Function<Tuple2<String, Row>, Row>() {
             private static final long serialVersionUID = 1L;
 
@@ -185,7 +192,6 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
                 return aRow._2;
             }
         });
-
     }
 
     /**
@@ -195,10 +201,12 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
      * @return
      */
     private JavaRDD<Row> sampleFromTop(final SparkContext sparkContext, final SamplingJobInput input,
-        final JavaRDD<Row> rdd2Sample) {
+            final JavaRDD<Row> rdd2Sample) {
+
         final JavaRDD<Row> samples;
         final long totalCount = rdd2Sample.count();
         final long c = getNumRowsToSample(input, totalCount);
+
         if (c >= totalCount) {
             samples = rdd2Sample;
         } else {
@@ -206,6 +214,7 @@ public class SamplingJob implements SparkJob<SamplingJobInput, SamplingJobOutput
             JavaSparkContext js = new JavaSparkContext(sparkContext);
             samples = js.parallelize(rdd2Sample.take((int)c));
         }
+
         return samples;
     }
 

@@ -23,8 +23,8 @@ package com.knime.bigdata.spark2_0.jobs.scorer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
@@ -44,13 +44,9 @@ import scala.Tuple2;
  */
 @SparkClass
 public class ClassificationScorerJob extends AbstractScorerJob {
-
     private static final long serialVersionUID = 1L;
-    protected static final Logger LOGGER = Logger.getLogger(ClassificationScorerJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClassificationScorerJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
         final Integer classCol = input.getActualColIdx();
@@ -86,5 +82,15 @@ public class ClassificationScorerJob extends AbstractScorerJob {
         }
         return new ScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
             labels);
+    }
+
+    @Override
+    protected String getScorerName() {
+        return "classification";
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

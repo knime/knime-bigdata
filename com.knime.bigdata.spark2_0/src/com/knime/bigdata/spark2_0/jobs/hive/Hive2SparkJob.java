@@ -20,15 +20,11 @@
  */
 package com.knime.bigdata.spark2_0.jobs.hive;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.hive.HiveContext;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructField;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -38,42 +34,37 @@ import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * executes given sql statement and puts result into a (named) JavaRDD
+ * Executes given SQL statement and puts result into a (named) data frame.
  *
  * @author dwk, jfr
  */
 @SparkClass
 public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        LOGGER.log(Level.INFO, "reading hive table...");
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        ensureHiveSupport(spark);
 
-
-        final HiveContext hiveContext = new HiveContext(sparkContext);
-        LOGGER.log(Level.INFO, "sql statement: " + input.getQuery());
-
-        final DataFrame dataFrame = hiveContext.sql(input.getQuery());
+        final Dataset<Row> dataFrame = spark.sql(input.getQuery());
 
         for (final StructField field : dataFrame.schema().fields()) {
-            LOGGER.log(Level.FINE, "Field '" + field.name() + "' of type '" + field.dataType() + "'");
+            LOGGER.debug("Field '" + field.name() + "' of type '" + field.dataType() + "'");
         }
 
-        final RDD<Row> rdd = dataFrame.rdd();
-        final JavaRDD<Row> javaRDD = new JavaRDD<>(rdd, rdd.elementClassTag());
-
         final String key = input.getFirstNamedOutputObject();
-        LOGGER.log(Level.INFO, "Storing Hive query result under key: " + key);
-        namedObjects.addJavaRdd(key, javaRDD);
-        LOGGER.log(Level.INFO, "done");
+        LOGGER.info("Storing Hive query result under key: " + key);
+        namedObjects.addDataFrame(key, dataFrame);
+    }
+
+    private void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {
+        if (!spark.conf().get("spark.sql.catalogImplementation", "").equals("hive")) {
+            throw new KNIMESparkException("Spark session does not support hive!"
+                + " Please set spark.sql.catalogImplementation = \"hive\" in environment.conf.");
+        }
     }
 }
