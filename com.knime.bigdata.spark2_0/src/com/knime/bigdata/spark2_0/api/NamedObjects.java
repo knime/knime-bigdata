@@ -24,68 +24,48 @@ import java.util.Set;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- *
  * @author Bjoern Lohrmann, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public interface NamedObjects {
 
     /**
-     * Adds the given RDD to the named RDDs (without forcing computation and storage level is {@link StorageLevel#NONE}).
+     * Adds the given data frame (without forcing computation and storage level is {@link StorageLevel#NONE}).
      *
      * @param key
-     * @param rdd
+     * @param dataset
      */
-    public  void addJavaRdd(final String key, final JavaRDD<Row> rdd);
-
+    public void addDataFrame(final String key, final Dataset<Row> dataset);
 
     /**
-     * Adds the given RDD to the named RDDs forcing computation as given (storage level is {@link StorageLevel#NONE}).
+     * Retrieves a previously stored data frame.
      *
-     * @param key
-     * @param rdd
-     * @param forceComputation
+     * @param key the key under which the data frame was previously stored
+     * @return the data frame
      */
-    public  void addJavaRdd(final String key, final JavaRDD<Row> rdd, final boolean forceComputation);
-
-
-    /**
-     * @param key
-     * @param rdd
-     * @param forceComputation
-     * @param storageLevel
-     */
-    public  void addJavaRdd(final String key, final JavaRDD<Row> rdd, final boolean forceComputation, final StorageLevel storageLevel);
-
-
-
-    /**
-     * Adds the given RDD to the named RDDs forcing computation as given (storage level is {@link StorageLevel#NONE}).
-     *
-     * @param key
-     * @param rdd
-     * @param storageLevel
-     */
-    public  void addJavaRdd(final String key, final JavaRDD<Row> rdd, final StorageLevel storageLevel);
-
+    public Dataset<Row> getDataFrame(final String key);
 
     /**
      * Retrieves a previously stored RDD as {@link RDD}.
      *
      * @param key the key under which the RDD was previously stored
      * @return the RDD as {@link RDD}.
+     * @see #getDataFrame(String)
      */
+    @Deprecated
     public  JavaRDD<Row> getJavaRdd(final String key);
 
 
     /**
-     * Checks whether an rdd is stored under the given key.
+     * Checks whether an object is stored under the given key.
      *
      * @param key
      * @return true if stored, false otherwise.
@@ -94,61 +74,14 @@ public interface NamedObjects {
 
 
     /**
-     * Deletes the given RDD from the map of named RDDs.
+     * Deletes the given object from the map of named objects.
      *
      * @param key
      */
-    public void deleteNamedObject(final String key);
+    public void deleteNamedDataFrame(final String key);
 
     /**
      * @return Returns the set of all named objects
      */
     public Set<String> getNamedObjects();
-
-    /**
-     * Adds the given RDD to the named RDDs (without forcing computation and storage level is {@link StorageLevel#NONE}).
-     *
-     * @param key
-     * @param rdd
-     */
-    public <T> void addRdd(final String key, final RDD<T> rdd);
-
-
-    /**
-     * Adds the given RDD to the named RDDs forcing computation as given (storage level is {@link StorageLevel#NONE}).
-     *
-     * @param key
-     * @param rdd
-     * @param forceComputation
-     */
-    public <T> void addRdd(final String key, final RDD<T> rdd, final boolean forceComputation);
-
-
-    /**
-     * @param key
-     * @param rdd
-     * @param forceComputation
-     * @param storageLevel
-     */
-    public <T> void addRdd(final String key, final RDD<T> rdd, final boolean forceComputation, final StorageLevel storageLevel);
-
-
-
-    /**
-     * Adds the given RDD to the named RDDs forcing computation as given (storage level is {@link StorageLevel#NONE}).
-     *
-     * @param key
-     * @param rdd
-     * @param storageLevel
-     */
-    public <T> void addRdd(final String key, final RDD<T> rdd, final StorageLevel storageLevel);
-
-
-    /**
-     * Retrieves a previously stored RDD as {@link RDD}.
-     *
-     * @param key the key under which the RDD was previously stored
-     * @return the RDD as {@link RDD}.
-     */
-    public <T> RDD<T> getRdd(final String key);
 }

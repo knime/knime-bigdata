@@ -101,7 +101,9 @@ public class SupervisedLearnerUtils {
             aLogger.log(Level.INFO, "Storing predicted data under key: " + namedOutputObject);
             //TODO - revert the label to int mapping ????
             final JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
-            namedObjects.addJavaRdd(namedOutputObject , predictedData);
+
+//            namedObjects.addJavaRdd(namedOutputObject , predictedData);
+            throw new RuntimeException("TODO DataFrame port");
         }
     }
 

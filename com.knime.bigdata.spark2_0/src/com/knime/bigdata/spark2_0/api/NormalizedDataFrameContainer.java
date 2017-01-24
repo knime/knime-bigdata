@@ -26,7 +26,11 @@ import java.util.Collection;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
@@ -65,7 +69,7 @@ class MinMax implements Serializable {
  * @author dwk
  */
 @SparkClass
-public class NormalizedRDDContainer implements Serializable{
+public class NormalizedDataFrameContainer implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
@@ -77,7 +81,7 @@ public class NormalizedRDDContainer implements Serializable{
      * @param aScale
      * @param aTranslation
      */
-    NormalizedRDDContainer(final double[] aScale, final double[] aTranslation) {
+    NormalizedDataFrameContainer(final double[] aScale, final double[] aTranslation) {
         m_scale = aScale;
         m_translation = aTranslation;
     }
@@ -95,13 +99,15 @@ public class NormalizedRDDContainer implements Serializable{
     }
 
     /**
-     * normalize the given RDD, column indices must match the pre-set scale and translation array
-     * @param aInputRdd
-     * @param aColumnIndices
-     * @return
+     * Normalize the given data frame, column indices must match the pre-set scale and translation array.
+     *
+     * @param spark
+     * @param input
+     * @param columnIndices
+     * @return normalized data frame
      */
-    public JavaRDD<Row> normalizeRDD(final JavaRDD<Row> aInputRdd, final Collection<Integer> aColumnIndices) {
-        JavaRDD<Row> normalizedRdd = aInputRdd.map(new Function<Row, Row>() {
+    public Dataset<Row> normalize(final SparkSession spark, final Dataset<Row> input, final Collection<Integer> columnIndices) {
+        JavaRDD<Row> normalizedRdd = input.javaRDD().map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -109,7 +115,7 @@ public class NormalizedRDDContainer implements Serializable{
                 RowBuilder builder = RowBuilder.emptyRow();
                 int ix = 0;
                 for (int i = 0; i < aRow.length(); i++) {
-                    if (aColumnIndices.contains(i)) {
+                    if (columnIndices.contains(i)) {
                         Object val = aRow.get(i);
                         if (val == null) {
                             builder.add(null);
@@ -126,7 +132,13 @@ public class NormalizedRDDContainer implements Serializable{
                 return builder.build();
             }
         });
-        return normalizedRdd;
+
+        final StructField fields[] = input.schema().fields();
+        for (int index : columnIndices) {
+            fields[index] = DataTypes.createStructField(fields[index].name(), DataTypes.DoubleType, true);
+        }
+
+        return spark.createDataFrame(normalizedRdd, DataTypes.createStructType(fields));
     }
 
     /**
