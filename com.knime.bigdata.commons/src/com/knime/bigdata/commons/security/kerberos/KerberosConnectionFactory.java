@@ -24,7 +24,9 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
@@ -33,8 +35,11 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
+import org.knime.core.node.workflow.NodeContext;
 
 import com.knime.bigdata.commons.config.CommonConfigContainer;
+import com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
+import com.knime.licenses.License;
 
 /**
  * {@link CachedConnectionFactory} implementation that supports Kerberos authentication.
@@ -73,13 +78,23 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
                 LOGGER.debug("Adding hdfs site from config");
                 conf.addResource(configContainer.getHdfsSiteConfig());
             }
-            final UserGroupInformation ugi = UserGroupUtil.getKerberosUser(conf);
+            final UserGroupInformation ugi;
+            final String jdbcImpersonationURL;
+            if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter()
+                    && License.runningInServerContext()) {
+                LOGGER.debug("Using JDBC impersonation parameter instead of proxy user on KNIME Server");
+                jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl);
+                ugi = UserGroupUtil.getKerberosTGTUser(conf);
+            } else {
+                ugi = UserGroupUtil.getKerberosUser(conf);
+                jdbcImpersonationURL = jdbcUrl;
+            }
             final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
             final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
                 @Override
                 public Connection run() throws Exception {
                     try {
-                        return d.connect(jdbcUrl, props);
+                        return d.connect(jdbcImpersonationURL, props);
                     } catch (Exception e) {
                         throw e;
                     }
@@ -91,5 +106,30 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             LOGGER.error(errMsg, e);
             throw new SQLException(errMsg, e);
         }
+    }
+
+    private String appendImpersonationParameter(final String jdbcUrl) {
+        final String param = CommonConfigContainer.getInstance().getJDBCImpersonationParameter();
+        LOGGER.debug("JDBC impersonation parameter: " + param);
+        LOGGER.debug("Original JDBC URL: " + jdbcUrl);
+        final String searchString = param.replace(CommonPreferenceInitializer.JDBC_IMPERSONATION_PLACEHOLDER, "");
+        if (jdbcUrl.contains(searchString)) {
+            throw new IllegalArgumentException("JDBC URL must not contain Kerberos impersonation parameter");
+        }
+        final Optional<String> wfUser = NodeContext.getWorkflowUser();
+        if (wfUser.isPresent()) {
+            final String replacedParam = param.replaceAll(
+                Pattern.quote(CommonPreferenceInitializer.JDBC_IMPERSONATION_PLACEHOLDER), wfUser.get());
+            final StringBuilder buf = new StringBuilder(jdbcUrl);
+            if (!jdbcUrl.endsWith(";")) {
+                buf.append(";");
+            }
+            buf.append(replacedParam);
+            final String newJDBCurl = buf.toString();
+            LOGGER.debug("JDBC URL with impersonation parameter: " + newJDBCurl);
+            return newJDBCurl;
+        }
+        LOGGER.warn("No workflow user found. Using original JDBC URL");
+        return jdbcUrl;
     }
 }
