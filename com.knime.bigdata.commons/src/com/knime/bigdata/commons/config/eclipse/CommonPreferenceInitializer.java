@@ -57,7 +57,6 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
 
     /** Preference key for the core-site.xml. */
     public static final String PREF_CORE_SITE_FILE = "com.knime.bigdata.config.core-site.file";
-
     /** Preference key for the hdfs-site.xml. */
     public static final String PREF_HDFS_SITE_FILE = "com.knime.bigdata.config.hdfs-site.file";
 
@@ -87,9 +86,16 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
 
     /** Preference key for custom kerberos user. */
     public static final String PREF_KERBEROS_USER = "com.knime.bigdata.config.kerberos.user";
-
     /** Preference key for custom kerberos keytab file. */
     public static final String PREF_KERBEROS_KEYTAB_FILE = "com.knime.bigdata.config.kerberos.keytab.file";
+    /** Preference key for JDBC impersonation parameter flag. */
+    public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG =
+            "com.knime.bigdata.config.kerberos.jdbc.impersonation.flag";
+    /** Preference key for JDBC impersonation parameter. */
+    public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM =
+            "com.knime.bigdata.config.kerberos.jdbc.impersonation.param";
+    /**The place holder for the workflow user in the JDBC impersonation parameter.*/
+    public static final String JDBC_IMPERSONATION_PLACEHOLDER = "{1}";
 
     @Override
     public void initializeDefaultPreferences() {
@@ -98,8 +104,8 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     private void loadDefaultValues(final IPreferenceStore store) {
-        store.setDefault(PREF_CORE_SITE_FILE, null);
-        store.setDefault(PREF_HDFS_SITE_FILE, null);
+        store.setDefault(PREF_CORE_SITE_FILE, "");
+        store.setDefault(PREF_HDFS_SITE_FILE, "");
 
         store.setDefault(PREF_TRUSTSTORE_ENABLE, false);
         store.setDefault(PREF_TRUSTSTORE_HOSTNAME_VERIFIER, "DEFAULT");
@@ -114,7 +120,9 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KEYSTORE_KEYPASSWORD, "");
         store.setDefault(PREF_KEYSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
 
-        store.setDefault(PREF_KERBEROS_USER, null);
-        store.setDefault(PREF_KERBEROS_KEYTAB_FILE, null);
+        store.setDefault(PREF_KERBEROS_USER, "");
+        store.setDefault(PREF_KERBEROS_KEYTAB_FILE, "");
+        store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG, false);
+        store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + JDBC_IMPERSONATION_PLACEHOLDER);
     }
 }

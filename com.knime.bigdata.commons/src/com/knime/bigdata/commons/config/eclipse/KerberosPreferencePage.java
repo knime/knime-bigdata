@@ -44,12 +44,16 @@
  */
 package com.knime.bigdata.commons.config.eclipse;
 
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.knime.workbench.ui.preferences.LabelField;
 
 import com.knime.bigdata.commons.CommonsPlugin;
 
@@ -57,6 +61,9 @@ import com.knime.bigdata.commons.CommonsPlugin;
  * @author Tobias Koetter, KNIME.com
  */
 public class KerberosPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+
+    private BooleanFieldEditor m_jdbcParamFlag;
+    private StringFieldEditor m_jdbcParam;
 
     /**
      * Creates a new kerberos preference page.
@@ -66,20 +73,83 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
         setDescription("Kerberos Configuration");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init(final IWorkbench workbench) {
         final IPreferenceStore prefStore = CommonsPlugin.getDefault().getPreferenceStore();
         setPreferenceStore(prefStore);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void createFieldEditors() {
-        StringFieldEditor kerberosUser = new StringFieldEditor(
+        final StringFieldEditor kerberosUser = new StringFieldEditor(
             CommonPreferenceInitializer.PREF_KERBEROS_USER, "Keytab user:", getFieldEditorParent());
         addField(kerberosUser);
 
-        FileFieldEditor kerberosKeytabFile = new FileFieldEditor(
+        final FileFieldEditor kerberosKeytabFile = new FileFieldEditor(
             CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE, "Keytab file:", getFieldEditorParent());
         addField(kerberosKeytabFile);
+
+        m_jdbcParamFlag = new BooleanFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG,
+            "Use JDBC impersonation parameter instead of Kerberos proxy user on KNIME server",
+            getFieldEditorParent());
+        m_jdbcParam = new StringFieldEditor(
+            CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "JDBC impersonation parameter:",
+            getFieldEditorParent());
+        m_jdbcParamFlag.setPropertyChangeListener(new IPropertyChangeListener() {
+
+            @Override
+            public void propertyChange(final PropertyChangeEvent event) {
+                updateFieldStatus();
+            }
+        });
+        final LabelField label = new LabelField(getFieldEditorParent(),
+                "The placeholder {1} in the impersonation parameter will be replace by the KNIME workflow user.");
+        updateFieldStatus();
+        addField(m_jdbcParamFlag);
+        addField(m_jdbcParam);
+        addField(label);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void initialize() {
+        super.initialize();
+        updateFieldStatus();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void propertyChange(final PropertyChangeEvent event) {
+        super.propertyChange(event);
+        if (event.getSource() == m_jdbcParamFlag) {
+            updateFieldStatus();
+        }
+    }
+
+    /**
+     *
+     */
+    private void updateFieldStatus() {
+        m_jdbcParam.setEnabled(m_jdbcParamFlag.getBooleanValue(), getFieldEditorParent());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void performDefaults() {
+        super.performDefaults();
+        updateFieldStatus();
     }
 }

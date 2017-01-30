@@ -104,11 +104,9 @@ public class UserGroupUtil {
      */
     public static synchronized UserGroupInformation getKerberosUser(final Configuration conf)
             throws Exception {
-
         LOGGER.debug("Retrieving user for Kerberos authentication");
-        UserGroupInformation.setConfiguration(conf);
         //Get the user with the Kerberos TGT
-        final UserGroupInformation kerberosTGTUser = getKerberosTGTUser();
+        final UserGroupInformation kerberosTGTUser = getKerberosTGTUser(conf);
 
         final UserGroupInformation user;
         if (License.runningInServerContext()) {
@@ -138,10 +136,12 @@ public class UserGroupUtil {
      * This method returns the Kerberos user which can be used directly or used for proxy user creation.
      * If the user has specified a keytab file in the KNIME preferences the method returns the Kerberos user from
      * the keytab file otherwise it looks in the ticket cache for a user.
+     * @param conf {@link Configuration} to use
      * @return the Kerberos user
      * @throws Exception if no Kerberos user could be obtained
      */
-    private static UserGroupInformation getKerberosTGTUser() throws Exception {
+    static UserGroupInformation getKerberosTGTUser(final Configuration conf) throws Exception {
+        UserGroupInformation.setConfiguration(conf);
         if (!UserGroupInformation.isSecurityEnabled()) {
             throw new Exception("Kerberos authentication not enabled in configuration.");
         }

@@ -174,6 +174,20 @@ public class CommonConfigContainer {
     }
 
     /**
+     * @return <code>true</code> if JDBC parameter based user impersonation should be used
+     */
+    public boolean useJDBCImpersonationParameter() {
+        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG);
+    }
+
+    /**
+     * @return the JDBC impersonation parameter whereas {1} should be replaced by the workflow user
+     */
+    public String getJDBCImpersonationParameter() {
+        return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM);
+    }
+
+    /**
      * @return the hdfsSupported
      */
     public boolean isHdfsSupported() {
