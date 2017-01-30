@@ -35,7 +35,6 @@ import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateArrayToSparkConverter;
 import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
