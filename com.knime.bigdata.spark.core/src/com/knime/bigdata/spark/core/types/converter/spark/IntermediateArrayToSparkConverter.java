@@ -72,6 +72,9 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             }
             return result;
 
+        } else if (sparkObject instanceof WrappedArray) {
+            return convert(((WrappedArray<?>) sparkObject).array());
+
         } else {
             return super.convert(sparkObject);
         }
