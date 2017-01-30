@@ -65,7 +65,7 @@ public class DefaultBundleGroupSparkJarProvider extends DefaultSparkProvider<Bun
     public static Bundle getBundle(final String name, final String inMinVersion) {
         final Bundle bundles[] = Platform.getBundles(name, inMinVersion);
 
-        if (bundles.length > 0) {
+        if (bundles != null && bundles.length > 0) {
             return bundles[0];
         } else {
             throw new RuntimeException("Unable to findle bundle " + name + " with min version " + inMinVersion);
