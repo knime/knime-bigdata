@@ -41,6 +41,8 @@ import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
@@ -122,11 +124,12 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final com.knime.bigdata.spark.node.preproc.joiner.JoinMode sparkJoinMode =
                 com.knime.bigdata.spark.node.preproc.joiner.JoinMode.fromKnimeJoinMode(joinMode.toString());
         final DataTableSpec outputSpec = joiner.getOutputSpec();
+        final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec);
         final SparkDataTable resultTable = new SparkDataTable(context, outputSpec);
 
         final SimpleJobRunFactory<SparkJoinerJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
         final SparkJoinerJobInput jobInput = new SparkJoinerJobInput(left.getData().getID(), right.getData().getID(), sparkJoinMode,
-            leftJoinColumns, rightJoinColumns, leftIncludCols, rightIncludCols, resultTable.getID());
+            leftJoinColumns, rightJoinColumns, leftIncludCols, rightIncludCols, resultTable.getID(), intermediaSpec);
         runFactory.createRun(jobInput).run(context, exec);
 
         return new PortObject[] {new SparkDataPortObject(resultTable)};

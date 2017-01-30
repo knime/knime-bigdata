@@ -31,7 +31,6 @@ import org.apache.spark.api.java.Optional;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -42,6 +41,7 @@ import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_0.api.TypeConverters;
 
 import scala.Tuple2;
 
@@ -103,10 +103,9 @@ public class JoinJob implements SimpleSparkJob<SparkJoinerJobInput> {
         }
 
         LOGGER.info("Storing join result under key: " + input.getFirstNamedOutputObject());
-        final StructType schema = DataTypes.createStructType(RDDUtilsInJava.getFields(
-            namedObjects.getDataFrame(input.getLeftInputObject()), colIdxLeft,
-            namedObjects.getDataFrame(input.getRightNamedObject()), colIdxRight));
-        final Dataset<Row> result = spark.createDataFrame(resultRdd, schema);
-        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
+        final String resultKey = input.getFirstNamedOutputObject();
+        final StructType resultSchema = TypeConverters.convertSpec(input.getSpec(resultKey));
+        final Dataset<Row> result = spark.createDataFrame(resultRdd, resultSchema);
+        namedObjects.addDataFrame(resultKey, result);
     }
 }
