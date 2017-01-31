@@ -97,7 +97,7 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
 
         m_jdbcParamFlag = new BooleanFieldEditor(
             CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG,
-            "Use JDBC impersonation parameter instead of Kerberos proxy user on KNIME server",
+            "Use JDBC impersonation parameter instead of Kerberos proxy user on KNIME Server",
             getFieldEditorParent());
         m_jdbcParam = new StringFieldEditor(
             CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "JDBC impersonation parameter:",
@@ -110,7 +110,7 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
             }
         });
         final LabelField label = new LabelField(getFieldEditorParent(),
-                "The placeholder {1} in the impersonation parameter will be replace by the KNIME workflow user.");
+                "The placeholder {1} in the impersonation parameter will be replaced by the KNIME workflow user.");
         updateFieldStatus();
         addField(m_jdbcParamFlag);
         addField(m_jdbcParam);
