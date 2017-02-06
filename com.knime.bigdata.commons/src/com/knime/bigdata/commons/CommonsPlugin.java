@@ -28,6 +28,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.knime.bigdata.commons.config.CommonConfigContainer;
+import com.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
+
 
 /**
  *
@@ -57,6 +60,16 @@ public class CommonsPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
+        checkConfiguration();
+    }
+
+    /**
+     * Looks at configuration parameter from the {@link CommonConfigContainer} that require attention on startup
+     * e.g. the Kerberos logging.
+     */
+    private void checkConfiguration() {
+        final CommonConfigContainer config = CommonConfigContainer.getInstance();
+        KerberosLogger.getInstance().setEnable(config.isKerberosLoggingEnabled(), config.getKerberosLoggingLevel());
     }
 
     /**

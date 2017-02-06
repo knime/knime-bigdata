@@ -29,6 +29,7 @@ import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.apache.hadoop.security.ssl.SSLFactory;
 import org.apache.hadoop.security.ssl.SSLFactory.Mode;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.knime.core.node.NodeLogger.LEVEL;
 
 import com.knime.bigdata.commons.CommonsPlugin;
 import com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
@@ -185,6 +186,21 @@ public class CommonConfigContainer {
      */
     public String getJDBCImpersonationParameter() {
         return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM);
+    }
+
+    /**
+     * @return true if Kerberos logging is enabled.
+     */
+    public boolean isKerberosLoggingEnabled() {
+        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_ENABLED);
+    }
+
+    /**
+     * @return the Kerberos logging {@link LEVEL}
+     */
+    public LEVEL getKerberosLoggingLevel() {
+        final String levelString = PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_LEVEL);
+        return LEVEL.valueOf(levelString);
     }
 
     /**

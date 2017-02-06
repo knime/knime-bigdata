@@ -44,18 +44,27 @@
  */
 package com.knime.bigdata.commons.config.eclipse;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
+import org.knime.core.node.NodeLogger.LEVEL;
+import org.knime.workbench.ui.preferences.HorizontalLineField;
 import org.knime.workbench.ui.preferences.LabelField;
 
 import com.knime.bigdata.commons.CommonsPlugin;
+import com.knime.bigdata.commons.config.CommonConfigContainer;
+import com.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -64,6 +73,8 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
 
     private BooleanFieldEditor m_jdbcParamFlag;
     private StringFieldEditor m_jdbcParam;
+    private RadioGroupFieldEditor m_loggingLevel;
+    private BooleanFieldEditor m_enableLogging;
 
     /**
      * Creates a new kerberos preference page.
@@ -95,6 +106,24 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
             CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE, "Keytab file:", getFieldEditorParent());
         addField(kerberosKeytabFile);
 
+        m_enableLogging = new BooleanFieldEditor(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_ENABLED,
+            "Enable Kerberos logging", getFieldEditorParent());
+        addField(m_enableLogging);
+        m_loggingLevel = new RadioGroupFieldEditor(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_LEVEL, "Log level",
+            4, new String[][] {
+                {"&DEBUG", LEVEL.DEBUG.name()},
+
+                {"&INFO", LEVEL.INFO.name()},
+
+                {"&WARN", LEVEL.WARN.name()},
+
+                {"&ERROR", LEVEL.ERROR.name()} }, getFieldEditorParent());
+        addField(m_loggingLevel);
+
+//Server settings
+        addField(new HorizontalLineField(getFieldEditorParent()));
+        addField(new LabelField(getFieldEditorParent(), "KNIME Server Settings", SWT.BOLD));
+
         m_jdbcParamFlag = new BooleanFieldEditor(
             CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG,
             "Use JDBC impersonation parameter instead of Kerberos proxy user on KNIME Server",
@@ -109,12 +138,11 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
                 updateFieldStatus();
             }
         });
-        final LabelField label = new LabelField(getFieldEditorParent(),
-                "The placeholder {1} in the impersonation parameter will be replaced by the KNIME workflow user.");
         updateFieldStatus();
         addField(m_jdbcParamFlag);
         addField(m_jdbcParam);
-        addField(label);
+        addField(new LabelField(getFieldEditorParent(),
+                "The placeholder {1} in the impersonation parameter will be replaced by the KNIME workflow user."));
     }
 
     /**
@@ -132,7 +160,8 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
     @Override
     public void propertyChange(final PropertyChangeEvent event) {
         super.propertyChange(event);
-        if (event.getSource() == m_jdbcParamFlag) {
+        final Object source = event.getSource();
+        if (source == m_jdbcParamFlag || source == m_enableLogging) {
             updateFieldStatus();
         }
     }
@@ -141,7 +170,9 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
      *
      */
     private void updateFieldStatus() {
-        m_jdbcParam.setEnabled(m_jdbcParamFlag.getBooleanValue(), getFieldEditorParent());
+        final Composite parent = getFieldEditorParent();
+        m_jdbcParam.setEnabled(m_jdbcParamFlag.getBooleanValue(), parent);
+        m_loggingLevel.setEnabled(m_enableLogging.getBooleanValue(), parent);
     }
 
     /**
@@ -151,5 +182,21 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
     protected void performDefaults() {
         super.performDefaults();
         updateFieldStatus();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean performOk() {
+        final boolean result = super.performOk();
+        if (!KerberosLogger.getInstance().isEnabled()
+                && CommonConfigContainer.getInstance().isKerberosLoggingEnabled()) {
+            MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                "Kerberos Logging", "Please restart the KNIME Analytics Platform to enable Kerberos logging");
+        }
+        KerberosLogger.getInstance().setEnable(CommonConfigContainer.getInstance().isKerberosLoggingEnabled(),
+            CommonConfigContainer.getInstance().getKerberosLoggingLevel());
+        return result;
     }
 }
