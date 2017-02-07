@@ -29,24 +29,25 @@ import com.knime.bigdata.spark.core.job.SparkClass;
  */
 @SparkClass
 public class SamplingJobOutput extends JobOutput {
-
-
-    private static final String IS_SUCCESS = "isSuccess";
+    private static final String SAMPLES_RDD_IS_INPUT_RDD = "samplesRddIsInputRdd";
 
     /**
      * Paramless constructor for automatic deserialization.
      */
     public SamplingJobOutput() {}
 
-    public SamplingJobOutput(final boolean isSuccess) {
-        set(IS_SUCCESS, isSuccess);
+    /**
+     * @param samplesRddIsInputRdd true if first output RDD is input RDD (all rows are sampled)
+     */
+    public SamplingJobOutput(final boolean samplesRddIsInputRdd) {
+        set(SAMPLES_RDD_IS_INPUT_RDD, samplesRddIsInputRdd);
     }
 
     /**
-     * @return whether the sampling was successfull
+     * @return true if first output RDD is input RDD (all rows are sampled)
      */
-    public boolean isSuccess() {
-        return get(IS_SUCCESS);
+    public boolean samplesRddIsInputRdd() {
+        return get(SAMPLES_RDD_IS_INPUT_RDD);
     }
 
 }

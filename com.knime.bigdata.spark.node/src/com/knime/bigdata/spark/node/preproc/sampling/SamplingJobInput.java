@@ -56,7 +56,7 @@ public class SamplingJobInput extends JobInput {
      */
     public SamplingJobInput() {}
 
-    SamplingJobInput(final String inputNamedObject, final String[] outputNamedObjects, final CountMethod countMethod,
+    public SamplingJobInput(final String inputNamedObject, final String[] outputNamedObjects, final CountMethod countMethod,
         final Integer count, final SamplingMethod samplingMethod, final Double fraction, final Integer classColIx,
         final Boolean isWithReplacement, final Long seed, final Boolean exact) {
         addNamedInputObject(inputNamedObject);
