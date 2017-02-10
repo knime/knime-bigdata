@@ -55,11 +55,11 @@ else
   
   echo "### Fixing ownership and permissions in $(readlink -f ${knimedir})"
   # fix ownership and permissions
-  chown -R root:root "${knimedir}"
-  chmod -R go-w "${knimedir}"
-  chmod -R go+r "${knimedir}"
-  find "${knimedir}" -type d -exec chmod go+x '{}' \;
-  ln -s "${knimedir}" knime
+  sudo chown -R root:root "${knimedir}"
+  sudo chmod -R go-w "${knimedir}"
+  sudo chmod -R go+r "${knimedir}"
+  sudo find "${knimedir}" -type d -exec chmod go+x '{}' \;
+  sudo ln -s "${knimedir}" knime
   echo
   
   echo "Success"
