@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Scripting
 Bundle-SymbolicName: com.knime.bigdata.scripting;singleton:=true
-Bundle-Version: 3.3.0.qualifier
+Bundle-Version: 3.4.0.qualifier
 Bundle-ClassPath: knime-bd-scripting.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
