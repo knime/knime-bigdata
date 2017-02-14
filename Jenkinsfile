@@ -1,4 +1,4 @@
-@Library('knime-pipeline@releases/master') _
+@Library('knime-pipeline@master') _
 
 node {
 	def upstreamParams = defaultProperties('org.knime.update.analytics-platform', 'com.knime.update.pmml.compilation',
