@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.reduction.pca;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -47,16 +45,13 @@ import scala.Tuple2;
 public class PCAJob implements SimpleSparkJob<PCAJobInput> {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(PCAJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(PCAJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final PCAJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
-        LOGGER.log(Level.INFO, "starting PCA job...");
+
+        LOGGER.info("Starting PCA job...");
 
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
 
@@ -67,16 +62,17 @@ public class PCAJob implements SimpleSparkJob<PCAJobInput> {
 
         final String matrixName = input.getMatrixName();
         if (matrixName != null) {
-            @SuppressWarnings("resource")
             final JavaSparkContext js = JavaSparkContext.fromSparkContext(sparkContext);
-            namedObjects.addJavaRdd(matrixName, RDDUtilsInJava.fromMatrix(js, pcaRes._2));
+            namedObjects.addDataFrame(matrixName, RDDUtilsInJava.fromMatrix(js, pcaRes._2));
         }
+
         final String projectionMatrix = input.getProjectionMatrix();
         if (projectionMatrix != null) {
             // Project the rows to the linear space spanned by the top N principal components.
             final RowMatrix projected = pcaRes._1.multiply(pcaRes._2);
-            namedObjects.addJavaRdd(projectionMatrix,  RDDUtilsInJava.fromRowMatrix(projected));
+            namedObjects.addDataFrame(projectionMatrix,  RDDUtilsInJava.fromRowMatrix(sparkContext, projected));
         }
+
         return;
     }
 }

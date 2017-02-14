@@ -1,9 +1,8 @@
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.optimization.Gradient;
@@ -45,14 +44,17 @@ implements SparkJob<I, ModelJobOutput> {
     public ModelJobOutput runJob(final SparkContext sparkContext, final I input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        getLogger().log(Level.INFO, "starting " + getAlgName() + " job...");
+        getLogger().info("starting " + getAlgName() + " job...");
 
         //note that the column in the input RDD should be normalized into 0-1 ranges
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
+
+        inputRdd.cache();
         final Serializable model = execute(sparkContext, input, inputRdd);
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model, getLogger());
-        getLogger().log(Level.INFO, getAlgName() + " done");
+        inputRdd.unpersist();
+
+        getLogger().info(getAlgName() + " done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);
     }

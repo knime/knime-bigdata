@@ -85,7 +85,7 @@ public class RandomForestJob implements SparkJob<RandomForestJobInput, ModelJobO
             model = RandomForest.trainRegressor(inputRdd, nominalFeatureInfo, numTrees, featureSubSetStrategy, impurity,
                 maxDepth, maxBins, seed);
         }
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model, LOGGER);
+        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model);
         LOGGER.log(Level.INFO, "Random Forest Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);

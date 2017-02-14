@@ -63,7 +63,7 @@ public class DecisionTreeJob implements SparkJob<DecisionTreeJobInput, ModelJobO
         final DecisionTreeModel model = execute(sparkContext, input, inputRdd);
 
         SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD,
-            inputRdd, model, LOGGER);
+            inputRdd, model);
         LOGGER.log(Level.INFO, "Decision Tree Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);

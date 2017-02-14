@@ -76,7 +76,7 @@ public class GradientBoostedTreesJob implements SparkJob<GradientBoostedTreesJob
 
         final GradientBoostedTreesModel model = execute(input, inputRdd);
         SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD,
-                inputRdd, model, LOGGER);
+                inputRdd, model);
         LOGGER.log(Level.INFO, "'Gradient Boosted Trees' done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);

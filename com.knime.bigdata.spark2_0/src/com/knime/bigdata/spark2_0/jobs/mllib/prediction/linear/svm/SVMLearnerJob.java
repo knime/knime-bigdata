@@ -1,8 +1,8 @@
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.svm;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.classification.SVMWithSGD;
@@ -19,7 +19,7 @@ import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.AbstractRegulariz
 public class SVMLearnerJob extends AbstractRegularizationJob<LinearLearnerJobInput> {
 
     private static final long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(SVMLearnerJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SVMLearnerJob.class.getName());
 
     /**
      * @param sc

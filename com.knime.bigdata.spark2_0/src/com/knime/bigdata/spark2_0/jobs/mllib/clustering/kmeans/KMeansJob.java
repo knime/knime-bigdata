@@ -20,57 +20,79 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.clustering.KMeans;
-import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.clustering.KMeans;
+import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
+import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
 import com.knime.bigdata.spark2_0.api.ModelUtils;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
- * runs MLlib KMeans on a given RDD, model is returned as result
+ * Runs KMeans on a given data frame and returns model as result
  *
- * @author Tobias Koetter, KNIME.com, dwk
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class KMeansJob implements SparkJob<KMeansJobInput, ModelJobOutput> {
-
-    private static final long serialVersionUID = 1L;
-
+    private final static long serialVersionUID = 1L;
     private final static Logger LOGGER = Logger.getLogger(KMeansJob.class.getName());
-
 
     @Override
     public ModelJobOutput runJob(final SparkContext sparkContext, final KMeansJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        LOGGER.log(Level.INFO, "Starting kMeans job...");
+        LOGGER.info("Starting KMeans job...");
 
-        final JavaRDD<Row> rowRdd = namedObjects.getJavaRdd(input.getNamedInputObjects().get(0));
+        final String namedInputObject = input.getFirstNamedInputObject();
+        final String tmpFeatureColumn = ModelUtils.getTemporaryColumnName("features");
+        final Dataset<Row> ds = namedObjects.getDataFrame(namedInputObject);
+        final VectorAssembler va = new VectorAssembler()
+                .setInputCols(input.getColumnNames(ds.columns()))
+                .setOutputCol(tmpFeatureColumn);
+        final Dataset<Row> vectors = va.transform(ds).cache();
+        final KMeans kMeans = new KMeans()
+                .setFeaturesCol(tmpFeatureColumn)
+                .setPredictionCol(input.getPredictionColumnName())
+                .setK(input.getNoOfClusters())
+                .setMaxIter(input.getNoOfIterations());
+        final KMeansModel model = kMeans.fit(vectors);
+        final Dataset<Row> output = model.transform(vectors).drop(tmpFeatureColumn);
+        vectors.unpersist();
 
-        //use only the column indices when converting to vector
-        final JavaRDD<Vector> vectorRdd =
-            RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRdd, input.getColumnIdxs());
-        vectorRdd.cache();
-        // Cluster the data into m_noOfCluster classes using KMeans
-        final KMeansModel model = KMeans.train(vectorRdd.rdd(), input.getNoOfClusters(), input.getNoOfIterations());
+        LOGGER.info("KMeans done");
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), output);
 
-        final JavaRDD<Row> predictedData = ModelUtils.predict(vectorRdd, rowRdd, model);
-        namedObjects.addJavaRdd(input.getNamedOutputObjects().get(0), predictedData);
-
-        LOGGER.log(Level.INFO, "kMeans done");
         return new ModelJobOutput(model);
+    }
+
+    /**
+     * Assign clusters from model to input data.
+     *
+     * @param input job configuration with input column names
+     * @param inputDataset input data
+     * @param model KMeans model
+     * @return input data with assigned clusters
+     */
+    public static Dataset<Row> transform(final PredictionJobInput input, final Dataset<Row> inputDataset,
+            final KMeansModel model) {
+
+        final String tmpFeatureColumn = ModelUtils.getTemporaryColumnName("features");
+        final VectorAssembler va = new VectorAssembler()
+                .setInputCols(input.getIncludeColumnNames(inputDataset.columns()))
+                .setOutputCol(tmpFeatureColumn);
+        final Dataset<Row> vectors = va.transform(inputDataset).cache();
+        model.setFeaturesCol(tmpFeatureColumn);
+        model.setPredictionCol(input.getPredictionColumnName());
+        return model.transform(vectors).drop(tmpFeatureColumn);
     }
 }

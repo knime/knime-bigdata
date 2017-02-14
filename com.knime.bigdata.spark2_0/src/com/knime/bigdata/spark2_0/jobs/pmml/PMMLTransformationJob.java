@@ -35,20 +35,19 @@ import com.knime.bigdata.spark.node.pmml.transformation.PMMLTransformationJobInp
 import com.knime.bigdata.spark2_0.api.RowBuilder;
 
 /**
- * applies a compiled pmml model to the input data
+ * Applies a compiled PMML model to the input data.
  *
  * @author Tobias Koetter, KNIME.com
  */
 @SparkClass
 public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobInput> {
-
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(PMMLTransformationJob.class.getName());
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     protected Function<Row, Row> createFunction(final Map<String, byte[]> bytecode, final String mainClass, final List<Integer> inputColIdxs,
-        final PMMLTransformationJobInput input) {
+            final PMMLTransformationJobInput input) {
+
         LOGGER.debug("Create pmml transformation function");
         final boolean replace = input.replace();
         final List<Integer> resultColIdxs2Add = input.getAdditionalColIdxs();
@@ -60,12 +59,10 @@ public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobIn
             //use transient since a Method can not be serialized
             private transient Method m_evalMethod;
 
-            /** {@inheritDoc} */
             @Override
             public Row call(final Row r) throws Exception {
                 if (m_evalMethod == null) {
                     final ClassLoader cl = new ClassLoader(Thread.currentThread().getContextClassLoader()) {
-                        /** {@inheritDoc} */
                         @Override
                         protected Class<?> findClass(final String name) throws ClassNotFoundException {
                             byte[] bc = bytecode.get(name);
@@ -99,11 +96,13 @@ public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobIn
                 } else {
                     rowBuilder = RowBuilder.fromRow(r);
                 }
+
                 //this is a PMML transformation task
                 for (int i = 0; i < resultColIdxs2Add.size(); i++) {
                     final Integer colIdx = resultColIdxs2Add.get(i);
                     rowBuilder.add(result[colIdx]);
                 }
+
                 return rowBuilder.build();
             }
         };
