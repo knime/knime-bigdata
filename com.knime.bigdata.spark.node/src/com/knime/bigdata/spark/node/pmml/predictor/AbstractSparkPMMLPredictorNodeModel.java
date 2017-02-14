@@ -47,6 +47,8 @@ import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 import com.knime.bigdata.spark.core.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
@@ -129,11 +131,12 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
             predColName, m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
         final String aOutputTableName = SparkIDs.createRDDID();
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
         final File jobFile = createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
         final PMMLPredictionJobInput input = new PMMLPredictionJobInput(data.getTableName(), colIdxs,
-            pmml.getModelClassName(), aOutputTableName, m_outputProbabilities.getBooleanValue());
+            pmml.getModelClassName(), aOutputTableName, outputSchema, m_outputProbabilities.getBooleanValue());
         final JobWithFilesRunFactory<PMMLPredictionJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
         execProvider.createRun(input, Collections.singletonList(jobFile)).run(data.getContextID(), exec);

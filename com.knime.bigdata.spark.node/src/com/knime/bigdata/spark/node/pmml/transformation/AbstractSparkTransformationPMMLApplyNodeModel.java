@@ -42,6 +42,8 @@ import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 import com.knime.bigdata.spark.core.util.SparkPMMLUtil;
 import com.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeModel;
@@ -96,10 +98,11 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(data.getTableSpec(), cms,
             colIdxs, addCols, m_replace.getBooleanValue(), skipCols);
         final String aOutputTableName = SparkIDs.createRDDID();
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
         final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), colIdxs,
-            pmml.getModelClassName(), aOutputTableName, addCols, m_replace.getBooleanValue(), skipCols);
+            pmml.getModelClassName(), aOutputTableName, outputSchema, addCols, m_replace.getBooleanValue(), skipCols);
         exec.setMessage("Execute Spark job");
         final JobWithFilesRunFactory<PMMLTransformationJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);

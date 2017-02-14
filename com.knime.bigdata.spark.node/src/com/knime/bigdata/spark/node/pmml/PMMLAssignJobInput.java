@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.pmml;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -42,10 +43,13 @@ public abstract class PMMLAssignJobInput extends ColumnsJobInput {
      * @param colIdxs
      * @param mainClass
      * @param outputID
+     * @param outputSpec
      */
     public PMMLAssignJobInput(final String inputID, final Integer[] colIdxs, final String mainClass,
-        final String outputID) {
+            final String outputID, final IntermediateSpec outputSpec) {
+
         super(inputID, outputID, colIdxs);
+        withSpec(outputID, outputSpec);
         set(CLASS, mainClass);
     }
 

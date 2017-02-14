@@ -41,9 +41,11 @@ import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -108,9 +110,10 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
         final DataTableSpec resultSpec = createSpec(inputSpec);
+        final IntermediateSpec resultsInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final String aOutputTableName = SparkIDs.createRDDID();
         final SparkDataTable resultRDD = new SparkDataTable(data.getContextID(), aOutputTableName, resultSpec);
-        final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), colIdxs, resultRDD.getID());
+        final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), colIdxs, resultRDD.getID(), resultsInterSpec);
 
         final File modelFile = jobInput.writeModelIntoTemporaryFile(model.getModel());
         addFileToDeleteAfterExecute(modelFile);

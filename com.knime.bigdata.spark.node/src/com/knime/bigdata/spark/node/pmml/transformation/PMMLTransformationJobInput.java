@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.pmml.transformation;
 import java.util.List;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.pmml.PMMLAssignJobInput;
 
 /**
@@ -46,14 +47,16 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
      * @param colIdxs
      * @param mainClass
      * @param outputNamedObject
+     * @param outputSpec
      * @param addCols
      * @param replace
      * @param skipCols
      */
     public PMMLTransformationJobInput(final String inputNamedObject, final Integer[] colIdxs, final String mainClass,
-        final String outputNamedObject, final List<Integer> addCols, final boolean replace,
-        final List<Integer> skipCols) {
-        super(inputNamedObject, colIdxs, mainClass, outputNamedObject);
+            final String outputNamedObject, final IntermediateSpec outputSpec,
+            final List<Integer> addCols, final boolean replace, final List<Integer> skipCols) {
+
+        super(inputNamedObject, colIdxs, mainClass, outputNamedObject, outputSpec);
         set(REPLACE, replace);
         set(ADD_COLS, addCols);
         set(SKIP_COLS, skipCols);
