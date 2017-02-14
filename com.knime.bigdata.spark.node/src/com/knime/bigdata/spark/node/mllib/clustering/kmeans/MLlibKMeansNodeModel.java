@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
@@ -32,14 +33,18 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
+import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.job.JobRunFactory;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import com.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
+import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 
@@ -47,12 +52,14 @@ import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssign
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobInput, MLlibNodeSettings> {
+public class MLlibKMeansNodeModel extends SparkNodeModel {
 
     /**
      * Name by which to refer to the KMeans models this node creates.
      */
     public static final String MODEL_NAME = "KMeans";
+
+    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
 
     private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
 
@@ -66,7 +73,7 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
      */
     public MLlibKMeansNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
-            new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE}, MODEL_NAME, JOB_ID, false);
+            new PortType[]{SparkDataPortObject.TYPE, SparkModelPortObject.TYPE});
     }
 
     /**
@@ -88,13 +95,16 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        //call super to check the column names
-        super.configureInternal(inSpecs);
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
+            throw new InvalidSettingsException("No input found");
+        }
+
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec tableSpec = spec.getTableSpec();
+        m_settings.check(tableSpec);
         final SparkDataPortObjectSpec asignedSpec =
             new SparkDataPortObjectSpec(spec.getContextID(), createResultTableSpec(tableSpec));
-        final SparkModelPortObjectSpec modelSpec = createMLSpec(spec);
+        final SparkModelPortObjectSpec modelSpec = new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME);
         return new PortObjectSpec[]{asignedSpec, modelSpec};
     }
 
@@ -112,29 +122,28 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        final JobRunFactory<KMeansJobInput, ModelJobOutput> runFactory = getJobRunFactory(data);
+        final SparkContextID contextId = data.getContextID();
+        final JobRunFactory<KMeansJobInput, ModelJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextId, JOB_ID);
         exec.setMessage("Starting KMeans (SPARK) Learner");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
-        final MLlibNodeSettings settings = getSettings();
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        final KMeansJobInput jobInput = createJobInput(inObjects, settings);
+        final IntermediateSpec resultInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec);
+        final KMeansJobInput jobInput = createJobInput(inObjects, resultInterSpec);
         final ModelJobOutput result = runFactory.createRun(jobInput).run(data.getContextID(), exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{createSparkPortObject(data, resultSpec, jobInput.getFirstNamedOutputObject()),
-            createSparkModelPortObject(inObjects, settings, result)};
+            createSparkModelPortObject(data, MODEL_NAME, m_settings.getSettings(data), result)};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected KMeansJobInput createJobInput(final PortObject[] inData, final MLlibNodeSettings settings)
-        throws InvalidSettingsException {
+    private KMeansJobInput createJobInput(final PortObject[] inData, final IntermediateSpec outputSpec)
+            throws InvalidSettingsException {
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
-        final String aOutputTableName = SparkIDs.createRDDID();
-        final KMeansJobInput jobInput = new KMeansJobInput(data.getTableName(), aOutputTableName,
-            Arrays.asList(settings.getSettings(data).getFeatueColIdxs()), m_noOfCluster.getIntValue(), m_noOfIteration.getIntValue());
+        final String inputKey = data.getTableName();
+        final String outputKey = SparkIDs.createRDDID();
+        final List<Integer> featureColumnIdxs = Arrays.asList(m_settings.getSettings(data).getFeatueColIdxs());
+        final KMeansJobInput jobInput = new KMeansJobInput(inputKey, outputKey, outputSpec, featureColumnIdxs,
+            m_noOfCluster.getIntValue(), m_noOfIteration.getIntValue());
         return jobInput;
     }
 
@@ -142,7 +151,8 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
      * {@inheritDoc}
      */
     @Override
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+        m_settings.saveSettingsTo(settings);
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIteration.saveSettingsTo(settings);
     }
@@ -151,7 +161,8 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
      * {@inheritDoc}
      */
     @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.validateSettings(settings);
         m_noOfCluster.validateSettings(settings);
         m_noOfIteration.validateSettings(settings);
     }
@@ -160,7 +171,8 @@ public class MLlibKMeansNodeModel extends SparkModelLearnerNodeModel<KMeansJobIn
      * {@inheritDoc}
      */
     @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.loadSettingsFrom(settings);
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);
     }

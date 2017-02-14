@@ -24,6 +24,8 @@ import java.util.List;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -35,7 +37,6 @@ public class KMeansJobInput extends ColumnsJobInput {
     private final static String KEY_NO_OF_ITERATIONS = "noOfIterations";
 
     private final static String KEY_NO_CLUSTERS = "noOfClusters";
-
 
     /**
      * Paramless constructor for automatic deserialization.
@@ -51,9 +52,12 @@ public class KMeansJobInput extends ColumnsJobInput {
      * @param noOfClusters - number of clusters (aka "k")
      * @param noOfIterations - maximal number of iterations
      * @param namedOutputObject - table identifier (classified output data)
+     * @param outputSpec - output intermediate specification
      */
     public KMeansJobInput(final String namedInputObject, final String namedOutputObject,
-        final List<Integer> featureColumnIdxs, final int noOfClusters, final int noOfIterations) {
+        final IntermediateSpec outputSpec, final List<Integer> featureColumnIdxs, final int noOfClusters,
+        final int noOfIterations) {
+
         super(namedInputObject, featureColumnIdxs);
         if (noOfClusters < 1) {
             throw new IllegalArgumentException("Number of clusters must not be smaller than 1.");
@@ -63,8 +67,17 @@ public class KMeansJobInput extends ColumnsJobInput {
             throw new IllegalArgumentException("Number of iterations must not be smaller than 1.");
         }
         addNamedOutputObject(namedOutputObject);
+        withSpec(namedOutputObject, outputSpec);
         set(KEY_NO_CLUSTERS, noOfClusters);
         set(KEY_NO_OF_ITERATIONS, noOfIterations);
+    }
+
+    /**
+     * @return the name of the result/cluster column (last column in spec)
+     */
+    public String getPredictionColumnName() {
+        final IntermediateField fields[] = getSpec(getFirstNamedOutputObject()).getFields();
+        return fields[fields.length - 1].getName();
     }
 
     /**
