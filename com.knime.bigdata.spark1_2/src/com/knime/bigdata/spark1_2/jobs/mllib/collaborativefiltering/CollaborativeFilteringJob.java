@@ -255,6 +255,7 @@ public class CollaborativeFilteringJob implements SparkJob<CollaborativeFilterin
 
         ALS solver = new ALS();
         // Build the recommendation model using ALS
+        solver = setLambda(solver, input);
         solver = setRank(solver, input);
         solver = setNumIterations(solver, input);
         solver = setAlpha(solver, input);

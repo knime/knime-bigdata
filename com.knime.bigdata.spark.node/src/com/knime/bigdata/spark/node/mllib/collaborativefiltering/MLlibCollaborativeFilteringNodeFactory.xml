@@ -29,8 +29,8 @@
 		<option name="Lambda">Specifies the regularization parameter in ALS.</option>
 		<option name="Alpha">Is a parameter applicable to the implicit feedback variant of ALS that governs the 
 		baseline confidence in preference observations.</option>
-		<option name="Rank">The is the number of latent factors in the model.</option>
-		<option name="Iterations">The is the number of iterations to run.</option>
+		<option name="Rank">The number of latent factors in the model.</option>
+		<option name="Iterations">The number of iterations to run.</option>
 		<option name="Number of blocks">The number of blocks used to parallelize computation (set to -1 to auto-configure).</option>
 		<option name="Implicit feedback">
 		Select this option to use the ALS variant adapted for implicit feedback data otherwise the explicit feedback ALS 
@@ -39,7 +39,7 @@
 
 	<ports>
 	    <inPort index="0" name="Ratings RDD">Spark RDD with user ratings of products</inPort>
-        <outPort index="0" name="Labeled input">The input data labelled with the prediction.</outPort>
+        <outPort index="0" name="Labeled input">The input data labeled with the prediction.</outPort>
         <outPort index="1" name="Matrix factorization model (unstorable)">The matrix factorization model. 
         <b>The model is not selfcontained and thus can not be saved to file.</b></outPort>
 	</ports>
