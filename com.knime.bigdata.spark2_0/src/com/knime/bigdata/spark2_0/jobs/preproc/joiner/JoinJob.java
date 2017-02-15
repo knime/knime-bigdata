@@ -108,4 +108,61 @@ public class JoinJob implements SimpleSparkJob<SparkJoinerJobInput> {
         final Dataset<Row> result = spark.createDataFrame(resultRdd, resultSchema);
         namedObjects.addDataFrame(resultKey, result);
     }
+
+
+
+//        LOGGER.info("Joining data frames via " + input.getJoineMode() + "...");
+//
+//        final Dataset<Row> left = namedObjects.getDataFrame(input.getLeftInputObject()).as("left");
+//        final Dataset<Row> right = namedObjects.getDataFrame(input.getRightNamedObject()).as("right");
+//        final Column joinExpr = createJoinExpr(input, left, right);
+//        final String joinType = input.getJoineMode().toSparkJoinType();
+//        final String selectCols[] = selectColumns(input, left, right);
+//        final Dataset<Row> result = left.join(right, joinExpr, joinType).selectExpr(selectCols);
+//        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
+//
+//
+//      final List<Integer> colIdxLeft = Arrays.asList(input.getSelectColIdxsLeft());
+//      final List<Integer> colIdxRight = Arrays.asList(input.getSelectColIdxsRight());
+////      final StructType schema = DataTypes.createStructType(RDDUtilsInJava.getFields(
+////      namedObjects.getDataFrame(input.getLeftInputObject()), colIdxLeft,
+////      namedObjects.getDataFrame(input.getRightNamedObject()), colIdxRight));
+//
+//      LOGGER.warn("Old fields: " + Arrays.toString(RDDUtilsInJava.getFields(left, colIdxLeft, right, colIdxRight).toArray()));
+//      LOGGER.warn("New schema: " + result.schema());
+//}
+//
+//    /** Creates a join expr from left and right column indices. */
+//    private Column createJoinExpr(final SparkJoinerJobInput input, final Dataset<Row> left, final Dataset<Row> right) {
+//        final String leftCols[] = left.columns();
+//        final Integer leftColIdx[] = input.getJoinColIdxsLeft();
+//        final String rightCols[] = right.columns();
+//        final Integer rightColIdx[] = input.getJoinColIdxsRight();
+//
+//        Column expr = left.col(leftCols[leftColIdx[0]]).equalTo(right.col(rightCols[rightColIdx[0]]));
+//
+//        for (int i = 1; i < leftColIdx.length; i++) {
+//            expr = expr.and(left.col(leftCols[leftColIdx[i]]).equalTo(right.col(rightCols[rightColIdx[i]])));
+//        }
+//
+//        return expr;
+//    }
+//
+//    private String[] selectColumns(final SparkJoinerJobInput input, final Dataset<Row> left, final Dataset<Row> right) {
+//        final String leftCols[] = left.columns();
+//        final Integer leftColIdx[] = input.getSelectColIdxsLeft();
+//        final String rightCols[] = right.columns();
+//        final Integer rightColIdx[] = input.getSelectColIdxsRight();
+//        final ArrayList<String> columns = new ArrayList<>(leftColIdx.length + rightColIdx.length);
+//
+//        for (int index : leftColIdx) {
+//            columns.add("left." + leftCols[index]);
+//        }
+//
+//        for (int index : rightColIdx) {
+//            columns.add("right." + rightCols[index]);
+//        }
+//
+//        return columns.toArray(new String[0]);
+//    }
 }
