@@ -6,7 +6,7 @@ node {
 	
 	stage('Clean workspace') {
 		cleanWorkspace()
-		sh 'rm -rf git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target'
+		sh 'rm -rf git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target com.knime.update.bigdata.externals'
 	}
 	
 	checkoutSources (
