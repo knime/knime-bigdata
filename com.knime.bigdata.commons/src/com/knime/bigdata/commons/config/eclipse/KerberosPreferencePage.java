@@ -44,6 +44,7 @@
  */
 package com.knime.bigdata.commons.config.eclipse;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
@@ -56,6 +57,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.workbench.ui.preferences.HorizontalLineField;
 import org.knime.workbench.ui.preferences.LabelField;
@@ -189,6 +191,11 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
     @Override
     public boolean performOk() {
         final boolean result = super.performOk();
+        if (!KerberosLogger.getInstance().isEnabled()
+                && CommonConfigContainer.getInstance().isKerberosLoggingEnabled()) {
+            MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                "Kerberos Logging", "Please restart the KNIME Analytics Platform to enable Kerberos logging");
+        }
         KerberosLogger.getInstance().setEnable(CommonConfigContainer.getInstance().isKerberosLoggingEnabled(),
             CommonConfigContainer.getInstance().getKerberosLoggingLevel());
         return result;
