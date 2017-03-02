@@ -140,7 +140,7 @@ public class UserGroupUtil {
      * @return the Kerberos user
      * @throws Exception if no Kerberos user could be obtained
      */
-    static UserGroupInformation getKerberosTGTUser(final Configuration conf) throws Exception {
+    static synchronized UserGroupInformation getKerberosTGTUser(final Configuration conf) throws Exception {
         UserGroupInformation.setConfiguration(conf);
         if (!UserGroupInformation.isSecurityEnabled()) {
             throw new Exception("Kerberos authentication not enabled in configuration.");
