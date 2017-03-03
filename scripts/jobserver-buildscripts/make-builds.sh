@@ -66,10 +66,22 @@ function do_build {
         tar xzf "spark-job-server-$ENV.tar.gz"
         cp "$ENVDIR/runsettings.sh" "spark-job-server-$ENV/settings.sh" # copy runsettings.sh
         rm "spark-job-server-$ENV/$ENV.conf" # delete dummy conf
-        cp "$SCRIPT_DIR/buildfiles/environment.conf" "spark-job-server-$ENV/" # copy real conf
+        
+        if [ -f "${ENVDIR}/environment.conf" ] ; then
+          cp "${ENVDIR}/environment.conf" "spark-job-server-$ENV/"
+        else
+          cp "$SCRIPT_DIR/buildfiles/environment.conf" "spark-job-server-$ENV/"
+        fi
+        
         cp ./config/shiro.ini.*.template "spark-job-server-$ENV/" # copy shiro.ini templates
         echo "Commit $(git show --format='format:%H' | head -1) on branch $BRANCH built on $(date --rfc-3339=seconds)" >"spark-job-server-$ENV/build.version"
-        cp "$SCRIPT_DIR/buildfiles/spark-job-server-init.d" "spark-job-server-$ENV/"
+        
+        if [ -f "${ENVDIR}/spark-job-server-init.d" ] ; then
+          cp "${ENVDIR}/spark-job-server-init.d" "spark-job-server-$ENV/"
+        else
+          cp "$SCRIPT_DIR/buildfiles/spark-job-server-init.d" "spark-job-server-$ENV/"
+        fi
+        
         cp "$SCRIPT_DIR/buildfiles/LICENSE" "spark-job-server-$ENV/"
         cp "$SCRIPT_DIR/buildfiles/README" "spark-job-server-$ENV/"
         tar czf ../"spark-job-server-$ENV.tar.gz" --owner root --group root "spark-job-server-$ENV/"
