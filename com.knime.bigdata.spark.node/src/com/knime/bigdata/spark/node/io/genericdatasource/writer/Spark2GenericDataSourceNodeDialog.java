@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
@@ -39,9 +40,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -106,7 +110,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
         m_optionsPanelConstraints = new GridBagConstraints();
         NodeUtils.resetGBC(m_optionsPanelConstraints);
 
-        m_directoryFlowVariable = createFlowVariableModel("targetDir", FlowVariable.Type.STRING);
+        m_directoryFlowVariable = createFlowVariableModel(Spark2GenericDataSourceSettings.CFG_DIRECTORY, FlowVariable.Type.STRING);
         m_directoryChooser = new RemoteFileChooserPanel(getPanel(), "Target dir", false,
             "outputDirSpark_" + m_settings.getFormat(),
             RemoteFileChooser.SELECT_DIR, m_directoryFlowVariable, null);
@@ -114,11 +118,34 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
 
         m_outputName = new JComboBox<>();
         m_outputName.setEditable(true);
-        m_outputNameFlowVariable = createFlowVariableModel("targetFilename", FlowVariable.Type.STRING);
+        m_outputNameFlowVariable = createFlowVariableModel(Spark2GenericDataSourceSettings.CFG_NAME, FlowVariable.Type.STRING);
         m_outputNameFlowVariable.addChangeListener( new ChangeListener() {
             @Override
             public void stateChanged(final ChangeEvent e) {
-                m_outputName.setEnabled(!m_outputNameFlowVariable.isVariableReplacementEnabled());
+                boolean replacement = m_outputNameFlowVariable.isVariableReplacementEnabled();
+                Optional<FlowVariable> variableValue = m_outputNameFlowVariable.getVariableValue();
+                m_outputName.setEnabled(!replacement);
+                if (replacement && variableValue.isPresent()) {
+                    m_outputName.setSelectedItem(variableValue.get().getStringValue());
+                }
+            }
+        });
+        m_optionsPanel.addAncestorListener(new AncestorListener() {
+            @Override
+            public void ancestorRemoved(final AncestorEvent event) {}
+
+            @Override
+            public void ancestorMoved(final AncestorEvent event) {}
+
+            @Override
+            public void ancestorAdded(final AncestorEvent event) {
+                if (m_outputNameFlowVariable.isVariableReplacementEnabled() && m_outputNameFlowVariable.getVariableValue().isPresent()) {
+                    String newPath = m_outputNameFlowVariable.getVariableValue().get().getStringValue();
+                    String oldPath = getSelection(m_outputName);
+                    if (!StringUtils.equals(newPath, oldPath)) {
+                        m_outputName.setSelectedItem(newPath);
+                    }
+                }
             }
         });
         m_outputNameFlowVariableButton = new FlowVariableModelButton(m_outputNameFlowVariable);

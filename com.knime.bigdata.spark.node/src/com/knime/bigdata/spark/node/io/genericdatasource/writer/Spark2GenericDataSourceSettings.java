@@ -50,12 +50,12 @@ public class Spark2GenericDataSourceSettings {
     private final boolean m_hasDriver;
 
     /** Required output directory. */
-    private static final String CFG_DIRECTORY = "outputDirectory";
+    public static final String CFG_DIRECTORY = "outputDirectory";
     private static final String DEFAULT_DIRECTORY = "/";
     private String m_directory = DEFAULT_DIRECTORY;
 
     /** Required output name. */
-    private static final String CFG_NAME = "outputName";
+    public static final String CFG_NAME = "outputName";
     private static final String DEFAULT_NAME = "";
     private String m_name = DEFAULT_NAME;
 
