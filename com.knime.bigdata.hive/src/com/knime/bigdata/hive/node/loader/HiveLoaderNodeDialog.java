@@ -77,7 +77,7 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
         JPanel p = new JPanel(new GridBagLayout());
         m_target =
             new RemoteFileChooserPanel(p, "", false, "targetHistory", RemoteFileChooser.SELECT_DIR,
-                createFlowVariableModel("target", FlowVariable.Type.STRING), null);
+                createFlowVariableModel(HiveLoaderSettings.CFG_TARGET_FOLDER, FlowVariable.Type.STRING), null);
 
         GridBagConstraints c = new GridBagConstraints();
         NodeUtils.resetGBC(c);
