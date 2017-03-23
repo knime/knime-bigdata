@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor jobs for Spark 1.6
 Bundle-SymbolicName: com.knime.bigdata.spark1_6;singleton:=true
-Bundle-Version: 1.7.0.qualifier
+Bundle-Version: 1.7.1.qualifier
 Bundle-ClassPath: knime.jar,
  lib/job-server-api_2.10-0.6.2-KNIME_spark-1.6.1.jar,
  lib/knime-jobserver-utils-0.6.2-KNIME_spark-1.6.1.jar
