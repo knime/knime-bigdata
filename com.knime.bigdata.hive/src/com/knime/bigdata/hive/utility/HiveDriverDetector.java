@@ -36,6 +36,8 @@ public class HiveDriverDetector {
 
     private static final String CLOUDERA_DRIVER_NAME = "com.cloudera.hive.jdbc41.HS2Driver";
 
+    private static final String SIMBA_DRIVER_NAME = "com.simba.hive.jdbc41.HS2Driver";
+
     private static final String AMAZON_EMR_DRIVER_NAME_REGEX = "com\\.amazon\\.hive\\.jdbc[0-9]+\\.HS2Driver";
 
     /**
@@ -50,6 +52,10 @@ public class HiveDriverDetector {
         if (externalDriver.contains(CLOUDERA_DRIVER_NAME)) {
             driverName = CLOUDERA_DRIVER_NAME;
             LOGGER.debug("Using Cloudera Hive driver: " + driverName);
+
+        } else if (externalDriver.contains(SIMBA_DRIVER_NAME)) {
+            driverName = SIMBA_DRIVER_NAME;
+            LOGGER.debug("Using Simba Hive driver: " + driverName);
 
         } else if ((driverName = containsDriver(externalDriver, AMAZON_EMR_DRIVER_NAME_REGEX)) != null) {
             LOGGER.debug("Using Amazon EMR Hive driver: " + driverName);
@@ -79,6 +85,8 @@ public class HiveDriverDetector {
 
         if (driverName.equals(CLOUDERA_DRIVER_NAME)) {
             return String.format("Cloudera Hive Driver (%s%s)", driverName, versionInfo);
+        } else if (driverName.equals(SIMBA_DRIVER_NAME)) {
+            return String.format("Simba Hive Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.matches(AMAZON_EMR_DRIVER_NAME_REGEX)) {
             return String.format("Amazon EMR Hive Driver (%s%s)", driverName, versionInfo);
         } else if (driverName.equals(HiveUtility.DRIVER)) {
