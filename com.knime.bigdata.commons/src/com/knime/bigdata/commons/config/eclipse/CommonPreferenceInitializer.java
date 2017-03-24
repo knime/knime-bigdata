@@ -47,6 +47,7 @@ package com.knime.bigdata.commons.config.eclipse;
 import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.knime.core.node.NodeLogger.LEVEL;
 
 import com.knime.bigdata.commons.CommonsPlugin;
 
@@ -83,11 +84,16 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     public static final String PREF_KEYSTORE_KEYPASSWORD = "com.knime.bigdata.config.keystore.keypassword";
     /** Preference key for keystore type */
     public static final String PREF_KEYSTORE_TYPE = "com.knime.bigdata.config.keystore.type";
-
     /** Preference key for custom kerberos user. */
     public static final String PREF_KERBEROS_USER = "com.knime.bigdata.config.kerberos.user";
     /** Preference key for custom kerberos keytab file. */
     public static final String PREF_KERBEROS_KEYTAB_FILE = "com.knime.bigdata.config.kerberos.keytab.file";
+
+    /**Kerberos logging flag.*/
+    public static final String PREF_KERBEROS_LOGGING_ENABLED = "com.knime.bigdata.config.kerberos.logging.enabled";
+    /**Kerberos logging level.*/
+    public static final String PREF_KERBEROS_LOGGING_LEVEL = "com.knime.bigdata.config.kerberos.logging.level";
+
     /** Preference key for JDBC impersonation parameter flag. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG =
             "com.knime.bigdata.config.kerberos.jdbc.impersonation.flag";
@@ -119,6 +125,9 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KEYSTORE_PASSWORD, "");
         store.setDefault(PREF_KEYSTORE_KEYPASSWORD, "");
         store.setDefault(PREF_KEYSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
+
+        store.setDefault(PREF_KERBEROS_LOGGING_ENABLED, false);
+        store.setDefault(PREF_KERBEROS_LOGGING_LEVEL, LEVEL.INFO.name());
 
         store.setDefault(PREF_KERBEROS_USER, "");
         store.setDefault(PREF_KERBEROS_KEYTAB_FILE, "");
