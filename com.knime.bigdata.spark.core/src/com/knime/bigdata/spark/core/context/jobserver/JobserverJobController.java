@@ -264,7 +264,11 @@ class JobserverJobController implements JobController {
             }
         }
 
-        return jsonResponse.getJsonObject("result").getString("jobId");
+        if (jsonResponse.containsKey("result")) { // SJS < 0.7
+            return jsonResponse.getJsonObject("result").getString("jobId");
+        } else { // SJS >= 0.7
+            return jsonResponse.getString("jobId");
+        }
     }
 
     private void logMessages(final List<LogMessage> logMessages) throws KNIMESparkException {
