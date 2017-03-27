@@ -92,14 +92,14 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
         final SparkContextID context = rdd.getContextID();
         final SparkDataTable resultTable = new SparkDataTable(context, rdd.getData().getTableSpec());
         exec.setMessage("Start Spark sampling job...");
-        final boolean success = runJob(exec, rdd, resultTable.getID(), null);
+        final boolean samplesRddIsInputRdd = runJob(exec, JOB_ID, rdd, resultTable.getID(), null);
         final SparkDataTable output;
-        if (success) {
-            output = resultTable;
-            setDeleteOnReset(true);
-        } else {
+        if (samplesRddIsInputRdd) {
             output = rdd.getData();
             setDeleteOnReset(false);
+        } else {
+            output = resultTable;
+            setDeleteOnReset(true);
         }
         return new PortObject[] {new SparkDataPortObject(output)};
     }
@@ -107,16 +107,17 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
     /**
      * @param exec
      * @param rdd
+     * @param jobID sampling or partitioning job id
      * @param aOutputTable1
      * @param aOutputTable2
-     * @return <code>true</code> if sampling succeeded. Sampling might fail if the rdd contains
-     * less rows then requested
+     * @return <code>true</code> if first output RDD (samples) is the input RDD (all input data sampled)
      * @throws InvalidSettingsException
      * @throws KNIMESparkException
      * @throws CanceledExecutionException
      */
-    protected boolean runJob(final ExecutionContext exec, final SparkDataPortObject rdd, final String aOutputTable1,
-        final String aOutputTable2) throws InvalidSettingsException, KNIMESparkException, CanceledExecutionException {
+    protected boolean runJob(final ExecutionContext exec, final String jobID, final SparkDataPortObject rdd, final String aOutputTable1,
+            final String aOutputTable2) throws InvalidSettingsException, KNIMESparkException, CanceledExecutionException {
+
         final SparkSamplingNodeSettings settings = getSettings();
         final SparkContextID contextID = rdd.getContextID();
 
@@ -132,16 +133,17 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
             aOutputTable.add(aOutputTable2);
         }
         exec.checkCanceled();
-        final JobRunFactory<SamplingJobInput, SamplingJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
+        final JobRunFactory<SamplingJobInput, SamplingJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, jobID);
         final SamplingJobInput jobInput = new SamplingJobInput(rdd.getTableName(), aOutputTable.toArray(new String[0]), sparkCountMethod, settings.count(),
             sparkSamplingMethod, settings.fraction(), clasColIdx, settings.withReplacement(), settings.seed(), settings.exactSampling());
         final SamplingJobOutput jobOutput= runFactory.createRun(jobInput).run(contextID, exec);
 
-        if (!jobOutput.isSuccess()) {
+        if (jobOutput.samplesRddIsInputRdd()) {
             //if the sampling failed the job returns the input RDD as output RDD so we shouldn't delete it on node reset
             setWarningMessage("Sampling failed. Sampling size larger then number of available rows in Spark. Return input data.");
         }
-        return jobOutput.isSuccess();
+
+        return jobOutput.samplesRddIsInputRdd();
     }
 
     /**

@@ -47,6 +47,7 @@ import com.knime.bigdata.spark1_3.jobs.preproc.convert.number2category.Number2Ca
 import com.knime.bigdata.spark1_3.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
 import com.knime.bigdata.spark1_3.jobs.preproc.joiner.JoinJobRunFactory;
 import com.knime.bigdata.spark1_3.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
+import com.knime.bigdata.spark1_3.jobs.preproc.partition.PartitionJobRunFactory;
 import com.knime.bigdata.spark1_3.jobs.preproc.sampling.SamplingJobRunFactory;
 import com.knime.bigdata.spark1_3.jobs.preproc.sorter.SortJobRunFactory;
 import com.knime.bigdata.spark1_3.jobs.scorer.ClassificationScorerJobRunFactory;
@@ -95,6 +96,7 @@ public class Spark_1_3_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new ColumnFilterJobRunFactory(),
             new JoinJobRunFactory(),
             new NormalizeColumnsJobRunFactory(),
+            new PartitionJobRunFactory(),
             new SamplingJobRunFactory(),
             new SortJobRunFactory(),
 //            new TFIDFJobRunFactory(),
