@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.preproc.joiner;
 
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -45,10 +46,11 @@ public class SparkJoinerJobInput extends JobInput {
 
     SparkJoinerJobInput(final String aLeftRDD, final String aRightRDD, final JoinMode aJoinMode,
         final Integer[] leftJoinColumns, final Integer[] rightJoinColumns, final Integer[] aSelectColIdxesLeft,
-        final Integer[] aSelectColIdxesRight, final String aResultRDD) {
+        final Integer[] aSelectColIdxesRight, final String aResultRDD, final IntermediateSpec resultSpec) {
         addNamedInputObject(aLeftRDD);
         addNamedInputObject(aRightRDD);
         addNamedOutputObject(aResultRDD);
+        withSpec(aResultRDD, resultSpec);
         set(JOIN_MODE, aJoinMode.name());
         set(JOIN_COL_IDXS_LEFT,leftJoinColumns);
         set(JOIN_COL_IDXS_RIGHT, rightJoinColumns);

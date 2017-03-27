@@ -83,4 +83,16 @@ public class ColumnsJobInput extends JobInput {
         return get(KEY_FEATURE_COLUMN_INDICES);
     }
 
+    /**
+     * @param columns - All column names in data frame
+     * @return The column names that should be considered in the Spark job.
+     */
+    public String[] getColumnNames(final String columns[]) {
+        final List<Integer> columnIndices = getColumnIdxs();
+        final String columnNames[] = new String[columnIndices.size()];
+        for (int i = 0; i < columnIndices.size(); i++) {
+            columnNames[i] = columns[columnIndices.get(i)];
+        }
+        return columnNames;
+    }
 }

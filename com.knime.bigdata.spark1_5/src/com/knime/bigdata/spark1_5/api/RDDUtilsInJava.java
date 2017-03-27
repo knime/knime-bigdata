@@ -51,20 +51,23 @@ public class RDDUtilsInJava {
      * (Java friendly version) convert nominal values in columns for given column indices to integers and append columns
      * with mapped values
      *
-     * @param aInputRdd Row RDD to be processed
-     * @param aColumnIds array of indices to be converted
-     * @param aMappingType indicates how values are to be mapped
-     * @param aKeepOriginalColumns - keep original columns as well or not
+     * @param inputRdd Row RDD to be processed
+     * @param columnIds - array of indices to be converted
+     * @param columnNames - array of column names to be converted
+     * @param mappingType indicates how values are to be mapped
+     * @param keepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return container JavaRDD<Row> with original data plus appended columns and mapping
      */
-    public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
-        final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
+    public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> inputRdd,
+            final int[] columnIds, final String[] columnNames, final MappingType mappingType,
+            final boolean keepOriginalColumns) {
 
+        final NominalValueMapping mappings = toLabelMapping(inputRdd, columnIds, mappingType);
         final JavaRDD<Row> rddWithConvertedValues =
-            applyLabelMapping(aInputRdd, aColumnIds, mappings, aKeepOriginalColumns);
-        return new MappedRDDContainer(rddWithConvertedValues, mappings);
+            applyLabelMapping(inputRdd, columnIds, mappings, keepOriginalColumns);
+
+        return MappedRDDContainer.createContainer(rddWithConvertedValues, columnIds, columnNames, mappings, keepOriginalColumns);
     }
 
     /**

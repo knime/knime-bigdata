@@ -35,6 +35,8 @@ import java.util.List;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -55,15 +57,19 @@ public class PredictionJobInput extends JobInput {
      * @param namedInputObject the unique name of the input object
      * @param colIdxs the column indices to us for prediction
      * @param namedOutputObject the unique name of the output object
+     * @param outputSpec output table spec
      */
-    public PredictionJobInput(final String namedInputObject,
-        final Integer[] colIdxs, final String namedOutputObject) {
+    public PredictionJobInput(final String namedInputObject, final Integer[] colIdxs,
+            final String namedOutputObject, final IntermediateSpec outputSpec) {
+
         if (colIdxs == null || colIdxs.length < 1) {
             throw new IllegalArgumentException("Prediction columns must not be null or empty");
         }
+
         addNamedInputObject(namedInputObject);
-        addNamedOutputObject(namedOutputObject);
         set(KEY_INCLUDE_COLUMN_INDICES, Arrays.asList(colIdxs));
+        addNamedOutputObject(namedOutputObject);
+        withSpec(namedOutputObject, outputSpec);
     }
 
 
@@ -72,6 +78,27 @@ public class PredictionJobInput extends JobInput {
      */
     public List<Integer> getIncludeColumnIndices() {
         return get(KEY_INCLUDE_COLUMN_INDICES);
+    }
+
+    /**
+     * @param columns - All column names in data frame
+     * @return The column names of the columns to use for predictions
+     */
+    public String[] getIncludeColumnNames(final String columns[]) {
+        final List<Integer> columnIndices = getIncludeColumnIndices();
+        final String columnNames[] = new String[columnIndices.size()];
+        for (int i = 0; i < columnIndices.size(); i++) {
+            columnNames[i] = columns[columnIndices.get(i)];
+        }
+        return columnNames;
+    }
+
+    /**
+     * @return the name of the result column, containing predictions
+     */
+    public String getPredictionColumnName() {
+        final IntermediateField fields[] = getSpec(getFirstNamedOutputObject()).getFields();
+        return fields[fields.length - 1].getName();
     }
 
     /**

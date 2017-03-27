@@ -3,11 +3,10 @@ package com.knime.bigdata.spark2_0.jobs.fetchrows;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataType;
 
@@ -24,40 +23,36 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
 import com.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
- * SparkJob that fetches and serializes a number of rows from the specified RDD (some other job must have previously
- * stored this RDD under this name in the named rdds map)
+ * SparkJob that fetches and serializes a number of rows from the specified data frame.
  *
  * @author dwk
  * @author Bjoern Lohrmann, KNIME.com
  */
 @SparkClass
 public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOutput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(FetchRowsJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FetchRowsJob.class.getName());
 
     @Override
     public FetchRowsJobOutput runJob(final SparkContext sparkContext, final FetchRowsJobInput config,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        final JavaRDD<Row> inputRDD = namedObjects.getJavaRdd(config.getFirstNamedInputObject());
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(config.getFirstNamedInputObject());
         final int numRows = config.getNumberOfRows();
 
-        LOGGER.log(Level.INFO, "Fetching " + numRows + " rows from input RDD");
+        LOGGER.info("Fetching " + numRows + " rows from input data frame.");
 
         final List<Row> res;
         if (numRows > 0) {
-            res = inputRDD.take(numRows);
+            res = inputDataset.takeAsList(numRows);
         } else {
-            res = inputRDD.collect();
+            res = inputDataset.collectAsList();
         }
 
         return FetchRowsJobOutput.create(mapToListOfLists(res, config.getSpec(config.getFirstNamedInputObject())));
     }
 
     private List<List<Serializable>> mapToListOfLists(final List<Row> aRows, final IntermediateSpec spec) {
-
         final int numFields = spec.getNoOfFields();
         final IntermediateToSparkConverter<DataType>[] converters = TypeConverters.getConverters(spec);
         final IntermediateField fieldSpecs[] = spec.getFields();
@@ -76,6 +71,7 @@ public class FetchRowsJob implements SparkJob<FetchRowsJobInput, FetchRowsJobOut
             }
             rows.add(convertedRow);
         }
+
         return rows;
     }
 }

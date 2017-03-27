@@ -23,15 +23,16 @@ package com.knime.bigdata.spark2_0.api;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.job.ClassificationJobInput;
 import com.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
@@ -45,7 +46,6 @@ import com.knime.bigdata.spark.jobserver.server.RDDUtils;
  */
 @SparkClass
 public class SupervisedLearnerUtils {
-    private final static Logger LOGGER = Logger.getLogger(SupervisedLearnerUtils.class.getName());
     /**
      * array with the indices of the nominal columns
      */
@@ -74,13 +74,12 @@ public class SupervisedLearnerUtils {
      * @param rowRDD
      * @param inputRdd
      * @param model
-     * @param logger
      * @throws Exception
      */
     public static void storePredictions(final SparkContext sparkContext, final NamedObjects namedObjects,
         final JobInput input, final JavaRDD<Row> rowRDD, final JavaRDD<LabeledPoint> inputRdd,
-        final Serializable model, final Logger logger) throws Exception {
-        storePredictions(sparkContext, input, namedObjects, rowRDD, RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model, logger);
+        final Serializable model) throws Exception {
+        storePredictions(sparkContext, input, namedObjects, rowRDD, RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model);
     }
 
     /**
@@ -90,18 +89,20 @@ public class SupervisedLearnerUtils {
      * @param aInputRdd
      * @param aFeatures
      * @param aModel
-     * @param aLogger
      * @throws Exception
      */
     public static void storePredictions(final SparkContext sc, final JobInput input, final NamedObjects namedObjects,
-        final JavaRDD<Row> aInputRdd, final JavaRDD<Vector> aFeatures, final Serializable aModel, final Logger aLogger)
-        throws Exception {
+            final JavaRDD<Row> aInputRdd, final JavaRDD<Vector> aFeatures, final Serializable aModel)
+            throws Exception {
+
         if (!input.getNamedOutputObjects().isEmpty()) {
-            String namedOutputObject = input.getFirstNamedOutputObject();
-            aLogger.log(Level.INFO, "Storing predicted data under key: " + namedOutputObject);
+            final SparkSession spark = SparkSession.builder().sparkContext(sc).getOrCreate();
+            final String namedOutputObject = input.getFirstNamedOutputObject();
             //TODO - revert the label to int mapping ????
             final JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
-            namedObjects.addJavaRdd(namedOutputObject , predictedData);
+            final StructType schema = TypeConverters.convertSpec(input.getSpec(namedOutputObject));
+            final Dataset<Row> predictedDataset = spark.createDataFrame(predictedData, schema);
+            namedObjects.addDataFrame(namedOutputObject , predictedDataset);
         }
     }
 

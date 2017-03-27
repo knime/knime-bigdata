@@ -24,7 +24,9 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -34,32 +36,31 @@ import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * sorts input RDD by given indices, in given order
+ * sorts input data frame by given indices, in given order
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
 @SparkClass
 public class SortJob implements SimpleSparkJob<SortJobInput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(SortJob.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(SortJob.class.getName());
 
     @Override
     public void runJob(final SparkContext sparkContext, final SortJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
-        LOGGER.info("starting RDD Sort job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+
+        LOGGER.info("Starting sort job...");
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final Integer[] colIdxs = input.getFeatureColIdxs();
         final Boolean[] sortOrders = input.isSortDirectionAscending();
         final Boolean missingToEnd = input.missingToEnd();
         LOGGER.debug("Missing to end? " + missingToEnd);
-        final JavaRDD<Row> res = execute(sparkContext.defaultMinPartitions(), rowRDD, colIdxs, sortOrders, missingToEnd);
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), res);
+        final JavaRDD<Row> resRDD = execute(sparkContext.defaultMinPartitions(), inputDataset.javaRDD(), colIdxs, sortOrders, missingToEnd);
+        final Dataset<Row> resultDataset = spark.createDataFrame(resRDD, inputDataset.schema());
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), resultDataset);
 
-        LOGGER.info("RDD Sort done");
-
+        LOGGER.info("Sort done");
     }
 
     static JavaRDD<Row> execute(final int numPartitions, final JavaRDD<Row> rowRDD, final Integer[] colIdxs,

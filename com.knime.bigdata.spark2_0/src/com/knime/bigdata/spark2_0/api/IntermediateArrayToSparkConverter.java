@@ -18,32 +18,40 @@
  * History
  *   Created on 30.05.2016 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.spark;
+package com.knime.bigdata.spark2_0.api;
 
 import java.io.Serializable;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
+import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import com.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 
 import scala.collection.mutable.WrappedArray;
 
 /**
+ * Converts intermediate arrays into spark arrays and vice versa.
+ * We need some scala magic to do this, so we have to implements this within the spark specific packages.
  *
  * @author Tobias Koetter, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  * @param <T> The Spark data type this converter converts to
  */
 @SparkClass
 public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToSparkConverter<T> {
-
     private static final long serialVersionUID = 1L;
+
+    /** Element converter of this array */
     private final IntermediateToSparkConverter<?> m_elementConverter;
+
 
     /**
      * @param elementConverter the {@link IntermediateToSparkConverter} for the array element type
      * @param sparkTypeProxy {@link SerializableProxyType}
      */
     public IntermediateArrayToSparkConverter(final IntermediateToSparkConverter<?> elementConverter,
-        final SerializableProxyType<T> sparkTypeProxy) {
+            final SerializableProxyType<T> sparkTypeProxy) {
         super(new IntermediateArrayDataType(elementConverter.getIntermediateDataType()), sparkTypeProxy);
         m_elementConverter = elementConverter;
     }
@@ -54,14 +62,11 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
      * @throws ClassCastException if T is not {@link Serializable}
      */
     public IntermediateArrayToSparkConverter(final IntermediateToSparkConverter<?> elementConverter,
-        final T sparkType) {
+            final T sparkType) {
         super(new IntermediateArrayDataType(elementConverter.getIntermediateDataType()), sparkType);
         m_elementConverter = elementConverter;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Serializable convert(final Object sparkObject) {
         if (sparkObject instanceof Object[]) {
@@ -72,14 +77,14 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             }
             return result;
 
+        } else if (sparkObject instanceof WrappedArray) {
+            return convert(((WrappedArray<?>) sparkObject).array());
+
         } else {
             return super.convert(sparkObject);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object convert(final Serializable intermediateTypeValue) {
         if (intermediateTypeValue instanceof Object[]) {
@@ -88,12 +93,10 @@ public class IntermediateArrayToSparkConverter<T> extends DefaultIntermediateToS
             for (int i = 0, length = objectArray.length; i < length; i++) {
                 result[i] = m_elementConverter.convert(objectArray[i]);
             }
-
-          return WrappedArray.make(result);
+            return WrappedArray.make(result);
 
         } else {
             return super.convert(intermediateTypeValue);
         }
     }
-
 }

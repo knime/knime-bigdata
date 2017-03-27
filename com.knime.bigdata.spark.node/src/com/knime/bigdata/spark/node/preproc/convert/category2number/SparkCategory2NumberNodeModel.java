@@ -200,20 +200,15 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
                 SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final Category2NumberJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
-        //create port object from mapping
-        //these are all the column names of the original (selected) and the mapped columns
-        // (original columns that were not selected are not included, but the index of the new
-        //  columns is still correct)
-        final Map<Integer, String> names = jobOutput.getColumnsNames();
-
         //we have two output RDDs - the mapped data and the RDD with the mappings
         exec.setMessage("Nominal to Number mapping done.");
-        final DataColumnSpec[] mappingSpecs = createMappingSpecs(inputTableSpec, names);
+        final String appendedColumns[] = jobOutput.getAppendedColumnsNames();
+        final DataColumnSpec[] appendedColumnsSpecs = createMappingSpecs(inputTableSpec, appendedColumns);
         final DataTableSpec resultSpec =
-                createResultSpec(inputTableSpec, includeColIdxs, mappingSpecs, keepOriginalColumns, mappingType, suffix);
+                createResultSpec(inputTableSpec, includeColIdxs, appendedColumnsSpecs, keepOriginalColumns, mappingType, suffix);
         //we have to create a spec for pmml which contains all input columns AND the transformed columns
         final DataTableSpec pmmlSpec =
-                createResultSpec(inputTableSpec, includeColIdxs, mappingSpecs, true, mappingType, suffix);
+                createResultSpec(inputTableSpec, includeColIdxs, appendedColumnsSpecs, true, mappingType, suffix);
         // the optional PMML in port (can be null)
         exec.setMessage("Create PMML model");
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(pmmlSpec);
@@ -362,24 +357,18 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
 
     /**
      * @param inputTableSpec input table spec
-     * @param names mapping column names from the MappedRDDContainer
+     * @param appendedColumns column names from the MappedRDDContainer
      * @return the appended mapped value columns
      */
-    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec inputTableSpec, final Map<Integer, String> names) {
-        final DataColumnSpec[] specList = new DataColumnSpec[names.size()];
+    public static DataColumnSpec[] createMappingSpecs(final DataTableSpec inputTableSpec, final String appendedColumns[]) {
+        final DataColumnSpec[] specList = new DataColumnSpec[appendedColumns.length];
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Dummy", MAP_TYPE);
-        int count = 0;
-        for (final Entry<Integer, String> entry : names.entrySet()) {
-            final String colName = entry.getValue();
-            if (!inputTableSpec.containsName(colName)) {
-                final int mapColIdx = entry.getKey().intValue() - inputTableSpec.getNumColumns();
-                specCreator.setName(DataTableSpec.getUniqueColumnName(inputTableSpec, colName));
-                specList[mapColIdx] = specCreator.createSpec();
-                count++;
-            }
+        for (int i = 0; i < appendedColumns.length; i++) {
+            String colName = appendedColumns[i];
+            specCreator.setName(DataTableSpec.getUniqueColumnName(inputTableSpec, colName));
+            specList[i] = specCreator.createSpec();
         }
-        final DataColumnSpec[] specs = Arrays.copyOfRange(specList, 0, count);
-        return specs;
+        return specList;
     }
 
     private static DataTableSpec createMapSpec() {

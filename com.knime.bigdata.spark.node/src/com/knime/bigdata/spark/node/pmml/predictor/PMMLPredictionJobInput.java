@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.pmml.predictor;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.pmml.PMMLAssignJobInput;
 
 /**
@@ -42,11 +43,13 @@ public class PMMLPredictionJobInput extends PMMLAssignJobInput {
      * @param colIdxs
      * @param mainClass
      * @param outputID
+     * @param outputSpec
      * @param appendProbabilities <code>true</code> if probability columns should be added
      */
     public PMMLPredictionJobInput(final String inputID, final Integer[] colIdxs, final String mainClass,
-        final String outputID, final boolean appendProbabilities) {
-        super(inputID, colIdxs, mainClass, outputID);
+            final String outputID, final IntermediateSpec outputSpec, final boolean appendProbabilities) {
+
+        super(inputID, colIdxs, mainClass, outputID, outputSpec);
         set(PROBABILITIES, appendProbabilities);
     }
 

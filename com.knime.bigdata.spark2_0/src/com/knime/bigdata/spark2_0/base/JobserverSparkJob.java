@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.JobInput;
@@ -13,7 +15,7 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.jobserver.JobserverJobInput;
 import com.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
 import com.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
-import com.knime.bigdata.spark.jobserver.server.KnimeSparkJobWithNamedRDD;
+import com.knime.bigdata.spark.jobserver.server.KNIMESparkJob;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 import com.knime.bigdata.spark2_0.api.SparkJob;
@@ -21,27 +23,26 @@ import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
 
-import spark.jobserver.SparkJobValid$;
-import spark.jobserver.SparkJobValidation;
+import spark.jobserver.api.JobEnvironment;
 
 /**
  * handles translation of Scala interface to Java, wraps generic config with JobConfig
  *
  * @author dwk
  * @author Bjoern Lohrmann, KNIME.com
- *
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
-public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements NamedObjects {
+public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
 
+    /** Empty deserialization constructor */
     public JobserverSparkJob() {
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public Object runJob(final Object sparkContext, final Config config) {
-
+    public String runJob(final SparkContext sparkContext, final JobEnvironment runtime, final Config config) {
         InterceptingAppender appender = null;
-
         JobserverJobOutput toReturn;
 
         try {
@@ -62,11 +63,11 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
             Logger.getRootLogger().addAppender(appender);
 
             if (sparkJob instanceof SparkJob) {
-                toReturn = JobserverJobOutput.success(((SparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this));
+                toReturn = JobserverJobOutput.success(((SparkJob) sparkJob).runJob(sparkContext, input, this));
             } else if (sparkJob instanceof SparkJobWithFiles){
-                toReturn = JobserverJobOutput.success(((SparkJobWithFiles)sparkJob).runJob((SparkContext)sparkContext, input, inputFiles, this));
+                toReturn = JobserverJobOutput.success(((SparkJobWithFiles) sparkJob).runJob(sparkContext, input, inputFiles, this));
             } else {
-                ((SimpleSparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this);
+                ((SimpleSparkJob) sparkJob).runJob(sparkContext, input, this);
                 toReturn = JobserverJobOutput.success();
             }
         } catch (KNIMESparkException e) {
@@ -85,7 +86,7 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
     }
 
     private List<File> validateInputFiles(final JobserverJobInput jsInput) throws KNIMESparkException {
-        List<File> inputFiles = new LinkedList<File>();
+        List<File> inputFiles = new LinkedList<>();
 
         for (String pathToFile : jsInput.getFiles()) {
             File inputFile = new File(pathToFile);
@@ -118,9 +119,9 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         }
     }
 
+    @Deprecated
     @Override
-    public final SparkJobValidation validate(final Object aSparkContext, final Config config) {
-        // in scala this is a case object and this is the way these are referenced from Java.
-        return SparkJobValid$.MODULE$;
+    public JavaRDD<Row> getJavaRdd(final String key) {
+        return getDataFrame(key).javaRDD();
     }
 }

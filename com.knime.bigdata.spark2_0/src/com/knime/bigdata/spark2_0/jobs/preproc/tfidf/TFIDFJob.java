@@ -20,103 +20,76 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.tfidf;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.mllib.feature.HashingTF;
-import org.apache.spark.mllib.feature.IDF;
-import org.apache.spark.mllib.feature.IDFModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.feature.HashingTF;
+import org.apache.spark.ml.feature.IDF;
+import org.apache.spark.ml.feature.IDFModel;
+import org.apache.spark.ml.feature.RegexTokenizer;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * splits a given string column into a word vector and adds the vector to an RDD
+ * Splits a given string column into a word vector and adds the (rescaled) feature vector as a new column.
  *
- * @author dwk
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class TFIDFJob implements SimpleSparkJob<TFIDFJobInput> {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(TFIDFJob.class.getName());
+    private static final String ALG_NAME = "TF-IDF";
 
-    private final static Logger LOGGER = Logger.getLogger(TFIDFJob.class.getName());
-
-
-    Logger getLogger() {
-        return LOGGER;
-    }
-
-    String getAlgName() {
-        return "TF-IDF";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final TFIDFJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
-        getLogger().info("START " + getAlgName() + " job...");
 
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        JavaRDD<Row> tfidf = execute(input, rowRDD);
+        LOGGER.info("Starting " + ALG_NAME + " job...");
 
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), tfidf);
-        getLogger().info("DONE " + getAlgName() + " job...");
-    }
+        final Dataset<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        Dataset<Row> tfidf = execute(input, rowRDD);
 
-    static JavaRDD<Row> execute(final TFIDFJobInput input, final JavaRDD<Row> aRowRDD) {
-
-        final Integer stringCol = input.getColIdx();
-        final String separator = input.getTermSeparator();
-        final Integer minFrequency = input.getMinFrequency();
-
-        final JavaRDD<Iterable<String>> text = aRowRDD.map(new Function<Row, Iterable<String>>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public ArrayList<String> call(final Row aRow) throws Exception {
-
-                final String[] words;
-                if (!aRow.isNullAt(stringCol)) {
-                    words = aRow.getString(stringCol).split(separator);
-                } else {
-                    words = new String[0];
-                }
-                ArrayList<String> a = new ArrayList<>();
-                for (String w : words) {
-                    a.add(w);
-                }
-                return a;
-            }
-        });
-
-        final HashingTF hashingTF;
-        if (input.getMaxNumTerms() != null && input.getMaxNumTerms() > 0) {
-            final Integer maxNumTerms = input.getMaxNumTerms();
-            hashingTF = new HashingTF(maxNumTerms);
-        } else {
-            hashingTF = new HashingTF();
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), tfidf);
+        LOGGER.info(ALG_NAME + " job done.");
         }
-        final JavaRDD<Vector> tf = hashingTF.transform(text);
 
-        //While applying HashingTF only needs a single pass to the data, applying IDF needs two passes: first to compute the IDF vector and second to scale the term frequencies by IDF.
-        //MLlib�s IDF implementation provides an option for ignoring terms which occur in less than a minimum number of documents.
-        // In such cases, the IDF for these terms is set to 0. This feature can be used by passing the minDocFreq value to the IDF constructor.
-        tf.cache();
-        final IDFModel idf = new IDF(minFrequency).fit(tf);
-        JavaRDD<Vector> tfidf =  idf.transform(tf);
+    private Dataset<Row> execute(final TFIDFJobInput config, final Dataset<Row> input) {
+        final String inputColumn = input.columns()[config.getColIdx()];
+        final String wordsColumn = "words_" + Long.toHexString(Math.abs(new Random().nextLong()));
+        final String rawFeaturesColumn = inputColumn + "_RawFeatures";
+        final String featuresColumn = inputColumn + "_Features";
+        final String separator = config.getTermSeparator();
+        final Integer minFrequency = config.getMinFrequency();
+        final RegexTokenizer tokenizer = new RegexTokenizer().setInputCol(inputColumn)
+                                                             .setOutputCol(wordsColumn)
+                                                             .setPattern(separator);
+        final Dataset<Row> tokenized = tokenizer.transform(input);
 
-        return RDDUtils.addColumn(aRowRDD.zip(tfidf));
+        final HashingTF hashingTF = new HashingTF().setInputCol(wordsColumn)
+                                                   .setOutputCol(rawFeaturesColumn);
+
+        if (config.getMaxNumTerms() != null && config.getMaxNumTerms() > 0) {
+            final Integer maxNumTerms = config.getMaxNumTerms();
+            hashingTF.setNumFeatures(maxNumTerms);
+        }
+
+        final Dataset<Row> featurizedData = hashingTF.transform(tokenized);
+        featurizedData.cache();
+        final IDF idf = new IDF().setInputCol(rawFeaturesColumn)
+                           .setOutputCol(featuresColumn)
+                           .setMinDocFreq(minFrequency);
+        final IDFModel idfModel = idf.fit(featurizedData);
+        final Dataset<Row> rescaledData = idfModel.transform(featurizedData);
+
+        return rescaledData.drop(wordsColumn, rawFeaturesColumn);
     }
 }

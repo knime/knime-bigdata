@@ -21,8 +21,8 @@
 package com.knime.bigdata.spark2_0.jobs.namedobjects;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
@@ -40,18 +40,16 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
  */
 @SparkClass
 public class NamedObjectsJob implements SparkJob<NamedObjectsJobInput, NamedObjectsJobOutput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(NamedObjectsJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(NamedObjectsJob.class.getName());
 
     @Override
     public NamedObjectsJobOutput runJob(final SparkContext sparkContext, final NamedObjectsJobInput input,
-        final NamedObjects namedObjects) throws KNIMESparkException, Exception {
+            final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         switch (input.getOperation()) {
             case DELETE:
-                deleteNamedRDDs(input.getNamedObjectsToDelete(), namedObjects);
+                deleteNamedDataFrames(input.getNamedObjectsToDelete(), namedObjects);
                 return NamedObjectsJobOutput.createDeleteObjectsSuccess();
             case LIST:
                 return NamedObjectsJobOutput.createListObjectsSuccess(namedObjects.getNamedObjects());
@@ -60,18 +58,16 @@ public class NamedObjectsJob implements SparkJob<NamedObjectsJobInput, NamedObje
         }
     }
 
-    private void deleteNamedRDDs(final Set<String> namedObjectsToDelete, final NamedObjects namedObjects) {
-
-        for (String rddName : namedObjectsToDelete) {
-            if (namedObjects.validateNamedObject(rddName)) {
-                LOGGER.info("Deleting reference to named RDD " + rddName);
-                namedObjects.deleteNamedObject(rddName);
+    private void deleteNamedDataFrames(final Set<String> namedObjectsToDelete, final NamedObjects namedObjects) {
+        for (String key : namedObjectsToDelete) {
+            if (namedObjects.validateNamedObject(key)) {
+                LOGGER.info("Deleting reference to named data frame " + key);
+                namedObjects.deleteNamedDataFrame(key);
             }
 
-            if (namedObjects.validateNamedObject(rddName)) {
-                LOGGER.warning("Failed to delete reference to named RDD " + rddName);
+            if (namedObjects.validateNamedObject(key)) {
+                LOGGER.warn("Failed to delete reference to named data frame " + key);
             }
         }
-
     }
 }

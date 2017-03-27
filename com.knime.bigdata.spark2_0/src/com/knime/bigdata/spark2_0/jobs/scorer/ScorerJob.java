@@ -20,8 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.scorer;
 
-import java.util.logging.Logger;
-
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
@@ -43,7 +42,7 @@ import com.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
 public class ScorerJob extends AbstractScorerJob {
 
     private static final long serialVersionUID = 1L;
-    protected static final Logger LOGGER = Logger.getLogger(ScorerJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ScorerJob.class.getName());
 
     private final static int REFERENCE_IX = 0;
     private final static int ABBS_ERROR_IX = 1;
@@ -117,5 +116,15 @@ public class ScorerJob extends AbstractScorerJob {
 
         return new NumericScorerJobOutput(rowRDD.count(), (1 - squaredError / ssErrorNullModel),
             absError, squaredError, Math.sqrt(squaredError), signedDiff, classCol, predictionCol);
+    }
+
+    @Override
+    protected String getScorerName() {
+        return "numeric";
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

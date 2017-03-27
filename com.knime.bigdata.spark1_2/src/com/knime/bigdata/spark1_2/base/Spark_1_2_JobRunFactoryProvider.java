@@ -48,6 +48,7 @@ import com.knime.bigdata.spark1_2.jobs.preproc.filter.column.ColumnFilterJobRunF
 import com.knime.bigdata.spark1_2.jobs.preproc.joiner.JoinJobRunFactory;
 import com.knime.bigdata.spark1_2.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
 import com.knime.bigdata.spark1_2.jobs.preproc.partition.PartitionJobRunFactory;
+import com.knime.bigdata.spark1_2.jobs.preproc.rename.RenameColumnJobRunFactory;
 import com.knime.bigdata.spark1_2.jobs.preproc.sampling.SamplingJobRunFactory;
 import com.knime.bigdata.spark1_2.jobs.preproc.sorter.SortJobRunFactory;
 import com.knime.bigdata.spark1_2.jobs.scorer.ClassificationScorerJobRunFactory;
@@ -96,6 +97,7 @@ public class Spark_1_2_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new JoinJobRunFactory(),
             new NormalizeColumnsJobRunFactory(),
             new PartitionJobRunFactory(),
+            new RenameColumnJobRunFactory(),
             new SamplingJobRunFactory(),
             new SortJobRunFactory(),
 //            new TFIDFJobRunFactory(),

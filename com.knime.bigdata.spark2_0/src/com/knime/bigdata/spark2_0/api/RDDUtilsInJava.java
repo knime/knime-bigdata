@@ -1,7 +1,6 @@
 package com.knime.bigdata.spark2_0.api;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
@@ -21,19 +22,21 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
-import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.rdd.RDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
-import com.google.common.base.Optional;
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import com.knime.bigdata.spark.core.job.util.MyJoinKey;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.NominalValueMappingFactory;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
 
 import scala.Tuple2;
 
@@ -51,36 +54,18 @@ public class RDDUtilsInJava {
      * (Java friendly version) convert nominal values in columns for given column indices to integers and append columns
      * with mapped values
      *
-     * @param aInputRdd Row RDD to be processed
-     * @param aColumnIds array of indices to be converted
+     * @param inputDataset dataset to be processed
+     * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
      * @param aMappingType indicates how values are to be mapped
      * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
-     * @return container JavaRDD<Row> with original data plus appended columns and mapping
+     * @return dataset container with converted data (columns are appended)
      */
-    public static MappedRDDContainer convertNominalValuesForSelectedIndices(final JavaRDD<Row> aInputRdd,
-        final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
-        final NominalValueMapping mappings = toLabelMapping(aInputRdd, aColumnIds, aMappingType);
+    public static MappedDatasetContainer convertNominalValuesForSelectedIndices(final Dataset<Row> inputDataset,
+            final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
 
-        final JavaRDD<Row> rddWithConvertedValues =
-            applyLabelMapping(aInputRdd, aColumnIds, mappings, aKeepOriginalColumns);
-        return new MappedRDDContainer(rddWithConvertedValues, mappings);
-    }
-
-    /**
-     * apply the given mapping to the given input RDD
-     *
-     * @param aInputRdd
-     * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
-     * @param aMappings
-     * @param aKeepOriginalColumns - keep original columns as well or not
-     * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
-     * @return JavaRDD<Row> with converted data (columns are appended)
-     */
-    public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
-        final NominalValueMapping aMappings, final boolean aKeepOriginalColumns) {
-
-        JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
+        final NominalValueMapping mappings = toLabelMapping(inputDataset.javaRDD(), aColumnIds, aMappingType);
+        JavaRDD<Row> mappedRdd = inputDataset.javaRDD().map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -93,14 +78,14 @@ public class RDDUtilsInJava {
                 }
                 for (int ix : aColumnIds) {
                     //ignore columns that have no mapping
-                    if (aMappings.hasMappingForColumn(ix)) {
+                    if (mappings.hasMappingForColumn(ix)) {
                         Object val = row.get(ix);
                         if (val == null) {
                             builder.add(null);
                         } else {
-                            Integer labelOrIndex = aMappings.getNumberForValue(ix, val.toString());
-                            if (aMappings.getType() == MappingType.BINARY) {
-                                int numValues = aMappings.getNumberOfValues(ix);
+                            Integer labelOrIndex = mappings.getNumberForValue(ix, val.toString());
+                            if (mappings.getType() == MappingType.BINARY) {
+                                int numValues = mappings.getNumberOfValues(ix);
                                 for (int i = 0; i < numValues; i++) {
                                     if (labelOrIndex == i) {
                                         builder.add(1.0d);
@@ -117,7 +102,39 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-        return rddWithConvertedValues;
+
+        return MappedDatasetContainer.createContainer(inputDataset, mappedRdd, aColumnIds, mappings, aKeepOriginalColumns);
+    }
+
+    /**
+     * Create a number to category schema.
+     * @param dataset
+     * @param map
+     * @param keepOriginalColumns
+     * @param colSuffix - column suffix to append
+     * @return Number to category schema
+     */
+    public static StructType createSchema(final Dataset<Row> dataset, final ColumnBasedValueMapping map,
+            final boolean keepOriginalColumns, final String colSuffix) {
+
+        StructType schema = dataset.schema();
+        List<Integer> columnIdsList = map.getColumnIndices();
+        Collections.sort(columnIdsList);
+        List<StructField> fields = new ArrayList<>();
+        StructField oldFields[] = schema.fields();
+
+        for (int i = 0; i < oldFields.length; i++) {
+            if (keepOriginalColumns || !columnIdsList.contains(i)) {
+                fields.add(oldFields[i]);
+            }
+        }
+
+        for (int idx : columnIdsList) {
+            String name = oldFields[idx].name() + colSuffix;
+            fields.add(DataTypes.createStructField(name, DataTypes.StringType, false));
+        }
+
+        return DataTypes.createStructType(fields);
     }
 
     /**
@@ -261,66 +278,6 @@ public class RDDUtilsInJava {
                 }
             });
         return labels;
-    }
-
-    /**
-     * convert given RDD to an RDD<Vector> with selected columns and compute statistics for these columns
-     *
-     * @param aInputRdd
-     * @param aColumnIndices
-     * @return MultivariateStatisticalSummary
-     */
-    public static MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd,
-        final Collection<Integer> aColumnIndices) {
-
-        List<Integer> columnIndices = new ArrayList<>();
-        columnIndices.addAll(aColumnIndices);
-        Collections.sort(columnIndices);
-
-        JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
-
-        // Compute column summary statistics.
-        MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
-        return summary;
-    }
-
-    /**
-     * computes the scale and translation parameters from the given data and according to the given normalization
-     * settings, then applies these parameters to the input RDD
-     *
-     * @param aInputRdd
-     * @param aColumnIndices indices of numeric columns to be normalized
-     * @param aNormalization
-     * @return container with normalization parameters for each of the given columns, other columns are just copied over
-     */
-    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
-        final Collection<Integer> aColumnIndices, final NormalizationSettings aNormalization) {
-
-        MultivariateStatisticalSummary stats = findColumnStats(aInputRdd, aColumnIndices);
-        final NormalizedRDDContainer rddNormalizer =
-            NormalizedRDDContainerFactory.getNormalizedRDDContainer(stats, aNormalization);
-
-        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
-        return rddNormalizer;
-    }
-
-    /**
-     * applies the given the scale and translation parameters to the given data to the input RDD
-     *
-     * @param aInputRdd
-     * @param aColumnIndices indices of numeric columns to be normalized
-     * @param aScalesAndTranslations normalization parameters
-     * @return container with normalization parameters for each of the given columns, other columns are just copied over
-     */
-    public static NormalizedRDDContainer normalize(final JavaRDD<Row> aInputRdd,
-        final Collection<Integer> aColumnIndices, final Double[][] aScalesAndTranslations) {
-
-        final NormalizedRDDContainer rddNormalizer =
-            NormalizedRDDContainerFactory.getNormalizedRDDContainer(aScalesAndTranslations[0],
-                aScalesAndTranslations[1]);
-
-        rddNormalizer.normalizeRDD(aInputRdd, aColumnIndices);
-        return rddNormalizer;
     }
 
     /**
@@ -520,6 +477,33 @@ public class RDDUtilsInJava {
     }
 
     /**
+     * Creates a list of fields matching schema of rows produced by {@link #mergeRows(JavaRDD, List, List)}.
+     *
+     * @param left - left data frame
+     * @param aColIdxLeft - indices of <L> to be kept
+     * @param right - right data frame
+     * @param aColIdxRight - indices of <R> to be kept
+     * @return list of fields
+     */
+    public static List<StructField> getFields(final Dataset<Row> left, final List<Integer> aColIdxLeft,
+            final Dataset<Row> right, final List<Integer> aColIdxRight) {
+
+        final List<StructField> fields = new ArrayList<>(aColIdxLeft.size() + aColIdxRight.size());
+        final StructField leftFields[] = left.schema().fields();
+        final StructField rightFields[] = right.schema().fields();
+
+        for (int index : aColIdxLeft) {
+            fields.add(leftFields[index]);
+        }
+
+        for (int index : aColIdxRight) {
+            fields.add(rightFields[index]);
+        }
+
+        return fields;
+    }
+
+    /**
      * convert the given JavaRDD of Row to a RowMatrix
      *
      * @param aRowRDD
@@ -534,24 +518,25 @@ public class RDDUtilsInJava {
     /**
      * convert the given RowMatrix to a JavaRDD of Row
      *
+     * @param sparkContext
      * @param aRowMatrix
      * @return converted JavaRDD
      */
-    public static JavaRDD<Row> fromRowMatrix(final RowMatrix aRowMatrix) {
+    public static Dataset<Row> fromRowMatrix(final SparkContext sparkContext, final RowMatrix aRowMatrix) {
         final RDD<Vector> rows = aRowMatrix.rows();
-        final JavaRDD<Vector> vectorRows = new JavaRDD<>(rows, rows.elementClassTag());
-        return fromVectorRdd(vectorRows);
+        final JavaRDD<Row> vectorRows = fromVectorRdd(new JavaRDD<>(rows, rows.elementClassTag()));
+        return createDoubleDataFrame(sparkContext, vectorRows, (int) aRowMatrix.numCols());
     }
 
     /**
-     * convert the given Matrix to a JavaRDD of Row
+     * convert the given Matrix to a data frame
      *
      * @param aContext java context, required for RDD construction
      *
      * @param aMatrix
-     * @return converted JavaRDD
+     * @return converted data frame
      */
-    public static JavaRDD<Row> fromMatrix(final JavaSparkContext aContext, final Matrix aMatrix) {
+    public static Dataset<Row> fromMatrix(final JavaSparkContext aContext, final Matrix aMatrix) {
         final int nRows = aMatrix.numRows();
         final int nCols = aMatrix.numCols();
         final List<Row> rows = new ArrayList<>(nRows);
@@ -562,9 +547,22 @@ public class RDDUtilsInJava {
             }
             rows.add(builder.build());
         }
-        return aContext.parallelize(rows);
+        final JavaRDD<Row> resultRdd = aContext.parallelize(rows);
+        return createDoubleDataFrame(aContext.sc(), resultRdd, nCols);
     }
 
+    /** Create a data frame containing double columns named by index. */
+    private static Dataset<Row> createDoubleDataFrame(final SparkContext sparkContext, final JavaRDD<Row> rdd, final int numColumns) {
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+
+        final List<StructField> fields = new ArrayList<>(numColumns);
+        for (int i = 0; i < numColumns; i++) {
+            fields.add(DataTypes.createStructField(Integer.toString(i), DataTypes.DoubleType, false));
+        }
+        final StructType schema = DataTypes.createStructType(fields);
+
+        return spark.createDataFrame(rdd, schema);
+    }
 
     /**
      *

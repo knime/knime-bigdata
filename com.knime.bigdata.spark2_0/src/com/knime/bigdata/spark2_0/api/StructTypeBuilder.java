@@ -299,7 +299,7 @@ public class StructTypeBuilder {
      * The {@link DataType DataTypes} of the various fields resp. column are inferred from the column values of the
      * given rows. The initial guess is based on the values in the first row, and is made according to the table shown
      * above. If the first row contains a {@code null} value in a given column, it initially assumes the
-     * {@link DataType#NullType} for this column.
+     * {@link DataTypes#NullType} for this column.
      *
      * <p>
      * The initial guesses are subsequently refined based on the values in the other rows:

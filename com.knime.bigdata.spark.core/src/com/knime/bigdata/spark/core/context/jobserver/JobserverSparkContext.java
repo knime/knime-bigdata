@@ -270,7 +270,7 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     private void ensureJobJar() throws KNIMESparkException {
-        if (m_jobJar == null) {
+        if (m_jobJar == null || !m_jobJar.getJarFile().exists()) {
             m_jobJar = SparkJarRegistry.getJobJar(m_config.getSparkVersion());
             if (m_jobJar == null) {
                 throw new KNIMESparkException(

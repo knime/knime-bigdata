@@ -45,12 +45,14 @@ import com.knime.bigdata.spark2_0.jobs.namedobjects.NamedObjectsJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.pmml.PMMLPredictionJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.pmml.PMMLTransformationJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.prepare.PrepareContextJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.concatenate.ConcatenateRDDsJobRunFactory;
+import com.knime.bigdata.spark2_0.jobs.preproc.concatenate.ConcatenateDataFramesJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number.Category2NumberJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.convert.number2category.Number2CategoryJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.joiner.JoinJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
+import com.knime.bigdata.spark2_0.jobs.preproc.partition.PartitionJobRunFactory;
+import com.knime.bigdata.spark2_0.jobs.preproc.rename.RenameColumnJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.sampling.SamplingJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.sorter.SortJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.scorer.ClassificationScorerJobRunFactory;
@@ -98,12 +100,14 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new SVDJobRunFactory(),
             new NamedObjectsJobRunFactory(),
             new PrepareContextJobRunFactory(),
-            new ConcatenateRDDsJobRunFactory(),
+            new ConcatenateDataFramesJobRunFactory(),
             new Category2NumberJobRunFactory(),
             new Number2CategoryJobRunFactory(),
             new ColumnFilterJobRunFactory(),
             new JoinJobRunFactory(),
             new NormalizeColumnsJobRunFactory(),
+            new RenameColumnJobRunFactory(),
+            new PartitionJobRunFactory(),
             new SamplingJobRunFactory(),
             new SortJobRunFactory(),
 //            new TFIDFJobRunFactory(),

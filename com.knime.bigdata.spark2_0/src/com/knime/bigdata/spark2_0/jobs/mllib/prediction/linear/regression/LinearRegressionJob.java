@@ -1,9 +1,8 @@
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -26,7 +25,7 @@ import scala.Tuple2;
 public class LinearRegressionJob extends AbstractRegularizationJob<LinearLearnerJobInput> {
 
     private static final long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(LinearRegressionJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LinearRegressionJob.class.getName());
 
     /**
      * {@inheritDoc}
@@ -34,7 +33,7 @@ public class LinearRegressionJob extends AbstractRegularizationJob<LinearLearner
     @Override
     protected Serializable execute(final SparkContext sc, final LinearLearnerJobInput aConfig, final JavaRDD<LabeledPoint> inputRdd) {
         LinearRegressionModel model = configureLinRegWithSGD(aConfig).run(inputRdd.rdd().cache());
-        //evaluateModel(inputRdd, model);
+        evaluateModel(inputRdd, model);
         return model;
     }
 
@@ -70,11 +69,11 @@ public class LinearRegressionJob extends AbstractRegularizationJob<LinearLearner
             @Override
             public Object call(final Tuple2<Double, Double> pair) {
                 final double mse = Math.pow(pair._1() - pair._2(), 2.0);
-                LOGGER.log(Level.SEVERE, "error: " + mse + " for value: " + pair._2() + " and prediction: " + pair._1());
+                LOGGER.debug("error: " + mse + " for value: " + pair._2() + " and prediction: " + pair._1());
                 return mse;
             }
         }).rdd()).mean();
-        LOGGER.log(Level.SEVERE, "training Mean Squared Error = " + MSE);
+        LOGGER.debug("training Mean Squared Error = " + MSE);
         return MSE;
     }
 

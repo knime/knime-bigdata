@@ -34,29 +34,27 @@ import com.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionJobInput;
 import com.knime.bigdata.spark2_0.api.RowBuilder;
 
 /**
- * applies a compiled pmml model to the input data
+ * Applies a compiled PMML model to the input data.
  *
  * @author Tobias Koetter, KNIME.com
  */
 @SparkClass
 public class PMMLPredictionJob extends PMMLAssignJob<PMMLPredictionJobInput> {
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(PMMLPredictionJob.class.getName());
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Function<Row, Row> createFunction(final Map<String, byte[]> bytecode, final String mainClass,
-        final List<Integer> inputColIdxs, final PMMLPredictionJobInput input) {
+            final List<Integer> inputColIdxs, final PMMLPredictionJobInput input) {
+
         LOGGER.debug("Create pmml prediction function");
         final Function<Row, Row> predict = new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
             final boolean addProbabilites = input.appendProbabilities();
+
             //use transient since a Method can not be serialized
             private transient Method m_evalMethod;
-            /** {@inheritDoc} */
+
             @Override
             public Row call(final Row r) throws Exception {
                 if (m_evalMethod == null) {

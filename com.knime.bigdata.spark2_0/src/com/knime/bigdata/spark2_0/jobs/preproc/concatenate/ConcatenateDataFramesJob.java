@@ -20,13 +20,11 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.concatenate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -36,33 +34,29 @@ import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * append the given input RDDs and store result in new RDD
+ * Concatenates the given data frames and store result in a new data frame.
  *
- * @author Tobias Koetter, KNIME.com, dwk
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
-public class ConcatenateRDDsJob implements SimpleSparkJob<ConcatenateRDDsJobInput> {
-
+public class ConcatenateDataFramesJob implements SimpleSparkJob<ConcatenateRDDsJobInput> {
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(ConcatenateDataFramesJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(ConcatenateRDDsJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void runJob(final SparkContext sparkContext, final ConcatenateRDDsJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException, Exception {
-        LOGGER.info("starting RDD Concatenation job...");
-        final List<String> rddNames = input.getNamedInputObjects();
-        final JavaRDD<Row> firstRDD = namedObjects.getJavaRdd(rddNames.get(0));
-        final List<JavaRDD<Row>> restRDDs = new ArrayList<>();
-        for (int i = 1; i < rddNames.size(); i++) {
-            restRDDs.add(namedObjects.getJavaRdd(rddNames.get(i)));
+    public void runJob(final SparkContext sparkContext, final ConcatenateRDDsJobInput input,
+            final NamedObjects namedObjects) throws KNIMESparkException, Exception {
+
+        LOGGER.info("Concatinating data frames...");
+
+        final List<String> inputNames = input.getNamedInputObjects();
+        Dataset<Row> current = namedObjects.getDataFrame(inputNames.get(0));
+        for (int i = 1; i < inputNames.size(); i++) {
+            Dataset<Row> next = namedObjects.getDataFrame(inputNames.get(i));
+            current = current.union(next);
         }
-        final JavaSparkContext js = JavaSparkContext.fromSparkContext(sparkContext);
-        final JavaRDD<Row> res = js.union(firstRDD, restRDDs);
-        namedObjects.addJavaRdd(input.getFirstNamedOutputObject(), res);
-        LOGGER.info("RDD Concatenation done");
+        namedObjects.addDataFrame(input.getFirstNamedOutputObject(), current);
+
+        LOGGER.info("Data frame concatenation done.");
     }
 }

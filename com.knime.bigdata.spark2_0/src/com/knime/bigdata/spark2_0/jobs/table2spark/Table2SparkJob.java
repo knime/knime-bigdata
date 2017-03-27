@@ -27,14 +27,14 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
@@ -48,15 +48,12 @@ import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
 import com.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
- *
  * @author dwk, Bjoern Lohrmann, KNIME.com
  */
 @SparkClass
 public class Table2SparkJob implements SparkJobWithFiles<Table2SparkJobInput, EmptyJobOutput> {
-
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(Table2SparkJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Table2SparkJob.class.getName());
 
     private List<Row> readFileIntoRows(final File inputFile, final IntermediateSpec sparkDataSpec) throws Exception {
 
@@ -83,14 +80,18 @@ public class Table2SparkJob implements SparkJobWithFiles<Table2SparkJobInput, Em
     public EmptyJobOutput runJob(final SparkContext sparkContext, final Table2SparkJobInput input,
         final List<File> inputFiles, final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        LOGGER.log(Level.INFO, "Inserting KNIME data table into RDD...");
-        final List<Row> rowData = readFileIntoRows(inputFiles.get(0), input.getSpec(input.getFirstNamedOutputObject()));
+        LOGGER.info("Inserting KNIME data table into data frame...");
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        final String inputObjectName = input.getFirstNamedOutputObject();
+        final String outputObjectName = input.getFirstNamedOutputObject();
 
-        final JavaRDD<Row> rdd = new JavaSparkContext(sparkContext).parallelize(rowData);
+        final IntermediateSpec spec = input.getSpec(inputObjectName);
+        final StructType schema = TypeConverters.convertSpec(spec);
+        final List<Row> rowData = readFileIntoRows(inputFiles.get(0), spec);
+        final Dataset<Row> dataset = spark.createDataFrame(rowData, schema);
 
-        final String outputRdd = input.getFirstNamedOutputObject();
-        LOGGER.log(Level.INFO, "Storing data rdd under key: " + outputRdd);
-        namedObjects.addJavaRdd(outputRdd, rdd);
+        LOGGER.info("Storing data frame under key: " + outputObjectName);
+        namedObjects.addDataFrame(outputObjectName, dataset);
 
         return EmptyJobOutput.getInstance();
     }

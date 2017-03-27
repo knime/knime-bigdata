@@ -20,8 +20,8 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.logistic;
 
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.classification.LogisticRegressionModel;
@@ -44,7 +44,7 @@ public class LogisticRegressionJob extends AbstractRegularizationJob<LinearLearn
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(LogisticRegressionJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LogisticRegressionJob.class.getName());
 
     /**
      * {@inheritDoc}

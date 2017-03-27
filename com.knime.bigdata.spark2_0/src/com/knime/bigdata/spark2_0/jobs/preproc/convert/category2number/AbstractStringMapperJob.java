@@ -20,12 +20,9 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -42,43 +39,28 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
  */
 @SparkClass
 public abstract class AbstractStringMapperJob implements SparkJob<Category2NumberJobInput, Category2NumberJobOutput> {
-
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(AbstractStringMapperJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(AbstractStringMapperJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Category2NumberJobOutput runJob(final SparkContext sparkContext, final Category2NumberJobInput input,
-        final NamedObjects namedObjects) throws KNIMESparkException, Exception {
-        LOGGER.info("starting job to convert nominal values...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        final String[] colNames = input.getIncludeColNames();
-        final Integer[] colIdxs = input.getIncludeColIdxs();
-        final int[] colIds = new int[colIdxs.length];
-        final Map<Integer, String> colNameForIndex = new HashMap<>();
-        int i = 0;
-        for (Integer ix : colIdxs) {
-            colIds[i] = ix;
-            colNameForIndex.put(ix, colNames[i]);
-            i++;
-        }
+            final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        return execute(sparkContext, input, namedObjects, rowRDD, colIds, colNameForIndex);
+        LOGGER.info("Starting job to convert nominal values...");
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final int[] colIdxs = input.getIncludeColIdxs();
+        return execute(sparkContext, input, namedObjects, dataset, colIdxs);
     }
 
     /**
-     * @param aContext
-     * @param aConfig
-     * @param namedObjects
-     * @param aRowRDD
-     * @param aColIds
-     * @param aColNameForIndex
-     * @return
+     * @param context - current context
+     * @param config - job configuration
+     * @param namedObjects - named objects
+     * @param dataset - input dataset
+     * @param colIds - included column indices
+     * @return job output
      * @throws KNIMESparkException
      */
-    protected abstract Category2NumberJobOutput execute(final SparkContext aContext, final Category2NumberJobInput aConfig, NamedObjects namedObjects,
-        final JavaRDD<Row> aRowRDD, final int[] aColIds, final Map<Integer, String> aColNameForIndex) throws KNIMESparkException;
+    protected abstract Category2NumberJobOutput execute(final SparkContext context, final Category2NumberJobInput config,
+        final NamedObjects namedObjects, final Dataset<Row> dataset, final int[] colIds) throws KNIMESparkException;
 }

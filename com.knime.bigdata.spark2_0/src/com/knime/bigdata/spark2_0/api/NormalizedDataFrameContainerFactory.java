@@ -33,7 +33,7 @@ import com.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
  * @author dwk
  */
 @SparkClass
-public class NormalizedRDDContainerFactory {
+public class NormalizedDataFrameContainerFactory {
 
 
     /**
@@ -42,14 +42,14 @@ public class NormalizedRDDContainerFactory {
      * @param aTranslations
      * @return NormalizedRDDContainer with given scales and translations
      */
-    public static NormalizedRDDContainer getNormalizedRDDContainer(final Double[] aScales, final Double[] aTranslations) {
+    public static NormalizedDataFrameContainer getNormalizedRDDContainer(final Double[] aScales, final Double[] aTranslations) {
         final double[] scales = new double[aScales.length];
         final double[] translations = new double[aTranslations.length];
         for (int i = 0; i < scales.length; i++) {
             scales[i] = aScales[i];
             translations[i] = aTranslations[i];
         }
-        return new NormalizedRDDContainer(scales, translations);
+        return new NormalizedDataFrameContainer(scales, translations);
     }
 
     /**
@@ -58,7 +58,7 @@ public class NormalizedRDDContainerFactory {
      * @param aMode
      * @return NormalizedRDDContainer with extracted scales and translations
      */
-   public static NormalizedRDDContainer getNormalizedRDDContainer(final MultivariateStatisticalSummary aStats, final NormalizationSettings aMode) {
+   public static NormalizedDataFrameContainer getNormalizedRDDContainer(final MultivariateStatisticalSummary aStats, final NormalizationSettings aMode) {
 
        final double[] scale;
        final double[] translation;
@@ -117,6 +117,6 @@ public class NormalizedRDDContainerFactory {
             }
         }
 
-        return new NormalizedRDDContainer(scale, translation);
+        return new NormalizedDataFrameContainer(scale, translation);
     }
 }

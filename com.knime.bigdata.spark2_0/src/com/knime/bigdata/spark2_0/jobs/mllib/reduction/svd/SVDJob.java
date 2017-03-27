@@ -20,15 +20,15 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.reduction.svd;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.SingularValueDecomposition;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -47,17 +47,12 @@ import com.knime.bigdata.spark2_0.api.SparkJob;
 public class SVDJob implements SparkJob<SVDJobInput, SVDJobOutput> {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(SVDJob.class.getName());
 
-    private final static Logger LOGGER = Logger.getLogger(SVDJob.class.getName());
-
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("resource")
     @Override
     public SVDJobOutput runJob(final SparkContext sparkContext, final SVDJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
-        LOGGER.log(Level.INFO, "starting SVD job...");
+        LOGGER.info("Starting SVD job...");
 
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
 
@@ -76,12 +71,12 @@ public class SVDJob implements SparkJob<SVDJobInput, SVDJobOutput> {
         final SVDJobOutput jobOutput = new SVDJobOutput(svd.s().toArray());
 
         final JavaSparkContext js = JavaSparkContext.fromSparkContext(sparkContext);
-        final JavaRDD<Row> V = RDDUtilsInJava.fromMatrix(js, svd.V());
-        namedObjects.addJavaRdd(input.getVMatrixName(), V);
+        final Dataset<Row> V = RDDUtilsInJava.fromMatrix(js, svd.V());
+        namedObjects.addDataFrame(input.getVMatrixName(), V);
 
         if (input.computeU()) {
-            final JavaRDD<Row> U = RDDUtilsInJava.fromRowMatrix(svd.U());
-            namedObjects.addJavaRdd(input.getUMatrixName(), U);
+            final Dataset<Row> U = RDDUtilsInJava.fromRowMatrix(sparkContext, svd.U());
+            namedObjects.addDataFrame(input.getUMatrixName(), U);
         }
 
         //this would be an alternative to converting the matrices:
@@ -94,7 +89,8 @@ public class SVDJob implements SparkJob<SVDJobInput, SVDJobOutput> {
 //        JavaRDD<Object> named = getFromNamedRddsAsObject(aConfig.getOutputStringParameter(PARAM_RESULT_MATRIX_U));
 //        List<Object> l = named.take(1);
 //        SingularValueDecomposition<RowMatrix, Matrix> svd2 = (SingularValueDecomposition<RowMatrix, Matrix>)l.get(0);
-        LOGGER.log(Level.INFO, "SVD done");
+
+        LOGGER.info("SVD job done.");
         return jobOutput;
     }
 }

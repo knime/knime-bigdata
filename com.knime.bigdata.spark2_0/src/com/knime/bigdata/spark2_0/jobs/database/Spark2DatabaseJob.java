@@ -25,32 +25,27 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.rdd.RDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
 import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
 import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
 
 /**
- * Write given (named) RDD into JDBC table.
+ * Write given (named) data frame into a JDBC table.
  *
  * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class Spark2DatabaseJob implements SparkJobWithFiles<Spark2DatabaseJobInput, EmptyJobOutput> {
     private static final long serialVersionUID = 1L;
-
-    private final static Logger LOGGER = Logger.getLogger(Spark2DatabaseJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Spark2DatabaseJob.class.getName());
 
     @Override
     public EmptyJobOutput runJob(final SparkContext sparkContext, final Spark2DatabaseJobInput input,
@@ -60,24 +55,19 @@ public class Spark2DatabaseJob implements SparkJobWithFiles<Spark2DatabaseJobInp
 
         try {
             final String namedInputObject = input.getFirstNamedInputObject();
-            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
-            final RDD<Row> rowRdd = namedObjects.getRdd(namedInputObject);
-            final IntermediateSpec resultSchema = input.getSpec(namedInputObject);
-            final StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
+            final Dataset<Row> dataFrame = namedObjects.getDataFrame(namedInputObject);
 
-            LOGGER.info("Writing spark rdd " + namedInputObject + " into " + input.getTable());
+            LOGGER.info("Writing data frame " + namedInputObject + " into JDBC tabel " + input.getTable());
 
-            sqlContext.createDataFrame(rowRdd, sparkSchema)
-                .write()
+            dataFrame.write()
                 .mode(SaveMode.valueOf(input.getSaveMode()))
                 .jdbc(input.getUrl(), input.getTable(), input.getConnectionProperties());
 
-            LOGGER.info("Writing " + namedInputObject + " into JDBC table done.");
+            LOGGER.info("Writing data frame " + namedInputObject + " into JDBC table done.");
+            return EmptyJobOutput.getInstance();
 
         } catch(Exception e) {
             throw new KNIMESparkException("Failed to load JDBC data: " + e.getMessage(), e);
         }
-
-        return EmptyJobOutput.getInstance();
     }
 }

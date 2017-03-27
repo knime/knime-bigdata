@@ -22,8 +22,8 @@ package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
 import java.util.LinkedHashSet;
 
-import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.linalg.Vector;
 import org.knime.base.node.mine.cluster.PMMLClusterTranslator;
 import org.knime.base.node.mine.cluster.PMMLClusterTranslator.ComparisonMeasure;
 import org.knime.core.data.DataTableSpec;

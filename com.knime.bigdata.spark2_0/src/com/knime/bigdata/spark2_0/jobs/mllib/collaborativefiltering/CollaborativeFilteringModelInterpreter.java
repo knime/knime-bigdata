@@ -36,7 +36,7 @@ public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter
             new CollaborativeFilteringModelInterpreter();
 
     private CollaborativeFilteringModelInterpreter() {
-        //avoid object creation
+        // avoid object creation
     }
 
     /**
@@ -53,34 +53,21 @@ public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter
         }
         return instance;
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public String getModelName() {
         return MLlibCollaborativeFilteringNodeModel.MODEL_NAME;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSummary(final SparkModel sparkModel) {
-        final CollaborativeFilteringModel model = (CollaborativeFilteringModel)sparkModel.getModel();
-        return "Rank: " + model.rank(); //TODO - what is this? + " Log name: " + model.logName();
+        final CollaborativeFilteringModel model = (CollaborativeFilteringModel) sparkModel.getModel();
+        return "Rank: " + model.getRank() + ", User column: " + model.getUserFeaturesColumnName()
+            + ", Product column: " + model.getProductFeaturesColumnName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected String getHTMLDescription(final SparkModel sparkModel) {
-        final CollaborativeFilteringModel model = (CollaborativeFilteringModel)sparkModel.getModel();
-//        StringBuilder buf = new StringBuilder();
-//        RDD<Tuple2<Object, double[]>> userFeatures = model.userFeatures();
-//        createHTMLDesc(buf, "User" , userFeatures);
-//        RDD<Tuple2<Object, double[]>> productFeatures = model.productFeatures();
-//        createHTMLDesc(buf, "Product" , productFeatures);
-        return "Rank: " + model.rank(); //TODO - what is this? + " Log name: " + model.logName();
+        return getSummary(sparkModel);
     }
 }

@@ -60,11 +60,11 @@ public class NaiveBayesJob implements SparkJob<NaiveBayesJobInput, ModelJobOutpu
         LOGGER.log(Level.INFO, "starting Naive Bayes learner job...");
         final JavaRDD<Row> inputData = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
         final JavaRDD<LabeledPoint> trainingsData = SupervisedLearnerUtils.getTrainingData(input, inputData);
-        //cache input object to speedup calculation
+
         trainingsData.cache();
         final NaiveBayesModel model = NaiveBayes.train(trainingsData.rdd(), input.getLambda());
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, inputData, trainingsData, model,
-            LOGGER);
+        trainingsData.unpersist();
+
         LOGGER.log(Level.INFO, " Naive Bayes Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);

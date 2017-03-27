@@ -22,8 +22,8 @@ package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
 import java.util.List;
 
-import org.apache.spark.mllib.clustering.KMeansModel;
-import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.linalg.Vector;
 
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;

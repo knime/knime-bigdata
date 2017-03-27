@@ -22,11 +22,8 @@ package com.knime.bigdata.spark1_2.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.api.java.Row;
@@ -37,93 +34,102 @@ import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
 import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
- *
  * @author dwk
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public class MappedRDDContainer implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     /**
      * mapped data (original + converted data)
      */
-    public transient final JavaRDD<Row> m_RddWithConvertedValues;
+    private transient final JavaRDD<Row> m_rddWithConvertedValues;
 
     /**
      * the mappings of nominal values to numbers
      */
-    public final NominalValueMapping m_Mappings;
-
-    private Map<Integer, String> m_colNames;
+    private final NominalValueMapping m_mappings;
 
     /**
-     * @param aRddWithConvertedValues
-     * @param aMappings
+     * Appended column names
      */
-    public MappedRDDContainer(final JavaRDD<Row> aRddWithConvertedValues, final NominalValueMapping aMappings) {
-        if (aMappings == null) {
-            throw new NullPointerException("aMappings must not be null!");
-        }
-        m_RddWithConvertedValues = aRddWithConvertedValues;
-        m_Mappings = aMappings;
+    private final String m_appendedColNames[];
+
+    /**
+     * @param rddWithConvertedValues - rdd with mapped values
+     * @param mappings - mapping of this container
+     * @param appendedColumns - appended column names
+     */
+    public MappedRDDContainer(final JavaRDD<Row> rddWithConvertedValues, final NominalValueMapping mappings,
+            final String appendedColumns[]) {
+
+        m_rddWithConvertedValues = rddWithConvertedValues;
+        m_mappings = mappings;
+        m_appendedColNames = appendedColumns;
     }
 
     /**
-     * @param aColNames
+     * @return the rddWithConvertedValues
      */
-    private void setColumnNames(final Map<Integer, String> aColNames) {
-        m_colNames = Collections.unmodifiableMap(aColNames);
+    public JavaRDD<Row> getRddWithConvertedValues() {
+        return m_rddWithConvertedValues;
     }
 
     /**
+     * @return the mappings
+     */
+    public NominalValueMapping getMappings() {
+        return m_mappings;
+    }
+
+    /**
+     * @return appended column names
+     */
+    public String[] getAppendedColumnNames() {
+        return m_appendedColNames;
+    }
+
+    /**
+     * Creates a new container and generates appended column names array.
      *
-     * @return map with column names and their corresponding indices, includes original columns and mapped columns, does
-     *         not include columns that were not converted
+     * @param mappedRdd - rdd with mapped data
+     * @param columnIds - included (mapped) column indices
+     * @param columnNames - included (mapped) column names
+     * @param mappings - mapping of this container
+     * @param keepOriginalColumns - keep original columns or not
+     * @return new container
      */
-    public Map<Integer, String> getColumnNames() {
-        return m_colNames;
-    }
+    public static MappedRDDContainer createContainer(final JavaRDD<Row> mappedRdd,
+            final int[] columnIds, final String[] columnNames,
+            final NominalValueMapping mappings, final boolean keepOriginalColumns) {
 
-    /**
-     * extract a list of rows with mapping values from the mapped data, as a side effect, sets the column names in
-     * container
-     *
-     * @param aColNameForIndex
-     * @param aOffset
-     * @return list of rows with mapping values
-     */
-    public List<Row> createMappingTable(final Map<Integer, String> aColNameForIndex, int aOffset) {
-        final Map<Integer, String> colNames = new LinkedHashMap<>(aColNameForIndex);
-        final Iterator<MyRecord> iter = m_Mappings.iterator();
-        final List<Row> rows = new ArrayList<>();
-        String lastSeenName = null;
-        while (iter.hasNext()) {
-            MyRecord record = iter.next();
-            final String colName = aColNameForIndex.get(record.m_nominalColumnIndex);
-            RowBuilder builder = RowBuilder.emptyRow();
-            final String name;
-            if (m_Mappings.getType() == MappingType.BINARY) {
-                name = colName + "_" + record.m_nominalValue;
-                colNames.put(aOffset++, name);
-            } else {
-                name = colName + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
-                if (!name.equals(lastSeenName)) {
-                    colNames.put(aOffset++, name);
+        List<String> appendedColumns = new ArrayList<>();
+
+        if (mappings.getType() == MappingType.BINARY) {
+            // ordered by column index and mapped value index:
+            final Iterator<MyRecord> mappingIter = mappings.iterator();
+            MyRecord currentMapping = null;
+            for (int i : columnIds) {
+                if (mappings.hasMappingForColumn(i)) {
+                    int numValues = mappings.getNumberOfValues(i);
+                    for (int j = 0; j < numValues; j++) {
+                        currentMapping = mappingIter.next();
+                        String name = columnNames[i] + "_" + currentMapping.m_nominalValue;
+                        appendedColumns.add(name);
+                    }
                 }
-                lastSeenName = name;
             }
-            builder.add(name);
-            builder.add(record.m_nominalColumnIndex).add(record.m_nominalValue).add(record.m_numberValue);
-            rows.add(builder.build());
 
-            builder = RowBuilder.emptyRow();
-            builder.add(colName);
-            builder.add(record.m_nominalColumnIndex).add(record.m_nominalValue).add(record.m_numberValue);
-            rows.add(builder.build());
+        } else {
+            for (int i : columnIds) {
+                if (mappings.hasMappingForColumn(i)) {
+                    String name = columnNames[i] + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
+                    appendedColumns.add(name);
+                }
+            }
         }
 
-        setColumnNames(colNames);
-        return rows;
+        return new MappedRDDContainer(mappedRdd, mappings, appendedColumns.toArray(new String[0]));
     }
 }

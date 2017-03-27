@@ -311,6 +311,7 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
             "org.apache.spark",
             "org.apache.spark.sql",
             "org.apache.spark.sql.hive",
+            "org.apache.spark.ml",
             "org.apache.spark.mllib",
             "com.knime.bigdata.spark.core.exception",
             "org.apache.hadoop.conf",

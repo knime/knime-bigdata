@@ -4,8 +4,8 @@ Bundle-Name: KNIME Spark Executor jobs for Spark 2.0
 Bundle-SymbolicName: com.knime.bigdata.spark2_0;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Bundle-ClassPath: knime.jar,
- lib/job-server-api_2.10-0.6.2-KNIME_spark-1.6.1.jar,
- lib/knime-jobserver-utils-0.6.2-KNIME_spark-1.6.1.jar
+ lib/job-server-api_2.11-0.7.0-SNAPSHOT-KNIME_spark-2.0.0.jar,
+ lib/knime-jobserver-utils-0.7.0-SNAPSHOT-KNIME_spark-2.0.0.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark2_0.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
@@ -35,6 +35,7 @@ Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  com.typesafe.config;bundle-version="[1.3.0,2.0.0)",
  org.json4s.ast_2.10;bundle-version="3.2.11",
  org.json4s.core_2.10;bundle-version="3.2.11",
- org.json4s.jackson_2.10;bundle-version="3.2.11"
+ org.json4s.jackson_2.10;bundle-version="3.2.11",
+ org.scalactic;bundle-version="[2.2.6,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

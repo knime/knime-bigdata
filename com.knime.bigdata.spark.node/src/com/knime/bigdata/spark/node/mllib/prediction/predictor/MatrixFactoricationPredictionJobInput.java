@@ -20,6 +20,8 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -33,8 +35,9 @@ public class MatrixFactoricationPredictionJobInput extends PredictionJobInput {
 
     }
 
-    public MatrixFactoricationPredictionJobInput(final String namedInputObject, final Integer[] colIdxs, final String namedOutputObject) {
-        super(namedInputObject, colIdxs, namedOutputObject);
+    public MatrixFactoricationPredictionJobInput(final String namedInputObject,
+            final Integer[] colIdxs, final String namedOutputObject, final IntermediateSpec outputSpec) {
+        super(namedInputObject, colIdxs, namedOutputObject, outputSpec);
     }
 
 }

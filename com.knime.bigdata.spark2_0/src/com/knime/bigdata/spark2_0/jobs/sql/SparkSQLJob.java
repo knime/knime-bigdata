@@ -21,11 +21,9 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -51,7 +49,7 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
             throws KNIMESparkException, Exception {
 
         try {
-            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
+            final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
 
             final String tempTable = "sparkSQLJob_" + Long.toHexString(Math.abs(new Random().nextLong()));
             final String query = input.getQuery(tempTable);
@@ -59,21 +57,18 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
             LOGGER.info("Running Spark SQL query: " + query);
 
             final String namedInputObject = input.getFirstNamedInputObject();
-            final RDD<Row> rowRdd = namedObjects.getRdd(namedInputObject);
-            final IntermediateSpec inputSchema = input.getSpec(namedInputObject);
-            final StructType sparkSchema = TypeConverters.convertSpec(inputSchema);
-            final DataFrame inputDataFrame = sqlContext.createDataFrame(rowRdd, sparkSchema);
+            final Dataset<Row> inputDataFrame = namedObjects.getDataFrame(namedInputObject);
 
-            inputDataFrame.registerTempTable(tempTable);
+            inputDataFrame.createTempView(tempTable);
             try {
-                final DataFrame outputDataFrame = sqlContext.sql(query);
+                final Dataset<Row> outputDataFrame = sparkSession.sql(query);
                 final String namedOutputObject = input.getFirstNamedOutputObject();
                 final IntermediateSpec outputSchema = TypeConverters.convertSpec(outputDataFrame.schema());
-                namedObjects.addJavaRdd(namedOutputObject, outputDataFrame.toJavaRDD());
-                LOGGER.info("Running Spark SQL query done with RDD: " + namedOutputObject);
+                namedObjects.addDataFrame(namedOutputObject, outputDataFrame);
+                LOGGER.info("Running Spark SQL query done with data frame: " + namedOutputObject);
                 return new SparkSQLJobOutput(namedOutputObject, outputSchema);
-            }finally {
-                sqlContext.dropTempTable(tempTable);
+            } finally {
+                sparkSession.catalog().dropTempView(tempTable);
             }
         } catch(Exception e) {
             throw new KNIMESparkException("Failed to execute Spark SQL query: " + e.getMessage(), e);

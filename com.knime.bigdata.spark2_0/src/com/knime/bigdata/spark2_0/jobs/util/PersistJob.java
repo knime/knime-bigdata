@@ -20,11 +20,10 @@
  */
 package com.knime.bigdata.spark2_0.jobs.util;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.StorageLevels;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
 
@@ -41,22 +40,19 @@ import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
  */
 @SparkClass
 public class PersistJob implements SimpleSparkJob<PersistJobInput> {
-
     private static final long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(PersistJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PersistJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final PersistJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException, Exception {
-        final String name = input.getFirstNamedInputObject();
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(name);
+            throws KNIMESparkException, Exception {
+
+        final String key = input.getFirstNamedInputObject();
+        final Dataset<Row> dataFrame = namedObjects.getDataFrame(key);
         final StorageLevel level = StorageLevels.create(input.useDisk(), input.useMemory(), input.useOffHeap(),
             input.deserialized(), input.getReplication());
-        LOGGER.log(Level.INFO, "Persisting: " + name + " with storage level: " + level.description());
-        rowRDD.persist(level);
-        LOGGER.info(name + " successful persisted");
+        LOGGER.info("Persisting: " + key + " with storage level: " + level.description());
+        dataFrame.persist(level);
+        LOGGER.info(key + " successful persisted");
     }
 }
