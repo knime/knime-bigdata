@@ -91,7 +91,7 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
         m_optionsPanelConstraints = new GridBagConstraints();
         NodeUtils.resetGBC(m_optionsPanelConstraints);
 
-        m_filenameFlowVariable = createFlowVariableModel("sourceFilename", FlowVariable.Type.STRING);
+        m_filenameFlowVariable = createFlowVariableModel(GenericDataSource2SparkSettings.CFG_INPUT_PATH, FlowVariable.Type.STRING);
         m_filenameChooser = new RemoteFileChooserPanel(getPanel(), "Source file", false,
             "inputNameSpark_" + m_settings.getFormat(),
             RemoteFileChooser.SELECT_FILE_OR_DIR, m_filenameFlowVariable, null);

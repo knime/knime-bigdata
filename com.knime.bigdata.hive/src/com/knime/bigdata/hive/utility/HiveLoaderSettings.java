@@ -45,6 +45,10 @@ import org.knime.core.node.NodeSettingsWO;
  * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
  */
 public class HiveLoaderSettings {
+
+    /** Target folder settings key */
+    public static final String CFG_TARGET_FOLDER = "targetFolder";
+
     private String m_tableName;
 
     private String m_targetFolder;
@@ -175,7 +179,7 @@ public class HiveLoaderSettings {
      */
     public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_tableName = settings.getString("tableName");
-        m_targetFolder = settings.getString("targetFolder");
+        m_targetFolder = settings.getString(CFG_TARGET_FOLDER);
         m_dropTableIfExists = settings.getBoolean("dropTableIfExists");
         clearTypeMapping();
         settings.getNodeSettings("typeMap").copyTo(m_typeMap);
@@ -194,7 +198,7 @@ public class HiveLoaderSettings {
      */
     public void loadSettingsForDialog(final NodeSettingsRO settings) {
         m_tableName = settings.getString("tableName", "");
-        m_targetFolder = settings.getString("targetFolder", "");
+        m_targetFolder = settings.getString(CFG_TARGET_FOLDER, "");
         m_dropTableIfExists = settings.getBoolean("dropTableIfExists", false);
         m_valueDelimiter = settings.getString("valueDelimiter", "\\t");
         clearTypeMapping();
@@ -218,7 +222,7 @@ public class HiveLoaderSettings {
      */
     public void saveSettings(final NodeSettingsWO settings) {
         settings.addString("tableName", m_tableName);
-        settings.addString("targetFolder", m_targetFolder);
+        settings.addString(CFG_TARGET_FOLDER, m_targetFolder);
         settings.addBoolean("dropTableIfExists", m_dropTableIfExists);
         settings.addString("valueDelimiter", m_valueDelimiter);
         settings.addStringArray("partitionColumns", m_partitionColumns.toArray(new String[m_partitionColumns.size()]));

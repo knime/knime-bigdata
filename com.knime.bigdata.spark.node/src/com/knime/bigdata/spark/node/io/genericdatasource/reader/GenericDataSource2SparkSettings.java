@@ -44,7 +44,7 @@ public class GenericDataSource2SparkSettings {
     private final boolean m_hasDriver;
 
     /** Required input path. */
-    private static final String CFG_INPUT_PATH = "inputPath";
+    public static final String CFG_INPUT_PATH = "inputPath";
     private static final String DEFAULT_INPUT_PATH = "";
     private String m_path = DEFAULT_INPUT_PATH;
 
