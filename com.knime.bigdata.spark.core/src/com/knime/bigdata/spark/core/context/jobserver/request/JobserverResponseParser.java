@@ -92,6 +92,8 @@ public class JobserverResponseParser {
                     // *unknown* auth error situation. If we find those they should be incorporated into the known ones.
                     return ParsedResponse.createFailure(httpStatusCode, stringResponse, FailureReason.UNPARSEABLE_RESPONSE);
                 }
+            case 407:
+                return ParsedResponse.createFailure(httpStatusCode, stringResponse, FailureReason.PROXY_AUTHENTICATION_REQUIRED);
             case 413:
                 return ParsedResponse.createFailure(httpStatusCode, stringResponse, FailureReason.ENTITY_TOO_LARGE);
         }
