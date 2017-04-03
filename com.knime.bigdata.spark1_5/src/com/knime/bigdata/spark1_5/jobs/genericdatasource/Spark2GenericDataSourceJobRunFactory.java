@@ -38,6 +38,7 @@ import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDat
  */
 public class Spark2GenericDataSourceJobRunFactory extends DefaultJobWithFilesRunFactory<Spark2GenericDataSourceJobInput, EmptyJobOutput> {
 
+
     /** Constructor */
     public Spark2GenericDataSourceJobRunFactory() {
         super(Spark2GenericDataSourceNodeModel.JOB_ID);

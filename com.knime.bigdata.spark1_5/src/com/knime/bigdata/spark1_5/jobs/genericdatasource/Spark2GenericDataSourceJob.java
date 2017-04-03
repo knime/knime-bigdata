@@ -44,6 +44,8 @@ import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDat
 import com.knime.bigdata.spark1_5.api.NamedObjects;
 import com.knime.bigdata.spark1_5.api.SparkJobWithFiles;
 import com.knime.bigdata.spark1_5.api.TypeConverters;
+import com.knime.bigdata.spark1_5.hive.HiveContextProvider;
+import com.knime.bigdata.spark1_5.hive.HiveContextProvider.HiveContextAction;
 import com.knime.bigdata.spark1_5.jobs.scripting.java.JarRegistry;
 
 /**
@@ -74,9 +76,20 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
 
             final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(namedObject);
             final IntermediateSpec resultSchema = input.getSpec(namedObject);
-            StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
-            final SQLContext sqlContext = getContext(sparkContext, input);
-            final DataFrame schemaPredictedData = sqlContext.createDataFrame(rowRDD, sparkSchema);
+            final StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
+            final DataFrame schemaPredictedData;
+
+            if (input.useHiveContext()) {
+                schemaPredictedData = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
+                    @Override
+                    public DataFrame runWithHiveContext(final HiveContext hiveContext) {
+                        return hiveContext.createDataFrame(rowRDD, sparkSchema);
+                    }
+                });
+            } else {
+                final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
+                schemaPredictedData = sqlContext.createDataFrame(rowRDD, sparkSchema);
+            }
 
             final DataFrameWriter writer;
             if (input.overwriteNumPartitons()) {
@@ -106,13 +119,5 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
         LOGGER.info("Writing rdd " + namedObject + " into " + outputPath +  " done.");
 
         return new EmptyJobOutput();
-    }
-
-    private SQLContext getContext(final SparkContext sparkContext, final Spark2GenericDataSourceJobInput jobInput) {
-        if (jobInput.useHiveContext()) {
-            return new HiveContext(sparkContext);
-        } else {
-            return SQLContext.getOrCreate(sparkContext);
-        }
     }
 }

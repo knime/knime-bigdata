@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.JavaSchemaRDD;
 import org.apache.spark.sql.api.java.Row;
@@ -38,6 +36,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
 import com.knime.bigdata.spark1_2.api.NamedObjects;
 import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
+import com.knime.bigdata.spark1_2.hive.HiveContextProvider;
+import com.knime.bigdata.spark1_2.hive.HiveContextProvider.HiveContextAction;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD
@@ -51,25 +51,26 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
 
     private final static Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         LOGGER.log(Level.INFO, "reading hive table...");
 
-        final JavaHiveContext hiveContext = new JavaHiveContext(JavaSparkContext.fromSparkContext(sparkContext));
-        final String sqlStatement = input.getQuery();
-        LOGGER.log(Level.INFO, "sql statement: " + sqlStatement);
+        LOGGER.log(Level.INFO, "sql statement: " + input.getQuery());
 
-        final JavaSchemaRDD schemaInputRDD = hiveContext.sql(sqlStatement);
+        final JavaSchemaRDD dataFrame = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<JavaSchemaRDD>() {
+            @Override
+            public JavaSchemaRDD runWithHiveContext(final JavaHiveContext hiveContext) {
+                return hiveContext.sql(input.getQuery());
+            }
+        });
 
-        for (final StructField field : schemaInputRDD.schema().getFields()) {
+        for (final StructField field : dataFrame.schema().getFields()) {
             LOGGER.log(Level.FINE, "Field '" + field.getName() + "' of type '" + field.getDataType() + "'");
         }
-        final RDD<Row> rdd = schemaInputRDD.rdd();
+
+        final RDD<Row> rdd = dataFrame.rdd();
         final JavaRDD<Row> javaRDD = new JavaRDD<>(rdd, rdd.elementClassTag());
 
         final String key = input.getFirstNamedOutputObject();
