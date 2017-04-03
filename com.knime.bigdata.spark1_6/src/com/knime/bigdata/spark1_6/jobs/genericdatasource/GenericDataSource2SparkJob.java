@@ -41,6 +41,8 @@ import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSourc
 import com.knime.bigdata.spark1_6.api.NamedObjects;
 import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
 import com.knime.bigdata.spark1_6.api.TypeConverters;
+import com.knime.bigdata.spark1_6.hive.HiveContextProvider;
+import com.knime.bigdata.spark1_6.hive.HiveContextProvider.HiveContextAction;
 import com.knime.bigdata.spark1_6.jobs.scripting.java.JarRegistry;
 
 /**
@@ -59,9 +61,9 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
     public GenericDataSource2SparkJobOutput runJob(final SparkContext sparkContext, final GenericDataSource2SparkJobInput input,
             final List<File> inputFiles, final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
-        final SQLContext sqlContext = getContext(sparkContext, input);
         final String namedObject = input.getFirstNamedOutputObject();
         final String inputPath = FileSystem.getDefaultUri(new Configuration()).resolve(input.getInputPath()).toString();
+        final DataFrame dataFrame;
 
         LOGGER.info("Reading path " + inputPath + " into rdd " + namedObject);
 
@@ -70,13 +72,29 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
                 JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(inputFiles);
             }
 
-            final DataFrameReader reader = sqlContext.read().format(input.getFormat());
+            if (input.useHiveContext()) {
+                dataFrame = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
+                    @Override
+                    public DataFrame runWithHiveContext(final HiveContext hiveContext) {
+                        final DataFrameReader reader = hiveContext.read().format(input.getFormat());
 
-            if (input.hasOptions()) {
-                reader.options(input.getOptions());
+                        if (input.hasOptions()) {
+                            reader.options(input.getOptions());
+                        }
+
+                        return reader.load(inputPath);
+                    }
+                });
+            } else {
+                final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
+                final DataFrameReader reader = sqlContext.read().format(input.getFormat());
+
+                if (input.hasOptions()) {
+                    reader.options(input.getOptions());
+                }
+
+                dataFrame = reader.load(inputPath);
             }
-
-            final DataFrame dataFrame = reader.load(inputPath);
 
             for (final StructField field : dataFrame.schema().fields()) {
                 LOGGER.debug("Field '" + field.name() + "' of type '" + field.dataType() + "'");
@@ -92,14 +110,6 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
         } catch (Exception e) {
             throw new KNIMESparkException(
                 String.format("Failed to read input path with name '%s'. Reason: %s", inputPath, e.getMessage()));
-        }
-    }
-
-    private SQLContext getContext(final SparkContext sparkContext, final GenericDataSource2SparkJobInput jobInput) {
-        if (jobInput.useHiveContext()) {
-            return new HiveContext(sparkContext);
-        } else {
-            return SQLContext.getOrCreate(sparkContext);
         }
     }
 }
