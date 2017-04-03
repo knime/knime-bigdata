@@ -118,7 +118,7 @@ public abstract class AbstractJobserverRequest<T> {
     }
 
     protected void handleGeneralFailures(final ParsedResponse parsedResponse) throws KNIMESparkException {
-        switch(parsedResponse.getFailureReason()) {
+        switch (parsedResponse.getFailureReason()) {
             case UNPARSEABLE_RESPONSE:
             case REDIRECT:
                 throw createUnexpectedResponseException(parsedResponse);
@@ -126,12 +126,16 @@ public abstract class AbstractJobserverRequest<T> {
                 throw new KNIMESparkException("Request to Spark jobserver timed out.");
             case AUTHENTICATION_REQUIRED:
                 throw new KNIMESparkException(
-                    "Spark jobserver requires authentication. Please configure a username/password in File > Preferences > KNIME > Spark "
-                    + "(or the 'Create Spark Context node', if you are not using the default Spark context).");
+                    "Spark jobserver requires authentication. Please configure credentials in File > Preferences > KNIME > Spark "
+                        + "(or in the respective 'Create Spark Context' node).");
             case AUTHENTICATION_FAILED:
                 throw new KNIMESparkException(
-                    "Spark jobserver authentication failed. Please configure a correct username/password in File > Preferences > KNIME > Spark "
-                    + "(or the 'Create Spark Context node', if you are not using the default Spark context).");
+                    "Spark jobserver authentication failed. Please correct the credentials in File > Preferences > KNIME > Spark "
+                        + "(or in the respective 'Create Spark Context' node).");
+            case PROXY_AUTHENTICATION_REQUIRED:
+                throw new KNIMESparkException(
+                    "You are connecting to Spark jobserver via a proxy that requires authentication. Please configure proxy credentials in File > "
+                        + "Preferences > General > Network Connections.");
             case ENTITY_TOO_LARGE:
                 throw new KNIMESparkException(
                     "Request to Spark Jobserver failed, because the amount of uploaded data was too large.");

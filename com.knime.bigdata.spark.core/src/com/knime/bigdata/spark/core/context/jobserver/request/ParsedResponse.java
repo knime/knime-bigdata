@@ -62,9 +62,10 @@ public class ParsedResponse {
              */
             REDIRECT,
 
-            // /////////////////////// HTTP 401: Authentication related errors ///////////////////////
+            // /////////////////////// HTTP 401/407: Authentication related errors ///////////////////////
             AUTHENTICATION_REQUIRED,
             AUTHENTICATION_FAILED,
+            PROXY_AUTHENTICATION_REQUIRED,
 
             // /////////////////////// HTTP 413 ///////////////////////
             ENTITY_TOO_LARGE,
