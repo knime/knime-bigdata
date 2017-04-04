@@ -36,6 +36,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
 import com.knime.bigdata.spark1_5.api.NamedObjects;
 import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
+import com.knime.bigdata.spark1_5.hive.HiveContextProvider;
+import com.knime.bigdata.spark1_5.hive.HiveContextProvider.HiveContextAction;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD
@@ -49,20 +51,20 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
 
     private final static Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         LOGGER.log(Level.INFO, "reading hive table...");
 
-
-        final HiveContext hiveContext = new HiveContext(sparkContext);
         LOGGER.log(Level.INFO, "sql statement: " + input.getQuery());
 
-        final DataFrame dataFrame = hiveContext.sql(input.getQuery());
+        final DataFrame dataFrame = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
+            @Override
+            public DataFrame runWithHiveContext(final HiveContext hiveContext) {
+                return hiveContext.sql(input.getQuery());
+            }
+        });
 
         for (final StructField field : dataFrame.schema().fields()) {
             LOGGER.log(Level.FINE, "Field '" + field.name() + "' of type '" + field.dataType() + "'");
