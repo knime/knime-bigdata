@@ -115,9 +115,13 @@ public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
                     m_config.getContextName()));
                 break;
             case CONTEXT_INIT_FAILED:
-                throw new KNIMESparkException(
-                    "Failed to initialize Spark context " + KNIMESparkException.SEE_LOG_SNIPPET,
-                    parsedResponse.getThrowable());
+                String msg = "Failed to initialize Spark context " + KNIMESparkException.SEE_LOG_SNIPPET;
+                if (parsedResponse.getThrowable() != null) {
+                    msg = String.format("%s %s",
+                        parsedResponse.getThrowable().getOriginalMessage(),
+                        KNIMESparkException.SEE_LOG_SNIPPET);
+                }
+                throw new KNIMESparkException(msg, parsedResponse.getThrowable());
             default:
                 throw createUnexpectedResponseException(parsedResponse);
         }
