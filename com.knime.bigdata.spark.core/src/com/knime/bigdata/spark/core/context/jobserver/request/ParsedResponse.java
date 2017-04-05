@@ -106,7 +106,7 @@ public class ParsedResponse {
 
     private final FailureReason m_failureReason;
 
-    private final Throwable m_throwable;
+    private final RestoredThrowable m_throwable;
 
     private final String m_customErrorMessage;
 
@@ -120,7 +120,7 @@ public class ParsedResponse {
     private ParsedResponse(final int httpResponseStatus,
         final String httpResponseEntity,
         final FailureReason reason,
-        final Throwable throwable,
+        final RestoredThrowable throwable,
         final String customErrorMessage,
         final JsonStructure jsonBody,
         final boolean hasPlaintextBody) {
@@ -170,7 +170,7 @@ public class ParsedResponse {
     /**
      * @return the throwable
      */
-    public Throwable getThrowable() {
+    public RestoredThrowable getThrowable() {
         return m_throwable;
     }
 
@@ -250,7 +250,7 @@ public class ParsedResponse {
      * @return a parsed response instance
      */
     public static ParsedResponse createFailure(final int httpResponseStatus,
-        final String httpResponseEntity, final FailureReason reason, final Throwable throwable) {
+        final String httpResponseEntity, final FailureReason reason, final RestoredThrowable throwable) {
 
         return new ParsedResponse(httpResponseStatus, httpResponseEntity, reason, throwable, null, null, false);
     }
@@ -265,7 +265,7 @@ public class ParsedResponse {
      * @return a parsed response instance
      */
     public static ParsedResponse createFailure(final int httpResponseStatus,
-        final String httpResponseEntity, final Throwable throwable) {
+        final String httpResponseEntity, final RestoredThrowable throwable) {
         return new ParsedResponse(httpResponseStatus, httpResponseEntity, FailureReason.THROWABLE, throwable, null, null, false);
     }
 

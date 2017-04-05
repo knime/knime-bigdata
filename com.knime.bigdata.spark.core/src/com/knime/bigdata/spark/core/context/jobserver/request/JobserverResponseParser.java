@@ -250,15 +250,18 @@ public class JobserverResponseParser {
             && resultObject.containsKey("stack");
     }
 
-    private static Throwable restoreThrowable(final JsonObject resultObject) {
+    private static RestoredThrowable restoreThrowable(final JsonObject resultObject) {
 
-        String errorMessage = "n/a";
-        if (!resultObject.isNull("message")) {
+        String errorMessage = "No error message provided";
+        if (!resultObject.isNull("message")
+              && !resultObject.getString("message").isEmpty()
+              && !resultObject.getString("message").equals("null")) {
+
             errorMessage = resultObject.getString("message");
         }
 
         String errorClass = resultObject.getString("errorClass");
-        Throwable t = new Throwable(errorClass + ": " + errorMessage);
+        RestoredThrowable t = new RestoredThrowable(errorClass, errorMessage);
 
         // try to reconstruct stack trace from json
         Pattern traceLinePattern = Pattern.compile("^(.+)\\.([^(]+)\\(([^:]+)\\:(\\d+)\\)$");
