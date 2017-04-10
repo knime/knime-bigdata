@@ -64,6 +64,9 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
     /** Internal settings model */
     protected final T m_settings;
 
+    /** Connection info to use (might be null if not connected) */
+    private ConnectionInformation m_connectionInfo;
+
     private final FlowVariableModel m_filenameFlowVariable;
     private final RemoteFileChooserPanel m_filenameChooser;
 
@@ -111,11 +114,15 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
 
             @Override
             protected SparkDataTable prepareDataTable(final ExecutionMonitor exec) throws Exception {
-                final NodeSettings tmpSettings = new NodeSettings("preview");
-                saveSettingsTo(tmpSettings);
-                final GenericDataSource2SparkSettings prevSettings = m_settings.newInstance();
-                prevSettings.loadSettings(tmpSettings);
-                return GenericDataSource2SparkNodeModel.preparePreview(prevSettings, m_contextId, exec);
+                if (m_connectionInfo != null) {
+                    final NodeSettings tmpSettings = new NodeSettings("preview");
+                    saveSettingsTo(tmpSettings);
+                    final GenericDataSource2SparkSettings prevSettings = m_settings.newInstance();
+                    prevSettings.loadSettings(tmpSettings);
+                    return GenericDataSource2SparkNodeModel.preparePreview(prevSettings, m_contextId, m_connectionInfo, exec);
+                } else {
+                    throw new RuntimeException("Unable to load preview. Connection required.");
+                }
             }
         };
         addTab("Preview", m_previewPanel, false);
@@ -150,13 +157,12 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
-        ConnectionInformation connInfo = null;
         if (specs.length > 0 && specs[0] != null) {
-            connInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
+            m_connectionInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
         }
 
         m_settings.loadSettings(settings);
-        m_filenameChooser.setConnectionInformation(connInfo);
+        m_filenameChooser.setConnectionInformation(m_connectionInfo);
         m_filenameChooser.setSelection(m_settings.getInputPath());
 
         if (m_settings.hasDriver()) {

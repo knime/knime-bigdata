@@ -65,7 +65,7 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
             final NamedObjects namedObjects) throws KNIMESparkException {
 
         final String namedObject = input.getFirstNamedInputObject();
-        final String outputPath = FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
+        final String outputPath = getOutputPath(input);
 
         LOGGER.info("Writing rdd " + namedObject + " into " + outputPath);
 
@@ -120,4 +120,13 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
 
         return new EmptyJobOutput();
     }
+
+    private String getOutputPath(final Spark2GenericDataSourceJobInput input) {
+        if (input.useDefaultFS()) {
+            return FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
+        } else {
+            return input.getOutputPath();
+        }
+    }
+
 }

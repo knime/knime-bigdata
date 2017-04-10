@@ -36,6 +36,7 @@ public class GenericDataSource2SparkJobInput extends JobInput {
     private static final String KEY_FORMAT = "format";
     private static final String KEY_UPLOAD_DRIVER = "uploadDriver";
     private static final String KEY_INPUT_PATH = "inputPath";
+    private static final String KEY_USE_DEFAULT_FS = "useDefaultFS";
     private static final String KEY_USE_HIVE_CONTEXT = "useHiveContext";
     private static final String KEY_OPTIONS = "options";
 
@@ -49,14 +50,16 @@ public class GenericDataSource2SparkJobInput extends JobInput {
      * @param format - fully qualified or short format name (e.g. parquet)
      * @param uploadDriver - Upload local jar files or depend on cluster version.
      * @param inputPath - the input directory or file
+     * @param useDefaultFS - if false, input path should be a full URI
      */
     public GenericDataSource2SparkJobInput(final String namedOutputObject, final String format, final boolean uploadDriver,
-            final String inputPath) {
+            final String inputPath, final boolean useDefaultFS) {
 
         addNamedOutputObject(namedOutputObject);
         set(KEY_FORMAT, format);
         set(KEY_UPLOAD_DRIVER, uploadDriver);
         set(KEY_INPUT_PATH, inputPath);
+        set(KEY_USE_DEFAULT_FS, useDefaultFS);
     }
 
     /** @return format name */
@@ -67,6 +70,9 @@ public class GenericDataSource2SparkJobInput extends JobInput {
 
     /** @return Input path */
     public String getInputPath() { return get(KEY_INPUT_PATH); }
+
+    /** @return false, if input path is already a full URI */
+    public boolean useDefaultFS() { return get(KEY_USE_DEFAULT_FS); }
 
     /** @param useHiveContext - use hive context if true, SQL context otherwise */
     public void setUseHiveContext(final boolean useHiveContext) { set(KEY_USE_HIVE_CONTEXT, useHiveContext); }

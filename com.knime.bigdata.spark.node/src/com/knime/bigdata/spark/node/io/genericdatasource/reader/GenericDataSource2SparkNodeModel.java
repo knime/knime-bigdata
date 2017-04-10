@@ -21,11 +21,18 @@
 package com.knime.bigdata.spark.node.io.genericdatasource.reader;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.base.filehandling.remote.files.ConnectionMonitor;
+import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.cloud.core.file.CloudRemoteFile;
+import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -85,8 +92,9 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
             throw new InvalidSettingsException("No connection information available");
         }
 
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
-            throw new InvalidSettingsException("HDFS connection required");
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+                && !(connInfo instanceof CloudConnectionInformation)) {
+            throw new InvalidSettingsException("HDFS or cloud connection required");
         }
 
         m_settings.validateSettings();
@@ -103,8 +111,10 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
+        final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
+        final ConnectionInformation connInfo = object.getConnectionInformation();
         final SparkContextID contextID = getContextID(inData);
-        final SparkDataTable resultTable = runJob(m_settings, contextID, exec);
+        final SparkDataTable resultTable = runJob(m_settings, contextID, connInfo, exec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
 
         return new PortObject[] { sparkObject };
@@ -114,25 +124,47 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
      * Run job with given settings for preview table.
      * @param settings - Settings to use.
      * @param contextID - Context to run on.
+     * @param connectionInfo - Connection info to use.
      * @param exec - Execution monitor to use.
      * @return Result table
      * @throws Exception
      */
-    public static <T extends GenericDataSource2SparkSettings> SparkDataTable preparePreview(final T settings, final SparkContextID contextID, final ExecutionMonitor exec) throws Exception {
+    public static <T extends GenericDataSource2SparkSettings> SparkDataTable preparePreview(final T settings, final SparkContextID contextID,
+            final ConnectionInformation connectionInfo, final ExecutionMonitor exec) throws Exception {
+
         exec.setMessage("Running spark job and fetching preview");
-        return runJob(settings, contextID, exec);
+        return runJob(settings, contextID, connectionInfo, exec);
     }
 
-    private static <T extends GenericDataSource2SparkSettings> SparkDataTable runJob(final T settings, final SparkContextID contextID, final ExecutionMonitor exec) throws Exception {
+    private static <T extends GenericDataSource2SparkSettings> SparkDataTable runJob(final T settings, final SparkContextID contextID,
+            final ConnectionInformation connectionInfo, final ExecutionMonitor exec) throws Exception {
+
         final String format = settings.getFormat();
-        final String inputPath = settings.getInputPath();
         final boolean uploadDriver = settings.uploadDriver();
         ensureContextIsOpen(contextID);
         final JobWithFilesRunFactory<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);
 
         final String namedOutputObject = SparkIDs.createRDDID();
-        LOGGER.info("Loading " + inputPath + " into " + namedOutputObject + " rdd");
-        final GenericDataSource2SparkJobInput jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath);
+        LOGGER.info("Loading " + settings.getInputPath() + " into " + namedOutputObject + " rdd");
+        final GenericDataSource2SparkJobInput jobInput;
+
+        if (connectionInfo instanceof CloudConnectionInformation) {
+            try {
+                URI knimeUri = connectionInfo.toURI().resolve(settings.getInputPath());
+                ConnectionMonitor<? extends Connection> connectionMonitor = new ConnectionMonitor<Connection>();
+                RemoteFile<? extends Connection> remoteFile = RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
+                CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>) remoteFile;
+                final String inputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
+                jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath, false);
+            } catch(UnsupportedOperationException e) {
+                throw new InvalidSettingsException("Unsupported remote file connection.");
+            }
+
+        } else {
+            final String inputPath = settings.getInputPath();
+            jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath, true);
+        }
+
         settings.addReaderOptions(jobInput);
 
         try {
