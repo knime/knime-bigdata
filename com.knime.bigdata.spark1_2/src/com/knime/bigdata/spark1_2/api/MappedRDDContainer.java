@@ -110,9 +110,9 @@ public class MappedRDDContainer implements Serializable {
             // ordered by column index and mapped value index:
             final Iterator<MyRecord> mappingIter = mappings.iterator();
             MyRecord currentMapping = null;
-            for (int i : columnIds) {
-                if (mappings.hasMappingForColumn(i)) {
-                    int numValues = mappings.getNumberOfValues(i);
+            for (int i=0; i < columnIds.length; i++) {
+                if (mappings.hasMappingForColumn(columnIds[i])) {
+                    int numValues = mappings.getNumberOfValues(columnIds[i]);
                     for (int j = 0; j < numValues; j++) {
                         currentMapping = mappingIter.next();
                         String name = columnNames[i] + "_" + currentMapping.m_nominalValue;
@@ -122,8 +122,8 @@ public class MappedRDDContainer implements Serializable {
             }
 
         } else {
-            for (int i : columnIds) {
-                if (mappings.hasMappingForColumn(i)) {
+            for (int i=0; i < columnIds.length; i++) {
+                if (mappings.hasMappingForColumn(columnIds[i])) {
                     String name = columnNames[i] + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
                     appendedColumns.add(name);
                 }
