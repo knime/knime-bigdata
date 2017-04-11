@@ -21,11 +21,18 @@
 package com.knime.bigdata.spark.node.io.genericdatasource.writer;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.base.filehandling.remote.files.ConnectionMonitor;
+import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.cloud.core.file.CloudRemoteFile;
+import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -88,8 +95,9 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
             throw new InvalidSettingsException("No connection information available");
         }
 
-        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
-            throw new InvalidSettingsException("HDFS connection required");
+        if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+                && !(connInfo instanceof CloudConnectionInformation)) {
+            throw new InvalidSettingsException("HDFS or cloud connection required");
         }
 
         m_settings.loadDefault(tableSpec);
@@ -124,6 +132,9 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
 
+        final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
+        final ConnectionInformation connectionInfo = object.getConnectionInformation();
+
         final String format = m_settings.getFormat();
         final String outputPath = m_settings.getDirectory() + "/" + m_settings.getName();
         final String saveMode = m_settings.getSaveMode();
@@ -134,7 +145,24 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
 
         LOGGER.info("Writing " + rdd.getData().getID() + " rdd into " + outputPath);
         final JobWithFilesRunFactory<Spark2GenericDataSourceJobInput, EmptyJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(rdd.getContextID(), JOB_ID);
-        final Spark2GenericDataSourceJobInput jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver, outputPath, schema, saveMode);
+        final Spark2GenericDataSourceJobInput jobInput;
+
+        if (connectionInfo instanceof CloudConnectionInformation) {
+            try {
+                URI knimeUri = connectionInfo.toURI().resolve(outputPath);
+                ConnectionMonitor<? extends Connection> connectionMonitor = new ConnectionMonitor<Connection>();
+                RemoteFile<? extends Connection> remoteFile = RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
+                CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>) remoteFile;
+                final String clusterOutputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
+                jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver, clusterOutputPath, false, schema, saveMode);
+            } catch(UnsupportedOperationException e) {
+                throw new InvalidSettingsException("Unsupported remote file connection.");
+            }
+
+        } else {
+            jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver, outputPath, true, schema, saveMode);
+        }
+
         addPartitioning(rdd.getTableSpec(), jobInput);
         m_settings.addWriterOptions(jobInput);
 
