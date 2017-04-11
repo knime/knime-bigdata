@@ -110,8 +110,8 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
         m_enableLogging = new BooleanFieldEditor(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_ENABLED,
             "Enable Kerberos logging", getFieldEditorParent());
         addField(m_enableLogging);
-        m_loggingLevel = new RadioGroupFieldEditor(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_LEVEL, "Log level",
-            4, new String[][] {
+        m_loggingLevel = new RadioGroupFieldEditor(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_LEVEL,
+            "Console View Log Level", 4, new String[][] {
                 {"&DEBUG", LEVEL.DEBUG.name()},
 
                 {"&INFO", LEVEL.INFO.name()},
