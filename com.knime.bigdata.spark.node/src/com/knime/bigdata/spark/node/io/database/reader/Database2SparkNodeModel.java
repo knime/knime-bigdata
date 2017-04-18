@@ -25,7 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Random;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
@@ -66,8 +66,6 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
     public static final String JOB_ID = Database2SparkNodeModel.class.getCanonicalName();
 
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
-
-    private final Random m_rand = new Random();
 
     /** Constructor. */
     public Database2SparkNodeModel() {
@@ -212,7 +210,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
      * @return a random table name
      */
     private final String getTempTableName() {
-        return "tempTable_" + Math.abs(m_rand.nextLong());
+        return "tempTable_" + UUID.randomUUID().toString().replace('-', '_');
     }
 
     @Override

@@ -20,7 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.tfidf;
 
-import java.util.Random;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -64,7 +64,7 @@ public class TFIDFJob implements SimpleSparkJob<TFIDFJobInput> {
 
     private Dataset<Row> execute(final TFIDFJobInput config, final Dataset<Row> input) {
         final String inputColumn = input.columns()[config.getColIdx()];
-        final String wordsColumn = "words_" + Long.toHexString(Math.abs(new Random().nextLong()));
+        final String wordsColumn = "words_" + UUID.randomUUID().toString().replace('-', '_');
         final String rawFeaturesColumn = inputColumn + "_RawFeatures";
         final String featuresColumn = inputColumn + "_Features";
         final String separator = config.getTermSeparator();

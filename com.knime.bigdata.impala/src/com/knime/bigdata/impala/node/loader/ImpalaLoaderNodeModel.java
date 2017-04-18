@@ -26,14 +26,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -79,8 +78,6 @@ import com.knime.bigdata.impala.utility.ImpalaUtility;
  * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
  */
 class ImpalaLoaderNodeModel extends NodeModel {
-
-    private static final Random RND = new SecureRandom();
 
     private final ImpalaLoaderSettings m_settings = new ImpalaLoaderSettings();
 
@@ -223,7 +220,7 @@ class ImpalaLoaderNodeModel extends NodeModel {
             targetFolder += "/";
         }
         final URI folderUri = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(targetFolder));
-        final String tempFileName = "knime2impala" + Math.abs(RND.nextLong());
+        final String tempFileName = "knime2impala_" + UUID.randomUUID().toString().replace('-', '_');
         final URI targetUri = new URI(folderUri + tempFileName);
         remoteFile =
                 RemoteFileFactory.<HDFSConnection, HDFSRemoteFile>createRemoteFile(targetUri, connInfo, connMonitor);
@@ -320,7 +317,7 @@ class ImpalaLoaderNodeModel extends NodeModel {
     private void importPartitionedData(final HDFSRemoteFile remoteFile, final DataTableSpec tableSpec,
         final List<String> normalColumns, final StatementManipulator manip, final boolean tableAlreadyExists,
         final Statement st, final ExecutionContext exec) throws Exception {
-        final String tempTableName = m_settings.tableName() + "_" + Long.toHexString(Math.abs(new Random().nextLong()));
+        final String tempTableName = m_settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
 
         // first create an unpartitioned table
         exec.setProgress(0, "Creating temporary table");

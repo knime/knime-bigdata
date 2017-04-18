@@ -180,7 +180,7 @@ public class StructTypeBuilder {
                 if (isNullable) {
                     message.append("nullable ");
                 }
-                message.append("data type ").append(valueDataType.typeName()).append(" to value '")
+                message.append("data type ").append(dataType.getClass().getSimpleName()).append(" to value '")
                     .append(value).append("'");
                 if (value != null) {
                     message.append(" of type ").append(value.getClass().getSimpleName());
@@ -193,7 +193,7 @@ public class StructTypeBuilder {
         private boolean canBeGeneralizedTo(final DataType otherDataType) {
             assert otherDataType != null;
 
-            return otherDataType.equals(DataTypes.NullType) || otherDataType.equals(DataTypes.NullType)
+            return dataType.equals(DataTypes.NullType) || otherDataType.equals(DataTypes.NullType)
                 || otherDataType.equals(dataType);
         }
 

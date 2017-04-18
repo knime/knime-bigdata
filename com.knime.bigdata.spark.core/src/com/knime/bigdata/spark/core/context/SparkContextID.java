@@ -58,11 +58,13 @@ public class SparkContextID {
 
     @Override
     public boolean equals(final Object other) {
-        if (other.getClass() != getClass()) {
-            return false;
-        } else {
-            return ((SparkContextID)other).m_stringID.equals(m_stringID);
+        if (other == this) {
+            return true;
         }
+        if (!(other instanceof SparkContextID)) {
+            return false;
+        }
+        return ((SparkContextID)other).m_stringID.equals(m_stringID);
     }
 
     public String toPrettyString() {

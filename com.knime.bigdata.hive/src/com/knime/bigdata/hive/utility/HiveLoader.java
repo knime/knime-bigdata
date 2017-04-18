@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
@@ -183,7 +183,7 @@ public final class HiveLoader {
         final List<String> columnNames, final StatementManipulator manip, final boolean tableAlreadyExists,
         final Statement st, final ExecutionContext exec, final HiveLoaderSettings settings) throws Exception {
         LOGGER.debug("Start load partitioned data...");
-        String tempTableName = settings.tableName() + "_" + Long.toHexString(Math.abs(new Random().nextLong()));
+        String tempTableName = settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
         LOGGER.debug("Creating temporary table " + tempTableName);
         // first create an unpartitioned table
         exec.setProgress(0, "Creating temporary table");

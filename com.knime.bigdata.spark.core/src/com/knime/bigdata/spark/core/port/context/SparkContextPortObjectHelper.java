@@ -126,11 +126,11 @@ public class SparkContextPortObjectHelper implements SparkContextProvider {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof SparkContextPortObject)) {
+        if (!(obj instanceof SparkContextPortObjectHelper)) {
             return false;
         }
-        final SparkContextPortObject context = (SparkContextPortObject) obj;
-        return m_context.equals(context);
+        final SparkContextPortObjectHelper portObject = (SparkContextPortObjectHelper) obj;
+        return m_context.equals(portObject.m_context);
     }
 
     /**

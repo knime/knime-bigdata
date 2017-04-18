@@ -36,6 +36,7 @@ import scala.Tuple2;
 public class ModelUtils {
 
     private final static Logger LOGGER = Logger.getLogger(ModelUtils.class.getName());
+    private final static Random RAND = new Random();
 
     /**
      * @param includeColumnIndices indices of columns to be used for prediction
@@ -146,6 +147,6 @@ public class ModelUtils {
      * @return prefix concatenated with a random hex number
      */
     public static String getTemporaryColumnName(final String prefix) {
-        return prefix + "_" + Long.toHexString(Math.abs(new Random().nextLong()));
+        return prefix + "_" + Long.toHexString(RAND.nextLong());
     }
 }

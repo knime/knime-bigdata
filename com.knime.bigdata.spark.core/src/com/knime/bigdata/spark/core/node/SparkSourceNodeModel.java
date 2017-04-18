@@ -100,7 +100,7 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
     }
 
     private static SparkContextID tryGetContextFromInputs(final Object[] in) {
-        if (in != null && in.length >= 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
+        if (in != null && in.length > 0 && (in[in.length - 1] instanceof SparkContextProvider)) {
             return ((SparkContextProvider)in[in.length - 1]).getContextID();
         }
         return null;

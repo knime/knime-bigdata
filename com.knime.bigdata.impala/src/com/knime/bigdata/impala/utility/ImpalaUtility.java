@@ -93,7 +93,7 @@ public class ImpalaUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getStatementManipulator();
     }
@@ -106,7 +106,7 @@ public class ImpalaUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getAggregationFunctions();
     }
@@ -119,7 +119,7 @@ public class ImpalaUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getAggregationFunction(id);
     }

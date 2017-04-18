@@ -40,7 +40,7 @@ public class SparkVersion extends Version {
     /**Spark version 1.6.0.*/
     public static final SparkVersion V_1_6 = new SparkVersion(1, 6, 0);
 
-    /**Spark version 1.6.0.*/
+    /**Spark version 2.0.0.*/
     public static final SparkVersion V_2_0 = new SparkVersion(2, 0, 0);
 
     /**All {@link SparkVersion}s.*/
