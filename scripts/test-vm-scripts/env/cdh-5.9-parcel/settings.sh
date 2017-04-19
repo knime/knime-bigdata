@@ -1,6 +1,0 @@
-VM_NAME="cdh-5-9-0-parcel"
-JOB_SERVER_VARIANT="${SJS_VERSION}_cdh-5.9"
-JOB_SERVER_URL="http://$HOSTNAME:8090"
-TESTS="^/BigDataTests/trunk/(SparkExecutor|BigDataConnectors)/(spark_1_6|spark_all|Hive|Impala|HDFS)/.+"
-SERVICES="hdfs yarn hive impala"
-START_IMPALA="true"

@@ -1,1 +1,0 @@
-../cdh-5.7-base/prepare-vm.sh
