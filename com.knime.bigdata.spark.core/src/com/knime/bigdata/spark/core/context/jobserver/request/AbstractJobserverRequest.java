@@ -74,9 +74,9 @@ public abstract class AbstractJobserverRequest<T> {
             } catch (ProcessingException e) {
                 // Thrown by Java REST API when something went wrong while sending the request
                 // e.g. connection refused
-                throw new KNIMESparkException("Error connecting to Spark Jobserver. Possible reasons: Spark jobserver is down or invalid connection settings " + KNIMESparkException.SEE_LOG_SNIPPET, e);
+                throw new KNIMESparkException("Error connecting to Spark Jobserver. Possible reasons: Spark Jobserver is down or invalid connection settings " + KNIMESparkException.SEE_LOG_SNIPPET, e);
             } catch (RetryableKNIMESparkException e) {
-                // Thrown by the request class to indicate that an error has been returned by the jobserver
+                // Thrown by the request class to indicate that an error has been returned by the Jobserver
                 // but that it might make sense to repeat the request (up to maxAttempts times).
                 if (currentAttempt >= m_maxAttempts) {
                     throw e;
@@ -123,25 +123,26 @@ public abstract class AbstractJobserverRequest<T> {
             case REDIRECT:
                 throw createUnexpectedResponseException(parsedResponse);
             case REQUEST_TIMEOUT:
-                throw new KNIMESparkException("Request to Spark jobserver timed out.");
+                throw new KNIMESparkException("Request to Spark Jobserver timed out.");
             case AUTHENTICATION_REQUIRED:
                 throw new KNIMESparkException(
-                    "Spark jobserver requires authentication. Please configure credentials in File > Preferences > KNIME > Spark "
+                    "Spark Jobserver requires authentication. Please configure credentials in File > Preferences > KNIME > Spark "
                         + "(or in the respective 'Create Spark Context' node).");
             case AUTHENTICATION_FAILED:
                 throw new KNIMESparkException(
-                    "Spark jobserver authentication failed. Please correct the credentials in File > Preferences > KNIME > Spark "
+                    "Spark Jobserver authentication failed. Please correct the credentials in File > Preferences > KNIME > Spark "
                         + "(or in the respective 'Create Spark Context' node).");
             case PROXY_AUTHENTICATION_REQUIRED:
                 throw new KNIMESparkException(
-                    "You are connecting to Spark jobserver via a proxy that requires authentication. Please configure proxy credentials in File > "
+                    "You are connecting to Spark Jobserver via a proxy that requires authentication. Please configure proxy credentials in File > "
                         + "Preferences > General > Network Connections.");
             case ENTITY_TOO_LARGE:
                 throw new KNIMESparkException(
-                    "Request to Spark Jobserver failed, because the amount of uploaded data was too large.");
+                    "Request to Spark Jobserver failed, because the uploaded data exceeded that allowed by the Spark Jobserver. "
+                    + "For instructions to change this please see the installation guide (https://www.knime.org/knime-spark-executor#install).");
             case UNKNOWN:
                 logResponseAsError(parsedResponse);
-                throw new KNIMESparkException("Error on Spark jobserver: " + parsedResponse.getCustomErrorMessage());
+                throw new KNIMESparkException("Error on Spark Jobserver: " + parsedResponse.getCustomErrorMessage());
             case THROWABLE:
                 throw new KNIMESparkException(parsedResponse.getThrowable());
             case CONTEXT_NOT_FOUND:
@@ -153,7 +154,7 @@ public abstract class AbstractJobserverRequest<T> {
 
     protected KNIMESparkException createUnexpectedResponseException(final ParsedResponse parsedResponse) {
         logResponseAsError(parsedResponse);
-        return new KNIMESparkException(String.format("Spark Jobserver gave unexpected response %s. Possible reason: Incompatible jobserver version, malconfigured Spark jobserver", KNIMESparkException.SEE_LOG_SNIPPET));
+        return new KNIMESparkException(String.format("Spark Jobserver gave unexpected response %s. Possible reason: Incompatible Jobserver version, malconfigured Spark Jobserver", KNIMESparkException.SEE_LOG_SNIPPET));
     }
 
     protected String formatMessage(final String msg) {
