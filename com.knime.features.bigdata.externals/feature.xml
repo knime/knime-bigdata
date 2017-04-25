@@ -2,812 +2,612 @@
 <feature
       id="com.knime.features.bigdata.externals"
       label="Feature with all external plug-ins for the KNIME Big Data Extension"
-      version="1.8.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="KNIME GmbH, Konstanz, Germany">
-
-   <plugin
-         id="avro"
-         download-size="0"
-         install-size="0"
-         version="1.7.6"
-         unpack="false"/>
-
-   <plugin
-         id="avro.source"
-         download-size="0"
-         install-size="0"
-         version="1.7.6"
-         unpack="false"/>
-
-   <plugin
-         id="com.databricks.spark-avro_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.1"
-         unpack="false"/>
-
-   <plugin
-         id="com.databricks.spark-avro_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.1"
-         unpack="false"/>
-
-   <plugin
-         id="com.databricks.spark-csv_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.databricks.spark-csv_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.github.fommil.netlib.core"
-         download-size="0"
-         install-size="0"
-         version="1.1.2"
-         unpack="false"/>
-
-   <plugin
-         id="com.github.rwl.jtransforms"
-         download-size="0"
-         install-size="0"
-         version="2.4.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.thoughtworks.paranamer"
-         download-size="0"
-         install-size="0"
-         version="2.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.thoughtworks.paranamer"
-         download-size="0"
-         install-size="0"
-         version="2.6.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.thoughtworks.paranamer.source"
-         download-size="0"
-         install-size="0"
-         version="2.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.thoughtworks.paranamer.source"
-         download-size="0"
-         install-size="0"
-         version="2.6.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.typesafe.config"
-         download-size="0"
-         install-size="0"
-         version="1.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.typesafe.config.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.univocity.parsers"
-         download-size="0"
-         install-size="0"
-         version="1.5.1"
-         unpack="false"/>
-
-   <plugin
-         id="com.univocity.parsers.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.1"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-core-asl"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-core-asl.source"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-mapper-asl"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-mapper-asl.source"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
-         unpack="false"/>
-
-   <plugin
-         id="net.sf.opencsv"
-         download-size="0"
-         install-size="0"
-         version="2.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="net.sourceforge.f2j.arpack_combined_all"
-         download-size="0"
-         install-size="0"
-         version="0.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.compress"
-         download-size="0"
-         install-size="0"
-         version="1.4.1"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.compress.source"
-         download-size="0"
-         install-size="0"
-         version="1.4.1"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.csv"
-         download-size="0"
-         install-size="0"
-         version="1.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.csv.source"
-         download-size="0"
-         install-size="0"
-         version="1.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.hadoop.common"
-         download-size="0"
-         install-size="0"
-         version="2.7.2"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.hadoop.common.source"
-         download-size="0"
-         install-size="0"
-         version="2.7.2"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.hadoop.mapreduce-client-core"
-         download-size="0"
-         install-size="0"
-         version="2.7.2"
-         unpack="false"/>
-
+      
+      <!-- THIS FILE IS GENERATED BY generate_feature_xml.sh. MANUAL EDITS MAY THUS BE OVERWRITTEN --> 
+      
    <plugin
-         id="org.apache.hadoop.mapreduce-client-core.source"
-         download-size="0"
-         install-size="0"
-         version="2.7.2"
-         unpack="false"/>
+      id="com.databricks.spark-avro_2.10"
+      download-size="0"
+      install-size="0"
+      version="2.0.1.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="com.databricks.spark-avro_2.11"
+      download-size="0"
+      install-size="0"
+      version="3.2.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="com.databricks.spark-csv_2.10"
+      download-size="0"
+      install-size="0"
+      version="1.5.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="com.diffplug.osgi.extension.sun.misc"
+      download-size="0"
+      install-size="0"
+      version="1.0.0"
+      fragment="true"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="com.github.fommil.netlib.core"
+      download-size="0"
+      install-size="0"
+      version="1.1.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="com.github.rwl.jtransforms"
+      download-size="0"
+      install-size="0"
+      version="2.4.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="com.google.gson"
+      download-size="0"
+      install-size="0"
+      version="2.2.4"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="com.google.protobuf"
+      download-size="0"
+      install-size="0"
+      version="2.5.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="com.sun.istack.commons-runtime"
+      download-size="0"
+      install-size="0"
+      version="2.16.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="com.sun.jersey.jersey-client"
+      download-size="0"
+      install-size="0"
+      version="1.9.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.catalyst_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="com.sun.jersey.jersey-core"
+      download-size="0"
+      install-size="0"
+      version="1.9.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="com.sun.xml.bind.jaxb-merged"
+      download-size="0"
+      install-size="0"
+      version="2.2.7.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="com.sun.xml.fastinfoset.FastInfoset"
+      download-size="0"
+      install-size="0"
+      version="1.2.12.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="com.thoughtworks.paranamer"
+      download-size="0"
+      install-size="0"
+      version="2.3.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="com.thoughtworks.paranamer"
+      download-size="0"
+      install-size="0"
+      version="2.6.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="com.typesafe.config"
+      download-size="0"
+      install-size="0"
+      version="1.3.1"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="curator-client"
+      download-size="0"
+      install-size="0"
+      version="2.7.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="curator-framework"
+      download-size="0"
+      install-size="0"
+      version="2.7.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="curator-recipes"
+      download-size="0"
+      install-size="0"
+      version="2.7.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="io.netty.all"
+      download-size="0"
+      install-size="0"
+      version="4.0.23.Final-knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.core_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="jackson-core-asl"
+      download-size="0"
+      install-size="0"
+      version="1.9.13"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="jackson-jaxrs"
+      download-size="0"
+      install-size="0"
+      version="1.9.13"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="jackson-mapper-asl"
+      download-size="0"
+      install-size="0"
+      version="1.9.13"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="jackson-xc"
+      download-size="0"
+      install-size="0"
+      version="1.9.13"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="javax.servlet.jsp.api"
+      download-size="0"
+      install-size="0"
+      version="2.1.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="javax.xml.bind.jsr173_api"
+      download-size="0"
+      install-size="0"
+      version="1.0.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="junit"
+      download-size="0"
+      install-size="0"
+      version="4.8.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="net.sf.opencsv"
+      download-size="0"
+      install-size="0"
+      version="2.3.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="net.sourceforge.f2j.arpack_combined_all"
+      download-size="0"
+      install-size="0"
+      version="0.1.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="org.apache.avro"
+      download-size="0"
+      install-size="0"
+      version="1.7.4.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.hive_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons"
+      download-size="0"
+      install-size="0"
+      version="1.7.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="org.apache.commons"
+      download-size="0"
+      install-size="0"
+      version="1.8.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="org.apache.commons.cli"
+      download-size="0"
+      install-size="0"
+      version="1.2.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="org.apache.commons.codec"
+      download-size="0"
+      install-size="0"
+      version="1.4.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="org.apache.commons.collections"
+      download-size="0"
+      install-size="0"
+      version="3.2.2"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons.compress"
+      download-size="0"
+      install-size="0"
+      version="1.4.1"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="org.apache.commons.configuration"
+      download-size="0"
+      install-size="0"
+      version="1.6.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="org.apache.commons.digester"
+      download-size="0"
+      install-size="0"
+      version="1.8.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="org.apache.commons.io"
+      download-size="0"
+      install-size="0"
+      version="2.4.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="org.apache.commons.lang"
+      download-size="0"
+      install-size="0"
+      version="2.4.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons.lang"
+      download-size="0"
+      install-size="0"
+      version="2.6.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib-local_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons.math3"
+      download-size="0"
+      install-size="0"
+      version="3.1.1"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.mllib-local_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons.math3"
+      download-size="0"
+      install-size="0"
+      version="3.2.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sketch_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.commons.net"
+      download-size="0"
+      install-size="0"
+      version="3.1.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sketch_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.directory.api.asn1.api"
+      download-size="0"
+      install-size="0"
+      version="1.0.0.M20"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="org.apache.directory.api.i18n"
+      download-size="0"
+      install-size="0"
+      version="1.0.0.M20"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="org.apache.directory.api.util"
+      download-size="0"
+      install-size="0"
+      version="1.0.0.M20"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="org.apache.directory.server.i18n"
+      download-size="0"
+      install-size="0"
+      version="2.0.0.M15"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="org.apache.directory.server.kerberos.codec"
+      download-size="0"
+      install-size="0"
+      version="2.0.0.M15-knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.hadoop.client"
+      download-size="0"
+      install-size="0"
+      version="2.7.3.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.2.2.knime-20161024"
-         unpack="false"/>
+      id="org.apache.hadoop.zookeeper"
+      download-size="0"
+      install-size="0"
+      version="3.4.6"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.3.1"
-         unpack="false"/>
+      id="org.apache.htrace.core"
+      download-size="0"
+      install-size="0"
+      version="3.1.0.incubating-knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.5.2"
-         unpack="false"/>
+      id="org.apache.spark_2.10"
+      download-size="0"
+      install-size="0"
+      version="1.2.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.1"
-         unpack="false"/>
+      id="org.apache.spark_2.10"
+      download-size="0"
+      install-size="0"
+      version="1.3.1.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.sql_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.spark_2.10"
+      download-size="0"
+      install-size="0"
+      version="1.5.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.tags_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.spark_2.10"
+      download-size="0"
+      install-size="0"
+      version="1.6.3.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.tags_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.apache.spark_2.11"
+      download-size="0"
+      install-size="0"
+      version="2.0.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.unsafe_2.10"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.fusesource.leveldbjni.leveldbjni-all"
+      download-size="0"
+      install-size="0"
+      version="1.8.0"
+      unpack="false"/>
 
    <plugin
-         id="org.apache.spark.unsafe_2.10.source"
-         download-size="0"
-         install-size="0"
-         version="2.0.2"
-         unpack="false"/>
+      id="org.jblas"
+      download-size="0"
+      install-size="0"
+      version="1.2.3.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.jblas"
-         download-size="0"
-         install-size="0"
-         version="1.2.3"
-         unpack="false"/>
+      id="org.jboss.netty"
+      download-size="0"
+      install-size="0"
+      version="3.9.9.Final"
+      unpack="false"/>
 
    <plugin
-         id="org.jpmml.pmml-model"
-         download-size="0"
-         install-size="0"
-         version="1.1.15"
-         unpack="false"/>
+      id="org.jpmml.pmml-merged"
+      download-size="0"
+      install-size="0"
+      version="1.1.15.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.jpmml.pmml-model.source"
-         download-size="0"
-         install-size="0"
-         version="1.1.15"
-         unpack="false"/>
+      id="org.jpmml.pmml-merged"
+      download-size="0"
+      install-size="0"
+      version="1.2.15.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.json4s.ast_2.10"
-         download-size="0"
-         install-size="0"
-         version="3.2.11"
-         unpack="false"/>
+      id="org.json4s-merged_2.10"
+      download-size="0"
+      install-size="0"
+      version="3.2.10.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.json4s.core_2.10"
-         download-size="0"
-         install-size="0"
-         version="3.2.11"
-         unpack="false"/>
+      id="org.json4s-merged_2.11"
+      download-size="0"
+      install-size="0"
+      version="3.2.11.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.json4s.jackson_2.10"
-         download-size="0"
-         install-size="0"
-         version="3.2.11"
-         unpack="false"/>
+      id="org.mortbay.jetty.util"
+      download-size="0"
+      install-size="0"
+      version="6.1.26"
+      unpack="false"/>
 
    <plugin
-         id="org.scalactic"
-         download-size="0"
-         install-size="0"
-         version="2.2.6"
-         unpack="false"/>
+      id="org.scalactic_2.11"
+      download-size="0"
+      install-size="0"
+      version="2.2.6.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-compiler"
-         download-size="0"
-         install-size="0"
-         version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
-         unpack="false"/>
+      id="org.scala-lang.modules.scala-parser-combinators"
+      download-size="0"
+      install-size="0"
+      version="1.0.4"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-library"
-         download-size="0"
-         install-size="0"
-         version="2.10.5.v20150226-164155-VFINAL-88c5407613"
-         unpack="false"/>
+      id="org.scala-lang.modules.scala-xml"
+      download-size="0"
+      install-size="0"
+      version="1.0.5"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-library"
-         download-size="0"
-         install-size="0"
-         version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
-         unpack="false"/>
+      id="org.scala-lang.scala-compiler"
+      download-size="0"
+      install-size="0"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-library.source"
-         download-size="0"
-         install-size="0"
-         version="2.10.5.v20150226-164155-VFINAL-88c5407613"
-         unpack="false"/>
+      id="org.scala-lang.scala-compiler"
+      download-size="0"
+      install-size="0"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-library.source"
-         download-size="0"
-         install-size="0"
-         version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
-         unpack="false"/>
+      id="org.scala-lang.scala-library"
+      download-size="0"
+      install-size="0"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scalap"
-         download-size="0"
-         install-size="0"
-         version="2.10.6"
-         unpack="false"/>
+      id="org.scala-lang.scala-library"
+      download-size="0"
+      install-size="0"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-reflect"
-         download-size="0"
-         install-size="0"
-         version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
-         unpack="false"/>
+      id="org.scala-lang.scalap"
+      download-size="0"
+      install-size="0"
+      version="2.10.6.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.scala-lang.scala-reflect.source"
-         download-size="0"
-         install-size="0"
-         version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
-         unpack="false"/>
+      id="org.scala-lang.scalap"
+      download-size="0"
+      install-size="0"
+      version="2.11.11.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.scalanlp.breeze_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.10.0"
-         unpack="false"/>
+      id="org.scala-lang.scala-reflect"
+      download-size="0"
+      install-size="0"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      unpack="false"/>
 
    <plugin
-         id="org.scalanlp.breeze_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.11.2"
-         unpack="false"/>
+      id="org.scala-lang.scala-reflect"
+      download-size="0"
+      install-size="0"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
+      unpack="false"/>
 
    <plugin
-         id="org.scalanlp.breeze-macros_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.11.2"
-         unpack="false"/>
+      id="org.scalamacros.quasiquotes_2.10"
+      download-size="0"
+      install-size="0"
+      version="2.0.0.M8-knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.scalanlp.breeze-macros_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.3.1"
-         unpack="false"/>
+      id="org.scalanlp.breeze_2.10"
+      download-size="0"
+      install-size="0"
+      version="0.10.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.spire-math.spire_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.7.4"
-         unpack="false"/>
+      id="org.scalanlp.breeze-macros_2.10"
+      download-size="0"
+      install-size="0"
+      version="0.3.1.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.spire-math.spire-macros_2.10"
-         download-size="0"
-         install-size="0"
-         version="0.7.4"
-         unpack="false"/>
+      id="org.scalanlp.breeze-merged_2.10"
+      download-size="0"
+      install-size="0"
+      version="0.11.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.tukaani.xz"
-         download-size="0"
-         install-size="0"
-         version="1.0.0"
-         unpack="false"/>
+      id="org.scalanlp.breeze-merged_2.11"
+      download-size="0"
+      install-size="0"
+      version="0.11.2.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.tukaani.xz.source"
-         download-size="0"
-         install-size="0"
-         version="1.0.0"
-         unpack="false"/>
+      id="org.spire-math.spire-merged_2.10"
+      download-size="0"
+      install-size="0"
+      version="0.7.4.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.xerial.snappy.snappy-java"
-         download-size="0"
-         install-size="0"
-         version="1.0.5"
-         unpack="false"/>
+      id="org.spire-math.spire-merged_2.11"
+      download-size="0"
+      install-size="0"
+      version="0.7.4.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="org.xerial.snappy.snappy-java.source"
-         download-size="0"
-         install-size="0"
-         version="1.0.5"
-         unpack="false"/>
+      id="org.tukaani.xz"
+      download-size="0"
+      install-size="0"
+      version="1.0.0.knimebd-20170508"
+      unpack="false"/>
 
    <plugin
-         id="slf4j.api"
-         download-size="0"
-         install-size="0"
-         version="1.6.4"
-         unpack="false"/>
+      id="org.xerial.snappy.snappy-java"
+      download-size="0"
+      install-size="0"
+      version="1.0.4.1"
+      unpack="false"/>
 
    <plugin
-         id="slf4j.api.source"
-         download-size="0"
-         install-size="0"
-         version="1.6.4"
-         unpack="false"/>
+      id="org.znerd.xmlenc"
+      download-size="0"
+      install-size="0"
+      version="0.52.0.knimebd-20170508"
+      unpack="false"/>
 
 </feature>
