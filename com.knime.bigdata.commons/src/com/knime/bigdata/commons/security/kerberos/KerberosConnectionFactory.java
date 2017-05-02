@@ -90,6 +90,7 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
                 jdbcImpersonationURL = jdbcUrl;
             }
             final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
+            LOGGER.debug("Create jdbc connection with Kerberos user: " + ugi.toString());
             final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
                 @Override
                 public Connection run() throws Exception {
