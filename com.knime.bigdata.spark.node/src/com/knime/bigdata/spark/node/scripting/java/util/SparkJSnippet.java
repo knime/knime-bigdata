@@ -23,6 +23,8 @@ package com.knime.bigdata.spark.node.scripting.java.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
@@ -302,18 +304,36 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     public File[] getClassPath() throws IOException {
         if (m_classpathCache == null) {
             List<File> baseJars = m_helper.getSnippetClasspath();
-            String[] userJars = m_settings.getJarFiles();
+            File[] userJars = getUserJarFiles();
 
             m_classpathCache = new File[baseJars.size() + userJars.length];
             baseJars.toArray(m_classpathCache);
 
             int offset = baseJars.size();
             for (int i = 0; i < userJars.length; i++) {
-                m_classpathCache[offset + i] = new File(userJars[i]);
+                m_classpathCache[offset + i] = userJars[i];
             }
         }
 
         return m_classpathCache;
+    }
+
+    /**
+     * @return Translated user jar file location (translates knime://...)
+     */
+    public File[] getUserJarFiles() {
+        final String[] userJars = m_settings.getJarFiles();
+        final File[] userJarFiles = new File[userJars.length];
+
+        for (int i = 0; i < userJars.length; i++) {
+            try {
+                userJarFiles[i] =  FileUtil.getFileFromURL(new URL(userJars[i]));
+            } catch (MalformedURLException mue) {
+                userJarFiles[i] = new File(userJars[i]);
+            }
+        }
+
+        return userJarFiles;
     }
 
     /**
