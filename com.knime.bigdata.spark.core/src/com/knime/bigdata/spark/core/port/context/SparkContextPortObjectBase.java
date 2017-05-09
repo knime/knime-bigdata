@@ -40,7 +40,7 @@ import com.knime.bigdata.spark.core.port.SparkContextProvider;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkContextPortObjectHelper implements SparkContextProvider {
+public abstract class SparkContextPortObjectBase implements SparkContextProvider {
 
     /**
      * Key required to load legacy workflows (KNIME Spark Executor <= v1.3)
@@ -59,7 +59,7 @@ public class SparkContextPortObjectHelper implements SparkContextProvider {
      * Constructor.
      * @param contextID the {@link SparkContextID}
      */
-    protected SparkContextPortObjectHelper(final SparkContextID contextID) {
+    protected SparkContextPortObjectBase(final SparkContextID contextID) {
         m_context = contextID;
     }
 
@@ -116,36 +116,5 @@ public class SparkContextPortObjectHelper implements SparkContextProvider {
      */
     public JComponent[] getViews() {
         return new JComponent[] {new SparkContextConnectionView(m_context)};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof SparkContextPortObjectHelper)) {
-            return false;
-        }
-        final SparkContextPortObjectHelper portObject = (SparkContextPortObjectHelper) obj;
-        return m_context.equals(portObject.m_context);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return m_context.hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return m_context.toString();
     }
 }
