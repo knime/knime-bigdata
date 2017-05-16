@@ -49,6 +49,7 @@ package com.knime.bigdata.spark.node.scripting.java;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -357,7 +358,14 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
                 updateSnippet();
             }
         });
-        return m_jarPanel;
+
+        final JLabel warningLabel = new JLabel("The used libraries need to be present on your cluster and added to the class path of your Spark job server. They are not automatically uploaded!");
+        final JPanel warningPanel = new JPanel(new FlowLayout()); // center label
+        warningPanel.add(warningLabel);
+        final JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(m_jarPanel, BorderLayout.CENTER);
+        wrapper.add(warningPanel, BorderLayout.SOUTH);
+        return wrapper;
     }
 
     /** Create the templates tab. */
