@@ -37,7 +37,7 @@ import com.knime.bigdata.spark.core.context.SparkContextID;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkContextPortObject extends SparkContextPortObjectHelper implements PortObject {
+public class SparkContextPortObject extends SparkContextPortObjectBase implements PortObject {
 
     /**
      * Spark context port type.
@@ -86,7 +86,7 @@ public class SparkContextPortObject extends SparkContextPortObjectHelper impleme
         public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in,
             final PortObjectSpec spec, final ExecutionMonitor exec)
                     throws IOException, CanceledExecutionException {
-            final SparkContextID context = SparkContextPortObjectHelper.load(in);
+            final SparkContextID context = SparkContextPortObjectBase.load(in);
             return new SparkContextPortObject(context);
         }
     }

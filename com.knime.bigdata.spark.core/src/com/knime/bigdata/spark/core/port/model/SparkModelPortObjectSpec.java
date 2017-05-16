@@ -145,10 +145,10 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof SparkModelPortObject)) {
+        if (!(obj instanceof SparkModelPortObjectSpec)) {
             return false;
         }
-        SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec)obj;
+        final SparkModelPortObjectSpec spec = (SparkModelPortObjectSpec) obj;
         return m_model.equals(spec.m_model);
     }
 

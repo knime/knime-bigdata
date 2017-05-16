@@ -28,7 +28,7 @@ import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectHelper;
+import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
 
 /**
  * Class required to load legacy workflows. Please use
@@ -53,7 +53,7 @@ public class SparkContextPortObjectSpec extends com.knime.bigdata.spark.core.por
 
         @Override
         public SparkContextPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
-            final SparkContextID contextID = SparkContextPortObjectHelper.load(in);
+            final SparkContextID contextID = SparkContextPortObjectBase.load(in);
             return new SparkContextPortObjectSpec(contextID);
         }
     }

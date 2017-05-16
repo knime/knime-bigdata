@@ -107,7 +107,7 @@ public class HiveUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getStatementManipulator();
     }
@@ -120,7 +120,7 @@ public class HiveUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getAggregationFunction(id);
     }
@@ -133,7 +133,7 @@ public class HiveUtility extends DatabaseUtility {
         try {
             LICENSE_CHECKER.checkLicense();
         } catch (LicenseException e) {
-            new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         return super.getAggregationFunctions();
     }

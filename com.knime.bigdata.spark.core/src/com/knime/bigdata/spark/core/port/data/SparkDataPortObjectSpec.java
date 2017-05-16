@@ -106,10 +106,10 @@ public class SparkDataPortObjectSpec extends SparkContextPortObjectSpec {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof SparkDataPortObject)) {
+        if (!(obj instanceof SparkDataPortObjectSpec)) {
             return false;
         }
-        SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)obj;
+        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec) obj;
         return m_data.equals(spec.m_data);
     }
 

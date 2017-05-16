@@ -32,7 +32,7 @@ import com.knime.bigdata.spark.core.context.SparkContextID;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkContextPortObjectSpec extends SparkContextPortObjectHelper implements PortObjectSpec {
+public class SparkContextPortObjectSpec extends SparkContextPortObjectBase implements PortObjectSpec {
 
     /**
      * Creates a Spark context port object.
@@ -54,7 +54,7 @@ public class SparkContextPortObjectSpec extends SparkContextPortObjectHelper imp
         }
         @Override
         public SparkContextPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
-            final SparkContextID contextID = SparkContextPortObjectHelper.load(in);
+            final SparkContextID contextID = SparkContextPortObjectBase.load(in);
             return new SparkContextPortObjectSpec(contextID);
         }
     }

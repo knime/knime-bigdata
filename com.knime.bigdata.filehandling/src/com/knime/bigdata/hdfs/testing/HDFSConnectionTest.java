@@ -41,6 +41,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.UUID;
 
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -140,7 +141,7 @@ public class HDFSConnectionTest {
     }
 
     private static String createDir(final String prefix) {
-        return prefix + Math.abs(RND.nextLong()) + "/";
+        return prefix + "_" + UUID.randomUUID().toString().replace('-', '_') + "/";
     }
 
     private static String createFile() {

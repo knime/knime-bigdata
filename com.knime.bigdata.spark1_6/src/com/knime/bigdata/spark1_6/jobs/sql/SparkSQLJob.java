@@ -17,7 +17,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.sql;
 
-import java.util.Random;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -53,7 +53,7 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
         try {
             final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
 
-            final String tempTable = "sparkSQLJob_" + Long.toHexString(Math.abs(new Random().nextLong()));
+            final String tempTable = "sparkSQLJob_" + UUID.randomUUID().toString().replace('-', '_');
             final String query = input.getQuery(tempTable);
 
             LOGGER.info("Running Spark SQL query: " + query);

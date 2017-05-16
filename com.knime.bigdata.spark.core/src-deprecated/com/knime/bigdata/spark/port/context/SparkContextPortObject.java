@@ -29,7 +29,7 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectHelper;
+import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
 
 /**
  * Class required to load legacy workflows. Please use
@@ -62,7 +62,7 @@ public class SparkContextPortObject extends com.knime.bigdata.spark.core.port.co
         public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in, final PortObjectSpec spec,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 
-            final SparkContextID context = SparkContextPortObjectHelper.load(in);
+            final SparkContextID context = SparkContextPortObjectBase.load(in);
             return new SparkContextPortObject(context);
         }
     }

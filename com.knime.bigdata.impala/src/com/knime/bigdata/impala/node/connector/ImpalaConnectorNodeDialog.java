@@ -144,9 +144,8 @@ class ImpalaConnectorNodeDialog extends NodeDialogPane {
 
         if (!ImpalaDriverDetector.getDriverName().equals(m_settings.getDriver())) {
             m_driver.setIcon(BigDataIcons.WARNING_ICON);
-            m_driver.setToolTipText(String.format(
-                "Clicking 'OK' or 'Apply' will change the driver to the one displayed and the node will be reset.",
-                m_settings.getDriver()));
+            m_driver.setToolTipText(
+                "Clicking 'OK' or 'Apply' will change the driver to the one displayed and the node will be reset.");
             m_driver.setText(ImpalaDriverDetector.mapToPrettyDriverName(ImpalaDriverDetector.getDriverName()));
         } else {
             m_driver.setIcon(null);
