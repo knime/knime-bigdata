@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.knime.update.bigdata.externals</name>
+	<name>bigdata-externals-parent</name>
 	<comment></comment>
 	<projects>
 	</projects>

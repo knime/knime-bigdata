@@ -1,0 +1,607 @@
+# version will be appended the OSGI version qualifier of all
+# generated bundles which were either (1) newly created or (2) an existing bunde was rebundled.
+version: knimebd-20170508
+
+# Global switch to control wheter source bundles will be created.
+# Defaults to true.
+source: false
+
+properties:
+  spark1_2: 1.2.2
+  spark1_3: 1.3.1
+  spark1_5: 1.5.2
+  spark1_6: 1.6.3
+  spark2_0: 2.0.2
+  spark2_1: 2.1.0
+  knime_log4j_version: 1.2.15
+  knime_slf4j_version: 1.7.2
+  knime_jackson_version: 2.7.1
+  knime_guava_version: 19.0.0
+  knime_commons_httpclient_version: 3.1.0
+  knime_httpcomponents_httpclient_version: 4.3.6
+  knime_httpcomponents_httpcore_version: 4.3.3
+  knime_servletapi_version: 3.1.0
+  knime_xerces_version: 2.9.0
+  
+  jackson_module_scala_version: 2.7.2
+  jsr305_version: 3.0.2
+  
+  # taken from spark's hadoop-2.7 profile (with update to curator, see
+  # https://issues.apache.org/jira/browse/SPARK-13933)
+  hadoop_version: 2.7.3
+  jets3t_version: 0.9.3
+  zookeeper_version: 3.4.6
+  curator_version: 2.7.0
+  netty_version: 3.9.9.Final
+  
+  scalactic_version: 2.2.6
+  scala2_10: 2.10.6
+  scala2_11: 2.11.11
+  
+# mavenBlacklist specifies maven artifacts that should not get bundled (nor its transitive dependencies unless they are pulled in
+# by other artifacts).
+#
+# Note that this blacklist only affect what gets *bundled*. It is still
+# possible for other artifacts to *depend* on blacklisted artifacts. These dependencies
+# must be dealt with manually:
+#
+#   - Case 1: The backlisted artifact is "externally provided". In this case you need to
+#     specify a matching requireBundleOverride or importPackageOverride. An example is log4j, which
+#     is already provided by KNIME as bundle org.apache.log4j.
+#
+#   - Case 2: You also want the dependencies on the blacklisted artifact to be dropped, e.g. because
+#     they are test or runtime dependencies that you don't want bundled. In this case specifiy a matching entry
+#     in mavenDependencyBlacklist.
+# 
+# Syntax:
+#   - <mvn-coordinate-regex>
+mavenBlacklist:
+  # Equinox/OSGI already provides these:
+  - javax\.annotation:.*
+  - javax\.activation:activation:jar:.*
+  - javax\.xml\.bind:jaxb-api:.*
+  - stax:stax-api:jar:.*
+  - org\.osgi:.*
+
+  # KNIME TP already provides these:
+  - log4j:.*
+  - org\.slf4j:(?!slf4j-ext).*
+  - com\.fasterxml\.jackson\.core:.*
+  - com\.google\.guava:guava:.*
+  - commons-httpclient:commons-httpclient:jar:.*
+  - org\.apache\.httpcomponents:httpclient:jar:.*
+  - org\.apache\.httpcomponents:httpcore:jar:.*
+  - javax\.servlet:servlet-api:jar:.*
+  - javax\.servlet:javax\.servlet-api:jar:.*
+  - commons-logging:commons-logging:jar:.*
+  - xerces:xercesImpl:jar:.*
+  
+  # javax.annotation packages from jsr305  are never required at runtime
+  - com\.google\.code\.findbugs:jsr305:jar:.*
+  
+  # this is a dummy artifact that Spark uses along with the shading plug-in
+  - org\.spark-project\.spark:unused:.*
+  
+  # not properly scoped to "test", see https://issues.apache.org/jira/browse/AVRO-1755
+  - org\.apache\.avro:avro-ipc:tests:.*
+  
+  # we don't need javadoc for arpack (javadoc should not be packaged like this anyway)
+  - net\.sourceforge\.f2j:arpack_combined_all:javadoc:.*
+  
+  # org.fusesource.leveldbjni:leveldbjni-all is an uber jar that contains all of its dependencies
+  # hence we don't need those
+  - org\.fusesource\.leveldbjni:leveldbjni(?!-all).*
+  
+  # we don't need the hive shims for Hadoop 0.X from org.spark-project.hive.shims
+  - org\.spark-project\.hive\.shims:hive-shims-0\..*
+  
+  # this is a dependency of org.spark-project.hive:hive-exec which is
+  # quite outdated (hopefull we will never need it)
+  - org\.iq80\.snappy:snappy:jar:.*
+  
+  # this is a compile dependency of spark-tags which is however only
+  # needed for tests, see https://issues.apache.org/jira/browse/SPARK-17807
+  - org\.scalatest:scalatest.*:jar:.*
+  
+  # jaxb-runtime is a dependency of pmml-model 1.2.x (required by spark mllib)
+  # It is required for reading PMML documents, which Spark never does. If a proper pmml-model 1.2.x
+  # is ever required, we should make a proper bundle for it
+  - org\.glassfish\.jaxb:jaxb-runtime:jar:.*
+  
+  
+# mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
+# collection. If there is a maven dependency A -> B, and B is on this blacklist, this has the following effect:
+#   - B will be dropped from B's list of dependencies (no Require-Bundle entry)
+#   - B and its dependencies will not be packaged as an OSGI bundles
+#
+# NOTE: mavenDependencyBlacklist is best used in conjunction with mavenBlacklist (see respective documentation)
+#
+# Syntax:
+#   - <mvn-coordinate-regex>
+#
+mavenDependencyBlacklist:
+  # throw away maven dependencies on osgi components, because the maven artifacts that have these dependencies
+  # are already OSGI bundles
+  - org\.osgi:.*
+
+  # runtime dependencies of some log4j and slf4j artifacts (they are useless anyway)
+  - log4j:apache-log4j-extras:.*
+  - org\.slf4j:slf4j-jdk14:.*
+  - org\.slf4j:jcl-over-slf4j:.*
+  - org\.slf4j:slf4j-log4j12:.*
+  - org\.slf4j:jul-to-slf4j:.*
+  
+  # javax.annotation packages from jsr305  are never required at runtime
+  - com\.google\.code\.findbugs:jsr305:jar:.*
+
+  # dummy dependency that Spark uses along with the shading plug-in
+  - org\.spark-project\.spark:unused:.*
+
+  # not properly scoped to "test", see https://issues.apache.org/jira/browse/AVRO-1755
+  - org\.apache\.avro:avro-ipc:tests:.*
+  
+  # we don't need javadoc for arpack (javadoc should not be packaged like this anyway)
+  - net\.sourceforge\.f2j:arpack_combined_all:javadoc:.*
+  
+  # org.fusesource.leveldbjni:leveldbjni-all is already an uber jar that contains all of its dependencies
+  # hence we don't need those
+  - org\.fusesource\.leveldbjni:leveldbjni(?!-all).*
+  
+  # we don't need the hive shims for Hadoop 0.X from org.spark-project.hive.shims
+  - org\.spark-project\.hive\.shims:hive-shims-0\..*
+  
+  # this is a dependency of org.spark-project.hive:hive-exec which is
+  # quite outdated (hopefully we will never need it)
+  - org\.iq80\.snappy:snappy:jar:.*
+  
+  # this is a compile dependency of spark-tags which is however only
+  # needed for tests, see https://issues.apache.org/jira/browse/SPARK-17807
+  - org\.scalatest:scalatest.*:jar:.*
+  
+  # jaxb-runtime is a dependency of pmml-model 1.2.x (required by spark mllib)
+  # It is required for reading PMML documents, which Spark never does. If a proper pmml-model 1.2.x
+  # is ever required, we should make a proper bundle for it
+  - org\.glassfish\.jaxb:jaxb-runtime:jar:.*
+  
+#  # hadoop-annotations depends jdiff (provided scope), but not at runtime 
+#  - jdiff:jdiff:jar:.*
+  
+  # optional dependency of io.netty:netty-all:jar:4.0.23.Final that causes resolution failure
+  - io\.netty:netty-transport-native-epoll:.*:4\.0\.23\.Final
+  
+  # hive-metastore will be merged with hive-exec and other hive-* artifacts
+  # since we are doing a requireBundleOverride for hive-exec we don't need the dependency to
+  # hive-metastore anymore  
+  # - org.spark-project.hive:hive-metastore:-*
+
+
+# Let's say, artifact A depends on artifact B in version 1.2.1. By default, such a maven dependency is translated 
+# into a Require-Bundle clause that says bundle A depends on bundle B version range [1.2,1.3).
+# Sometimes you want to override this default mechanism because you know better. Under requireBundleOverrides 
+# you can specify such an override. Each override specifies... 
+#   - coordPattern: a regular expression applied to the *maven* coordinate of a *maven* dependency (i.e. B in the above example)
+#   - replacement: a RequireBundle clause, e.g. org.apache.log4j;bundle-version="[1.2.0,1.3.0)"
+#
+# NOTE: requireBundleOverrides is best used in conjunction with mavenBlacklist (see respective documentation)
+#
+# NOTE: The list of overrides is order sensitive. The first override whose pattern matches will be used. 
+#
+# Syntax:
+#   - coordPattern: <mvn-coordinate-regex>
+#     replacement: <RequireBundle-Clause>[,<RequireBundle-Clause>[,...]]
+#
+requireBundleOverrides:
+  # KNIME TP already provides these:
+  - coordPattern: org\.slf4j:slf4j-api:.*
+    replacement: org.slf4j.api;bundle-version="${knime_slf4j_version}"
+    
+  - coordPattern: log4j:log4j:.*
+    replacement: org.apache.log4j;bundle-version="${knime_log4j_version}"
+   
+  - coordPattern: com\.google\.guava:guava:jar:.*
+    replacement: com.google.guava;bundle-version=${knime_guava_version}
+  
+  - coordPattern: commons-httpclient:commons-httpclient:jar:.*
+    replacement: org.apache.commons.httpclient;bundle-version=${knime_commons_httpclient_version}
+    
+  - coordPattern: org.apache.httpcomponents:httpclient:jar:.*
+    replacement: org.apache.httpcomponents.httpclient;bundle-version=${knime_httpcomponents_httpclient_version}
+
+  - coordPattern: org.apache.httpcomponents:httpcore:jar:.*
+    replacement: org.apache.httpcomponents.httpcore;bundle-version=${knime_httpcomponents_httpcore_version}
+
+  - coordPattern: com\.fasterxml\.jackson\.core:([^:]*):jar:.*
+    replacement: com.fasterxml.jackson.core.${1};bundle-version="${knime_jackson_version}"
+    
+  - coordPattern: javax\.servlet:servlet-api:jar:.*
+    replacement: javax.servlet;bundle-version="${knime_servletapi_version}"
+  
+  - coordPattern: javax\.servlet:javax\.servlet-api:jar:.*
+    replacement: javax.servlet;bundle-version="${knime_servletapi_version}"
+    
+  - coordPattern: xerces:xercesImpl:jar:.*
+    replacement: org.apache.xerces;bundle-version="${knime_xerces_version}"
+    
+    
+  # Rewrites spark-hive's dependency on hive-exec to a precise version of the (merged) org.spark-project.hive bundle
+  # This prevents faulty wiring because 
+#  - coordPattern: org\.spark-project\.hive:hive-exec:jar:0\.13\.1a
+#    replacement: org.spark-project.hive;bundle-version="[0.0.0.0131a-knime,0.0.0.0131a-knime]"
+#  - coordPattern: org\.spark-project\.hive:hive-exec:jar:1\.2\.1\.spark
+#    replacement: org.spark-project.hive;bundle-version="[1.2.1.spark-knime,1.2.1.spark-knime]"
+#  - coordPattern: org\.spark-project\.hive:hive-exec:jar:1\.2\.1\.spark2
+#    replacement: org.spark-project.hive.exec;bundle-version="[1.2.1.spark2-${tp.version},1.2.1.spark2-${tp.version}]"
+  
+ 
+# Let's say, artifact A depends on artifact B in version 1.2.1. By default, such a maven dependency is translated 
+# into a Require-Bundle clause that says bundle A depends on bundle B version range [1.2,1.3).
+# Sometimes you want to override this default mechanism with an Import-Package (instead of Require-Bundle)
+# because you know better.
+#
+# NOTE: importPackageOverrides is best used in conjunction with mavenBlacklist (see respective documentation)
+#
+# Syntax:
+#   - coordPattern: <mvn-coordinate-regex>
+#     replacement: <bnd-import-package-instruction>[,<bnd-import-package-instruction>[,...]]
+#
+importPackageOverrides:
+  # OSGI already provides these because they are part of J2SE
+  - coordPattern: javax\.annotation:.*
+    replacement: javax.annotation.*
+  
+  - coordPattern: javax\.activation:activation:jar:.*
+    replacement: javax.activation.*
+  
+  - coordPattern: javax\.xml\.bind:jaxb-api:.*
+    replacement: javax.xml.bind.*
+    
+  - coordPattern: stax:stax-api:jar:.*
+    replacement: javax.xml.*
+    
+    
+  # KNIME TP provides these
+  - coordPattern: commons-logging:commons-logging:jar:.*
+    replacement: org.apache.commons.logging.*;version="[1.1,2)"
+
+# mavenDependencyOverrides 
+# use this to *redirect* maven dependencies. The intended
+# usage scenario is that you redirect to maven artifacts that you actually 
+# want to package as bundles (so they shouldn't be on mavenBlacklist).
+#
+# Syntax:
+#   - coordPattern: <mvn-coordinate-regex>
+#     replacement: <mvn-coordinate>
+#
+mavenDependencyOverrides:  
+  # limit everything to one version of scala 2.10/2.11
+  - coordPattern: org\.scala-lang:([^:]*):jar:2\.10\..*
+    replacement: org.scala-lang:${1}:jar:${scala2_10}
+  - coordPattern: org\.scala-lang:([^:]*):jar:2\.11\..*
+    replacement: org.scala-lang:${1}:jar:${scala2_11}
+
+  # mimics the hadoop2 profile for avro-mapred
+  - coordPattern: org\.apache\.hadoop:hadoop-core:jar:.*
+    replacement: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
+
+  # mimics the hadoop-2.7 profile for spark
+  - coordPattern: org\.apache\.hadoop:([^:]*):jar:.*
+    replacement: org.apache.hadoop:${1}:jar:${hadoop_version}
+  - coordPattern: net\.java\.dev\.jets3t:([^:]*):jar:.*
+    replacement: net.java.dev.jets3t:${1}:jar:${jets3t_version}
+  - coordPattern: org\.apache\.zookeeper:([^:]*):jar:.*
+    replacement: org.apache.zookeeper:${1}:jar:${zookeeper_version}
+  - coordPattern: org\.apache\.curator:([^:]*):jar:.*
+    replacement: org.apache.curator:${1}:jar:${curator_version}
+
+  # always use the configured jackson-module-scala version
+  - coordPattern: com\.fasterxml\.jackson\.module:jackson-module-scala_2\.10:jar:.*
+    replacement: com.fasterxml.jackson.module:jackson-module-scala_2.10:jar:${jackson_module_scala_version}
+  - coordPattern: com\.fasterxml\.jackson\.module:jackson-module-scala_2\.11:jar:.*
+    replacement: com.fasterxml.jackson.module:jackson-module-scala_2.11:jar:${jackson_module_scala_version}
+  
+  # always use the configured jackson-module-paranamer version
+  - coordPattern: com\.fasterxml\.jackson\.module:jackson-module-paranamer:jar:.*
+    replacement: com.fasterxml.jackson.module:jackson-module-paranamer:jar:${knime_jackson_version}
+  
+  # always use the latest version of the legacy jackson artifacts (also: we need to bundle them
+  # because they are not included in KNIME TP)
+  - coordPattern: org\.codehaus\.jackson:([^:]*):.*
+    replacement: org.codehaus.jackson:${1}:jar:1.9.13
+    
+  # accidentally pulled in by 
+  - coordPattern: org\.datanucleus:datanucleus-core:jar:5\..*
+    replacement: org.datanucleus:datanucleus-core:jar:3.2.10
+    
+  # jersey-common (prebundled) needs osgi-resource-locator >= 2.4 but in maven only pulls in 1.0.1
+  - coordPattern: org\.glassfish\.hk2:osgi-resource-locator:jar:.*
+    replacement: org.glassfish.hk2:osgi-resource-locator:jar:2.4.0
+    
+  # redirect all netty dependencies
+  - coordPattern: io\.netty:netty:jar:.*
+    replacement: io.netty:netty:jar:3.9.9.Final
+  
+
+# Prevents artifacts that only differ in their micro version from undergoing duplicate removal
+duplicateRemovalBlacklist:
+  # (only required for full spark):
+  # keep all versions of org.spark-project.hive:merged (we have requireBundleOverrides
+  # that require all versions)
+  - org\.spark-project\.hive:merged:jar:.*
+
+
+# specifies file excludes and BND instructions for *maven* coordinates 
+bundleInstructions:
+  
+  # hadoop-client: rename the merged hadoop bundle to hadoop-client
+  - coordPattern: org\.apache\.hadoop:merged:jar:.*
+    instructions:
+      Bundle-SymbolicName: org.apache.hadoop.client
+      
+  # apacheds-kerberos-codec (prebundled, dep of hadoop-client): make several dependencies of optional
+  # because they are excluded via maven-exclude
+  - coordPattern: org\.apache\.directory\.server:apacheds-kerberos-codec:jar:.*
+    instructions:
+      Import-Package: >-
+        net.sf.ehcache.*                      ;resolution:=optional,
+        org.apache.directory.api.*            ;resolution:=optional;version="[1.0,2)",
+        org.apache.directory.server.i18n      ;resolution:=optional;version="[2.0,3)",
+        org.slf4j                             ;version="[1.7,2)",
+        *
+        
+  # curator (prebundled, dep of hadoop-client): fix guava version
+  - coordPattern: org\.apache\.curator:[^:]*:jar:2\.7\..*
+    instructions:
+      Import-Package: >-
+        com.google.common.*                   ;version=${knime_guava_version},
+        org.apache.zookeeper.*                ;version="[3.4,4)",
+        org.apache.curator.*                  ;version="[2.7,3)",
+        org.slf4j                             ;version="[1.7,2)",
+        *
+
+  # spark: rename the merged spark bundles to something nicer
+  - coordPattern: org\.apache\.spark:merged_2\.10:jar:.*
+    fileExcludes:
+      - com/google/*
+    instructions:
+      Bundle-SymbolicName: org.apache.spark_2.10
+#      Export-Package: "!com*,*;version=${bundle.version}"
+  - coordPattern: org\.apache\.spark:merged_2\.11:jar:.*
+    instructions:
+      Bundle-SymbolicName: org.apache.spark_2.11
+#      Export-Package: "!org.spark_project*,!com*,*;version=${bundle.version}"
+      
+  # (only required for full spark): limit exports of spark's hive fork      
+  - coordPattern: org\.spark-project\.hive:merged:jar:.*
+    instructions:
+      "-exportcontents": "org.apache.hive.common.*;version=${bundle.version},org.apache.hadoop.hive.*;version=${bundle.version},!*"
+      
+  # bonecp (prebundled, dep of spark's hive fork): fix guava and slf4j imports 
+  - coordPattern: com\.jolbox:bonecp:jar:.*
+    instructions:
+      Import-Package: >-
+        com.google.common.*                   ;version=${knime_guava_version},
+        org.slf4j                             ;version="[1.7,2)",
+        *
+
+  # jackson-module-scala (prebundled, dep of spark): fix bundle names of 2.10/2.11 variants, so they can coexist
+  # within the same OSGI container
+  - coordPattern: com\.fasterxml\.jackson\.module:jackson-module-scala_2\.11:jar:.*
+    instructions:
+      Bundle-SymbolicName: com.fasterxml.jackson.module.jackson.module.scala_2.11
+  - coordPattern: com\.fasterxml\.jackson\.module:jackson-module-scala_2\.10:jar:.*
+    instructions:
+      Bundle-SymbolicName: com.fasterxml.jackson.module.jackson.module.scala_2.10
+        
+  # CANNOT QUITE REMEMVER WHAT THIS DOES
+  - coordPattern: org\.glassfish\.jersey\.(media|core|containers):.*:jar:2\.22\.2
+    instructions:
+      Import-Package: >-
+        javax.servlet.*         ;version="[3.0,4.0)",
+        javax.inject.*          ;version="[1.0,2)",
+        javax.ws.rs.*           ;version="[2.0,3)",
+        javax.validation.*      ;version="[1.1,2)",
+        javax.persistence.*     ;resolution:=optional,
+        org.glassfish.jersey.*  ;version="[2.22,3)",
+        org.glassfish.hk2.*     ;version="[2.4,3)",
+        org.jvnet.hk2.*         ;version="[2.4,3)",
+        jersey.repackaged.*     ;version="[2.22,3)",
+        sun.misc                ;resolution:=optional,
+        *
+
+  # scalactic (prebundled): fix bundle name to end with _2.11
+  - coordPattern: org\.scalactic:scalactic_2\.11:.*
+    instructions:
+      Bundle-SymbolicName: org.scalactic_2.11
+      
+  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0
+    instructions:
+      Manifest-Version: 1.0
+      Bundle-ManifestVersion: 2
+      Bundle-SymbolicName: com.diffplug.osgi.extension.sun.misc
+      Bundle-Version: 1.0.0
+      Export-Package: sun.misc;version="0.0.0"
+      Fragment-Host: system.bundle; extension:=framework
+  
+artifactGroups:
+
+  # ##############################################################
+  # Scala
+  # ##############################################################
+  - name: Scala 2.10 + 2.11
+    multiArtifacts:
+      - group: org.scala-lang
+        version: ${scala2_10}
+        artifacts:
+          - scala-compiler
+          - scala-library
+          - scalap
+          - scala-reflect
+      - group: org.scala-lang
+        version: ${scala2_11}
+        artifacts:
+          - scala-compiler
+          - scala-library 
+          - scalap
+          - scala-reflect
+
+  # ##############################################################
+  # Spark Jobserver related
+  # ##############################################################
+  - name: Spark Jobserver related stuff
+    singleArtifacts:
+      - id: com.typesafe:config:1.3.1
+      
+      # required by jobserver >= 0.7.0
+      - id: org.scalactic:scalactic_2.11:2.2.6
+  
+  # ##############################################################
+  # Hadoop client
+  # ##############################################################
+  - name: Hadoop client
+    singleArtifacts:
+      - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
+        
+        # a transitive but excluded dependency of hadoop-client. Unfortunately
+        # the prebundled org.apache.directory.api.util does not resolve without it.
+      - id: org.apache.directory.api:api-i18n:1.0.0-M20
+      
+      # transitive but excluded dependency of hadoop-client. Unfortunately the
+      # prebundled 
+      - id: com.sun.jersey:jersey-core:1.9
+      
+      # avro (dep of hadoop-client) needs sun.misc package. This bundles
+      # makes OSGI export sun.misc
+      - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
+        
+  # ##############################################################
+  # Spark 1.2
+  # ##############################################################
+  - name: Spark 1.2 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark1_2}
+        transitive: false
+        artifacts:
+          - spark-core_2.10
+          - spark-sql_2.10
+          - spark-catalyst_2.10
+          - spark-mllib_2.10
+          - spark-hive_2.10
+          - spark-graphx_2.10
+    singleArtifacts:
+      # spark-mllib deps
+      - id: org.jblas:jblas:1.2.3
+      - id: org.scalanlp:breeze_2.10:0.10
+      
+      # spark-core dep 
+      - id: org.json4s:json4s-jackson_2.10:3.2.10
+        
+  
+  # ##############################################################
+  # Spark 1.3
+  # ##############################################################
+  - name: Spark 1.3 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark1_3}
+        transitive: false
+        artifacts:
+          - spark-core_2.10
+          - spark-sql_2.10
+          - spark-catalyst_2.10
+          - spark-mllib_2.10
+          - spark-hive_2.10
+          - spark-graphx_2.10
+    singleArtifacts:
+      - id: org.scalanlp:breeze_2.10:0.11.2
+      # csv reading support for Spark [1.3, 2) (was inlined into 2.0) 
+      - id: com.databricks:spark-csv_2.10:1.5.0
+        transitive: false
+
+  # ##############################################################
+  # Spark 1.5
+  # ##############################################################
+  - name: Spark 1.5 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark1_5}
+        transitive: false
+        artifacts:
+          - spark-core_2.10
+          - spark-sql_2.10
+          - spark-catalyst_2.10
+          - spark-mllib_2.10
+          - spark-hive_2.10
+          - spark-launcher_2.10
+          - spark-graphx_2.10
+    singleArtifacts:
+      # dependency of spark-mllib 1.5 and 1.6
+      - id: org.jpmml:pmml-model:1.1.15
+      # avro support for spark-sql 1.5-1.6
+      - id: com.databricks:spark-avro_2.10:2.0.1
+        transitive: false
+
+  # ##############################################################
+  # Spark 1.6
+  # ##############################################################
+  - name: Spark 1.6 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark1_6}
+        transitive: false
+        artifacts:
+          - spark-core_2.10
+          - spark-sql_2.10
+          - spark-catalyst_2.10
+          - spark-mllib_2.10
+          - spark-hive_2.10
+          - spark-graphx_2.10
+
+
+  # ##############################################################
+  # Spark 2.0
+  # ##############################################################
+  - name: Spark 2.0 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark2_0}
+        transitive: false
+        artifacts:
+          - spark-core_2.11
+          - spark-sql_2.11
+          - spark-catalyst_2.11
+          - spark-mllib_2.11
+          - spark-mllib-local_2.11
+          - spark-sketch_2.11
+          - spark-hive_2.11
+          - spark-graphx_2.11
+          - spark-unsafe_2.11
+          - spark-tags_2.11
+          - spark-launcher_2.11
+          
+      # (only required for full Spark 2.0): 
+      # several jetty dependencies are excluded from spark
+      # but since jetty is prebundled, they are required
+      # in OSGI
+#      - group: org.eclipse.jetty
+#        version: 9.2.16.v20160414
+#        artifacts:
+#          - jetty-io
+#          - jetty-security
+#          - jetty-jndi
+    singleArtifacts:
+      # avro support for spark-sql 2.0+
+      - id: com.databricks:spark-avro_2.11:3.2.0
+        transitive: false
+    
+      # for shallow spark 2.0
+      - id: org.json4s:json4s-jackson_2.11:3.2.11
+      - id: org.scalanlp:breeze_2.11:0.11.2
+      - id: org.jpmml:pmml-model:1.2.15
+    
+      # (only required for full Spark 2.0):
+      # jetty-plus needs javax.transaction, which needs javax.interceptor
+      # but has no maven dependency on it, so we must pull it in explicitly
+#      - id: javax.interceptor:javax.interceptor-api:1.2
+      
+      

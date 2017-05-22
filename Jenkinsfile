@@ -1,13 +1,16 @@
 @Library('knime-pipeline@master') _
 
 node {
-	def upstreamParams = defaultProperties('org.knime.update.analytics-platform', 'com.knime.update.pmml.compilation',
-		'com.knime.update.productivity')
+	def upstreamParams = defaultProperties('org.knime.update.analytics-platform', 
+		'com.knime.update.pmml.compilation',
+		'com.knime.update.productivity', 
+		'org.knime.update.targetPlatform')
+
 	
 	stage('Clean workspace') {
 		cleanWorkspace()
 		try {
-			sh 'rm -rf git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target com.knime.update.bigdata.externals'
+			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target com.knime.update.bigdata.externals'
 		} catch (ex) {
 			currentBuild.result = 'FAILED'
 			emailext (
@@ -35,32 +38,12 @@ node {
 	stage('Maven-to-OSGi') {
 		try {
 			withMaven(maven: 'Maven 3.2') {
-				sh 'mvn -f "$WORKSPACE"/git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/pom.xml p2:site'
+				sh 'mvn -f "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder/pom.xml scala:compile scala:run'
+				sh '''mvn "-Dknime-tp-p2=${upstreamParams['org.knime.update.targetPlatform'].p2}" -f "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.tycho/pom.xml clean package'''
 			}
-			
+
 			sh '''
-				source "git/knime-jenkins/org.knime.build.config/hudson-product-install.inc"
-	
-				rm -f git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target/repository/{artifacts,content}.{jar,xml}
-				# Remove Guava package from Spark Core 1.2.2 (see BD-240)
-				zip git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target/repository/plugins/org.apache.spark.core_2.10_1.2.*.jar -d 'com*'
-			
-				# Recompute artifacts.jar because the hash sums have changed
-				p2-publisher -metadataRepository "file:$WORKSPACE/git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target/repository" \
-					-artifactRepository "file:$WORKSPACE/git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target/repository" \
-					-compress \
-					-source "$WORKSPACE/git/knime-bigdata/com.knime.features.bigdata.externals/maven2osgi/target/repository"
-			'''
-			buckminster (
-				commands: '''
-					setpref org.eclipse.buckminster.pde.targetPlatformPath='$WORKSPACE/buckminster.targetPlatform'
-					import 'git/knime-bigdata/com.knime.update.bigdata.externals/com.knime.update.bigdata.externals.cquery'
-					build -c
-					perform -D site.signing=false com.knime.update.bigdata.externals#site.p2
-				'''
-			)
-			sh '''
-				mv buckminster.output/com.knime.update.bigdata.externals_*/site.p2 com.knime.update.bigdata.externals
+				mv "$WORKSPACE"/git/knime-bigdata/com.knime.update.bigdata.externals/target/repository com.knime.update.bigdata.externals
 				rm -rf .metadata buckminster.*
 			'''
 		} catch (ex) {
