@@ -56,6 +56,8 @@ public interface JavaSnippetHelper extends SparkProvider {
 
     String getSnippetClassName(SnippetType type, String suffix);
 
+    String getMethodSignature(final SnippetType type);
+
     void updateGuardedClassnameSuffix(SnippetType type, GuardedDocument doc, JavaSnippetFields fields, String suffix);
 
     List<File> getSnippetClasspath();
