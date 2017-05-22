@@ -167,7 +167,11 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 
     private JSnippetFieldsController m_fieldsController;
 
+    private SparkJavaSnippetNodeDialog m_previewPanel;
+
     private DefaultTemplateController<SparkJavaSnippetTemplate> m_templatesController;
+
+    private TemplatesPanel<SparkJavaSnippetTemplate> m_templatesPanel;
 
     private File[] m_autoCompletionClassPath;
 
@@ -370,11 +374,11 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 
     /** Create the templates tab. */
     private JPanel createTemplatesPanel() {
-        SparkJavaSnippetNodeDialog preview = createPreview();
-        m_templatesController = new DefaultTemplateController<>(this, preview);
-        TemplatesPanel<SparkJavaSnippetTemplate> templatesPanel = new TemplatesPanel<>(
+        m_previewPanel = createPreview();
+        m_templatesController = new DefaultTemplateController<>(this, m_previewPanel);
+        m_templatesPanel = new TemplatesPanel<>(
             Collections.singleton(m_templateMetaCategory), m_templatesController, getTemplateProvider());
-        return templatesPanel;
+        return m_templatesPanel;
     }
 
     /**
@@ -582,6 +586,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         m_settings.loadSettingsForDialog(settings);
 
         final DataTableSpec tableSpec;
+        final SparkVersion lastSparkVersion = m_sparkVersion;
         if (specs == null || specs.length < 1 || specs[0] == null) {
             tableSpec = new DataTableSpec();
             m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
@@ -624,6 +629,19 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
         SparkJavaSnippetTemplate template = null != uuid ? provider.getTemplate(UUID.fromString(uuid)) : null;
         String loc = null != template ? createTemplateLocationText(template) : "";
         m_templateLocation.setText(loc);
+
+        // forward version changes to template and template preview panel
+        if (lastSparkVersion != null && !lastSparkVersion.equals(m_sparkVersion) && !m_isPreview) {
+            m_templatesPanel.setTemplateProvider(provider);
+            m_previewPanel.setSparkVersion(m_sparkVersion);
+        }
+    }
+
+    /** Update spark version in underlying snippet. */
+    private void setSparkVersion(final SparkVersion sparkVersion) {
+        if (m_snippet != null) {
+            m_snippet.setSparkVersion(sparkVersion);
+        }
     }
 
     /**
