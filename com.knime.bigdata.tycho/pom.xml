@@ -12,7 +12,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tycho-version>1.0.0</tycho-version>
 		<tycho-extras-version>1.0.0</tycho-extras-version>
-		<knime-tp-p2>/home/bjoern/tmp/empty/org.knime.update.analytics-platform_3.4.20170424/org.knime.update.org</knime-tp-p2>
+		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
+		a file:// or http:// URL pointing to org.knime.update.org  -->
+		<knime-tp-p2>REPLACE_ME_WITH_URL</knime-tp-p2>
 	</properties>
 
 	<modules>
@@ -110,7 +112,7 @@
 		<repository>
 			<id>org.knime.update.org</id>
 			<layout>p2</layout>
-			<url>file:${knime-tp-p2}</url>
+			<url>${knime-tp-p2}</url>
 		</repository>
 	</repositories>
 

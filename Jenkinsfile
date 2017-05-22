@@ -38,8 +38,19 @@ node {
 	stage('Maven-to-OSGi') {
 		try {
 			withMaven(maven: 'Maven 3.2') {
-				sh 'mvn -f "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder/pom.xml scala:compile scala:run'
-				sh '''mvn "-Dknime-tp-p2=${upstreamParams['org.knime.update.targetPlatform'].p2}" -f "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.tycho/pom.xml clean package'''
+				sh '''
+					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder
+					mvn clean scala:compile scala:run
+					popd
+				'''
+			}
+
+			withMaven(maven: 'Maven 3.2') {
+				sh '''
+					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.tycho
+					mvn -Dknime-tp-p2="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.targetPlatform'].p2 + '''" clean package
+					popd
+				'''
 			}
 
 			sh '''

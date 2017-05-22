@@ -17,11 +17,14 @@ object Main extends App {
   // this is the default location for plugins that the maven plugin
   // org.eclipse.tycho.extras:tycho-p2-extras-plugin:1.0.0:publish-features-and-bundles
   // expects when generating an update site
+  require(args.size > 0, s"You need to specify a target platform config (YAML) as first parameter")
+  require(new File(args(0)).canRead(), s"Target platforn config ${args(1)} is not readable")
+  
   val pluginDir = new File(new File(new File("target"), "source"), "plugins")
   FileUtils.deleteDirectory(pluginDir)
   FileUtils.forceMkdir(pluginDir)
     
-  val config = TPConfigReader.read("tp-config.yml")
+  val config = TPConfigReader.read(args(0))
   val depGraph = HashMap[Artifact, Set[Artifact]]()
   
   for (artGroup <- config.artifactGroups) {

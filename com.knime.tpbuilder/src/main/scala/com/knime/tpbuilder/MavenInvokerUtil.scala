@@ -43,7 +43,8 @@ object MavenInvokerUtil {
 
     val invoker = new DefaultInvoker();
 
-    val logOutputStream = new PrintStream(new FileOutputStream(new File(new File("target"), "maven-invoker.log"), true))
+//    val logOutputStream = new PrintStream(new FileOutputStream(new File(new File("target"), "maven-invoker.log"), true))
+    val logOutputStream = System.out
     invoker.setLogger(new PrintStreamLogger(logOutputStream, InvokerLogger.INFO))
 
     invoker.setOutputHandler(new OutputHandlerAdapater(logOutputStream, lineHandler))

@@ -17,8 +17,8 @@ import com.knime.tpbuilder.BundleInfo
 
 object OsgiUtil {
 
-  //  val localRepoDir = Paths.get(System.getProperty("user.home"), ".m2", "repository").toFile()
-  val localRepoDir = Paths.get("/home/bjoern", ".m2", "repository").toFile()
+  val localRepoDir = Paths.get(System.getProperty("user.home"), ".m2", "repository").toFile()
+//  val localRepoDir = Paths.get("/home/bjoern", ".m2", "repository").toFile()
 
   val mavenRepoLayout = new DefaultRepositoryLayout()
 

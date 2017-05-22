@@ -12,6 +12,7 @@
 		<aetherVersion>1.1.0</aetherVersion>
 		<mavenVersion>3.3.9</mavenVersion>
 		<wagonVersion>1.0</wagonVersion>
+		<tp.config.yml>${project.basedir}/tp-config.yml</tp.config.yml>
 	</properties>
 
 	<dependencies>
@@ -145,6 +146,7 @@
 				<version>3.2.2</version>
 				<configuration>
 					<mainClass>com.knime.tpbuilder.Main</mainClass>
+					<addArgs>${tp.config.yml}</addArgs>
 				</configuration>
 			</plugin>
 		</plugins>
