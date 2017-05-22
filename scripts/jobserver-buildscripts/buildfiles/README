@@ -50,4 +50,7 @@ Please follow the Spark Job Server installation manual provided as PDF by KNIME.
 
 2016-11-06 Default aggregated chunk size limit increased from 1M to 200M
 
-2017-05-15 Create new context after context initialization errors fixed
+2017-05-18
+ - Create new context after context initialization errors fixed
+ - Stop job manager (and remove context from jobserver list) if spark context was stopped
+   (via context.stop() or killed YARN application)
