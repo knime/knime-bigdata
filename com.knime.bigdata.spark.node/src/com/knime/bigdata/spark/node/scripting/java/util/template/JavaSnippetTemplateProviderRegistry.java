@@ -48,7 +48,7 @@ public class JavaSnippetTemplateProviderRegistry extends SparkProviderRegistry<J
 
         public AggregateTemplateRepository() {
             super(WORKSPACE_REPOSITORY);
-
+            addRepository(WORKSPACE_REPOSITORY); // add in repository list too!
         }
 
         public void addRepository(final TemplateRepository<SparkJavaSnippetTemplate> repo) {
