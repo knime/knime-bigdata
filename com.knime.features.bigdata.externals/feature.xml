@@ -58,13 +58,6 @@
       unpack="false"/>
 
    <plugin
-      id="com.diffplug.osgi.extension.sun.misc.source"
-      download-size="0"
-      install-size="0"
-      version="1.0.0"
-      unpack="false"/>
-
-   <plugin
       id="com.github.fommil.netlib.core"
       download-size="0"
       install-size="0"
