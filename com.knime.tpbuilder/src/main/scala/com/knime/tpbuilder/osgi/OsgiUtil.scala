@@ -76,7 +76,10 @@ object OsgiUtil {
   }
 
   private def findEffectiveBundleVersion(art: Artifact, mavenArtifact: MavenArtifact, isPrebundled: Boolean, config: TPConfig): String = {
-    val baseVersion = maven2Osgi.getVersion(art.version).replaceAll("[^A-Za-z0-9.]", "")
+    val baseVersion = if (isPrebundled)
+      extractBundleVersion(mavenArtifact)
+    else
+      maven2Osgi.getVersion(art.version).replaceAll("[^A-Za-z0-9.]", "")
 
     // a version string that is suffixed with the version of the target platform itself
     val baseVersionWithSuffix = addKNIMEVersionSuffix(baseVersion, config.version)
@@ -139,5 +142,17 @@ object OsgiUtil {
     } else {
       false
     }
+  }
+  
+  private def extractBundleVersion(artifact: MavenArtifact): String = {
+      val jar = new JarFile(artifact.getFile, false)
+
+      Option(jar.getManifest()) match {
+        case Some(manifest) =>
+          jar.getManifest().getMainAttributes().getValue(new Name(Analyzer.BUNDLE_VERSION))
+        case _ =>
+          // never happens
+          throw new RuntimeException("Prebundled artifact does not contain manifest!?")
+      }
   }
 }

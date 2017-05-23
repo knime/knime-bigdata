@@ -508,6 +508,7 @@ artifactGroups:
       # avro (dep of hadoop-client) needs sun.misc package. This bundles
       # makes OSGI export sun.misc
       - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
+        source: false
         
   # ##############################################################
   # Spark 1.2

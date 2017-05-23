@@ -63,7 +63,6 @@ object DepGraphResolver {
 
         // only grab the source for jars where this is explicitly requested
         val sourceFile = if (config.source.get && artsWithSource(art)) {
-              trySourceResolution(aetherArt, remoteRepos, session)
             println(s"    Bundle-SymbolicName ${resolvedArt.bundle.get.bundleSymbolicName}.source / Bundle-Version: ${resolvedArt.bundle.get.bundleVersion}")
             trySourceResolution(aetherArt, remoteRepos, session)
           } else None
