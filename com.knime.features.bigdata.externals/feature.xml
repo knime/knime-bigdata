@@ -579,14 +579,14 @@
       id="org.scala-lang.scala-compiler.source"
       download-size="0"
       install-size="0"
-      version="2.10.6"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scala-compiler.source"
       download-size="0"
       install-size="0"
-      version="2.11.11"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
       unpack="false"/>
 
    <plugin
@@ -607,14 +607,14 @@
       id="org.scala-lang.scala-library.source"
       download-size="0"
       install-size="0"
-      version="2.10.6"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scala-library.source"
       download-size="0"
       install-size="0"
-      version="2.11.11"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
       unpack="false"/>
 
    <plugin
@@ -663,14 +663,14 @@
       id="org.scala-lang.scala-reflect.source"
       download-size="0"
       install-size="0"
-      version="2.10.6"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scala-reflect.source"
       download-size="0"
       install-size="0"
-      version="2.11.11"
+      version="2.11.11.v20170413-090219-8a413ba7cc"
       unpack="false"/>
 
    <plugin
