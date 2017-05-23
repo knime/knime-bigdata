@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Create result schema_54069b77-6fee-4373-ab87-baf91edaebe3.xml">
+<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Create result schema manually"/>
+<entry key="Description" type="xstring" value="This template shows you how to manually create the StructType of the result data frame."/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010import java.util.List;%%00010import org.apache.spark.sql.Row;%%00010import java.util.ArrayList;%%00010"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010    "/>
+<entry key="scriptBody" type="xstring" value="// Enter your code here:%%00010%%00010%%00009final SparkSession spark = SparkSession.builder().sparkContext(sc.sc()).getOrCreate();%%00010%%00009final StructField fields[] = new StructField[] {%%00010%%00009%%00009DataTypes.createStructField(&quot;col1&quot;, DataTypes.StringType, false),%%00010%%00009%%00009DataTypes.createStructField(&quot;col2&quot;, DataTypes.DoubleType, false),%%00010%%00009%%00009DataTypes.createStructField(&quot;col3&quot;, DataTypes.IntegerType, false),%%00010%%00009%%00009DataTypes.createStructField(&quot;col4&quot;, DataTypes.LongType, false)%%00010%%00009};%%00010%%00009final StructType schema = DataTypes.createStructType(fields);%%00010%%00009%%00010%%00009final List&lt;Row&gt; rows = new ArrayList&lt;&gt;();%%00010%%00009rows.add(RowFactory.create(new Object[] { &quot;a&quot;, 0.1, 2, 3l }));%%00010%%00010%%00009return spark.createDataFrame(rows, schema);%%00010%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" value="version 1.x"/>
+<entry key="templateUUID" type="xstring" value="985e3951-a909-4a47-8933-878138a7a2ec"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>

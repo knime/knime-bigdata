@@ -664,27 +664,26 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
             NodeSettingsRO settingsro =
                 NodeSettings.loadFromXML(new ByteArrayInputStream(os.toString("UTF-8").getBytes("UTF-8")));
             m_settings.loadSettings(settingsro);
+            m_snippet.updateDocumentFromSettings(m_sparkVersion, m_snippetType, m_settings);
+
+            //        m_colList.setSpec(spec);
+            m_flowVarsList.setFlowVariables(flowVariables.values());
+
+            m_jarPanel.setJarFiles(m_settings.getJarFiles());
+
+            m_fieldsController.updateData(m_settings, spec, flowVariables);
+            // update template info panel
+            m_templateLocation.setText(createTemplateLocationText(template));
+
+            setSelected(TITLE_SNIPPET_TAB);
+            // set caret position to the start of the custom expression
+            m_snippetTextArea.setCaretPosition(((GuardedDocument)m_snippet.getDocument())
+                .getGuardedSection(JavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset() + 1);
+            m_snippetTextArea.requestFocus();
+
         } catch (Exception e) {
             LOGGER.error("Cannot apply template.", e);
         }
-
-        m_snippet.updateDocumentFromSettings(m_sparkVersion, m_snippetType, m_settings);
-
-        //        m_colList.setSpec(spec);
-        m_flowVarsList.setFlowVariables(flowVariables.values());
-
-        m_jarPanel.setJarFiles(m_settings.getJarFiles());
-
-        m_fieldsController.updateData(m_settings, spec, flowVariables);
-        // update template info panel
-        m_templateLocation.setText(createTemplateLocationText(template));
-
-        setSelected(TITLE_SNIPPET_TAB);
-        // set caret position to the start of the custom expression
-        m_snippetTextArea.setCaretPosition(((GuardedDocument)m_snippet.getDocument())
-            .getGuardedSection(JavaSnippetDocument.GUARDED_BODY_START).getEnd().getOffset() + 1);
-        m_snippetTextArea.requestFocus();
-
     }
 
     /**

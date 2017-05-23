@@ -41,29 +41,22 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
- *
- * History
- *   25.11.2011 (hofer): created
  */
 package com.knime.bigdata.spark2_0.jobs.scripting.java;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.InvalidSchemaException;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark2_0.api.StructTypeBuilder;
 
 /**
- *
  * @author Tobias Koetter, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public abstract class AbstractSparkJavaSnippet implements Serializable {
@@ -73,31 +66,13 @@ public abstract class AbstractSparkJavaSnippet implements Serializable {
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkJavaSnippet.class.getName());
 
     /**
-     * Overwrite this method to return a manual create {@link StructType}.
-     *
-     * @param resultRDD the Spark RDD that contains the result
-     * @return {@link StructType} that defines the column names and types
-     * @throws InvalidSchemaException if the schema is invalid
-     */
-    protected StructType getSchema(final JavaRDD<Row> resultRDD) throws InvalidSchemaException {
-        final List<Row> rowSample = resultRDD.take(10);
-        if (rowSample.isEmpty()) {
-            throw new InvalidSchemaException(
-                "Snippet returned no rows. Cannot infer columns without having some rows.");
-        }
-
-        return StructTypeBuilder.fromRows(resultRDD.take(10)).build();
-    }
-
-    /**
      * @param sc the JavaSparkContext
-     * @param rowRDD1 the first input RDD. Might be <code>null</code> if not connected.
-     * @param rowRDD2 the second input RDD. Might be <code>null</code> if not connected.
-     * @return the resulting RDD or <code>null</code>
+     * @param dataFrame1 the first input data frame. Might be <code>null</code> if not connected.
+     * @param dataFrame2 the second input data frame. Might be <code>null</code> if not connected.
+     * @return the resulting data frame or <code>null</code>
      * @throws Exception if an exception occurs
      */
-    public abstract JavaRDD<Row> apply(JavaSparkContext sc, JavaRDD<Row> rowRDD1, JavaRDD<Row> rowRDD2)
-        throws Exception;
+    public abstract Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2) throws Exception;
 
     /**
      * Write warning message to the logger.

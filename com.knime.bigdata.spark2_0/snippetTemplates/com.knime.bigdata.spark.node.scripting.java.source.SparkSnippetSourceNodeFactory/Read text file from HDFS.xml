@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Read HDFS_f946773f-07b0-415e-a371-0230ee1e01d8.xml">
+<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Read text file from HDFS"/>
+<entry key="Description" type="xstring" value="Reads a text file from HDFS and returns each line as data frame row."/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009// reads data from given path into a data frame%%00010%%00009final String hdfsPath = &quot;&lt;yourPath&gt;&quot;;%%00010%%00009final SparkSession spark = SparkSession.builder().sparkContext(sc.sc()).getOrCreate();%%00010%%00009final DataFrameReader reader = spark.read();%%00010%%00009reader.format(&quot;text&quot;); // csv, json, orc or parquet%%00010%%00009return reader.load(hdfsPath);%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="1"/>
+<config key="0">
+<entry key="Name" type="xstring" value="hdfsPath"/>
+<entry key="JavaName" type="xstring" value="v_hdfsPath"/>
+<entry key="JavaType" type="xstring" value="java.lang.String"/>
+<entry key="Type" type="xstring" value="STRING"/>
+</config>
+</config>
+<entry key="version" type="xstring" isnull="true" value=""/>
+<entry key="templateUUID" type="xstring" value="590e7a6e-6b80-45b2-a5ba-d3751f51c8c8"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>

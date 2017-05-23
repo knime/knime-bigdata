@@ -6,7 +6,7 @@
 	<shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>
-            <p>This node allows you to execute arbitrary java code to persist an existing Spark RDD e.g.
+            <p>This node allows you to execute arbitrary java code to persist an existing Spark RDD/DataFrame e.g.
             by writing it to HDFS (See provided templates). Simply enter the java code in the text area.</p>
             <p>Note, that this node also supports flow variables as input to your Spark job. 
             To use a flow variable simply double click on the variable in the "Flow Variable List".</p>
@@ -32,17 +32,24 @@
 	          selection, if any).
 	        </option>
 	        <option name="Snippet text area">
-	          Enter your java code here. 
-	          <br/>
+	          <p>Enter your java code here.</p>
+
+	          <p><b>Spark 1.2 - 1.6 (RDD):</b><br/>
 	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.
-	          The input <i>JavaRDD&lt;Row&gt;</i> can be accessed via the method input parameter <i>rowRDD1</i>. 
-	          <p>
-	          You can access input flow variables by defining them in the <b>Input</b> table. 
-	          To define a flow variable simply double click on the variable in the "Flow Variable list".
-	          </p>
+	          The input <i>JavaRDD&lt;Row&gt;</i> can be accessed via the method input parameter <i>rowRDD</i>.</p>
+
+	          <p><b>Spark 2.0+ (DataFrame):</b><br/>
+	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.
+	          The input <i>Dataset&lt;Row&gt;</i> can be accessed via the method input parameter <i>dataFrame</i>.</p>
+
+	          <p><b>Flow variables:</b><br/>
+	          You can access input flow variables by defining them in the <b>Input</b> table.
+	          To define a flow variable simply double click on the variable in the "Flow Variable list".</p>
+
 	          <p>You can hit <i>ctrl+space</i> to get an auto completion box with all
 	          available classes, methods and fields. When you select a class and hit
-	          <i>enter</i> a import statement will be generated if missing.</p>          
+	          <i>enter</i> a import statement will be generated if missing.</p>
+
 	          <p>Note, that the snippet allows to define custom global variables and
 	          custom imports. To view the hidden editor parts simply click on the plus symbols in the editor.</p>
 	        </option>
@@ -71,7 +78,7 @@
 	   </tab>
     </fullDescription>
 
-	<ports>
-		<inPort index="0" name="Spark RDD">Input Spark RDD.</inPort>
-	</ports>
+    <ports>
+        <inPort index="0" name="Spark Data">Input Spark RDD/DataFrame.</inPort>
+    </ports>
 </knimeNode>

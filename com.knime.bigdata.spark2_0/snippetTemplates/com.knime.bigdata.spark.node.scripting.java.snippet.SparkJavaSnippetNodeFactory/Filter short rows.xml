@@ -3,12 +3,12 @@
 <entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="Filter short rows"/>
-<entry key="Description" type="xstring" value="Splits a String into separate values by a given split character e.g. | and filters all rows that contain less elements than specified."/>
+<entry key="Description" type="xstring" value="Filters all rows with less characters than specified."/>
 <entry key="Version" type="xstring" value="version 1.x"/>
 <config key="Snippet">
 <entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
 <entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
-<entry key="scriptBody" type="xstring" value="%%00009//***********************************************%%00010%%00009//Specifiy the row length and the split character%%00010%%00009//***********************************************%%00010%%00009final int rowLength = 14;%%00010%%00009final String splitCharacter = &quot;\\|&quot;;%%00010%%00010%%00010%%00009//Filters all rows from the RDD that do not have the given length%%00010%%00009JavaRDD&lt;Row&gt; result = rowRDD1.filter(new Function&lt;Row, Boolean&gt;(){%%00010   %%00009private static final long serialVersionUID = 1L;%%00010       @Override%%00010       public Boolean call(Row r) throws Exception {%%00010       %%00009//read the first entry of the row that contains the String%%00010       %%00009//to split and filter%%00010       %%00009String s = r.getString(0);%%00010       %%00009//Split the string using the splitCharacter into a String array%%00010%%00009%%00009String[] vals = s.split(splitCharacter);%%00010%%00009%%00009//return true if the array has rowLength number of elements%%00010%%00009%%00009return vals.length == rowLength;%%00010       }});%%00010%%00009return result;"/>
+<entry key="scriptBody" type="xstring" value="%%00009//*************************%%00010%%00009// Specifiy the row length%%00010%%00009//*************************%%00010%%00009final int minLength = 10;%%00010%%00010%%00009// Filters all rows from the Dataset that do not have the given length%%00010%%00009Dataset&lt;Row&gt; result = dataFrame1.filter(new FilterFunction&lt;Row&gt;() {%%00010%%00009  private static final long serialVersionUID = 1L;%%00010%%00010       @Override%%00010       public boolean call(Row row) throws Exception {%%00010       %%00009// filter by length of value in first column%%00010%%00009%%00009return row.getString(0).length() &gt; minLength;%%00010       }%%00010     });%%00010     %%00010%%00009return result;"/>
 <config key="jarFiles">
 <entry key="array-size" type="xint" value="0"/>
 </config>
