@@ -424,7 +424,36 @@ bundleInstructions:
       Bundle-Version: 1.0.0
       Export-Package: sun.misc;version="0.0.0"
       Fragment-Host: system.bundle; extension:=framework
-  
+
+#
+# Specifies the artifacts that are supposed to be bundled.
+# Notes:
+#   - artifacts are grouped only for display/usability purposes ()
+#   - multiArtifacts allows to more easily bundle artifacts of the same group
+#   - transitiveSourceDepth=X is only used when source=true.
+#     - X=0 means that only the artifact itself will get a source bundle
+#     - X=1 means that the artifact itself and its immediate dependencies will get a source bundle
+#     - X=2 means that the artifact itself, its immediate dependencies as well as their immediate dependencies will get a source bundle
+#     - (... and so on...)
+#     - X=-1 means that the artifact itself and all its transitive dependencies will get a source bundle
+#      
+#
+# Syntax:
+#   - name: <custom-artififact-group-name>
+#     multiArtifacts:
+#       - group: <artifact-group>
+#         version: <artifact-version>
+#         [source: true|false (true is default)]
+#         [transitive: true|false (true is default)]
+#         [transitiveSourceDepth: <number> (0 is default)]
+#         artifacts:
+#           - <artifact-id>
+#     singleArtifacts:
+#       - id: <maven-coordinate>
+#         [source: true|false (true is default)]
+#         [transitive: true|false (true is default)]
+#         [transitiveSourceDepth: <number> (0 is default)]
+#
 artifactGroups:
 
   # ##############################################################
@@ -464,6 +493,7 @@ artifactGroups:
   - name: Hadoop client
     singleArtifacts:
       - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
+        transitiveSourceDepth: 1
         
         # a transitive but excluded dependency of hadoop-client. Unfortunately
         # the prebundled org.apache.directory.api.util does not resolve without it.

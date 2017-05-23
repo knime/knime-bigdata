@@ -22,11 +22,13 @@ object TPConfigReader {
     var version: String,
     var artifacts: Seq[String],
     var transitive: Option[Boolean],
-    var source: Option[Boolean])
+    var source: Option[Boolean],
+    var transitiveSourceDepth: Int)
 
   case class TPSingleArtifact(var id: String,
     var transitive: Option[Boolean],
-    var source: Option[Boolean])
+    var source: Option[Boolean],
+    var transitiveSourceDepth: Int)
 
   case class TPArtifactGroup(var name: String,
     var multiArtifacts: Seq[TPMultiArtifact],
@@ -169,26 +171,44 @@ object TPConfigReader {
       eval(resolveMap)(instructionValue)
     }
     
-    def getArtifactCoordsWithSource(config: TPConfig): Set[String] = {
-      val ret = HashSet[String]()
+    def getArtifactCoordsWithSource(depGraph: Map[Artifact, Set[Artifact]], config: TPConfig): Set[Artifact] = {
+      val ret = HashSet[Artifact]()
       
       for (group <- config.artifactGroups) {
         for (singleArt <- group.singleArtifacts) {
           if (singleArt.source.get) {
-            ret += TPArtifactGroup.toArtifact(singleArt).mvnCoordinate
+            val art = TPArtifactGroup.toArtifact(singleArt)
+            ret += art
+            addTransitiveSources(art, singleArt.transitiveSourceDepth, depGraph, ret)
           }
         }
 
         for (multiArt <- group.multiArtifacts) {
           if (multiArt.source.get) {
             for (art <- TPArtifactGroup.toArtifactSet(multiArt)) {
-              ret += art.mvnCoordinate
+              ret += art
+              addTransitiveSources(art, multiArt.transitiveSourceDepth, depGraph, ret)
             }
           }
         }
       }
 
       ret
+    }
+  }
+
+  private def addTransitiveSources(art: Artifact,
+      transitiveSourceDepth: Int,
+      depGraph: Map[Artifact, Set[Artifact]],
+      alreadyAdded: Set[Artifact]): Unit = {
+
+    alreadyAdded += art
+
+    if (transitiveSourceDepth > 0 || transitiveSourceDepth < 0) {
+      for (dep <- depGraph.getOrElse(art, Set())) {
+        if (!alreadyAdded(dep))
+          addTransitiveSources(dep, transitiveSourceDepth - 1, depGraph, alreadyAdded)
+      }
     }
   }
 

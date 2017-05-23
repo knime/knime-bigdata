@@ -29,7 +29,7 @@ object DepGraphResolver {
     val session = AetherUtils.repoSession
 
     val resolvedArtifactCache = HashMap[String, Artifact]()
-    val artsWithSource = TPConfig.getArtifactCoordsWithSource(config)
+    val artsWithSource = TPConfig.getArtifactCoordsWithSource(oldGraph, config)
     val resolve = doResolve(session, config, resolvedArtifactCache, artsWithSource)(_)
 
     for (oldArt <- oldGraph.keys) {
@@ -39,7 +39,11 @@ object DepGraphResolver {
     depGraph
   }
 
-  private def doResolve(session: RepositorySystemSession, config: TPConfig, resolvedArtifactCache: Map[String, Artifact], artsWithSource: Set[String])(art: Artifact): Artifact = {
+  private def doResolve(session: RepositorySystemSession, 
+      config: TPConfig, 
+      resolvedArtifactCache: Map[String, Artifact], 
+      artsWithSource: Set[Artifact])
+  (art: Artifact): Artifact = {
 
     val artCoord = art.mvnCoordinate
 
@@ -57,8 +61,8 @@ object DepGraphResolver {
         val resolvedArt = OsgiUtil.withBundleAndVersion(AetherUtils.aetherArtToArt(result.getArtifact), None, config)
         println(s"    Bundle-SymbolicName ${resolvedArt.bundle.get.bundleSymbolicName} / Bundle-Version: ${resolvedArt.bundle.get.bundleVersion}")
 
-        // only grab the source for jars where this is explicitly requested or if the jar is already prebundled 
-        val sourceFile = if (config.source.get && artsWithSource(artCoord)) {
+        // only grab the source for jars where this is explicitly requested
+        val sourceFile = if (config.source.get && artsWithSource(art)) {
               trySourceResolution(aetherArt, remoteRepos, session)
             println(s"    Bundle-SymbolicName ${resolvedArt.bundle.get.bundleSymbolicName}.source / Bundle-Version: ${resolvedArt.bundle.get.bundleVersion}")
             trySourceResolution(aetherArt, remoteRepos, session)
