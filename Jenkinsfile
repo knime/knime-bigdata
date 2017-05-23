@@ -1,12 +1,12 @@
 @Library('knime-pipeline@master') _
 
 node {
-	def upstreamParams = defaultProperties('org.knime.update.analytics-platform', 
+	def upstreamParams = defaultProperties('org.knime.update.analytics-platform',
 		'com.knime.update.pmml.compilation',
-		'com.knime.update.productivity', 
+		'com.knime.update.productivity',
 		'org.knime.update.targetPlatform')
 
-	
+
 	stage('Clean workspace') {
 		cleanWorkspace()
 		try {
@@ -22,7 +22,7 @@ node {
 		}
 
 	}
-	
+
 	stage('Checkout sources') {
 		checkoutSources (
 			defaultBranch: 'master',
@@ -34,7 +34,7 @@ node {
 			]
 		)
 	}
-	
+
 	stage('Maven-to-OSGi') {
 		try {
 			withMaven(maven: 'Maven 3.2') {
@@ -44,6 +44,25 @@ node {
 					popd
 				'''
 			}
+
+			sh '''
+				source "git/knime-jenkins/org.knime.build.config/hudson-product-install.inc"
+
+				rm -f git/knime-bigdata/com.knime.tpbuilder/target/repository/{artifacts,content}.{jar,xml}
+
+				# add dummy file into otherwise empty fragment jar
+				pushd git/knime-bigdata/com.knime.tpbuilder/target/repository/plugins
+				echo "PLACEHOLDER CONTENT" >dummy.txt
+				zip -rv com.diffplug.osgi.extension.sun.misc_*.jar dummy.txt
+				rm dummy.txt
+				popd
+
+				# Recompute artifacts.jar because the hash sums have changed
+				p2-publisher -metadataRepository "file:$WORKSPACE/git/knime-bigdata/com.knime.tpbuilder/target/repository" \
+					-artifactRepository "file:$WORKSPACE/git/knime-bigdata/com.knime.tpbuilder/target/repository" \
+					-compress \
+					-source "$WORKSPACE/git/knime-bigdata/com.knime.tpbuilder/target/repository"
+			'''
 
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
@@ -69,7 +88,7 @@ node {
 			throw ex
 		}
 	}
-	
+
 	stage('Build update site') {
 		buckminster (
 			component: 'com.knime.update.bigdata',
@@ -84,7 +103,7 @@ node {
 
 		finalizeP2Repository()
 	}
-	
+
 	stage('Archive artifacts') {
 		archive()
 		try {
