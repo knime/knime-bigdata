@@ -172,6 +172,7 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
     public void setSparkVersion(final SparkVersion sparkVersion) {
         if (!m_helper.supportSpark(sparkVersion)) {
             updateDocumentFromSettings(sparkVersion, m_snippetType, getSettings());
+            m_snippetFileDirty = true;
         }
     }
 

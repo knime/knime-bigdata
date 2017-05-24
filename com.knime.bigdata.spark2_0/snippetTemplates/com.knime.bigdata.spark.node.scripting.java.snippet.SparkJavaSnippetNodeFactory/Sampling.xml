@@ -3,12 +3,12 @@
 <entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="Sampling"/>
-<entry key="Description" type="xstring" value="Returns a sample of a given size from the input RDD"/>
+<entry key="Description" type="xstring" value="Returns a sample of a given size from the input data frame."/>
 <entry key="Version" type="xstring" value="version 1.x"/>
 <config key="Snippet">
 <entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
 <entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
-<entry key="scriptBody" type="xstring" value="%%00010%%00009//*************************************************%%00010%%00009//Specify the fraction of data to sample and if%%00010%%00009//the sampling should be performed with replacement%%00010%%00009//*************************************************%%00010%%00009final double fraction = 0.5;%%00010%%00009final boolean withReplacement = false;%%00009%%00010%%00009//final boolean withReplacement = true;%%00010%%00010%%00009%%00010%%00009//Returns a sample of the incoming RDD%%00010%%00009return rowRDD1.sample(withReplacement, fraction);%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009//***************************************************%%00010%%00009// Specify the fraction of data to sample and if%%00010%%00009// the sampling should be performed with replacement%%00010%%00009//***************************************************%%00010%%00009final double fraction = 0.5;%%00010%%00009final boolean withReplacement = false;%%00009%%00010%%00009return dataFrame1.sample(withReplacement, fraction);%%00010"/>
 <config key="jarFiles">
 <entry key="array-size" type="xint" value="0"/>
 </config>

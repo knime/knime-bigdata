@@ -14,42 +14,33 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on 24.06.2015 by koetter
  */
 package com.knime.bigdata.spark2_0.jobs.scripting.java;
 
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- *
  * @author Tobias Koetter, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
 @SparkClass
 public abstract class AbstractSparkJavaSnippetSource extends AbstractSparkJavaSnippet {
 
     private static final long serialVersionUID = 4248837360910849154L;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)
-        throws Exception {
-
+    public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2) throws Exception {
         return apply(sc);
     }
 
     /**
      * @param sc the JavaSparkContext
-     * @return the result rdd
+     * @return the resulting data frame or <code>null</code>
      * @throws Exception if an exception occurs
      */
-    public abstract JavaRDD<Row> apply(JavaSparkContext sc) throws Exception;
-
+    public abstract Dataset<Row> apply(final JavaSparkContext sc) throws Exception;
 }

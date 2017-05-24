@@ -14,9 +14,6 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on May 6, 2016 by bjoern
  */
 package com.knime.bigdata.spark2_0.base;
 
@@ -52,9 +49,10 @@ import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSi
 import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSource;
 
 /**
- *
  * @author Bjoern Lohrmann, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
+@SuppressWarnings("restriction")
 public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark_2_0_JavaSnippetHelper.class);
@@ -66,20 +64,20 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     private static final Class<?> SINK_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippetSink.class;
 
     private final static String INNER_SNIPPET_METHOD_SIG =
-        "public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)"
+        "public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2)"
             + " throws Exception";
 
     private final static String SOURCE_SNIPPET_METHOD_SIG =
-        "public JavaRDD<Row> apply(final JavaSparkContext sc) " + "throws Exception";
+        "public Dataset<Row> apply(final JavaSparkContext sc) throws Exception";
 
     private final static String SINK_SNIPPET_METHOD_SIG =
-        "public void apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD)" + " throws Exception";
+        "public void apply(final JavaSparkContext sc, final Dataset<Row> dataFrame) throws Exception";
 
-    private final static String INNER_SNIPPET_DEFAULT_CONTENT = "return rowRDD1;";
+    private final static String INNER_SNIPPET_DEFAULT_CONTENT = "return dataFrame1;";
 
-    private final static String SINK_SNIPPET_DEFAULT_CONTENT = "//sink";
+    private final static String SINK_SNIPPET_DEFAULT_CONTENT = "// sink";
 
-    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "return sc.<Row>emptyRDD();";
+    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "final SparkSession spark = SparkSession.builder().sparkContext(sc.sc()).getOrCreate();\n\t\treturn spark.emptyDataFrame();";
 
     private final static String INNER_SNIPPET_CLASSNAME = "SparkJavaSnippet";
 
@@ -89,9 +87,7 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
 
     private final static List<File> classpathSingleton = new LinkedList<File>();
 
-    /**
-     * Constructor.
-     */
+    /** Constructor. */
     public Spark_2_0_JavaSnippetHelper() {
         super(Spark_2_0_CompatibilityChecker.INSTANCE);
     }
@@ -101,29 +97,9 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
      */
     @Override
     public GuardedDocument createGuardedSnippetDocument(final SnippetType type, final JavaSnippetSettings settings) {
-
-        switch (type) {
-            case INNER:
-                return createGuardedDoc(getSnippetClassName(type), getSnippetSuperClass(type), settings,
-                    INNER_SNIPPET_METHOD_SIG);
-            case SOURCE:
-                return createGuardedDoc(getSnippetClassName(type), getSnippetSuperClass(type), settings,
-                    SOURCE_SNIPPET_METHOD_SIG);
-            case SINK:
-                return createGuardedDoc(getSnippetClassName(type), getSnippetSuperClass(type), settings,
-                    SINK_SNIPPET_METHOD_SIG);
-            default:
-                throw new IllegalArgumentException("Unsupported snippet type: " + type.toString());
-        }
-    }
-
-    private GuardedDocument createGuardedDoc(final String snippetClassName, final Class<?> snippetSuperClass,
-        final JavaSnippetSettings settings, final String methodSig) {
-
-        GuardedDocument doc = new JavaSnippetDocument(methodSig);
-
-        updateAllSections(doc, snippetClassName, snippetSuperClass, settings);
-
+        final String methodSignature = getMethodSignature(type);
+        GuardedDocument doc = new JavaSnippetDocument(methodSignature);
+        updateAllSections(doc, getSnippetClassName(type), getSnippetSuperClass(type), methodSignature, settings);
         return doc;
     }
 
@@ -131,7 +107,7 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     public void updateGuardedSections(final SnippetType type, final GuardedDocument doc,
         final JavaSnippetFields fields) {
 
-        updateGuardedSections(doc, fields, getSnippetClassName(type), getSnippetSuperClass(type));
+        updateGuardedSections(doc, fields, getSnippetClassName(type), getSnippetSuperClass(type), getMethodSignature(type));
     }
 
     /**
@@ -141,15 +117,15 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     public void updateAllSections(final SnippetType type, final GuardedDocument doc,
         final JavaSnippetSettings settings) {
 
-        updateAllSections(doc, getSnippetClassName(type), getSnippetSuperClass(type), settings);
+        updateAllSections(doc, getSnippetClassName(type), getSnippetSuperClass(type), getMethodSignature(type), settings);
     }
 
 
     private static void updateAllSections(final GuardedDocument doc, final String snippetClassName,
-        final Class<?> snippetSuperClass, final JavaSnippetSettings settings) {
+        final Class<?> snippetSuperClass, final String methodSignature, final JavaSnippetSettings settings) {
 
         try {
-            updateGuardedSections(doc, settings.getJavaSnippetFields(), snippetClassName, snippetSuperClass);
+            updateGuardedSections(doc, settings.getJavaSnippetFields(), snippetClassName, snippetSuperClass, methodSignature);
             updateFreetextSections(doc, settings);
         } catch (BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -172,17 +148,27 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
      * Updates the guarded sections of the given {@link GuardedDocument}.
      */
     private static void updateGuardedSections(final GuardedDocument doc, final JavaSnippetFields fields,
-        final String snippetClassName, final Class<?> snippetSuperClass) {
+        final String snippetClassName, final Class<?> snippetSuperClass, final String methodSignature) {
 
         try {
             GuardedSection guardedImports = doc.getGuardedSection(JavaSnippetDocument.GUARDED_IMPORTS);
             guardedImports.setText(createImportsSection());
+
+            GuardedSection guardedBodyStart = doc.getGuardedSection(JavaSnippetDocument.GUARDED_BODY_START);
+            guardedBodyStart.setText(createBodyStartSection(methodSignature));
 
             GuardedSection guardedFields = doc.getGuardedSection(JavaSnippetDocument.GUARDED_FIELDS);
             guardedFields.setText(createFieldsSection(fields, snippetClassName, snippetSuperClass));
         } catch (BadLocationException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Create body start section (containing the method signature) of the snippet.
+     */
+    private static String createBodyStartSection(final String methodSignature) {
+        return "// expression start\n    " + methodSignature + " {\n";
     }
 
     /**
@@ -298,7 +284,6 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
         return classpathSingleton;
     }
 
-    @SuppressWarnings("restriction")
     private void initSnippetClasspath() {
 
         // Each of these packages is accessible from spark2_0 plugin
@@ -401,7 +386,7 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     public void updateGuardedClassnameSuffix(final SnippetType type, final GuardedDocument doc,
         final JavaSnippetFields fields, final String classnameSuffix) {
 
-        updateGuardedSections(doc, fields, getSnippetClassName(type, classnameSuffix), getSnippetSuperClass(type));
+        updateGuardedSections(doc, fields, getSnippetClassName(type, classnameSuffix), getSnippetSuperClass(type), getMethodSignature(type));
     }
 
     /**
@@ -416,6 +401,20 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
                 return SOURCE_SNIPPET_DEFAULT_CONTENT;
             case SINK:
                 return SINK_SNIPPET_DEFAULT_CONTENT;
+            default:
+                throw new IllegalArgumentException("Unsupported snippet type: " + type.toString());
+        }
+    }
+
+    @Override
+    public String getMethodSignature(final SnippetType type) {
+        switch (type) {
+            case INNER:
+                return INNER_SNIPPET_METHOD_SIG;
+            case SOURCE:
+                return SOURCE_SNIPPET_METHOD_SIG;
+            case SINK:
+                return SINK_SNIPPET_METHOD_SIG;
             default:
                 throw new IllegalArgumentException("Unsupported snippet type: " + type.toString());
         }
