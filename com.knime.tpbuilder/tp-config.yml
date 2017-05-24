@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created
 #  (2) an existing bundling was changed
-version: knimebd-20170523
+version: knimebd-20170524
 
 # Global switch to control wheter source bundles will be created.
 # Defaults to true.
@@ -416,14 +416,14 @@ bundleInstructions:
     instructions:
       Bundle-SymbolicName: org.scalactic_2.11
       
-  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0
-    instructions:
-      Manifest-Version: 1.0
-      Bundle-ManifestVersion: 2
-      Bundle-SymbolicName: com.diffplug.osgi.extension.sun.misc
-      Bundle-Version: 1.0.0
-      Export-Package: sun.misc;version="0.0.0"
-      Fragment-Host: system.bundle; extension:=framework
+#  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0
+#    instructions:
+#      Manifest-Version: 1.0
+#      Bundle-ManifestVersion: 2
+#      Bundle-SymbolicName: com.diffplug.osgi.extension.sun.misc
+#      Bundle-Version: 1.0.0
+#      Export-Package: sun.misc;version="0.0.0"
+#      Fragment-Host: system.bundle; extension:=framework
 
 #
 # Specifies the artifacts that are supposed to be bundled.
@@ -505,10 +505,13 @@ artifactGroups:
       - id: com.sun.jersey:jersey-core:1.9
         source: false
       
-      # avro (dep of hadoop-client) needs sun.misc package. This bundles
-      # makes OSGI export sun.misc
-      - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
-        source: false
+      # avro >1.7.4 needs sun.misc package. This bundle
+      # is a fragment that makes org.eclipse.osgi export the sun.misc package
+      # NOTE: 2017-05-24: There is something funny about this bundle. Eclipse
+      # fails to verify the signature (which is created by Buckminster) for
+      # unknown reasons.
+#      - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
+#        source: false
         
   # ##############################################################
   # Spark 1.2
