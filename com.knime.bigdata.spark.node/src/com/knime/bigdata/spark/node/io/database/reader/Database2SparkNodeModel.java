@@ -141,7 +141,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DatabaseQueryConnectionSettings settings) throws InvalidSettingsException {
         final CredentialsProvider cp = getCredentialsProvider();
         final String url = settings.getJDBCUrl();
-        final String query =  String.format("(%s) %s", settings.getQuery(), getTempTableName());
+        final String query =  String.format("(%s) %s", settings.getQuery(), getTempTableName(url));
         final Properties conProperties = new Properties();
         final Database2SparkJobInput input = new Database2SparkJobInput(namedOutputObject, url, query, conProperties);
 
@@ -182,7 +182,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         String partCol = utility.getStatementManipulator().quoteIdentifier(m_settings.getPartitionColumn());
         DBAggregationFunction minFunction = utility.getAggregationFunction("MIN");
         DBAggregationFunction maxFunction = utility.getAggregationFunction("MAX");
-        String table = "(" + settings.getQuery() + ") " + getTempTableName();
+        String table = "(" + settings.getQuery() + ") " + getTempTableName(settings.getJDBCUrl());
         String newQuery = "SELECT "
                 + minFunction.getSQLFragment4SubQuery(statementManipulator, table, partCol)
                 + ", "
@@ -209,8 +209,13 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
      *
      * @return a random table name
      */
-    private final String getTempTableName() {
-        return "tempTable_" + UUID.randomUUID().toString().replace('-', '_');
+    private final String getTempTableName(final String jdbcUrl) {
+        if (jdbcUrl.toLowerCase().startsWith("jdbc:oracle")) {
+            // oracle supports only 30 characters in table names...
+            return ("t" + UUID.randomUUID().toString().replace("-", "")).substring(0, 29);
+        } else {
+            return "tempTable_" + UUID.randomUUID().toString().replace('-', '_');
+        }
     }
 
     @Override
