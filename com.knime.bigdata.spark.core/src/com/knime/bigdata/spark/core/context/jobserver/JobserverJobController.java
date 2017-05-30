@@ -308,6 +308,8 @@ class JobserverJobController implements JobController {
         final long timeOfTimeout = timeOfStart + (aTimeoutInSeconds * 1000);
 
         int checkCounter = 0;
+        JobStatus status = null;
+
         while (System.currentTimeMillis() <= timeOfTimeout) {
             sleepSafely(computeSleepTime(checkCounter, timeOfTimeout, aCheckFrequencyInSeconds));
             checkCounter++;
@@ -318,7 +320,7 @@ class JobserverJobController implements JobController {
 
             // throws a KNIMESparkException if request failed
             JsonObject jobData = pollJobData(jobID);
-            JobStatus status = JobStatus.valueOf(jobData.getString("status"));
+            status = JobStatus.valueOf(jobData.getString("status"));
 
             switch (status) {
                 case RUNNING:
@@ -329,8 +331,8 @@ class JobserverJobController implements JobController {
                 case FINISHED:
                 case OK:
                     if (!jobData.containsKey("result")) {
-                        throw new KNIMESparkException("Unable to fetch job result, might be removed from result cache."
-                            + " See spark.jobserver.job-result-cache-size in environment.conf to increase cache size.");
+                        LOGGER.debug("Got job status OK without result, waiting for job result.");
+                        continue;
                     }
 
                     try {
@@ -344,6 +346,11 @@ class JobserverJobController implements JobController {
                 case KILLED:
                     throw new KNIMESparkException("Spark job was cancelled");
             }
+        }
+
+        if (status != JobStatus.RUNNING) { // no result received
+            throw new KNIMESparkException("Unable to fetch job result, might be removed from result cache."
+                    + " See spark.jobserver.job-result-cache-size in environment.conf to increase cache size.");
         }
 
         killJobSafely(jobID);
