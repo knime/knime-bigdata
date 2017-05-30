@@ -293,11 +293,9 @@ public class Spark_2_0_JavaSnippetHelper extends DefaultJavaSnippetHelper {
         // for java snippet compilation.
         final String[] packages = {
             "scala",
+            "scala.reflect.api",
             "org.apache.spark",
-            "org.apache.spark.sql",
-            "org.apache.spark.sql.hive",
-            "org.apache.spark.ml",
-            "org.apache.spark.mllib",
+            "com.google.common.base",
             "com.knime.bigdata.spark.core.exception",
             "org.apache.hadoop.conf",
             "org.apache.hadoop.mapred"
