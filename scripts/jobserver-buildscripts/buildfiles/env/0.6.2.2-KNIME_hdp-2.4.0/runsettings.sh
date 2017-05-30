@@ -5,7 +5,7 @@
 # The amount of RAM (eg 512m, 2G) to allocate to job server. The job server
 # runs within the Spark driver process (via spark-submit). Hence this actually
 # sets "spark.driver.memory" (see Spark documentation).
-JOBSERVER_MEMORY=1G
+JOBSERVER_MEMORY=2G
 
 # Spark installation and configuration directories on this machine.
 SPARK_HOME=/usr/hdp/current/spark-client
