@@ -27,7 +27,7 @@ spark {
     port = 8090
 
     # Directory where the job server stores uploaded jar files
-    jar-store-rootdir = /tmp/spark-job-server/jars
+    jar-store-rootdir = /tmp/%JSLINKNAME%/jars
 
     # Class to use to persist data such as jars, applications, jobs, etc.
     #   spark.jobserver.io.JobFileDAO uses the file system for persistence
@@ -36,14 +36,14 @@ spark {
     jobdao = spark.jobserver.io.JobSqlDAO
     sqldao {
       # by default this will use a H2 database
-      rootdir = "/tmp/spark-job-server/sqldao/data"
-      jdbc.url = "jdbc:h2:/tmp/spark-job-server/sqldao/data/"
+      rootdir = "/tmp/%JSLINKNAME%/sqldao/data"
+      jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db"
     }
 
     # Storage directory for files that are uploaded to the server
     # via POST/data commands
     datadao {
-      rootdir = /tmp/spark-job-server/upload
+      rootdir = /tmp/%JSLINKNAME%/upload
     }
 
     # Number of jobs that can be run simultaneously per context. If not set,
@@ -61,7 +61,7 @@ spark {
     # If true, a separate JVM is forked for each Spark context.
     # KERBEROS NOTE: In a Kerberos-enabled environment, you should set this to true
     # (as well as shiro authentication, see later in this file).
-    context-per-jvm = false
+    context-per-jvm = true
   }
 
 
@@ -96,7 +96,7 @@ spark {
     #
     # Note: In "yarn-client" mode, Spark will request this amount of memory per YARN
     # container, plus some additional overhead.
-    memory-per-node = 512m
+    memory-per-node = 1G
 
     # Useful settings for yarn-client mode. Please consult the Spark-on-YARN
     # documentation.

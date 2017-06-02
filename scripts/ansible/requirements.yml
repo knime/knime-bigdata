@@ -1,0 +1,4 @@
+# install with: ansible-galaxy install -r requirements.yml -p roles/
+
+- src: https://github.com/willshersystems/ansible-users
+  name: willshersystems.users

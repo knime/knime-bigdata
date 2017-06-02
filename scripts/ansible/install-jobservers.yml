@@ -1,0 +1,85 @@
+# #############################################################################
+# Copy Jobserver files
+# #############################################################################
+- hosts: hadoop-hosts:&master-*:&spark1-hosts
+  tasks:
+    - name: Install Base files for Spark 1.x jobserver
+      include: tasks/js_install_basefiles.yml
+      vars:
+        js_build_file: "{{ js_build_file_pattern | regex_replace('%ENV%', js1_env) | regex_replace('%VERSION%', js1_version) }}"
+        js_linkname: "{{js1_linkname}}"
+        js_conf: "{{js1_conf}}"
+
+- hosts: hadoop-hosts:&master-*:&spark20-hosts
+  tasks:
+    - name: Install Base files for Spark 2.0 jobserver
+      include: tasks/js_install_basefiles.yml
+      vars:
+        js_build_file: "{{ js_build_file_pattern | regex_replace('%ENV%', js2_env) | regex_replace('%VERSION%', js2_version) }}"
+        js_linkname: "{{js2_linkname}}"
+        js_conf: "{{js2_conf}}"
+
+
+# #############################################################################
+# Fix paths for spark 2.0 hosts that assume js_linkname=spark-job-server
+# #############################################################################
+- hosts: hadoop-hosts:&master-*:&spark20-hosts
+  tasks:
+    - name: Fix paths for spark 2.0 hosts that assume js_linkname=spark-job-server
+      include: tasks/fs_fix_paths.yml
+      vars:
+        js_linkname: "{{js2_linkname}}"
+
+
+# #############################################################################
+# Setup Jobserver for Kerberos
+# #############################################################################
+- hosts: hadoop-hosts:&master-*:&spark1-hosts:&secure-hosts
+  tasks:
+    - name: Setup Kerberos configuration for Spark 1.x jobserver
+      include: tasks/js_configure_kerberos.yml
+      vars:
+        js_linkname: "{{js1_linkname}}"
+
+- hosts: hadoop-hosts:&master-*:&spark20-hosts:&secure-hosts
+  tasks:
+    - name: Setup Kerberos configuration for Spark 2.0 jobserver
+      include: tasks/js_configure_kerberos.yml
+      vars:
+        js_linkname: "{{js2_linkname}}"
+
+
+# #############################################################################
+# Make user HDFS homedirs
+# #############################################################################
+- hosts: hadoop-hosts:&master-*:&secure-hosts
+  tasks:
+    - name: Copy hdfs keytab
+      copy: src={{keytab_dir}}/hdfs.keytab dest=/root/hdfs.keytab owner=root mode=u=rw,go=
+
+    - name: Get hdfs@CDH TGT
+      shell: kdestroy ; kinit -kt /root/hdfs.keytab hdfs@CDH
+
+    - name: Make HDFS homedir for jobserver
+      shell: hdfs dfs -mkdir -p /user/spark-job-server ; hdfs dfs -chown -R spark-job-server /user/spark-job-server
+
+- hosts: hadoop-hosts:&master-*:!secure-hosts
+  tasks:
+    - name: Make HDFS homedir for jobserver
+      become: yes
+      become_user: hdfs
+      shell: hdfs dfs -mkdir -p /user/spark-job-server ; hdfs dfs -chown -R spark-job-server /user/spark-job-server
+
+
+# #############################################################################
+# Restart jobserver
+# #############################################################################
+- hosts: hadoop-hosts:&master-*:&spark1-hosts
+  tasks:
+    - name: Restart Jobserver
+      service: name={{js1_linkname}} state=restarted
+
+- hosts: hadoop-hosts:&master-*:&spark20-hosts
+  tasks:
+    - name: Restart Jobserver
+      service: name={{js2_linkname}} state=restarted
