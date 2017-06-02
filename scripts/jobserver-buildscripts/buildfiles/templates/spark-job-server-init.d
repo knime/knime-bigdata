@@ -8,13 +8,13 @@
 . /etc/init.d/functions
 
 # installation directory of the job server
-JSDIR=/opt/spark-job-server
+JSDIR=/opt/%JSLINKNAME%
 # the Linux user under which the job server runs
-USER=spark-job-server
+USER=%JSUSER%
 
 DAEMON_START="$JSDIR/server_start.sh"
 DAEMON_STOP="$JSDIR/server_stop.sh"
-LOGDIR=/var/log/spark-job-server
+LOGDIR=/var/log/%JSLINKNAME%
 PIDFILE="$JSDIR/spark-jobserver.pid"
 DO="/sbin/runuser -s /bin/bash $USER -c"
 

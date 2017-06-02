@@ -24,10 +24,10 @@ spark {
   # #########################################################################
   jobserver {
     # TCP port that the job server listens on for HTTP requests
-    port = 8090
+    port = 8091
 
     # Directory where the job server stores uploaded jar files
-    jar-store-rootdir = /tmp/spark-job-server/jars
+    jar-store-rootdir = /tmp/%JSLINKNAME%/jars
 
     # Class to use to persist data such as jars, applications, jobs, etc.
     #   spark.jobserver.io.JobFileDAO uses the file system for persistence
@@ -35,15 +35,23 @@ spark {
     #
     jobdao = spark.jobserver.io.JobSqlDAO
     sqldao {
-      # by default this will use a H2 database
-      rootdir = "/tmp/spark-job-server/sqldao/data"
-      jdbc.url = "jdbc:h2:/tmp/spark-job-server/sqldao/data/"
+      slick-driver = slick.driver.H2Driver
+      jdbc-driver = org.h2.Driver
+      rootdir = "/tmp/%JSLINKNAME%/sqldao/data"
+      jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db;AUTO_SERVER=TRUE"
+
+      dbcp {
+        enabled = true
+        maxactive = 20
+        maxidle = 10
+        initialsize = 10
+      }
     }
 
     # Storage directory for files that are uploaded to the server
     # via POST/data commands
     datadao {
-      rootdir = /tmp/spark-job-server/upload
+      rootdir = /tmp/%JSLINKNAME%/upload
     }
 
     # Number of jobs that can be run simultaneously per context. If not set,
@@ -61,7 +69,7 @@ spark {
     # If true, a separate JVM is forked for each Spark context.
     # KERBEROS NOTE: In a Kerberos-enabled environment, you should set this to true
     # (as well as shiro authentication, see later in this file).
-    context-per-jvm = false
+    context-per-jvm = true
   }
 
 

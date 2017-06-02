@@ -24,7 +24,7 @@ SPARK_CONF_DIR=$SPARK_HOME/conf
 # Logging directory of the job server.
 # IMPORTANT: If you change this value AND are using the boot-script (spark-job-server-init.d),
 # you also have to change it in the boot-script!
-LOG_DIR=/var/log/spark-job-server
+LOG_DIR=/var/log/%JSLINKNAME%
 
 # Name of pid file that will be created by server_start.sh. This is interpreted
 # relative to the job server installation directory.

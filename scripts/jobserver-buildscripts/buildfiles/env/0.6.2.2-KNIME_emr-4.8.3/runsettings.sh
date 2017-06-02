@@ -20,7 +20,7 @@ SPARK_SUBMIT_OPTIONS="--conf spark.sql.hive.metastore.jars=/usr/lib/hive/lib/* -
 # Logging directory of the job server.
 # IMPORTANT: If you change this value AND are using the boot-script (spark-job-server-init.d),
 # you also have to change it in the boot-script!
-LOG_DIR=/mnt/spark-job-server/log
+LOG_DIR=/mnt/%JSLINKNAME%/log
 
 # Name of pid file that will be created by server_start.sh. This is interpreted
 # relative to the job server installation directory.
