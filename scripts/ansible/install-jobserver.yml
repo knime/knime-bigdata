@@ -1,7 +1,0 @@
-- hosts: hadoop-hosts:&master-*
-  tasks:
-    - copy: src={{js_build_dir}}/{{ js_build_file | regex_replace('%ENV%', js_env) }} dest=/tmp/{{ js_build_file | regex_replace('%ENV%', js_env) }}
-    - script: install_js_files/install-jobserver.sh --clear-tmp --clear-log /tmp/{{ js_build_file | regex_replace('%ENV%', js_env) }}
-    - copy: src={{js_conf}} dest=/opt/spark-job-server/environment.conf owner=spark
-    - service: name=spark-job-server state=restarted
-    
