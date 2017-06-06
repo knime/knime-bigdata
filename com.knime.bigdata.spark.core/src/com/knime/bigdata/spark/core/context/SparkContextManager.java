@@ -155,7 +155,7 @@ public class SparkContextManager {
      * @return true, when reconfiguration was successful, false otherwise.
      * @throws KNIMESparkException When something went wrong while destroying the context.
      */
-    public synchronized static boolean reconfigureContext(final SparkContextID contextID,
+    public static boolean reconfigureContext(final SparkContextID contextID,
         final SparkContextConfig newConfig, final boolean destroyIfNecessary) throws KNIMESparkException {
         return getOrCreateSparkContext(contextID).reconfigure(newConfig, destroyIfNecessary);
     }
