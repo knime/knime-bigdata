@@ -129,6 +129,10 @@ spark {
 
     # uris of jars to be loaded into the classpath for this context. Uris is a string list, or a string separated by commas ','
     # dependent-jar-uris = ["file:///some/path/present/in/each/mesos/slave/somepackage.jar"]
+
+    # Enable Hive per default and put warehouse on HDFS
+    spark.sql.warehouse.dir = "hdfs:///user/hive/warehouse"
+    spark.sql.catalogImplementation = "hive"
   }
 
   # Predefined Spark contexts with individual names. You can put settings here

@@ -64,6 +64,7 @@ function do_build {
         # copy buildsettings and make dummy .conf
         cp "$ENVDIR/buildsettings.sh" "config/$ENV.sh"
         touch "config/$ENV.conf" # create dummy conf
+        touch "config/shiro.ini" # create dummy conf
 
         # switch to branch
         echo "Building environment $ENV with branch $BRANCH"
@@ -82,6 +83,7 @@ function do_build {
 
         # environment.conf
         rm "spark-job-server-$ENV/$ENV.conf" # delete dummy conf
+        rm "spark-job-server-$ENV/shiro.ini" # delete dummy conf
         cp "${CONF}" "spark-job-server-$ENV/environment.conf"
         sed -i "s/%JSLINKNAME%/${JSLINKNAME}/g" "spark-job-server-$ENV/environment.conf"
         sed -i "s/%JSUSER%/${JSUSER}/g" "spark-job-server-$ENV/environment.conf"
@@ -110,16 +112,16 @@ function do_build {
         rm -Rf "spark-job-server-$ENV/"
 
         if [ -f "$ENVDIR/publish-api" ] ; then
-          git apply "${SCRIPT_DIR}/buildfiles/jobserverapi-publish-local.patch" || { echo "Failed to apply publish patch. Exiting." ; exit 1 ; }
-          sbt job-server-api/publish
-          git reset --hard
+          echo "Publishing to local m2 repository"
+          sbt "set isSnapshot in ThisBuild := true" publishM2
         fi
         sbt clean
 }
 
 
 if [ -z "$REPOSITORY" ]; then
-  REPOSITORY="git@github.com:bjoernlohrmann/spark-jobserver.git"
+  REPOSITORY="https://bitbucket.org/KNIME/spark-jobserver"
+  # REPOSITORY="git@github.com:bjoernlohrmann/spark-jobserver.git"
   # REPOSITORY="git@github.com:dersascha/spark-jobserver.git"
   # REPOSITORY="/home/bjoern/knime/bigdata/spark-jobserver"
 fi
