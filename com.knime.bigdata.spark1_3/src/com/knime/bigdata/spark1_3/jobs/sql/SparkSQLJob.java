@@ -24,7 +24,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructType;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -35,6 +35,8 @@ import com.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
 import com.knime.bigdata.spark1_3.api.NamedObjects;
 import com.knime.bigdata.spark1_3.api.SparkJob;
 import com.knime.bigdata.spark1_3.api.TypeConverters;
+import com.knime.bigdata.spark1_3.hive.HiveContextProvider;
+import com.knime.bigdata.spark1_3.hive.HiveContextProvider.HiveContextAction;
 
 /**
  * Executes a Spark SQL query.
@@ -51,8 +53,6 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
             throws KNIMESparkException, Exception {
 
         try {
-            final SQLContext sqlContext = new SQLContext(sparkContext);
-
             final String tempTable = "sparkSQLJob_" + UUID.randomUUID().toString().replace('-', '_');
             final String query = input.getQuery(tempTable);
 
@@ -62,19 +62,25 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
             final RDD<Row> rowRdd = namedObjects.getRdd(namedInputObject);
             final IntermediateSpec inputSchema = input.getSpec(namedInputObject);
             final StructType sparkSchema = TypeConverters.convertSpec(inputSchema);
-            final DataFrame inputDataFrame = sqlContext.createDataFrame(rowRdd, sparkSchema);
 
-            inputDataFrame.registerTempTable(tempTable);
-            try {
-                final DataFrame outputDataFrame = sqlContext.sql(query);
-                final String namedOutputObject = input.getFirstNamedOutputObject();
-                final IntermediateSpec outputSchema = TypeConverters.convertSpec(outputDataFrame.schema());
-                namedObjects.addJavaRdd(namedOutputObject, outputDataFrame.toJavaRDD());
-                LOGGER.info("Running Spark SQL query done with RDD: " + namedOutputObject);
-                return new SparkSQLJobOutput(namedOutputObject, outputSchema);
-            }finally {
-                sqlContext.dropTempTable(tempTable);
-            }
+            final DataFrame outputDataFrame = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
+                @Override
+                public DataFrame runWithHiveContext(final HiveContext hiveContext) {
+                    try {
+                        final DataFrame inputDataFrame = hiveContext.createDataFrame(rowRdd, sparkSchema);
+                        inputDataFrame.registerTempTable(tempTable);
+                        return hiveContext.sql(query);
+                    } finally {
+                        hiveContext.dropTempTable(tempTable);
+                    }
+                }
+            });
+
+            final String namedOutputObject = input.getFirstNamedOutputObject();
+            final IntermediateSpec outputSchema = TypeConverters.convertSpec(outputDataFrame.schema());
+            namedObjects.addJavaRdd(namedOutputObject, outputDataFrame.toJavaRDD());
+            LOGGER.info("Running Spark SQL query done with RDD: " + namedOutputObject);
+            return new SparkSQLJobOutput(namedOutputObject, outputSchema);
         } catch(Exception e) {
             throw new KNIMESparkException("Failed to execute Spark SQL query: " + e.getMessage(), e);
         }
