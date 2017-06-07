@@ -38,7 +38,7 @@ spark {
       slick-driver = slick.driver.H2Driver
       jdbc-driver = org.h2.Driver
       rootdir = "/tmp/%JSLINKNAME%/sqldao/data"
-      jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db;AUTO_SERVER=TRUE"
+      jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
 
       dbcp {
         enabled = true
