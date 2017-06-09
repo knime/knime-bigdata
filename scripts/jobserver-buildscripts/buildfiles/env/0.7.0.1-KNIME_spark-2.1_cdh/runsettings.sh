@@ -49,6 +49,10 @@ PIDFILE=spark-jobserver.pid
 # This option specifies the maximum total size of java.nio (New I/O package) direct buffer allocations.
 MAX_DIRECT_MEMORY=512M
 
+# Fix for Cloudera environments not providing hive-site.xml in the Spark config dir
+# (needed for accessing Hive from Spark)
+HADOOP_CONF_DIR=/etc/hive/conf
+
 # Only needed for YARN running outside of the cluster
 # You will need to COPY these files from your cluster to the remote machine
 # Normally these are kept on the cluster in /etc/hadoop/conf
