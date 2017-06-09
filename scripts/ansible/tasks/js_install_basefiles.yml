@@ -1,6 +1,6 @@
 # - copy: src={{js_build_dir}}/{{js_build_file}} dest=/tmp/{{js_build_file}}
 - name: Copy Jobserver .tar.gz from S3
-  shell: aws s3 cp s3://knime-bigdata-dev/jobserver-builds/{{js_build_file}} /tmp/
+  shell: rm -f /tmp/{{js_build_file}} ; aws s3 cp s3://knime-bigdata-dev/jobserver-builds/{{js_build_file}} /tmp/
 - name: Run Jobserver install script
   script: install_js_files/install-jobserver.sh --clear-tmp --clear-log /tmp/{{js_build_file}} {{js_linkname}}
 - name: Copy environment.conf

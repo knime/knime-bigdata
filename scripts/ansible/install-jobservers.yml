@@ -23,12 +23,12 @@
 # #############################################################################
 # Fix paths for spark 2.0 hosts that assume js_linkname=spark-job-server
 # #############################################################################
-- hosts: hadoop-hosts:&master-*:&spark20-hosts
-  tasks:
-    - name: Fix paths for spark 2.0 hosts that assume js_linkname=spark-job-server
-      include: tasks/fs_fix_paths.yml
-      vars:
-        js_linkname: "{{js2_linkname}}"
+# - hosts: hadoop-hosts:&master-*:&spark20-hosts
+#   tasks:
+#     - name: Fix paths for spark 2.0 hosts that assume js_linkname=spark-job-server
+#       include: tasks/fs_fix_paths.yml
+#       vars:
+#         js_linkname: "{{js2_linkname}}"
 
 
 # #############################################################################

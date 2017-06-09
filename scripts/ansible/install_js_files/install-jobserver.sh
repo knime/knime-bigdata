@@ -52,11 +52,11 @@ if [ -e "$INSTDIR/$LINKNAME" ] ; then
   BAKDIR="/root/install-jobserver-backup-$( date --rfc-3339=seconds | sed 's/ /_/' )"
   mkdir -p "$BAKDIR"
 
+  LINKTARGET=$( readlink -f "$INSTDIR/$LINKNAME" )
+
   if [ -L "$INSTDIR/$LINKNAME" ] ; then
     rm "$INSTDIR/$LINKNAME"
   fi
-
-  LINKTARGET=$( readlink -f "$INSTDIR/$LINKNAME" )
 
   echo "Backing up $LINKTARGET to $BAKDIR"
   # move any old jobserver files into backup area
