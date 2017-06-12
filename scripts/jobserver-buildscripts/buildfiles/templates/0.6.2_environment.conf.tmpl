@@ -35,14 +35,13 @@ spark {
     #
     jobdao = spark.jobserver.io.JobSqlDAO
     sqldao {
-      slick-driver = slick.driver.H2Driver
-      jdbc-driver = org.h2.Driver
       rootdir = "/tmp/%JSLINKNAME%/sqldao/data"
       jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
 
       dbcp {
-        enabled = true
+        connectonstart = true
         maxactive = 20
+        minidle = 1
         maxidle = 10
         initialsize = 10
       }
