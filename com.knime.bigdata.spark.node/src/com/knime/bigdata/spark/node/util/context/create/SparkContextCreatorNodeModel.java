@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.util.context.create;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JOptionPane;
 
@@ -33,6 +34,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.util.ViewUtils;
 
 import com.knime.bigdata.spark.core.context.SparkContext;
 import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
@@ -85,14 +87,22 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
 
             } else if (m_lastContextID != null && m_lastContextID.equals(newContextID)) {
                 LOGGER.debug("Reconfiguring old context with same ID.");
-                if (!SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(getCredentialsProvider()), false)) {
-                    final int n = JOptionPane.showConfirmDialog(null,
-                        "New settings only become active after destroying the existing remote Spark context. "
-                                + "Should the existing context be destroyed?\n\n"
-                                + "WARNING: This deletes all cached data such as RDDs in the context and you have to reset all executed Spark nodes.",
-                        "Spark context settings have changed", JOptionPane.OK_CANCEL_OPTION);
 
-                    if (n == JOptionPane.OK_OPTION) {
+                if (!SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(getCredentialsProvider()), false)) {
+                    final AtomicInteger choice = new AtomicInteger();
+
+                    ViewUtils.invokeAndWaitInEDT(new Runnable() {
+                        @Override
+                        public void run() {
+                            choice.set(JOptionPane.showConfirmDialog(null,
+                                "New settings only become active after destroying the existing remote Spark context. "
+                                        + "Should the existing context be destroyed?\n\n"
+                                        + "WARNING: This deletes all cached data such as RDDs in the context and you have to reset all executed Spark nodes.",
+                                "Spark context settings have changed", JOptionPane.OK_CANCEL_OPTION));
+                        }
+                    });
+
+                    if (choice.get() == JOptionPane.OK_OPTION) {
                         LOGGER.info("Destroying remote context and configuring new one.");
                         SparkContextManager.reconfigureContext(m_lastContextID, m_settings.createContextConfig(getCredentialsProvider()), true);
                     } else {
