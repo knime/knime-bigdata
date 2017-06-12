@@ -94,19 +94,7 @@ public class SparkContextManager {
      * @throws KNIMESparkException
      */
     public synchronized static void disposeCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        checkDefaultContext(contextID);
         sparkContexts.remove(contextID);
-    }
-
-    /**
-     * @param contextID the {@link SparkContextID} to check
-     * @throws KNIMESparkException if the given {@link SparkContextID} is the default {@link SparkContextID}
-     */
-    private static void checkDefaultContext(final SparkContextID contextID) throws KNIMESparkException {
-        ensureDefaultContext();
-        if (contextID.equals(getDefaultSparkContext().getID()) || DEFAULT_SPARK_CONTEXT_ID.equals(contextID)) {
-            throw new KNIMESparkException("Cannot modify default Spark context (from KNIME preferences).");
-        }
     }
 
     /**
@@ -120,7 +108,6 @@ public class SparkContextManager {
      * @throws KNIMESparkException
      */
     public static void destroyCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        checkDefaultContext(contextID);
         final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.destroy();
