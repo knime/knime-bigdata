@@ -66,9 +66,7 @@
 - hosts: hadoop-hosts:&master-*:!secure-hosts
   tasks:
     - name: Make HDFS homedir for jobserver
-      become: yes
-      become_user: hdfs
-      shell: hdfs dfs -mkdir -p /user/spark-job-server ; hdfs dfs -chown -R spark-job-server /user/spark-job-server
+      shell: su -l -c "hdfs dfs -mkdir -p /user/spark-job-server ; hdfs dfs -chown -R spark-job-server /user/spark-job-server" hdfs
 
 
 # #############################################################################
