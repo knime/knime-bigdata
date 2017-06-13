@@ -62,8 +62,8 @@ spark {
     # creation takes longer than the timeout, the jobserver closes the context.
     # Especially in yarn-client mode, context creation includes container
     # allocation, which can take a while.
-    # yarn-context-creation-timeout = 40
-    # context-creation-timeout = 60
+    yarn-context-creation-timeout = 60 s
+    context-creation-timeout = 60 s
 
     # If true, a separate JVM is forked for each Spark context.
     # KERBEROS NOTE: In a Kerberos-enabled environment, you should set this to true
@@ -151,6 +151,8 @@ spray.can.server {
   # parsing {
   #   max-content-length = 200m
   # }
+  request-timeout = 60 s
+  idle-timeout = 120 s
   request-chunk-aggregation-limit = 200m
 }
 
