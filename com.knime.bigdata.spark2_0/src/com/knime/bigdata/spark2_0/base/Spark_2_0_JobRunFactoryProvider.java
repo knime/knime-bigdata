@@ -58,6 +58,7 @@ import com.knime.bigdata.spark2_0.jobs.preproc.sorter.SortJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.scorer.ClassificationScorerJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.scorer.EntropyScorerJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.scorer.ScorerJobRunFactory;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.JavaDataFrameSnippetJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.scripting.java.JavaSnippetJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.sql.SparkSQLFunctionsJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.sql.SparkSQLJobRunFactory;
@@ -112,6 +113,7 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new SortJobRunFactory(),
 //            new TFIDFJobRunFactory(),
             new JavaSnippetJobRunFactory(),
+            new JavaDataFrameSnippetJobRunFactory(),
             new Table2SparkJobRunFactory(),
             new StatisticsJobRunFactory(),
             new CorrelationColumnJobRunFactory(),

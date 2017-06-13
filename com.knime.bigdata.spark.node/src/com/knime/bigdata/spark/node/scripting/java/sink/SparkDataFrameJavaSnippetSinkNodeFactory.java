@@ -18,25 +18,25 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java.snippet;
+package com.knime.bigdata.spark.node.scripting.java.sink;
 
 import org.knime.core.node.NodeDialogPane;
 
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
+import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetNodeFactory extends DefaultSparkNodeFactory<SparkJavaSnippetNodeModel> {
+public class SparkDataFrameJavaSnippetSinkNodeFactory extends DefaultSparkNodeFactory<SparkDataFrameJavaSnippetSinkNodeModel> {
 
     /**
      * Constructor.
      */
-    public SparkJavaSnippetNodeFactory() {
+    public SparkDataFrameJavaSnippetSinkNodeFactory() {
         super("misc/java");
     }
 
@@ -44,8 +44,8 @@ public class SparkJavaSnippetNodeFactory extends DefaultSparkNodeFactory<SparkJa
      * {@inheritDoc}
      */
     @Override
-    public SparkJavaSnippetNodeModel createNodeModel() {
-        return new SparkJavaSnippetNodeModel();
+    public SparkDataFrameJavaSnippetSinkNodeModel createNodeModel() {
+        return new SparkDataFrameJavaSnippetSinkNodeModel();
     }
 
     /**
@@ -61,6 +61,6 @@ public class SparkJavaSnippetNodeFactory extends DefaultSparkNodeFactory<SparkJa
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.INNER, JavaSnippetHelperRegistry.getInstance());
+        return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.SINK, JavaDataFrameSnippetHelperRegistry.getInstance());
     }
 }

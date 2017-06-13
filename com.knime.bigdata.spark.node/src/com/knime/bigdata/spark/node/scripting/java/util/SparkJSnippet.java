@@ -50,9 +50,9 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 
 import com.knime.bigdata.spark.core.version.SparkVersion;
+import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 
 /**
@@ -65,6 +65,8 @@ import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippe
 public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
 
     private SnippetType m_snippetType;
+
+    private final AbstractJavaSnippetHelperRegistry m_helperRegistry;
 
     private JavaSnippetHelper m_helper;
 
@@ -92,10 +94,11 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
      *
      * @param sparkVersion
      * @param snippetType
+     * @param helperRegistry
      */
-    public SparkJSnippet(final SparkVersion sparkVersion, final SnippetType snippetType) {
+    public SparkJSnippet(final SparkVersion sparkVersion, final SnippetType snippetType, final AbstractJavaSnippetHelperRegistry helperRegistry) {
         this(sparkVersion, snippetType, new JavaSnippetSettings(
-            JavaSnippetHelperRegistry.getInstance().getHelper(sparkVersion).getDefaultContent(snippetType)));
+            helperRegistry.getHelper(sparkVersion).getDefaultContent(snippetType)), helperRegistry);
     }
 
     /**
@@ -104,12 +107,14 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
      * @param sparkVersion the name of the class
      * @param snippetType
      * @param settings
+     * @param helperRegistry
      */
     public SparkJSnippet(final SparkVersion sparkVersion, final SnippetType snippetType,
-        final JavaSnippetSettings settings) {
+        final JavaSnippetSettings settings, final AbstractJavaSnippetHelperRegistry helperRegistry) {
 
         m_snippetType = snippetType;
-        m_helper = JavaSnippetHelperRegistry.getInstance().getHelper(sparkVersion);
+        m_helperRegistry = helperRegistry;
+        m_helper = helperRegistry.getHelper(sparkVersion);
         m_settings = settings;
 
         m_document = m_helper.createGuardedSnippetDocument(snippetType, settings);
@@ -187,7 +192,7 @@ public class SparkJSnippet implements JSnippet<SparkJavaSnippetTemplate> {
         final JavaSnippetSettings settings) {
         if (!m_helper.supportSpark(sparkVersion)) {
             //update the helper if the spark version has changed
-            m_helper = JavaSnippetHelperRegistry.getInstance().getHelper(sparkVersion);
+            m_helper = m_helperRegistry.getHelper(sparkVersion);
             //invalidate the class path as well when the Spark version changes
             invalidateClasspath();
         }

@@ -36,6 +36,12 @@
       </JavaSnippetHelper>
    </extension>
    <extension
+         point="com.knime.bigdata.spark.node.JavaDataFrameSnippetHelper">
+      <JavaDataFrameSnippetHelper
+            HelperClass="com.knime.bigdata.spark2_0.base.Spark_2_0_JavaDataFrameSnippetHelper">
+      </JavaDataFrameSnippetHelper>
+   </extension>
+   <extension
          point="com.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
       <JavaSnippetTemplateRepositoryProvider
             ProviderClass="com.knime.bigdata.spark2_0.base.Spark_2_0_JavaSnippetTemplateRepositoryProvider">

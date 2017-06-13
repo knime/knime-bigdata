@@ -28,17 +28,17 @@ import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
+import com.knime.bigdata.spark.node.scripting.java.AbstractSparkDataFrameJavaSnippetNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNodeModel {
+public class SparkDataFrameJavaSnippetSourceNodeModel extends AbstractSparkDataFrameJavaSnippetNodeModel {
 
     /** Constructor.*/
-    public SparkJavaSnippetSourceNodeModel() {
+    public SparkDataFrameJavaSnippetSourceNodeModel() {
         super(SparkSourceNodeModel.addContextPort(null), new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE);
     }
 

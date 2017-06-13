@@ -18,7 +18,7 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java.source;
+package com.knime.bigdata.spark.node.scripting.java.sink;
 
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -26,20 +26,21 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
+import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.node.scripting.java.AbstractSparkDataFrameJavaSnippetNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNodeModel {
+public class SparkDataFrameJavaSnippetSinkNodeModel extends AbstractSparkDataFrameJavaSnippetNodeModel {
+    static final String CLASS_NAME = "SparkDataFrameJavaSnippetSink";
 
     /** Constructor.*/
-    public SparkJavaSnippetSourceNodeModel() {
-        super(SparkSourceNodeModel.addContextPort(null), new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE);
+    public SparkDataFrameJavaSnippetSinkNodeModel() {
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{}, SnippetType.SINK);
     }
 
     /**
@@ -47,8 +48,11 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
+            throw new InvalidSettingsException("Please connect the first inport of the node with an data frame outport");
+        }
         super.configureInternal(inSpecs);
-        return new PortObjectSpec[] {null};
+        return new PortObjectSpec[0];
     }
 
     /**
@@ -56,6 +60,9 @@ public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNod
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        return super.executeSnippetJob(inData, true, exec, JOB_ID);
+        if (inData == null || inData.length < 1 || !(inData[0] instanceof SparkDataPortObject)) {
+            throw new InvalidSettingsException("Please connect the first inport of the node with an data frame outport");
+        }
+        return super.executeSnippetJob(inData, false, exec, JOB_ID);
     }
 }

@@ -25,17 +25,17 @@ package com.knime.bigdata.spark.node.scripting.java.util.helper;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class JavaSnippetHelperRegistry extends AbstractJavaSnippetHelperRegistry {
+public class JavaDataFrameSnippetHelperRegistry extends AbstractJavaSnippetHelperRegistry {
 
     /** The id of the converter extension point. */
-    private static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.JavaSnippetHelper";
+    private static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.JavaDataFrameSnippetHelper";
 
     /**The attribute of the extension point.*/
     private static final String EXT_POINT_ATTR_DF = "HelperClass";
 
-    private static JavaSnippetHelperRegistry instance;
+    private static JavaDataFrameSnippetHelperRegistry instance;
 
-    private JavaSnippetHelperRegistry() {
+    private JavaDataFrameSnippetHelperRegistry() {
     }
 
     /**
@@ -43,9 +43,9 @@ public class JavaSnippetHelperRegistry extends AbstractJavaSnippetHelperRegistry
      *
      * @return the only instance
      */
-    public static synchronized JavaSnippetHelperRegistry getInstance() {
+    public static synchronized JavaDataFrameSnippetHelperRegistry getInstance() {
         if (instance == null) {
-            instance = new JavaSnippetHelperRegistry();
+            instance = new JavaDataFrameSnippetHelperRegistry();
             instance.registerExtensions(EXT_POINT_ID, EXT_POINT_ATTR_DF);
         }
         return instance;

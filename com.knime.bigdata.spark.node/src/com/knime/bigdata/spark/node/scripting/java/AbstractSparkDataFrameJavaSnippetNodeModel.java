@@ -16,24 +16,24 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 24.06.2015 by koetter
+ *   Created on Mar 7, 2017 by sascha
  */
 package com.knime.bigdata.spark.node.scripting.java;
 
 import org.knime.core.node.port.PortType;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 
 /**
- * RDD specific java snippet model
- * @author Tobias Koetter, KNIME.com
+ * Data frame specific java snippet model
+ * @author Sascha Wolke, KNIME.com
  */
-public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetBaseNodeModel {
+public abstract class AbstractSparkDataFrameJavaSnippetNodeModel extends AbstractSparkJavaSnippetBaseNodeModel {
 
     /** Unique job id */
-    public static final String JOB_ID = "JavaSnippetJob";
+    public static final String JOB_ID = "JavaDataFrameSnippetJob";
 
     /**
      * Default constructor
@@ -41,7 +41,7 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkJav
      * @param outPortTypes
      * @param snippetType Type of the snippet node (e.g. source, sink, ...)
      */
-    protected AbstractSparkJavaSnippetNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
+    protected AbstractSparkDataFrameJavaSnippetNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
             final SnippetType snippetType) {
         super(inPortTypes, outPortTypes, snippetType);
     }
@@ -49,6 +49,6 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkJav
     /** @return snippet helper registry */
     @Override
     protected AbstractJavaSnippetHelperRegistry getHelperRegistry() {
-        return JavaSnippetHelperRegistry.getInstance();
+        return JavaDataFrameSnippetHelperRegistry.getInstance();
     }
 }

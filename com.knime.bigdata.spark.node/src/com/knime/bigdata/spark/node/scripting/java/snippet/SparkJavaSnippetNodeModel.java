@@ -63,6 +63,6 @@ public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel
         if (inData == null || inData.length < 1 || !(inData[0] instanceof SparkDataPortObject)) {
             throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
         }
-        return super.executeSnippetJob(inData, true, exec);
+        return super.executeSnippetJob(inData, true, exec, JOB_ID);
     }
 }

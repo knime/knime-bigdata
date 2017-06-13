@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Write HDFS_7bee9063-a612-45e9-a557-503a24d9cb27.xml">
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Write to HDFS.xml">
 <entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="Write to HDFS"/>
-<entry key="Description" type="xstring" value="Writes the content of the input data frame to HDFS."/>
+<entry key="Description" type="xstring" value="Writes the content of the input RDD to HDFS."/>
 <entry key="Version" type="xstring" value="version 1.x"/>
 <config key="Snippet">
 <entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
 <entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
-<entry key="scriptBody" type="xstring" value="%%00010%%00009// writes a data frame to a specified path%%00010%%00009final String hdfsPath = &quot;&lt;yourPath&gt;&quot;;%%00010%%00009final DataFrameWriter&lt;Row&gt; writer = dataFrame.write();%%00010%%00009writer.format(&quot;text&quot;); // csv, json, orc or parquet%%00010%%00009writer.mode(SaveMode.Overwrite);%%00010%%00009writer.save(hdfsPath);%%00010%%00009"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009//*******************************************%%00010%%00009//Change the hdfsPath variable to the path of %%00010%%00009//the HDFS file to write to%%00010%%00009//*******************************************%%00010%%00009final String hdfsPath = &quot;hdfs://&lt;yourPath&gt;&quot;;%%00010%%00010%%00009//writes the incoming RDD to the specified file path%%00010%%00009rowRDD.saveAsTextFile(hdfsPath);%%00010"/>
 <config key="jarFiles">
 <entry key="array-size" type="xint" value="0"/>
 </config>
@@ -24,7 +24,7 @@
 <config key="inVars">
 <entry key="array-size" type="xint" value="0"/>
 </config>
-<entry key="version" type="xstring" value="version 1.x"/>
+<entry key="version" type="xstring" isnull="true" value=""/>
 <entry key="templateUUID" type="xstring" value="069e51f6-31f7-4a4a-9d29-b09ecaa0e006"/>
 <entry key="runOnExecute" type="xboolean" value="false"/>
 </config>
