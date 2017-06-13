@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
 
 import java.text.SimpleDateFormat;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -47,6 +48,11 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     private static final String DEFAULT_DELIMITER = ",";
     private String m_delimiter = DEFAULT_DELIMITER;
 
+    /** Example delimiters in dialog */
+    public static final String[] DELIMITER_EXAMPLES = new String[] {
+        ",", ";", "|", "<tab>", "<space>"
+    };
+
     /** Quote character */
     private static final String CFG_QUOTE = "quote";
     private static final String DEFAULT_QUOTE = "\"";
@@ -67,6 +73,14 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     private static final String DEFAULT_DATE_FORMAT = "";
     private String m_dateFormat = DEFAULT_DATE_FORMAT;
 
+    /** Example date formats in dialog */
+    public static final String[] DATE_FORMAT_EXAMPLES = new String[] {
+        "yyyy-MM-dd HH:mm:ss.S", "dd.MM.yyyy HH:mm:ss.S",
+        "yyyy-MM-dd;HH:mm:ss.S", "dd.MM.yyyy;HH:mm:ss.S",
+        "yyyy-MM-dd'T'HH:mm:ssZZZZ",
+        "yyyy-MM-dd", "yyyy/MM/dd", "dd.MM.yyyy", "HH:mm:ss"
+    };
+
     /** Compression codec. */
     public static final String COMPRESSION_CODECS[] = new String[] {
         "", "bzip2", "gzip", "lz4", "snappy"
@@ -86,7 +100,7 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     private static final String DEFAULT_QUOTE_MODE = "MINIMAL";
     private String m_quoteMode = DEFAULT_QUOTE_MODE;
 
-    /** @see Spark2GenericDataSourceSettings#Spark2GenericDataSourceSettings(String, boolean, boolean) */
+    /** @see Spark2GenericDataSourceSettings#Spark2GenericDataSourceSettings(String, SparkVersion, boolean, boolean) */
     public Spark2CSVSettings(final String format, final SparkVersion minSparkVersion, final boolean supportsPartitioning, final boolean hasDriver) {
         super(format, minSparkVersion, supportsPartitioning, hasDriver);
     }
@@ -156,8 +170,12 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
             throw new InvalidSettingsException("Quote character has to be exactly one character (default: " + DEFAULT_QUOTE + ")");
         }
 
-        if (m_delimiter.length() != 1) {
+        if (unescapeDelimiter() == null || unescapeDelimiter().length() != 1) {
             throw new InvalidSettingsException("Delimiter character has to be exactly one character (default: " + DEFAULT_DELIMITER + ")");
+        }
+
+        if (unescapeDelimiter() != null && unescapeDelimiter().equals("\n")) {
+            throw new InvalidSettingsException("Newline as delimiter is not allowed (default: " + DEFAULT_DELIMITER + ")");
         }
 
         try {
@@ -186,7 +204,12 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     @Override
     public void addWriterOptions(final Spark2GenericDataSourceJobInput jobInput) {
         jobInput.setOption(CFG_HEADER, Boolean.toString(m_header));
-        jobInput.setOption(CFG_DELIMITER, m_delimiter);
+
+        final String delimiter = unescapeDelimiter();
+        if (unescapeDelimiter() != null && unescapeDelimiter().length() == 1) {
+            jobInput.setOption(CFG_DELIMITER, delimiter);
+        }
+
         jobInput.setOption(CFG_QUOTE, m_quote);
         if (!StringUtils.isBlank(m_escape)) {
             jobInput.setOption(CFG_ESCAPE, m_escape);
@@ -204,5 +227,24 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
         jobInput.setOption(CFG_QUOTE_MODE, m_quoteMode);
 
         super.addWriterOptions(jobInput);
+    }
+
+    /**
+     * Transform generic delimiter input string into a delimiter character.
+     *
+     * @return unescaped delimiter string with one character or null
+     */
+    private String unescapeDelimiter() {
+        final String unescaped = StringEscapeUtils.unescapeJava(m_delimiter);
+
+        if (m_delimiter.equalsIgnoreCase("<space>")) {
+            return " ";
+        } else if (m_delimiter.equalsIgnoreCase("<tab>")) {
+            return "\t";
+        } else if (unescaped.length() == 1) {
+            return unescaped;
+        } else {
+            return null;
+        }
     }
 }

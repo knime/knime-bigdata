@@ -247,7 +247,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
         m_directoryChooser.setConnectionInformation(connInfo);
         m_directoryChooser.setSelection(m_settings.getDirectory());
 
-        updateHistory("outputDirSpark_" + m_settings.getFormat(), m_outputName);
+        updateHistory("outputDirSpark_" + m_settings.getFormat(), m_outputName, new String[0]);
         m_outputName.setSelectedItem(m_settings.getName());
         m_saveMode.setSelectedItem(m_settings.getSparkSaveMode());
 
@@ -307,11 +307,13 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
      * Update a combo box with string history.
      * @param id - History ID
      * @param comboBox - Combo box with strings
+     * @param defaults - Default values to always add
      */
-    protected void updateHistory(final String id, final JComboBox<String> comboBox) {
+    protected void updateHistory(final String id, final JComboBox<String> comboBox, final String[] defaults) {
         final StringHistory history = StringHistory.getInstance(id, 15);
         final Set<String> set = new LinkedHashSet<>();
         Collections.addAll(set, history.getHistory());
+        Collections.addAll(set, defaults);
         final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
         model.removeAllElements();
         for (final String string : set) {
