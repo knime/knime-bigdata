@@ -22,12 +22,12 @@
         	See <a href="http://spark.apache.org/docs/1.5.0/api/java/org/apache/spark/sql/DataFrame.html#coalesce(int)">Spark documentation</a> for more informations.	
        	</option>
 		<option name="Header">The header will be written at the first line.</option>
-		<option name="Delimiter">Character used as delimiter between columns.</option>
+		<option name="Delimiter">Character used as delimiter between columns (supports <a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.10.6">escape sequences</a>, e.g. <i>\t</i> or <i>\u0123</i>).</option>
 		<option name="Quote character">Quote character (delimiters inside quotes are ignored).</option>
 		<option name="Escape character">Escape character (escaped quote characters are ignored).</option>
 		<option name="Null value">Specifies a string that indicates a null value, nulls in the DataFrame will be written as this string.</option>
 		<option name="Date format">
-			Specifies a string that indicates the date format to use when reading dates or timestamps. Custom date formats follow the formats at <a href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">java.text.SimpleDateFormat</a>. This applies to both DateType and TimestampType. By default, it is null which means trying to parse times and date by java.sql.Timestamp.valueOf() and java.sql.Date.valueOf().
+			Specifies a string that indicates the date format to use when reading dates or timestamps. Custom date formats follow the formats at <a href="https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html">java.text.SimpleDateFormat</a>. This applies to both DateType and TimestampType. By default, it is null which means trying to parse times and date by java.sql.Timestamp.valueOf() and java.sql.Date.valueOf().
 		</option>
 		<option name="codec">Compression codec to use when saving to file.</option>
 		<option name="Quote mode">When to quote fields (ALL, MINIMAL (default), NON_NUMERIC, NONE), see <a href="https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/QuoteMode.html">Quote Modes</a>.</option>

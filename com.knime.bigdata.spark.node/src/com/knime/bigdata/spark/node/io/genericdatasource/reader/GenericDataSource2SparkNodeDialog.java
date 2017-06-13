@@ -191,11 +191,13 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
      * Update a combo box with string history.
      * @param id - History ID
      * @param comboBox - Combo box with strings
+     * @param defaults - Default values to always add
      */
-    protected void updateHistory(final String id, final JComboBox<String> comboBox) {
-        final StringHistory history = StringHistory.getInstance(id);
+    protected void updateHistory(final String id, final JComboBox<String> comboBox, final String[] defaults) {
+        final StringHistory history = StringHistory.getInstance(id, 15);
         final Set<String> set = new LinkedHashSet<>();
         Collections.addAll(set, history.getHistory());
+        Collections.addAll(set, defaults);
         final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
         model.removeAllElements();
         for (final String string : set) {

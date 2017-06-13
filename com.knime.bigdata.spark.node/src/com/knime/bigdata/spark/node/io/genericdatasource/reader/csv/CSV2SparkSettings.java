@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader.csv;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -49,6 +50,11 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     private static final String DEFAULT_DELIMITER = ",";
     private String m_delimiter = DEFAULT_DELIMITER;
 
+    /** Example delimiters in dialog */
+    public static final String[] DELIMITER_EXAMPLES = new String[] {
+        ",", ";", "|", "<tab>", "<space>"
+    };
+
     /** Quote character */
     private static final String CFG_QUOTE = "quote";
     private static final String DEFAULT_QUOTE = "\"";
@@ -74,6 +80,11 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     private static final String DEFAULT_CHARSET = "UTF-8";
     private String m_charset = DEFAULT_CHARSET;
 
+    /** Example charsets in dialog */
+    public static final String[] CHARSET_EXAMPLES = new String[] {
+        "UTF-8", "UTF-16", "UTF-16LE", "UTF-16BE", "ISO-8859-1"
+    };
+
     /** Infer schema or read all values as string */
     private static final String CFG_INFER_SCHEMA = "inferSchema";
     private static final boolean DEFAULT_INFER_SCHEMA = true;
@@ -94,7 +105,15 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     private static final String DEFAULT_DATE_FORMAT = "";
     private String m_dateFormat = DEFAULT_DATE_FORMAT;
 
-    /** @see GenericDataSource2SparkSettings#GenericDataSource2SparkSettings(String, boolean) */
+    /** Example date formats in dialog */
+    public static final String[] DATE_FORMAT_EXAMPLES = new String[] {
+        "yyyy-MM-dd HH:mm:ss.S", "dd.MM.yyyy HH:mm:ss.S",
+        "yyyy-MM-dd;HH:mm:ss.S", "dd.MM.yyyy;HH:mm:ss.S",
+        "yyyy-MM-dd'T'HH:mm:ssZZZZ",
+        "yyyy-MM-dd", "yyyy/MM/dd", "dd.MM.yyyy", "HH:mm:ss"
+    };
+
+    /** @see GenericDataSource2SparkSettings#GenericDataSource2SparkSettings(String, SparkVersion, boolean) */
     public CSV2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver) {
         super(format, minSparkVersion, hasDriver);
     }
@@ -176,8 +195,12 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
             throw new InvalidSettingsException("Quote character has to be exactly one character (default: " + DEFAULT_QUOTE + ")");
         }
 
-        if (m_delimiter.length() != 1) {
+        if (unescapeDelimiter() == null || unescapeDelimiter().length() != 1) {
             throw new InvalidSettingsException("Delimiter character has to be exactly one character (default: " + DEFAULT_DELIMITER + ")");
+        }
+
+        if (unescapeDelimiter() != null && unescapeDelimiter().equals("\n")) {
+            throw new InvalidSettingsException("Newline as delimiter is not allowed (default: " + DEFAULT_DELIMITER + ")");
         }
 
         if (!StringUtils.isBlank(m_charset) && !Charset.isSupported(m_charset)) {
@@ -216,7 +239,12 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     @Override
     public void addReaderOptions(final GenericDataSource2SparkJobInput jobInput) {
         jobInput.setOption(CFG_HEADER, Boolean.toString(m_header));
-        jobInput.setOption(CFG_DELIMITER, m_delimiter);
+
+        final String delimiter = unescapeDelimiter();
+        if (unescapeDelimiter() != null && unescapeDelimiter().length() == 1) {
+            jobInput.setOption(CFG_DELIMITER, delimiter);
+        }
+
         jobInput.setOption(CFG_QUOTE, m_quote);
         if (!StringUtils.isBlank(m_escape)) {
             jobInput.setOption(CFG_ESCAPE, m_escape);
@@ -236,5 +264,24 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
         }
 
         super.addReaderOptions(jobInput);
+    }
+
+    /**
+     * Transform generic delimiter input string into a delimiter character.
+     *
+     * @return unescaped delimiter string with one character or null
+     */
+    private String unescapeDelimiter() {
+        final String unescaped = StringEscapeUtils.unescapeJava(m_delimiter);
+
+        if (m_delimiter.equalsIgnoreCase("<space>")) {
+            return " ";
+        } else if (m_delimiter.equalsIgnoreCase("<tab>")) {
+            return "\t";
+        } else if (unescaped.length() == 1) {
+            return unescaped;
+        } else {
+            return null;
+        }
     }
 }
