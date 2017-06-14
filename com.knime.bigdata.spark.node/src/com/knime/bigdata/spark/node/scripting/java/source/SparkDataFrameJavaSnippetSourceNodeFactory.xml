@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
-	type="Manipulator" icon="../icon.png">
-	<name>Spark RDD Java Snippet</name>
-	<shortDescription>Execute arbitrary java code in Spark.</shortDescription>
+    type="Source" icon="../icon.png">
+	<name>Spark Data Frame Java Snippet (Source)</name>
+	   <shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>
-            <p>This node allows you to execute arbitrary java code to manipulate or create Spark RDD.
+            <p>This node allows you to execute arbitrary java code to create a Spark DataFrame e.g.
+            by reading a file from HDFS (See provided templates).
              Simply enter the java code in the text area.</p>
             <p>Note, that this node also supports flow variables as input to your Spark job. 
             To use a flow variable simply double click on the variable in the "Flow Variable List".</p>
@@ -35,16 +36,7 @@
               <p>Enter your java code here.</p>
 
               <p>
-              The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.
-              The input <i>JavaRDD&lt;Row&gt;</i> can be accessed via the method input parameter <i>rowRDD1</i> and <i>rowRDD2</i>
-              whereas <i>rowRDD2</i> is <i>null</i> if the input port is not connected.</p>
-
-              <p><i>Output Schema:</i><br/>
-              The schema (e.g. data table specification) of the returned <i>JavaRDD&lt;Row&gt;</i> is by default 
-              derived automatically by looking at the top 10 rows of the returned <i>JavaRDD&lt;Row&gt;</i>. 
-              However you can also specify the schema programmatically by overwriting the <i>getSchema()</i> method. 
-              For an example on how to implement the method have a look at the "Create result schema manually" template 
-              in the "Templates" tab.</p>
+	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.</p>
 
               <p><b>Flow variables:</b><br/>
               You can access input flow variables by defining them in the <b>Input</b> table.
@@ -82,9 +74,10 @@
        </tab>
     </fullDescription>
 
-	<ports>
-        <inPort index="0" name="First Spark Data">First input Spark RDD.</inPort>
-        <inPort index="1" optional="true" name="Second Spark Data">Optional second input Spark RDD.</inPort>
-        <outPort index="0" name="Result Spark Data">Result Spark RDD.</outPort>
-	</ports>
+    <ports>
+        <inPort index="0" name="Spark context">
+            Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
+        </inPort>
+        <outPort index="0" name="Spark Data">The new created Spark DataFrame.</outPort>
+    </ports>
 </knimeNode>

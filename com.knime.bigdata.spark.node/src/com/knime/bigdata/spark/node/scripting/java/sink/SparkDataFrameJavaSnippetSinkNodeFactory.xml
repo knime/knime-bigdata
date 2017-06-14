@@ -2,11 +2,11 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Sink" icon="../icon.png">
-	<name>Spark RDD Java Snippet (Sink)</name>
+	<name>Spark Data Frame Java Snippet (Sink)</name>
 	<shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>
-            <p>This node allows you to execute arbitrary java code to persist an existing Spark RDD e.g.
+            <p>This node allows you to execute arbitrary java code to persist an existing Spark DataFrame e.g.
             by writing it to HDFS (See provided templates). Simply enter the java code in the text area.</p>
             <p>Note, that this node also supports flow variables as input to your Spark job. 
             To use a flow variable simply double click on the variable in the "Flow Variable List".</p>
@@ -36,7 +36,7 @@
 
 	          <p>
 	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.
-	          The input <i>JavaRDD&lt;Row&gt;</i> can be accessed via the method input parameter <i>rowRDD</i>.</p>
+	          The input <i>Dataset&lt;Row&gt;</i> can be accessed via the method input parameter <i>dataFrame</i>.</p>
 
 	          <p><b>Flow variables:</b><br/>
 	          You can access input flow variables by defining them in the <b>Input</b> table.
@@ -75,6 +75,6 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Spark Data">Input Spark RDD.</inPort>
+        <inPort index="0" name="Spark Data">Input Spark DataFrame.</inPort>
     </ports>
 </knimeNode>

@@ -74,8 +74,11 @@ import com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeFactory;
 import com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeFactory;
 import com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeFactory;
 import com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeFactory;
+import com.knime.bigdata.spark.node.scripting.java.sink.SparkDataFrameJavaSnippetSinkNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory;
+import com.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory;
+import com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory;
 import com.knime.bigdata.spark.node.sql.SparkSQLNodeFactory;
 import com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory;
@@ -145,6 +148,9 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkJavaSnippetNodeFactory(),
             new SparkJavaSnippetSourceNodeFactory(),
             new SparkJavaSnippetSinkNodeFactory(),
+            new SparkDataFrameJavaSnippetSourceNodeFactory(),
+            new SparkDataFrameJavaSnippetNodeFactory(),
+            new SparkDataFrameJavaSnippetSinkNodeFactory(),
             new MLlibStatisticsNodeFactory(),
             new MLlibCorrelationColumnNodeFactory(),
             new MLlibCorrelationMatrixNodeFactory(),

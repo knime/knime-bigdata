@@ -14,46 +14,48 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
+ *
+ * History
+ *   Created on May 6, 2016 by bjoern
  */
 package com.knime.bigdata.spark2_0.base;
 
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippet;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSink;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSource;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippet;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSink;
+import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSource;
 
 /**
- * @author Bjoern Lohrmann, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
-public class Spark_2_0_JavaSnippetHelper extends Spark_2_0_AbstractJavaSnippetHelper {
+public class Spark_2_0_JavaDataFrameSnippetHelper extends Spark_2_0_AbstractJavaSnippetHelper {
 
-    private static final Class<?> INNER_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippet.class;
+    private static final Class<?> INNER_SNIPPET_SUPERCLASS = AbstractSparkDataFrameJavaSnippet.class;
 
-    private static final Class<?> SOURCE_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippetSource.class;
+    private static final Class<?> SOURCE_SNIPPET_SUPERCLASS = AbstractSparkDataFrameJavaSnippetSource.class;
 
-    private static final Class<?> SINK_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippetSink.class;
+    private static final Class<?> SINK_SNIPPET_SUPERCLASS = AbstractSparkDataFrameJavaSnippetSink.class;
 
     private final static String INNER_SNIPPET_METHOD_SIG =
-        "public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)"
+        "public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2)"
             + " throws Exception";
 
     private final static String SOURCE_SNIPPET_METHOD_SIG =
-        "public JavaRDD<Row> apply(final JavaSparkContext sc) throws Exception";
+        "public Dataset<Row> apply(final JavaSparkContext sc) " + "throws Exception";
 
     private final static String SINK_SNIPPET_METHOD_SIG =
-        "public void apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD) throws Exception";
+        "public void apply(final JavaSparkContext sc, final Dataset<Row> dataFrame)" + " throws Exception";
 
-    private final static String INNER_SNIPPET_DEFAULT_CONTENT = "return rowRDD1;";
+    private final static String INNER_SNIPPET_DEFAULT_CONTENT = "return dataFrame1;";
 
     private final static String SINK_SNIPPET_DEFAULT_CONTENT = "// sink";
 
-    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "return sc.<Row>emptyRDD();";
+    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "final SparkSession spark = SparkSession.builder().sparkContext(sc.sc()).getOrCreate();\n\t\treturn spark.emptyDataFrame();";
 
-    private final static String INNER_SNIPPET_CLASSNAME = "SparkJavaSnippet";
+    private final static String INNER_SNIPPET_CLASSNAME = "SparkDataFrameJavaSnippet";
 
-    private final static String SOURCE_SNIPPET_CLASSNAME = "SparkJavaSnippetSource";
+    private final static String SOURCE_SNIPPET_CLASSNAME = "SparkDataFrameJavaSnippetSource";
 
-    private final static String SINK_SNIPPET_CLASSNAME = "SparkJavaSnippetSink";
+    private final static String SINK_SNIPPET_CLASSNAME = "SparkDataFrameJavaSnippetSink";
 
     @Override
     protected String[] getSystemImports() {

@@ -20,8 +20,8 @@
  */
 package com.knime.bigdata.spark2_0.jobs.scripting.java;
 
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -31,25 +31,20 @@ import com.knime.bigdata.spark.core.job.SparkClass;
  * @author Tobias Koetter, KNIME.com
  */
 @SparkClass
-public abstract class AbstractSparkJavaSnippetSource extends AbstractSparkJavaSnippet {
+public abstract class AbstractSparkDataFrameJavaSnippetSink extends AbstractSparkDataFrameJavaSnippet {
 
-    private static final long serialVersionUID = 4248837360910849154L;
+    private static final long serialVersionUID = 1843886386294265404L;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public JavaRDD<Row> apply(final JavaSparkContext sc, final JavaRDD<Row> rowRDD1, final JavaRDD<Row> rowRDD2)
-        throws Exception {
-
-        return apply(sc);
+    public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2) throws Exception {
+        apply(sc, dataFrame1);
+        return null;
     }
 
     /**
      * @param sc the JavaSparkContext
-     * @return the result rdd
+     * @param dataFrame the input data frame
      * @throws Exception if an exception occurs
      */
-    public abstract JavaRDD<Row> apply(JavaSparkContext sc) throws Exception;
-
+    public abstract void apply(JavaSparkContext sc, final Dataset<Row> dataFrame) throws Exception;
 }

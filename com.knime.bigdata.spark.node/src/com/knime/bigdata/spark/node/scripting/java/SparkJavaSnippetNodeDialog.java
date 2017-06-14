@@ -121,6 +121,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
+import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 import com.knime.bigdata.spark.node.scripting.java.util.template.JavaSnippetTemplateProviderRegistry;
 import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
@@ -161,6 +162,8 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
 
     private final SnippetType m_snippetType;
 
+    private final AbstractJavaSnippetHelperRegistry m_helperRegistry;
+
     private SparkVersion m_sparkVersion;
 
     private SparkJSnippet m_snippet;
@@ -199,10 +202,13 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      *
      * @param templateMetaCategory the meta category used in the templates tab or to create templates
      * @param snippetType The type of the Spark java snippet (e.g. source)
+     * @param helperRegistry
      */
-    public SparkJavaSnippetNodeDialog(final Class<?> templateMetaCategory, final SnippetType snippetType) {
+    public SparkJavaSnippetNodeDialog(final Class<?> templateMetaCategory, final SnippetType snippetType,
+        final AbstractJavaSnippetHelperRegistry helperRegistry) {
         m_templateMetaCategory = templateMetaCategory;
         m_snippetType = snippetType;
+        m_helperRegistry = helperRegistry;
         m_isPreview = false;
         m_settings = new JavaSnippetSettings();
         m_tabsInitialized = false;
@@ -216,15 +222,18 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      *
      * @param templateMetaCategory
      * @param sparkVersion
+     * @param snippetType
+     * @param helperRegistry
      */
     private SparkJavaSnippetNodeDialog(final Class<?> templateMetaCategory, final SparkVersion sparkVersion,
-        final SnippetType snippetType) {
+        final SnippetType snippetType, final AbstractJavaSnippetHelperRegistry helperRegistry) {
         m_templateMetaCategory = templateMetaCategory;
         m_snippetType = snippetType;
+        m_helperRegistry = helperRegistry;
         m_isPreview = true;
         m_settings = new JavaSnippetSettings();
         m_sparkVersion = sparkVersion;
-        m_snippet = new SparkJSnippet(sparkVersion, snippetType, m_settings);
+        m_snippet = new SparkJSnippet(sparkVersion, snippetType, m_settings, m_helperRegistry);
         m_tabsInitialized = false;
         initTabs();
     }
@@ -388,7 +397,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      * @return a new instance prepared to display a preview.
      */
     protected SparkJavaSnippetNodeDialog createPreview() {
-        return new SparkJavaSnippetNodeDialog(m_templateMetaCategory, m_sparkVersion, m_snippetType);
+        return new SparkJavaSnippetNodeDialog(m_templateMetaCategory, m_sparkVersion, m_snippetType, m_helperRegistry);
     }
 
     /**
@@ -567,12 +576,27 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
-        ViewUtils.invokeAndWaitInEDT(new Runnable() {
-            @Override
-            public void run() {
-                loadSettingsFromInternal(settings, specs);
+
+        try {
+            ViewUtils.invokeAndWaitInEDT(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        loadSettingsFromInternal(settings, specs);
+                    } catch(NotConfigurableException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                }
+            });
+        } catch(RuntimeException e) {
+            if (e.getCause() != null && e.getCause() instanceof NotConfigurableException) {
+                throw ((NotConfigurableException) e.getCause());
+            } else if (e.getCause() != null && e.getCause() instanceof InvalidSettingsException) {
+                throw new NotConfigurableException(e.getCause().getMessage(), e.getCause());
+            } else {
+                throw e;
             }
-        });
+        }
     }
 
     /**
@@ -580,8 +604,9 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      *
      * @param settings the settings to load
      * @param specs the specs of the input table
+     * @throws NotConfigurableException on invalid settings
      */
-    protected void loadSettingsFromInternal(final NodeSettingsRO settings, final PortObjectSpec[] specs) {
+    protected void loadSettingsFromInternal(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
 
         m_settings.loadSettingsForDialog(settings);
 
@@ -602,8 +627,12 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
             }
         }
 
+        if (!m_helperRegistry.supportsVersion(m_sparkVersion)) {
+            throw new NotConfigurableException("Unsupported Spark version: " + m_sparkVersion);
+        }
+
         if (m_snippet == null) {
-            m_snippet = new SparkJSnippet(m_sparkVersion, m_snippetType, m_settings);
+            m_snippet = new SparkJSnippet(m_sparkVersion, m_snippetType, m_settings, m_helperRegistry);
         } else {
             m_snippet.updateDocumentFromSettings(m_sparkVersion, m_snippetType, m_settings);
         }

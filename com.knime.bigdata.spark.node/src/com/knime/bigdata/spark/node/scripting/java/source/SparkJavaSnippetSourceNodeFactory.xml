@@ -2,11 +2,11 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
     type="Source" icon="../icon.png">
-	<name>Spark Java Snippet (Source)</name>
+	<name>Spark RDD Java Snippet (Source)</name>
 	   <shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>
-            <p>This node allows you to execute arbitrary java code to create a Spark RDD/DataFrame e.g.
+            <p>This node allows you to execute arbitrary java code to create a Spark RDD e.g.
             by reading a file from HDFS (See provided templates).
              Simply enter the java code in the text area.</p>
             <p>Note, that this node also supports flow variables as input to your Spark job. 
@@ -34,7 +34,8 @@
             </option>
             <option name="Snippet text area">
               <p>Enter your java code here.</p>
-              <p><b>Spark 1.2 - 1.6 (RDD):</b><br/>
+
+              <p>
 	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.</p>
 
               <p><i>Output Schema:</i><br/>
@@ -43,9 +44,6 @@
               However you can also specify the schema programmatically by overwriting the <i>getSchema()</i> method. 
               For an example on how to implement the method have a look at the "Create result schema manually" template 
               in the "Templates" tab.</p>
-
-              <p><b>Spark 2.0+ (DataFrame):</b><br/>
-	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.</p>
 
               <p><b>Flow variables:</b><br/>
               You can access input flow variables by defining them in the <b>Input</b> table.
@@ -87,6 +85,6 @@
         <inPort index="0" name="Spark context">
             Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
         </inPort>
-        <outPort index="0" name="Spark Data">The new created Spark RDD/DataFrame.</outPort>
+        <outPort index="0" name="Spark Data">The new created Spark RDD.</outPort>
     </ports>
 </knimeNode>

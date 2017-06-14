@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Cache data frame.xml">
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Cache RDD.xml">
 <entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
-<entry key="Name" type="xstring" value="Cache data frame"/>
-<entry key="Description" type="xstring" value="Caches the input data frame in memory which might speed up operations that iterate several times over the input data e.g. when accessing the same data frame within a KNIME loop (parameter optimization)."/>
+<entry key="Name" type="xstring" value="Cache RDD"/>
+<entry key="Description" type="xstring" value="Caches the input RDD in memory which might speed up operations that iterate several times over the input RDD e.g. when accessing the same RDD within a KNIME loop (parameter optimization)"/>
 <entry key="Version" type="xstring" value="version 1.x"/>
 <config key="Snippet">
 <entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
 <entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
-<entry key="scriptBody" type="xstring" value="%%00009// Caches the incoming data frame in memory. This might speed up%%00010%%00009// operations that iterate several times over the input data frame%%00010%%00009// e.g. when using the input data frame in a KNIME loop%%00010%%00009return dataFrame1.cache();%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00010%%00009//Caches the incoming RDD in memory. This might speed up%%00010%%00009//operations that iterate several times over the input RDD%%00010%%00009//e.g. when using the input RDD in a KNIME loop%%00010%%00009return rowRDD1.cache();%%00010"/>
 <config key="jarFiles">
 <entry key="array-size" type="xint" value="0"/>
 </config>

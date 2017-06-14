@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="JavaSnippetTemplateRepository" name="Java Snippet Template Repository" schema="schema/JavaSnippetTemplateRepository.exsd"/>
    <extension-point id="JavaSnippetHelper" name="JavaSnippetHelper" schema="schema/JavaSnippetHelper.exsd"/>
+   <extension-point id="JavaDataFrameSnippetHelper" name="Java Data Frame Snippet Helper" schema="schema/JavaDataFrameSnippetHelper.exsd"/>
    <extension-point id="PMMLPortObjectFactoryProvider" name="PMMLPortObjectFactoryProvider" schema="schema/PMMLPortObjectFactoryProvider.exsd"/>
    <extension
          point="org.knime.workbench.repository.categories">

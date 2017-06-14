@@ -25,6 +25,7 @@ import org.knime.core.node.NodeDialogPane;
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 
 /**
  *
@@ -60,6 +61,6 @@ public class SparkJavaSnippetSinkNodeFactory extends DefaultSparkNodeFactory<Spa
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.SINK);
+        return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.SINK, JavaSnippetHelperRegistry.getInstance());
     }
 }
