@@ -11,56 +11,56 @@
       id="com.databricks.spark-avro_2.10"
       download-size="0"
       install-size="0"
-      version="2.0.1.knimebd-20170524"
+      version="2.0.1.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.databricks.spark-avro_2.10.source"
       download-size="0"
       install-size="0"
-      version="2.0.1.knimebd-20170524"
+      version="2.0.1.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.databricks.spark-avro_2.11"
       download-size="0"
       install-size="0"
-      version="3.2.0.knimebd-20170524"
+      version="3.2.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.databricks.spark-avro_2.11.source"
       download-size="0"
       install-size="0"
-      version="3.2.0.knimebd-20170524"
+      version="3.2.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.databricks.spark-csv_2.10"
       download-size="0"
       install-size="0"
-      version="1.5.0.knimebd-20170524"
+      version="1.5.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.databricks.spark-csv_2.10.source"
       download-size="0"
       install-size="0"
-      version="1.5.0.knimebd-20170524"
+      version="1.5.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.github.fommil.netlib.core"
       download-size="0"
       install-size="0"
-      version="1.1.2.knimebd-20170524"
+      version="1.1.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.github.rwl.jtransforms"
       download-size="0"
       install-size="0"
-      version="2.4.0.knimebd-20170524"
+      version="2.4.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -102,28 +102,28 @@
       id="com.sun.xml.bind.jaxb-merged"
       download-size="0"
       install-size="0"
-      version="2.2.7.knimebd-20170524"
+      version="2.2.7.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.sun.xml.fastinfoset.FastInfoset"
       download-size="0"
       install-size="0"
-      version="1.2.12.knimebd-20170524"
+      version="1.2.12.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.thoughtworks.paranamer"
       download-size="0"
       install-size="0"
-      version="2.3.0.knimebd-20170524"
+      version="2.3.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="com.thoughtworks.paranamer"
       download-size="0"
       install-size="0"
-      version="2.6.0.knimebd-20170524"
+      version="2.6.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -144,28 +144,28 @@
       id="curator-client"
       download-size="0"
       install-size="0"
-      version="2.7.0.knimebd-20170524"
+      version="2.7.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="curator-framework"
       download-size="0"
       install-size="0"
-      version="2.7.0.knimebd-20170524"
+      version="2.7.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="curator-recipes"
       download-size="0"
       install-size="0"
-      version="2.7.0.knimebd-20170524"
+      version="2.7.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="io.netty.all"
       download-size="0"
       install-size="0"
-      version="4.0.23.Final-knimebd-20170524"
+      version="4.0.23.Final-knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -200,56 +200,56 @@
       id="javax.servlet.jsp.api"
       download-size="0"
       install-size="0"
-      version="2.1.0.knimebd-20170524"
+      version="2.1.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="javax.xml.bind.jsr173_api"
       download-size="0"
       install-size="0"
-      version="1.0.0.knimebd-20170524"
+      version="1.0.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="junit"
       download-size="0"
       install-size="0"
-      version="4.8.2.knimebd-20170524"
+      version="4.8.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="net.sf.opencsv"
       download-size="0"
       install-size="0"
-      version="2.3.0.knimebd-20170524"
+      version="2.3.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="net.sourceforge.f2j.arpack_combined_all"
       download-size="0"
       install-size="0"
-      version="0.1.0.knimebd-20170524"
+      version="0.1.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.avro"
       download-size="0"
       install-size="0"
-      version="1.7.4.knimebd-20170524"
+      version="1.7.4.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.commons"
       download-size="0"
       install-size="0"
-      version="1.7.0.knimebd-20170524"
+      version="1.7.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.commons"
       download-size="0"
       install-size="0"
-      version="1.8.0.knimebd-20170524"
+      version="1.8.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -291,7 +291,7 @@
       id="org.apache.commons.digester"
       download-size="0"
       install-size="0"
-      version="1.8.0.knimebd-20170524"
+      version="1.8.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -368,21 +368,21 @@
       id="org.apache.directory.server.kerberos.codec"
       download-size="0"
       install-size="0"
-      version="2.0.0.M15-knimebd-20170524"
+      version="2.0.0.M15-knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.hadoop.client"
       download-size="0"
       install-size="0"
-      version="2.7.3.knimebd-20170524"
+      version="2.7.3.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.hadoop.client.source"
       download-size="0"
       install-size="0"
-      version="2.7.3.knimebd-20170524"
+      version="2.7.3.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -396,77 +396,77 @@
       id="org.apache.htrace.core"
       download-size="0"
       install-size="0"
-      version="3.1.0.incubating-knimebd-20170524"
+      version="3.1.0.incubating-knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10"
       download-size="0"
       install-size="0"
-      version="1.2.2.knimebd-20170524"
+      version="1.2.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10"
       download-size="0"
       install-size="0"
-      version="1.3.1.knimebd-20170524"
+      version="1.3.1.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10"
       download-size="0"
       install-size="0"
-      version="1.5.2.knimebd-20170524"
+      version="1.5.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10"
       download-size="0"
       install-size="0"
-      version="1.6.3.knimebd-20170524"
+      version="1.6.3.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10.source"
       download-size="0"
       install-size="0"
-      version="1.2.2.knimebd-20170524"
+      version="1.2.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10.source"
       download-size="0"
       install-size="0"
-      version="1.3.1.knimebd-20170524"
+      version="1.3.1.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10.source"
       download-size="0"
       install-size="0"
-      version="1.5.2.knimebd-20170524"
+      version="1.5.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.10.source"
       download-size="0"
       install-size="0"
-      version="1.6.3.knimebd-20170524"
+      version="1.6.3.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.11"
       download-size="0"
       install-size="0"
-      version="2.0.2.knimebd-20170524"
+      version="2.0.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.apache.spark_2.11.source"
       download-size="0"
       install-size="0"
-      version="2.0.2.knimebd-20170524"
+      version="2.0.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -480,7 +480,7 @@
       id="org.jblas"
       download-size="0"
       install-size="0"
-      version="1.2.3.knimebd-20170524"
+      version="1.2.3.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -494,28 +494,28 @@
       id="org.jpmml.pmml-merged"
       download-size="0"
       install-size="0"
-      version="1.1.15.knimebd-20170524"
+      version="1.1.15.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.jpmml.pmml-merged"
       download-size="0"
       install-size="0"
-      version="1.2.15.knimebd-20170524"
+      version="1.2.15.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.json4s-merged_2.10"
       download-size="0"
       install-size="0"
-      version="3.2.10.knimebd-20170524"
+      version="3.2.10.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.json4s-merged_2.11"
       download-size="0"
       install-size="0"
-      version="3.2.11.knimebd-20170524"
+      version="3.2.11.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -529,7 +529,7 @@
       id="org.scalactic_2.11"
       download-size="0"
       install-size="0"
-      version="2.2.6.knimebd-20170524"
+      version="2.2.6.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -550,7 +550,7 @@
       id="org.scala-lang.scala-compiler"
       download-size="0"
       install-size="0"
-      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb-knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -564,7 +564,7 @@
       id="org.scala-lang.scala-compiler.source"
       download-size="0"
       install-size="0"
-      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb-knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -606,35 +606,35 @@
       id="org.scala-lang.scalap"
       download-size="0"
       install-size="0"
-      version="2.10.6.knimebd-20170524"
+      version="2.10.6.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scalap"
       download-size="0"
       install-size="0"
-      version="2.11.11.knimebd-20170524"
+      version="2.11.11.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scalap.source"
       download-size="0"
       install-size="0"
-      version="2.10.6.knimebd-20170524"
+      version="2.10.6.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scalap.source"
       download-size="0"
       install-size="0"
-      version="2.11.11.knimebd-20170524"
+      version="2.11.11.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scala-lang.scala-reflect"
       download-size="0"
       install-size="0"
-      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb-knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -648,7 +648,7 @@
       id="org.scala-lang.scala-reflect.source"
       download-size="0"
       install-size="0"
-      version="2.10.6.v20150918-105036-VFINAL-bda53196eb"
+      version="2.10.6.v20150918-105036-VFINAL-bda53196eb-knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -662,56 +662,56 @@
       id="org.scalamacros.quasiquotes_2.10"
       download-size="0"
       install-size="0"
-      version="2.0.0.M8-knimebd-20170524"
+      version="2.0.0.M8-knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scalanlp.breeze_2.10"
       download-size="0"
       install-size="0"
-      version="0.10.0.knimebd-20170524"
+      version="0.10.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scalanlp.breeze-macros_2.10"
       download-size="0"
       install-size="0"
-      version="0.3.1.knimebd-20170524"
+      version="0.3.1.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scalanlp.breeze-merged_2.10"
       download-size="0"
       install-size="0"
-      version="0.11.2.knimebd-20170524"
+      version="0.11.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.scalanlp.breeze-merged_2.11"
       download-size="0"
       install-size="0"
-      version="0.11.2.knimebd-20170524"
+      version="0.11.2.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.spire-math.spire-merged_2.10"
       download-size="0"
       install-size="0"
-      version="0.7.4.knimebd-20170524"
+      version="0.7.4.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.spire-math.spire-merged_2.11"
       download-size="0"
       install-size="0"
-      version="0.7.4.knimebd-20170524"
+      version="0.7.4.knimebd-20170614"
       unpack="false"/>
 
    <plugin
       id="org.tukaani.xz"
       download-size="0"
       install-size="0"
-      version="1.0.0.knimebd-20170524"
+      version="1.0.0.knimebd-20170614"
       unpack="false"/>
 
    <plugin
@@ -725,7 +725,7 @@
       id="org.znerd.xmlenc"
       download-size="0"
       install-size="0"
-      version="0.52.0.knimebd-20170524"
+      version="0.52.0.knimebd-20170614"
       unpack="false"/>
 
 </feature>

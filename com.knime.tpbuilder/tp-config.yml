@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created
 #  (2) an existing bundling was changed
-version: knimebd-20170524
+version: knimebd-20170614
 
 # Global switch to control wheter source bundles will be created.
 # Defaults to true.
@@ -415,6 +415,22 @@ bundleInstructions:
   - coordPattern: org\.scalactic:scalactic_2\.11:.*
     instructions:
       Bundle-SymbolicName: org.scalactic_2.11
+      
+  # fixes imports of (badly prebundled) scala 2.10 bundles
+  - coordPattern: org\.scala-lang:scala-reflect:jar:${scala2_10}
+    instructions:
+      Import-Package: >-
+        scala.tools.nsc*                     ;resolution:=optional;version="[2.10,2.11)",
+        scala.*                              ;version="[2.10,2.11)",
+        *
+  - coordPattern: org\.scala-lang:scala-compiler:jar:${scala2_10}
+    instructions:
+      Import-Package: >-
+        scala.tools.jline*                   ;resolution:=optional;version="[2.10,2.11)",
+        scala.*                              ;version="[2.10,2.11)",
+        org.apache.tools.ant*                ;resolution:=optional,
+        ch.epfl.lamp.*                       ;version="[2.10,2.11)",
+        *
       
 #  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0
 #    instructions:
