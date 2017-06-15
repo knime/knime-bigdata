@@ -65,7 +65,13 @@ public class KNIMEConfigContainer {
     }
 
     public static String getCustomSparkSettings() {
-        return PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS);
+        final String settings = PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS);
+        if (settings.matches("memory-per-node: 512m\\s+") && !overrideSparkSettings()) {
+            //these are the old default settings from the application.conf file prior KNIME 3.4
+            //so overwrite them with the new default settings
+            return "memory-per-node: 1G\nspark.executor.cores: 2\nspark.executor.instances: 3\n";
+        }
+        return settings;
     }
 
 

@@ -125,7 +125,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         panel.add(new DialogComponentMultiLineString(m_settings.getCustomSparkSettingsModel(),
-                "Custom spark settings: ").getComponentPanel(), gbc);
+                "Custom spark settings: ", true, 40, 5).getComponentPanel(), gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
