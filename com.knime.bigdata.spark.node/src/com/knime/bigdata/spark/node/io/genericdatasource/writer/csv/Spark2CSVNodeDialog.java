@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDat
 class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSettings> {
 
     private final JCheckBox m_header;
-    private final JTextField m_delimiter;
+    private final JComboBox<String> m_delimiter;
     private final JTextField m_quote;
     private final JTextField m_escape;
     private final JTextField m_nullValue;
@@ -50,7 +50,8 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
         super(initialSettings);
         m_header = new JCheckBox("add Header");
         addToOptionsPanel("Header", m_header);
-        m_delimiter = new JTextField(1);
+        m_delimiter = new JComboBox<>();
+        m_delimiter.setEditable(true);
         addToOptionsPanel("Delimiter", m_delimiter);
         m_quote = new JTextField(1);
         addToOptionsPanel("Quote character", m_quote);
@@ -71,11 +72,12 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         super.loadSettingsFrom(settings, specs);
         m_header.setSelected(m_settings.withHeader());
-        m_delimiter.setText(m_settings.getDelimiter());
+        updateHistory("delimiter", m_delimiter, Spark2CSVSettings.DELIMITER_EXAMPLES);
+        m_delimiter.setSelectedItem(m_settings.getDelimiter());
         m_quote.setText(m_settings.getQuote());
         m_escape.setText(m_settings.getEscape());
         m_nullValue.setText(m_settings.getNullValue());
-        updateHistory("dateFormat", m_dateFormat);
+        updateHistory("dateFormat", m_dateFormat, Spark2CSVSettings.DATE_FORMAT_EXAMPLES);
         m_dateFormat.setSelectedItem(m_settings.getDateFormat());
         m_compressionCodec.setSelectedItem(m_settings.getCompressionCodec());
         m_quoteMode.setSelectedItem(m_settings.getQuoteMode());
@@ -84,7 +86,8 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setHeader(m_header.isSelected());
-        m_settings.setDelimiter(m_delimiter.getText());
+        m_settings.setDelimiter(getSelection(m_delimiter));
+        StringHistory.getInstance("delimiter", 15).add(getSelection(m_delimiter));
         m_settings.setQuote(m_quote.getText());
         m_settings.setEscape(m_escape.getText());
         m_settings.setNullValue(m_nullValue.getText());

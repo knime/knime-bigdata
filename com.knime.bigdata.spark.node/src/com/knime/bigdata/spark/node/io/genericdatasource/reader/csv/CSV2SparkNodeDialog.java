@@ -41,7 +41,7 @@ import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSourc
 class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSettings> {
 
     private final JCheckBox m_header;
-    private final JTextField m_delimiter;
+    private final JComboBox<String> m_delimiter;
     private final JTextField m_quote;
     private final JTextField m_escape;
     private final JComboBox<String> m_mode;
@@ -55,7 +55,8 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
         super(initialSettings);
         m_header = new JCheckBox("with Header");
         addToOptionsPanel("Header", m_header);
-        m_delimiter = new JTextField(1);
+        m_delimiter = new JComboBox<>();
+        m_delimiter.setEditable(true);
         addToOptionsPanel("Delimiter", m_delimiter);
         m_quote = new JTextField(1);
         addToOptionsPanel("Quote character", m_quote);
@@ -81,23 +82,25 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         super.loadSettingsFrom(settings, specs);
         m_header.setSelected(m_settings.withHeader());
-        m_delimiter.setText(m_settings.getDelimiter());
+        updateHistory("delimiter", m_delimiter, CSV2SparkSettings.DELIMITER_EXAMPLES);
+        m_delimiter.setSelectedItem(m_settings.getDelimiter());
         m_quote.setText(m_settings.getQuote());
         m_escape.setText(m_settings.getEscape());
         m_mode.setSelectedItem(m_settings.getMode());
-        updateHistory("charset", m_charset);
+        updateHistory("charset", m_charset, CSV2SparkSettings.CHARSET_EXAMPLES);
         m_charset.setSelectedItem(m_settings.getCharset());
         m_inferSchema.setSelected(m_settings.inferSchema());
         m_comment.setText(m_settings.getComment());
         m_nullValue.setText(m_settings.getNullValue());
-        updateHistory("dateFormat", m_dateFormat);
+        updateHistory("dateFormat", m_dateFormat, CSV2SparkSettings.DATE_FORMAT_EXAMPLES);
         m_dateFormat.setSelectedItem(m_settings.getDateFormat());
     }
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setHeader(m_header.isSelected());
-        m_settings.setDelimiter(m_delimiter.getText());
+        m_settings.setDelimiter(getSelection(m_delimiter));
+        StringHistory.getInstance("delimiter", 15).add(getSelection(m_delimiter));
         m_settings.setQuote(m_quote.getText());
         m_settings.setEscape(m_escape.getText());
         m_settings.setMode((String) m_mode.getSelectedItem());
