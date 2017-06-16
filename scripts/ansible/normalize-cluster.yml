@@ -53,10 +53,10 @@
 - hosts: hadoop-hosts:&master-*:&secure-hosts
   tasks:
     - name: Copy hdfs keytab
-      copy: src={{keytab_dir}}/hdfs.keytab dest=/root/hdfs.keytab owner=root mode=u=rw,go=
+      copy: src={{keytab_dir}}/{{hdfs_keytab}} dest=/root/hdfs.keytab owner=root mode=u=rw,go=
 
-    - name: Get hdfs@CDH TGT
-      shell: kdestroy ; kinit -kt /root/hdfs.keytab hdfs@CDH
+    - name: Get hdfs TGT
+      shell: kdestroy ; kinit -kt /root/hdfs.keytab hdfs
 
     - name: create HDFS homedirs for users
       shell: for u in test tobias sascha knime bjoern ; do hdfs dfs -mkdir -p /user/$u ; hdfs dfs -chown -R $u /user/$u ; done
