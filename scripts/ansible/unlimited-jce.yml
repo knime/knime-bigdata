@@ -1,0 +1,21 @@
+# Deploys the unlimited JCE security configs to the Cloudera Java 7
+- hosts: hadoop-hosts:&cdh
+  vars:
+    cdh_java7_home: /usr/java/jdk1.7.0_67-cloudera
+  tasks:
+    - name: Copy local_policy.jar
+      copy:
+        src: unlimited_jce_files/java7/local_policy.jar
+        dest: "{{cdh_java7_home}}/jre/lib/security/local_policy.jar"
+        owner: root
+        group: root
+        backup: yes
+        mode: u=rw,g=r,o=r
+    - name: Copy US_export_policy.jar
+      copy:
+        src: unlimited_jce_files/java7/US_export_policy.jar
+        dest: "{{cdh_java7_home}}/jre/lib/security/US_export_policy.jar"
+        owner: root
+        group: root
+        backup: yes
+        mode: u=rw,g=r,o=r
