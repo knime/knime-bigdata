@@ -133,9 +133,22 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         mainContainerLayoutData.widthHint = 300;
         mainContainer.setLayoutData(mainContainerLayoutData);
 
+        /////////////// Deprecation warning ///////////////
+        Composite deprecationContainer = new Composite(mainContainer, SWT.NONE);
+        deprecationContainer.setLayout(new GridLayout(2, false));
+        deprecationContainer.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+        Label image = new Label(deprecationContainer, SWT.NONE);
+        image.setImage(mainContainer.getDisplay().getSystemImage(SWT.ICON_INFORMATION));
+        image.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        Label text = new Label(deprecationContainer, SWT.NONE);
+        text.setText("Default spark context settings defined on this page are\nused as inital values in the Create Spark Context Node.");
+        text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+
         /////////////// Connection settings ///////////////
         Group connectionSettings = new Group(mainContainer, SWT.NONE);
-        connectionSettings.setText("Connection settings:");
+        connectionSettings.setText("Default connection settings:");
         connectionSettings.setLayout(new GridLayout(1, false));
         connectionSettings.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
@@ -174,7 +187,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
         /////////////// Context settings ///////////////
         Group contextSettings = new Group(mainContainer, SWT.NONE);
-        contextSettings.setText("Context settings:");
+        contextSettings.setText("Default context settings:");
         contextSettings.setLayout(new GridLayout(1, false));
         contextSettings.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 

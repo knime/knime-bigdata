@@ -23,13 +23,20 @@ package com.knime.bigdata.spark.node;
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.csv.CSV2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.csv.CSV2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.json.Json2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.json.Json2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.orc.Orc2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.orc.Orc2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.text.Text2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.genericdatasource.reader.text.Text2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.avro.Spark2AvroNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.csv.Spark2CSVNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.json.Spark2JsonNodeFactory;
@@ -37,10 +44,13 @@ import com.knime.bigdata.spark.node.io.genericdatasource.writer.orc.Spark2OrcNod
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2ParquetNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.writer.text.Spark2TextNodeFactory;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeFactory;
 import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory;
+import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory;
@@ -78,8 +88,8 @@ import com.knime.bigdata.spark.node.scripting.java.sink.SparkDataFrameJavaSnippe
 import com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory;
-import com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory;
-import com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory;
+import com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory2;
+import com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory2;
 import com.knime.bigdata.spark.node.sql.SparkSQLNodeFactory;
 import com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory;
 import com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory;
@@ -102,23 +112,23 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
      */
     public StandardSparkNodeFactoryProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE,
-            new Avro2SparkNodeFactory(),
+            new Avro2SparkNodeFactory2(),
             new Spark2AvroNodeFactory(),
-            new CSV2SparkNodeFactory(),
+            new CSV2SparkNodeFactory2(),
             new Spark2CSVNodeFactory(),
-            new Database2SparkNodeFactory(),
+            new Database2SparkNodeFactory2(),
             new Spark2DatabaseNodeFactory(),
-            new Hive2SparkNodeFactory(),
+            new Hive2SparkNodeFactory2(),
             new Spark2HiveNodeFactory(),
-            new Json2SparkNodeFactory(),
+            new Json2SparkNodeFactory2(),
             new Spark2JsonNodeFactory(),
-            new Table2SparkNodeFactory(),
+            new Table2SparkNodeFactory2(),
             new Spark2TableNodeFactory(),
-            new Text2SparkNodeFactory(),
+            new Text2SparkNodeFactory2(),
             new Spark2TextNodeFactory(),
-            new Orc2SparkNodeFactory(),
+            new Orc2SparkNodeFactory2(),
             new Spark2OrcNodeFactory(),
-            new Parquet2SparkNodeFactory(),
+            new Parquet2SparkNodeFactory2(),
             new Spark2ParquetNodeFactory(),
             new MLlibClusterAssignerNodeFactory(),
             new MLlibKMeansNodeFactory(),
@@ -146,9 +156,9 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkSorterNodeFactory(),
             new SparkSQLNodeFactory(),
             new SparkJavaSnippetNodeFactory(),
-            new SparkJavaSnippetSourceNodeFactory(),
+            new SparkJavaSnippetSourceNodeFactory2(),
             new SparkJavaSnippetSinkNodeFactory(),
-            new SparkDataFrameJavaSnippetSourceNodeFactory(),
+            new SparkDataFrameJavaSnippetSourceNodeFactory2(),
             new SparkDataFrameJavaSnippetNodeFactory(),
             new SparkDataFrameJavaSnippetSinkNodeFactory(),
             new MLlibStatisticsNodeFactory(),
@@ -169,7 +179,22 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkNumericScorerNodeFactory(),
             new SparkContextCreatorNodeFactory(),
             new Spark2ImpalaNodeFactory(),
-            new Impala2SparkNodeFactory());
+            new Impala2SparkNodeFactory2(),
+
+            // deprecated
+            new Avro2SparkNodeFactory(),
+            new CSV2SparkNodeFactory(),
+            new Database2SparkNodeFactory(),
+            new Hive2SparkNodeFactory(),
+            new Json2SparkNodeFactory(),
+            new Table2SparkNodeFactory(),
+            new Text2SparkNodeFactory(),
+            new Orc2SparkNodeFactory(),
+            new Parquet2SparkNodeFactory(),
+            new Impala2SparkNodeFactory(),
+            new SparkJavaSnippetSourceNodeFactory2(),
+            new SparkDataFrameJavaSnippetNodeFactory()
+            );
     }
 
 }

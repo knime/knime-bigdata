@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" deprecated="true" icon="icon.png">
+	<name>Database to Spark</name>
+	<shortDescription>Reads a database query/table into a Spark RDD</shortDescription>
+	<fullDescription>
+		<intro>
+			Reads a database query/table into a Spark RDD.
+			See <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#jdbc-to-other-databases">Spark documentation</a> for more information.
+			
+			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
+		</intro>
+		
+		<option name="Driver">
+			Upload local driver (used in this KNIME instance) or depend on cluster side provided driver. 
+		</option>
+		<option name="Fetch size">Optional: The JDBC fetch size, which determines how many rows to fetch per round trip. This can help performance on JDBC drivers which default to low fetch size (eg. Oracle with 10 rows).</option>
+		<option name="Partition column, lower bound, upper bound, num partitions">These options must all be specified if any of them is specified. They describe how to partition the table when reading in parallel from multiple workers. partitionColumn must be a numeric column from the table in question. Notice that lowerBound and upperBound are just used to decide the partition stride, not for filtering the rows in table. So all rows in the table will be partitioned and returned.</option>
+		<option name="Query DB for upper and lower count">Fetch bounds via min/max query or use manual entered bounds.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Database query">Input query</inPort>
+		<inPort index="1" name="Spark context">
+        	Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
+        </inPort>
+		<outPort index="0" name="Spark data">Spark RDD</outPort>
+	</ports>
+</knimeNode>
