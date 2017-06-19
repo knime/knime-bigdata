@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.mine.scorer.accuracy.AccuracyScorerNodeModel;
 import org.knime.base.node.mine.scorer.accuracy.ScorerViewData;
 import org.knime.base.util.SortingOptionPanel;
@@ -144,6 +145,9 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
 
         if (inSpec.getNumColumns() < 2) {
             throw new InvalidSettingsException("The input table must have at least two colums to compare");
+        }
+        if (StringUtils.isBlank(m_firstCompareColumn) || StringUtils.isBlank(m_secondCompareColumn)) {
+            throw new InvalidSettingsException("No columns selected.");
         }
         if (!inSpec.containsName(m_firstCompareColumn)) {
             throw new InvalidSettingsException("Column " + m_firstCompareColumn + " not found.");
