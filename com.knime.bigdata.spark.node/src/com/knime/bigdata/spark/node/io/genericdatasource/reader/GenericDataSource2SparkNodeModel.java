@@ -73,9 +73,10 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
     /**
      * Default constructor.
      * @param settings - Initial settings
+     * @param optionalSparkPort true if input spark context port is optional
      */
-    public GenericDataSource2SparkNodeModel(final T settings) {
-        super(new PortType[] {ConnectionInformationPortObject.TYPE}, new PortType[] {SparkDataPortObject.TYPE});
+    public GenericDataSource2SparkNodeModel(final T settings, final boolean optionalSparkPort) {
+        super(new PortType[] {ConnectionInformationPortObject.TYPE}, optionalSparkPort, new PortType[] {SparkDataPortObject.TYPE});
         m_settings = settings;
     }
 

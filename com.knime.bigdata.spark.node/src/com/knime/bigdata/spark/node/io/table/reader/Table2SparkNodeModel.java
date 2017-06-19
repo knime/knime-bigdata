@@ -66,9 +66,12 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
     /**The unique Spark job id.*/
     public static final String JOB_ID = "Table2SparkJob";
 
-    /** Constructor. */
-    Table2SparkNodeModel() {
-        super(new PortType[]{BufferedDataTable.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
+    /**
+     * Default constructor.
+     * @param optionalSparkPort true if input spark context port is optional
+     */
+    Table2SparkNodeModel(final boolean optionalSparkPort) {
+        super(new PortType[]{BufferedDataTable.TYPE}, optionalSparkPort, new PortType[]{SparkDataPortObject.TYPE});
     }
 
     /**

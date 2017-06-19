@@ -41,27 +41,31 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
 
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
+     * @param optionalSparkPort true if input spark context port is optional
      * @param outPortTypes the output port types
      */
-    protected SparkSourceNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
-        this(inPortTypes, outPortTypes, true);
+    protected SparkSourceNodeModel(final PortType[] inPortTypes, final boolean optionalSparkPort, final PortType[] outPortTypes) {
+        this(inPortTypes, optionalSparkPort, outPortTypes, true);
     }
+
     /**Constructor for class AbstractGraphNodeModel.
      * @param inPortTypes the input port types
+     * @param optionalSparkPort true if input spark context port is optional
      * @param outPortTypes the output port types
      * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
      * Always set this flag to <code>false</code> when you return the input RDD also as output RDD!
      */
-    protected SparkSourceNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
+    protected SparkSourceNodeModel(final PortType[] inPortTypes, final boolean optionalSparkPort, final PortType[] outPortTypes,
         final boolean deleteOnReset) {
-        super(addContextPort(inPortTypes), outPortTypes, deleteOnReset);
+        super(addContextPort(inPortTypes, optionalSparkPort), outPortTypes, deleteOnReset);
     }
 
     /**
      * @param inTypes the input {@link PortType} array to add the context port to
+     * @param optionalSparkPort true if input spark context port is optional
      * @return the input {@link PortType} array plus the {@link SparkContextPortObject} type as last port
      */
-    public static PortType[] addContextPort(final PortType[] inTypes) {
+    public static PortType[] addContextPort(final PortType[] inTypes, final boolean optionalSparkPort) {
        final PortType[] types;
         if (inTypes == null) {
             types = new PortType[1];
@@ -71,7 +75,13 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
                 types[i] = inTypes[i];
             }
         }
-        types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
+
+        if (optionalSparkPort) {
+            types[types.length - 1] = SparkContextPortObject.TYPE_OPTIONAL;
+        } else {
+            types[types.length - 1] = SparkContextPortObject.TYPE;
+        }
+
         return types;
     }
 

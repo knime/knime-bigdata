@@ -37,9 +37,13 @@ import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
  */
 public class SparkDataFrameJavaSnippetSourceNodeModel extends AbstractSparkDataFrameJavaSnippetNodeModel {
 
-    /** Constructor.*/
-    public SparkDataFrameJavaSnippetSourceNodeModel() {
-        super(SparkSourceNodeModel.addContextPort(null), new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE);
+    /**
+     * Default constructor.
+     * @param optionalSparkPort true if input spark context port is optional
+     */
+    public SparkDataFrameJavaSnippetSourceNodeModel(final boolean optionalSparkPort) {
+        super(SparkSourceNodeModel.addContextPort(null, optionalSparkPort),
+            new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE);
     }
 
     /**

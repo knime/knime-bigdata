@@ -67,9 +67,12 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
 
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
 
-    /** Constructor. */
-    public Database2SparkNodeModel() {
-        super(new PortType[] {DatabasePortObject.TYPE},
+    /**
+     * Default constructor.
+     * @param optionalSparkPort true if input spark context port is optional
+     */
+    public Database2SparkNodeModel(final boolean optionalSparkPort) {
+        super(new PortType[] {DatabasePortObject.TYPE}, optionalSparkPort,
               new PortType[] {SparkDataPortObject.TYPE});
     }
 

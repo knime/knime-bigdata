@@ -32,6 +32,14 @@ import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
  */
 public class Impala2SparkNodeModel extends Hive2SparkNodeModel {
 
+    /**
+     * Default constructor.
+     * @param optionalSparkPort true if input spark context port is optional
+     */
+    public Impala2SparkNodeModel(final boolean optionalSparkPort) {
+        super(optionalSparkPort);
+    }
+
     @Override
     protected void checkDatabaseIdentifier(final DatabasePortObjectSpec spec) throws InvalidSettingsException {
         if (!ImpalaUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {

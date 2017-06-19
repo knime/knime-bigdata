@@ -56,9 +56,10 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
 
     /**
      * Constructor.
+     * @param optionalSparkPort true if input spark context port is optional
      */
-    public Hive2SparkNodeModel() {
-        super(new PortType[] {DatabasePortObject.TYPE}, new PortType[] {SparkDataPortObject.TYPE});
+    public Hive2SparkNodeModel(final boolean optionalSparkPort) {
+        super(new PortType[] {DatabasePortObject.TYPE}, optionalSparkPort, new PortType[] {SparkDataPortObject.TYPE});
     }
 
     /**
