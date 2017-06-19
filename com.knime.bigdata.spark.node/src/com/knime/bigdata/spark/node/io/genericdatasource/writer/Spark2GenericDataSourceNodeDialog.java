@@ -64,7 +64,11 @@ import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
 
+import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.port.SparkContextProvider;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
@@ -319,5 +323,35 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
         for (final String string : set) {
             model.addElement(string);
         }
+    }
+
+    /**
+     * Set combo box elements.
+     * @param comboBox desired box
+     * @param elements all box elements
+     */
+    protected void setAllElements(final JComboBox<String> comboBox, final String[] elements) {
+        final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) comboBox.getModel();
+        model.removeAllElements();
+        for (final String element : elements) {
+            model.addElement(element);
+        }
+    }
+
+    /**
+     * Get spark version from port specs.
+     * @param specs spark port spec with version or null
+     * @return spark version from spec or default context
+     */
+    protected SparkVersion getSparkVersion(final PortObjectSpec[] specs) {
+        if (specs != null) {
+            for (PortObjectSpec spec : specs) {
+                if (spec != null && spec instanceof SparkContextProvider) {
+                    return SparkContextUtil.getSparkVersion(((SparkContextProvider)spec).getContextID());
+                }
+            }
+        }
+
+        return KNIMEConfigContainer.getSparkVersion();
     }
 }
