@@ -90,12 +90,23 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     private String m_compressionCodec = DEFAULT_COMPRESSION_CODEC;
 
     /**
-     * Quote mode.
+     * Supported quote modes of Spark 1.x CSV writer plugin.
      * @see <a href="https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/QuoteMode.html">common-csv</a>
      */
-    public static final String QUOTE_MODES[] = new String[] {
+    public static final String QUOTE_MODES_SPARK_1_x[] = new String[] {
         "ALL", "MINIMAL", "NON_NUMERIC", "NONE"
     };
+    /** Supported quote modes of inlined Spark 2.x CSV writer. */
+    public static final String QUOTE_MODES_SPARK_2_x[] = new String[] {
+        "ALL", "MINIMAL"
+    };
+    /**
+     * @param sparkVersion
+     * @return supported quote modes
+     */
+    public static final String[] getQuoteModes(final SparkVersion sparkVersion) {
+        return sparkVersion.compareTo(SparkVersion.V_2_0) >= 0 ? QUOTE_MODES_SPARK_2_x : QUOTE_MODES_SPARK_1_x;
+    }
     private static final String CFG_QUOTE_MODE = "quoteMode";
     private static final String DEFAULT_QUOTE_MODE = "MINIMAL";
     private String m_quoteMode = DEFAULT_QUOTE_MODE;
@@ -145,9 +156,9 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
     /** @param codec - Compression codec or empty string (see {@link #COMPRESSION_CODECS}) */
     public void setCompressionCodec(final String codec) { m_compressionCodec = codec; }
 
-    /** @return Quote mode (see {@link #QUOTE_MODES}) */
+    /** @return Quote mode (see {@link #QUOTE_MODES_SPARK_1_x} and {@link #QUOTE_MODES_SPARK_2_x}) */
     public String getQuoteMode() { return m_quoteMode; }
-    /** @param quoteMode - Quote mode (see {@link #QUOTE_MODES}) */
+    /** @param quoteMode - Quote mode (see {@link #QUOTE_MODES_SPARK_1_x} and {@link #QUOTE_MODES_SPARK_2_x}}) */
     public void setQuoteMode(final String quoteMode) { m_quoteMode = quoteMode; }
 
     @Override
@@ -225,6 +236,9 @@ public class Spark2CSVSettings extends Spark2GenericDataSourceSettings {
         }
 
         jobInput.setOption(CFG_QUOTE_MODE, m_quoteMode);
+        if (m_quoteMode.equals("ALL")) {
+            jobInput.setOption("quoteAll", "true");
+        }
 
         super.addWriterOptions(jobInput);
     }

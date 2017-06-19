@@ -64,7 +64,7 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
         addToOptionsPanel("Date format", m_dateFormat);
         m_compressionCodec = new JComboBox<>(Spark2CSVSettings.COMPRESSION_CODECS);
         addToOptionsPanel("Compression", m_compressionCodec);
-        m_quoteMode = new JComboBox<>(Spark2CSVSettings.QUOTE_MODES);
+        m_quoteMode = new JComboBox<>();
         addToOptionsPanel("Quote mode", m_quoteMode);
     }
 
@@ -80,6 +80,7 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
         updateHistory("dateFormat", m_dateFormat, Spark2CSVSettings.DATE_FORMAT_EXAMPLES);
         m_dateFormat.setSelectedItem(m_settings.getDateFormat());
         m_compressionCodec.setSelectedItem(m_settings.getCompressionCodec());
+        setAllElements(m_quoteMode, Spark2CSVSettings.getQuoteModes(getSparkVersion(specs))); // updates elements by spark version
         m_quoteMode.setSelectedItem(m_settings.getQuoteMode());
     }
 
