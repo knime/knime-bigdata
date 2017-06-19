@@ -74,10 +74,6 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
 
         m_settings.validateSettings();
 
-        if (newContextID.equals(SparkContextManager.getDefaultSparkContext().getID())) {
-            warnings.add("Context is the same as in the Spark preferences (see File > Preferences > KNIME > Spark)");
-        }
-
         try {
             if (m_lastContextID != null && !m_lastContextID.equals(newContextID)
                     && SparkContextManager.getOrCreateSparkContext(m_lastContextID).getStatus() == SparkContextStatus.OPEN) {
@@ -146,11 +142,6 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         final SparkContextID contextID = m_settings.getSparkContextID();
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
         final List<String> warnings = new ArrayList<>();
-
-        if (SparkContextManager.getDefaultSparkContext() == sparkContext) {
-            warnings.add(
-                "Context is the same as in the Spark preferences (see File > Preferences > KNIME > Spark)");
-        }
 
         //try to open the context
         exec.setMessage("Opening Spark context");
