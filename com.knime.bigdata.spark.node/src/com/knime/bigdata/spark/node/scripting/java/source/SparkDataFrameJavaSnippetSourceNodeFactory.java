@@ -45,7 +45,7 @@ public class SparkDataFrameJavaSnippetSourceNodeFactory extends DefaultSparkNode
      */
     @Override
     public SparkDataFrameJavaSnippetSourceNodeModel createNodeModel() {
-        return new SparkDataFrameJavaSnippetSourceNodeModel(true);
+        return new SparkDataFrameJavaSnippetSourceNodeModel(false);
     }
 
     /**

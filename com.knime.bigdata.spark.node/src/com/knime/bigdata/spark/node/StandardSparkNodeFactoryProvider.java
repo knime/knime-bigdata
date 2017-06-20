@@ -88,7 +88,8 @@ import com.knime.bigdata.spark.node.scripting.java.sink.SparkDataFrameJavaSnippe
 import com.knime.bigdata.spark.node.scripting.java.sink.SparkJavaSnippetSinkNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory;
-import com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory2;
+import com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory;
+import com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory;
 import com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory2;
 import com.knime.bigdata.spark.node.sql.SparkSQLNodeFactory;
 import com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory;
@@ -158,7 +159,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkJavaSnippetNodeFactory(),
             new SparkJavaSnippetSourceNodeFactory2(),
             new SparkJavaSnippetSinkNodeFactory(),
-            new SparkDataFrameJavaSnippetSourceNodeFactory2(),
+            new SparkDataFrameJavaSnippetSourceNodeFactory(),
             new SparkDataFrameJavaSnippetNodeFactory(),
             new SparkDataFrameJavaSnippetSinkNodeFactory(),
             new MLlibStatisticsNodeFactory(),
@@ -192,8 +193,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Orc2SparkNodeFactory(),
             new Parquet2SparkNodeFactory(),
             new Impala2SparkNodeFactory(),
-            new SparkJavaSnippetSourceNodeFactory2(),
-            new SparkDataFrameJavaSnippetNodeFactory()
+            new SparkJavaSnippetSourceNodeFactory()
             );
     }
 
