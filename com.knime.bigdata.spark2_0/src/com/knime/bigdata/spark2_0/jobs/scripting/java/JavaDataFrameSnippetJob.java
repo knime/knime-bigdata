@@ -27,9 +27,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
@@ -68,7 +68,8 @@ public class JavaDataFrameSnippetJob implements SparkJobWithFiles<JavaSnippetJob
 
         setFlowVariableValues(snippet, input.getFlowVariableValues());
 
-        Dataset<Row> resultDataFrame = snippet.apply(new JavaSparkContext(sparkContext), dataFrame1, dataFrame2);
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        Dataset<Row> resultDataFrame = snippet.apply(spark, dataFrame1, dataFrame2);
 
         if (!(snippet instanceof AbstractSparkDataFrameJavaSnippetSink) && resultDataFrame == null) {
             throw new KNIMESparkException("Snippet must not return a null reference!");

@@ -36,7 +36,7 @@
               <p>Enter your java code here.</p>
 
               <p>
-	          The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.</p>
+	          The <i>SparkSession</i> can be accessed via the method input parameter <i>spark</i>.</p>
 
               <p><b>Flow variables:</b><br/>
               You can access input flow variables by defining them in the <b>Input</b> table.

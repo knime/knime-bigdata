@@ -20,9 +20,9 @@
  */
 package com.knime.bigdata.spark2_0.jobs.scripting.java;
 
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
@@ -36,15 +36,15 @@ public abstract class AbstractSparkDataFrameJavaSnippetSink extends AbstractSpar
     private static final long serialVersionUID = 1843886386294265404L;
 
     @Override
-    public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2) throws Exception {
-        apply(sc, dataFrame1);
+    public Dataset<Row> apply(final SparkSession spark, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2) throws Exception {
+        apply(spark, dataFrame1);
         return null;
     }
 
     /**
-     * @param sc the JavaSparkContext
+     * @param spark the SparkSession
      * @param dataFrame the input data frame
      * @throws Exception if an exception occurs
      */
-    public abstract void apply(JavaSparkContext sc, final Dataset<Row> dataFrame) throws Exception;
+    public abstract void apply(final SparkSession spark, final Dataset<Row> dataFrame) throws Exception;
 }

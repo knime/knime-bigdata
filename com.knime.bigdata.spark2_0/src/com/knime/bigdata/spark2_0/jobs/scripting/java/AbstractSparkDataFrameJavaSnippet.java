@@ -51,9 +51,9 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
 
@@ -69,13 +69,13 @@ public abstract class AbstractSparkDataFrameJavaSnippet implements Serializable 
     private final static Logger LOGGER = Logger.getLogger(AbstractSparkDataFrameJavaSnippet.class.getName());
 
     /**
-     * @param sc the JavaSparkContext
+     * @param spark the SparkSession
      * @param dataFrame1 the first input data frame. Might be <code>null</code> if not connected.
      * @param dataFrame2 the second input data frame. Might be <code>null</code> if not connected.
      * @return the resulting data frame or <code>null</code>
      * @throws Exception if an exception occurs
      */
-    public abstract Dataset<Row> apply(JavaSparkContext sc, Dataset<Row> dataFrame1, Dataset<Row> dataFrame2)
+    public abstract Dataset<Row> apply(SparkSession spark, Dataset<Row> dataFrame1, Dataset<Row> dataFrame2)
         throws Exception;
 
     /**

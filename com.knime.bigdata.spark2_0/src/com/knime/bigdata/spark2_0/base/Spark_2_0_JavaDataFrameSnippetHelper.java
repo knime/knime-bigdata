@@ -36,20 +36,20 @@ public class Spark_2_0_JavaDataFrameSnippetHelper extends Spark_2_0_AbstractJava
     private static final Class<?> SINK_SNIPPET_SUPERCLASS = AbstractSparkDataFrameJavaSnippetSink.class;
 
     private final static String INNER_SNIPPET_METHOD_SIG =
-        "public Dataset<Row> apply(final JavaSparkContext sc, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2)"
+        "public Dataset<Row> apply(final SparkSession spark, final Dataset<Row> dataFrame1, final Dataset<Row> dataFrame2)"
             + " throws Exception";
 
     private final static String SOURCE_SNIPPET_METHOD_SIG =
-        "public Dataset<Row> apply(final JavaSparkContext sc) " + "throws Exception";
+        "public Dataset<Row> apply(final SparkSession spark) " + "throws Exception";
 
     private final static String SINK_SNIPPET_METHOD_SIG =
-        "public void apply(final JavaSparkContext sc, final Dataset<Row> dataFrame)" + " throws Exception";
+        "public void apply(final SparkSession spark, final Dataset<Row> dataFrame)" + " throws Exception";
 
     private final static String INNER_SNIPPET_DEFAULT_CONTENT = "return dataFrame1;";
 
     private final static String SINK_SNIPPET_DEFAULT_CONTENT = "// sink";
 
-    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "final SparkSession spark = SparkSession.builder().sparkContext(sc.sc()).getOrCreate();\n\t\treturn spark.emptyDataFrame();";
+    private final static String SOURCE_SNIPPET_DEFAULT_CONTENT = "return spark.emptyDataFrame();";
 
     private final static String INNER_SNIPPET_CLASSNAME = "SparkDataFrameJavaSnippet";
 

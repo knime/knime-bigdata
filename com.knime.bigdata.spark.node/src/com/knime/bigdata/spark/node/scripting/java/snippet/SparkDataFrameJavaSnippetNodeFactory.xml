@@ -35,7 +35,7 @@
               <p>Enter your java code here.</p>
 
               <p>
-              The <i>JavaSparkContext</i> can be accessed via the method input parameter <i>sc</i>.
+	          The <i>SparkSession</i> can be accessed via the method input parameter <i>spark</i>.
               The input <i>Dataset&lt;Row&gt;</i> can be accessed via the method input parameter <i>dataFrame1</i> and <i>dataFrame2</i>
               whereas <i>dataFrame2</i> is <i>null</i> if the input port is not connected.</p>
 
