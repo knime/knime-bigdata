@@ -49,7 +49,7 @@ public class SparkDataFrameJavaSnippetSinkNodeModel extends AbstractSparkDataFra
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
-            throw new InvalidSettingsException("Please connect the first inport of the node with an data frame outport");
+            throw new InvalidSettingsException("Please connect the first inport of the node with an DataFrame outport");
         }
         super.configureInternal(inSpecs);
         return new PortObjectSpec[0];
@@ -61,7 +61,7 @@ public class SparkDataFrameJavaSnippetSinkNodeModel extends AbstractSparkDataFra
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         if (inData == null || inData.length < 1 || !(inData[0] instanceof SparkDataPortObject)) {
-            throw new InvalidSettingsException("Please connect the first inport of the node with an data frame outport");
+            throw new InvalidSettingsException("Please connect the first inport of the node with an DataFrame outport");
         }
         return super.executeSnippetJob(inData, false, exec, JOB_ID);
     }

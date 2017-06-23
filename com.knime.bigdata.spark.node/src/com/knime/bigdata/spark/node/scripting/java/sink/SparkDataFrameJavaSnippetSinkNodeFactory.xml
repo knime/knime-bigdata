@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Sink" icon="../icon.png">
-	<name>Spark Data Frame Java Snippet (Sink)</name>
+	<name>Spark DataFrame Java Snippet (Sink)</name>
 	<shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>

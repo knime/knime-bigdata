@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Manipulator" icon="../icon.png">
-	<name>Spark Data Frame Java Snippet</name>
+	<name>Spark DataFrame Java Snippet</name>
 	<shortDescription>Execute arbitrary java code in Spark.</shortDescription>
     <fullDescription>
         <intro>

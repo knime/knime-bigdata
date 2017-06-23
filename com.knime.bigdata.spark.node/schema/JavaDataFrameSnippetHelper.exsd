@@ -6,7 +6,7 @@
          <meta.schema plugin="com.knime.bigdata.spark.node" id="JavaDataFrameSnippetHelper" name="Java Data Frame Snippet Helper"/>
       </appinfo>
       <documentation>
-         Extension point to register Spark version-specific Java Data Frame Snippet Helpers. These are used by the Spark Java snippet nodes to obtain pieces of code and other information required to write Spark version-specific snippets.
+         Extension point to register Spark version-specific Java DataFrame Snippet Helpers. These are used by the Spark Java snippet nodes to obtain pieces of code and other information required to write Spark version-specific snippets.
       </documentation>
    </annotation>
 

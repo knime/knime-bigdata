@@ -27,7 +27,7 @@ import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnip
 import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 
 /**
- * Data frame specific java snippet model
+ * DataFrame specific java snippet model
  * @author Sascha Wolke, KNIME.com
  */
 public abstract class AbstractSparkDataFrameJavaSnippetNodeModel extends AbstractSparkJavaSnippetBaseNodeModel {
