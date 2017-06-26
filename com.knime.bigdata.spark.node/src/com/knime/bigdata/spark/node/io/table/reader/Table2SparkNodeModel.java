@@ -30,6 +30,7 @@ import java.util.Collections;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -54,6 +55,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -82,8 +84,14 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Please connect the input port");
         }
-        DataTableSpec spec = (DataTableSpec)inSpecs[0];
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContextID(inSpecs), spec);
+
+        // convert KNIME spec into spark spec and back into KNIME spec
+        final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
+        final IntermediateSpec interSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(interSpec);
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContextID(inSpecs), inputSpec);
+        setConverterWarningMessage(inputSpec, outputSpec);
+
         return new PortObjectSpec[]{resultSpec};
     }
 
@@ -105,7 +113,13 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         final File convertedInputTable = writeBufferedDataTable(table, subExec);
 
         exec.setMessage("Importing data into Spark...");
-        final SparkDataTable resultTable = new SparkDataTable(contextID, table.getDataTableSpec());
+
+        // convert KNIME spec into spark spec and back into KNIME spec
+        final DataTableSpec inputSpec = table.getDataTableSpec();
+        final IntermediateSpec interSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(interSpec);
+        final SparkDataTable resultTable = new SparkDataTable(contextID, inputSpec);
+        setConverterWarningMessage(inputSpec, outputSpec);
         executeSparkJob(contextID, exec, convertedInputTable, resultTable);
 
         exec.setProgress(1, "Spark data object created");
@@ -147,7 +161,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
                 if (rowIdx % 100 == 0) {
                     exec.checkCanceled();
                     exec.setProgress(rowIdx / (double)rowCount, "Processing row " + rowIdx + " of " + rowCount);
-                    //call reset to clear the object cache periodically which otherwise would result in high memory 
+                    //call reset to clear the object cache periodically which otherwise would result in high memory
                     //consumption since each object is kept in memory to prevent duplicate serialization
                     out.reset();
                 }
@@ -164,6 +178,39 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         exec.setProgress(1);
 
         return outFile;
+    }
+
+    /**
+     * Clears or sets the warning node messages if type converters are missing.
+     * @param inSpec current KNIME spec
+     * @param outSpec KNIME spec after converting to Spark and back to KNIME
+     */
+    private void setConverterWarningMessage(final DataTableSpec inSpec, final DataTableSpec outSpec) {
+        StringBuilder sb = new StringBuilder();
+        int nodeWarnings = 0;
+
+        for (int i = 0; i < inSpec.getNumColumns(); i++) {
+            final DataType inType = inSpec.getColumnSpec(i).getType();
+            final DataType outType = outSpec.getColumnSpec(i).getType();
+            if (!inType.equals(outType)) {
+                final String warning = String.format(
+                    "Data type of column '%s' changes between Spark and KNIME (type before: %s, after: %s).\n",
+                    inSpec.getColumnNames()[i], inType, outType);
+
+                if (nodeWarnings < 5) { // limit warning messages
+                    sb.append(warning);
+                    nodeWarnings++;
+                } else {
+                    LOGGER.warn(warning);
+                }
+            }
+        }
+
+        if (sb.length() > 0) {
+            setWarningMessage(sb.toString());
+        } else {
+            setWarningMessage(null);
+        }
     }
 
     /**

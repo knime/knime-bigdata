@@ -78,6 +78,8 @@ public class KNIMEToIntermediateConverterRegistry {
         addConverter(DateAndTimeType.INSTANCE);
         addConverter(DoubleType.INSTANCE);
         addConverter(IntegerType.INSTANCE);
+        addConverter(LocalDateType.INSTANCE);
+        addConverter(LocalDateTimeType.INSTANCE);
         addConverter(LongType.INSTANCE);
         addConverter(StringType.INSTANCE);
         //register all extension point implementations

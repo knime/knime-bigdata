@@ -14,60 +14,54 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on 05.07.2015 by koetter
  */
 package com.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.knime.core.data.DataCell;
-import org.knime.core.data.date.DateAndTimeCell;
-import org.knime.core.data.date.DateAndTimeValue;
+import org.knime.core.data.DataType;
+import org.knime.core.data.time.localdatetime.LocalDateTimeCell;
+import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
+import org.knime.core.data.time.localdatetime.LocalDateTimeValue;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
+ * Converts between LocalDateTime and Timestamps without time shifts.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Sascha Wolke, KNIME.com
  */
-public class DateAndTimeType extends AbstractKNIMEToIntermediateConverter {
+public class LocalDateTimeType extends AbstractKNIMEToIntermediateConverter {
 
-    /**The only instance.*/
-    public static final DateAndTimeType INSTANCE = new DateAndTimeType();
+    /** The only instance. */
+    public static final LocalDateTimeType INSTANCE = new LocalDateTimeType();
 
-    private DateAndTimeType() {
-        super("Date and time", DateAndTimeCell.TYPE, IntermediateDataTypes.TIMESTAMP,
-            new IntermediateDataType[] {});
+    private LocalDateTimeType() {
+        super("Local date and time", DataType.getType(LocalDateTimeCell.class), IntermediateDataTypes.TIMESTAMP,
+            new IntermediateDataType[] { IntermediateDataTypes.TIMESTAMP });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Serializable convertNoneMissingCell(final DataCell cell) {
-        if (cell instanceof DateAndTimeValue) {
-            return new Timestamp(((DateAndTimeValue)cell).getUTCTimeInMillis());
+        if (cell instanceof LocalDateTimeValue) {
+            LocalDateTime utcDateTime = ((LocalDateTimeValue)cell).getLocalDateTime().atOffset(ZoneOffset.UTC).toLocalDateTime();
+            return Timestamp.valueOf(utcDateTime);
         }
+
         throw incompatibleCellException(cell);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
         if (intermediateTypeObject instanceof Timestamp) {
-            Timestamp val = (Timestamp) intermediateTypeObject;
-            return new DateAndTimeCell(val.getTime(), true, true, true);
-        } else if (intermediateTypeObject instanceof Date) {
-            Date val = (Date) intermediateTypeObject;
-            return new DateAndTimeCell(val.getTime(), true, false, false);
+            return LocalDateTimeCellFactory.create(((Timestamp) intermediateTypeObject).toLocalDateTime());
         }
+
         throw incompatibleSerializableException(intermediateTypeObject);
     }
 }
