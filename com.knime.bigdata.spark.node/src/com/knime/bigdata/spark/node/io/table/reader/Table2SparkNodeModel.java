@@ -55,7 +55,6 @@ import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
@@ -87,9 +86,8 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // convert KNIME spec into spark spec and back into KNIME spec
         final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
-        final IntermediateSpec interSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(interSpec);
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContextID(inSpecs), inputSpec);
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
+        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec);
         setConverterWarningMessage(inputSpec, outputSpec);
 
         return new PortObjectSpec[]{resultSpec};
@@ -116,9 +114,8 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // convert KNIME spec into spark spec and back into KNIME spec
         final DataTableSpec inputSpec = table.getDataTableSpec();
-        final IntermediateSpec interSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(interSpec);
-        final SparkDataTable resultTable = new SparkDataTable(contextID, inputSpec);
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
+        final SparkDataTable resultTable = new SparkDataTable(contextID, outputSpec);
         setConverterWarningMessage(inputSpec, outputSpec);
         executeSparkJob(contextID, exec, convertedInputTable, resultTable);
 

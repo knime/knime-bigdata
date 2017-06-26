@@ -267,4 +267,38 @@ public final class SparkDataTableUtil {
         }
         return new IntermediateSpec(fields);
     }
+
+    /**
+     * Converts input spec into intermediate and back into KNIME spec.
+     * This ensures that KNIME's spec containts e.g. String as data type on Spark types without a converter.
+     * On same in and output types, all column attributes are used in output spec.
+     * On different in and output types, only name and properties are used in output spec.
+     *
+     * @param inputSpec input {@link DataTableSpec} to use
+     * @deprecated This implementation use the first available converter. See {@link KNIMEToIntermediateConverterRegistry#convertSpec(IntermediateSpec)}.
+     * @return output {@link DataTableSpec} with types after converting back from spark
+     */
+    @Deprecated
+    public static DataTableSpec toSparkOutputSpec(final DataTableSpec inputSpec) {
+        final IntermediateSpec intermediateSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(intermediateSpec);
+        final DataColumnSpec[] outputColumns = new DataColumnSpec[inputSpec.getNumColumns()];
+
+        for (int i = 0; i < inputSpec.getNumColumns(); i++) {
+            final DataColumnSpec inputCol = inputSpec.getColumnSpec(i);
+            final DataType outputType = outputSpec.getColumnSpec(i).getType();
+            final DataColumnSpecCreator creator;
+
+            if (inputCol.getType().equals(outputType)) {
+                creator = new DataColumnSpecCreator(inputCol);
+            } else {
+                creator = new DataColumnSpecCreator(inputCol.getName(), outputType);
+                creator.setProperties(inputCol.getProperties());
+            }
+
+            outputColumns[i] = creator.createSpec();
+        }
+
+        return new DataTableSpec(outputColumns);
+    }
 }

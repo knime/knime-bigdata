@@ -186,6 +186,7 @@ public class KNIMEToIntermediateConverterRegistry {
      * @param type the {@link IntermediateDataType} to get the converter for
      * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
      * @see #getDefaultConverter()
+     * @deprecated This implementation returns the first available converter.
      */
     @Deprecated
     private static KNIMEToIntermediateConverter get(final IntermediateDataType type) {
@@ -253,6 +254,7 @@ public class KNIMEToIntermediateConverterRegistry {
      *
      * @param intermediateSpec
      * @return a KNIME {@link DataTableSpec} with converted types.
+     * @deprecated This implementation use the first available converter.
      */
     @Deprecated
     public static DataTableSpec convertSpec(final IntermediateSpec intermediateSpec) {
