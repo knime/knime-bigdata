@@ -61,7 +61,7 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-         
+
    <plugin
          id="com.knime.bigdata.spark2_0"
          download-size="0"
@@ -74,7 +74,7 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.databricks.spark-avro_2.11"
          download-size="0"
