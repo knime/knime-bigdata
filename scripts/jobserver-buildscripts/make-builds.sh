@@ -40,6 +40,22 @@ function finish {
 }
 trap finish EXIT
 
+function prep_startupscript {
+  local name="$1"
+  if [ -z "$name" ] ; then
+    echo "prep_startupscript: no file name given"
+    exit 1
+  fi
+
+  if [ -f "${ENVDIR}/${name}" ] ; then
+    cp "${ENVDIR}/${name}" "spark-job-server-$ENV/"
+  else
+    cp "$SCRIPT_DIR/buildfiles/templates/${name}" "spark-job-server-$ENV/"
+  fi
+  sed -i "s/%JSLINKNAME%/${JSLINKNAME}/g" "spark-job-server-$ENV/${name}"
+  sed -i "s/%JSUSER%/${JSUSER}/g" "spark-job-server-$ENV/${name}"
+}
+
 function do_build {
         ENV="$1"
         ENVDIR="$SCRIPT_DIR/buildfiles/env/$ENV/"
@@ -94,14 +110,9 @@ function do_build {
         # build.version
         echo "Commit $(git show --format='format:%H' | head -1) on branch $BRANCH built on $(date --rfc-3339=seconds)" >"spark-job-server-$ENV/build.version"
 
-        # spark-job-server-init.d
-        if [ -f "${ENVDIR}/spark-job-server-init.d" ] ; then
-          cp "${ENVDIR}/spark-job-server-init.d" "spark-job-server-$ENV/"
-        else
-          cp "$SCRIPT_DIR/buildfiles/templates/spark-job-server-init.d" "spark-job-server-$ENV/"
-        fi
-        sed -i "s/%JSLINKNAME%/${JSLINKNAME}/g" "spark-job-server-$ENV/spark-job-server-init.d"
-        sed -i "s/%JSUSER%/${JSUSER}/g" "spark-job-server-$ENV/spark-job-server-init.d"
+        # prepare init.d startup scripts
+        prep_startupscript "spark-job-server-init.d"
+        prep_startupscript "spark-job-server-init.d-ubuntu-sysv"
 
         # README and LICENSE
         cp "$SCRIPT_DIR/buildfiles/LICENSE" "spark-job-server-$ENV/"
@@ -123,7 +134,7 @@ if [ -z "$REPOSITORY" ]; then
   REPOSITORY="https://bitbucket.org/KNIME/spark-jobserver"
   # REPOSITORY="git@github.com:bjoernlohrmann/spark-jobserver.git"
   # REPOSITORY="git@github.com:dersascha/spark-jobserver.git"
-  # REPOSITORY="/home/bjoern/knime/bigdata/spark-jobserver"
+  # REPOSITORY="/home/bjoern/git/spark-jobserver"
 fi
 echo "Using repository: $REPOSITORY"
 

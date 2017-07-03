@@ -39,10 +39,10 @@ Please follow the Spark Job Server installation manual provided as PDF by KNIME.
 
 2016-07-21 User impersonation on Kerberos secured clusters
  - Added user impersonation support for Kerberos secured clusters. For
-   a step-by-step guide on how to set this up please consult the "KNIME Spark Executor 
+   a step-by-step guide on how to set this up please consult the "KNIME Spark Executor
    Guide" (PDF) on the product website: https://www.knime.org/knime-spark-executor#install
  - The provided init.d script now runs Spark Jobserver as the Linux user "spark-jobserver"
-   (previously: spark). 
+   (previously: spark).
 
 2016-10-12 Close context with context-per-jvm fixed (spark-jobserver PR 624)
 
@@ -50,7 +50,21 @@ Please follow the Spark Job Server installation manual provided as PDF by KNIME.
 
 2016-11-06 Default aggregated chunk size limit increased from 1M to 200M
 
-2017-05-18
- - Create new context after context initialization errors fixed
- - Stop job manager (and remove context from jobserver list) if spark context was stopped
-   (via context.stop() or killed YARN application)
+2017-07-12
+ - New versions: 0.6.2.2-KNIME and 0.7.0.1-KNIME
+ - Fixed bugs:
+   - If jvm-per-context=true then Jobserver becomes unuseable after a context initialization
+     has failed
+   - If jvm-per-context=true then Jobserver becomes unuseable if Spark context was stopped
+     externally (e.g. because killed YARN application)
+   - If jvm-per-context=true then jobserver sometimes fails because of concurrent
+     access to file-based H2 database
+ - Enhancements:
+   - Added startup script for Ubuntu 14
+   - Changed default paths in /tmp so that only /tmp/spark-job-server will be
+     created
+
+ IMPORTANT NOTE: There have been significant changes to the defaults in environment.conf
+ w.r.t. H2 database settings. When updating from 0.6.2.1-KNIME or earlier versions,
+ you should start from scratch with a fresh default environment.conf and merge in the
+ changes you have done.
