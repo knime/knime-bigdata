@@ -11,9 +11,10 @@ import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import java.nio.file.Paths
 import java.util.jar.Attributes.Name
 import com.knime.tpbuilder.TPConfigReader.TPConfig
-import org.apache.maven.artifact.{DefaultArtifact, Artifact => MavenArtifact}
+import org.apache.maven.artifact.{ DefaultArtifact, Artifact => MavenArtifact }
 import com.knime.tpbuilder.Artifact
 import com.knime.tpbuilder.BundleInfo
+import java.util.regex.Pattern
 
 object OsgiUtil {
 
@@ -79,7 +80,7 @@ object OsgiUtil {
     val baseVersion = if (isPrebundled)
       extractBundleVersion(mavenArtifact)
     else
-      maven2Osgi.getVersion(art.version).replaceAll("[^A-Za-z0-9.]", "")
+      maven2Osgi.getVersion(art.version).replaceAll("[^A-Za-z0-9._-]", "")
 
     // a version string that is suffixed with the version of the target platform itself
     val baseVersionWithSuffix = addKNIMEVersionSuffix(baseVersion, config.version)
@@ -112,9 +113,9 @@ object OsgiUtil {
       baseVersion + "." + suffix
   }
 
-  def withBundle(art: Artifact, 
-      bundleInfo: BundleInfo, 
-      artifactJar: Option[File] = None, 
+  def withBundle(art: Artifact,
+      bundleInfo: BundleInfo,
+      artifactJar: Option[File] = None,
       srcFile: Option[File] = None): Artifact = {
     
     Artifact(group = art.group,
@@ -143,16 +144,16 @@ object OsgiUtil {
       false
     }
   }
-  
-  private def extractBundleVersion(artifact: MavenArtifact): String = {
-      val jar = new JarFile(artifact.getFile, false)
 
-      Option(jar.getManifest()) match {
-        case Some(manifest) =>
-          jar.getManifest().getMainAttributes().getValue(new Name(Analyzer.BUNDLE_VERSION))
-        case _ =>
-          // never happens
-          throw new RuntimeException("Prebundled artifact does not contain manifest!?")
-      }
+  private def extractBundleVersion(artifact: MavenArtifact): String = {
+    val jar = new JarFile(artifact.getFile, false)
+
+    Option(jar.getManifest()) match {
+      case Some(manifest) =>
+        jar.getManifest().getMainAttributes().getValue(new Name(Analyzer.BUNDLE_VERSION))
+      case _ =>
+        // never happens
+        throw new RuntimeException("Prebundled artifact does not contain manifest!?")
+    }
   }
 }
