@@ -1,4 +1,6 @@
-@Library('knime-pipeline@master') _
+#!groovy
+
+library "knime-pipeline@$BRANCH_NAME"
 
 node {
 	def upstreamParams = defaultProperties('org.knime.update.analytics-platform',
@@ -25,10 +27,10 @@ node {
 
 	stage('Checkout sources') {
 		checkoutSources (
-			defaultBranch: 'master',
+			defaultBranch: BRANCH_NAME,
 			credentialsId: 'bitbucket-jenkins',
 			repos: [
-				[name : 'knime-bigdata', branch: BRANCH_NAME],
+				[name : 'knime-bigdata'],
 				[name : 'knime-config'],
 				[name : 'knime-jenkins']
 			]
