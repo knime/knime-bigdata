@@ -32,7 +32,7 @@ public class SparkDestroyContextNodeFactory extends DefaultSparkNodeFactory<Spar
 
     /**Constructor.*/
     public SparkDestroyContextNodeFactory() {
-        super("misc/management");
+        super("");
     }
 
     /**

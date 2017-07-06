@@ -34,7 +34,7 @@ public class SparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<Spar
      * Constructor.
      */
     public SparkContextCreatorNodeFactory() {
-        super("misc/management");
+        super("");
     }
 
     /**

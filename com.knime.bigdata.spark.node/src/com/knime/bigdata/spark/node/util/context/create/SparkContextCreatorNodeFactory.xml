@@ -10,8 +10,7 @@
             Creates a new Spark Context. The settings e.g. dispose on reset affect all connected Spark nodes and 
             their successors.
             <p>The default values of the node are taken from the Spark preference page which
-            you can open via <i>File->Preferences->KNIME->Spark</i>.</p> 
-            <p><b>Using multiple contexts with the same Spark Job Server is experimental.</b></p>
+            you can open via <i>File->Preferences->KNIME->Spark</i>.</p>
         </intro>
         <tab name="KNIME Settings">
         <option name="Spark job timeout (seconds)">The timeout of a Spark job.</option>
