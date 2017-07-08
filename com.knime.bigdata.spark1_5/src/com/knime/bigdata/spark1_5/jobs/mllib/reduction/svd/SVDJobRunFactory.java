@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.mllib.reduction.svd;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeModel;
 import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobInput;
 import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobOutput;
@@ -37,14 +35,6 @@ public class SVDJobRunFactory extends DefaultJobRunFactory<SVDJobInput, SVDJobOu
      * Constructor
      */
     public SVDJobRunFactory() {
-        super(MLlibSVDNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<SVDJobInput, SVDJobOutput> createRun(final SVDJobInput input) {
-        return new DefaultJobRun<>(input, SVDJob.class, SVDJobOutput.class);
+        super(MLlibSVDNodeModel.JOB_ID, SVDJob.class, SVDJobOutput.class);
     }
 }

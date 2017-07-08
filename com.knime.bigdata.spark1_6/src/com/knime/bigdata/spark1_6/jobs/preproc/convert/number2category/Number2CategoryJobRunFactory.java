@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.preproc.convert.number2category;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.convert.number2category.Number2CategoryJobInput;
 import com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeModel;
 
@@ -33,17 +31,9 @@ import com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2
 public class Number2CategoryJobRunFactory extends DefaultSimpleJobRunFactory<Number2CategoryJobInput> {
 
     /**
-     *
+     * Constructor.
      */
     public Number2CategoryJobRunFactory() {
-        super(SparkNumber2CategoryNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<Number2CategoryJobInput> createRun(final Number2CategoryJobInput input) {
-        return new DefaultSimpleJobRun<>(input, Number2CategoryJob.class);
+        super(SparkNumber2CategoryNodeModel.JOB_ID, Number2CategoryJob.class);
     }
 }

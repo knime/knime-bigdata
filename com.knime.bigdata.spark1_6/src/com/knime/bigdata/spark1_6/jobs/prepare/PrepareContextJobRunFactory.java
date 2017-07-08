@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark1_6.jobs.prepare;
 
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
 
 /**
@@ -33,17 +31,9 @@ import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
 public class PrepareContextJobRunFactory extends DefaultSimpleJobRunFactory<PrepareContextJobInput> {
 
     /**
-     *
+     * Constructor.
      */
     public PrepareContextJobRunFactory() {
-        super(SparkContextConstants.PREPARE_CONTEXT_JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<PrepareContextJobInput> createRun(final PrepareContextJobInput input) {
-        return new DefaultSimpleJobRun<>(input, PrepareContextJob.class);
+        super(SparkContextConstants.PREPARE_CONTEXT_JOB_ID, PrepareContextJob.class);
     }
 }

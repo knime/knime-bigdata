@@ -191,7 +191,8 @@ public class ContextSettings {
     }
 
     public SparkVersion getSparkVersion() {
-        return SparkVersion.getVersion(m_sparkVersion.getStringValue());
+        // the settings model for the Spark version operates with label strings
+        return SparkVersion.fromLabel(m_sparkVersion.getStringValue());
     }
 
     public String getContextName() {

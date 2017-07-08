@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.writer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -39,6 +40,7 @@ import org.knime.core.node.port.PortType;
 import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -138,8 +140,14 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         addPartitioning(rdd.getTableSpec(), jobInput);
         m_settings.addWriterOptions(jobInput);
 
+        final List<File> toUpload = new ArrayList<>();
+        if (jobInput.uploadDriver()) {
+            toUpload.addAll(BundleGroupSparkJarRegistry
+                .getBundledDriverJars(SparkContextUtil.getSparkVersion(rdd.getContextID()), jobInput.getFormat()));
+        }
+
         try {
-            runFactory.createRun(jobInput, new ArrayList<File>()).run(rdd.getContextID(), exec);
+            runFactory.createRun(jobInput, toUpload).run(rdd.getContextID(), exec);
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Reason: Failed to find data source:")) {

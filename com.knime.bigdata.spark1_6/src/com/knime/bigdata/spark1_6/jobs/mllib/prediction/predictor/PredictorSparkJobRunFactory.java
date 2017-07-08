@@ -20,13 +20,8 @@
  */
 package com.knime.bigdata.spark1_6.jobs.mllib.prediction.predictor;
 
-import java.io.File;
-import java.util.List;
-
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
@@ -38,17 +33,9 @@ import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInpu
 public class PredictorSparkJobRunFactory extends DefaultJobWithFilesRunFactory<PredictionJobInput, EmptyJobOutput> {
 
     /**
-     * Constructor
+     * Constructor.
      */
     public PredictorSparkJobRunFactory() {
-        super(MLlibPredictorNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobWithFilesRun<PredictionJobInput, EmptyJobOutput> createRun(final PredictionJobInput input, final List<File> localFiles) {
-        return new DefaultJobWithFilesRun<PredictionJobInput, EmptyJobOutput>(input, PredictionJob.class, EmptyJobOutput.class, localFiles, FileLifetime.JOB);
+        super(MLlibPredictorNodeModel.JOB_ID, PredictionJob.class, EmptyJobOutput.class, FileLifetime.JOB, false);
     }
 }

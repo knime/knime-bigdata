@@ -55,7 +55,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.node.scripting.java.util.template.AbstractJavaSnippetTemplateRepositoryProvider;
 import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
+import com.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 
 /**
  *
@@ -74,7 +74,7 @@ public class Spark_1_6_JavaSnippetTemplateRepositoryProvider extends AbstractJav
      * Create a instance for the bundle "com.knime.bigdata.spark" and the relative path "/snippetTemplates".
      */
     public Spark_1_6_JavaSnippetTemplateRepositoryProvider() {
-        super(Spark_1_6_CompatibilityChecker.INSTANCE);
+        super(AllSpark_1_6_CompatibilityChecker.INSTANCE);
 
         final String currentPluginName = FrameworkUtil.getBundle(getClass()).getSymbolicName();
 

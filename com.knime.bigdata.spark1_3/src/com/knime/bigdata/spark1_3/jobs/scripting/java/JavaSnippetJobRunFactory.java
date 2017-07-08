@@ -20,12 +20,7 @@
  */
 package com.knime.bigdata.spark1_3.jobs.scripting.java;
 
-import java.io.File;
-import java.util.List;
-
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
 import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
@@ -38,22 +33,12 @@ import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
 public class JavaSnippetJobRunFactory extends DefaultJobWithFilesRunFactory<JavaSnippetJobInput, JavaSnippetJobOutput> {
 
     /**
-     * Constructor
+     * Constructor.
      */
     public JavaSnippetJobRunFactory() {
-        super(AbstractSparkJavaSnippetNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobWithFilesRun<JavaSnippetJobInput, JavaSnippetJobOutput> createRun(final JavaSnippetJobInput input,
-        final List<File> localFiles) {
-
         // once the jar files with snippets have been added to the Spark-side classloaders, they must stay
         // there until the context is destroyed. Hence we use FileLifetime.CONTEXT here
-        return new DefaultJobWithFilesRun<JavaSnippetJobInput, JavaSnippetJobOutput>(input, JavaSnippetJob.class,
-            JavaSnippetJobOutput.class, localFiles, FileLifetime.CONTEXT, true);
+        super(AbstractSparkJavaSnippetNodeModel.JOB_ID, JavaSnippetJob.class, JavaSnippetJobOutput.class,
+            FileLifetime.CONTEXT, true);
     }
 }

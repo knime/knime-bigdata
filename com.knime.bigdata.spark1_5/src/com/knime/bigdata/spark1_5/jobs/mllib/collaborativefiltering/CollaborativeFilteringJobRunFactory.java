@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.mllib.collaborativefiltering;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobOutput;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
@@ -32,19 +30,12 @@ import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborat
  * @author Tobias Koetter, KNIME.com
  */
 public class CollaborativeFilteringJobRunFactory
-extends DefaultJobRunFactory<CollaborativeFilteringJobInput, CollaborativeFilteringJobOutput> {
+    extends DefaultJobRunFactory<CollaborativeFilteringJobInput, CollaborativeFilteringJobOutput> {
 
-    /**Constructor.*/
+    /** Constructor. */
     public CollaborativeFilteringJobRunFactory() {
-        super(MLlibCollaborativeFilteringNodeModel.JOB_ID);
-    }
+        super(MLlibCollaborativeFilteringNodeModel.JOB_ID, CollaborativeFilteringJob.class,
+            CollaborativeFilteringJobOutput.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<CollaborativeFilteringJobInput, CollaborativeFilteringJobOutput>
-        createRun(final CollaborativeFilteringJobInput input) {
-        return new DefaultJobRun<>(input, CollaborativeFilteringJob.class, CollaborativeFilteringJobOutput.class);
     }
 }

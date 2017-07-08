@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.preproc.partition;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeModel;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
@@ -34,17 +32,9 @@ import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
 public class PartitionJobRunFactory extends DefaultJobRunFactory<SamplingJobInput, SamplingJobOutput> {
 
     /**
-     *
+     * Constructor.
      */
     public PartitionJobRunFactory() {
-        super(SparkPartitionNodeModel.PARTITION_JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<SamplingJobInput, SamplingJobOutput> createRun(final SamplingJobInput input) {
-        return new DefaultJobRun<>(input, PartitionJob.class, SamplingJobOutput.class);
+        super(SparkPartitionNodeModel.PARTITION_JOB_ID, PartitionJob.class, SamplingJobOutput.class);
     }
 }

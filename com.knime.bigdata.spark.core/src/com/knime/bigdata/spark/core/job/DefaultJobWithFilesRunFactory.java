@@ -20,15 +20,51 @@
  */
 package com.knime.bigdata.spark.core.job;
 
+import java.io.File;
+import java.util.List;
+
+import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+
 /**
+ * Default implementation of a {@link JobWithFilesRunFactory} for jobs that require input files to be uploaded.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class DefaultJobWithFilesRunFactory<I extends JobInput, O extends JobOutput>
-    extends DefaultJobRunFactory<I, O> implements JobWithFilesRunFactory<I, O> {
+public class DefaultJobWithFilesRunFactory<I extends JobInput, O extends JobOutput> extends DefaultJobRunFactory<I, O>
+    implements JobWithFilesRunFactory<I, O> {
 
-    public DefaultJobWithFilesRunFactory(final String jobId) {
-        super(jobId);
+    private final FileLifetime m_filesLifetime;
+
+    private final boolean m_useInputFileCopyCache;
+
+    public DefaultJobWithFilesRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass,
+        final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
+
+        this(jobId, jobClass, jobOutputClass, jobClass.getClassLoader(), filesLifetime, useInputFileCopyCache);
+    }
+
+    public DefaultJobWithFilesRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass,
+        final ClassLoader jobOutputClassLoader, final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
+
+        super(jobId, jobClass, jobOutputClass, jobOutputClassLoader);
+        m_filesLifetime = filesLifetime;
+        m_useInputFileCopyCache = useInputFileCopyCache;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FileLifetime getFilesLifetime() {
+        return m_filesLifetime;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean useInputFileCopyCache() {
+        return m_useInputFileCopyCache;
     }
 
     /**
@@ -37,5 +73,14 @@ public abstract class DefaultJobWithFilesRunFactory<I extends JobInput, O extend
     @Override
     public JobRun<I, O> createRun(final I input) {
         throw new UnsupportedOperationException("Job run requires input files");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JobWithFilesRun<I, O> createRun(final I input, final List<File> localFiles) {
+        return new DefaultJobWithFilesRun<I, O>(input, getJobClass(), getJobOutputClass(), getJobOutputClassLoader(),
+            localFiles, m_filesLifetime, m_useInputFileCopyCache);
     }
 }

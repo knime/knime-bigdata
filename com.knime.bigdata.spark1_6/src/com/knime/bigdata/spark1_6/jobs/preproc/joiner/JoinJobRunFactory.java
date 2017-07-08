@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.preproc.joiner;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeModel;
 
@@ -33,17 +31,9 @@ import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeModel;
 public class JoinJobRunFactory extends DefaultSimpleJobRunFactory<SparkJoinerJobInput> {
 
     /**
-     *
+     * Constructor.
      */
     public JoinJobRunFactory() {
-        super(SparkJoinerNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<SparkJoinerJobInput> createRun(final SparkJoinerJobInput input) {
-        return new DefaultSimpleJobRun<>(input, JoinJob.class);
+        super(SparkJoinerNodeModel.JOB_ID, JoinJob.class);
     }
 }

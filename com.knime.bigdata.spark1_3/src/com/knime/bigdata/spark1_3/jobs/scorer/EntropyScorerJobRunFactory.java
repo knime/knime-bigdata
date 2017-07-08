@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_3.jobs.scorer;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
 import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 import com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeModel;
@@ -34,17 +32,9 @@ import com.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeModel;
 public class EntropyScorerJobRunFactory extends DefaultJobRunFactory<EntropyScorerJobInput, EntropyScorerJobOutput> {
 
     /**
-     *
+     * Constructor.
      */
     public EntropyScorerJobRunFactory() {
-        super(SparkEntropyScorerNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<EntropyScorerJobInput, EntropyScorerJobOutput> createRun(final EntropyScorerJobInput input) {
-        return new DefaultJobRun<>(input, EntropyScorerJob.class, EntropyScorerJobOutput.class);
+        super(SparkEntropyScorerNodeModel.JOB_ID, EntropyScorerJob.class, EntropyScorerJobOutput.class);
     }
 }

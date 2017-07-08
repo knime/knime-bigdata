@@ -109,7 +109,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
         }
         final ModelContent content = new ModelContent("SparkModel");
         content.addString(MODEL_NAME, modelName);
-        content.addString(SPARK_VERSION, version.getLabel());
+        content.addString(SPARK_VERSION, version.toString());
         m_model = content;
     }
 
@@ -164,7 +164,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
      * @return the {@link SparkVersion}
      */
     public SparkVersion getSparkVersion() {
-        return SparkVersion.getVersion(m_model.getString(SPARK_VERSION, SparkVersion.V_1_2.getLabel()));
+        return SparkVersion.fromString(m_model.getString(SPARK_VERSION, SparkVersion.V_1_2.toString()));
     }
 
     /**

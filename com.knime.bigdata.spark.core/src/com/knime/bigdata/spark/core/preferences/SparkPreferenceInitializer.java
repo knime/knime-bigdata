@@ -254,7 +254,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         }
 
         store.setValue(PREF_VERBOSE_LOGGING, verboseLogging);
-        store.setValue(PREF_SPARK_VERSION, sparkVersion.getLabel());
+        store.setValue(PREF_SPARK_VERSION, sparkVersion.toString());
     }
 
     private void loadDefaultValues(final IPreferenceStore store) {

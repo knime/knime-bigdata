@@ -20,12 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.database;
 
-import java.io.File;
-import java.util.List;
-
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
@@ -34,17 +29,12 @@ import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeModel;
 /**
  * @author Sascha Wolke, KNIME.com
  */
-public class Database2SparkJobRunFactory extends DefaultJobWithFilesRunFactory<Database2SparkJobInput, Database2SparkJobOutput> {
+public class Database2SparkJobRunFactory
+    extends DefaultJobWithFilesRunFactory<Database2SparkJobInput, Database2SparkJobOutput> {
 
     /** Default constructor. */
     public Database2SparkJobRunFactory() {
-        super(Database2SparkNodeModel.JOB_ID);
-    }
-
-    @Override
-    public JobWithFilesRun<Database2SparkJobInput, Database2SparkJobOutput> createRun(final Database2SparkJobInput input, final List<File> jarFiles) {
-        return new DefaultJobWithFilesRun<Database2SparkJobInput, Database2SparkJobOutput>(
-                input, Database2SparkJob.class, Database2SparkJobOutput.class,
-                jarFiles, FileLifetime.CONTEXT, true);
+        super(Database2SparkNodeModel.JOB_ID, Database2SparkJob.class, Database2SparkJobOutput.class,
+            FileLifetime.CONTEXT, true);
     }
 }

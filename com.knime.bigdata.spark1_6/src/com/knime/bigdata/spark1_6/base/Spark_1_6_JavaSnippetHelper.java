@@ -46,7 +46,7 @@ import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
+import com.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippet;
 import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippetSink;
 import com.knime.bigdata.spark1_6.jobs.scripting.java.AbstractSparkJavaSnippetSource;
@@ -93,7 +93,7 @@ public class Spark_1_6_JavaSnippetHelper extends DefaultJavaSnippetHelper {
      * Constructor.
      */
     public Spark_1_6_JavaSnippetHelper() {
-        super(Spark_1_6_CompatibilityChecker.INSTANCE);
+        super(AllSpark_1_6_CompatibilityChecker.INSTANCE);
     }
 
     /**

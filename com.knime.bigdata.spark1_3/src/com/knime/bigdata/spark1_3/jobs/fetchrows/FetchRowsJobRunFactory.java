@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark1_3.jobs.fetchrows;
 
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
 import com.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
 
@@ -37,14 +35,6 @@ public class FetchRowsJobRunFactory extends DefaultJobRunFactory<FetchRowsJobInp
      * Constructor.
      */
     public FetchRowsJobRunFactory() {
-        super(SparkContextConstants.FETCH_ROWS_JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<FetchRowsJobInput, FetchRowsJobOutput> createRun(final FetchRowsJobInput input) {
-        return new DefaultJobRun<>(input, FetchRowsJob.class, FetchRowsJobOutput.class);
+        super(SparkContextConstants.FETCH_ROWS_JOB_ID, FetchRowsJob.class, FetchRowsJobOutput.class);
     }
 }

@@ -291,7 +291,7 @@ class JobserverJobController implements JobController {
         }
     }
 
-    private JobserverJobOutput waitForJob(final JobRun<?, ?> jobExecution, final String jobID,
+    private JobserverJobOutput waitForJob(final JobRun<?, ?> jobRun, final String jobID,
         final ExecutionMonitor exec) throws CanceledExecutionException, KNIMESparkException {
 
         final int aTimeoutInSeconds = m_contextConfig.getJobTimeout();
@@ -333,7 +333,7 @@ class JobserverJobController implements JobController {
                         final Config typesafeConfig = ConfigFactory.parseString(jobData.getString("result"));
                         return JobserverJobOutput
                             .fromMap(TypesafeConfigSerializationUtils.deserializeFromTypesafeConfig(typesafeConfig,
-                                jobExecution.getJobClass().getClassLoader()));
+                                jobRun.getJobOutputClassLoader()));
                     } catch (ClassNotFoundException | IOException e) {
                         throw new KNIMESparkException(e);
                     }

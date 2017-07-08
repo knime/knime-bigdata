@@ -27,15 +27,13 @@ import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class DefaultModelHelperProvider extends DefaultSparkProvider<ModelHelper>
-implements ModelHelperProvider {
+public class DefaultModelHelperProvider extends DefaultSparkProvider<ModelHelper> implements ModelHelperProvider {
 
     /**
      * @param checker the {@link CompatibilityChecker}
      * @param helper the {@link ModelHelper}
      */
-    public DefaultModelHelperProvider(final CompatibilityChecker checker,
-        final ModelHelper... helper) {
+    public DefaultModelHelperProvider(final CompatibilityChecker checker, final ModelHelper... helper) {
         super(checker, helper);
     }
 }

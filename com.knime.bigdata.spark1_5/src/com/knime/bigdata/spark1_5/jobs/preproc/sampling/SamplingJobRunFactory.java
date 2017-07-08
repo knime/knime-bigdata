@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.preproc.sampling;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
 import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
@@ -34,17 +32,9 @@ import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 public class SamplingJobRunFactory extends DefaultJobRunFactory<SamplingJobInput, SamplingJobOutput> {
 
     /**
-     *
+     * Constructor.
      */
     public SamplingJobRunFactory() {
-        super(SparkSamplingNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<SamplingJobInput, SamplingJobOutput> createRun(final SamplingJobInput input) {
-        return new DefaultJobRun<>(input, SamplingJob.class, SamplingJobOutput.class);
+        super(SparkSamplingNodeModel.JOB_ID, SamplingJob.class, SamplingJobOutput.class);
     }
 }
