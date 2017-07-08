@@ -16,36 +16,30 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Apr 27, 2016 by bjoern
+ *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_3.jobs.prepare;
+package com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.bayes.naive;
 
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
-import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
+import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
+import com.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class PrepareContextJobExecutionFactory extends DefaultSimpleJobRunFactory<PrepareContextJobInput> {
+public class NaiveBayesModelHelper extends Spark_1_6_CDH5_9_ModelHelper {
 
-
-    /**
-     * Constructor
-     */
-    public PrepareContextJobExecutionFactory() {
-        super(SparkContextConstants.PREPARE_CONTEXT_JOB_ID);
+    /**Constructor.*/
+    public NaiveBayesModelHelper() {
+        super(MLlibNaiveBayesNodeModel.MODEL_NAME);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SimpleJobRun<PrepareContextJobInput> createRun(final PrepareContextJobInput input) {
-
-        return new DefaultSimpleJobRun<PrepareContextJobInput>(input, PrepareContextJob.class);
+    public ModelInterpreter getModelInterpreter() {
+        return NaiveBayesInterpreter.getInstance();
     }
 }

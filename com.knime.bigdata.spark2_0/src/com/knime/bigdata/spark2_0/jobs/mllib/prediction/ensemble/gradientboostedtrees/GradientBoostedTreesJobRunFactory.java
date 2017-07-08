@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobInput;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
@@ -34,16 +32,8 @@ import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtre
 public class GradientBoostedTreesJobRunFactory
     extends DefaultJobRunFactory<GradientBoostedTreesJobInput, ModelJobOutput> {
 
-    /**Constructor.*/
+    /** Constructor. */
     public GradientBoostedTreesJobRunFactory() {
-        super(MLlibGradientBoostedTreeNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<GradientBoostedTreesJobInput, ModelJobOutput> createRun(final GradientBoostedTreesJobInput input) {
-        return new DefaultJobRun<>(input, GradientBoostedTreesJob.class, ModelJobOutput.class);
+        super(MLlibGradientBoostedTreeNodeModel.JOB_ID, GradientBoostedTreesJob.class, ModelJobOutput.class);
     }
 }

@@ -259,7 +259,7 @@ public class SparkModel {
 
         // read the header
         final NodeSettingsRO header = NodeSettings.loadFromXML(new NonClosableInputStream.Zip(in));
-        final SparkVersion sparkVersion = SparkVersion.getVersion(header.getString(KEY_SPARK_VERSION));
+        final SparkVersion sparkVersion = SparkVersion.fromString(header.getString(KEY_SPARK_VERSION));
         final String modelName = header.getString(KEY_MODEL_NAME);
         final String classColumnName = header.getString(KEY_CLASS_COLUMN_NAME);
 
@@ -327,7 +327,7 @@ public class SparkModel {
     public void write(final ExecutionMonitor exec, final PortObjectZipOutputStream out) throws IOException {
         out.putNextEntry(new ZipEntry(ZIP_KEY_MODEL_1_6_HEADER));
         NodeSettings header = new NodeSettings(ZIP_KEY_MODEL_1_6_HEADER);
-        header.addString(KEY_SPARK_VERSION, m_sparkVersion.getLabel());
+        header.addString(KEY_SPARK_VERSION, m_sparkVersion.toString());
         header.addString(KEY_MODEL_NAME, m_modelName);
         header.addString(KEY_CLASS_COLUMN_NAME, m_classColumnName);
         header.saveToXML(new NonClosableOutputStream.Zip(out));

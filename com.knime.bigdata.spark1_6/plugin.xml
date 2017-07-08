@@ -12,6 +12,11 @@
             ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_JobRunFactoryProvider">
       </JobRunFactoryProvider>
    </extension>
+   <extension point="com.knime.bigdata.spark.core.JobRunFactoryProvider">
+      <JobRunFactoryProvider
+            ProviderClass="com.knime.bigdata.spark1_6.base.Spark_1_6_CDH5_9_JobRunFactoryProvider">
+      </JobRunFactoryProvider>
+   </extension>
    <extension
          point="com.knime.bigdata.spark.core.ModelHelperProvider">
       <ModelHelperProvider

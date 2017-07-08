@@ -16,36 +16,33 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Apr 27, 2016 by bjoern
+ *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.prepare;
+package com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.linear.logistic;
 
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
-import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
+import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
+import com.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
 
 /**
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Tobias Koetter, KNIME.com
  */
-public class PrepareContextJobExecutionFactory extends DefaultSimpleJobRunFactory<PrepareContextJobInput> {
-
+public class LogisticRegressionModelHelper extends Spark_1_6_CDH5_9_ModelHelper {
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public PrepareContextJobExecutionFactory() {
-        super(SparkContextConstants.PREPARE_CONTEXT_JOB_ID);
+    public LogisticRegressionModelHelper() {
+        super(MLlibLogisticRegressionNodeFactory.MODEL_NAME);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SimpleJobRun<PrepareContextJobInput> createRun(final PrepareContextJobInput input) {
-
-        return new DefaultSimpleJobRun<PrepareContextJobInput>(input, PrepareContextJob.class);
+    public ModelInterpreter getModelInterpreter() {
+        return LogisticRegressionInterpreter.getInstance();
     }
+
 }

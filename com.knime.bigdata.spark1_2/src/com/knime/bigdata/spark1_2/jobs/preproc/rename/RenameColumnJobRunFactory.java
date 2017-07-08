@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.preproc.rename;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
 import com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
 
@@ -33,11 +31,6 @@ public class RenameColumnJobRunFactory extends DefaultSimpleJobRunFactory<Rename
 
     /** Default constructor. */
     public RenameColumnJobRunFactory() {
-        super(SparkRenameColumnNodeModel.JOB_ID);
-    }
-
-    @Override
-    public SimpleJobRun<RenameColumnJobInput> createRun(final RenameColumnJobInput input) {
-        return new DefaultSimpleJobRun<>(input, RenameColumnJob.class);
+        super(SparkRenameColumnNodeModel.JOB_ID, RenameColumnJob.class);
     }
 }

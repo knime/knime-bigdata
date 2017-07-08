@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
+import com.knime.bigdata.spark.core.version.CompatibilityChecker;
 import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
 import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import com.knime.bigdata.spark.core.version.SparkVersion;
@@ -39,19 +40,34 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 public class DefaultBundleGroupSparkJarProvider extends DefaultSparkProvider<BundleGroupSparkJarProvider> {
 
     /**
-     * Creates a new driver bundle.
+     * Creates a new driver bundle with a compatibility checker that checks against the
+     * given Spark version.
+     *
      * @param version - Spark version
      * @param drivers - Map with driver name string and bundles
      */
     public DefaultBundleGroupSparkJarProvider(final SparkVersion version, final Map<String, Bundle[]> drivers) {
-        super(new FixedVersionCompatibilityChecker(version), getProviders(version, drivers));
+        super(new FixedVersionCompatibilityChecker(version), getProviders(drivers, version));
     }
 
+    /**
+     * Creates a new driver bundle with a given compatibility checker.
+     *
+     * @param checker - Compatibility checker for Spark versions
+     * @param drivers - Map with driver name string and bundles
+     */
+    public DefaultBundleGroupSparkJarProvider(final CompatibilityChecker checker, final Map<String, Bundle[]> drivers) {
+        super(checker, getProviders(drivers, checker.getSupportedSparkVersions().toArray(new SparkVersion[0])));
+    }
+
+
     /** Converts driver name and bundles into {@link BundleGroupSparkJarProvider}s */
-    private static BundleGroupSparkJarProvider[] getProviders(final SparkVersion version, final Map<String, Bundle[]> drivers) {
+    private static BundleGroupSparkJarProvider[] getProviders(final Map<String, Bundle[]> drivers, final SparkVersion... versions) {
         final ArrayList<BundleGroupSparkJarProvider> provider = new ArrayList<>(drivers.size());
         for (Map.Entry<String, Bundle[]> driver : drivers.entrySet()) {
-            provider.add(new BundleGroupSparkJarProvider(version, driver.getKey(), driver.getValue()));
+            for(SparkVersion version : versions) {
+                provider.add(new BundleGroupSparkJarProvider(version, driver.getKey(), driver.getValue()));
+            }
         }
         return provider.toArray(new BundleGroupSparkJarProvider[0]);
     }

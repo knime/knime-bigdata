@@ -64,6 +64,12 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          version="0.0.0"/>
 
    <plugin
+         id="com.knime.bigdata.spark1_6_cdh_5_9"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
          id="com.knime.bigdata.spark2_0"
          download-size="0"
          install-size="0"

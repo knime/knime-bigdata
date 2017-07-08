@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.knime.bigdata.spark.core.ModelHelperProvider">
+      <ModelHelperProvider
+            ProviderClass="com.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_ModelHelperProvider">
+      </ModelHelperProvider>
+   </extension>
+</plugin>

@@ -20,13 +20,8 @@
  */
 package com.knime.bigdata.spark1_6.jobs.pmml;
 
-import java.io.File;
-import java.util.List;
-
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeModel;
 import com.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionJobInput;
@@ -41,16 +36,7 @@ public class PMMLPredictionJobRunFactory extends DefaultJobWithFilesRunFactory<P
      * Constructor.
      */
     public PMMLPredictionJobRunFactory() {
-        super(AbstractSparkPMMLPredictorNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobWithFilesRun<PMMLPredictionJobInput, EmptyJobOutput> createRun(final PMMLPredictionJobInput input,
-        final List<File> localFiles) {
-        return new DefaultJobWithFilesRun<>(input, PMMLPredictionJob.class, EmptyJobOutput.class, localFiles,
-                FileLifetime.JOB);
+        super(AbstractSparkPMMLPredictorNodeModel.JOB_ID, PMMLPredictionJob.class, EmptyJobOutput.class,
+            FileLifetime.JOB, false);
     }
 }

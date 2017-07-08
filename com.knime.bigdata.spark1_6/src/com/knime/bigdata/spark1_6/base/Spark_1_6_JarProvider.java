@@ -22,7 +22,7 @@ package com.knime.bigdata.spark1_6.base;
 
 import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
 import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import com.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 
 /**
  * Implementation of the {@link DefaultSparkJarProvider} for Spark 1.6.
@@ -35,6 +35,7 @@ public class Spark_1_6_JarProvider extends JobsPluginJarProvider {
      * Default constructor.
      */
     public Spark_1_6_JarProvider() {
-        super(SparkVersion.V_1_6, JobserverSparkJob.class);
+        super(AllSpark_1_6_CompatibilityChecker.INSTANCE,
+            JobserverSparkJob.class);
     }
 }

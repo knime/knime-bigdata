@@ -23,9 +23,7 @@ package com.knime.bigdata.spark1_2.jobs.namedobjects;
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 
 /**
  *
@@ -37,14 +35,6 @@ public class NamedObjectsJobRunFactory extends DefaultJobRunFactory<NamedObjects
      * Constructor.
      */
     public NamedObjectsJobRunFactory() {
-        super(SparkContextConstants.NAMED_OBJECTS_JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<NamedObjectsJobInput, NamedObjectsJobOutput> createRun(final NamedObjectsJobInput input) {
-        return new DefaultJobRun<>(input, NamedObjectsJob.class, NamedObjectsJobOutput.class);
+        super(SparkContextConstants.NAMED_OBJECTS_JOB_ID, NamedObjectsJob.class, NamedObjectsJobOutput.class);
     }
 }

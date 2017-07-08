@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.hive;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveJobInput;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
 
@@ -33,17 +31,9 @@ import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
 public class Spark2HiveJobRunFactory extends DefaultSimpleJobRunFactory<Spark2HiveJobInput> {
 
     /**
-     *
+     * Constructor.
      */
     public Spark2HiveJobRunFactory() {
-        super(Spark2HiveNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<Spark2HiveJobInput> createRun(final Spark2HiveJobInput input) {
-        return new DefaultSimpleJobRun<>(input, Spark2HiveJob.class);
+        super(Spark2HiveNodeModel.JOB_ID, Spark2HiveJob.class);
     }
 }

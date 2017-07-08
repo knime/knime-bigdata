@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.mllib.prediction.linear;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
 
@@ -32,20 +30,14 @@ import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInpu
  */
 public class DefaultRegularizationJobRunFactory extends DefaultJobRunFactory<LinearLearnerJobInput, ModelJobOutput> {
 
-    private Class<? extends AbstractRegularizationJob<LinearLearnerJobInput>> m_jobClass;
-
+    /**
+     * Constructor.
+     *
+     * @param jobId Unique identifier for job.
+     * @param jobClass The class that implements the job.
+     */
     protected DefaultRegularizationJobRunFactory(final String jobId,
         final Class<? extends AbstractRegularizationJob<LinearLearnerJobInput>> jobClass) {
-        super(jobId);
-        m_jobClass = jobClass;
+        super(jobId, jobClass, ModelJobOutput.class);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<LinearLearnerJobInput, ModelJobOutput> createRun(final LinearLearnerJobInput input) {
-        return new DefaultJobRun<>(input, m_jobClass, ModelJobOutput.class);
-    }
-
 }

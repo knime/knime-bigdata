@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.randomforest;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.RandomForestJobInput;
@@ -33,16 +31,8 @@ import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.Rando
  */
 public class RandomForestJobRunFactory extends DefaultJobRunFactory<RandomForestJobInput, ModelJobOutput> {
 
-    /**Constructor.*/
+    /** Constructor. */
     public RandomForestJobRunFactory() {
-        super(MLlibRandomForestNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<RandomForestJobInput, ModelJobOutput> createRun(final RandomForestJobInput input) {
-        return new DefaultJobRun<>(input, RandomForestJob.class, ModelJobOutput.class);
+        super(MLlibRandomForestNodeModel.JOB_ID, RandomForestJob.class, ModelJobOutput.class);
     }
 }

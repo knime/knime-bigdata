@@ -77,7 +77,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  * @author Sascha Wolke, KNIME.com
  */
 public class SparkPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, Listener {
-    
+
     //TODO: Use the Big Data Extensions preference page in com.knime.bigdata.commons as parent for this page
 
     private static final NodeLogger LOG = NodeLogger.getLogger(SparkPreferencePage.class);
@@ -340,7 +340,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
         if (m_sparkVersion.getSelectionIndex() >= 0) {
             prefs.setValue(SparkPreferenceInitializer.PREF_SPARK_VERSION,
-                SparkVersion.getAllVersionLabels()[m_sparkVersion.getSelectionIndex()]);
+                SparkVersion.ALL[m_sparkVersion.getSelectionIndex()].toString());
         } else {
             prefs.setToDefault(SparkPreferenceInitializer.PREF_SPARK_VERSION);
         }
@@ -429,7 +429,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     /** Selects given version in spark version combo box. */
     private void setSparkVersionField(final String version) {
-        int index = m_sparkVersion.indexOf(SparkVersion.getVersion(version).getLabel());
+        int index = m_sparkVersion.indexOf(SparkVersion.fromString(version).getLabel());
         if (index >= 0 && index < m_sparkVersion.getItemCount()) {
             m_sparkVersion.select(index);
         }

@@ -47,7 +47,7 @@ public class JobJar {
      * @return the Spark version the job jar was created for.
      */
     public SparkVersion getSparkVersion() {
-        return SparkVersion.getVersion(m_descriptor.getSparkVersion());
+        return SparkVersion.fromString(m_descriptor.getSparkVersion());
     }
 
     /**

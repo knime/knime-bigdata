@@ -34,15 +34,45 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
  */
 public interface JobRun<I extends JobInput, O extends JobOutput> {
 
+    /**
+     * @return The class that implements the job.
+     */
     Class<?> getJobClass();
 
+    /**
+     * @return The class that will be used by the job to return its output to KNIME.
+     */
     Class<O> getJobOutputClass();
 
+    /**
+     *
+     * @return a class loader that should be used to load the job output object
+     */
+    ClassLoader getJobOutputClassLoader();
+
+    /**
+     * @return The job input object that provides the input parameters the job needs.
+     */
     I getInput();
 
+    /**
+     * Runs the job on the Spark context with the given ID.
+     *
+     * @param contextID The ID of the Spark context in which to run the job.
+     * @param exec An execution monitor to report progress to.
+     * @return the job output produced by the Spark job.
+     * @throws KNIMESparkException If an error occured while try to run the Spark job.
+     * @throws CanceledExecutionException
+     */
     O run(final SparkContextID contextID, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException;
 
+    /**
+     * Runs the job on the Spark context with the given ID.
+     *
+     * @param contextID The ID of the Spark context in which to run the job.
+     * @return the job output produced by the Spark job.
+     * @throws KNIMESparkException If an error occured while try to run the Spark job.
+     */
     O run(final SparkContextID contextID) throws KNIMESparkException;
-
 }

@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobInput;
@@ -31,19 +29,10 @@ import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobIn
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class NaiveBayesJobRunFactory
-    extends DefaultJobRunFactory<NaiveBayesJobInput, ModelJobOutput> {
+public class NaiveBayesJobRunFactory extends DefaultJobRunFactory<NaiveBayesJobInput, ModelJobOutput> {
 
-    /**Constructor.*/
+    /** Constructor. */
     public NaiveBayesJobRunFactory() {
-        super(MLlibNaiveBayesNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<NaiveBayesJobInput, ModelJobOutput> createRun(final NaiveBayesJobInput input) {
-        return new DefaultJobRun<>(input, NaiveBayesJob.class, ModelJobOutput.class);
+        super(MLlibNaiveBayesNodeModel.JOB_ID, NaiveBayesJob.class, ModelJobOutput.class);
     }
 }

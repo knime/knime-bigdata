@@ -45,7 +45,7 @@ public class KNIMEConfigContainer {
         if (stringVersion.isEmpty()) {
             return SparkVersion.V_1_2;
         }
-        return SparkVersion.getVersion(stringVersion);
+        return SparkVersion.fromString(stringVersion);
     }
 
     public static String getSparkContext() {
