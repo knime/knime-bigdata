@@ -10,7 +10,8 @@ worker0-cdh-5.10-secured ansible_host=10.0.0.87
 worker1-cdh-5.10-secured ansible_host=10.0.0.218
 
 [cdh-5.11-secured]
-master-cdh-5.11-secured ansible_host=10.0.0.156 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
+# master-cdh-5.11-secured ansible_host=10.0.0.156 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
+master-cdh-5.11-secured ansible_host=cdh-5-11-secured js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
 worker0-cdh-5.11-secured ansible_host=10.0.0.160
 worker1-cdh-5.11-secured ansible_host=10.0.0.14
 
@@ -49,6 +50,17 @@ master-cdh-5.8 ansible_host=10.0.0.210 js1_env=cdh-5.8 js2_env=cdh
 worker0-cdh-5.8 ansible_host=10.0.0.7
 worker1-cdh-5.8 ansible_host=10.0.0.8
 
+#[cdh-5.8-train]
+#master-cdh-5.8-train ansible_host=10.0.0.66
+#worker0-cdh-5.8-train ansible_host=10.0.0.239
+#worker1-cdh-5.8-train ansible_host=10.0.0.254
+#worker2-cdh-5.8-train ansible_host=10.0.0.158
+#worker3-cdh-5.8-train ansible_host=10.0.0.12
+#worker4-cdh-5.8-train ansible_host=10.0.0.58
+#worker5-cdh-5.8-train ansible_host=10.0.0.217
+#worker6-cdh-5.8-train ansible_host=10.0.0.245
+#worker7-cdh-5.8-train ansible_host=10.0.0.146
+
 [hdp-2.4.2-secured]
 master-hdp-2.4.2-secured ansible_host=10.0.0.70 js_env=hdp-2.4.0
 worker0-hdp-2.4.2-secured ansible_host=10.0.0.212
@@ -83,6 +95,7 @@ cdh-5.6
 cdh-5.7
 cdh-5.7-secured
 cdh-5.8
+#cdh-5.8-train
 cdh-5.10-secured
 cdh-5.11-secured
 
@@ -140,7 +153,7 @@ hdp-2.5-secured
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 # js_build_dir='/run/user/1000/gvfs/smb-share:server=wdnas,share=public/spark_jobserver/0.6.2-KNIME/'
 # js_build_dir='/home/bjoern/knime/bigdata/scripts/jobserver-buildscripts/target/'
-js_build_dir='/home/bjoern/knime/bigdata/jobserver-builds/'
+js_build_dir='/home/bjoern/0.6.2.2-KNIME/'
 js_build_file_pattern=spark-job-server-%VERSION%_%ENV%.tar.gz
 keytab_dir="install_js_files/keytabs"
 hdfs_keytab=hdfs.keytab

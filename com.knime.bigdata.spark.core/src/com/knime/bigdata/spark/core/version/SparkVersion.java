@@ -20,6 +20,10 @@
  */
 package com.knime.bigdata.spark.core.version;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.osgi.framework.Version;
 
 /**
@@ -28,60 +32,118 @@ import org.osgi.framework.Version;
  */
 public class SparkVersion extends Version {
 
-    /**Spark version 1.2.0.*/
-    public static final SparkVersion V_1_2 = new SparkVersion(1, 2, 0);
+    /**
+     * A lookup map from string representation (.toString()) to Spark version.
+     */
+    private final static Map<String, SparkVersion> VERSION_MAP = new HashMap<>();
 
-    /**Spark version 1.3.0.*/
-    public static final SparkVersion V_1_3 = new SparkVersion(1, 3, 0);
+    /** Spark version 1.2.0. */
+    public static final SparkVersion V_1_2 = new SparkVersion(1, 2);
 
-    /**Spark version 1.5.0.*/
-    public static final SparkVersion V_1_5 = new SparkVersion(1, 5, 0);
+    /** Spark version 1.3.0. */
+    public static final SparkVersion V_1_3 = new SparkVersion(1, 3);
 
-    /**Spark version 1.6.0.*/
-    public static final SparkVersion V_1_6 = new SparkVersion(1, 6, 0);
+    /** Spark version 1.5.0. */
+    public static final SparkVersion V_1_5 = new SparkVersion(1, 5);
 
-    /**Spark version 2.0.0.*/
-    public static final SparkVersion V_2_0 = new SparkVersion(2, 0, 0);
+    /** Spark version 1.6.0. */
+    public static final SparkVersion V_1_6 = new SparkVersion(1, 6);
 
-    /**All {@link SparkVersion}s.*/
-    public static final SparkVersion[] ALL = new SparkVersion[]{V_1_2, V_1_3, V_1_5, V_1_6, V_2_0};
+    /** Spark version 1.6 on Cloudera CDH 5.9 and later */
+    public static final SparkVersion V_1_6_CDH_5_9 = new SparkVersion(1, 6, 0, "cdh5_9", "1.6 (CDH 5.9+)");
+
+    /** Spark version 2.0.0. */
+    public static final SparkVersion V_2_0 = new SparkVersion(2, 0);
+
+    /** All {@link SparkVersion}s. */
+    public static final SparkVersion[] ALL = new SparkVersion[]{V_1_2, V_1_3, V_1_5, V_1_6, V_1_6_CDH_5_9, V_2_0};
 
     /**
-     * Creates a Spark version identifier from the specified numerical components.
+     * Label for display purposes in GUI.
+     */
+    private final String m_label;
+
+    /**
+     * Creates a Spark version identifier from the specified numerical components. It will have "major.minor" as label
+     * for display purposes.
      *
      * <p>
      * The qualifier is set to the empty string.
      *
      * @param major Major component of the version identifier.
      * @param minor Minor component of the version identifier.
+     * @throws IllegalArgumentException If the numerical components are negative.
+     */
+    protected SparkVersion(final int major, final int minor) {
+        this(major, minor, 0, null, String.format("%d.%d", major, minor));
+    }
+
+    /**
+     * Creates a Spark version identifier from the specified components. This constructor allows to set a label for GUI
+     * display purposes.
+     *
+     * @param major Major component of the version identifier.
+     * @param minor Minor component of the version identifier.
      * @param micro Micro component of the version identifier.
-     * @throws IllegalArgumentException If the numerical components are
-     *         negative.
+     * @param qualifier Qualifier string. May be null.
+     * @param label Label for GUI display purposes. Must not be null.
+     * @throws IllegalArgumentException If the numerical components are negative or the label was null.
      */
-    public SparkVersion(final int major, final int minor, final int micro) {
-        super(major, minor, micro);
+    protected SparkVersion(final int major, final int minor, final int micro, final String qualifier,
+        final String label) {
+        super(major, minor, micro, qualifier);
+
+        if (label == null) {
+            throw new IllegalArgumentException("Label must not be null");
+        }
+
+        m_label = label;
+
+        VERSION_MAP.put(toString(), this);
     }
 
     /**
-     * @param version
+     *
+     * @param stringRepr the {@link String} representation of the {@link SparkVersion}
+     * @return the {@link SparkVersion} for the given string representation
      */
-    public SparkVersion(final String version) {
-        super(version);
+    public static SparkVersion fromString(final String stringRepr) {
+        return VERSION_MAP.get(stringRepr);
     }
 
     /**
-     * @param label the {@link String} representation of the {@link SparkVersion}
+     * @param label The GUI label string of the {@link SparkVersion}
      * @return the {@link SparkVersion} for the given label
      */
-    public static SparkVersion getVersion(final String label) {
-        return new SparkVersion(label);
+    public static SparkVersion fromLabel(final String label) {
+        return ALL[Arrays.asList(getAllVersionLabels()).indexOf(label)];
     }
 
     /**
-     * @return the string representation of the {@link SparkVersion}
+     * @return A label string to be used for representing the Spark version in the GUI.
      */
     public String getLabel() {
-        return String.format("%d.%d", getMajor(), getMinor());
+        return m_label;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        buf.append(getMajor());
+        buf.append('.');
+        buf.append(getMinor());
+
+        if (getMicro() != 0) {
+            buf.append('.');
+            buf.append(getMicro());
+        }
+
+        if (getQualifier().length() > 0) {
+            buf.append('.');
+            buf.append(getQualifier());
+        }
+
+        return buf.toString();
     }
 
     /**

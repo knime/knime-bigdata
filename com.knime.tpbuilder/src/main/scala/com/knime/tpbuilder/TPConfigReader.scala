@@ -100,6 +100,9 @@ object TPConfigReader {
   case class TPBundleInstruction(var coordPattern: String,
     var fileExcludes: Seq[String],
     var instructions: Map[String, String])
+    
+  case class TPMavenRepo(var id: String,
+    var url: String)
 
   case class TPConfig(
     var version: String,
@@ -112,6 +115,7 @@ object TPConfigReader {
     var requireBundleOverrides: Seq[TPMavenOverride],
     var importPackageOverrides: Seq[TPMavenOverride],
     var bundleInstructions: Seq[TPBundleInstruction],
+    var mavenRepositories: Seq[TPMavenRepo],
     var artifactGroups: Seq[TPArtifactGroup])
 
   object TPConfig {
@@ -239,6 +243,7 @@ object TPConfigReader {
     config.mavenDependencyBlacklist = Option(config.mavenDependencyBlacklist).getOrElse(Seq())
     config.duplicateRemovalBlacklist = Option(config.duplicateRemovalBlacklist).getOrElse(Seq())
     config.bundleInstructions = Option(config.bundleInstructions).getOrElse(Seq())
+    config.mavenRepositories = Option(config.mavenRepositories).getOrElse(Seq())
 
     require(config.version != null && !config.version.isEmpty, "You need to define a version for your target platform, as it will become part of bundle versions.")
 
@@ -277,6 +282,17 @@ object TPConfigReader {
       require(!i.instructions.isEmpty || i.fileExcludes.isEmpty,
         s"Bundle instruction with pattern ${i.coordPattern} must at least specify a map of instructions or a list of fileExcludes")
     })
+    
+    config.mavenRepositories.foreach(r => {
+      require(r.id != null && !r.id.isEmpty,
+        "For each maven repository you have to specify a unique id")
+      require(r.url != null && !r.url.isEmpty,
+        "For each maven repository you have to specify a URL")
+        
+      require(config.mavenRepositories.map(_.id).toSet.size == config.mavenRepositories.size,
+          "The IDs of your maven repositories are not unique.")
+    })
+
 
     config.artifactGroups = Option(config.artifactGroups).getOrElse(Seq())
 

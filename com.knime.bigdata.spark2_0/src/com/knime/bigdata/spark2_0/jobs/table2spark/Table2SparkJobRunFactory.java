@@ -20,13 +20,8 @@
  */
 package com.knime.bigdata.spark2_0.jobs.table2spark;
 
-import java.io.File;
-import java.util.List;
-
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRun;
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
@@ -38,20 +33,9 @@ import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 public class Table2SparkJobRunFactory extends DefaultJobWithFilesRunFactory<Table2SparkJobInput, EmptyJobOutput> {
 
     /**
-     * Constructor
+     * Constructor.
      */
     public Table2SparkJobRunFactory() {
-        super(Table2SparkNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobWithFilesRun<Table2SparkJobInput, EmptyJobOutput> createRun(final Table2SparkJobInput input,
-        final List<File> localFiles) {
-
-        return new DefaultJobWithFilesRun<Table2SparkJobInput, EmptyJobOutput>(input, Table2SparkJob.class, EmptyJobOutput.class, localFiles,
-            FileLifetime.JOB);
+        super(Table2SparkNodeModel.JOB_ID, Table2SparkJob.class, EmptyJobOutput.class, FileLifetime.JOB, false);
     }
 }

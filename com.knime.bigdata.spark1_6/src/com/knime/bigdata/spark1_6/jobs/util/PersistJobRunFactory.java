@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.util;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
 import com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeModel;
 
@@ -36,14 +34,6 @@ public class PersistJobRunFactory extends DefaultSimpleJobRunFactory<PersistJobI
      * Constructor.
      */
     public PersistJobRunFactory() {
-        super(SparkPersistNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<PersistJobInput> createRun(final PersistJobInput input) {
-        return new DefaultSimpleJobRun<>(input, PersistJob.class);
+        super(SparkPersistNodeModel.JOB_ID, PersistJob.class);
     }
 }

@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.mllib.clustering.kmeans;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
@@ -34,16 +32,10 @@ import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel
 public class KMeansJobRunFactory
     extends DefaultJobRunFactory<KMeansJobInput, ModelJobOutput> {
 
-    /**Constructor.*/
-    public KMeansJobRunFactory() {
-        super(MLlibKMeansNodeModel.JOB_ID);
-    }
-
     /**
-     * {@inheritDoc}
+     * Constructor.
      */
-    @Override
-    public JobRun<KMeansJobInput, ModelJobOutput> createRun(final KMeansJobInput input) {
-        return new DefaultJobRun<>(input, KMeansJob.class, ModelJobOutput.class);
+    public KMeansJobRunFactory() {
+        super(MLlibKMeansNodeModel.JOB_ID, KMeansJob.class, ModelJobOutput.class);
     }
 }

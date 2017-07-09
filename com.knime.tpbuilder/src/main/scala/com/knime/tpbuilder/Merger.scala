@@ -26,7 +26,7 @@ object Merger {
         
       
       val mergedBundleName = proposeMergedBundleSymbolicName(mergedArt, mergeUnit, config)
-      val mergedBundleVersion = OsgiUtil.addKNIMEVersionSuffix(mergeUnit.artifacts.head.bundle.get.bundleVersion.toString, config.version)
+      val mergedBundleVersion = proposeMergedBundleVersion(mergedArt, mergeUnit, config)
       
       mergedArt = OsgiUtil.withBundle(mergedArt, 
           BundleInfo(mergedBundleName, Version.parseVersion(mergedBundleVersion), false))
@@ -78,7 +78,7 @@ object Merger {
     strings.foldLeft(strings.head)((l, r) => (l, r).zipped.takeWhile(Function.tupled(_ == _)).map(_._1).mkString)
   }
 
-  def proposeMergedBundleSymbolicName(mergedArt: Artifact, mergeUnit: MergeableUnit, config: TPConfig): String = {
+  private def proposeMergedBundleSymbolicName(mergedArt: Artifact, mergeUnit: MergeableUnit, config: TPConfig): String = {
     
     val defaultMergedBundleName = computeDefaultMergedBundleSymblicName(mergeUnit)
     
@@ -87,6 +87,21 @@ object Merger {
         instr.getOrElse(Analyzer.BUNDLE_SYMBOLICNAME, defaultMergedBundleName)
       case None =>
         defaultMergedBundleName
+    }
+  }
+  
+  def proposeMergedBundleVersion(mergedArt: Artifact, mergeUnit: MergeableUnit, config: TPConfig): String = {
+    val defaultMergedBundleVersion = OsgiUtil.addKNIMEVersionSuffix(mergeUnit.artifacts.head.bundle.get.bundleVersion.toString,
+        config.version)
+        
+    TPConfig.getBundleInstructions(config)(mergedArt) match {
+      case Some(instr) =>
+        if(instr.contains(Analyzer.BUNDLE_VERSION))
+            OsgiUtil.addKNIMEVersionSuffix(instr(Analyzer.BUNDLE_VERSION), config.version)
+        else
+          defaultMergedBundleVersion
+      case None =>
+        defaultMergedBundleVersion
     }
   }
    

@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark1_3.jobs.statistics.compute;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeModel;
 import com.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
 
@@ -37,14 +35,6 @@ public class StatisticsJobRunFactory extends DefaultJobRunFactory<ColumnsJobInpu
      * Constructor.
      */
     public StatisticsJobRunFactory() {
-        super(MLlibStatisticsNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<ColumnsJobInput, StatisticsJobOutput> createRun(final ColumnsJobInput input) {
-        return new DefaultJobRun<>(input, StatisticsJob.class, StatisticsJobOutput.class);
+        super(MLlibStatisticsNodeModel.JOB_ID, StatisticsJob.class, StatisticsJobOutput.class);
     }
 }

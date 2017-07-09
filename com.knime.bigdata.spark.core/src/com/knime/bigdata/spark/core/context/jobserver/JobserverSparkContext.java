@@ -289,14 +289,14 @@ public class JobserverSparkContext extends SparkContext {
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
         return String.format("knimeJobs_%s_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
             jobJarHash,
-            m_config.getSparkVersion().getLabel());
+            m_config.getSparkVersion().toString());
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
         SparkVersion sparkVersion = m_config.getSparkVersion();
 
         PrepareContextJobInput prepInput = PrepareContextJobInput.create(m_jobJar.getDescriptor().getHash(),
-            sparkVersion.getLabel(), m_jobJar.getDescriptor().getPluginVersion(),
+            sparkVersion.toString(), m_jobJar.getDescriptor().getPluginVersion(),
             IntermediateToSparkConverterRegistry.getConverters(sparkVersion));
 
         SparkContextUtil.getSimpleRunFactory(m_contextID, SparkContextConstants.PREPARE_CONTEXT_JOB_ID)

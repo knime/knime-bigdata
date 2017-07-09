@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.concatenate;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.concatenate.ConcatenateRDDsJobInput;
 import com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeModel;
 
@@ -33,11 +31,6 @@ public class ConcatenateDataFramesJobRunFactory extends DefaultSimpleJobRunFacto
 
     /** Default constructor. */
     public ConcatenateDataFramesJobRunFactory() {
-        super(SparkConcatenateNodeModel.JOB_ID);
-    }
-
-    @Override
-    public SimpleJobRun<ConcatenateRDDsJobInput> createRun(final ConcatenateRDDsJobInput input) {
-        return new DefaultSimpleJobRun<>(input, ConcatenateDataFramesJob.class);
+        super(SparkConcatenateNodeModel.JOB_ID, ConcatenateDataFramesJob.class);
     }
 }

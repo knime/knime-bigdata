@@ -54,12 +54,12 @@ public class DefaultJobWithFilesRun<I extends JobInput, O extends JobOutput> ext
      */
     public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass, final List<File> inputFiles,
         final FileLifetime filesLifetime) {
-        this(input, sparkJobClass, jobOutputClass, inputFiles, filesLifetime, false);
+        this(input, sparkJobClass, jobOutputClass, sparkJobClass.getClassLoader(), inputFiles, filesLifetime, false);
     }
 
-    public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass, final List<File> inputFiles,
+    public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass, final ClassLoader jobOutputClassLoader, final List<File> inputFiles,
         final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
-        super(input, sparkJobClass, jobOutputClass);
+        super(input, sparkJobClass, jobOutputClass, jobOutputClassLoader);
         m_inputFiles = inputFiles;
         m_filesLifetime = filesLifetime;
         m_useInputFileCopyCache = useInputFileCopyCache;

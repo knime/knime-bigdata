@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.preproc.sorter;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
 import com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeModel;
 
@@ -33,17 +31,9 @@ import com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeModel;
 public class SortJobRunFactory extends DefaultSimpleJobRunFactory<SortJobInput> {
 
     /**
-     *
+     * Constructor.
      */
     public SortJobRunFactory() {
-        super(SparkSorterNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<SortJobInput> createRun(final SortJobInput input) {
-        return new DefaultSimpleJobRun<>(input, SortJob.class);
+        super(SparkSorterNodeModel.JOB_ID, SortJob.class);
     }
 }

@@ -21,9 +21,7 @@
 package com.knime.bigdata.spark2_0.jobs.preproc.filter.column;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.preproc.filter.column.AbstractSparkColumnFilterNodeModel;
 
 /**
@@ -36,14 +34,6 @@ public class ColumnFilterJobRunFactory extends DefaultSimpleJobRunFactory<Column
      *
      */
     public ColumnFilterJobRunFactory() {
-        super(AbstractSparkColumnFilterNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<ColumnsJobInput> createRun(final ColumnsJobInput input) {
-        return new DefaultSimpleJobRun<>(input, ColumnFilterJob.class);
+        super(AbstractSparkColumnFilterNodeModel.JOB_ID, ColumnFilterJob.class);
     }
 }

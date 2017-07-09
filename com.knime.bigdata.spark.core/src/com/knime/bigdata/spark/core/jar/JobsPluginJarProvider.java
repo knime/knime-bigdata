@@ -23,6 +23,8 @@ package com.knime.bigdata.spark.core.jar;
 import java.io.File;
 
 import com.knime.bigdata.spark.core.job.SparkClass;
+import com.knime.bigdata.spark.core.version.CompatibilityChecker;
+import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -35,10 +37,25 @@ public class JobsPluginJarProvider extends DefaultSparkJarProvider {
     private final String m_jobserverSparkJobClass;
 
     /**
-     * Default constructor.
+     * Constructor to support a single Spark version.
+     *
+     * @param sparkVersion The supported Spark version.
+     * @param jobserverSparkJobClass The class the provides the binding between the Spark job API in KNIME and the
+     *            underlying jobserver job API.
      */
     public JobsPluginJarProvider(final SparkVersion sparkVersion, final Class<?> jobserverSparkJobClass) {
-        super(sparkVersion, KNIMEPluginScanPredicates.KNIME_JOBS_PLUGIN_PREDICATE,
+        this(new FixedVersionCompatibilityChecker(sparkVersion), jobserverSparkJobClass);
+    }
+
+    /**
+     * Constructor to support all Spark versions that the given checker supports.
+     *
+     * @param checker The Spark version compatibility checker.
+     * @param jobserverSparkJobClass The class the provides the binding between the Spark job API in KNIME and the
+     *            underlying jobserver job API.
+     */
+    public JobsPluginJarProvider(final CompatibilityChecker checker, final Class<?> jobserverSparkJobClass) {
+        super(checker, KNIMEPluginScanPredicates.KNIME_JOBS_PLUGIN_PREDICATE,
             KNIMEPluginScanPredicates.KNIME_JAR_PREDICATE,
             KNIMEPluginScanPredicates.KNIME_JOBSERVER_UTILS_JAR_PREDICATE);
 

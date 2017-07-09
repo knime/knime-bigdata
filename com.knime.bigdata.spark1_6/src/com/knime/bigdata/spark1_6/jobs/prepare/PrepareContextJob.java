@@ -21,6 +21,8 @@
 package com.knime.bigdata.spark1_6.jobs.prepare;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.types.DataType;
@@ -43,6 +45,12 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
     private static final long serialVersionUID = 5767134504557370285L;
 
     /**
+     * A regex pattern to extract the major and minor Spark version from a full version string (the Spark version string
+     * provided by KNIME).
+     */
+    private static final Pattern versionPrefixPattern = Pattern.compile("([0-9]+\\.[0-9]+).*");
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -53,7 +61,16 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
             JobJarDescriptor jobJarInfo =
                 JobJarDescriptor.load(this.getClass().getClassLoader().getResourceAsStream(JobJarDescriptor.FILE_NAME));
 
-            if (!sparkContext.version().startsWith(input.getSparkVersion())) {
+            // input.getSparkVersion() returns something like 1.6 or 1.6.0.cdh5_9
+            // to do at least basic version checking we need to extract the major and minor version components,
+            // which is what the regex pattern does
+            final Matcher m = versionPrefixPattern.matcher(input.getSparkVersion());
+            if (!m.matches()) {
+                throw new RuntimeException("Invalid Spark version: " + input.getSparkVersion() + ". This is a bug.");
+            }
+            final String knimeSparkVersionPrefix = m.group(1);
+
+            if (!sparkContext.version().startsWith(knimeSparkVersionPrefix)) {
                 throw new KNIMESparkException(String.format(
                     "Spark version mismatch: KNIME Spark Executor is set to %s, but the cluster runs %s. Please correct the setting under Preferences > KNIME > Spark. Then destroy and reopen the Spark context.",
                     input.getSparkVersion(), sparkContext.version()));

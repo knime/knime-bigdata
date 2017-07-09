@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.preproc.normalize;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
 import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeModel;
@@ -34,17 +32,9 @@ import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeMod
 public class NormalizeColumnsJobRunFactory extends DefaultJobRunFactory<NormalizeJobInput, NormalizeJobOutput> {
 
     /**
-     *
+     * Constructor.
      */
     public NormalizeColumnsJobRunFactory() {
-        super(SparkNormalizerPMMLNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<NormalizeJobInput, NormalizeJobOutput> createRun(final NormalizeJobInput input) {
-        return new DefaultJobRun<>(input, NormalizeColumnsJob.class, NormalizeJobOutput.class);
+        super(SparkNormalizerPMMLNodeModel.JOB_ID, NormalizeColumnsJob.class, NormalizeJobOutput.class);
     }
 }

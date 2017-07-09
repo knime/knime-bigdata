@@ -23,7 +23,7 @@ package com.knime.bigdata.spark1_6.converter.type;
 import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark1_6.api.Spark_1_6_CompatibilityChecker;
+import com.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.BinaryTypeProxy;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.BooleanTypeProxy;
 import com.knime.bigdata.spark1_6.converter.type.SerializableTypeProxies.ByteTypeProxy;
@@ -48,7 +48,7 @@ public class DefaultSpark_1_6_IntermediateToSparkConverterProvider extends Defau
      * Constructor.
      */
     public DefaultSpark_1_6_IntermediateToSparkConverterProvider() {
-        super(Spark_1_6_CompatibilityChecker.INSTANCE,
+        super(AllSpark_1_6_CompatibilityChecker.INSTANCE,
                 new DefaultIntermediateToSparkConverter<>(IntermediateDataTypes.BINARY, new BinaryTypeProxy()),
                 new DefaultIntermediateToSparkConverter<>(IntermediateDataTypes.BOOLEAN, new BooleanTypeProxy()),
                 new DefaultIntermediateToSparkConverter<>(IntermediateDataTypes.BYTE, new ByteTypeProxy()),

@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 import scala.collection.mutable.HashMap
 import scala.collection.Set
+import scala.collection.mutable.{Set => MutableSet}
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.DefaultRepositorySystemSession
@@ -22,11 +23,12 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory
 import com.knime.tpbuilder.Artifact
 import com.knime.tpbuilder.osgi.OsgiUtil
 import java.io.File
+import com.knime.tpbuilder.TPConfigReader.TPConfig
 
 object AetherUtils {
   val localRepo = new LocalRepository(Paths.get(System.getProperty("user.home"), ".m2", "repository").toFile())
 
-  val mavenCentral = new RemoteRepository.Builder("maven-central", "default", "http://repo1.maven.org/maven2/").build()
+  private val mavenCentral = new RemoteRepository.Builder("maven-central", "default", "http://repo1.maven.org/maven2/").build()
   
   private val locator = MavenRepositorySystemUtils.newServiceLocator()
 
@@ -49,6 +51,16 @@ object AetherUtils {
    * of a maven artifact.
    */
   val remoteArtifactRepos = HashMap[String, Set[RemoteRepository]]()
+  
+  val defaultRemoteArtifactRepos: Set[RemoteRepository] = MutableSet(mavenCentral)
+  
+  def initDefaultRemoteArtifactRepos(config: TPConfig) = {
+    for (repo <- config.mavenRepositories) {
+      defaultRemoteArtifactRepos
+        .asInstanceOf[MutableSet[RemoteRepository]]
+        .add(new RemoteRepository.Builder(repo.id, "default", repo.url).build())
+    }
+  }
 
   def depToArt(dep: Dependency): Artifact = {
     val aetherArt = dep.getArtifact

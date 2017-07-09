@@ -17,9 +17,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.sql;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.sql.SparkSQLJobInput;
 import com.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
 import com.knime.bigdata.spark.node.sql.SparkSQLNodeModel;
@@ -31,11 +29,6 @@ public class SparkSQLJobRunFactory extends DefaultJobRunFactory<SparkSQLJobInput
 
     /** Default constructor. */
     public SparkSQLJobRunFactory() {
-        super(SparkSQLNodeModel.JOB_ID);
-    }
-
-    @Override
-    public JobRun<SparkSQLJobInput, SparkSQLJobOutput> createRun(final SparkSQLJobInput input) {
-        return new DefaultJobRun<>(input, SparkSQLJob.class, SparkSQLJobOutput.class);
+        super(SparkSQLNodeModel.JOB_ID, SparkSQLJob.class, SparkSQLJobOutput.class);
     }
 }

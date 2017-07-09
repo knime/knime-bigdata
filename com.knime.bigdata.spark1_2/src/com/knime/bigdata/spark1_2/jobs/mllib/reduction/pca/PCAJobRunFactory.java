@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_2.jobs.mllib.reduction.pca;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRun;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
 import com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeModel;
 import com.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
 
@@ -36,15 +34,6 @@ public class PCAJobRunFactory extends DefaultSimpleJobRunFactory<PCAJobInput> {
      * Constructor
      */
     public PCAJobRunFactory() {
-        super(MLlibPCANodeModel.JOB_ID);
+        super(MLlibPCANodeModel.JOB_ID, PCAJob.class);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SimpleJobRun<PCAJobInput> createRun(final PCAJobInput input) {
-        return new DefaultSimpleJobRun<>(input, PCAJob.class);
-    }
-
 }

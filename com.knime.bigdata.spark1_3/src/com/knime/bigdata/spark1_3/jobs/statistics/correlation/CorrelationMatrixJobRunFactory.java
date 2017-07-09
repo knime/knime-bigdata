@@ -20,10 +20,8 @@
  */
 package com.knime.bigdata.spark1_3.jobs.statistics.correlation;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.core.job.HalfDoubleMatrixJobOutput;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeModel;
 
@@ -32,20 +30,12 @@ import com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelati
  * @author Tobias Koetter, KNIME.com
  */
 public class CorrelationMatrixJobRunFactory
-extends DefaultJobRunFactory<CorrelationJobInput, HalfDoubleMatrixJobOutput> {
+    extends DefaultJobRunFactory<CorrelationJobInput, HalfDoubleMatrixJobOutput> {
 
     /**
      * Constructor.
      */
     public CorrelationMatrixJobRunFactory() {
-        super(MLlibCorrelationMatrixNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<CorrelationJobInput, HalfDoubleMatrixJobOutput> createRun(final CorrelationJobInput input) {
-        return new DefaultJobRun<>(input, CorrelationMatrixJob.class, HalfDoubleMatrixJobOutput.class);
+        super(MLlibCorrelationMatrixNodeModel.JOB_ID, CorrelationMatrixJob.class, HalfDoubleMatrixJobOutput.class);
     }
 }

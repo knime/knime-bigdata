@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.scorer;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import com.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
@@ -36,17 +34,9 @@ import com.knime.bigdata.spark.node.scorer.numeric.SparkNumericScorerNodeModel;
 public class ScorerJobRunFactory extends DefaultJobRunFactory<ScorerJobInput, NumericScorerJobOutput> {
 
     /**
-     *
+     * Constructor.
      */
     public ScorerJobRunFactory() {
-        super(SparkNumericScorerNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<ScorerJobInput, NumericScorerJobOutput> createRun(final ScorerJobInput input) {
-        return new DefaultJobRun<>(input, ScorerJob.class, NumericScorerJobOutput.class);
+        super(SparkNumericScorerNodeModel.JOB_ID, ScorerJob.class, NumericScorerJobOutput.class);
     }
 }

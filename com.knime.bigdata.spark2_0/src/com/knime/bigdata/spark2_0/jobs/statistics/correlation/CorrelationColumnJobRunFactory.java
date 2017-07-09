@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark2_0.jobs.statistics.correlation;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import com.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeModel;
@@ -38,14 +36,6 @@ public class CorrelationColumnJobRunFactory
      * Constructor.
      */
     public CorrelationColumnJobRunFactory() {
-        super(MLlibCorrelationColumnNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<CorrelationJobInput, CorrelationColumnJobOutput> createRun(final CorrelationJobInput input) {
-        return new DefaultJobRun<>(input, CorrelationColumnJob.class, CorrelationColumnJobOutput.class);
+        super(MLlibCorrelationColumnNodeModel.JOB_ID, CorrelationColumnJob.class, CorrelationColumnJobOutput.class);
     }
 }

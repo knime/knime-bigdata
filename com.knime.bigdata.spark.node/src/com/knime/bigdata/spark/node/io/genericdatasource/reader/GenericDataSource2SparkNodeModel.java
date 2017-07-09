@@ -23,6 +23,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -48,6 +49,7 @@ import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import com.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -168,12 +170,18 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
         settings.addReaderOptions(jobInput);
 
+        final List<File> toUpload = new ArrayList<>();
+        if (jobInput.uploadDriver()) {
+            toUpload.addAll(BundleGroupSparkJarRegistry
+                .getBundledDriverJars(SparkContextUtil.getSparkVersion(contextID), jobInput.getFormat()));
+        }
+
         try {
             final GenericDataSource2SparkJobOutput jobOutput;
             if (exec != null) {
-                jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID, exec);
+                jobOutput = runFactory.createRun(jobInput, toUpload).run(contextID, exec);
             } else {
-                jobOutput = runFactory.createRun(jobInput, new ArrayList<File>()).run(contextID);
+                jobOutput = runFactory.createRun(jobInput, toUpload).run(contextID);
             }
 
             final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));

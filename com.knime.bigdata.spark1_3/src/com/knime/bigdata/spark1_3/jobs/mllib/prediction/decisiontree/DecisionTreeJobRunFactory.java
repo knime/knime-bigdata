@@ -20,9 +20,7 @@
  */
 package com.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRun;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRun;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
@@ -31,19 +29,10 @@ import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionT
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class DecisionTreeJobRunFactory
-    extends DefaultJobRunFactory<DecisionTreeJobInput, ModelJobOutput> {
+public class DecisionTreeJobRunFactory extends DefaultJobRunFactory<DecisionTreeJobInput, ModelJobOutput> {
 
-    /**Constructor.*/
+    /** Constructor. */
     public DecisionTreeJobRunFactory() {
-        super(MLlibDecisionTreeNodeModel.JOB_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JobRun<DecisionTreeJobInput, ModelJobOutput> createRun(final DecisionTreeJobInput input) {
-        return new DefaultJobRun<>(input, DecisionTreeJob.class, ModelJobOutput.class);
+        super(MLlibDecisionTreeNodeModel.JOB_ID, DecisionTreeJob.class, ModelJobOutput.class);
     }
 }

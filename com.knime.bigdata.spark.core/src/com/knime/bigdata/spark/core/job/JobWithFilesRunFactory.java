@@ -23,6 +23,8 @@ package com.knime.bigdata.spark.core.job;
 import java.io.File;
 import java.util.List;
 
+import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
@@ -30,4 +32,15 @@ import java.util.List;
 public interface JobWithFilesRunFactory<I extends JobInput, O extends JobOutput> extends JobRunFactory<I, O> {
 
     public JobWithFilesRun<I, O> createRun(I input, List<File> localFiles);
+
+    /**
+     * @return the lifetime of uploaded files, i.e. how long the remain on the remote side.
+     */
+    public FileLifetime getFilesLifetime();
+
+    /**
+     * @return whether to use the file input cache or not
+     */
+    public boolean useInputFileCopyCache();
+
 }

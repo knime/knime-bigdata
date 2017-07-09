@@ -67,12 +67,12 @@ object DepGraphBuilder {
   }
 
   def makeDepGraph(artGroup: TPArtifactGroup, depGraph: Map[Artifact, Set[Artifact]], config: TPConfig): Unit = {
+    // register maven artifact repositories from config
+    AetherUtils.initDefaultRemoteArtifactRepos(config)
 
     for (multiArt <- artGroup.multiArtifacts) {
       for (art <- TPArtifactGroup.toArtifactSet(multiArt)) {
-        // FIXME: at some point we have to allow the user to define remote repositories. These need to be put in here
-        // instead of maven central
-        AetherUtils.remoteArtifactRepos += (art.mvnCoordinate -> ImmutableSet(AetherUtils.mavenCentral))
+        AetherUtils.remoteArtifactRepos += (art.mvnCoordinate -> AetherUtils.defaultRemoteArtifactRepos)
 
         makeDepGraphTransitively(art, depGraph, multiArt.transitive.get, config)
       }
@@ -81,9 +81,7 @@ object DepGraphBuilder {
     for (singleArt <- artGroup.singleArtifacts) {
       val art = TPArtifactGroup.toArtifact(singleArt)
 
-      // FIXME: at some point we have to allow the user to define remote repositories. These need to be put in here
-      // instead of maven central
-      AetherUtils.remoteArtifactRepos += (art.mvnCoordinate -> ImmutableSet(AetherUtils.mavenCentral))
+      AetherUtils.remoteArtifactRepos += (art.mvnCoordinate -> AetherUtils.defaultRemoteArtifactRepos)
 
       makeDepGraphTransitively(art, depGraph, singleArt.transitive.get, config)
     }
@@ -163,12 +161,12 @@ object DepGraphBuilder {
 
     val collectRequest = new CollectRequest()
     collectRequest.setRoot(root)
-    collectRequest.addRepository(AetherUtils.mavenCentral)
+    for (remoteRepo <- AetherUtils.remoteArtifactRepos(AetherUtils.depToArt(root).mvnCoordinate)) {
+      collectRequest.addRepository(remoteRepo)
+    }
 
     // first collect dependencies
     val rootNode = AetherUtils.repoSys.collectDependencies(session, collectRequest).getRoot()
-
-    
 
     val directDeps = rootNode.getChildren.asScala
       .map(_.getDependency)
@@ -216,9 +214,7 @@ object DepGraphBuilder {
   private def registerRepositoriesForDependencies(root: Dependency, directDeps: Iterable[Dependency]) = {
     val rootDepRepos = AetherUtils.remoteArtifactRepos.get(AetherUtils.depToArt(root).mvnCoordinate) match {
       case Some(repoSet) => repoSet
-      // FIXME: at some point we have to allow the user to define remote repositories. These need to be put in here
-      // instead of maven central
-      case None => ImmutableSet(AetherUtils.mavenCentral)
+      case None => AetherUtils.defaultRemoteArtifactRepos
     }
 
     val artDescriptorRequest = new ArtifactDescriptorRequest()

@@ -26,16 +26,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Compatibility checker that checks for compatibility with one or multiple Spark versions.
  *
  * @author Tobias Koetter, KNIME.com
  */
 public class FixedVersionCompatibilityChecker implements CompatibilityChecker {
 
-
     private Set<SparkVersion> m_versions;
 
     /**
-     * @param version the supported Spark versions
+     * Constructor.
+     *
+     * @param version The supported Spark versions
      *
      */
     public FixedVersionCompatibilityChecker(final SparkVersion... version) {
