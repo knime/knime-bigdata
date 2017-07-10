@@ -55,7 +55,7 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
             final NamedObjects namedObjects) throws KNIMESparkException {
 
         final String namedObject = input.getFirstNamedInputObject();
-        final String outputPath = FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
+        final String outputPath = getOutputPath(input);
 
         LOGGER.info("Writing data frame " + namedObject + " into " + outputPath);
 
@@ -92,6 +92,14 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
         } catch (Exception e) {
             throw new KNIMESparkException(
                 String.format("Failed to create output path with name '%s'. Reason: %s", outputPath, e.getMessage()));
+        }
+    }
+
+    private String getOutputPath(final Spark2GenericDataSourceJobInput input) {
+        if (input.useDefaultFS()) {
+            return FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
+        } else {
+            return input.getOutputPath();
         }
     }
 }

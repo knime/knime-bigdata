@@ -59,8 +59,7 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
 
         final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final String namedObject = input.getFirstNamedOutputObject();
-        final String inputPath = FileSystem.getDefaultUri(new Configuration())
-                                           .resolve(input.getInputPath()).toString();
+        final String inputPath = getInputPath(input);
 
         LOGGER.info("Reading path " + inputPath + " into data frame " + namedObject);
 
@@ -90,6 +89,14 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
         } catch (Exception e) {
             throw new KNIMESparkException(
                 String.format("Failed to read input path with name '%s'. Reason: %s", inputPath, e.getMessage()));
+        }
+    }
+
+    private String getInputPath(final GenericDataSource2SparkJobInput input) {
+        if (input.useDefaultFS()) {
+            return FileSystem.getDefaultUri(new Configuration()).resolve(input.getInputPath()).toString();
+        } else {
+            return input.getInputPath();
         }
     }
 }
