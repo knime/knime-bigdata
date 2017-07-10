@@ -15,12 +15,13 @@ All rights reserved.
    </copyright>
 
    <license url="">
-      All rights reserved.
-Copyright by 
+      Terms for License of the KNIME Spark Executor Feature
+All rights reserved.
+Copyright by
 KNIME.com, Zurich, Switzerland
 You may not use, modify, publish, transmit, transfer or sell,
 reproduce, create derivative works from, distribute, perform,
-display, or in any way exploit any of the content, in whole 
+display, or in any way exploit any of the content, in whole
 or in part, except as otherwise expressly permitted in writing
 by the copyright owner.
 In case of any questions, please contact KNIME.com at contact@knime.com
@@ -63,7 +64,7 @@ In case of any questions, please contact KNIME.com at contact@knime.com
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_6_cdh_5_9"
+         id="com.knime.bigdata.spark1_6_cdh5_9"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
