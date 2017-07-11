@@ -23,6 +23,7 @@ package com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.collaborativefiltering;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
+import com.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
 
 /**
  *
