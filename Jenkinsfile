@@ -5,7 +5,6 @@ library "knime-pipeline@$BRANCH_NAME"
 node {
 	def upstreamParams = defaultProperties('org.knime.update.analytics-platform',
 		'com.knime.update.pmml.compilation',
-		'com.knime.update.productivity',
 		'org.knime.update.targetPlatform')
 
 
@@ -79,7 +78,6 @@ node {
 			repos: [
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.analytics-platform'].p2}",
 				"$JENKINS_URL/jobs/${upstreamParams['com.knime.update.pmml.compilation'].p2}",
-				"$JENKINS_URL/jobs/${upstreamParams['com.knime.update.productivity'].p2}",
 				"file:///${WORKSPACE.replace('\\', '/')}/com.knime.update.bigdata.externals/"
 			]
 		)
