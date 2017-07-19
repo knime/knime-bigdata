@@ -37,9 +37,9 @@ public class Spark_1_5_BundleGroupSparkJarProvider extends DefaultBundleGroupSpa
     public Spark_1_5_BundleGroupSparkJarProvider() {
         super(SparkVersion.V_1_5, ImmutableMap.of(
             "com.databricks.spark.avro", new Bundle[] {
-                    getBundle("databricks.spark-avro", "2.0.0", "3.0.0") },
+                    getBundle("com.databricks.spark-avro_2.10", "2.0.0", "3.0.0") },
             "com.databricks.spark.csv", new Bundle[] {
-                    getBundle("databricks.spark-csv", "1.5.0"),
+                    getBundle("com.databricks.spark-csv_2.10", "1.5.0"),
                     getBundle("org.apache.commons.csv", "1.1.0") }
         ));
     }

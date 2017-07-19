@@ -61,7 +61,7 @@
 			*;resolution:=optional</imports-1.5>
 		<exports-1.5>org.apache.spark.*;version=${spark-1.5.version},org.spark-project.*;version=${spark-1.5.version}</exports-1.5>
 		
-		<spark-1.6.version>1.6.1</spark-1.6.version>
+		<spark-1.6.version>1.6.3</spark-1.6.version>
 		<imports-1.6>org.apache.spark.*;version="[${spark-1.6.version},${spark-1.6.version}]";resolution:=optional,
 			org.spark-project.*;version="[${spark-1.6.version},${spark-1.6.version}]";resolution:=optional,
 			scala.*;version="[2.10.0,2.11.0)";resolution:=optional,
@@ -72,6 +72,19 @@
 			org.netlib.*;version=${arpack.version};resolution:=optional,
 			*;resolution:=optional</imports-1.6>
 		<exports-1.6>org.apache.spark.*;version=${spark-1.6.version},org.spark-project.*;version=${spark-1.6.version}</exports-1.6>
+		
+		<spark-1.6-cdh.version>1.6.0.cdh5_9_3</spark-1.6-cdh.version>
+		<spark-1.6-cdh.mavenversion>1.6.0-cdh5.9.3</spark-1.6-cdh.mavenversion>
+		<imports-1.6-cdh>org.apache.spark.*;version="[${spark-1.6-cdh.version},${spark-1.6-cdh.version}]";resolution:=optional,
+			org.spark-project.*;version="[${spark-1.6-cdh.version},${spark-1.6-cdh.version}]";resolution:=optional,
+			scala.*;version="[2.10.0,2.11.0)";resolution:=optional,
+			org.json4s.*;version=${json4s.version};resolution:=optional,
+			breeze.*;version=0.11.2;resolution:=optional,
+			com.github.fommil.netlib.*;version=${fommil.version};resolution:=optional,
+			org.jblas.*;version=${jblas.version};resolution:=optional,
+			org.netlib.*;version=${arpack.version};resolution:=optional,
+			*;resolution:=optional</imports-1.6-cdh>
+		<exports-1.6-cdh>org.apache.spark.*;version=${spark-1.6-cdh.version},org.spark-project.*;version=${spark-1.6-cdh.version}</exports-1.6-cdh>
 	</properties>
 
 	<build>
@@ -508,21 +521,94 @@
 								</artifact>
 								<!-- END Spark 1.6 dependencies -->
 								
+								<!-- BEGIN Spark 1.6-cdh dependencies -->
+								<artifact>
+									<id>org.apache.spark:spark-core_2.10:${spark-1.6-cdh.mavenversion}</id>
+									<source>true</source>
+									<transitive>false</transitive>
+									<source>true</source>
+									<instructions>
+										<Bundle-Version>1.6.0.cdh5_9_3</Bundle-Version>
+										<Import-Package>${imports-1.6-cdh}</Import-Package>
+										<Export-Package>${exports-1.6-cdh}</Export-Package>
+									</instructions>		
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-mllib_2.10:${spark-1.6-cdh.mavenversion}</id>
+									<source>true</source>
+									<transitive>false</transitive>
+									<source>true</source>
+									<instructions>
+										<Bundle-Version>1.6.0.cdh5_9_3</Bundle-Version>
+										<Import-Package>${imports-1.6-cdh}</Import-Package>
+										<Export-Package>${exports-1.6-cdh}</Export-Package>
+									</instructions>		
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-sql_2.10:${spark-1.6-cdh.mavenversion}</id>
+									<source>true</source>
+									<transitive>false</transitive>
+									<source>true</source>
+									<instructions>
+										<Bundle-Version>1.6.0.cdh5_9_3</Bundle-Version>
+										<Import-Package>${imports-1.6-cdh}</Import-Package>
+										<Export-Package>${exports-1.6-cdh}</Export-Package>
+									</instructions>		
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-hive_2.10:${spark-1.6-cdh.mavenversion}</id>
+									<source>true</source>
+									<transitive>false</transitive>
+									<source>true</source>
+									<instructions>
+										<Bundle-Version>1.6.0.cdh5_9_3</Bundle-Version>
+										<Import-Package>${imports-1.6-cdh}</Import-Package>
+										<Export-Package>${exports-1.6-cdh}</Export-Package>
+									</instructions>		
+								</artifact>
+								<artifact>
+									<id>org.apache.spark:spark-catalyst_2.10:${spark-1.6-cdh.mavenversion}</id>
+									<source>true</source>
+									<transitive>false</transitive>
+									<source>true</source>
+									<instructions>
+										<Bundle-Version>1.6.0.cdh5_9_3</Bundle-Version>
+										<Import-Package>${imports-1.6-cdh}</Import-Package>
+										<Export-Package>${exports-1.6-cdh}</Export-Package>
+									</instructions>		
+								</artifact>
+								<!-- END Spark 1.6-cdh dependencies -->
+
 								<!-- BEGIN Additional Spark bundles -->
-                                <artifact>
-                                    <id>databricks:spark-avro:2.0.1-s_2.10</id>
-                                    <source>true</source>
-                                </artifact>
-                                <artifact>
-                                    <id>databricks:spark-csv:1.5.0-s_2.10</id>
-                                    <source>true</source>
-                                </artifact>
-                                <artifact>
-                                    <id>databricks:spark-csv:1.5.0-s_2.10</id>
-                                    <source>true</source>
-                                </artifact>								
+								<artifact>
+									<id>com.databricks:spark-avro_2.10:2.0.1</id>
+									<source>false</source>
+									<transitive>false</transitive>
+									<instructions>
+										<Import-Package>scala.*;version="[2.10.0,2.11.0)";resolution:=optional,
+											*;resolution:=optional
+										</Import-Package>
+										<Export-Package>com.databricks.*;version=2.0.1</Export-Package>
+									</instructions>
+								</artifact>
+								<artifact>
+									<id>com.databricks:spark-csv_2.10:1.5.0</id>
+									<transitive>false</transitive>
+									<instructions>
+										<Import-Package>scala.*;version="[2.10.0,2.11.0)";resolution:=optional,
+											*;resolution:=optional
+										</Import-Package>
+										<Export-Package>com.databricks.*;version=2.0.1</Export-Package>
+									</instructions>
+									<source>false</source>
+								</artifact>
+								<artifact>
+									<id>org.apache.commons:commons-csv:1.1</id>
+									<transitive>false</transitive>
+									<source>false</source>
+								</artifact>
+								<!-- BEGIN Additional Spark bundles -->
 								
-								<!-- BEGIN Additional Spark bundles -->
 							</artifacts>
 						</configuration>
 					</execution>
@@ -530,6 +616,13 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>Cloudera Maven Repo</id>
+			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		</repository>
+	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
