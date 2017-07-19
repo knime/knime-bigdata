@@ -10,8 +10,8 @@ worker0-cdh-5.10-secured ansible_host=10.0.0.87
 worker1-cdh-5.10-secured ansible_host=10.0.0.218
 
 [cdh-5.11-secured]
-# master-cdh-5.11-secured ansible_host=10.0.0.156 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
-master-cdh-5.11-secured ansible_host=cdh-5-11-secured js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
+master-cdh-5.11-secured ansible_host=10.0.0.156 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
+# master-cdh-5.11-secured ansible_host=cdh-5-11-secured js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured.keytab
 worker0-cdh-5.11-secured ansible_host=10.0.0.160
 worker1-cdh-5.11-secured ansible_host=10.0.0.14
 
@@ -42,13 +42,21 @@ worker1-cdh-5.7 ansible_host=10.0.0.167
 worker2-cdh-5.7 ansible_host=10.0.0.168
 
 [cdh-5.7-secured]
-master-cdh-5.7-secured ansible_host=10.0.0.26 js1_env=cdh-5.7 js2_env=cdh js_keytab=cdh-5-7-secured.keytab
+master-cdh-5.7-secured ansible_host= js1_env=cdh-5.7 js2_env=cdh js_keytab=cdh-5-7-secured.keytab
 worker0-cdh-5.7-secured ansible_host=10.0.0.92
+
+[cdh-5.9-secured]
+master-cdh-5.9-secured ansible_host=10.0.0.29 js1_env=cdh-5.9 js2_env=cdh js_keytab=cdh-5-9-secured.keytab
+worker0-cdh-5.9-secured ansible_host=10.0.0.24
 
 [cdh-5.8]
 master-cdh-5.8 ansible_host=10.0.0.210 js1_env=cdh-5.8 js2_env=cdh
 worker0-cdh-5.8 ansible_host=10.0.0.7
 worker1-cdh-5.8 ansible_host=10.0.0.8
+
+[cdh-5.8-secured]
+master-cdh-5.8-secured ansible_host=10.0.0.144 js1_env=cdh-5.8 js2_env=cdh js_keytab=cdh-5-8-secured.keytab
+worker0-cdh-5.8-secured ansible_host=10.0.0.143
 
 #[cdh-5.8-train]
 #master-cdh-5.8-train ansible_host=10.0.0.66
@@ -66,6 +74,7 @@ master-hdp-2.4.2-secured ansible_host=10.0.0.70 js_env=hdp-2.4.0
 worker0-hdp-2.4.2-secured ansible_host=10.0.0.212
 
 [hdp-2.5-secured]
+# master-hdp-2.5-secured ansible_host=hdp-2-5-secured.dev.cloud.knime.com js1_env=hdp-2.5.0 js2_env=hdp js_keytab=hdp-2-5-secured.keytab
 master-hdp-2.5-secured ansible_host=10.0.0.109 js1_env=hdp-2.5.0 js2_env=hdp js_keytab=hdp-2-5-secured.keytab
 worker0-hdp-2.5-secured ansible_host=10.0.0.183
 worker1-hdp-2.5-secured ansible_host=10.0.0.55
@@ -96,6 +105,8 @@ cdh-5.7
 cdh-5.7-secured
 cdh-5.8
 #cdh-5.8-train
+cdh-5.8-secured
+cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
 
@@ -122,6 +133,8 @@ cdh-5.7-secured
 cdh-5.10-secured
 cdh-5.11-secured
 hdp-2.5-secured
+cdh-5.9-secured
+cdh-5.8-secured
 
 # Put all clusters with Spark 1.x in here
 [spark1-hosts:children]
@@ -132,6 +145,8 @@ cdh-5.6
 cdh-5.7
 cdh-5.7-secured
 cdh-5.8
+cdh-5.8-secured
+cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
 hdp-2.4.2-secured
@@ -141,6 +156,8 @@ hdp-2.5-secured
 [spark20-hosts:children]
 cdh-5.7-secured
 cdh-5.8
+cdh-5.8-secured
+cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
 hdp-2.5-secured
