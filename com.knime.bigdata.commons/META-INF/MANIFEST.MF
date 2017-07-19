@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Commons
 Bundle-SymbolicName: com.knime.bigdata.commons;singleton:=true
-Bundle-Version: 3.3.1.qualifier
+Bundle-Version: 3.3.3.qualifier
 Bundle-ClassPath: knime_bd_commons.jar
 Bundle-Activator: com.knime.bigdata.commons.CommonsPlugin
 Bundle-Vendor: KNIME.com, Zurich, Switzerland

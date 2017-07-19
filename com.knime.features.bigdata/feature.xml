@@ -2,7 +2,7 @@
 <feature
       id="com.knime.features.bigdata"
       label="KNIME Big Data Connectors"
-      version="3.3.1.qualifier"
+      version="3.3.3.qualifier"
       provider-name="KNIME.com, Zurich, Switzerland">
 
    <description>
@@ -16,11 +16,11 @@ All rights reserved.
 
    <license url="">
       All rights reserved.
-Copyright by 
+Copyright by
 KNIME.com, Zurich, Switzerland
 You may not use, modify, publish, transmit, transfer or sell,
 reproduce, create derivative works from, distribute, perform,
-display, or in any way exploit any of the content, in whole 
+display, or in any way exploit any of the content, in whole
 or in part, except as otherwise expressly permitted in writing
 by the copyright owner.
 In case of any questions, please contact KNIME.com at contact@knime.com
