@@ -48,7 +48,7 @@ node {
 
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
-					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.tycho
+					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.bigdata-externals-parent
 					mvn -Dknime-tp-p2="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.targetPlatform'].p2 + '''" clean package
 					popd
 				'''
