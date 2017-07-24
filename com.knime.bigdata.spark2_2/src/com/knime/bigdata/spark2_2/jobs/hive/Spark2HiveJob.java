@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.hive;
+package com.knime.bigdata.spark2_2.jobs.hive;
 
 import java.util.UUID;
 
@@ -31,8 +31,8 @@ import org.apache.spark.sql.SparkSession;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SimpleSparkJob;
 
 /**
  * Converts the given named data frame into a Hive table.

@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.namedobjects;
+package com.knime.bigdata.spark2_2.jobs.namedobjects;
 
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;

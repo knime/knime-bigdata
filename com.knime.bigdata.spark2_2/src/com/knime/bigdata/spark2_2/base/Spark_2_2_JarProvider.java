@@ -18,7 +18,7 @@
  * History
  *   Created on 04.03.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_2.base;
 
 import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
 import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
@@ -29,12 +29,12 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_2_0_JarProvider extends JobsPluginJarProvider {
+public class Spark_2_2_JarProvider extends JobsPluginJarProvider {
 
     /**
      * Default constructor.
      */
-    public Spark_2_0_JarProvider() {
-        super(SparkVersion.V_2_0, JobserverSparkJob.class);
+    public Spark_2_2_JarProvider() {
+        super(SparkVersion.V_2_2, JobserverSparkJob.class);
     }
 }

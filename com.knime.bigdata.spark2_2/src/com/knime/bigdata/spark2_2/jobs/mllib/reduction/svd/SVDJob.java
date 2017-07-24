@@ -18,7 +18,7 @@
  * History
  *   Created on 12.08.2015 by dwk
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.reduction.svd;
+package com.knime.bigdata.spark2_2.jobs.mllib.reduction.svd;
 
 
 import org.apache.log4j.Logger;
@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobInput;
 import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.RDDUtilsInJava;
+import com.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  *

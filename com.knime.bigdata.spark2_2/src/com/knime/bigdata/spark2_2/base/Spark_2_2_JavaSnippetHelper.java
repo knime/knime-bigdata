@@ -15,17 +15,17 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_2.base;
 
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippet;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSink;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkJavaSnippetSource;
+import com.knime.bigdata.spark2_2.jobs.scripting.java.AbstractSparkJavaSnippet;
+import com.knime.bigdata.spark2_2.jobs.scripting.java.AbstractSparkJavaSnippetSink;
+import com.knime.bigdata.spark2_2.jobs.scripting.java.AbstractSparkJavaSnippetSource;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
-public class Spark_2_0_JavaSnippetHelper extends Spark_2_0_AbstractJavaSnippetHelper {
+public class Spark_2_2_JavaSnippetHelper extends Spark_2_2_AbstractJavaSnippetHelper {
 
     private static final Class<?> INNER_SNIPPET_SUPERCLASS = AbstractSparkJavaSnippet.class;
 
@@ -60,7 +60,7 @@ public class Spark_2_0_JavaSnippetHelper extends Spark_2_0_AbstractJavaSnippetHe
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
             "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*", "org.apache.spark.sql.types.*","org.apache.spark.sql.*",
             "com.knime.bigdata.spark.core.exception.*",
-            "com.knime.bigdata.spark2_0.api.RowBuilder",
+            "com.knime.bigdata.spark2_2.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
             SOURCE_SNIPPET_SUPERCLASS.getName(), SINK_SNIPPET_SUPERCLASS.getName()};
     }

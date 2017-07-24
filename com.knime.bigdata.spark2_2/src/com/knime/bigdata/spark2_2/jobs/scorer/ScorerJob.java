@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.scorer;
+package com.knime.bigdata.spark2_2.jobs.scorer;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaDoubleRDD;

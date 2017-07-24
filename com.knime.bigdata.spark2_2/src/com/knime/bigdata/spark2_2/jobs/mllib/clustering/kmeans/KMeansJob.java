@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
+package com.knime.bigdata.spark2_2.jobs.mllib.clustering.kmeans;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -33,9 +33,9 @@ import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
 import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark2_0.api.ModelUtils;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.ModelUtils;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  * Runs KMeans on a given data frame and returns model as result

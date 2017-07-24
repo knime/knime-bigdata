@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.statistics.compute;
+package com.knime.bigdata.spark2_2.jobs.statistics.compute;
 
 import java.util.List;
 
@@ -36,8 +36,8 @@ import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  * computes multivariate statistics from input data frame and given indices

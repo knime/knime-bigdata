@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_0.jobs.fetchrows;
+package com.knime.bigdata.spark2_2.jobs.fetchrows;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkCon
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.TypeConverters;
 
 /**
  * SparkJob that fetches and serializes a number of rows from the specified data frame.

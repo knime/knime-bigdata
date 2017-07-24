@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.statistics.compute;
+package com.knime.bigdata.spark2_2.jobs.statistics.compute;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;

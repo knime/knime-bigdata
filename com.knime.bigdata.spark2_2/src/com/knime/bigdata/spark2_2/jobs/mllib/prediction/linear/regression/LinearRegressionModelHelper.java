@@ -18,17 +18,17 @@
  * History
  *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.linear.regression;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import com.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
+import com.knime.bigdata.spark2_2.api.Spark_2_2_ModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LinearRegressionModelHelper extends Spark_2_0_ModelHelper {
+public class LinearRegressionModelHelper extends Spark_2_2_ModelHelper {
 
     /**
      * Constructor.

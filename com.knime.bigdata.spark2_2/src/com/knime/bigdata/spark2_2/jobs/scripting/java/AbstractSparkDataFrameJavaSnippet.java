@@ -45,7 +45,7 @@
  * History
  *   25.11.2011 (hofer): created
  */
-package com.knime.bigdata.spark2_0.jobs.scripting.java;
+package com.knime.bigdata.spark2_2.jobs.scripting.java;
 
 import java.io.Serializable;
 import java.util.logging.Level;

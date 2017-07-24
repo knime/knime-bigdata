@@ -18,7 +18,7 @@
  * History
  *   Created on 23.09.2015 by dwk
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
+package com.knime.bigdata.spark2_2.jobs.mllib.collaborativefiltering;
 
 import java.io.Serializable;
 

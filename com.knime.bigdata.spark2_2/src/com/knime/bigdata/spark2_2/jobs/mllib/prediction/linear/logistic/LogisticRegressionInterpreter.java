@@ -18,10 +18,10 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.logistic;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.linear.logistic;
 
 import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.GeneralizedLinearModelInterpreter;
+import com.knime.bigdata.spark2_2.jobs.mllib.prediction.linear.GeneralizedLinearModelInterpreter;
 
 /**
  *

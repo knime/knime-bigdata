@@ -18,17 +18,17 @@
  * History
  *   Created on 01.05.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
+package com.knime.bigdata.spark2_2.jobs.mllib.collaborativefiltering;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
-import com.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
+import com.knime.bigdata.spark2_2.api.Spark_2_2_ModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class CollaborativeFilteringModelHelper extends Spark_2_0_ModelHelper {
+public class CollaborativeFilteringModelHelper extends Spark_2_2_ModelHelper {
 
     /**Constructor.*/
     public CollaborativeFilteringModelHelper() {

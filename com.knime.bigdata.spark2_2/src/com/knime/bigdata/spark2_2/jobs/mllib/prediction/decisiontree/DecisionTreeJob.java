@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.decisiontree;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -35,9 +35,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.SupervisedLearnerUtils;
 
 /**
  * runs MLlib DecisionTree on a given RDD to create a decision tree, model is returned as result

@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_2.base;
 
 import org.osgi.framework.Bundle;
 
@@ -31,11 +31,11 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Sascha Wolke, KNIME.com
  */
-public class Spark_2_0_BundleGroupSparkJarProvider extends DefaultBundleGroupSparkJarProvider {
+public class Spark_2_2_BundleGroupSparkJarProvider extends DefaultBundleGroupSparkJarProvider {
 
     /** Default constructor. */
-    public Spark_2_0_BundleGroupSparkJarProvider() {
-        super(SparkVersion.V_2_0, ImmutableMap.of(
+    public Spark_2_2_BundleGroupSparkJarProvider() {
+        super(SparkVersion.V_2_2, ImmutableMap.of(
             "com.databricks.spark.avro", new Bundle[] {
                     getBundle("com.databricks.spark-avro_2.11", "3.0.0", "4.0.0") }));
     }

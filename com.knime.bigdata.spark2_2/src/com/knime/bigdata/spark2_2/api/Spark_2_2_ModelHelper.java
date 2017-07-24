@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.api;
+package com.knime.bigdata.spark2_2.api;
 
 import com.knime.bigdata.spark.core.model.DefaultModelHelper;
 
@@ -26,12 +26,12 @@ import com.knime.bigdata.spark.core.model.DefaultModelHelper;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class Spark_2_0_ModelHelper extends DefaultModelHelper {
+public abstract class Spark_2_2_ModelHelper extends DefaultModelHelper {
 
     /**
      * @param modelName
      */
-    public Spark_2_0_ModelHelper(final String modelName) {
+    public Spark_2_2_ModelHelper(final String modelName) {
         super(modelName);
     }
 }
