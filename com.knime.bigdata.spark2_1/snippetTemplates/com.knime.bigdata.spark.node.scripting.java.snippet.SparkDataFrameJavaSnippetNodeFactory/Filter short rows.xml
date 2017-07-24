@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Filter short rows.xml">
+<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Filter short rows"/>
+<entry key="Description" type="xstring" value="Filters all rows with less characters than specified."/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00009//*************************%%00010%%00009// Specifiy the row length%%00010%%00009//*************************%%00010%%00009final int minLength = 10;%%00010%%00010%%00009// Filters all rows from the Dataset that do not have the given length%%00010%%00009Dataset&lt;Row&gt; result = dataFrame1.filter(new FilterFunction&lt;Row&gt;() {%%00010%%00009  private static final long serialVersionUID = 1L;%%00010%%00010       @Override%%00010       public boolean call(Row row) throws Exception {%%00010       %%00009// filter by length of value in first column%%00010%%00009%%00009return row.getString(0).length() &gt; minLength;%%00010       }%%00010     });%%00010     %%00010%%00009return result;"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" isnull="true" value=""/>
+<entry key="templateUUID" type="xstring" value="3731676b-6c9f-4dfe-8d1c-20da3196f96b"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>
