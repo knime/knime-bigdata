@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_1.base;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,10 +17,10 @@ import com.knime.bigdata.spark.core.jobserver.JobserverJobInput;
 import com.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
 import com.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
 import com.knime.bigdata.spark.jobserver.server.KNIMESparkJob;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_1.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.SparkJobWithFiles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
 

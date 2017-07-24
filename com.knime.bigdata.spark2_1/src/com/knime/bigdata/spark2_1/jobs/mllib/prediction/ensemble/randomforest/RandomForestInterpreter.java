@@ -18,12 +18,12 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.randomforest;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.randomforest;
 
 import org.apache.spark.mllib.tree.model.RandomForestModel;
 
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 15, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.jobs.table2spark;
+package com.knime.bigdata.spark2_1.jobs.table2spark;
 
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;

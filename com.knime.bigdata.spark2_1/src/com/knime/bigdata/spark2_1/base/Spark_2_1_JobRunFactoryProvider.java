@@ -18,68 +18,68 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_1.base;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider;
-import com.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
-import com.knime.bigdata.spark2_0.jobs.database.Database2SparkJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.database.Spark2DatabaseJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.fetchrows.FetchRowsJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.genericdatasource.GenericDataSource2SparkJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.genericdatasource.Spark2GenericDataSourceJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.hive.Hive2SparkJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.hive.Spark2HiveJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering.CollaborativeFilteringJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive.NaiveBayesJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.DecisionTreeJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.randomforest.RandomForestJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.logistic.LogisticRegressionJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression.LinearRegressionJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.svm.SVMJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.predictor.PredictorSparkJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.reduction.pca.PCAJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.reduction.svd.SVDJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.namedobjects.NamedObjectsJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.pmml.PMMLPredictionJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.pmml.PMMLTransformationJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.prepare.PrepareContextJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.concatenate.ConcatenateDataFramesJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number.Category2NumberJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.convert.number2category.Number2CategoryJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.joiner.JoinJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.partition.PartitionJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.rename.RenameColumnJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.sampling.SamplingJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.preproc.sorter.SortJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.scorer.ClassificationScorerJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.scorer.EntropyScorerJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.scorer.ScorerJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.JavaDataFrameSnippetJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.JavaSnippetJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.sql.SparkSQLFunctionsJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.sql.SparkSQLJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.statistics.compute.StatisticsJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.statistics.correlation.CorrelationColumnJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.statistics.correlation.CorrelationMatrixJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.table2spark.Table2SparkJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.util.PersistJobRunFactory;
-import com.knime.bigdata.spark2_0.jobs.util.UnpersistJobRunFactory;
+import com.knime.bigdata.spark2_1.api.Spark_2_1_CompatibilityChecker;
+import com.knime.bigdata.spark2_1.jobs.database.Database2SparkJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.database.Spark2DatabaseJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.fetchrows.FetchRowsJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.genericdatasource.GenericDataSource2SparkJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.genericdatasource.Spark2GenericDataSourceJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.hive.Hive2SparkJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.hive.Spark2HiveJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.bayes.naive.NaiveBayesJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree.DecisionTreeJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.randomforest.RandomForestJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.logistic.LogisticRegressionJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.regression.LinearRegressionJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm.SVMJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor.PredictorSparkJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.reduction.pca.PCAJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.mllib.reduction.svd.SVDJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.namedobjects.NamedObjectsJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.pmml.PMMLPredictionJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.pmml.PMMLTransformationJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.prepare.PrepareContextJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.concatenate.ConcatenateDataFramesJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.convert.category2number.Category2NumberJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.convert.number2category.Number2CategoryJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.joiner.JoinJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.partition.PartitionJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.rename.RenameColumnJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.sampling.SamplingJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.preproc.sorter.SortJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.scorer.ClassificationScorerJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.scorer.EntropyScorerJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.scorer.ScorerJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.scripting.java.JavaDataFrameSnippetJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.scripting.java.JavaSnippetJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.sql.SparkSQLFunctionsJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.sql.SparkSQLJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.statistics.compute.StatisticsJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.statistics.correlation.CorrelationColumnJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.statistics.correlation.CorrelationMatrixJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.table2spark.Table2SparkJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.util.PersistJobRunFactory;
+import com.knime.bigdata.spark2_1.jobs.util.UnpersistJobRunFactory;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvider {
+public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvider {
 
     /**
      * Constructor.
      */
-    public Spark_2_0_JobRunFactoryProvider() {
-        super(Spark_2_0_CompatibilityChecker.INSTANCE,
+    public Spark_2_1_JobRunFactoryProvider() {
+        super(Spark_2_1_CompatibilityChecker.INSTANCE,
             new Database2SparkJobRunFactory(),
             new Spark2DatabaseJobRunFactory(),
             new FetchRowsJobRunFactory(),

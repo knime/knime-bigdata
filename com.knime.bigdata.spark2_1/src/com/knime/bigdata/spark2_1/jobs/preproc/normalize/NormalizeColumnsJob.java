@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_0.jobs.preproc.normalize;
+package com.knime.bigdata.spark2_1.jobs.preproc.normalize;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,10 +21,10 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
 import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.NormalizedDataFrameContainer;
-import com.knime.bigdata.spark2_0.api.NormalizedDataFrameContainerFactory;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.NormalizedDataFrameContainer;
+import com.knime.bigdata.spark2_1.api.NormalizedDataFrameContainerFactory;
+import com.knime.bigdata.spark2_1.api.SparkJob;
 
 /**
  * @author dwk

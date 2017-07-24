@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.statistics.correlation;
+package com.knime.bigdata.spark2_1.jobs.statistics.correlation;
 
 import org.apache.spark.mllib.linalg.Matrix;
 

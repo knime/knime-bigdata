@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.sampling;
+package com.knime.bigdata.spark2_1.jobs.preproc.sampling;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,8 +39,8 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.CountMethod;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SparkJob;
 
 import scala.Tuple2;
 

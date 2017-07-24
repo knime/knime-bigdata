@@ -18,7 +18,7 @@
  * History
  *   Created on 27.09.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -45,8 +45,8 @@ import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.TreeNode2_0;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree.TreeNode2_1;
 
 import scala.Enumeration.Value;
 
@@ -211,7 +211,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
      * @return the {@link TreeNode} that wraps the root node
      */
     protected TreeNode getRootNode(final DecisionTreeModel treeModel, final boolean isClassification) {
-        final TreeNode rootNode = new TreeNode2_0(treeModel.topNode());
+        final TreeNode rootNode = new TreeNode2_1(treeModel.topNode());
         return rootNode;
     }
 }

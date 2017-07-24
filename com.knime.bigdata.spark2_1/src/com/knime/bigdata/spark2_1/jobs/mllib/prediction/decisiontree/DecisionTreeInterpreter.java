@@ -18,7 +18,7 @@ O * This source code, its documentation and all appendant files
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -199,7 +199,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
      * @return the {@link TreeNode} that wraps the root node
      */
     protected TreeNode getRootNode(final DecisionTreeModel treeModel) {
-        final TreeNode rootNode = new TreeNode2_0(treeModel.topNode());
+        final TreeNode rootNode = new TreeNode2_1(treeModel.topNode());
         return rootNode;
     }
 }

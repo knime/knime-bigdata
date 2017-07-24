@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number;
+package com.knime.bigdata.spark2_1.jobs.preproc.convert.category2number;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;

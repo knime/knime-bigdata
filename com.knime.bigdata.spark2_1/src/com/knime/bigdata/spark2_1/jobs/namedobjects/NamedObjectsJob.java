@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.namedobjects;
+package com.knime.bigdata.spark2_1.jobs.namedobjects;
 
 import java.util.Set;
 
@@ -29,8 +29,8 @@ import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
 import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SparkJob;
 
 /**
  * Helper job to manage named objects on the server side.

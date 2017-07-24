@@ -18,7 +18,7 @@
  * History
  *   Created on 02.10.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear;
 
 import java.text.NumberFormat;
 import java.util.List;

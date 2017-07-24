@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 11, 2016 by sascha
  */
-package com.knime.bigdata.spark2_0.jobs.genericdatasource;
+package com.knime.bigdata.spark2_1.jobs.genericdatasource;
 
 import java.io.File;
 import java.util.List;
@@ -38,10 +38,10 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_1.api.TypeConverters;
+import com.knime.bigdata.spark2_1.jobs.scripting.java.JarRegistry;
 
 /**
  * Loads the given path into a named data frame.

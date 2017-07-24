@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.joiner;
+package com.knime.bigdata.spark2_1.jobs.preproc.joiner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,10 +38,10 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.MyJoinKey;
 import com.knime.bigdata.spark.node.preproc.joiner.JoinMode;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.RDDUtilsInJava;
+import com.knime.bigdata.spark2_1.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_1.api.TypeConverters;
 
 import scala.Tuple2;
 
