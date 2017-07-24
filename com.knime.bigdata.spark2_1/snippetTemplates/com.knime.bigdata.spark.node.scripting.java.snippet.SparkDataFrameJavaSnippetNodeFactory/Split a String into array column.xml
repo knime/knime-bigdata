@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Split String.xml">
+<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSnippetNodeFactory"/>
+<entry key="Category" type="xstring" value="KNIME"/>
+<entry key="Name" type="xstring" value="Split a String into an array column"/>
+<entry key="Description" type="xstring" value="Splits a String into an additional array column by a given splitCharacter e.g. |"/>
+<entry key="Version" type="xstring" value="version 1.x"/>
+<config key="Snippet">
+<entry key="scriptImports" type="xstring" value="// Your custom imports:%%00010import java.util.List;%%00010import java.util.Arrays;%%00010import org.apache.spark.rdd.RDD;%%00010"/>
+<entry key="scriptFields" type="xstring" value="// Your custom variables:%%00010"/>
+<entry key="scriptBody" type="xstring" value="%%00009final String splitCharacter = &quot;\\|&quot;;%%00010%%00010%%00009// Append column with splits%%00010%%00009final JavaRDD&lt;Row&gt; rows = dataFrame1.javaRDD().map(new Function&lt;Row, Row&gt;(){%%00010%%00009%%00009public static final long serialVersionUID = 1L;%%00010%%00009%%00009%%00010%%00009%%00009@Override%%00010%%00009%%00009public Row call(Row row) throws Exception {%%00010%%00009%%00009%%00009final String[] splits = row.getString(0).split(splitCharacter);%%00010%%00009%%00009%%00009return RowFactory.create(row.getString(0), splits);%%00010%%00009%%00009}%%00010%%00009});%%00010%%00010%%00009// Wrap result into a new data frame%%00010%%00009final StructField fields[] = new StructField[] {%%00010%%00009%%00009DataTypes.createStructField(&quot;input&quot;, DataTypes.StringType, false),%%00010%%00009%%00009DataTypes.createStructField(&quot;splits&quot;, DataTypes.createArrayType(DataTypes.StringType), false)%%00010%%00009};%%00010%%00009final StructType schema = DataTypes.createStructType(fields);%%00010%%00009%%00010%%00009return spark.createDataFrame(rows, schema);%%00010"/>
+<config key="jarFiles">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="outVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inCols">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<config key="inVars">
+<entry key="array-size" type="xint" value="0"/>
+</config>
+<entry key="version" type="xstring" value="version 1.x"/>
+<entry key="templateUUID" type="xstring" value="df872bbb-04e2-4711-865d-9b875239b095"/>
+<entry key="runOnExecute" type="xboolean" value="false"/>
+</config>
+</config>
