@@ -75,7 +75,7 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
     }
 
     private void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {
-        if (!spark.conf().get("spark.sql.catalogImplementation", "").equals("hive")) {
+        if (!spark.conf().get("spark.sql.catalogImplementation", "in-memory").equals("hive")) {
             throw new KNIMESparkException("Spark session does not support hive!"
                 + " Please set spark.sql.catalogImplementation = \"hive\" in environment.conf.");
         }
