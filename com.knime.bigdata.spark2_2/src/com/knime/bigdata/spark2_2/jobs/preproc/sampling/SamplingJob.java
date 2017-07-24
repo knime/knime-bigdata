@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.sampling;
+package com.knime.bigdata.spark2_2.jobs.preproc.sampling;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +36,8 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.jobs.preproc.partition.PartitionJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.jobs.preproc.partition.PartitionJob;
 
 /**
  * Samples values from input RDD.

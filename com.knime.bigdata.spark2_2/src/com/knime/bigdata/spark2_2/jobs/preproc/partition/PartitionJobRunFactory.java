@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.partition;
+package com.knime.bigdata.spark2_2.jobs.preproc.partition;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeModel;

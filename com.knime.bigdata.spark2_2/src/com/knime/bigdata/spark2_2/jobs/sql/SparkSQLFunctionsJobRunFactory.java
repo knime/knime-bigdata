@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.jobs.sql;
+package com.knime.bigdata.spark2_2.jobs.sql;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.core.job.EmptyJobInput;

@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.joiner;
+package com.knime.bigdata.spark2_2.jobs.preproc.joiner;
 
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;

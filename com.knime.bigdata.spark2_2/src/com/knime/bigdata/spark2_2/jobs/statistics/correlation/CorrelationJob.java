@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.statistics.correlation;
+package com.knime.bigdata.spark2_2.jobs.statistics.correlation;
 
 import java.util.List;
 
@@ -37,9 +37,9 @@ import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.RDDUtilsInJava;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.RDDUtilsInJava;
+import com.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  * Computes correlation

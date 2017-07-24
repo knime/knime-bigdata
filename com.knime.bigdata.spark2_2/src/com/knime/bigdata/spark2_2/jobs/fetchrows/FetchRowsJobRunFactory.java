@@ -18,7 +18,7 @@
  * History
  *   Created on 08.02.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.fetchrows;
+package com.knime.bigdata.spark2_2.jobs.fetchrows;
 
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;

@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_2.base;
 
 import java.io.File;
 import java.util.HashSet;
@@ -43,23 +43,23 @@ import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
 import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
-import com.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
+import com.knime.bigdata.spark2_2.api.Spark_2_2_CompatibilityChecker;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
 @SuppressWarnings("restriction")
-public abstract class Spark_2_0_AbstractJavaSnippetHelper extends DefaultJavaSnippetHelper {
+public abstract class Spark_2_2_AbstractJavaSnippetHelper extends DefaultJavaSnippetHelper {
 
     /** internal logger */
-    protected static final NodeLogger LOGGER = NodeLogger.getLogger(Spark_2_0_AbstractJavaSnippetHelper.class);
+    protected static final NodeLogger LOGGER = NodeLogger.getLogger(Spark_2_2_AbstractJavaSnippetHelper.class);
 
     private final static List<File> classpathSingleton = new LinkedList<File>();
 
     /** Default constructor */
-    public Spark_2_0_AbstractJavaSnippetHelper() {
-        super(Spark_2_0_CompatibilityChecker.INSTANCE);
+    public Spark_2_2_AbstractJavaSnippetHelper() {
+        super(Spark_2_2_CompatibilityChecker.INSTANCE);
     }
 
     @Override
@@ -235,7 +235,7 @@ public abstract class Spark_2_0_AbstractJavaSnippetHelper extends DefaultJavaSni
 
     private void initSnippetClasspath() {
 
-        // Each of these packages is accessible from spark2_0 plugin
+        // Each of these packages is accessible from spark2_2 plugin
         // but comes from a different plugin dependency.
         // Below we use these packages to locate their physical
         // location, i.e. their jar files and class folders to build the classpath

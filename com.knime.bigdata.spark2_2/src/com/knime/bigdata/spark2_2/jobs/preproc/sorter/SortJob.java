@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.sorter;
+package com.knime.bigdata.spark2_2.jobs.preproc.sorter;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -32,8 +32,8 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.job.util.MultiValueSortKey;
 import com.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SimpleSparkJob;
 
 /**
  * sorts input data frame by given indices, in given order

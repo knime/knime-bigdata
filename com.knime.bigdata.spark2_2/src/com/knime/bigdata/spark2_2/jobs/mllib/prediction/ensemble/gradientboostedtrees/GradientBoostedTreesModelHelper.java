@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.AbstractDecisionTreeModelHelper;
+import com.knime.bigdata.spark2_2.jobs.mllib.prediction.decisiontree.AbstractDecisionTreeModelHelper;
 
 /**
  *

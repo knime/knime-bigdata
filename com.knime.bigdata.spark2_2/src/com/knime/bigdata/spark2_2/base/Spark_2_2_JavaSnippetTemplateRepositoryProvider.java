@@ -45,7 +45,7 @@
  * History
  *   07.06.2012 (hofer): created
  */
-package com.knime.bigdata.spark2_0.base;
+package com.knime.bigdata.spark2_2.base;
 
 import org.knime.base.node.jsnippet.template.PluginTemplateRepositoryProvider;
 import org.knime.base.node.jsnippet.template.SnippetTemplateFactory;
@@ -55,13 +55,13 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.node.scripting.java.util.template.AbstractJavaSnippetTemplateRepositoryProvider;
 import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
-import com.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
+import com.knime.bigdata.spark2_2.api.Spark_2_2_CompatibilityChecker;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_2_0_JavaSnippetTemplateRepositoryProvider extends AbstractJavaSnippetTemplateRepositoryProvider {
+public class Spark_2_2_JavaSnippetTemplateRepositoryProvider extends AbstractJavaSnippetTemplateRepositoryProvider {
 
     /**
      * Directory relative to the plugin root where the snippet templates are stored.
@@ -73,8 +73,8 @@ public class Spark_2_0_JavaSnippetTemplateRepositoryProvider extends AbstractJav
     /**
      * Create a instance for the bundle "com.knime.bigdata.spark" and the relative path "/snippetTemplates".
      */
-    public Spark_2_0_JavaSnippetTemplateRepositoryProvider() {
-        super(Spark_2_0_CompatibilityChecker.INSTANCE);
+    public Spark_2_2_JavaSnippetTemplateRepositoryProvider() {
+        super(Spark_2_2_CompatibilityChecker.INSTANCE);
 
         final String currentPluginName = FrameworkUtil.getBundle(getClass()).getSymbolicName();
 

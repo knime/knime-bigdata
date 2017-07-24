@@ -18,7 +18,7 @@
  * History
  *   Created on May 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.jobs.scripting.java;
+package com.knime.bigdata.spark2_2.jobs.scripting.java;
 
 import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;

@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.decisiontree;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;

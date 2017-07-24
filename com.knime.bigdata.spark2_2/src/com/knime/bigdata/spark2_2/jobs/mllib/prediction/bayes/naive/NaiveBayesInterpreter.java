@@ -18,7 +18,7 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive;
+package com.knime.bigdata.spark2_2.jobs.mllib.prediction.bayes.naive;
 
 import java.util.List;
 

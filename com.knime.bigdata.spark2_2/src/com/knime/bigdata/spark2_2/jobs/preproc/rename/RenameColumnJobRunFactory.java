@@ -18,7 +18,7 @@
  * History
  *   Created on Jan 17, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.rename;
+package com.knime.bigdata.spark2_2.jobs.preproc.rename;
 
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import com.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;

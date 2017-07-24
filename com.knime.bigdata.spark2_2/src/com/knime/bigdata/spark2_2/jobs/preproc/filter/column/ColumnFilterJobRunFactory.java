@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.filter.column;
+package com.knime.bigdata.spark2_2.jobs.preproc.filter.column;
 
 import com.knime.bigdata.spark.core.job.ColumnsJobInput;
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;

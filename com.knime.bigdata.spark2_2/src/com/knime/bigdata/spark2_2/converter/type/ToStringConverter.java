@@ -18,7 +18,7 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.converter.type;
+package com.knime.bigdata.spark2_2.converter.type;
 
 import java.io.Serializable;
 
@@ -29,7 +29,7 @@ import com.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSpark
 import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark2_0.converter.type.SerializableTypeProxies.StringTypeProxy;
+import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.StringTypeProxy;
 
 /**
  * Converter that converts any intermediate value to a string and vice versa.

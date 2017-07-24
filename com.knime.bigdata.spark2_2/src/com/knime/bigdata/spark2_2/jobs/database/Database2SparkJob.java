@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by sascha
  */
-package com.knime.bigdata.spark2_0.jobs.database;
+package com.knime.bigdata.spark2_2.jobs.database;
 
 import java.io.File;
 import java.util.List;
@@ -34,10 +34,10 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.JarRegistry;
+import com.knime.bigdata.spark2_2.api.NamedObjects;
+import com.knime.bigdata.spark2_2.api.SparkJobWithFiles;
+import com.knime.bigdata.spark2_2.api.TypeConverters;
+import com.knime.bigdata.spark2_2.jobs.scripting.java.JarRegistry;
 
 /**
  * Executes given SQL statement and puts result into a (named) data frame.
