@@ -1,0 +1,22 @@
+#!/bin/bash
+export PATH="/home/bjoern/.local/bin/:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin"
+export HOME="/home/bjoern"
+
+hash -r
+
+echo "$( date --rfc-3339 seconds ) -- Stopping cluster"
+rm -Rf $HOME/.clusters
+$HOME/scripts/cluster/stop-cluster cdh-5.3 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.4 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.5 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.6 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.7 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.8 dev
+$HOME/scripts/cluster/stop-cluster cdh-5.7-secured dev
+$HOME/scripts/cluster/stop-cluster cdh-5.8-secured dev
+$HOME/scripts/cluster/stop-cluster cdh-5.9-secured dev
+$HOME/scripts/cluster/stop-cluster cdh-5.10-secured dev
+$HOME/scripts/cluster/stop-cluster cdh-5.11-secured dev
+$HOME/scripts/cluster/stop-cluster hdp-2.4.2-secured dev
+rm -Rf $HOME/.clusters
+echo "$( date --rfc-3339 seconds ) -- Cluster stopped"

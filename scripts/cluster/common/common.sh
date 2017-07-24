@@ -17,9 +17,17 @@ define_locations() {
 	export MANAGER_JSON="$METADIR/json-manager"
 
 	export ENV_HOSTS="$METADIR/env"
+
 	export CLUSTER_HOSTS="$METADIR/cluster"
+	export CLUSTER_PRIVATE_HOSTS="$METADIR/clusterPrivate"
+
 	export WORKER_HOSTS="$METADIR/worker"
+	export WORKER_PRIVATE_HOSTS="$METADIR/workerPrivate"
+
 	export MASTER_HOSTS="$METADIR/master"
+	export MASTER_PRIVATE_HOSTS="$METADIR/masterPrivate"
+
 	export MANAGER_HOSTS="$METADIR/manager"
+	export MANAGER_PRIVATE_HOSTS="$METADIR/managerPrivate"
 }
 
