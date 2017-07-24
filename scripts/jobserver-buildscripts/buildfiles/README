@@ -68,3 +68,7 @@ Please follow the Spark Job Server installation manual provided as PDF by KNIME.
  w.r.t. H2 database settings. When updating from 0.6.2.1-KNIME or earlier versions,
  you should start from scratch with a fresh default environment.conf and merge in the
  changes you have done.
+
+ 2017-07-24
+  - New version: 0.7.0.2-KNIME
+  - Enhancements: Spark YARN cluster driver mode support added
