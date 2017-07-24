@@ -18,14 +18,14 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
+import com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
 
 
 /**
@@ -72,7 +72,7 @@ public class GradientBoostedTreeInterpreter extends MLlibTreeEnsembleModelInterp
      */
     @Override
     protected TreeNode getRootNode(final DecisionTreeModel treeModel, final boolean isClassification) {
-        return new GradientTreeNode2_0(treeModel.topNode(), isClassification);
+        return new GradientTreeNode2_1(treeModel.topNode(), isClassification);
     }
 
 }

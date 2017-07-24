@@ -18,7 +18,7 @@
  * History
  *   Created on 24.06.2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.scripting.java;
+package com.knime.bigdata.spark2_1.jobs.scripting.java;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;

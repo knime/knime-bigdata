@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.bayes.naive;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,9 +34,9 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.SupervisedLearnerUtils;
 
 /**
  * runs MLlib Naive Bayes on a given RDD

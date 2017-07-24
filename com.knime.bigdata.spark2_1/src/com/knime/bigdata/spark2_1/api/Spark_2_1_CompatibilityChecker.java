@@ -18,7 +18,7 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.api;
+package com.knime.bigdata.spark2_1.api;
 
 import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import com.knime.bigdata.spark.core.version.SparkVersion;
@@ -27,12 +27,12 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_2_0_CompatibilityChecker extends FixedVersionCompatibilityChecker {
+public class Spark_2_1_CompatibilityChecker extends FixedVersionCompatibilityChecker {
 
     /**The only instance.*/
-    public static final Spark_2_0_CompatibilityChecker INSTANCE = new Spark_2_0_CompatibilityChecker();
+    public static final Spark_2_1_CompatibilityChecker INSTANCE = new Spark_2_1_CompatibilityChecker();
 
-    private Spark_2_0_CompatibilityChecker() {
-        super(SparkVersion.V_2_0);
+    private Spark_2_1_CompatibilityChecker() {
+        super(SparkVersion.V_2_1);
     }
 }

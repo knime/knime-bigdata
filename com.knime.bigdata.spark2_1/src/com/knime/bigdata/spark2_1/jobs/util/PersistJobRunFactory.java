@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.util;
+package com.knime.bigdata.spark2_1.jobs.util;
 
 import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import com.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;

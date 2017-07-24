@@ -18,7 +18,7 @@
  * History
  *   Created on 26.09.2015 by dwk
  */
-package com.knime.bigdata.spark2_0.jobs.statistics.correlation;
+package com.knime.bigdata.spark2_1.jobs.statistics.correlation;
 
 import java.io.Serializable;
 

@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.jobs.sql;
+package com.knime.bigdata.spark2_1.jobs.sql;
 
 import java.util.UUID;
 
@@ -30,9 +30,9 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.node.sql.SparkSQLJobInput;
 import com.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SparkJob;
+import com.knime.bigdata.spark2_1.api.TypeConverters;
 
 /**
  * Executes a Spark SQL query.

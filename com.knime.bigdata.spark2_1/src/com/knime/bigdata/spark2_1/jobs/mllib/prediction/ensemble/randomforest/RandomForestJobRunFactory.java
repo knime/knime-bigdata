@@ -18,7 +18,7 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.randomforest;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.randomforest;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;

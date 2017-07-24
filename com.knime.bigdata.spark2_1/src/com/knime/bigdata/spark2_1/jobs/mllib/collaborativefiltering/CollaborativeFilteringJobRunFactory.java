@@ -18,7 +18,7 @@
  * History
  *   Created on 01.05.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
+package com.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;

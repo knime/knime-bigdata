@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.hive;
+package com.knime.bigdata.spark2_1.jobs.hive;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -30,8 +30,8 @@ import org.apache.spark.sql.types.StructField;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import com.knime.bigdata.spark2_1.api.NamedObjects;
+import com.knime.bigdata.spark2_1.api.SimpleSparkJob;
 
 /**
  * Executes given SQL statement and puts result into a (named) data frame.

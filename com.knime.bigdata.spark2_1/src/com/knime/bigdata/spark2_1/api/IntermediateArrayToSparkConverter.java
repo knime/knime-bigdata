@@ -18,7 +18,7 @@
  * History
  *   Created on 30.05.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.api;
+package com.knime.bigdata.spark2_1.api;
 
 import java.io.Serializable;
 

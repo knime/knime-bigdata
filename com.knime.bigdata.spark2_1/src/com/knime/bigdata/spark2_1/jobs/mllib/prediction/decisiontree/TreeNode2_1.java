@@ -18,7 +18,7 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import scala.collection.Iterator;
  *
  * @author Ole Ostergaard
  */
-public class TreeNode2_0 implements TreeNode {
+public class TreeNode2_1 implements TreeNode {
 
     private Node m_node;
     private Node m_rootNode;
@@ -43,7 +43,7 @@ public class TreeNode2_0 implements TreeNode {
     /**
      * @param rootNode the root node to be wrapped
      */
-    public TreeNode2_0(final Node rootNode) {
+    public TreeNode2_1(final Node rootNode) {
         m_node = rootNode;
         m_rootNode = rootNode;
     }
@@ -51,7 +51,7 @@ public class TreeNode2_0 implements TreeNode {
     /**
      * @param node the node to be wrapped
      */
-    public TreeNode2_0(final Node node, final Node rootNode) {
+    public TreeNode2_1(final Node node, final Node rootNode) {
         m_node = node;
         m_rootNode = rootNode;
         m_parentNode = Node.getNode(Node.parentIndex(node.id()), m_rootNode);
@@ -193,7 +193,7 @@ public class TreeNode2_0 implements TreeNode {
     @Override
     public TreeNode getLeftNode() {
         if (m_node.leftNode().isDefined()) {
-            return new TreeNode2_0(m_node.leftNode().get(), m_rootNode);
+            return new TreeNode2_1(m_node.leftNode().get(), m_rootNode);
         } else {
             return null;
         }
@@ -205,7 +205,7 @@ public class TreeNode2_0 implements TreeNode {
     @Override
     public TreeNode getRightNode() {
         if (m_node.rightNode().isDefined()) {
-            return new TreeNode2_0(m_node.rightNode().get(), m_rootNode);
+            return new TreeNode2_1(m_node.rightNode().get(), m_rootNode);
         } else {
             return null;
         }
