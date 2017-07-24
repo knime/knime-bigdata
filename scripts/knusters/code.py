@@ -8,7 +8,20 @@ render = web.template.render('templates/')
 
 CLUSTER_DIR = '/home/bjoern/.clusters'
 CLUSTER_SCRIPT_HOME = '/home/bjoern/knusters/cluster'
-CLUSTERS = ['cdh-5.3', 'cdh-5.4', 'cdh-5.5', 'cdh-5.6', 'cdh-5.7', 'cdh-5.8', 'cdh-5.7-secured', 'hdp-2.4.2-secured']
+CLUSTERS = [ ('cdh-5.3','dev'), 
+	('cdh-5.4', 'dev'), 
+	('cdh-5.5', 'dev'), 
+	('cdh-5.6', 'dev'),
+	('cdh-5.7', 'dev'),
+	('cdh-5.8', 'dev'),
+	('cdh-5.7-secured', 'dev'),
+	('cdh-5.8-secured', 'dev'),
+	('cdh-5.9-secured', 'dev'),
+	('cdh-5.10-secured', 'dev'),
+	('cdh-5.11-secured', 'dev'),
+	('hdp-2.4.2-secured', 'dev'),
+	('hdp-2.5-secured', 'dev'),
+	('cdh-5.8-train', 'train')]
 
 urls = (
     '/(.*)', 'Index'
@@ -17,7 +30,7 @@ urls = (
 def short_cluster_name(clusterFolder):
     return string.join(clusterFolder.split('-')[0:-2], '-')
 
-def read_clusters():
+def read_clusters(privateIps = False):
     if not os.path.isdir(CLUSTER_DIR):
         return []
 
@@ -26,13 +39,23 @@ def read_clusters():
     for clusterFolder in os.listdir(CLUSTER_DIR):
         cluster = { 'name' : clusterFolder, 'shortName' : short_cluster_name(clusterFolder) }
 
-        with open("%s/%s/%s" % (CLUSTER_DIR, clusterFolder, "master")) as masterFile:
+
+	masterFileName = "master"
+	if privateIps:
+	    masterFileName = "masterPrivate"
+
+        with open("%s/%s/%s" % (CLUSTER_DIR, clusterFolder, masterFileName)) as masterFile:
             masterline = masterFile.readline().lstrip().rstrip()
             if (len(masterline) > 0) and (masterline != "null"):
                 cluster['master'] = masterline
+	
+	
+	workerFileName = "worker"
+	if privateIps:
+	    workerFileName = "workerPrivate"
         
         workers = []
-        with open("%s/%s/%s" % (CLUSTER_DIR, clusterFolder, "worker")) as workerFile:
+        with open("%s/%s/%s" % (CLUSTER_DIR, clusterFolder, workerFileName)) as workerFile:
             for workerLine in workerFile.xreadlines():
                 workerLineStripped = workerLine.lstrip().rstrip()
                 if (len(workerLineStripped) > 0) and (workerLineStripped != "null"):
@@ -52,9 +75,9 @@ def refresh_clusters():
     failed = []
     
     for cluster in CLUSTERS:
-        print("Refreshing cluster " + cluster)
+        print("Refreshing cluster " + str(cluster))
         try:
-            subprocess.check_call(CLUSTER_SCRIPT_HOME + '/refresh-cluster-public-ips ' + cluster,
+            subprocess.check_call(CLUSTER_SCRIPT_HOME + ("/refresh-cluster-ips %s %s" % cluster),
                 shell=True)
         except:
             failed.append(cluster)
@@ -68,10 +91,17 @@ class Index:
             refresh_clusters()
             raise web.seeother("/")
         else:
-            clusters = read_clusters()
             if command == "ansible":
+	        clusters = read_clusters()
+                return render.index_ansible(clusters)
+            elif command == "ansiblePrivate":
+	        clusters = read_clusters(privateIps=True)
+                return render.index_ansible(clusters)
+            elif command == "private":
+	        clusters = read_clusters(privateIps=True)
                 return render.index_ansible(clusters)
             else:
+	        clusters = read_clusters()
                 return render.index(clusters)
 
 if __name__ == "__main__": 
