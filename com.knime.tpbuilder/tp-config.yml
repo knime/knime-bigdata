@@ -16,7 +16,7 @@ properties:
   spark1_6: 1.6.3
   spark1_6_cdh: 1.6.0-cdh5.9.3
   spark2_0: 2.0.2
-  spark2_1: 2.1.0
+  spark2_1: 2.1.1
   knime_log4j_version: 1.2.15
   knime_slf4j_version: 1.7.2
   knime_jackson_version: 2.7.1
@@ -755,3 +755,23 @@ artifactGroups:
 #      - id: javax.interceptor:javax.interceptor-api:1.2
       
       
+  # ##############################################################
+  # Spark 2.1
+  # ##############################################################
+  - name: Spark 2.1 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark2_1}
+        transitive: false
+        artifacts:
+          - spark-core_2.11
+          - spark-sql_2.11
+          - spark-catalyst_2.11
+          - spark-mllib_2.11
+          - spark-mllib-local_2.11
+          - spark-sketch_2.11
+          - spark-hive_2.11
+          - spark-graphx_2.11
+          - spark-unsafe_2.11
+          - spark-tags_2.11
+          - spark-launcher_2.11
