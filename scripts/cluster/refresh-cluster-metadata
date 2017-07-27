@@ -19,30 +19,58 @@ mkdir -p "$METADIR"
 # ##############################
 # Create json documents for all, cluster and manager instances
 # ##############################
+
+filter_by_tag() {
+  local key=$1
+  local value=$2
+ 
+  if [ -z "$key" ] || [ -z "$value" ] ; then
+	echo "Called filter_by_tag without specifying both key and value: $1 $2"
+	exit 1
+  fi
+
+  jq "select(.Tags | map(select(.Key == \"${key}\"))[0].Value == \"${value}\")"
+}
+
+get_tag_value() {
+  local key=$1
+ 
+  if [ -z "$key" ] ; then
+	echo "Called get_tag_value without specifying key"
+	exit 1
+  fi
+
+  jq "select(.Tags | map(select(.Key == \"${key}\"))[0].Value == \"${value}\")"
+}
+
+filter_by_managed_cluster() {
+  local key="Managed-Clusters"
+  local cluster="$1"  
+
+  # first line only filters for presence of "Managed-Clusters" tag
+  # second line parses the "Managed-Clusters" tag value into a JSON array and checks for presence of $cluster
+  jq "select(.Tags | map(select(.Key == \"${key}\")) | length > 0) \
+    | select (.Tags | map(select(.Key == \"${key}\"))[0].Value | split(\" \") | map(select(. == \"${cluster}\")) | length > 0 )"
+}
+
+
 if ! aws ec2 describe-instances --dry-run 2>&1 | grep -q DryRunOperation ; then 
 	echo "Error: Either youy AWS credentials are not configured (try: aws configure) or you do not have the necessary AWS permission to do describeInstances."
 	exit 1
 fi
 
 echo "Requesting instance metadata from aws"
-aws ec2 describe-instances --output json | jq ".Reservations[].Instances[] | select(contains({ Tags : [{ Key : \"Owner\", Value : \"${COWNER}\"}] }))" >"${ALL_JSON}"
+aws ec2 describe-instances --output json | jq ".Reservations[].Instances[]" | filter_by_tag "Owner" "${COWNER}" >"${ALL_JSON}"
 
-jq "select(contains({ Tags : [ { Key : \"Cluster-Env\",  Value : \"${CENV}\" } ] }))" "${ALL_JSON}" >"${ENV_JSON}"
+# filter for Cluster-Env
+cat "${ALL_JSON}"     | filter_by_tag "Cluster-Env" "${CENV}" >"${ENV_JSON}"
 
-CLUSTER_TAGS="{ Key : \"Cluster-Env\",  Value : \"${CENV}\" }, \
-       	      { Key : \"Cluster-Name\", Value : \"${CNAME}\" }"
+# filter for Cluster-Name
+cat "${ENV_JSON}"     | filter_by_tag "Cluster-Name" "${CNAME}" >"${CLUSTER_JSON}"
 
-jq "select(contains({ Tags : [ ${CLUSTER_TAGS} ] }))" "${ALL_JSON}" >"${CLUSTER_JSON}"
-
-jq "select(contains({ Tags : [ ${CLUSTER_TAGS}, \
-        { Key : \"Cluster-Role\", Value : \"worker\"} ] }))" "${ALL_JSON}" >"${WORKER_JSON}"
-
-jq "select(contains({ Tags : [ ${CLUSTER_TAGS}, \
-        { Key : \"Cluster-Role\", Value : \"master\"} ] }))" "${ALL_JSON}" >"${MASTER_JSON}"
-
-jq "select(contains({ Tags : [ \
-        { Key : \"Owner\", Value : \"${COWNER}\" }, \
-        { Key : \"Cluster-Env\", Value : \"${CENV}\"}, \
-        { Key : \"Cluster-Role\", Value : \"manager\"} ] }))" "${ALL_JSON}" >"${MANAGER_JSON}"
+# filter for Cluster-Role
+cat "${ENV_JSON}" | filter_by_tag "Cluster-Role" "manager" | filter_by_managed_cluster "${CNAME}" >"${MANAGER_JSON}"
+cat "${CLUSTER_JSON}" | filter_by_tag "Cluster-Role" "master" >"${MASTER_JSON}"
+cat "${CLUSTER_JSON}" | filter_by_tag "Cluster-Role" "worker" >"${WORKER_JSON}"
 
 echo "Refreshed cluster metadata in ${METADIR}"

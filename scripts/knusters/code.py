@@ -1,3 +1,12 @@
+#
+# KNusters webapp written with web.py (http://webpy.org/)
+#
+# 
+# 
+# Prerequisites: Install web.py via pip:
+#   $ pip install web.py
+#
+
 import web
 import os
 import subprocess
@@ -7,7 +16,7 @@ import string
 render = web.template.render('templates/')
 
 CLUSTER_DIR = '/home/bjoern/.clusters'
-CLUSTER_SCRIPT_HOME = '/home/bjoern/knusters/cluster'
+CLUSTER_SCRIPT_HOME = '../cluster'
 CLUSTERS = [ ('cdh-5.3','dev'), 
 	('cdh-5.4', 'dev'), 
 	('cdh-5.5', 'dev'), 

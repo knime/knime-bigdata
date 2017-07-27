@@ -1,22 +1,44 @@
 #!/bin/bash
-export PATH="/home/bjoern/.local/bin/:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin"
+export PATH="/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin"
 export HOME="/home/bjoern"
+
+#!/bin/bash
+#
+# Stop instances of a cluster in AWS.
+#
+
+get_abs_script_dir() {
+  pushd . >/dev/null
+  cd "$(dirname $0)"
+  local abs_script_dir="$(pwd)"
+  popd  >/dev/null
+  echo "${abs_script_dir}"
+}
+SCRIPT_DIR="$(get_abs_script_dir)"
+
 
 hash -r
 
 echo "$( date --rfc-3339 seconds ) -- Stopping cluster"
 rm -Rf $HOME/.clusters
-$HOME/scripts/cluster/stop-cluster cdh-5.3 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.4 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.5 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.6 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.7 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.8 dev
-$HOME/scripts/cluster/stop-cluster cdh-5.7-secured dev
-$HOME/scripts/cluster/stop-cluster cdh-5.8-secured dev
-$HOME/scripts/cluster/stop-cluster cdh-5.9-secured dev
-$HOME/scripts/cluster/stop-cluster cdh-5.10-secured dev
-$HOME/scripts/cluster/stop-cluster cdh-5.11-secured dev
-$HOME/scripts/cluster/stop-cluster hdp-2.4.2-secured dev
-rm -Rf $HOME/.clusters
+
+devclusters="cdh-5.3
+ cdh-5.4
+ cdh-5.5
+ cdh-5.6
+ cdh-5.7
+ cdh-5.8
+ cdh-5.7-secured
+ cdh-5.8-secured
+ cdh-5.9-secured
+ cdh-5.10-secured
+ cdh-5.11-secured
+ hdp-2.4.2-secured
+ hdp-2.5-secured"
+
+
+for c in ${devclusters} ; do
+	"${SCRIPT_DIR}"/stop-cluster $c dev
+done
+
 echo "$( date --rfc-3339 seconds ) -- Cluster stopped"
