@@ -105,20 +105,21 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
             //                    "Spark context was created by a KNIME Spark Executor that has incompatible community extensions. Please destroy and reopen this Spark context or use a different one.");
             //            }
 
-            // Hive Metastore token patch due to SPARK-18627 having been backported by many vendords
-            final String master = sparkContext.getConf().get("spark.master");
-            if (sparkContext.getConf().getBoolean(ACTIVATE_METASTORE_TOKEN_PATCH, true) && master.equals("yarn-client")) {
-                try {
-                    monkeyPatchMetastoreToken(sparkContext);
-                } catch (Exception e) {
-                    LOGGER.error(String.format("Failed to activate Hive Metastore token patch: %s (%s)", e.getMessage(),
-                        e.getClass().getName()), e);
-                }
-            }
         } catch (IOException e) {
             throw new KNIMESparkException(
                 "Spark context was probably not created with KNIME Spark Executor (or an old version of it).  Please destroy and reopen this Spark context or use a different one.",
                 e);
+        }
+
+        // Hive Metastore token patch due to SPARK-18627 having been backported by many vendors
+        final String master = sparkContext.getConf().get("spark.master");
+        if (sparkContext.getConf().getBoolean(ACTIVATE_METASTORE_TOKEN_PATCH, true) && master.equals("yarn-client")) {
+            try {
+                monkeyPatchMetastoreToken(sparkContext);
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to activate Hive Metastore token patch: %s (%s)", e.getMessage(),
+                    e.getClass().getName()), e);
+            }
         }
 
         TypeConverters.ensureConvertersInitialized(input.<DataType> getTypeConverters());
@@ -195,7 +196,7 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
         fields.addAll(Arrays.asList(clazz.getFields()));
         fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
         for(Field field : fields) {
-            LOGGER.info("Field name: " + field.getName() + " // Looking for: " + fieldName);
+            LOGGER.debug("Field name: " + field.getName() + " // Looking for: " + fieldName);
             if (field.getName().equals(fieldName) || field.getName().endsWith("$$" + fieldName)) {
                 field.setAccessible(true);
                 return field.get(scalaObj);
@@ -215,5 +216,4 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
 
         throw new ReflectiveOperationException("No field or method found with name " + fieldName);
     }
-
 }
