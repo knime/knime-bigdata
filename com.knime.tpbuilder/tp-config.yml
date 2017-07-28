@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20170704
+version: knimebd-20170727
 
 # Global switch to control wheter source bundles will be created.
 # Defaults to true.
@@ -351,6 +351,57 @@ bundleInstructions:
   - coordPattern: org\.apache\.hadoop:merged:jar:.*
     instructions:
       Bundle-SymbolicName: org.apache.hadoop.client
+
+  # Packages for JAX-RS v1.1 API. We also have JAX-RS 2.x in the (non-bigdata) KNIME TP with the same
+  # bundle name. 
+  - coordPattern: javax.ws.rs:jsr311-api:jar:.*
+    instructions:
+      Bundle-SymbolicName: javax.ws.rs-api
+
+  # jersey-core and jersey-client are hadoop-client dependencies. Unfortunately jersey-core contains and exports the
+  # JAX-RS 1.x API packages (javax.ws.rs.*) without proper version. This here deletes the JAX-RS API packages from jersey-core,
+  # defines a properly versioned dependency on the JAX-RS 1.x API packages,
+  # and otherwise reconstructs the pre-existing bundling of jersey-core and jersey-client.
+  - coordPattern: com\.sun\.jersey:jersey-core:jar:.*
+    fileExcludes:
+      - javax/*
+    instructions:
+      Bundle-SymbolicName: com.sun.jersey.jersey-core
+      Bundle-Activator: com.sun.jersey.core.osgi.Activator
+      DynamicImport-Package: "*"
+      Bundle-License: http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
+      Private-Package: com.sun.jersey.core.osgi;-split-package:=merge-first
+      Import-Package: >-
+        javax.ws.rs.*                         ;version="[1.0,2)",
+        javax.mail.*                          ;resolution:=optional,
+        *
+  - coordPattern: com\.sun\.jersey:jersey-client:jar:.*
+    instructions:
+      Bundle-SymbolicName: com.sun.jersey.jersey-client
+      Bundle-Activator: com.sun.jersey.client.osgi.Activator
+      Bundle-License: http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
+      Private-Package: com.sun.jersey.client.osgi
+      Import-Package: >-
+        com.sun.jersey.*                      ;version="[1.9,2)",
+        javax.ws.rs.*                         ;version="[1.0,2)",
+        javax.mail.*                          ;resolution:=optional,
+        *
+
+  # jackson-jaxrs is a dep of hadoop-client.
+  # It needs the JAX-RS packages from JAX-RS 1.1. Since we also have JAX-RS 2.x in the (non-bigdata) KNIME TP
+  # we need to fix the import package statement of the prebundled jackson-jaxrs, because it does
+  # not declare a version constraint.
+  - coordPattern: org.codehaus.jackson:jackson-jaxrs:jar:1\.9\.13
+    instructions:
+      Bundle-SymbolicName: jackson-jaxrs
+      DynamicImport-Package: org.codehaus.jackson.xc
+      Import-Package: >-
+        javax.ws.rs.*                         ;version="[1.0,2)",
+        org.codehaus.jackson.*                ;version="1.9.13",
+        *
+      Export-Package: >-
+        org.codehaus.jackson.jaxrs.*          ;version="1.9.13"
+
       
   # apacheds-kerberos-codec (prebundled, dep of hadoop-client): make several dependencies of optional
   # because they are excluded via maven-exclude
@@ -411,7 +462,7 @@ bundleInstructions:
     instructions:
       Bundle-SymbolicName: com.fasterxml.jackson.module.jackson.module.scala_2.10
         
-  # CANNOT QUITE REMEMVER WHAT THIS DOES
+  # CANNOT QUITE REMEMBER WHAT THIS DOES
   - coordPattern: org\.glassfish\.jersey\.(media|core|containers):.*:jar:2\.22\.2
     instructions:
       Import-Package: >-
@@ -527,14 +578,16 @@ artifactGroups:
       - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
         transitiveSourceDepth: 1
         
-        # a transitive but excluded dependency of hadoop-client. Unfortunately
-        # the prebundled org.apache.directory.api.util does not resolve without it.
+      # a transitive but excluded dependency of hadoop-client. Unfortunately
+      # the prebundled org.apache.directory.api.util does not resolve without it.
       - id: org.apache.directory.api:api-i18n:1.0.0-M20
         source: false
-      
-      # transitive but excluded dependency of hadoop-client. Unfortunately the
-      # prebundled 
-      - id: com.sun.jersey:jersey-core:1.9
+     
+      # JAX-RS 1.1 is required by com.sun.jersey.jersey-core (a dep of Hadoop client)
+      # While the maven artifact for jersey-core CONTAINS the JAX-RS packages, we
+      # remove them during bundling (see bundle instructions).
+      # jsr311-api properly bundles the JAX-RS 1.1 classes (also see bundle instructions) 
+      - id: javax.ws.rs:jsr311-api:jar:1.1.1
         source: false
       
       # avro >1.7.4 needs sun.misc package. This bundle

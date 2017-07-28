@@ -108,9 +108,9 @@ object OsgiUtil {
     val qualifierExists = parsedVersion.getQualifier != null && !parsedVersion.getQualifier.isEmpty
 
     if (qualifierExists)
-      baseVersion + "-" + suffix
+      parsedVersion.toString + "-" + suffix
     else
-      baseVersion + "." + suffix
+      parsedVersion.toString + "." + suffix
   }
 
   def withBundle(art: Artifact,
