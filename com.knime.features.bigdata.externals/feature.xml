@@ -496,6 +496,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.spark_2.11"
+         download-size="0"
+         install-size="0"
+         version="2.1.1.knimebd-20170727"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark_2.11"
+         download-size="0"
+         install-size="0"
+         version="2.2.0.knimebd-20170727"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.spark_2.11.source"
          download-size="0"
          install-size="0"
@@ -507,6 +521,20 @@
          download-size="0"
          install-size="0"
          version="2.1.1.knimebd-20170801"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark_2.11.source"
+         download-size="0"
+         install-size="0"
+         version="2.1.1.knimebd-20170727"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark_2.11.source"
+         download-size="0"
+         install-size="0"
+         version="2.2.0.knimebd-20170727"
          unpack="false"/>
 
    <plugin
