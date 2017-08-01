@@ -778,7 +778,7 @@ artifactGroups:
           - spark-launcher_2.11
 
     singleArtifacts:
-      - id: org.scalanlp:breeze_2.11:0.12.0
+      - id: org.scalanlp:breeze_2.11:0.12
         source: false
       
   # ##############################################################
