@@ -802,3 +802,7 @@ artifactGroups:
           - spark-tags_2.11
           - spark-launcher_2.11
 
+    singleArtifacts:
+      - id: org.scalanlp:breeze_2.11:0.13.1
+        source: false
+
