@@ -1,7 +1,6 @@
 package com.knime.bigdata.spark1_5.api;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,7 +82,12 @@ import com.knime.bigdata.spark.core.job.SparkClass;
  * </tr>
  * <tr>
  * <td><code>DataTypes.DateType</code></td>
- * <td><code>Date.class</code></td>
+ * <td><code>java.sql.Date.class or java.util.Date.class</code></td>
+ * </tr>
+ * <tr>
+ * <td><code>DataTypes.TimestampType</code></td>
+ * <td><code>java.sql.Timestamp.class</code></td>
+ * </tr>
  * </tr>
  * <tr>
  * <td><code>DataTypes.StringType</code></td>
@@ -133,7 +137,9 @@ public class StructTypeBuilder {
         DATA_TYPES_BY_CLASS.put(Long.class, DataTypes.LongType);
         DATA_TYPES_BY_CLASS.put(Float.class, DataTypes.FloatType);
         DATA_TYPES_BY_CLASS.put(Double.class, DataTypes.DoubleType);
-        DATA_TYPES_BY_CLASS.put(Date.class, DataTypes.DateType);
+        DATA_TYPES_BY_CLASS.put(java.util.Date.class, DataTypes.DateType);
+        DATA_TYPES_BY_CLASS.put(java.sql.Date.class, DataTypes.DateType);
+        DATA_TYPES_BY_CLASS.put(java.sql.Timestamp.class, DataTypes.TimestampType);
         DATA_TYPES_BY_CLASS.put(String.class, DataTypes.StringType);
     }
 

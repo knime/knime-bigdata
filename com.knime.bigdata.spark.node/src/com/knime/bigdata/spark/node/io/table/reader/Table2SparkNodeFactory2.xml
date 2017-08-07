@@ -7,6 +7,9 @@
 	<fullDescription>
 		<intro>
 			Creates a Spark RDD from the KNIME data table.
+
+			<p>KNIME's <i>LocalTime</i> and <i>ZonedDateAndTime</i> data types are not supported by Spark.
+			The <i>Modify Time Zone</i> Node can be used to convert them into e.g. a compatible <i>LocalDateTime</i>.</p>
 		</intro>
 	</fullDescription>
 
