@@ -84,10 +84,18 @@ import org.knime.testing.core.TestrunJanitor;
  *
  *   hdfs.useCredentials:
  *     - true (creates hdfs.credentials variable with hdfs.user and hdfs.password)
- *     - false (use username from hdfs.user)
+ *     - false (use username from hdfs.user, backward compatibility)
  *
  *   hive/impala.useKerberos:
  *     - true/false
+ *
+ *   ssh.authMethod:
+ *     - Password
+ *     - Keyfile
+ *
+ *   ssh.useCredentials:
+ *     - true (creates ssh.credentials variable with ssh.username and ssh.password)
+ *     - false (use username from ssh.username, backward compatibility)
  *
  *   ssh.port:
  *     - gets converted into integer flow variable
@@ -101,17 +109,25 @@ import org.knime.testing.core.TestrunJanitor;
  *   HDFS nodes:
  *     - useworkflowcredentials = hdfs.useCredentials
  *     - workflowcredentials = hdfs.credentialsName
- *     - user = hdfs.user
+ *     - user = hdfs.user (optional, backward compatibility)
  *     - host = hostname
  *     - authenticationmethod = hdfs.authMethod
  *
  *   Hive/Impala nodes:
- *     - username = hive.username
- *     - password = hive.password
  *     - kerberos = hive.useKerberos
+ *     - credentials_name = hive.credentialsName
+ *     - username = hive.username (optional, backward compatibility)
+ *     - password = hive.password (optional, backward compatibility)
  *     - default-connection.hostname = hostname
  *     - default-connection.databaseName = hive.databasename
  *     - parameter.parameter = hive.parameter
+ *
+ *   SSH node:
+ *     - useworkflowcredentials = ssh.useCredentials
+ *     - workflowcredentials = ssh.credentialsName
+ *     - user = ssh.username (optional, backward compatibility)
+ *     - host = hostname
+ *     - authenticationmethod = ssh.authMethod
  *
  *   Spark Create Context node:
  *     - v1_6.jobServerUrl = spark.jobserver.url
@@ -144,7 +160,8 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
         m_flowVariables.add(new FlowVariable("hostname",DEFAULT_VALUE));
 
-        m_flowVariables.add(new FlowVariable("hdfs.useCredentials", "false"));
+        m_flowVariables.add(new FlowVariable("hdfs.authMethod", "Password"));
+        m_flowVariables.add(new FlowVariable("hdfs.useCredentials", "true"));
 		m_flowVariables.add(new FlowVariable("hdfs.credentialsName", "hdfs.credentials"));
         m_flowVariables.add(new FlowVariable("hdfs.url", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("hdfs.user", DEFAULT_VALUE));
@@ -153,23 +170,29 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
         m_flowVariables.add(new FlowVariable("hive.databasename", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("hive.parameter", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("hive.useKerberos", "false"));
+		m_flowVariables.add(new FlowVariable("hive.credentialsName", "hive.credentials"));
         m_flowVariables.add(new FlowVariable("hive.username", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("hive.password", DEFAULT_VALUE));
 
         m_flowVariables.add(new FlowVariable("impala.databasename", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("impala.parameter", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("impala.useKerberos", "false"));
+		m_flowVariables.add(new FlowVariable("impala.credentialsName", "impala.credentials"));
         m_flowVariables.add(new FlowVariable("impala.username", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("impala.password", DEFAULT_VALUE));
 
+        m_flowVariables.add(new FlowVariable("ssh.authMethod", "Password"));
+        m_flowVariables.add(new FlowVariable("ssh.useCredentials", "true"));
+		m_flowVariables.add(new FlowVariable("ssh.credentialsName", "ssh.credentials"));
         m_flowVariables.add(new FlowVariable("ssh.username", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("ssh.password", DEFAULT_VALUE));
+        m_flowVariables.add(new FlowVariable("ssh.keyfile", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("ssh.port", 22));
 
         m_flowVariables.add(new FlowVariable("spark.version", "1.6"));
         m_flowVariables.add(new FlowVariable("spark.context", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.jobserver.url", "http://execute-testflow-conf-node:123/"));
-        m_flowVariables.add(new FlowVariable("spark.settings.override", DEFAULT_VALUE));
+        m_flowVariables.add(new FlowVariable("spark.settings.override", "false"));
         m_flowVariables.add(new FlowVariable("spark.settings.custom", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.authMethod", "NONE"));
 		m_flowVariables.add(new FlowVariable("spark.credentialsName", "spark.credentials"));
@@ -182,6 +205,9 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
         try {
 	        m_flowVariables.add(CredentialsStore.newCredentialsFlowVariable("hdfs.credentials", DEFAULT_VALUE, DEFAULT_VALUE, false, false));
+	        m_flowVariables.add(CredentialsStore.newCredentialsFlowVariable("hive.credentials", DEFAULT_VALUE, DEFAULT_VALUE, false, false));
+	        m_flowVariables.add(CredentialsStore.newCredentialsFlowVariable("impala.credentials", DEFAULT_VALUE, DEFAULT_VALUE, false, false));
+	        m_flowVariables.add(CredentialsStore.newCredentialsFlowVariable("ssh.credentials", DEFAULT_VALUE, DEFAULT_VALUE, false, false));
 	        m_flowVariables.add(CredentialsStore.newCredentialsFlowVariable("spark.credentials", DEFAULT_VALUE, DEFAULT_VALUE, false, false));
 		} catch (final InvalidSettingsException e) {
 			LOGGER.error("Failure creating default credeantials flow variables: " + e, e);
@@ -227,37 +253,51 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
         try (final BufferedReader reader = new BufferedReader(new FileReader(getInputFile()));) {
             final HashMap<String, FlowVariable> flowVariables = new HashMap<>();
 
-            // Read lines into string flow variables, ignore variables with empty values.
-            String line = reader.readLine(); // skip header
-            while ((line = reader.readLine()) != null) {
-                final String kv[] = line.split(",", 2);
+			// Read lines into string flow variables, ignore variables with
+			// empty values.
+			String line = reader.readLine(); // skip header
+			while ((line = reader.readLine()) != null) {
+				if (!StringUtils.isBlank(line) && !line.startsWith("#")) {
+					final String kv[] = line.split(",", 2);
 
-                if (kv.length == 2 && !StringUtils.isBlank(kv[1])) {
 					if (isIntVariable(kv[0])) {
-						flowVariables.put(kv[0], new FlowVariable(kv[0], Integer.parseInt(kv[1])));
+						if (kv.length == 1 || StringUtils.isEmpty(kv[1])) {
+							throw new RuntimeException("Integer value " + kv[0] + " can't be empty!");
+						} else {
+							flowVariables.put(kv[0], new FlowVariable(kv[0], Integer.parseInt(kv[1])));
+						}
+
 					} else {
-						flowVariables.put(kv[0], new FlowVariable(kv[0], kv[1]));
+						if (kv.length == 1 || StringUtils.isEmpty(kv[1])) {
+							flowVariables.put(kv[0], new FlowVariable(kv[0], ""));
+						} else {
+							flowVariables.put(kv[0], new FlowVariable(kv[0], kv[1]));
+						}
 					}
-                }
-            }
-
-			// HDFS credentials
-			if (flowVariables.containsKey("hdfs.useCredentials")
-					&& flowVariables.get("hdfs.useCredentials").getStringValue().equalsIgnoreCase("true")) {
-				addCredentialsFlowVariable("hdfs", "hdfs.user", "hdfs.password", flowVariables);
-			} else {
-				m_flowVariables.add(
-						CredentialsStore.newCredentialsFlowVariable("hdfs.credentials", "none", "none", false, false));
+				}
 			}
 
-			// Spark credentials
-			if (flowVariables.containsKey("spark.authMethod")
-					&& flowVariables.get("spark.authMethod").getStringValue().equalsIgnoreCase("CREDENTIALS")) {
-				addCredentialsFlowVariable("spark", "spark.username", "spark.password", flowVariables);
-			} else {
-				m_flowVariables.add(
-						CredentialsStore.newCredentialsFlowVariable("spark.credentials", "none", "none", false, false));
-			}
+
+			final boolean hdfsUseCredentials = flowVariables.containsKey("hdfs.useCredentials")
+					&& flowVariables.get("hdfs.useCredentials").getStringValue().equalsIgnoreCase("true");
+			addCredentialsFlowVariable("hdfs", "user", hdfsUseCredentials, flowVariables);
+
+			final boolean hiveUseCredentials = flowVariables.containsKey("hive.useKerberos")
+					&& flowVariables.get("hive.useKerberos").getStringValue().equalsIgnoreCase("false");
+			addCredentialsFlowVariable("hive", "username", hiveUseCredentials, flowVariables);
+
+			final boolean impalaUseCredentials = flowVariables.containsKey("impala.useKerberos")
+					&& flowVariables.get("impala.useKerberos").getStringValue().equalsIgnoreCase("false");
+			addCredentialsFlowVariable("impala", "username", impalaUseCredentials, flowVariables);
+
+			final boolean sshUseCredentials = flowVariables.containsKey("ssh.useCredentials")
+					&& flowVariables.get("ssh.useCredentials").getStringValue().equalsIgnoreCase("true");
+			addCredentialsFlowVariable("ssh", "username", sshUseCredentials, flowVariables);
+
+			final boolean sparkUseCredentials = flowVariables.containsKey("spark.authMethod")
+					&& flowVariables.get("spark.authMethod").getStringValue().equalsIgnoreCase("CREDENTIALS");
+			addCredentialsFlowVariable("spark", "username", sparkUseCredentials, flowVariables);
+
 
             m_flowVariables.clear();
             m_flowVariables.addAll(flowVariables.values());
@@ -285,31 +325,30 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
      * Create a [prefix].credentials and [prefix].credentialsName flow variable with given
      * username and password variable.
      *
-     * @param prefix hdfs or spark
-     * @param usernameVariable name of variable contains username
-     * @param passwordVariable name of variable contains password
+     * @param prefix hdfs/hive/impala/ssh/spark
+     * @param usernameVariableName user or username
+     * @param useCredentials create dummy if false
      * @param flowVariables map with all flow variables
      * @throws Exception if username or password missing
      */
-    private void addCredentialsFlowVariable(final String prefix,
-			final String usernameVariable, final String passwordVariable,
-			final HashMap<String, FlowVariable> flowVariables) throws Exception {
+	private void addCredentialsFlowVariable(final String prefix, final String usernameVariableName,
+			final boolean useCredentials, final HashMap<String, FlowVariable> flowVariables) throws Exception {
 
 		flowVariables.put(prefix + ".credentialsName",
 				new FlowVariable(prefix + ".credentialsName", prefix + ".credentials"));
 
-		if (!flowVariables.containsKey(usernameVariable)
-				|| StringUtils.isBlank(flowVariables.get(usernameVariable).getStringValue())) {
+		if (!flowVariables.containsKey(prefix + "." + usernameVariableName)
+				|| StringUtils.isBlank(flowVariables.get(prefix + "." + usernameVariableName).getStringValue())) {
 			throw new RuntimeException(
-					"Can't create " + prefix + " credentials flow variable without " + usernameVariable + "!");
+					"Can't create " + prefix + " credentials flow variable without " + prefix + "." + usernameVariableName + "!");
 
-		} else if (!flowVariables.containsKey(passwordVariable)) { // might be empty
+		} else if (!flowVariables.containsKey(prefix + ".password")) { // might be empty
 			throw new RuntimeException(
-					"Can't create " + prefix + " credentials flow variable without " + passwordVariable + "!");
+					"Can't create " + prefix + " credentials flow variable without " + prefix + ".password!");
 
 		} else {
-			final String username = flowVariables.get(usernameVariable).getStringValue();
-			final String password = flowVariables.get(passwordVariable).getStringValue();
+			final String username = flowVariables.get(prefix + "." + usernameVariableName).getStringValue();
+			final String password = flowVariables.get(prefix + ".password").getStringValue();
 			flowVariables.put(prefix + ".credentialsName",
 					new FlowVariable(prefix + ".credentialsName", prefix + ".credentials"));
 			flowVariables.put(prefix + ".credentials",
