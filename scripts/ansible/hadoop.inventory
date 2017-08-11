@@ -58,6 +58,11 @@ worker1-cdh-5.8 ansible_host=10.0.0.8
 master-cdh-5.8-secured ansible_host=10.0.0.144 js1_env=cdh-5.8 js2_env=cdh js_keytab=cdh-5-8-secured.keytab
 worker0-cdh-5.8-secured ansible_host=10.0.0.143
 
+[cdh-5.12-secured]
+master-cdh-5.12-secured ansible_host=10.0.0.186 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-12-secured.keytab
+worker0-cdh-5.12-secured ansible_host=10.0.0.184
+worker1-cdh-5.12-secured ansible_host=10.0.0.134
+
 #[cdh-5.8-train]
 #master-cdh-5.8-train ansible_host=10.0.0.66
 #worker0-cdh-5.8-train ansible_host=10.0.0.239
@@ -70,7 +75,7 @@ worker0-cdh-5.8-secured ansible_host=10.0.0.143
 #worker7-cdh-5.8-train ansible_host=10.0.0.146
 
 [hdp-2.4.2-secured]
-master-hdp-2.4.2-secured ansible_host=10.0.0.70 js_env=hdp-2.4.0
+master-hdp-2.4.2-secured ansible_host=54.171.100.156 js_env=hdp-2.4.0
 worker0-hdp-2.4.2-secured ansible_host=10.0.0.212
 
 [hdp-2.5-secured]
@@ -109,6 +114,7 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.12-secured
 
 [hdp:children]
 hdp-2.4.2-secured
@@ -135,6 +141,7 @@ cdh-5.11-secured
 hdp-2.5-secured
 cdh-5.9-secured
 cdh-5.8-secured
+cdh-5.12-secured
 
 # Put all clusters with Spark 1.x in here
 [spark1-hosts:children]
@@ -149,6 +156,7 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.12-secured
 hdp-2.4.2-secured
 hdp-2.5-secured
 
@@ -160,6 +168,7 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.12-secured
 hdp-2.5-secured
 
 # #############################################################################

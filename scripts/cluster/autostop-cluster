@@ -33,6 +33,7 @@ devclusters="cdh-5.3
  cdh-5.9-secured
  cdh-5.10-secured
  cdh-5.11-secured
+ cdh-5.12-secured
  hdp-2.4.2-secured
  hdp-2.5-secured"
 

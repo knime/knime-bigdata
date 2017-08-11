@@ -28,6 +28,7 @@ CLUSTERS = [ ('cdh-5.3','dev'),
 	('cdh-5.9-secured', 'dev'),
 	('cdh-5.10-secured', 'dev'),
 	('cdh-5.11-secured', 'dev'),
+	('cdh-5.12-secured', 'dev'),
 	('hdp-2.4.2-secured', 'dev'),
 	('hdp-2.5-secured', 'dev'),
 	('cdh-5.8-train', 'train')]
