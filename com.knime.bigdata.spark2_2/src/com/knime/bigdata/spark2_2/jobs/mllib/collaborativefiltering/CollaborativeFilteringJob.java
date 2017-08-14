@@ -96,6 +96,7 @@ public class CollaborativeFilteringJob implements SparkJob<CollaborativeFilterin
         model.setPredictionCol(input.getPredictionColumnName());
         model.setUserCol(cModel.getUserFeaturesColumnName());
         model.setItemCol(cModel.getProductFeaturesColumnName());
+        model.setColdStartStrategy("nan");
         return model.transform(inputDataset);
     }
 
