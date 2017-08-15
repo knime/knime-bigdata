@@ -72,6 +72,8 @@ import org.knime.testing.core.TestrunJanitor;
 /**
  * Provides big data flow variables based on a CSV file. CSV contains string key/value pairs and a header line.
  *
+ * Additional, KRB5_CONFIG can be set in ENV and system property java.security.krb5.conf will be provided.
+ *
  * Location of flowvariables.csv:
  *    If FLOWVARS ENV is not set, this janitor searches in {@link BigDataExtensionJanitor#DEFAULT_PATH_WORKFLOW} or
  *    {@link #DEFAULT_PATH_WORKSPACE} for flowvariables.csv.
@@ -214,6 +216,12 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 		}
 
         Collections.reverse(m_flowVariables);
+
+		final String kerberosConfig = System.getenv("KRB5_CONFIG");
+		if (kerberosConfig != null && !System.getProperties().contains("java.security.krb5.conf")) {
+			LOGGER.info("Setting system property java.security.krb5.conf = " + kerberosConfig);
+			System.setProperty("java.security.krb5.conf", kerberosConfig);
+		}
     }
 
     @Override
@@ -327,17 +335,25 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
      *
      * @param prefix hdfs/hive/impala/ssh/spark
      * @param usernameVariableName user or username
-     * @param useCredentials create dummy if false
+     * @param realCredentials create real or dummy credentials (username might be empty in this case)
      * @param flowVariables map with all flow variables
      * @throws Exception if username or password missing
      */
 	private void addCredentialsFlowVariable(final String prefix, final String usernameVariableName,
-			final boolean useCredentials, final HashMap<String, FlowVariable> flowVariables) throws Exception {
+			final boolean realCredentials, final HashMap<String, FlowVariable> flowVariables) throws Exception {
 
 		flowVariables.put(prefix + ".credentialsName",
 				new FlowVariable(prefix + ".credentialsName", prefix + ".credentials"));
 
-		if (!flowVariables.containsKey(prefix + "." + usernameVariableName)
+		if (!realCredentials) {
+			flowVariables.put(prefix + "." + usernameVariableName,
+					new FlowVariable(prefix + "." + usernameVariableName, "dummy"));
+			flowVariables.put(prefix + ".password",
+					new FlowVariable(prefix + ".password", "dummy"));
+			flowVariables.put(prefix + ".credentials",
+					CredentialsStore.newCredentialsFlowVariable(prefix + ".credentials", "dummy", "dummy", false, false));
+
+		} else if (!flowVariables.containsKey(prefix + "." + usernameVariableName)
 				|| StringUtils.isBlank(flowVariables.get(prefix + "." + usernameVariableName).getStringValue())) {
 			throw new RuntimeException(
 					"Can't create " + prefix + " credentials flow variable without " + prefix + "." + usernameVariableName + "!");
@@ -349,8 +365,6 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 		} else {
 			final String username = flowVariables.get(prefix + "." + usernameVariableName).getStringValue();
 			final String password = flowVariables.get(prefix + ".password").getStringValue();
-			flowVariables.put(prefix + ".credentialsName",
-					new FlowVariable(prefix + ".credentialsName", prefix + ".credentials"));
 			flowVariables.put(prefix + ".credentials",
 					CredentialsStore.newCredentialsFlowVariable(prefix + ".credentials", username, password, false, false));
 		}
