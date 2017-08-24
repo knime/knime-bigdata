@@ -4,7 +4,7 @@
 #  (2) an existing bundling was changed
 version: knimebd-20170801
 
-# Global switch to control wheter source bundles will be created.
+# Global switch to control whether source bundles will be created.
 # Defaults to true.
 #
 # source: true
