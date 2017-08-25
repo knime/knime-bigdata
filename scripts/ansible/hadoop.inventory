@@ -58,6 +58,11 @@ worker1-cdh-5.8 ansible_host=10.0.0.8
 master-cdh-5.8-secured ansible_host=10.0.0.144 js1_env=cdh-5.8 js2_env=cdh js_keytab=cdh-5-8-secured.keytab
 worker0-cdh-5.8-secured ansible_host=10.0.0.143
 
+[cdh-5.11-secured-spark-2.1]
+master-cdh-5.11-secured-spark-2.1 ansible_host=10.0.0.13 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-11-secured-spark-2-1.keytab
+worker0-cdh-5.11-secured-spark-2.1 ansible_host=10.0.0.238
+worker1-cdh-5.11-secured-spark-2.1 ansible_host=10.0.0.30
+
 [cdh-5.12-secured]
 master-cdh-5.12-secured ansible_host=10.0.0.186 js1_env=cdh-5.11 js2_env=cdh js_keytab=cdh-5-12-secured.keytab
 worker0-cdh-5.12-secured ansible_host=10.0.0.184
@@ -83,6 +88,11 @@ worker0-hdp-2.4.2-secured ansible_host=10.0.0.212
 master-hdp-2.5-secured ansible_host=10.0.0.109 js1_env=hdp-2.5.0 js2_env=hdp js_keytab=hdp-2-5-secured.keytab
 worker0-hdp-2.5-secured ansible_host=10.0.0.183
 worker1-hdp-2.5-secured ansible_host=10.0.0.55
+
+[hdp-2.6-secured]
+master-hdp-2.6-secured ansible_host=10.0.0.72 js1_env=hdp-2.6.0 js2_env=hdp js_keytab=hdp-2-6-secured.keytab
+worker0-hdp-2.6-secured ansible_host=10.0.0.252
+worker1-hdp-2.6-secured ansible_host=10.0.0.74
 # ################# END OF KNUSTERS GENERATED ########################
 
 [hdpsandbox]
@@ -114,11 +124,13 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.11-secured-spark-2.1
 cdh-5.12-secured
 
 [hdp:children]
 hdp-2.4.2-secured
 hdp-2.5-secured
+hdp-2.6-secured
 
 [hdp-berlin:children]
 hdpsandbox
@@ -138,7 +150,9 @@ hdp-2.4.2-secured
 cdh-5.7-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.11-secured-spark-2.1
 hdp-2.5-secured
+hdp-2.6-secured
 cdh-5.9-secured
 cdh-5.8-secured
 cdh-5.12-secured
@@ -156,9 +170,11 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
+cdh-5.11-secured-spark-2.1
 cdh-5.12-secured
 hdp-2.4.2-secured
 hdp-2.5-secured
+hdp-2.6-secured
 
 # Put all clusters with Spark 2.0 in here
 [spark20-hosts:children]
@@ -168,8 +184,15 @@ cdh-5.8-secured
 cdh-5.9-secured
 cdh-5.10-secured
 cdh-5.11-secured
-cdh-5.12-secured
+cdh-5.11-secured-spark-2.1
+
 hdp-2.5-secured
+
+[spark21-hosts:children]
+hdp-2.6-secured
+
+[spark22-hosts:children]
+cdh-5.12-secured
 
 # #############################################################################
 #  Group variables
@@ -210,5 +233,18 @@ js1_conf="install_js_files/spark1_aws_environment.conf"
 
 [spark20-hosts:vars]
 js2_linkname=spark2-job-server
-js2_version='0.7.0.1-KNIME_spark-2.0'
+js2_version='0.7.0.2-KNIME_spark-2.0'
+# js2_conf="install_js_files/spark_yarncluster_aws_environment.conf"
+js2_conf="install_js_files/spark2_aws_environment.conf"
+
+[spark21-hosts:vars]
+js2_linkname=spark2-job-server
+js2_version='0.7.0.2-KNIME_spark-2.1'
+# js2_conf="install_js_files/spark_yarncluster_aws_environment.conf"
+js2_conf="install_js_files/spark2_aws_environment.conf"
+
+[spark22-hosts:vars]
+js2_linkname=spark2-job-server
+js2_version='0.7.0.2-KNIME_spark-2.2'
+# js2_conf="install_js_files/spark_yarncluster_aws_environment.conf"
 js2_conf="install_js_files/spark2_aws_environment.conf"

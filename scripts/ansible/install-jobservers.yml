@@ -10,7 +10,7 @@
         js_linkname: "{{js1_linkname}}"
         js_conf: "{{js1_conf}}"
 
-- hosts: hadoop-hosts:&master-*:&spark20-hosts
+- hosts: hadoop-hosts:&master-*:&spark2*-hosts
   tasks:
     - name: Install Base files for Spark 2.0 jobserver
       include: tasks/js_install_basefiles.yml
@@ -41,7 +41,7 @@
       vars:
         js_linkname: "{{js1_linkname}}"
 
-- hosts: hadoop-hosts:&master-*:&spark20-hosts:&secure-hosts
+- hosts: hadoop-hosts:&master-*:&spark2*-hosts:&secure-hosts
   tasks:
     - name: Setup Kerberos configuration for Spark 2.0 jobserver
       include: tasks/js_configure_kerberos.yml
@@ -77,7 +77,7 @@
     - name: Restart Jobserver
       service: name={{js1_linkname}} state=restarted
 
-- hosts: hadoop-hosts:&master-*:&spark20-hosts
+- hosts: hadoop-hosts:&master-*:&spark2*-hosts
   tasks:
     - name: Restart Jobserver
       service: name={{js2_linkname}} state=restarted
