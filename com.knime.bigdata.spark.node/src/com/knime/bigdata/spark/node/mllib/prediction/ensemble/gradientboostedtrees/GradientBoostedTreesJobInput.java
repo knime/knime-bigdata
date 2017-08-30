@@ -38,8 +38,6 @@ public class GradientBoostedTreesJobInput extends DecisionTreeJobInput {
 
     private static final String NO_OF_ITERATIONS = "noofIterations";
 
-    private static final String IS_CLASSIFICATION = "isClassifiation";
-
     private static final String LEARNING_RATE = "learningRate";
 
     //there are more options, search for 'further options' below
@@ -70,10 +68,9 @@ public class GradientBoostedTreesJobInput extends DecisionTreeJobInput {
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
         final int maxNoOfBins, final int aNumIterations, final double aLearningRate, final boolean aIsClassification,
         final InformationGain qualityMeasure) {
-        super(namedInputObject, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, maxDepth, maxNoOfBins,
+        super(namedInputObject, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, aIsClassification, maxDepth, maxNoOfBins,
             qualityMeasure);
         set(NO_OF_ITERATIONS, aNumIterations);
-        set(IS_CLASSIFICATION, aIsClassification);
         set(LEARNING_RATE, aLearningRate);
         final LossFunction lossFunction =
             aIsClassification ? LossFunction.LogLoss : LossFunction.SquaredError;
@@ -85,13 +82,6 @@ public class GradientBoostedTreesJobInput extends DecisionTreeJobInput {
      */
     public int getNoOfIterations() {
         return getInteger(NO_OF_ITERATIONS);
-    }
-
-    /**
-     * @return <code>true</code> if this is a classification
-     */
-    public boolean isClassification() {
-        return get(IS_CLASSIFICATION);
     }
 
     /**

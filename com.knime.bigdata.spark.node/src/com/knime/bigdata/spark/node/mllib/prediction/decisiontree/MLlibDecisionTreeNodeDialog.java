@@ -59,6 +59,8 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         gbc.gridx++;
         panel.add(m_components.getMaxDepthComponent().getComponentPanel(), gbc);
         gbc.gridx++;
+        panel.add(m_components.getIsClassificationComponent().getComponentPanel(), gbc);
+        gbc.gridx++;
         panel.add(m_components.getQualityMeasureComponent().getComponentPanel(), gbc);
         gbc.gridx++;
         gbc.weightx = 1;
@@ -67,7 +69,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         panel.add(m_components.getClassColComponent().getComponentPanel(), gbc);
 
         gbc.gridx = 0;
-        gbc.gridwidth=4;
+        gbc.gridwidth=5;
         gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;

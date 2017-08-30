@@ -7,9 +7,9 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html">Decision Tree</a> algorithm.
+			<a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html">Decision / Regression Tree</a> algorithm.
 			<p>
-            Please note that all data must be numeric, including the label column. 
+            Please note that all data must be numeric, including the label column for classification tasks. 
             Use the Spark Category To Number nodes to convert nominal values to
             numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
             </p>
@@ -23,6 +23,9 @@
 		</option>
 		<option name="Max depth">
 			Maximum depth of the tree (>= 0).
+		</option>
+		<option name="Is classification">
+			Indicates whether this is a classification or a regression task.
 		</option>
 		<option name="Quality measure">
 			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".

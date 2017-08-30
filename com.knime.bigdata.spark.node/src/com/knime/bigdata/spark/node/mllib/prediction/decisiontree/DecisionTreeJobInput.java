@@ -44,6 +44,9 @@ public class DecisionTreeJobInput extends ClassificationWithNominalFeatureInfoJo
     private static final String MAX_BINS = "maxBins";
 
 
+    /**isClassification - indicates whether this is a classification or regression task*/
+    private static final String IS_CLASSIFICATION = "isClassification";
+
     /**
      * Paramless constructor for automatic deserialization.
      */
@@ -55,17 +58,20 @@ public class DecisionTreeJobInput extends ClassificationWithNominalFeatureInfoJo
      * @param nominalFeatureInfo
      * @param classColIdx
      * @param noOfClasses
+     * @param isClassificationTask - indicates whether this is a classification or regression task
      * @param maxDepth
      * @param maxNoOfBins
      * @param qualityMeasure
      */
     protected DecisionTreeJobInput(final String namedInputObject, final Integer[] featureColIdxs,
-        final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
+        final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses,
+        final boolean isClassificationTask, final int maxDepth,
         final int maxNoOfBins, final InformationGain qualityMeasure) {
         super(namedInputObject, nominalFeatureInfo, noOfClasses, classColIdx, featureColIdxs);
         set(MAX_DEPTH, maxDepth);
         set(MAX_BINS, maxNoOfBins);
         set(QUALITY_MEASURE, qualityMeasure.name());
+        set(IS_CLASSIFICATION, isClassificationTask);
     }
 
     /**
@@ -88,4 +94,12 @@ public class DecisionTreeJobInput extends ClassificationWithNominalFeatureInfoJo
         final String measure = get(QUALITY_MEASURE);
         return InformationGain.valueOf(measure);
     }
+
+    /**
+     * @return <code>true</code> if this is a classification
+     */
+    public boolean isClassification() {
+        return get(IS_CLASSIFICATION);
+    }
+
 }

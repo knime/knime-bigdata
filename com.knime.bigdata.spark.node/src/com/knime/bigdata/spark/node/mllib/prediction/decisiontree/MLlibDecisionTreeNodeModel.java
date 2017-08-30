@@ -50,6 +50,7 @@ public class MLlibDecisionTreeNodeModel extends AbstractMLlibTreeNodeModel<Decis
         final MLlibSettings mllibSettings) {
         return new DecisionTreeJobInput(data.getTableName(), mllibSettings.getFeatueColIdxs(),
             mllibSettings.getNominalFeatureInfo(), mllibSettings.getClassColIdx(), mllibSettings.getNumberOfClasses(),
+            settings.isClassification(),
             settings.getMaxDepth(), settings.getMaxNoOfBins(), settings.getQualityMeasure());
     }
 }

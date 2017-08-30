@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.DecisionTree;
@@ -48,22 +49,22 @@ import com.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
 public class DecisionTreeJob implements SparkJob<DecisionTreeJobInput, ModelJobOutput> {
 
     private static final long serialVersionUID = 1L;
+
     private final static Logger LOGGER = Logger.getLogger(DecisionTreeJob.class.getName());
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ModelJobOutput runJob(final SparkContext sparkContext, final DecisionTreeJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException, Exception {
+    public ModelJobOutput runJob(final SparkContext sparkContext, final DecisionTreeJobInput input,
+        final NamedObjects namedObjects) throws KNIMESparkException, Exception {
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
         final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
 
         final DecisionTreeModel model = execute(sparkContext, input, inputRdd);
 
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD,
-            inputRdd, model);
+        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model);
         LOGGER.log(Level.INFO, "Decision Tree Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);
@@ -84,13 +85,19 @@ public class DecisionTreeJob implements SparkJob<DecisionTreeJobInput, ModelJobO
         final Map<Integer, Integer> nominalFeatureInfo = input.getNominalFeatureInfo().getMap();
         final Long numClasses = SupervisedLearnerUtils.getNoOfClasses(input, aInputData);
         LOGGER.log(Level.FINE, "Training decision tree for " + numClasses + " classes.");
-        LOGGER.log(Level.FINE, "Training decision tree with info for " + nominalFeatureInfo.size()
-            + " nominal features: ");
-        try {
-            return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo,
-                input.getQualityMeasure().name(), input.getMaxDepth(), input.getMaxNoOfBins());
-        } catch (Exception e) {
-            throw new KNIMESparkException(e);
+        LOGGER.log(Level.FINE,
+            "Training decision tree with info for " + nominalFeatureInfo.size() + " nominal features: ");
+
+        if (!input.isClassification()) {
+            return DecisionTree.trainRegressor(aInputData, nominalFeatureInfo, "variance", input.getMaxDepth(),
+                input.getMaxNoOfBins());
+        } else {
+            try {
+                return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo,
+                    input.getQualityMeasure().name(), input.getMaxDepth(), input.getMaxNoOfBins());
+            } catch (Exception e) {
+                throw new KNIMESparkException(e);
+            }
         }
     }
 

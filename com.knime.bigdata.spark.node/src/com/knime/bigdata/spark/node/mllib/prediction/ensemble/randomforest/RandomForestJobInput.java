@@ -45,11 +45,6 @@ public class RandomForestJobInput extends DecisionTreeJobInput {
      */
     private static final String NUM_TREES = "numTrees";
 
-    /**
-     * train a classifier or a regression
-     */
-    private static final String IS_CLASSIFICATION = "isClassification";
-
     private static final String RANDOM_SEED = "seed";
 
     /**
@@ -75,10 +70,9 @@ public class RandomForestJobInput extends DecisionTreeJobInput {
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
         final int maxNoOfBins, final int aNumTrees, final boolean aIsClassification,
         final FeatureSubsetStrategy aFSStrategy, final Integer aRandomSeed, final InformationGain qualityMeasure) {
-        super(aInputRDD, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, maxDepth, maxNoOfBins,
+        super(aInputRDD, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, aIsClassification, maxDepth, maxNoOfBins,
             qualityMeasure);
         set(NUM_TREES, aNumTrees);
-        set(IS_CLASSIFICATION, aIsClassification);
         set(FEATURE_SUBSET_STRATEGY, aFSStrategy.name());
         set(RANDOM_SEED, aRandomSeed);
     }
@@ -88,13 +82,6 @@ public class RandomForestJobInput extends DecisionTreeJobInput {
      */
     public int getNoOfTrees() {
         return getInteger(NUM_TREES);
-    }
-
-    /**
-     * @return <code>true</code> to train a classifier or <code>false</code> for a regression
-     */
-    public boolean isClassification() {
-        return get(IS_CLASSIFICATION);
     }
 
     /**

@@ -86,11 +86,17 @@ public class DecisionTreeJob implements SparkJob<DecisionTreeJobInput, ModelJobO
         LOGGER.log(Level.FINE, "Training decision tree for " + numClasses + " classes.");
         LOGGER.log(Level.FINE, "Training decision tree with info for " + nominalFeatureInfo.size()
             + " nominal features: ");
-        try {
-            return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo,
-                input.getQualityMeasure().name(), input.getMaxDepth(), input.getMaxNoOfBins());
-        } catch (Exception e) {
-            throw new KNIMESparkException(e);
+
+        if (!input.isClassification()) {
+            return DecisionTree.trainRegressor(aInputData, nominalFeatureInfo, "variance", input.getMaxDepth(),
+                input.getMaxNoOfBins());
+        } else {
+            try {
+                return DecisionTree.trainClassifier(aInputData, numClasses.intValue(), nominalFeatureInfo,
+                    input.getQualityMeasure().name(), input.getMaxDepth(), input.getMaxNoOfBins());
+            } catch (Exception e) {
+                throw new KNIMESparkException(e);
+            }
         }
     }
 
