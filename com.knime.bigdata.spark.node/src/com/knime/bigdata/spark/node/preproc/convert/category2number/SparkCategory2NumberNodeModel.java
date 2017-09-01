@@ -161,7 +161,8 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
                 createResultSpec(spec, includeColIdxs, null, keepOriginalColumns, mappingType, suffix);
         final SparkDataPortObjectSpec resultSpec;
         if (tableSpec != null) {
-            resultSpec = new SparkDataPortObjectSpec(sparkSpec.getContextID(), tableSpec);
+            resultSpec =
+                new SparkDataPortObjectSpec(sparkSpec.getContextID(), tableSpec, getKNIMESparkExecutorVersion());
         } else {
             resultSpec = null;
         }
@@ -192,7 +193,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         final FilterResult filterResult = m_cols.applyTo(inputTableSpec);
         final String[] includedCols = filterResult.getIncludes();
         final Integer[] includeColIdxs = SparkUtil.getColumnIndices(inputTableSpec, includedCols);
-        final String resultTableName = SparkIDs.createRDDID();
+        final String resultTableName = SparkIDs.createSparkDataObjectID();
         final Category2NumberJobInput jobInput =  new Category2NumberJobInput(rdd.getData().getID(), includeColIdxs,
             includedCols, mappingType, keepOriginalColumns, suffix, resultTableName);
 
@@ -218,7 +219,8 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         for (final TransformationDictionary dict : dicts) {
             outPMMLPort.addGlobalTransformations(dict);
         }
-        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableName, resultSpec);
+        final SparkDataTable resultTable =
+            new SparkDataTable(contextID, resultTableName, resultSpec, getKNIMESparkExecutorVersion());
         return new PortObject[]{new SparkDataPortObject(resultTable), outPMMLPort};
     }
 
@@ -392,7 +394,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_cols.saveSettingsTo(settings);
         m_mappingType.saveSettingsTo(settings);
         m_keepOriginalCols.saveSettingsTo(settings);
@@ -403,7 +405,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_cols.validateSettings(settings);
         final String mappingType =
                 ((SettingsModelString)m_mappingType.createCloneWithValidatedValue(settings)).getStringValue();
@@ -418,7 +420,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_cols.loadSettingsFrom(settings);
         m_mappingType.loadSettingsFrom(settings);
         m_keepOriginalCols.loadSettingsFrom(settings);

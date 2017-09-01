@@ -101,7 +101,7 @@ public class SparkColumnFilterNodeModel extends AbstractSparkColumnFilterNodeMod
      * @param settings the object to save the settings into
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_conf != null) {
             m_conf.saveConfiguration(settings);
         }
@@ -115,7 +115,7 @@ public class SparkColumnFilterNodeModel extends AbstractSparkColumnFilterNodeMod
      *             size or a particular column key
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         DataColumnSpecFilterConfiguration conf = createDCSFilterConfiguration();
         conf.loadConfigurationInModel(settings);
         m_conf = conf;
@@ -123,7 +123,7 @@ public class SparkColumnFilterNodeModel extends AbstractSparkColumnFilterNodeMod
 
     /** {@inheritDoc} */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         DataColumnSpecFilterConfiguration conf = createDCSFilterConfiguration();
         conf.loadConfigurationInModel(settings);
     }

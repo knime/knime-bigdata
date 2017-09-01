@@ -401,7 +401,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_firstCompareColumn != null) {
             settings.addString(FIRST_COMP_ID, m_firstCompareColumn);
         }
@@ -418,7 +418,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         settings.getString(FIRST_COMP_ID);
         settings.getString(SECOND_COMP_ID);
     }
@@ -427,7 +427,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_firstCompareColumn = settings.getString(FIRST_COMP_ID);
         m_secondCompareColumn = settings.getString(SECOND_COMP_ID);
 

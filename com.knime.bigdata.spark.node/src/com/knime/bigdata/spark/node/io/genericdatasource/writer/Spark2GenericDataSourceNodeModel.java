@@ -143,7 +143,7 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         final boolean uploadDriver = m_settings.uploadDriver();
 
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[1];
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
 
         LOGGER.info("Writing " + rdd.getData().getID() + " rdd into " + outputPath);
         final JobWithFilesRunFactory<Spark2GenericDataSourceJobInput, EmptyJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(rdd.getContextID(), JOB_ID);
@@ -205,17 +205,17 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 }

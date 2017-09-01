@@ -162,7 +162,7 @@ public class MLlibCorrelationFilterNodeModel extends AbstractSparkColumnFilterNo
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         m_threshold.loadSettingsFrom(settings);
     }
@@ -171,7 +171,7 @@ public class MLlibCorrelationFilterNodeModel extends AbstractSparkColumnFilterNo
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_threshold.saveSettingsTo(settings);
     }
 
@@ -179,7 +179,7 @@ public class MLlibCorrelationFilterNodeModel extends AbstractSparkColumnFilterNo
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         m_threshold.validateSettings(settings);
     }

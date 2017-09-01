@@ -23,7 +23,9 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader.json;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.osgi.framework.Version;
 
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
@@ -71,13 +73,13 @@ public class Json2SparkSettings extends GenericDataSource2SparkSettings {
     private boolean m_allowNonNumericNumbers = DEFAULT_ALLOW_NON_NUMERIC_NUMBERS;
 
     /** @see GenericDataSource2SparkSettings#GenericDataSource2SparkSettings(String, boolean) */
-    public Json2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver) {
-        super(format, minSparkVersion, hasDriver);
+    public Json2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver, final Version knimeSparkExecutorVersion) {
+        super(format, minSparkVersion, hasDriver, knimeSparkExecutorVersion);
     }
 
     @Override
     protected GenericDataSource2SparkSettings newInstance() {
-        return new Json2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver());
+        return new Json2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver(), SparkPluginVersion.VERSION_CURRENT);
     }
 
     /** @return Sampling ratio to infer schema from */

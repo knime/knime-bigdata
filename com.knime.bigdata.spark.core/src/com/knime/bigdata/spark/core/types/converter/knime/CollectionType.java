@@ -31,9 +31,11 @@ import org.knime.core.data.collection.CollectionDataValue;
 import org.knime.core.data.collection.ListCell;
 import org.knime.core.data.collection.SetCell;
 import org.knime.core.data.collection.SetDataValue;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  *
@@ -138,5 +140,29 @@ public class CollectionType implements KNIMEToIntermediateConverter {
             return vals;
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version getLowestSupportedVersion() {
+        return SparkPluginVersion.VERSION_ZERO;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version getHighestSupportedVersion() {
+        return SparkPluginVersion.VERSION_INFINITY;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsVersion(final Version knimeSparkExecutorVersion) {
+        return true;
     }
 }

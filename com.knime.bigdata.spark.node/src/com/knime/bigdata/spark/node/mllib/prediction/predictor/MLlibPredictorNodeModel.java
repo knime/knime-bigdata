@@ -95,7 +95,8 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         }
 
         final DataTableSpec resultTableSpec = createSpec(inputRDD.getTableSpec());
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(inputRDD.getContextID(), resultTableSpec)};
+        return new PortObjectSpec[]{
+            new SparkDataPortObjectSpec(inputRDD.getContextID(), resultTableSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -110,9 +111,10 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
         final DataTableSpec inputSpec = data.getTableSpec();
         final Integer[] colIdxs = model.getLearningColumnIndices(inputSpec);
         final DataTableSpec resultSpec = createSpec(inputSpec);
-        final IntermediateSpec resultsInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec);
-        final String aOutputTableName = SparkIDs.createRDDID();
-        final SparkDataTable resultRDD = new SparkDataTable(data.getContextID(), aOutputTableName, resultSpec);
+        final IntermediateSpec resultsInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
+        final String aOutputTableName = SparkIDs.createSparkDataObjectID();
+        final SparkDataTable resultRDD =
+            new SparkDataTable(data.getContextID(), aOutputTableName, resultSpec, getKNIMESparkExecutorVersion());
         final PredictionJobInput jobInput = new PredictionJobInput(data.getTableName(), colIdxs, resultRDD.getID(), resultsInterSpec);
 
         final File modelFile = jobInput.writeModelIntoTemporaryFile(model.getModel());
@@ -153,7 +155,7 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_colName.saveSettingsTo(settings);
     }
 
@@ -161,7 +163,7 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_colName.validateSettings(settings);
     }
 
@@ -169,7 +171,7 @@ public class MLlibPredictorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_colName.loadSettingsFrom(settings);
     }
 }

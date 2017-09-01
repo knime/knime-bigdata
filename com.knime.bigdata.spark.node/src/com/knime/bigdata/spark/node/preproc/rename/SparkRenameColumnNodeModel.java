@@ -60,6 +60,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.ConvenienceMethods;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -111,7 +112,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
             setWarningMessage("The following columns are configured but no longer exist: "
                 + ConvenienceMethods.getShortStringFrom(missingColumnNames, 5));
         }
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec)};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -121,27 +122,32 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject inputPort = (SparkDataPortObject) inObjects[0];
         final DataTableSpec outputTableSpec = m_config.getNewSpec(inputPort.getTableSpec());
-        return new PortObject[] { executeRenameColumnJob(inputPort, outputTableSpec, exec) };
+        return new PortObject[] { executeRenameColumnJob(inputPort, outputTableSpec, getKNIMESparkExecutorVersion(), exec) };
     }
 
     /**
      * Executes the rename column spark job.
      * @param inputPort - input RDD/data frame
      * @param outputTableSpec - output table spec with renamed columns
+     * @param knimeparkExecutorVersion
      * @param exec
      * @return output port with renamed columns
      * @throws Exception
      */
-    public static PortObject executeRenameColumnJob(final SparkDataPortObject inputPort, final DataTableSpec outputTableSpec, final ExecutionContext exec) throws Exception {
+    public static PortObject executeRenameColumnJob(final SparkDataPortObject inputPort,
+        final DataTableSpec outputTableSpec, final Version knimeparkExecutorVersion, final ExecutionContext exec)
+        throws Exception {
+
         final SparkContextID contextID = inputPort.getContextID();
         final String namedInputObject = inputPort.getData().getID();
-        final String namedOutputObject = SparkIDs.createRDDID();
-        final IntermediateSpec outputSpec = SparkDataTableUtil.toIntermediateSpec(outputTableSpec);
+        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
+        final IntermediateSpec outputSpec =
+            SparkDataTableUtil.toIntermediateSpec(outputTableSpec, knimeparkExecutorVersion);
 
         final RenameColumnJobInput jobInput = new RenameColumnJobInput(namedInputObject, namedOutputObject, outputSpec);
         SparkContextUtil.getJobRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
 
-        final SparkDataTable outputTable = new SparkDataTable(contextID, namedOutputObject, outputTableSpec);
+        final SparkDataTable outputTable = new SparkDataTable(contextID, namedOutputObject, outputTableSpec, knimeparkExecutorVersion);
         final SparkDataPortObject outputPort = new SparkDataPortObject(outputTable);
         return outputPort;
     }
@@ -150,7 +156,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_config != null) {
             final NodeSettingsWO subSettings = settings.addNodeSettings(CFG_SUB_CONFIG);
             m_config.save(subSettings);
@@ -161,7 +167,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         new RenameConfiguration(settings.getNodeSettings(CFG_SUB_CONFIG));
     }
 
@@ -169,7 +175,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_config = new RenameConfiguration(settings.getNodeSettings(CFG_SUB_CONFIG));
     }
 }

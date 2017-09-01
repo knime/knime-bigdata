@@ -151,7 +151,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         //check that all columns are present in the input data
         createMLlibSettings(tableSpec);
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
             new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME)};
     }
 
@@ -187,7 +187,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
         //vMatrix is the prediction result
         final DataTableSpec vMatrixSpec = createResultTableSpec(tableSpec);
-        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec);
+        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec, getKNIMESparkExecutorVersion());
         exec.checkCanceled();
         final CollaborativeFilteringJobInput jobInput = new CollaborativeFilteringJobInput(data.getTableName(),
             vMatrixRDD.getID(), userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,
@@ -197,7 +197,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
             SparkContextManager.getOrCreateSparkContext(data.getContextID()).getSparkVersion(), MODEL_NAME,
             output.getModel(), settings);
         //add the model RDDs to the list of RDDs to delete on reset
-        additionalRDDs2Delete(data.getContextID(), output.getUserFeaturesObjectName(),
+        addAdditionalSparkDataObjectsToDelete(data.getContextID(), output.getUserFeaturesObjectName(),
             output.getProductFeaturesObjectName());
         exec.setMessage("Collaborative filtering (SPARK) done.");
         return new PortObject[]{new SparkDataPortObject(vMatrixRDD), new SparkModelPortObject(sparkModel)};
@@ -244,7 +244,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_productCol.saveSettingsTo(settings);
         m_userCol.saveSettingsTo(settings);
         m_lambda.saveSettingsTo(settings);
@@ -260,7 +260,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_productCol.validateSettings(settings);
         m_userCol.validateSettings(settings);
         m_lambda.validateSettings(settings);
@@ -276,7 +276,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_productCol.loadSettingsFrom(settings);
         m_userCol.loadSettingsFrom(settings);
         m_lambda.loadSettingsFrom(settings);

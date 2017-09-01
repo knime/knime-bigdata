@@ -38,17 +38,18 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeLogger;
+import org.osgi.framework.Version;
 
-import com.knime.bigdata.spark.core.types.TypeConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
+ * Registry class by which to obtain the {@link KNIMEToIntermediateConverter}s registered at the
+ * KNIMEToIntermediateConverter extension point.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
  */
 public class KNIMEToIntermediateConverterRegistry {
 
@@ -72,14 +73,15 @@ public class KNIMEToIntermediateConverterRegistry {
     private final Map<IntermediateDataType, Collection<KNIMEToIntermediateConverter>> m_intermediate2Knime =
         new HashMap<>();
 
+    @SuppressWarnings("deprecation")
     private KNIMEToIntermediateConverterRegistry() {
         //avoid object creation
         addConverter(BooleanType.INSTANCE);
+        addConverter(LocalDateType.INSTANCE);
+        addConverter(LocalDateTimeType.INSTANCE);
         addConverter(DateAndTimeType.INSTANCE);
         addConverter(DoubleType.INSTANCE);
         addConverter(IntegerType.INSTANCE);
-        addConverter(LocalDateType.INSTANCE);
-        addConverter(LocalDateTimeType.INSTANCE);
         addConverter(LongType.INSTANCE);
         addConverter(StringType.INSTANCE);
         //register all extension point implementations
@@ -142,7 +144,7 @@ public class KNIMEToIntermediateConverterRegistry {
     }
 
     /**
-     * @param typeConverter the {@link KNIMEToIntermediateConverter} to register
+     * Adds a type converter to the internal maps.
      */
     private void addConverter(final KNIMEToIntermediateConverter typeConverter) {
 
@@ -167,57 +169,111 @@ public class KNIMEToIntermediateConverterRegistry {
     }
 
     /**
-     * @param type the {@link DataType} to get the converter for
-     * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
+     * Returns a type converter that (1) converts the given KNIME {@link DataType} into an intermediate data type and
+     * (2) supports the given version of KNIME Spark Executor, i.e. one which is supposed to be used by nodes that were
+     * created with the given version. This "version constraint" ensures that old workflows with Spark nodes continue to
+     * produce exactly the same results even in future versions of KNIME Spark Executor. If no matching type converter
+     * could be found a default type converted will be returned.
+     *
+     * @param type The KNIME {@link DataType} to get the converter for.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor that must be supported by the converter.
+     * @return A {@link KNIMEToIntermediateConverter} to use for the given KNIME type and version.
      * @see #getDefaultConverter()
+     * @since 2.1.0
      */
-    public static KNIMEToIntermediateConverter get(final DataType type) {
+    public static KNIMEToIntermediateConverter get(final DataType type, final Version knimeSparkExecutorVersion) {
         //we have to handle collection types special
         if (type.isCollectionType()) {
             final DataType elementType = type.getCollectionElementType();
-            final KNIMEToIntermediateConverter converter = get(elementType);
+            final KNIMEToIntermediateConverter converter = get(elementType, knimeSparkExecutorVersion);
             return new CollectionType(type, converter);
         }
+
         final KNIMEToIntermediateConverter converter = getInstance().m_knime2Intermediate.get(type);
-        return (converter != null) ? converter : DEFAULT_CONVERTER;
-    }
 
-    /**
-     * @param type the {@link IntermediateDataType} to get the converter for
-     * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
-     * @see #getDefaultConverter()
-     * @deprecated This implementation returns the first available converter.
-     */
-    @Deprecated
-    private static KNIMEToIntermediateConverter get(final IntermediateDataType type) {
-        return getConverterList(getInstance().m_intermediate2Knime, type).iterator().next();
-    }
-
-    /**
-     * @param type the {@link IntermediateDataType} to get the converter for
-     * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
-     * @see #getDefaultConverter()
-     */
-    @Deprecated
-    private static Collection<KNIMEToIntermediateConverter> getAll(final IntermediateDataType type) {
-        return getConverterList(getInstance().m_intermediate2Knime, type);
-    }
-
-    @Deprecated
-    private static <K extends IntermediateDataType> Collection<KNIMEToIntermediateConverter>
-        getConverterList(final Map<K, Collection<KNIMEToIntermediateConverter>> map, final K key) {
-        if (key instanceof IntermediateArrayDataType) {
-            final IntermediateArrayDataType arrayType = (IntermediateArrayDataType) key;
-            final IntermediateDataType baseType = arrayType.getBaseType();
-            final Collection<KNIMEToIntermediateConverter> converters = getAll(baseType);
-            final Collection<KNIMEToIntermediateConverter> arrayConverter = new ArrayList<>(converters.size());
-            for (KNIMEToIntermediateConverter converter : converters) {
-                arrayConverter.add(new CollectionType(null, converter));
-            }
-            return arrayConverter;
+        if (converter != null && converter.supportsVersion(knimeSparkExecutorVersion)) {
+            return converter;
+        } else {
+            return DEFAULT_CONVERTER;
         }
-        final Collection<KNIMEToIntermediateConverter> converter = map.get(key);
-        return converter != null ? converter : getDefaultConverterCollection();
+    }
+
+    /**
+     * Returns a type converter that (1) converts the given {@link IntermediateDataType} into a KNIME {@link DataType}
+     * and (2) supports the given version of KNIME Spark Executor, i.e. one which is supposed to be used by nodes that were
+     * created with the given version. This "version constraint" ensures that old workflows with Spark nodes continue to
+     * produce exactly the same results even in future versions of KNIME Spark Executor. If no matching type converter
+     * could be found a default type converter will be returned.
+     *
+     * <p>
+     * Note there may be multiple type converters that match. This method returns the "first" one, so this may change
+     * between versions of KNIME Spark Executor (which is why this method is deprecated).
+     * </p>
+     *
+     * @param type The {@link IntermediateDataType} to get the converter for.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor that must be supported by the converter.
+     * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
+     * @see #getDefaultConverter()
+     * @deprecated This implementation returns the first available converter, which may change between versions of KNIME
+     *             Spark Executor. New code should use {@link #getAll(IntermediateDataType, Version)} instead.
+     */
+    @Deprecated
+    public static KNIMEToIntermediateConverter get(final IntermediateDataType type,
+        final Version knimeSparkExecutorVersion) {
+        return getAll(type, knimeSparkExecutorVersion).iterator().next();
+    }
+
+
+    /**
+     * Returns a list of type converters that (1) convert the given {@link IntermediateDataType} into a KNIME
+     * {@link DataType} and (2) support the given version of KNIME Spark Executor, i.e. which are supposed to be used by
+     * nodes that were created with the given version. This "version constraint" ensures that old workflows with Spark
+     * nodes continue to produce exactly the same results even in future versions of KNIME Spark Executor. If no
+     * matching type converter could be found, then default type converters will be returned.
+     *
+     * @param type The {@link IntermediateDataType} to get the converters for.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor that must be supported by the converters.
+     * @return a list of matching {@link KNIMEToIntermediateConverter}, or default type converters.
+     * @since 2.1.0
+     * @see #getDefaultConverter()
+     */
+    public static Collection<KNIMEToIntermediateConverter> getAll(final IntermediateDataType type,
+        final Version knimeSparkExecutorVersion) {
+        if (type instanceof IntermediateArrayDataType) {
+            final IntermediateArrayDataType arrayType = (IntermediateArrayDataType)type;
+            final IntermediateDataType baseType = arrayType.getBaseType();
+            final Collection<KNIMEToIntermediateConverter> baseTypeConverters =
+                getAll(baseType, knimeSparkExecutorVersion);
+
+            final Collection<KNIMEToIntermediateConverter> arrayConverters = new ArrayList<>(baseTypeConverters.size());
+            for (KNIMEToIntermediateConverter converter : baseTypeConverters) {
+                arrayConverters.add(new CollectionType(null, converter));
+            }
+            return arrayConverters;
+        }
+
+        final Collection<KNIMEToIntermediateConverter> candidateConverters =
+            getInstance().m_intermediate2Knime.get(type);
+        final Collection<KNIMEToIntermediateConverter> toReturn;
+        if (candidateConverters == null) {
+            toReturn = filterByKNIMESparkExecutorVersion(getDefaultConverterCollection(), knimeSparkExecutorVersion);
+        } else {
+            toReturn = filterByKNIMESparkExecutorVersion(candidateConverters, knimeSparkExecutorVersion);
+        }
+        return toReturn;
+    }
+
+    private static Collection<KNIMEToIntermediateConverter> filterByKNIMESparkExecutorVersion(
+        final Collection<KNIMEToIntermediateConverter> candidates, final Version knimeSparkExecutorVersion) {
+
+        final List<KNIMEToIntermediateConverter> toReturn = new LinkedList<>();
+        for (KNIMEToIntermediateConverter candidate : candidates) {
+            if (candidate.supportsVersion(knimeSparkExecutorVersion)) {
+                toReturn.add(candidate);
+            }
+        }
+
+        return toReturn;
     }
 
     private static Collection<KNIMEToIntermediateConverter> getDefaultConverterCollection() {
@@ -225,46 +281,64 @@ public class KNIMEToIntermediateConverterRegistry {
     }
 
     /**
-     * @return the default converter to use for all unknown type
+     * Return the default {@link KNIMEToIntermediateConverter} that converts any KNIME {@link DataType} into and
+     * intermediate type and any intermediate type into a KNIME {@link DataType}. Currently this this is
+     * {@link StringType}.
+     *
+     * @return the default converter
      */
-    public static TypeConverter getDefaultConverter() {
+    public static KNIMEToIntermediateConverter getDefaultConverter() {
         return DEFAULT_CONVERTER;
     }
 
     /**
-     * @param spec {@link DataTableSpec} to get the converter for
-     * @return {@link KNIMEToIntermediateConverter} array with the appropriate converter for each data column of the
-     *         input spec in the same order as the input columns
+     * Returns the type converters to convert the given KNIME {@link DataTableSpec} into an {@link IntermediateSpec}.
+     * See {@link #get(DataType, Version)} to see how the converters are chosen.
+     *
+     * @param spec The KNIME {@link DataTableSpec} to get the converters for.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor that must be supported by the converters.
+     * @return an array of {@link KNIMEToIntermediateConverter}s
+     * @see #get(DataType, Version)
+     * @since 2.1.0
      */
-    public static KNIMEToIntermediateConverter[] getConverter(final DataTableSpec spec) {
+    public static KNIMEToIntermediateConverter[] getConverters(final DataTableSpec spec, final Version knimeSparkExecutorVersion) {
         KNIMEToIntermediateConverter[] converter = new KNIMEToIntermediateConverter[spec.getNumColumns()];
         int idx = 0;
         for (DataColumnSpec colSpec : spec) {
-            converter[idx++] = get(colSpec.getType());
+            converter[idx++] = get(colSpec.getType(), knimeSparkExecutorVersion);
         }
         return converter;
     }
 
     /**
-     * This converts the given {@link IntermediateSpec} into a {@link DataTableSpec} by retrieving the
-     * first {@link KNIMEToIntermediateConverter} for each field of the {@link IntermediateSpec} and then using the
-     * KNIME {@link DataType} of the returned converter. Use this with caution, as for {@link IntermediateDataType}s
-     * that are the target type of multiple converters (e.g. {@link IntermediateDataTypes#BINARY}) this may not give
-     * the result you want.
+     * Converts the given {@link IntermediateSpec} into a KNIME {@link DataTableSpec}.
+     *
+     * <p>
+     * For each column this method picks a converter that (1) converts the respective {@link IntermediateDataType} into
+     * a KNIME {@link DataType} and (2) supports the given version of KNIME Spark Executor, i.e. one which is supposed
+     * to be used by nodes that were created with the given version. This "version constraint" ensures that old
+     * workflows with Spark nodes continue to produce exactly the same results even in future versions of KNIME Spark
+     * Executor. If no matching type converter could be found, then default type converter is used. Note there may be
+     * multiple type converters that match. This method returns the "first" one, so it may use converters that produce
+     * undesired KNIME types.
+     * </p>
      *
      * @param intermediateSpec
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor tp be used while selecting type converters.
      * @return a KNIME {@link DataTableSpec} with converted types.
-     * @deprecated This implementation use the first available converter.
+     * @deprecated This method may produce a spec with undesired KNIME data types. New code should use
+     *             {@link #getAll(IntermediateDataType, Version)} and pick the converted that produces the desired KNIME
+     *             type.
      */
     @Deprecated
-    public static DataTableSpec convertSpec(final IntermediateSpec intermediateSpec) {
+    public static DataTableSpec convertSpec(final IntermediateSpec intermediateSpec, final Version knimeSparkExecutorVersion) {
         final List<DataColumnSpec> knimeColumns = new LinkedList<>();
 
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("foo", StringCell.TYPE);
 
         for (IntermediateField intermediateField : intermediateSpec.getFields()) {
             specCreator.setName(intermediateField.getName());
-            specCreator.setType(get(intermediateField.getType()).getKNIMEDataType());
+            specCreator.setType(get(intermediateField.getType(), knimeSparkExecutorVersion).getKNIMEDataType());
             knimeColumns.add(specCreator.createSpec());
         }
         return new DataTableSpec(knimeColumns.toArray(new DataColumnSpec[0]));

@@ -27,7 +27,6 @@ import javax.swing.JComponent;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
@@ -40,14 +39,11 @@ import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 
 /**
- * Spark data {@link PortObject} implementation which holds a reference to a {@link SparkDataTable} object.
+ * {@link PortObject} implementation which holds a reference to a {@link SparkDataTable} object.
  *
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkDataPortObject extends SparkContextPortObject {
-
-
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkDataPortObject.class);
 
     /**
      * Database port type.

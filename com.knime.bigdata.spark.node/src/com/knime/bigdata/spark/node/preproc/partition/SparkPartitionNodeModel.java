@@ -64,20 +64,20 @@ public class SparkPartitionNodeModel extends SparkSamplingNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
         SparkContextID contextID = rdd.getContextID();
-        final SparkDataTable resultTable1 = new SparkDataTable(contextID, rdd.getData().getTableSpec());
-        final SparkDataTable resultTable2 = new SparkDataTable(contextID, rdd.getData().getTableSpec());
+        final SparkDataTable resultTable1 = new SparkDataTable(contextID, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable2 = new SparkDataTable(contextID, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
         exec.setMessage("Start Spark partitioning job...");
         final boolean samplesRddIsInputRdd = runJob(exec, PARTITION_JOB_ID, rdd, resultTable1.getID(), resultTable2.getID());
         SparkDataTable firstOutput;
         if (samplesRddIsInputRdd) {
             //disable the automatic RDD handling since the first output RDD is the input RDD which
             //should not be deleted on node reset
-            setAutomticRDDHandling(false);
-            additionalRDDs2Delete(contextID, resultTable2.getID());
+            setAutomaticSparkDataHandling(false);
+            addAdditionalSparkDataObjectsToDelete(contextID, resultTable2.getID());
             firstOutput = rdd.getData();
         } else {
             //ensure that the automatic RDD handling is enabled
-            setAutomticRDDHandling(true);
+            setAutomaticSparkDataHandling(true);
             firstOutput = resultTable1;
         }
         return new PortObject[] {new SparkDataPortObject(firstOutput), new SparkDataPortObject(resultTable2)};

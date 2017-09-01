@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.api.job.SparkJobExecutionFactoryProvider"/>
+                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

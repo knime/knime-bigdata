@@ -80,7 +80,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
             setWarningMessage("Fetching only first " + m_fetchSize.getIntValue() + " rows");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        return new PortObjectSpec[] {SparkDataTableUtil.getDataTableSpec(spec.getTableSpec())};
+        return new PortObjectSpec[] { spec.getTableSpec() };
     }
 
     /**
@@ -108,7 +108,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_fetchSize.saveSettingsTo(settings);
         m_fetchAll.saveSettingsTo(settings);
     }
@@ -117,7 +117,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fetchSize.validateSettings(settings);
         m_fetchAll.validateSettings(settings);
     }
@@ -126,7 +126,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fetchSize.loadSettingsFrom(settings);
         m_fetchAll.loadSettingsFrom(settings);
     }

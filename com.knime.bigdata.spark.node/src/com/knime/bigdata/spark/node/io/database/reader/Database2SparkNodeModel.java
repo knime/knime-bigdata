@@ -111,7 +111,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         final SparkContextID contextID = getContextID(inData);
         ensureContextIsOpen(contextID);
 
-        final String namedOutputObject = SparkIDs.createRDDID();
+        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final ArrayList<File> jarFiles = new ArrayList<>();
         final Database2SparkJobInput jobInput = createJobInput(namedOutputObject, dbSettings);
         LOGGER.debug("Using JDBC Url: " + jobInput.getUrl());
@@ -126,10 +126,11 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
             final JobOutput jobOutput = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID)
                 .createRun(jobInput, jarFiles)
                 .run(contextID, exec);
-            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
-            final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, outputSpec);
-            final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
-            return new PortObject[] { sparkObject };
+            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
+                .convertSpec(jobOutput.getSpec(namedOutputObject), getKNIMESparkExecutorVersion());
+
+            return new PortObject[]{new SparkDataPortObject(
+                new SparkDataTable(contextID, namedOutputObject, outputSpec, getKNIMESparkExecutorVersion()))};
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Failed to load JDBC data: No suitable driver")) {
@@ -222,17 +223,17 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 }

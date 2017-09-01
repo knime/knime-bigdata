@@ -73,18 +73,18 @@ public class MLlib2PMMLNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {}
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) {}
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) {}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) {}
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) {}
 
 }

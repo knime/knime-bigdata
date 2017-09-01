@@ -135,7 +135,7 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
         final CredentialsProvider cp = getCredentialsProvider();
         final Properties conProperties = new Properties();
         final String namedInputObject = rdd.getData().getID();
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
         final Spark2DatabaseJobInput input = new Spark2DatabaseJobInput(namedInputObject, schema,
             settings.getJDBCUrl(), m_settings.getTable(), m_settings.getSaveMode(), conProperties);
 
@@ -170,17 +170,17 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 }

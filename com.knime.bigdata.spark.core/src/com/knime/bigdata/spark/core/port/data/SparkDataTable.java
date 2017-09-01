@@ -31,35 +31,55 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
- * This class represents a Spark SchemaRDD or data frame which represents a data table with columns and rows.
- * The table definition can be inspected with the {@link #getTableSpec()} method.
- * @author Tobias Koetter, KNIME.com
+ * This class represents tabular data in Spark, which has columns, rows and a {@link DataTableSpec}. In practice this is
+ * a Spark SchemaRDD or data frame, depending on the Spark version.
+ *
+ * The table spec can be inspected with the {@link #getTableSpec()} method.
+ *
+ * Instances of this class are immutable.
+ *
+ * @author Tobias Koetter, KNIME GmbH
  */
-public class SparkDataTable extends AbstractSparkRDD {
+public class SparkDataTable extends DefaultSparkData {
 
     private static final String TABLE_SPEC = "spec";
 
-    private DataTableSpec m_spec;
+    private final DataTableSpec m_spec;
+
     /**
-     * @param contextID ID of the context the Spark data table lives in
-     * @param spec the {@link DataTableSpec} of the Spark data table
+     * Creates a new Spark data table instance.
+     *
+     * @param contextID The ID of the context the Spark data table lives in.
+     * @param spec The {@link DataTableSpec} of the Spark data table.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
+     *            this Spark data table.
      */
-    public SparkDataTable(final SparkContextID contextID, final DataTableSpec spec) {
-        this(contextID, SparkIDs.createRDDID(), spec);
+    public SparkDataTable(final SparkContextID contextID, final DataTableSpec spec,
+        final Version knimeSparkExecutorVersion) {
+
+        this(contextID, SparkIDs.createSparkDataObjectID(), spec, knimeSparkExecutorVersion);
     }
 
     /**
-     * @param contextID the ID of context the Spark data table lives in
-     * @param tableName the unique name of the Spark data table
-     * @param spec the {@link DataTableSpec} of the Spark data table
+     * Creates a new Spark data table instance.
+     *
+     * @param contextID The ID of context the Spark data table lives in.
+     * @param id The unique id of the data object in Spark (e.g. a UUID).
+     * @param spec The {@link DataTableSpec} of the Spark data table.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
+     *            this Spark data table.
      */
-    public SparkDataTable(final SparkContextID contextID, final String tableName, final DataTableSpec spec) {
-        super(contextID, tableName);
+    public SparkDataTable(final SparkContextID contextID, final String id, final DataTableSpec spec,
+        final Version knimeSparkExecutorVersion) {
+
+        super(contextID, id, knimeSparkExecutorVersion);
         if (spec == null) {
             throw new NullPointerException("spec must not be null");
         }
@@ -67,7 +87,10 @@ public class SparkDataTable extends AbstractSparkRDD {
     }
 
     /**
-     * @param in
+     * Initializes a new instance from the given {@link ZipInputStream}.
+     *
+     * @param in A {@link ZipInputStream} to initialize this instance from.
+     * @throws IOException when something goes wrong during initialization.
      */
     public SparkDataTable(final ZipInputStream in) throws IOException {
         super(in);
@@ -78,15 +101,17 @@ public class SparkDataTable extends AbstractSparkRDD {
                     + TABLE_SPEC + "\".");
             }
             final ModelContentRO specModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-                m_spec = DataTableSpec.load(specModel);
+            m_spec = DataTableSpec.load(specModel);
         } catch (InvalidSettingsException ise) {
             throw new IOException(ise);
         }
     }
 
     /**
-     * @param out
-     * @throws IOException
+     * Saves this Spark data table to the given output stream.
+     *
+     * @param out An output stream to save to.
+     * @throws IOException when something goes wrong during saving.
      */
     @Override
     public void save(final ZipOutputStream out) throws IOException {
@@ -98,7 +123,7 @@ public class SparkDataTable extends AbstractSparkRDD {
     }
 
     /**
-     * @return the tableSpec
+     * @return the {@link DataTableSpec} of the Spark data table.
      */
     public DataTableSpec getTableSpec() {
         return m_spec;

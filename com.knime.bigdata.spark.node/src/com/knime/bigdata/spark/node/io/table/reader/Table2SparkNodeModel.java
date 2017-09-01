@@ -86,8 +86,9 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // convert KNIME spec into spark spec and back into KNIME spec
         final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
-        final SparkDataPortObjectSpec resultSpec = new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec);
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec, getKNIMESparkExecutorVersion());
+        final SparkDataPortObjectSpec resultSpec =
+            new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec, getKNIMESparkExecutorVersion());
         setConverterWarningMessage(inputSpec, outputSpec);
 
         return new PortObjectSpec[]{resultSpec};
@@ -114,8 +115,8 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // convert KNIME spec into spark spec and back into KNIME spec
         final DataTableSpec inputSpec = table.getDataTableSpec();
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
-        final SparkDataTable resultTable = new SparkDataTable(contextID, outputSpec);
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(contextID, outputSpec, getKNIMESparkExecutorVersion());
         setConverterWarningMessage(inputSpec, outputSpec);
         executeSparkJob(contextID, exec, convertedInputTable, resultTable);
 
@@ -127,7 +128,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         final File serializedTableFile, final SparkDataTable resultTable) throws KNIMESparkException, CanceledExecutionException {
 
         final Table2SparkJobInput input = Table2SparkJobInput.create(resultTable.getID(),
-            SparkDataTableUtil.toIntermediateSpec(resultTable.getTableSpec()));
+            SparkDataTableUtil.toIntermediateSpec(resultTable.getTableSpec(), getKNIMESparkExecutorVersion()));
 
         final JobWithFilesRunFactory<Table2SparkJobInput, EmptyJobOutput> execProvider =
             SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);
@@ -139,7 +140,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
     private File writeBufferedDataTable(final BufferedDataTable inputTable, final ExecutionMonitor exec)
         throws IOException, KNIMESparkException, CanceledExecutionException {
 
-        final KNIMEToIntermediateConverter[] converters = KNIMEToIntermediateConverterRegistry.getConverter(inputTable.getDataTableSpec());
+        final KNIMEToIntermediateConverter[] converters = KNIMEToIntermediateConverterRegistry.getConverters(inputTable.getDataTableSpec(), getKNIMESparkExecutorVersion());
 
         final File outFile = File.createTempFile("knime-table2spark", ".tmp");
         addFileToDeleteAfterExecute(outFile);
@@ -214,21 +215,21 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
     }
 
 }

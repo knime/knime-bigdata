@@ -52,10 +52,10 @@
          <attribute name="ConverterClass" type="string" use="required">
             <annotation>
                <documentation>
-                  Specify an implementation of the com.knime.bigdata.spark.api.spec.converter.KNIMEToIntermediateConverter interface. Classes could extend the existing AbstractKNIMEToIntermediateConverter.
+                  Specify an implementation of the com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter interface. Classes could extend the existing AbstractKNIMEToIntermediateConverter.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.api.converter.knime.KNIMEToIntermediateConverter"/>
+                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter"/>
                </appinfo>
             </annotation>
          </attribute>

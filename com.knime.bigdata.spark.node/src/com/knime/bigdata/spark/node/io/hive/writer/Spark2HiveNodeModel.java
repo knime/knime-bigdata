@@ -145,7 +145,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
                 }
             }
         }
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
         final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema);
         runFactory.createRun(jobInput).run(rdd.getContextID());
         try (final Connection connection = settings.createConnection(getCredentialsProvider());) {
@@ -172,7 +172,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_tableName.saveSettingsTo(settings);
         m_dropExisting.saveSettingsTo(settings);
     }
@@ -181,7 +181,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         final String name = ((SettingsModelString)m_tableName.createCloneWithValidatedValue(settings)).getStringValue();
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Table name must not be empty");
@@ -193,7 +193,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_tableName.loadSettingsFrom(settings);
         m_dropExisting.loadSettingsFrom(settings);
     }

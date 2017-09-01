@@ -97,8 +97,8 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         final List<Integer> skipCols = new LinkedList<>();
         final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(data.getTableSpec(), cms,
             colIdxs, addCols, m_replace.getBooleanValue(), skipCols);
-        final String aOutputTableName = SparkIDs.createRDDID();
-        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
+        final String aOutputTableName = SparkIDs.createSparkDataObjectID();
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
         final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), colIdxs,
@@ -107,7 +107,8 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         final JobWithFilesRunFactory<PMMLTransformationJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
         execProvider.createRun(input, Collections.singletonList(jobFile)).run(data.getContextID(), exec);
-        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
+        return new PortObject[]{
+            createSparkPortObject(data, resultSpec, aOutputTableName, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -132,7 +133,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         //TODO: Implement replace option
 //        m_replace.loadSettingsFrom(settings);
     }
@@ -141,7 +142,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         //TODO: Implement replace option
 //        m_replace.saveSettingsTo(settings);
     }
@@ -150,7 +151,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         //TODO: Implement replace option
 //        m_replace.validateSettings(settings);
     }

@@ -147,7 +147,7 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
         ensureContextIsOpen(contextID);
         final JobWithFilesRunFactory<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);
 
-        final String namedOutputObject = SparkIDs.createRDDID();
+        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         LOGGER.info("Loading " + settings.getInputPath() + " into " + namedOutputObject + " rdd");
         final GenericDataSource2SparkJobInput jobInput;
 
@@ -184,8 +184,9 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
                 jobOutput = runFactory.createRun(jobInput, toUpload).run(contextID);
             }
 
-            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
-            return new SparkDataTable(contextID, namedOutputObject, outputSpec);
+            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
+                .convertSpec(jobOutput.getSpec(namedOutputObject), settings.getKNIMESparkExecutorVersion());
+            return new SparkDataTable(contextID, namedOutputObject, outputSpec, settings.getKNIMESparkExecutorVersion());
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Reason: Failed to find data source:")) {
@@ -199,17 +200,17 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 }

@@ -19,6 +19,7 @@ package com.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -27,14 +28,17 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCell;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.data.time.localdatetime.LocalDateTimeValue;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  * Converts between LocalDateTime and Timestamps without time shifts.
  *
  * @author Sascha Wolke, KNIME.com
+ * @since 2.1.0
  */
 public class LocalDateTimeType extends AbstractKNIMEToIntermediateConverter {
 
@@ -46,22 +50,42 @@ public class LocalDateTimeType extends AbstractKNIMEToIntermediateConverter {
             new IntermediateDataType[] { IntermediateDataTypes.TIMESTAMP });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Serializable convertNoneMissingCell(final DataCell cell) {
         if (cell instanceof LocalDateTimeValue) {
-            LocalDateTime utcDateTime = ((LocalDateTimeValue)cell).getLocalDateTime().atOffset(ZoneOffset.UTC).toLocalDateTime();
-            return Timestamp.valueOf(utcDateTime);
+            // This interprets the given LocalDateTime in the UTC timezone. For example,
+            // 2017-01-02 01:02:03 is interpreted as the instant 2017-01-02 01:02:03 UTC.
+            final LocalDateTime localDateTime = ((LocalDateTimeValue)cell).getLocalDateTime();
+            final Instant instant = Instant.from(localDateTime.atZone(ZoneOffset.UTC));
+            return new Timestamp(instant.toEpochMilli());
         }
 
         throw incompatibleCellException(cell);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected DataCell convertNotNullSerializable(final Serializable intermediateTypeObject) {
         if (intermediateTypeObject instanceof Timestamp) {
-            return LocalDateTimeCellFactory.create(((Timestamp) intermediateTypeObject).toLocalDateTime());
+            final Timestamp sqlTimestamp = (Timestamp) intermediateTypeObject;
+
+            return LocalDateTimeCellFactory.create(
+                LocalDateTime.ofEpochSecond(sqlTimestamp.getTime() / 1000, sqlTimestamp.getNanos(), ZoneOffset.UTC));
         }
 
         throw incompatibleSerializableException(intermediateTypeObject);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version getLowestSupportedVersion() {
+        return SparkPluginVersion.VERSION_2_1_0;
     }
 }

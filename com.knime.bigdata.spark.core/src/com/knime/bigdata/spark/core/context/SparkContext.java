@@ -108,8 +108,7 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * not in state configured.
      * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
-    public abstract void open(final boolean createRemoteContext) throws KNIMESparkException,
-    SparkContextNotFoundException;
+    public abstract void open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException;
 
     public abstract void destroy() throws KNIMESparkException;
 

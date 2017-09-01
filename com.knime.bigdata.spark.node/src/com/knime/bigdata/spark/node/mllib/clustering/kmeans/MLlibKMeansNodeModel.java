@@ -103,7 +103,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
         final SparkDataPortObjectSpec asignedSpec =
-            new SparkDataPortObjectSpec(spec.getContextID(), createResultTableSpec(tableSpec));
+            new SparkDataPortObjectSpec(spec.getContextID(), createResultTableSpec(tableSpec), getKNIMESparkExecutorVersion());
         final SparkModelPortObjectSpec modelSpec = new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME);
         return new PortObjectSpec[]{asignedSpec, modelSpec};
     }
@@ -128,11 +128,13 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        final IntermediateSpec resultInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec);
+        final IntermediateSpec resultInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
         final KMeansJobInput jobInput = createJobInput(inObjects, resultInterSpec);
         final ModelJobOutput result = runFactory.createRun(jobInput).run(data.getContextID(), exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
-        return new PortObject[]{createSparkPortObject(data, resultSpec, jobInput.getFirstNamedOutputObject()),
+        return new PortObject[]{
+            createSparkPortObject(data, resultSpec, jobInput.getFirstNamedOutputObject(),
+                getKNIMESparkExecutorVersion()),
             createSparkModelPortObject(data, MODEL_NAME, m_settings.getSettings(data), result)};
     }
 
@@ -140,7 +142,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
             throws InvalidSettingsException {
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
         final String inputKey = data.getTableName();
-        final String outputKey = SparkIDs.createRDDID();
+        final String outputKey = SparkIDs.createSparkDataObjectID();
         final List<Integer> featureColumnIdxs = Arrays.asList(m_settings.getSettings(data).getFeatueColIdxs());
         final KMeansJobInput jobInput = new KMeansJobInput(inputKey, outputKey, outputSpec, featureColumnIdxs,
             m_noOfCluster.getIntValue(), m_noOfIteration.getIntValue());
@@ -151,7 +153,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIteration.saveSettingsTo(settings);
@@ -161,7 +163,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
         m_noOfCluster.validateSettings(settings);
         m_noOfIteration.validateSettings(settings);
@@ -171,7 +173,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);

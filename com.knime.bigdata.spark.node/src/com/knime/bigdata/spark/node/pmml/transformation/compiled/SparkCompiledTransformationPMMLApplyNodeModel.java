@@ -62,7 +62,8 @@ public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSpark
         final List<Integer> skipCols = new LinkedList<>();
         final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(sparkSpec.getTableSpec(),
             pmmlSpec, colIdxs, addCols, replace(), skipCols);
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec)};
+        return new PortObjectSpec[]{
+            new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**

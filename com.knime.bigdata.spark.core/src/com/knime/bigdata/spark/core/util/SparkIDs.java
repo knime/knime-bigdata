@@ -29,9 +29,9 @@ import java.util.UUID;
 public final class SparkIDs {
 
     /**
-     * @return a unique id that can be used for named RDDs
+     * @return a unique id that can be used to reference data objects in Spark.
      */
-    public static String createRDDID() {
+    public static String createSparkDataObjectID() {
         return UUID.randomUUID().toString();
     }
 }

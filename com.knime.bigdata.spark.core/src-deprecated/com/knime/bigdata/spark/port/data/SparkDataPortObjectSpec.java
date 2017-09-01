@@ -25,8 +25,10 @@ import java.io.IOException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 
 /**
@@ -41,9 +43,13 @@ public class SparkDataPortObjectSpec extends com.knime.bigdata.spark.core.port.d
     /**
      * @param contextID
      * @param spec
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
+     *            this Spark data table.
      */
-    public SparkDataPortObjectSpec(final SparkContextID contextID, final DataTableSpec spec) {
-        super(contextID, spec);
+    public SparkDataPortObjectSpec(final SparkContextID contextID, final DataTableSpec spec,
+        final Version knimeSparkExecutorVersion) {
+
+        super(contextID, spec, knimeSparkExecutorVersion);
     }
 
     /**
@@ -57,7 +63,7 @@ public class SparkDataPortObjectSpec extends com.knime.bigdata.spark.core.port.d
             throws IOException {
 
             final SparkDataTable table = new SparkDataTable(in);
-            return new SparkDataPortObjectSpec(table.getContextID(), table.getTableSpec());
+            return new SparkDataPortObjectSpec(table.getContextID(), table.getTableSpec(), table.getKNIMESparkExecutorVersion());
         }
 
         @Override

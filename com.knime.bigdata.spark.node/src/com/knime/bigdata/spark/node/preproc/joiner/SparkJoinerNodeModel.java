@@ -78,7 +78,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         }
         final Joiner joiner = new Joiner(left.getTableSpec(), right.getTableSpec(), m_settings);
         final PortObjectSpec[] spec =
-                new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec())};
+                new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec(), getKNIMESparkExecutorVersion())};
 
         if (!joiner.getConfigWarnings().isEmpty()) {
             for (String warning : joiner.getConfigWarnings()) {
@@ -124,8 +124,8 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final com.knime.bigdata.spark.node.preproc.joiner.JoinMode sparkJoinMode =
                 com.knime.bigdata.spark.node.preproc.joiner.JoinMode.fromKnimeJoinMode(joinMode.toString());
         final DataTableSpec outputSpec = joiner.getOutputSpec();
-        final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec);
-        final SparkDataTable resultTable = new SparkDataTable(context, outputSpec);
+        final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(context, outputSpec, getKNIMESparkExecutorVersion());
 
         final SimpleJobRunFactory<SparkJoinerJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
         final SparkJoinerJobInput jobInput = new SparkJoinerJobInput(left.getData().getID(), right.getData().getID(), sparkJoinMode,
@@ -139,7 +139,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettings(settings);
     }
 
@@ -147,7 +147,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         Joiner2Settings s = new Joiner2Settings();
         s.loadSettings(settings);
@@ -158,7 +158,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         m_settings.loadSettings(settings);
     }

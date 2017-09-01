@@ -152,7 +152,7 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_col1.saveSettingsTo(settings);
         m_col2.saveSettingsTo(settings);
         m_method.saveSettingsTo(settings);
@@ -162,7 +162,7 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_col1.validateSettings(settings);
         m_col2.validateSettings(settings);
         m_method.validateSettings(settings);
@@ -172,7 +172,7 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_col1.loadSettingsFrom(settings);
         m_col2.loadSettingsFrom(settings);
         m_method.loadSettingsFrom(settings);
