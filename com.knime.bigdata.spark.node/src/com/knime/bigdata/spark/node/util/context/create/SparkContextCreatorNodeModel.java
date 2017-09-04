@@ -188,7 +188,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
@@ -196,7 +196,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
@@ -204,7 +204,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
     }
 }

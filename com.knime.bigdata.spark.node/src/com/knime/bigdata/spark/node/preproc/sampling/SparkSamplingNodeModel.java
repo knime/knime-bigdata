@@ -90,7 +90,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
         final SparkContextID context = rdd.getContextID();
-        final SparkDataTable resultTable = new SparkDataTable(context, rdd.getData().getTableSpec());
+        final SparkDataTable resultTable = new SparkDataTable(context, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
         exec.setMessage("Start Spark sampling job...");
         final boolean samplesRddIsInputRdd = runJob(exec, JOB_ID, rdd, resultTable.getID(), null);
         final SparkDataTable output;
@@ -158,7 +158,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
@@ -166,7 +166,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         SparkSamplingNodeSettings.validateSamplingSettings(settings);
     }
@@ -175,7 +175,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings, false);
     }
 }

@@ -72,7 +72,7 @@ public class SparkUnpersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         //nothing to do
     }
 
@@ -80,7 +80,7 @@ public class SparkUnpersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 
@@ -88,7 +88,7 @@ public class SparkUnpersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 }

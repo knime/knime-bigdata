@@ -71,12 +71,15 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettings;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.config.Config;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
 import com.knime.bigdata.spark.core.context.SparkContext;
@@ -94,11 +97,13 @@ import com.knime.bigdata.spark.core.job.SimpleJobRunFactory;
 import com.knime.bigdata.spark.core.job.util.MLlibSettings;
 import com.knime.bigdata.spark.core.port.SparkContextProvider;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import com.knime.bigdata.spark.core.port.data.SparkData;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -114,37 +119,57 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private static final String CFG_SETTING = "saveInternalsSettings";
 
-    private static final String CF_RDD_SETTINGS = "RDDs";
+    /** Saved as "RDDs" for historical reasons */
+    private static final String CFG_SPARK_DATA_OBJECTS = "RDDs";
 
     /**
      * Key required to load legacy workflows (KNIME Spark Executor <= v1.3)
+     * @since 1.6.0
      */
     private static final String CFG_CONTEXT_LEGACY = "context";
 
     /**
      * Key required to load current workflows (KNIME Spark Executor >v1.3)
+     * @since 1.6.0
      */
     private static final String CFG_CONTEXT_ID = "contextID";
 
-    private static final String CFG_NAMED_RDD_UUIDS = "namedRDDs";
+    /** Saved as "namedRDDs" for historical reasons */
+    private static final String CFG_SPARK_DATA_OBJECT_IDS = "namedRDDs";
 
     private static final String CFG_DELETE_ON_RESET = "deleteRDDsOnReset";
 
+    /**
+     * Key to load the version of KNIME Spark Executor that the node was created with.
+     * @since 2.1.0
+     */
+    private static final String CFG_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
+
     private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
-    private final Map<SparkContextID, List<String>> m_namedRDDs = new LinkedHashMap<>();
+    private final Map<SparkContextID, List<String>> m_sparkDataObjects = new LinkedHashMap<>();
 
     private boolean m_deleteOnReset = DEFAULT_DELETE_ON_RESET;
 
-    private final List<File> filesToDeleteAfterExecute = new LinkedList<>();
+    private final List<File> m_filesToDeleteAfterExecute = new LinkedList<>();
 
     private boolean m_automaticHandling = true;
 
     /**
-     * Constructor for SparkNodeModel
+     * The OSGI version of KNIME Spark Executor (technically, of com.knime.bigdata.spark.core) that this particular node
+     * model instance was instantiated with. This value must only every be defined when a new node model is instantiated
+     * or has its node settings loaded. It must remain constant over other lifecycle operations (configure, execute,
+     * reset, ...).
      *
-     * @param inPortTypes the input port types
-     * @param outPortTypes the output port types
+     * @since 2.1.0
+     */
+    private Version m_knimeSparkExecutorVersion;
+
+    /**
+     * Constructor for SparkNodeModel.
+     *
+     * @param inPortTypes The input port types.
+     * @param outPortTypes The output port types.
      */
     protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
         this(inPortTypes, outPortTypes, true);
@@ -153,14 +178,16 @@ public abstract class SparkNodeModel extends NodeModel {
     /**
      * Base constructor for SparkNodeModel.
      *
-     * @param inPortTypes the input port types
-     * @param outPortTypes the output port types
-     * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted Always
-     *            set this flag to <code>false</code> when you return the input RDD also as output RDD!
+     * @param inPortTypes The input port types.
+     * @param outPortTypes The output port types.
+     * @param deleteOnReset <code>true</code> if all {@link SparkData} objects produced by this node model should be
+     *            deleted when the node is reset. Always set this flag to <code>false</code> when you return an ingoing
+     *            {@link SparkData} object in an output port.
      */
     protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, final boolean deleteOnReset) {
         super(inPortTypes, outPortTypes);
         m_deleteOnReset = deleteOnReset;
+        m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_CURRENT;
     }
 
     /**
@@ -168,7 +195,7 @@ public abstract class SparkNodeModel extends NodeModel {
      * delete all files that have been registered with the {@link #addFileToDeleteAfterExecute(File)}.
      */
     protected void deleteFilesAfterExecute() {
-        for (File toDelete : filesToDeleteAfterExecute) {
+        for (File toDelete : m_filesToDeleteAfterExecute) {
             try {
                 toDelete.delete();
             } catch (Exception e) {
@@ -176,7 +203,7 @@ public abstract class SparkNodeModel extends NodeModel {
             }
         }
 
-        filesToDeleteAfterExecute.clear();
+        m_filesToDeleteAfterExecute.clear();
     }
 
     /**
@@ -184,21 +211,36 @@ public abstract class SparkNodeModel extends NodeModel {
      * @see #deleteFilesAfterExecute()
      */
     protected void addFileToDeleteAfterExecute(final File toDelete) {
-        filesToDeleteAfterExecute.add(toDelete);
+        m_filesToDeleteAfterExecute.add(toDelete);
     }
 
     /**
-     * @param deleteOnReset <code>true</code> if all output Spark RDDs should be deleted when the node is reseted
+     * @param deleteOnReset <code>true</code> if all {@link SparkData} objects created by this node model should be
+     *            deleted when the node is reset.
      */
     protected void setDeleteOnReset(final boolean deleteOnReset) {
         m_deleteOnReset = deleteOnReset;
     }
 
     /**
-     * @return <code>true</code> if the output RDDs are deleted when the node is reseted
+     * @return <code>true</code> if all {@link SparkData} objects created by this node model are deleted when the node
+     *         is reset.
      */
     protected boolean isDeleteOnReset() {
         return m_deleteOnReset;
+    }
+
+    /**
+     * Provides the version of KNIME Spark Executor (technically, of com.knime.bigdata.spark.core) that this particular
+     * node model instance was first instantiated with. This value must only every be defined when a new node model is
+     * instantiated or has its node settings loaded. It remains constant over other lifecycle operations (configure,
+     * execute, reset, ...).
+     *
+     * @return the version as an OSGI {@link Version}.
+     * @since 2.1.0
+     */
+    public Version getKNIMESparkExecutorVersion() {
+        return m_knimeSparkExecutorVersion;
     }
 
     /**
@@ -237,7 +279,7 @@ public abstract class SparkNodeModel extends NodeModel {
             if (m_automaticHandling && portObjects != null && portObjects.length > 0) {
                 for (final PortObject portObject : portObjects) {
                     if (portObject instanceof SparkDataPortObject) {
-                        addSparkObject((SparkDataPortObject)portObject);
+                        addSparkDataObject(((SparkDataPortObject)portObject).getData());
                     }
                 }
             }
@@ -247,39 +289,42 @@ public abstract class SparkNodeModel extends NodeModel {
         }
     }
 
-    private void addSparkObject(final SparkDataPortObject sparkObject) {
-        addSparkObject(sparkObject.getContextID(), sparkObject.getTableName());
+    private void addSparkDataObject(final SparkData sparkData) {
+        addSparkDataObjects(sparkData.getContextID(), sparkData.getID());
     }
 
-    private void addSparkObject(final SparkContextID context, final String... RDDIDs) {
-        List<String> rdds = m_namedRDDs.get(context);
-        if (rdds == null) {
-            rdds = new LinkedList<>();
-            m_namedRDDs.put(context, rdds);
+    private void addSparkDataObjects(final SparkContextID context, final String... ids) {
+        List<String> idsInContext = m_sparkDataObjects.get(context);
+        if (idsInContext == null) {
+            idsInContext = new LinkedList<>();
+            m_sparkDataObjects.put(context, idsInContext);
         }
-        for (String RDDID : RDDIDs) {
-            rdds.add(RDDID);
+        for (String id : ids) {
+            idsInContext.add(id);
         }
     }
 
     /**
-     * Can be used to disable automatic RDD deletion.
-     * <b>Caution:</b> Disabling the RDD handling might result in resource problems
-     * on the Spark job server. RDDs that are added via the {@link #additionalRDDs2Delete(SparkContextID, String...)} method
-     * are deleted on the Spark server even if automatic RDD handling is disabled.
-     * @param automaticHandling <code>false</code> if the automatic RDD deletion handling should be disabled
-     * @see #additionalRDDs2Delete(SparkContextID, String...)
+     * Can be used to disable automatic handling of produced {@link SparkData} objects. <b>Caution:</b> Disabling
+     * automatic handling might result in resource problems in the Spark cluster. {@link SparkData} objects that are added via the
+     * {@link #addAdditionalSparkDataObjectsToDelete(SparkContextID, String...)} method are deleted from the Spark context even if
+     * automatic deletion is disabled.
+     *
+     * @param automaticHandling Whether automatic handling of deletion of {@link SparkData} objects should be enabled or not.
+     * @see #addAdditionalSparkDataObjectsToDelete(SparkContextID, String...)
+     * @since 2.1.0 (renamed from setAutomticRDDHandling)
      */
-    protected void setAutomticRDDHandling(final boolean automaticHandling) {
+    protected void setAutomaticSparkDataHandling(final boolean automaticHandling) {
         m_automaticHandling = automaticHandling;
     }
 
     /**
-     * @param context the {@link SparkContextConfig} the RDDs live in
-     * @param RDDIDs the RDD ids to delete when the node is reseted or disposed
+     * @param context the {@link SparkContextConfig} the respective Spark data objects live in.
+     * @param ids the Spark data object IDs to delete when the node is reset or disposed.
+     * @since 2.1.0 (renamed from additionalRDDs2Delete)
      */
-    protected final void additionalRDDs2Delete(final SparkContextID context, final String... RDDIDs) {
-        addSparkObject(context, RDDIDs);
+    protected final void addAdditionalSparkDataObjectsToDelete(final SparkContextID context, final String... ids) {
+        addSparkDataObjects(context, ids);
     }
 
     /**
@@ -301,14 +346,14 @@ public abstract class SparkNodeModel extends NodeModel {
         try (final FileOutputStream dataOS = new FileOutputStream(settingFile)) {
             final Config config = new NodeSettings(CFG_SETTING);
             config.addBoolean(CFG_DELETE_ON_RESET, m_deleteOnReset);
-            final Config rddConfig = config.addConfig(CF_RDD_SETTINGS);
+            final Config sparkDataObjectsConfig = config.addConfig(CFG_SPARK_DATA_OBJECTS);
             int idx = 0;
-            for (Entry<SparkContextID, List<String>> e : m_namedRDDs.entrySet()) {
-                final ConfigWO contextConfig = rddConfig.addConfig(CFG_CONTEXT_ID + idx++);
+            for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
+                final ConfigWO contextConfig = sparkDataObjectsConfig.addConfig(CFG_CONTEXT_ID + idx++);
                 final Config contextSettingsConfig = contextConfig.addConfig(CFG_CONTEXT_ID);
                 e.getKey().saveToConfigWO(contextSettingsConfig);
                 exec.checkCanceled();
-                contextConfig.addStringArray(CFG_NAMED_RDD_UUIDS, e.getValue().toArray(new String[0]));
+                contextConfig.addStringArray(CFG_SPARK_DATA_OBJECT_IDS, e.getValue().toArray(new String[0]));
             }
             config.saveToXML(dataOS);
         } catch (final Exception e) {
@@ -323,32 +368,34 @@ public abstract class SparkNodeModel extends NodeModel {
     @Override
     protected final void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
+
         final File settingFile = new File(nodeInternDir, CFG_FILE);
         try (final FileInputStream inData = new FileInputStream(settingFile)) {
             final ConfigRO config = NodeSettings.loadFromXML(inData);
+
             m_deleteOnReset = config.getBoolean(CFG_DELETE_ON_RESET, DEFAULT_DELETE_ON_RESET);
-            final Config rddConfig = config.getConfig(CF_RDD_SETTINGS);
-            final int noOfContexts = rddConfig.getChildCount();
+            final Config sparkDataObjectsConfig = config.getConfig(CFG_SPARK_DATA_OBJECTS);
+            final int noOfContexts = sparkDataObjectsConfig.getChildCount();
             for (int i = 0; i < noOfContexts; i++) {
-                if (rddConfig.containsKey(CFG_CONTEXT_ID + i)) {
-                    final ConfigRO contextConfig = rddConfig.getConfig(CFG_CONTEXT_ID + i);
+                if (sparkDataObjectsConfig.containsKey(CFG_CONTEXT_ID + i)) {
+                    final ConfigRO contextConfig = sparkDataObjectsConfig.getConfig(CFG_CONTEXT_ID + i);
                     final Config contextSettingsConfig = contextConfig.getConfig(CFG_CONTEXT_ID);
                     final SparkContextID contextID = SparkContextID.fromConfigRO(contextSettingsConfig);
-                    final String[] namedRDDUUIDs = contextConfig.getStringArray(CFG_NAMED_RDD_UUIDS);
-                    m_namedRDDs.put(contextID, new ArrayList<>(Arrays.asList(namedRDDUUIDs)));
-                } else if (rddConfig.containsKey(CFG_CONTEXT_LEGACY + i)) {
+                    final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
+                    m_sparkDataObjects.put(contextID, new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
+                } else if (sparkDataObjectsConfig.containsKey(CFG_CONTEXT_LEGACY + i)) {
                     // Load legacy workflow (KNIME Spark Executor <= v1.3)
-                    final ConfigRO contextConfig = rddConfig.getConfig(CFG_CONTEXT_LEGACY + i);
-                    final String[] namedRDDUUIDs = contextConfig.getStringArray(CFG_NAMED_RDD_UUIDS);
-                    m_namedRDDs.put(
+                    final ConfigRO contextConfig = sparkDataObjectsConfig.getConfig(CFG_CONTEXT_LEGACY + i);
+                    final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
+                    m_sparkDataObjects.put(
                         SparkContextConfig
                             .createSparkContextIDFromLegacyConfig(contextConfig.getConfig(CFG_CONTEXT_LEGACY)),
-                        new ArrayList<>(Arrays.asList(namedRDDUUIDs)));
+                        new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
                 }
             }
             loadAdditionalInternals(nodeInternDir, exec);
         } catch (final InvalidSettingsException | RuntimeException e) {
-            throw new IOException("Failed to load RDD settings.", e.getCause());
+            throw new IOException("Failed to load settings.", e.getCause());
         }
     }
 
@@ -385,13 +432,115 @@ public abstract class SparkNodeModel extends NodeModel {
         // override if you need to save some internal data
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final void saveSettingsTo(final NodeSettingsWO settings) {
+        settings.addString(CFG_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
+        saveAdditionalSettingsTo(settings);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final void validateSettings(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+        // currently does nothing. reserved for future use.
+        validateAdditionalSettings(settings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected final void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+
+        if (settings.containsKey(CFG_KNIME_SPARK_EXECUTOR_VERSION)) {
+            m_knimeSparkExecutorVersion = SparkPluginVersion.fromString(settings.getString(CFG_KNIME_SPARK_EXECUTOR_VERSION));
+        } else {
+            // node model was created with KNIME Spark Executor version <= 2.0.1
+            m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_2_0_1;
+        }
+        loadAdditionalValidatedSettingsFrom(settings);
+    }
+
+
+    /**
+     * Override this method to save additional node settings. This method is called by
+     * {@link #saveSettingsTo(NodeSettingsWO)} when the current settings need to be saved or transfered to the node's
+     * dialog.
+     * <p>
+     * See {@link #saveSettingsTo(NodeSettingsWO)} for further documentation.
+     *
+     * @param settings The object to write settings into.
+     *
+     * @see #loadAdditionalValidatedSettingsFrom(NodeSettingsRO)
+     * @see #validateAdditionalSettings(NodeSettingsRO)
+     * @see #saveSettingsTo(NodeSettingsWO)
+     *
+     * @since 2.1.0
+     */
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+        // empty implementation, expected to be overriden by subclasses
+    }
+
+    /**
+     * Override this method to validate additional node settings. This method is called by
+     * {@link #validateSettings(NodeSettingsRO)} to validate the additional node settings in the passed
+     * <code>NodeSettings</code> object.
+     * <p>
+     * See {@link #validateSettings(NodeSettingsRO)} for further documentation.
+     *
+     * @param settings The settings to validate.
+     * @throws InvalidSettingsException If the validation of the settings failed.
+     *
+     * @see #validateSettings(NodeSettingsRO)
+     * @see #saveAdditionalSettingsTo(NodeSettingsWO)
+     * @see #loadAdditionalValidatedSettingsFrom(NodeSettingsRO)
+     *
+     * @since 2.1.0
+     */
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+        // empty implementation, expected to be overriden by subclasses
+    }
+
+
+    /**
+     * Override this method to load additional validated node settings. This method is called by
+     * {@link #loadValidatedSettingsFrom(NodeSettingsRO)} to load additional validated node settings in the passed
+     * <code>NodeSettings</code> object.
+     * <p>
+     * See {@link #loadValidatedSettingsFrom(NodeSettingsRO)} for further documentation.
+     *
+     * @param settings The settings to read.
+     *
+     * @throws InvalidSettingsException If a property is not available.
+     *
+     * @see #saveAdditionalSettingsTo(NodeSettingsWO)
+     * @see #validateAdditionalSettings(NodeSettingsRO)
+     * @see #loadValidatedSettingsFrom(NodeSettingsRO)
+     *
+     * @since 2.1.0
+     */
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+        // empty implementation, expected to be overriden by subclasses
+    }
+
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected final void onDispose() {
-        LOGGER.debug("In onDispose() of SparkNodeModel. Calling deleteRDDs.");
-        deleteRDDs(true);
+        LOGGER.debug("In onDispose() of SparkNodeModel. Calling deleteSparkDataObjects.");
+        deleteSparkDataObjects(true);
 
         onDisposeInternal();
     }
@@ -404,65 +553,65 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     /**
-     * {@inheritDoc} Gets called when the node is reseted or deleted.
+     * {@inheritDoc} Gets called when the node is reset or deleted.
      */
     @Override
     protected final void reset() {
         if (m_deleteOnReset) {
-            LOGGER.debug("In reset() of SparkNodeModel. Calling deleteRDDs.");
-            deleteRDDs(false);
+            LOGGER.debug("In reset() of SparkNodeModel. Calling deleteSparkDataObjects.");
+            deleteSparkDataObjects(false);
         }
-        m_namedRDDs.clear();
+        m_sparkDataObjects.clear();
         resetInternal();
     }
 
     /**
-     * Called when the node is reseted.
+     * Called when the node is reset.
      */
     protected void resetInternal() {
         //override if you need to reset anything
     }
 
-    private void deleteRDDs(final boolean onDispose) {
-        if (m_deleteOnReset && m_namedRDDs != null && !m_namedRDDs.isEmpty()) {
-            LOGGER.debug("In reset of SparkNodeModel. Deleting named rdds. On dispose: " + onDispose);
+    private void deleteSparkDataObjects(final boolean onDispose) {
+        if (m_deleteOnReset && m_sparkDataObjects != null && !m_sparkDataObjects.isEmpty()) {
+            LOGGER.debug("In reset of SparkNodeModel. Deleting Spark data objects. On dispose: " + onDispose);
             if (KNIMEConfigContainer.verboseLogging()) {
-                LOGGER.debug("RDDS in delete queue: " + m_namedRDDs);
+                LOGGER.debug("Spark data objects in delete queue: " + m_sparkDataObjects);
             }
 
-            //make a copy of the rdds to delete for the deletion thread
-            final Map<SparkContextID, String[]> rdds2delete = new HashMap<>(m_namedRDDs.size());
-            for (Entry<SparkContextID, List<String>> e : m_namedRDDs.entrySet()) {
+            //make a copy of the spark data objects to delete for the deletion thread
+            final Map<SparkContextID, String[]> toDelete = new HashMap<>(m_sparkDataObjects.size());
+            for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
                 final SparkContextID contextID = e.getKey();
-                // mark for deletion if we are either resetting, or disposing and deleteRDDsOnDispose is on
+                // mark for deletion if we are either resetting, or disposing and deleteObjectsOnDispose is on
                 SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
 
                 if (!onDispose
                     || (context.getConfiguration() != null && context.getConfiguration().deleteObjectsOnDispose())) {
-                    rdds2delete.put(contextID, e.getValue().toArray(new String[0]));
+                    toDelete.put(contextID, e.getValue().toArray(new String[0]));
                 }
             }
 
-            if (!rdds2delete.isEmpty()) {
+            if (!toDelete.isEmpty()) {
                 if (KNIMEConfigContainer.verboseLogging()) {
-                    LOGGER.debug("RDDS to delete: " + rdds2delete);
+                    LOGGER.debug("Spark data objects to delete: " + toDelete);
                 }
                 SparkPlugin.getDefault().addJob(new Runnable() {
                     @Override
                     public void run() {
                         final long startTime = System.currentTimeMillis();
                         if (KNIMEConfigContainer.verboseLogging()) {
-                            LOGGER.debug("Deleting rdds: " + rdds2delete);
+                            LOGGER.debug("Deleting Spark data objects: " + toDelete);
                         }
-                        for (final Entry<SparkContextID, String[]> e : rdds2delete.entrySet()) {
+                        for (final Entry<SparkContextID, String[]> e : toDelete.entrySet()) {
                             try {
                                 final SparkContext context = SparkContextManager.getOrCreateSparkContext(e.getKey());
                                 context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
                             } catch (final SparkContextNotFoundException ex) {
                                 // ignore this exception since the context is either removed or the job server restarted
-                            	//in both cases we no longer need to delete the rdds
+                                // in both cases we no longer need to delete the Spark data objects
                             } catch (final Throwable ex) {
-                                LOGGER.error("Exception while deleting named RDDs for context: " + e.getKey()
+                                LOGGER.error("Exception while deleting named Spark data objects for context: " + e.getKey()
                                     + " Exception: " + ex.getMessage(), ex);
                             }
                         }
@@ -470,7 +619,7 @@ public abstract class SparkNodeModel extends NodeModel {
                             final long endTime = System.currentTimeMillis();
                             final long durationTime = endTime - startTime;
                             LOGGER
-                                .debug("Time deleting " + rdds2delete.size() + " namedRDD(s): " + durationTime + " ms");
+                                .debug("Time deleting " + toDelete.size() + " Spark data object(s): " + durationTime + " ms");
                         }
                     }
                 });
@@ -487,9 +636,9 @@ public abstract class SparkNodeModel extends NodeModel {
      * @throws MissingSparkModelHelperException
      */
     public static SparkModelPortObject createSparkModelPortObject(final SparkDataPortObject data,
-        final String modelName, final MLlibSettings settings, final ModelJobOutput model) throws MissingSparkModelHelperException {
-        return new SparkModelPortObject(new SparkModel(getSparkVersion(data), modelName,
-            model.getModel(), settings));
+        final String modelName, final MLlibSettings settings, final ModelJobOutput model)
+        throws MissingSparkModelHelperException {
+        return new SparkModelPortObject(new SparkModel(getSparkVersion(data), modelName, model.getModel(), settings));
     }
 
     /**
@@ -498,9 +647,8 @@ public abstract class SparkNodeModel extends NodeModel {
      * @return the corresponding {@link JobRunFactory}
      * @throws MissingJobException if no job is available for the given {@link SparkContextID} and job id
      */
-    public static <I extends JobInput, O extends JobOutput> JobRunFactory<I, O> getJobRunFactory(
-        final SparkDataPortObject data, final String jobId)
-        throws MissingJobException {
+    public static <I extends JobInput, O extends JobOutput> JobRunFactory<I, O>
+        getJobRunFactory(final SparkDataPortObject data, final String jobId) throws MissingJobException {
         return SparkContextUtil.getJobRunFactory(data.getContextID(), jobId);
     }
 
@@ -510,59 +658,44 @@ public abstract class SparkNodeModel extends NodeModel {
      * @return the corresponding {@link SimpleJobRunFactory}
      * @throws MissingJobException if no job is available for the given {@link SparkContextID} and job id
      */
-    public static <I extends JobInput> SimpleJobRunFactory<I> getSimpleJobRunFactory(
-        final SparkDataPortObject data, final String jobId) throws MissingJobException {
+    public static <I extends JobInput> SimpleJobRunFactory<I> getSimpleJobRunFactory(final SparkDataPortObject data,
+        final String jobId) throws MissingJobException {
         return SparkContextUtil.getSimpleRunFactory(data.getContextID(), jobId);
     }
 
     /**
      * @param provider {@link SparkContextProvider}
-     * @return the {@link SparkVersion} of the {@link SparkContextProvider}
+     * @return the {@link SparkVersion} of the {@link SparkContextProvider}.
      */
     public static SparkVersion getSparkVersion(final SparkContextProvider provider) {
         return SparkContextManager.getOrCreateSparkContext(provider.getContextID()).getSparkVersion();
     }
 
     /**
-     * @param inputRDD the original {@link SparkDataPortObject}
-     * @param dataTable the {@link SparkDataTable} object
-     * @return {@link SparkDataPortObject}
+     * @param sparkDataPortObject The original {@link SparkDataPortObject} to inherit the Spark context from.
+     * @param newSpec The {@link DataTableSpec} of the new {@link SparkDataTable} to wrap.
+     * @param newSparkObjectID The ID of the new {@link SparkDataTable} to wrap.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
+     *            this Spark data table.
+     * @return a new {@link SparkDataPortObject}.
+     * @since 2.1.0
      */
-    public static PortObject createSparkPortObject(final SparkDataPortObject inputRDD, final SparkDataTable dataTable) {
-        return createSparkPortObject(inputRDD, dataTable.getTableSpec(), dataTable.getID());
+    public static PortObject createSparkPortObject(final SparkDataPortObject sparkDataPortObject,
+        final DataTableSpec newSpec, final String newSparkObjectID, final Version knimeSparkExecutorVersion) {
+
+        return new SparkDataPortObject(new SparkDataTable(sparkDataPortObject.getContextID(), newSparkObjectID, newSpec,
+            knimeSparkExecutorVersion));
     }
 
     /**
-     * @param inputRDD the original {@link SparkDataPortObject}
-     * @param newSpec the new {@link DataTableSpec} of the input {@link SparkDataPortObject}
-     * @param resultRDDName the name of the result RDD
-     * @return {@link SparkDataPortObject}
+     * @param sparkDataPortObject The original {@link SparkDataPortObject} to inherit the Spark context the table spec
+     *            from.
+     * @param newSparkObjectID The ID of the new {@link SparkDataTable} to wrap.
+     * @return a new {@link SparkDataPortObject}.
      */
-    public static PortObject createSparkPortObject(final SparkDataPortObject inputRDD, final DataTableSpec newSpec,
-        final String resultRDDName) {
-        return new SparkDataPortObject(new SparkDataTable(inputRDD.getContextID(), resultRDDName, newSpec));
-    }
-
-    /**
-     * @param inputRDD the original {@link SparkDataPortObject}
-     * @param newSpec the new {@link DataTableSpec} of the input {@link SparkDataPortObject}
-     * @return the a new {@link SparkDataPortObject} based on the input object and spec
-     */
-    public static SparkDataPortObject createSparkPortObject(final SparkDataPortObject inputRDD,
-        final DataTableSpec newSpec) {
-        final SparkDataTable renamedRDD = new SparkDataTable(inputRDD.getContextID(), inputRDD.getTableName(), newSpec);
-        SparkDataPortObject result = new SparkDataPortObject(renamedRDD);
-        return result;
-    }
-
-    /**
-     * @param inputRDD the {@link SparkDataPortObject} that provides the context and the table spec
-     * @param resultRDDName the name of the result RDD
-     * @return {@link SparkDataPortObject}
-     */
-    public static SparkDataPortObject createSparkPortObject(final SparkDataPortObject inputRDD,
-        final String resultRDDName) {
-        return new SparkDataPortObject(
-            new SparkDataTable(inputRDD.getContextID(), resultRDDName, inputRDD.getTableSpec()));
+    public SparkDataPortObject createSparkPortObject(final SparkDataPortObject sparkDataPortObject,
+        final String newSparkObjectID) {
+        return new SparkDataPortObject(new SparkDataTable(sparkDataPortObject.getContextID(), newSparkObjectID,
+            sparkDataPortObject.getTableSpec(), getKNIMESparkExecutorVersion()));
     }
 }

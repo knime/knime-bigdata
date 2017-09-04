@@ -47,7 +47,7 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.util.SparkIDs;
+import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 
@@ -55,8 +55,7 @@ import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMetho
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibCorrelationMatrixNodeModel extends SparkNodeModel
-implements BufferedDataTableHolder {
+public class MLlibCorrelationMatrixNodeModel extends SparkNodeModel implements BufferedDataTableHolder {
 
     private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
 
@@ -96,7 +95,8 @@ implements BufferedDataTableHolder {
         final MLlibSettings settings = m_settings.getSettings(spec.getTableSpec());
         final String[] includes = settings.getFatureColNames().toArray(new String[0]);
         final DataTableSpec resultSpec = createSpec(settings);
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
+        return new PortObjectSpec[]{
+            new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
             PMCCPortObjectAndSpec.createOutSpec(includes), new PMCCPortObjectAndSpec(includes)};
     }
 
@@ -108,11 +108,13 @@ implements BufferedDataTableHolder {
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
         final SparkContextID contextID = data.getContextID();
         final MLlibSettings settings = m_settings.getSettings(data.getTableSpec());
-        final String resultRDD = SparkIDs.createRDDID();
-        final DataTableSpec resultSpec = createSpec(settings);
+
+        final SparkDataTable resultTable =
+            new SparkDataTable(data.getContextID(), createSpec(settings), getKNIMESparkExecutorVersion());
+
         final MLlibCorrelationMethod method = MLlibCorrelationMethod.get(m_method.getStringValue());
         final CorrelationJobInput input =
-                new CorrelationJobInput(data.getTableName(), method.getMethod(), resultRDD, settings.getFeatueColIdxs());
+                new CorrelationJobInput(data.getTableName(), method.getMethod(), resultTable.getID(), settings.getFeatueColIdxs());
         final JobRunFactory<CorrelationJobInput, HalfDoubleMatrixJobOutput> runFactory = getJobRunFactory(data, JOB_ID);
         final HalfDoubleMatrixJobOutput output = runFactory.createRun(input).run(contextID, exec);
         final HalfDoubleMatrix correlationMatrix = new HalfDoubleMatrix(output.getMatrix(), output.storesDiagonal());
@@ -121,7 +123,7 @@ implements BufferedDataTableHolder {
                 new PMCCPortObjectAndSpec(includeNames, correlationMatrix);
         final BufferedDataTable out = pmccModel.createCorrelationMatrix(exec);
         m_correlationTable = out;
-        return new PortObject[] {createSparkPortObject(data, resultSpec, resultRDD), out, pmccModel};
+        return new PortObject[]{new SparkDataPortObject(resultTable), out, pmccModel};
     }
 
     /** {@inheritDoc} */
@@ -164,7 +166,7 @@ implements BufferedDataTableHolder {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
         m_method.saveSettingsTo(settings);
     }
@@ -173,7 +175,7 @@ implements BufferedDataTableHolder {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
         m_method.validateSettings(settings);
     }
@@ -182,7 +184,7 @@ implements BufferedDataTableHolder {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
         m_method.loadSettingsFrom(settings);
     }

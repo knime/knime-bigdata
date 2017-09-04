@@ -42,7 +42,7 @@ class SparkDataView extends JPanel {
     /**
      * @param sparkData the {@link SparkDataTable} to visualize
      */
-    SparkDataView(final SparkRDD sparkData) {
+    SparkDataView(final SparkData sparkData) {
         super(new GridBagLayout());
         super.setName("Spark");
         final SparkContextID contextID = sparkData.getContextID();

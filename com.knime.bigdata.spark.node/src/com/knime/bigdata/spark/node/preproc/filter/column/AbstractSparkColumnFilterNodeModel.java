@@ -81,7 +81,8 @@ public abstract class AbstractSparkColumnFilterNodeModel extends SparkNodeModel 
             return null;
         }
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)inSpecs[m_sparkInputIdx];
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), c.createSpec())};
+        return new PortObjectSpec[]{
+            new SparkDataPortObjectSpec(sparkSpec.getContextID(), c.createSpec(), getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -98,20 +99,21 @@ public abstract class AbstractSparkColumnFilterNodeModel extends SparkNodeModel 
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-            final SparkDataPortObject rdd = (SparkDataPortObject) inData[m_sparkInputIdx];
-            final SparkDataTable sparkRDD = rdd.getData();
-            final SparkContextID context = sparkRDD.getContextID();
-            final ColumnRearranger c = createColumnRearranger(inData);
-            final Integer[] columnIndices =
-                    SparkUtil.getColumnIndices(rdd.getTableSpec(), c.createSpec().getColumnNames());
-            final DataTableSpec resultSpec = c.createSpec();
-            final SparkDataTable resultTable = new SparkDataTable(context, resultSpec);
-            final SimpleJobRunFactory<ColumnsJobInput> runfactory =
-                    SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
-            final ColumnsJobInput jobInput = new ColumnsJobInput(sparkRDD.getID(), resultTable.getID(), columnIndices);
-            runfactory.createRun(jobInput).run(context, exec);
-            return new PortObject[] {SparkNodeModel.createSparkPortObject(rdd, resultTable)};
-        }
+        final SparkDataPortObject rdd = (SparkDataPortObject) inData[m_sparkInputIdx];
+        final SparkDataTable sparkRDD = rdd.getData();
+        final SparkContextID context = sparkRDD.getContextID();
+        final ColumnRearranger c = createColumnRearranger(inData);
+        final Integer[] columnIndices =
+                SparkUtil.getColumnIndices(rdd.getTableSpec(), c.createSpec().getColumnNames());
+        final DataTableSpec resultSpec = c.createSpec();
+        final SparkDataTable resultTable = new SparkDataTable(context, resultSpec, getKNIMESparkExecutorVersion());
+        final SimpleJobRunFactory<ColumnsJobInput> runfactory =
+                SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
+        final ColumnsJobInput jobInput = new ColumnsJobInput(sparkRDD.getID(), resultTable.getID(), columnIndices);
+        runfactory.createRun(jobInput).run(context, exec);
+
+        return new PortObject[]{new SparkDataPortObject(resultTable)};
+    }
 
     /**
      * Called from the {@link #executeInternal(PortObject[], ExecutionContext)} method

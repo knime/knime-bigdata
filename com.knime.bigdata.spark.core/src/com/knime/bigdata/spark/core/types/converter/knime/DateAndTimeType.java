@@ -32,9 +32,12 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
+ * Intermediate type for KNIMES {@link DateAndTimeType}.
  *
  * @author Tobias Koetter, KNIME.com
+ * @deprecated Deprecated since 2.1.0 in favor of {@link LocalDateTimeType} and {@link LocalDateType}.
  */
+@Deprecated
 public class DateAndTimeType extends AbstractKNIMEToIntermediateConverter {
 
     /**The only instance.*/
@@ -42,7 +45,7 @@ public class DateAndTimeType extends AbstractKNIMEToIntermediateConverter {
 
     private DateAndTimeType() {
         super("Date and time", DateAndTimeCell.TYPE, IntermediateDataTypes.TIMESTAMP,
-            new IntermediateDataType[] {});
+            new IntermediateDataType[] {IntermediateDataTypes.TIMESTAMP, IntermediateDataTypes.DATE});
     }
 
     /**

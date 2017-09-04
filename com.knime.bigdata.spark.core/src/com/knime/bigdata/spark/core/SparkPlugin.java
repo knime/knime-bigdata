@@ -46,7 +46,10 @@ import com.knime.licenses.LicenseUtil;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkPlugin extends AbstractUIPlugin {
- // The shared instance.
+
+    /**
+     * Holds the singleton instance of the Spark plugin, once it has been created by the OSGI framework.
+     */
     private static SparkPlugin plugin;
 
     private String m_pluginRootPath;
@@ -117,9 +120,9 @@ public class SparkPlugin extends AbstractUIPlugin {
     }
 
     /**
-     * Returns the shared instance.
+     * Returns the singleton instance of the Spark plugin, once it has been created by the OSGI framework.
      *
-     * @return The shared instance
+     * @return The singleton instance of the Spark plugin
      */
     public static SparkPlugin getDefault() {
         return plugin;

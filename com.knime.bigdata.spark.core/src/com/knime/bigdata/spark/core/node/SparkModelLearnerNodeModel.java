@@ -231,46 +231,46 @@ public abstract class SparkModelLearnerNodeModel<I extends JobInput, S extends M
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected final void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
-        saveAdditionalSettingsTo(settings);
+        saveModelLearnerSettingsTo(settings);
     }
 
     /**
      * Overwrite this method to load additional settings.
      * @param settings
      */
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {}
+    protected void saveModelLearnerSettingsTo(final NodeSettingsWO settings) {}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected final void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
-        validateAdditionalSettings(settings);
+        validateModelLearnerSettings(settings);
     }
 
     /**
      * @param settings
      * @throws InvalidSettingsException
      */
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {}
+    protected void validateModelLearnerSettings(final NodeSettingsRO settings) throws InvalidSettingsException {}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected final void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
-        loadAdditionalValidatedSettingsFrom(settings);
+        loadValidatedModelLearnerSettingsFrom(settings);
     }
 
     /**
      * @param settings
      * @throws InvalidSettingsException
      */
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadValidatedModelLearnerSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {}
 
 }

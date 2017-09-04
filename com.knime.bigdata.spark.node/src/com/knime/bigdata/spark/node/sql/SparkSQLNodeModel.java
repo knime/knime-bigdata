@@ -82,8 +82,8 @@ public class SparkSQLNodeModel extends SparkNodeModel implements FlowVariablePro
         final SparkDataPortObject inputRdd = (SparkDataPortObject) inData[0];
         final SparkContextID contextID = inputRdd.getContextID();
         final String namedInputObject = inputRdd.getData().getID();
-        final IntermediateSpec inputSchema = SparkDataTableUtil.toIntermediateSpec(inputRdd.getTableSpec());
-        final String namedOutputObject = SparkIDs.createRDDID();
+        final IntermediateSpec inputSchema = SparkDataTableUtil.toIntermediateSpec(inputRdd.getTableSpec(), getKNIMESparkExecutorVersion());
+        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final String query = FlowVariableResolver.parse(m_settings.getQuery(), this);
         final SparkSQLJobInput input = new SparkSQLJobInput(namedInputObject, inputSchema, namedOutputObject, query);
 
@@ -93,8 +93,10 @@ public class SparkSQLNodeModel extends SparkNodeModel implements FlowVariablePro
                 .createRun(input)
                 .run(contextID, exec);
 
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
-        final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, outputSpec);
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
+            .convertSpec(jobOutput.getSpec(namedOutputObject), getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable =
+            new SparkDataTable(contextID, namedOutputObject, outputSpec, getKNIMESparkExecutorVersion());
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
 
         return new PortObject[] { sparkObject };
@@ -113,17 +115,17 @@ public class SparkSQLNodeModel extends SparkNodeModel implements FlowVariablePro
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 }

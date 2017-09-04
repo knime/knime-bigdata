@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.util.jar.SparkJarProvider"/>
+                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

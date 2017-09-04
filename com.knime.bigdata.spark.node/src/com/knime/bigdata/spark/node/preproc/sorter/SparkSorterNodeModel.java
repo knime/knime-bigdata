@@ -138,7 +138,7 @@ public class SparkSorterNodeModel extends SparkNodeModel {
         final SparkDataPortObject spark = (SparkDataPortObject) inData[0];
         final DataTableSpec tableSpec = spark.getTableSpec();
         final SparkDataTable data = spark.getData();
-        String resultTableName = SparkIDs.createRDDID();
+        String resultTableName = SparkIDs.createSparkDataObjectID();
         final Integer[] cols = SparkUtil.getColumnIndices(tableSpec, m_inclList);
         final Boolean[] sortDirection = SparkUtil.convert(m_sortOrder);
 
@@ -147,7 +147,7 @@ public class SparkSorterNodeModel extends SparkNodeModel {
         final SortJobInput jobInput = new SortJobInput(data.getID(), resultTableName, cols, sortDirection, m_missingToEnd);
         runFactory.createRun(jobInput).run(contextID, exec);
 
-        return new PortObject[] {SparkNodeModel.createSparkPortObject(spark, resultTableName)};
+        return new PortObject[] {createSparkPortObject(spark, resultTableName)};
     }
 
     /**
@@ -157,7 +157,7 @@ public class SparkSorterNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_inclList != null) {
             settings.addStringArray(INCLUDELIST_KEY, m_inclList.toArray(new String[0]));
         }
@@ -174,7 +174,7 @@ public class SparkSorterNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         final String[] inclList = settings.getStringArray(INCLUDELIST_KEY);
         if (inclList == null) {
@@ -202,7 +202,7 @@ public class SparkSorterNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         assert (settings != null);
         m_inclList = new ArrayList<>();

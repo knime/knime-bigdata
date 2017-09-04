@@ -76,7 +76,7 @@ public class MLlibNaiveBayesNodeModel extends SparkModelLearnerNodeModel<NaiveBa
      * {@inheritDoc}
      */
     @Override
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+    protected void saveModelLearnerSettingsTo(final NodeSettingsWO settings) {
         m_lambda.saveSettingsTo(settings);
     }
 
@@ -84,7 +84,7 @@ public class MLlibNaiveBayesNodeModel extends SparkModelLearnerNodeModel<NaiveBa
      * {@inheritDoc}
      */
     @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateModelLearnerSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_lambda.validateSettings(settings);
     }
 
@@ -92,7 +92,7 @@ public class MLlibNaiveBayesNodeModel extends SparkModelLearnerNodeModel<NaiveBa
      * {@inheritDoc}
      */
     @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadValidatedModelLearnerSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_lambda.loadSettingsFrom(settings);
     }
 

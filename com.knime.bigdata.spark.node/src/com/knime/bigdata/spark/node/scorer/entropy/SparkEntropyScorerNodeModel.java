@@ -203,7 +203,7 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_referenceCol != null) {
             settings.addString(CFG_REFERENCE_COLUMN, m_referenceCol);
             settings.addString(CFG_CLUSTERING_COLUMN, m_clusteringCol);
@@ -216,7 +216,7 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         settings.getString(CFG_REFERENCE_COLUMN);
         settings.getString(CFG_CLUSTERING_COLUMN);
         m_flowVarModel.validateSettings(settings);
@@ -227,7 +227,7 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_referenceCol = settings.getString(CFG_REFERENCE_COLUMN);
         m_clusteringCol = settings.getString(CFG_CLUSTERING_COLUMN);
 

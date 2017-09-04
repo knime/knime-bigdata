@@ -39,10 +39,21 @@ public class FetchRowsJobInput extends JobInput {
     public FetchRowsJobInput() {
     }
 
+    /**
+     * @return the number of rows to fetch.
+     */
     public int getNumberOfRows() {
         return getInteger(KEY_NUMBER_OF_ROWS);
     }
 
+    /**
+     * Factory method.
+     *
+     * @param numRows The number of rows to fetch.
+     * @param namedInputObjectId The unique ID of the Spark data object to fetch.
+     * @param namedInputObjectSpec The {@link IntermediateSpec} object the Spark data object to fetch.
+     * @return a new instance with the given parameters.
+     */
     public static FetchRowsJobInput create(final int numRows, final String namedInputObjectId,
         final IntermediateSpec namedInputObjectSpec) {
 

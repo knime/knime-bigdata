@@ -102,7 +102,7 @@ public class SparkConcatenateNodeModel extends SparkNodeModel {
             resultTable = rdds.get(0);
             setDeleteOnReset(false);
         } else {
-            resultTable = new SparkDataTable(context, spec);
+            resultTable = new SparkDataTable(context, spec, getKNIMESparkExecutorVersion());
             final SimpleJobRunFactory<ConcatenateRDDsJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
             final ConcatenateRDDsJobInput jobInput = new ConcatenateRDDsJobInput(rddIds.toArray(new String[0]), resultTable.getID());
             runFactory.createRun(jobInput).run(context, exec);
@@ -115,7 +115,7 @@ public class SparkConcatenateNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         //nothing to do
     }
 
@@ -123,7 +123,7 @@ public class SparkConcatenateNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 
@@ -131,7 +131,7 @@ public class SparkConcatenateNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 }

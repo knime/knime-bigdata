@@ -75,7 +75,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         checkDatabaseIdentifier(spec);
 
         final SparkDataPortObjectSpec resultSpec =
-                new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec());
+                new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec(), getKNIMESparkExecutorVersion());
         return new PortObjectSpec[] {resultSpec};
     }
 
@@ -104,7 +104,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
         final String hiveQuery = settings.getQuery();
-        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableSpec);
+        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableSpec, getKNIMESparkExecutorVersion());
         LOGGER.debug("Original sql: " + hiveQuery);
         final Hive2SparkJobInput jobInput = new Hive2SparkJobInput(resultTable.getID(), hiveQuery);
         LOGGER.debug("Cleaned sql: " + jobInput.getQuery());
@@ -117,7 +117,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         //nothing to do
     }
 
@@ -125,7 +125,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 
@@ -133,7 +133,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         //nothing to do
     }
 }

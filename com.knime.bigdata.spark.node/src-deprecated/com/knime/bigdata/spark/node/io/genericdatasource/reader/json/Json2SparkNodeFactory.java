@@ -22,6 +22,7 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader.json;
 
 import org.knime.core.node.NodeDialogPane;
 
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel;
@@ -35,7 +36,7 @@ public class Json2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Ge
 
     @Override
     public Json2SparkSettings getSettings() {
-        return new Json2SparkSettings(FORMAT, SparkVersion.V_1_5, HAS_DRIVER);
+        return new Json2SparkSettings(FORMAT, SparkVersion.V_1_5, HAS_DRIVER, SparkPluginVersion.VERSION_CURRENT);
     }
 
     @Override

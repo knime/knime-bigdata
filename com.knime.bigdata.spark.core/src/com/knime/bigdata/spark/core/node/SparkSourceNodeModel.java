@@ -39,7 +39,9 @@ import com.knime.bigdata.spark.core.version.SparkProvider;
  */
 public abstract class SparkSourceNodeModel extends SparkNodeModel {
 
-    /**Constructor for class AbstractGraphNodeModel.
+    /**
+     * Constructor for Spark source node model base class.
+     *
      * @param inPortTypes the input port types
      * @param optionalSparkPort true if input spark context port is optional
      * @param outPortTypes the output port types
@@ -48,7 +50,9 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
         this(inPortTypes, optionalSparkPort, outPortTypes, true);
     }
 
-    /**Constructor for class AbstractGraphNodeModel.
+    /**
+     * Constructor for Spark source node model base class.
+     *
      * @param inPortTypes the input port types
      * @param optionalSparkPort true if input spark context port is optional
      * @param outPortTypes the output port types

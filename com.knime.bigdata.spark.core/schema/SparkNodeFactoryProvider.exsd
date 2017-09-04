@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.node.SparkNodeFactoryProvider"/>
+                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

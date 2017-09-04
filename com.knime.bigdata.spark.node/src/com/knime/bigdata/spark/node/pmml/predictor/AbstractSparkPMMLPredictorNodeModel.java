@@ -106,7 +106,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         if (resultSpec == null) {
             return new PortObjectSpec[] {null};
         }
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec)};
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec, getKNIMESparkExecutorVersion())};
     }
     /**
      * @param pmmlSpec
@@ -130,8 +130,8 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final String predColName = m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
         final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
             predColName, m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
-        final String aOutputTableName = SparkIDs.createRDDID();
-        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
+        final String aOutputTableName = SparkIDs.createSparkDataObjectID();
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
         final File jobFile = createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
@@ -140,7 +140,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final JobWithFilesRunFactory<PMMLPredictionJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
         execProvider.createRun(input, Collections.singletonList(jobFile)).run(data.getContextID(), exec);
-        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
+        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -169,7 +169,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_changePredColName.saveSettingsTo(settings);
         m_outputProbabilities.saveSettingsTo(settings);
         m_predColName.saveSettingsTo(settings);
@@ -180,7 +180,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_changePredColName.loadSettingsFrom(settings);
         m_outputProbabilities.loadSettingsFrom(settings);
         m_predColName.loadSettingsFrom(settings);
@@ -191,7 +191,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_changePredColName.validateSettings(settings);
         m_outputProbabilities.validateSettings(settings);
         m_predColName.validateSettings(settings);

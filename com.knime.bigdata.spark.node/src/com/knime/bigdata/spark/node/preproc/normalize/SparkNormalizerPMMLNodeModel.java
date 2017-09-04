@@ -46,7 +46,7 @@ import com.knime.bigdata.spark.core.job.JobRunFactory;
 import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.util.SparkIDs;
+import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
@@ -113,7 +113,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         }
         final DataTableSpec resultSpec = Normalizer2.generateNewSpec(dataSpec, includes);
         final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
             pmmlSpecCreator.createSpec()};
     }
 
@@ -121,7 +121,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_config = new NormalizerConfig();
         m_config.loadConfigurationInModel(settings);
     }
@@ -130,7 +130,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_config != null) {
             m_config.saveSettings(settings);
         }
@@ -140,7 +140,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_config = new NormalizerConfig();
         m_config.loadConfigurationInModel(settings);
     }
@@ -161,10 +161,13 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         for (int i = 0, length = includedCols.length; i < length; i++) {
             includeColIdxs[i] = spec.findColumnIndex(includedCols[i]);
         }
-        final String outputTableName = SparkIDs.createRDDID();
+
+        final DataTableSpec resultSpec = Normalizer2.generateNewSpec(spec, includes);
+        final SparkDataTable resultTable = new SparkDataTable(contextID, resultSpec, getKNIMESparkExecutorVersion());
 
         final JobRunFactory<NormalizeJobInput, NormalizeJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
-        final NormalizeJobInput jobInput = new NormalizeJobInput(rdd.getData().getID(), outputTableName, includeColIdxs, convertToSettings());
+        final NormalizeJobInput jobInput =
+            new NormalizeJobInput(rdd.getData().getID(), resultTable.getID(), includeColIdxs, convertToSettings());
         final NormalizeJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
         //create from result
         final double[] min = new double[includedCols.length];
@@ -178,8 +181,8 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(spec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
         outPMMLPort.addGlobalTransformations(trans.exportToTransDict());
-        final DataTableSpec resultSpec = Normalizer2.generateNewSpec(spec, includes);
-        return new PortObject[]{createSparkPortObject(rdd, resultSpec, outputTableName), outPMMLPort};
+
+        return new PortObject[]{new SparkDataPortObject(resultTable), outPMMLPort};
     }
 
     /**

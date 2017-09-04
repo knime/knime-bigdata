@@ -187,7 +187,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
 
         String namedOutputObject = null;
         if (createOutputObject) {
-            namedOutputObject = SparkIDs.createRDDID();
+            namedOutputObject = SparkIDs.createSparkDataObjectID();
         }
 
         final Pair<String, File> compiledSnippet = compileSnippetCached(getSparkVersion(inData));
@@ -197,13 +197,16 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
 
         final SparkContextID contextID = getContextID(inData);
 
-        final JavaSnippetJobOutput output = SparkContextUtil.<JavaSnippetJobInput, JavaSnippetJobOutput>getJobWithFilesRunFactory(contextID, jobId)
+        final JavaSnippetJobOutput output =
+            SparkContextUtil.<JavaSnippetJobInput, JavaSnippetJobOutput> getJobWithFilesRunFactory(contextID, jobId)
                 .createRun(input, Arrays.asList(compiledSnippet.getSecond())).run(contextID, exec);
 
         PortObject[] toReturn = new PortObject[0];
-        if(createOutputObject) {
-            final DataTableSpec knimeOutputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(output.getSpec(namedOutputObject));
-            final SparkDataTable resultTable = new SparkDataTable(contextID, namedOutputObject, knimeOutputSpec);
+        if (createOutputObject) {
+            final DataTableSpec knimeOutputSpec =
+                KNIMEToIntermediateConverterRegistry.convertSpec(output.getSpec(namedOutputObject), getKNIMESparkExecutorVersion());
+            final SparkDataTable resultTable =
+                new SparkDataTable(contextID, namedOutputObject, knimeOutputSpec, getKNIMESparkExecutorVersion());
             toReturn = new PortObject[]{new SparkDataPortObject(resultTable)};
         }
 
@@ -315,7 +318,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_loadedSettings != null) {
             m_loadedSettings.saveSettings(settings);
         } else if (m_sparkJavaSnippet != null) {
@@ -327,7 +330,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         final JavaSnippetSettings s = new JavaSnippetSettings();
         s.loadSettings(settings);
     }
@@ -336,7 +339,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         if (m_loadedSettings == null) {
             m_loadedSettings = new JavaSnippetSettings();
         }

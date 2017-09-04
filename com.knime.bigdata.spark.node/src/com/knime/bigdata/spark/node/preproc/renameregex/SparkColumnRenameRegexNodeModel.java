@@ -53,7 +53,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
         final DataTableSpec outSpec = createNewSpec(sparkSpec.getTableSpec());
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec)};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -64,7 +64,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
         final SparkDataPortObject inputPort = (SparkDataPortObject) inObjects[0];
         final DataTableSpec outputTableSpec = createNewSpec(inputPort.getTableSpec());
         return new PortObject[] {
-            SparkRenameColumnNodeModel.executeRenameColumnJob(inputPort, outputTableSpec, exec)
+            SparkRenameColumnNodeModel.executeRenameColumnJob(inputPort, outputTableSpec, getKNIMESparkExecutorVersion(), exec)
         };
     }
 
@@ -89,7 +89,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         if (m_config != null) {
             m_config.saveConfiguration(settings);
         }
@@ -99,7 +99,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         ColumnRenameRegexConfiguration config =
             new ColumnRenameRegexConfiguration();
@@ -110,7 +110,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         ColumnRenameRegexConfiguration config = new ColumnRenameRegexConfiguration();
         config.loadSettingsInModel(settings);

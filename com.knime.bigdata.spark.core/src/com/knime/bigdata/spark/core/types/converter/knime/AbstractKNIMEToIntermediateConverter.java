@@ -21,26 +21,35 @@
 package com.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
+import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
+ * Abstract base class for all {@link KNIMEToIntermediateConverter} implementations.
  *
  * @author Tobias Koetter, KNIME.com
  */
 public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToIntermediateConverter {
 
     private DataType m_knimeDataType;
+
     private IntermediateDataType m_intermediateDataType;
+
     private IntermediateDataType[] m_supportedIntermediateDataTypes;
+
     private String m_name;
+
     private String m_description;
 
     /**
      * Constructor for converter that support one KNIME {@link DataType} and one {@link IntermediateDataType}.
+     *
      * @param name the user facing name of the converter
      * @param knimeType the KNIME {@link DataType} of the cell returned by the {@link #convert(Serializable)} method
      * @param intermediateType the {@link IntermediateDataType} returned by the {@link #convert(DataCell)} method
@@ -48,49 +57,56 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
     public AbstractKNIMEToIntermediateConverter(final String name, final DataType knimeType,
         final IntermediateDataType intermediateType) {
 
-        this(name, defDesc(name), knimeType, intermediateType, new IntermediateDataType[] {intermediateType});
+        this(name, defDesc(name), knimeType, intermediateType, new IntermediateDataType[]{intermediateType});
     }
 
     /**
      * Constructor for converter that support one KNIME {@link DataType} and one {@link IntermediateDataType}.
+     *
      * @param name the user facing name of the converter
      * @param description the user facing description e.g. tool tip
      * @param knimeType the KNIME {@link DataType} of the cell returned by the {@link #convert(Serializable)} method
      * @param intermediateType the {@link IntermediateDataType} returned by the {@link #convert(DataCell)} method
      */
-    public AbstractKNIMEToIntermediateConverter(final String name, final String description,
-        final DataType knimeType, final IntermediateDataType intermediateType) {
+    public AbstractKNIMEToIntermediateConverter(final String name, final String description, final DataType knimeType,
+        final IntermediateDataType intermediateType) {
 
-        this(name, description, knimeType, intermediateType, new IntermediateDataType[] {intermediateType});
+        this(name, description, knimeType, intermediateType, new IntermediateDataType[]{intermediateType});
     }
 
     /**
-     * Constructor for converter that support one KNIME {@link DataType} and multiple
-     * {@link IntermediateDataType}s.
+     * Constructor for converter that support one KNIME {@link DataType} and multiple {@link IntermediateDataType}s.
+     *
      * @param name the user facing name of the converter
      * @param knimeType the KNIME {@link DataType} of the cell returned by the {@link #convert(Serializable)} method
      * @param intermediateType the {@link IntermediateDataType} returned by the {@link #convert(DataCell)} method
      * @param supportedIntermediateTypes the supported {@link IntermediateDataType}s
      */
-    public AbstractKNIMEToIntermediateConverter(final String name,
-        final DataType knimeType, final IntermediateDataType intermediateType,
-        final IntermediateDataType[] supportedIntermediateTypes) {
+    public AbstractKNIMEToIntermediateConverter(final String name, final DataType knimeType,
+        final IntermediateDataType intermediateType, final IntermediateDataType[] supportedIntermediateTypes) {
 
         this(name, defDesc(name), knimeType, intermediateType, supportedIntermediateTypes);
     }
 
     /**
-     * Constructor for converter that support one KNIME {@link DataType} and multiple
-     * {@link IntermediateDataType}s.
+     * Constructor for converter that support one KNIME {@link DataType} and multiple {@link IntermediateDataType}s.
+     *
      * @param name the user facing name of the converter
      * @param description the user facing description e.g. tool tip
      * @param knimeType the KNIME {@link DataType} of the cell returned by the {@link #convert(Serializable)} method
      * @param intermediateType the {@link IntermediateDataType} returned by the {@link #convert(DataCell)} method
      * @param supportedIntermediateTypes the supported {@link IntermediateDataType}s
      */
-    public AbstractKNIMEToIntermediateConverter(final String name, final String description,
-        final DataType knimeType, final IntermediateDataType intermediateType,
-        final IntermediateDataType[] supportedIntermediateTypes) {
+    public AbstractKNIMEToIntermediateConverter(final String name, final String description, final DataType knimeType,
+        final IntermediateDataType intermediateType, final IntermediateDataType[] supportedIntermediateTypes) {
+
+        if (supportedIntermediateTypes == null) {
+            throw new IllegalArgumentException("supportedIntermediateTypes must not be null");
+        }
+
+        if (Arrays.asList(supportedIntermediateTypes).indexOf(intermediateType) == -1) {
+            throw new IllegalArgumentException("intermediateType is not in list of asupportedIntermediateTypes");
+        }
 
         m_name = name;
         m_description = description;
@@ -98,8 +114,6 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
         m_intermediateDataType = intermediateType;
         m_supportedIntermediateDataTypes = supportedIntermediateTypes;
     }
-
-
 
     /**
      * @param name the name of the converter
@@ -159,6 +173,7 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
         }
         return convertNoneMissingCell(cell);
     }
+
     /**
      * @param cell the {@link DataCell}. Can not be a missing {@link DataCell}!
      * @return the {@link Serializable} for the not missing {@link DataCell}
@@ -195,7 +210,34 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
      * @return the exception
      */
     protected IllegalArgumentException incompatibleSerializableException(final Serializable intermediateTypeObject) {
-        return new IllegalArgumentException("IntermediateTypeObject " + intermediateTypeObject
-            + " not compatible with " + getClass().getName());
+        return new IllegalArgumentException(
+            "IntermediateTypeObject " + intermediateTypeObject + " not compatible with " + getClass().getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version getLowestSupportedVersion() {
+        return SparkPluginVersion.VERSION_ZERO;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version getHighestSupportedVersion() {
+        return SparkPluginVersion.VERSION_INFINITY;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsVersion(final Version knimeSparkExecutorVersion) {
+        int lowerCmpResult = getLowestSupportedVersion().compareTo(knimeSparkExecutorVersion);
+        int higherCmpResult = getHighestSupportedVersion().compareTo(knimeSparkExecutorVersion);
+
+        return (lowerCmpResult <= 0) && (higherCmpResult > 0);
     }
 }

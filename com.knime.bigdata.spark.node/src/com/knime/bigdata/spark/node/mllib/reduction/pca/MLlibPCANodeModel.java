@@ -83,8 +83,8 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         m_settings.check(tableSpec);
         final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "PCA dimension ");
         final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component ");
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), projectedSpec),
-            new SparkDataPortObjectSpec(spec.getContextID(), matrixSpec)};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), projectedSpec, getKNIMESparkExecutorVersion()),
+            new SparkDataPortObjectSpec(spec.getContextID(), matrixSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -116,21 +116,21 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         int noOfComponents = m_noOfComponents.getIntValue();
         final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "DIM_");
         final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component_");
-        final String matrixName = SparkIDs.createRDDID();
-        final String projectionMatrixName = SparkIDs.createRDDID();
+        final String matrixName = SparkIDs.createSparkDataObjectID();
+        final String projectionMatrixName = SparkIDs.createSparkDataObjectID();
         final PCAJobInput jobInput = new PCAJobInput(data.getTableName(), settings.getFeatueColIdxs(), noOfComponents,
             matrixName, projectionMatrixName);
         SparkContextUtil.getSimpleRunFactory(data.getContextID(), JOB_ID).createRun(jobInput).run(data.getContextID());
         exec.setMessage("PCA (SPARK) done.");
-        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName),
-            createSparkPortObject(data, matrixSpec, matrixName)};
+        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName, getKNIMESparkExecutorVersion()),
+            createSparkPortObject(data, matrixSpec, matrixName, getKNIMESparkExecutorVersion())};
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_noOfComponents.saveSettingsTo(settings);
         m_settings.saveSettingsTo(settings);
     }
@@ -139,7 +139,7 @@ public class MLlibPCANodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfComponents.validateSettings(settings);
         m_settings.validateSettings(settings);
     }
@@ -148,7 +148,7 @@ public class MLlibPCANodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfComponents.loadSettingsFrom(settings);
         m_settings.loadSettingsFrom(settings);
     }

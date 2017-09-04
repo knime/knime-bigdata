@@ -52,10 +52,10 @@
          <attribute name="ProviderClass" type="string" use="required">
             <annotation>
                <documentation>
-                  Specify an implementation of the com.knime.bigdata.spark.api.converter.spark.IntermediateToSparkConverterProvider interface. Implementors could use the existing DefaultIntermediateToSparkConverterProvider.
+                  Specify an implementation of the com.knime.bigdata.spark.core.version.SparkProviderWithElements interface. Implementors must extend the existing base implementation com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.api.converter.spark.IntermediateToSparkConverterProvider"/>
+                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

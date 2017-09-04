@@ -156,7 +156,7 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_storageLevel.saveSettingsTo(settings);
         m_useDisk.saveSettingsTo(settings);
         m_useMemory.saveSettingsTo(settings);
@@ -169,7 +169,7 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         String level = ((SettingsModelString)m_storageLevel.createCloneWithValidatedValue(settings)).getStringValue();
         if (level == null || level.isEmpty()) {
             throw new InvalidSettingsException("storage level must not be empty");
@@ -188,7 +188,7 @@ public class SparkPersistNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_storageLevel.loadSettingsFrom(settings);
         m_useDisk.loadSettingsFrom(settings);
         m_useMemory.loadSettingsFrom(settings);

@@ -111,8 +111,8 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         final DataTableSpec svSpec = createSVSpec();
         final DataTableSpec vSpec = getVSpec(tableSpec);
         final DataTableSpec uSpec = getUSpec();
-        return new PortObjectSpec[]{svSpec, new SparkDataPortObjectSpec(spec.getContextID(), vSpec),
-            uSpec == null ? null : new SparkDataPortObjectSpec(spec.getContextID(), uSpec)};
+        return new PortObjectSpec[]{svSpec, new SparkDataPortObjectSpec(spec.getContextID(), vSpec, getKNIMESparkExecutorVersion()),
+            uSpec == null ? null : new SparkDataPortObjectSpec(spec.getContextID(), uSpec, getKNIMESparkExecutorVersion())};
     }
 
     /**
@@ -179,8 +179,8 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         final DataTableSpec svSpec = createSVSpec();
         final DataTableSpec vSpec = getVSpec(tableSpec);
         final DataTableSpec uSpec = getUSpec();
-        final String vMatrixName = SparkIDs.createRDDID();
-        final String uMatrixName = SparkIDs.createRDDID();
+        final String vMatrixName = SparkIDs.createSparkDataObjectID();
+        final String uMatrixName = SparkIDs.createSparkDataObjectID();
         final SVDJobInput jobInput = new SVDJobInput(data.getTableName(), settings.getFeatueColIdxs(), computeU, k,
             recCond, vMatrixName, uMatrixName);
         final JobRunFactory<SVDJobInput, SVDJobOutput> runFactory =
@@ -196,9 +196,9 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         exec.setMessage("SVD (SPARK) done.");
         SparkDataTable uMatixRDD = null;
         if (computeU) {
-            uMatixRDD = new SparkDataTable(data.getContextID(), uMatrixName, uSpec);
+            uMatixRDD = new SparkDataTable(data.getContextID(), uMatrixName, uSpec, getKNIMESparkExecutorVersion());
         }
-        return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName),
+        return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName, getKNIMESparkExecutorVersion()),
             uMatixRDD == null ? null : new SparkDataPortObject(uMatixRDD)};
     }
 
@@ -206,7 +206,7 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_noOfSingularValues.saveSettingsTo(settings);
         m_computeU.saveSettingsTo(settings);
         m_reciprocalCondition.saveSettingsTo(settings);
@@ -217,7 +217,7 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfSingularValues.validateSettings(settings);
         m_computeU.validateSettings(settings);
         m_reciprocalCondition.validateSettings(settings);
@@ -228,7 +228,7 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_noOfSingularValues.loadSettingsFrom(settings);
         m_computeU.loadSettingsFrom(settings);
         m_reciprocalCondition.loadSettingsFrom(settings);
