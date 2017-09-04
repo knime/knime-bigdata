@@ -22,7 +22,6 @@ package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,11 +34,8 @@ import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.Action;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -50,7 +46,6 @@ import org.knime.base.node.mine.decisiontree2.view.graph.CollapseBranchAction;
 import org.knime.base.node.mine.decisiontree2.view.graph.ExpandBranchAction;
 import org.knime.core.data.property.ColorAttr;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeView;
 
 import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 
@@ -60,8 +55,8 @@ import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionT
  *
  * @author Ole Ostergaard
  */
-public class MLlibDecisionTreeGraphPanel extends NodeView<MLlibDecisionTreeNodeModel> {
-
+public class MLlibDecisionTreeGraphPanel extends JSplitPane {
+    private static final long serialVersionUID = 4229032429584451491L;
     private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibDecisionTreeNodeModel.class);
     private MLlibDecisionTreeGraphView m_graph;
     private JPopupMenu m_popup;
@@ -71,7 +66,6 @@ public class MLlibDecisionTreeGraphPanel extends NodeView<MLlibDecisionTreeNodeM
      * @param graph the graph to be displayed
      */
     public MLlibDecisionTreeGraphPanel(final MLlibDecisionTreeNodeModel decisionTreeModel, final MLlibDecisionTreeGraphView graph) {
-        super(decisionTreeModel);
         m_graph = graph;
         JPanel p = new JPanel(new GridLayout());
         p.setBackground(ColorAttr.BACKGROUND);
@@ -81,15 +75,9 @@ public class MLlibDecisionTreeGraphPanel extends NodeView<MLlibDecisionTreeNodeM
         Dimension prefSize = treeView.getPreferredSize();
         treeView.setPreferredSize(new Dimension(Math.min(prefSize.width, 800), prefSize.height));
 
-        JSplitPane splitPane = new JSplitPane();
-        splitPane.setResizeWeight(1.0);
-        splitPane.setLeftComponent(treeView);
-        splitPane.setRightComponent(createRightPanel());
-
-        setComponent(splitPane);
-
-        // add menu entries for tree operations
-        this.getJMenuBar().add(createTreeMenu());
+        setResizeWeight(1.0);
+        setLeftComponent(treeView);
+        setRightComponent(createRightPanel());
 
         m_popup = new JPopupMenu();
         m_popup.add(new ExpandBranchAction<>(m_graph));
@@ -134,40 +122,6 @@ public class MLlibDecisionTreeGraphPanel extends NodeView<MLlibDecisionTreeNodeM
             }
         });
     }
-
-    /**
-     * Create menu to control tree.
-     *
-     * @return A new JMenu with tree operation buttons
-     */
-    private JMenu createTreeMenu() {
-        final JMenu result = new JMenu("Tree");
-        result.setMnemonic('T');
-
-        Action expand = new ExpandBranchAction<>(m_graph);
-        expand.putValue(Action.NAME, "Expand Selected Branch");
-        Action collapse = new CollapseBranchAction<>(m_graph);
-        collapse.putValue(Action.NAME, "Collapse Selected Branch");
-        result.add(expand);
-        result.add(collapse);
-
-        return result;
-    }
-
-    /**
-    * @return the JComponent for the View
-    */
-   public JComponent getView() {
-       return (JComponent)getComponent();
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   protected Container getExportComponent() {
-       return m_graph.getView();
-   }
 
     /**
      * @return
@@ -229,39 +183,11 @@ public class MLlibDecisionTreeGraphPanel extends NodeView<MLlibDecisionTreeNodeM
                 scaleFactorComboBox.setSelectedItem(sf);
                 scaleFactor = scaleFactor / 100f;
                 m_graph.setScaleFactor(scaleFactor);
-                getComponent().validate();
-                getComponent().repaint();
+                validate();
+                repaint();
             }
         });
         p.add(scaleFactorComboBox, c);
         return p;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onClose() {
-        // Do nothing
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onOpen() {
-        //  Do nothing
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void modelChanged() {
-        //  Do nothing
-
-    }
-
 }
