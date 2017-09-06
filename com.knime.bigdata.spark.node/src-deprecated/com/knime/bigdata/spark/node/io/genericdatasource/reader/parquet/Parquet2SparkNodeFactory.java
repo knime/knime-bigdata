@@ -47,7 +47,7 @@ public class Parquet2SparkNodeFactory extends GenericDataSource2SparkNodeFactory
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new GenericDataSource2SparkNodeDialog<>(getSettings());
     }
 }

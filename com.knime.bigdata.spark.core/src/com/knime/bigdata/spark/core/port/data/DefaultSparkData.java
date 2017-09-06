@@ -33,8 +33,8 @@ import org.knime.core.node.ModelContentRO;
 import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  * Default implementation of {@link SparkData}.
@@ -56,14 +56,6 @@ public class DefaultSparkData implements SparkData {
      * Key required to load current workflows (KNIME Spark Executor >v1.3)
      */
     private static final String KEY_CONTEXT_ID = "contextID";
-
-
-    /**
-     * Key to load the version of KNIME Spark Executor that this data object was created with.
-     *
-     * @since 2.1.0
-     */
-    private static final String KEY_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
 
     private final String m_id;
 
@@ -120,12 +112,7 @@ public class DefaultSparkData implements SparkData {
 
             m_id = sparkModel.getString(KEY_TABLE_NAME);
 
-            if (sparkModel.containsKey(KEY_KNIME_SPARK_EXECUTOR_VERSION)) {
-                m_knimeSparkExecutorVersion = Version.valueOf(sparkModel.getString(KEY_KNIME_SPARK_EXECUTOR_VERSION));
-            } else {
-                // data object was created with a version <= 2.0.1
-                m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_2_0_1;
-            }
+            m_knimeSparkExecutorVersion = SparkNodeModel.loadKNIMESparkExecutorVersionFrom(sparkModel);
         } catch (InvalidSettingsException ise) {
             throw new IOException(ise);
         }
@@ -139,7 +126,7 @@ public class DefaultSparkData implements SparkData {
         final ModelContent sparkModel = new ModelContent(SPARK_DATA);
         m_contextID.saveToConfigWO(sparkModel.addConfig(KEY_CONTEXT_ID));
         sparkModel.addString(KEY_TABLE_NAME, m_id);
-        sparkModel.addString(KEY_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
+        SparkNodeModel.saveKNIMESparkExecutorVersionTo(sparkModel, m_knimeSparkExecutorVersion);
         out.putNextEntry(new ZipEntry(SPARK_DATA));
         sparkModel.saveToXML(new NonClosableOutputStream.Zip(out));
     }

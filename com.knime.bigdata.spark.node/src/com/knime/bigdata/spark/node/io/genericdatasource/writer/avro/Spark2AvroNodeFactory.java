@@ -45,7 +45,7 @@ public class Spark2AvroNodeFactory extends Spark2GenericDataSourceNodeFactory<Sp
     }
 
     @Override
-    protected Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings> createNodeDialogPane() {
+    protected Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings> createSparkNodeDialogPane() {
         return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }

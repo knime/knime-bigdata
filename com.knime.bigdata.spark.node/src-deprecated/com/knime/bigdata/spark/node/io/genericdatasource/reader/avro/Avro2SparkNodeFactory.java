@@ -47,7 +47,7 @@ public class Avro2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Ge
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new GenericDataSource2SparkNodeDialog<>(getSettings());
     }
 }

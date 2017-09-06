@@ -79,8 +79,8 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
-        super.loadSettingsFrom(settings, specs);
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+        super.loadAdditionalSparkSettingsFrom(settings, specs);
         m_header.setSelected(m_settings.withHeader());
         updateHistory("delimiter", m_delimiter, CSV2SparkSettings.DELIMITER_EXAMPLES);
         m_delimiter.setSelectedItem(m_settings.getDelimiter());
@@ -97,7 +97,7 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setHeader(m_header.isSelected());
         m_settings.setDelimiter(getSelection(m_delimiter));
         StringHistory.getInstance("delimiter", 15).add(getSelection(m_delimiter));
@@ -111,6 +111,6 @@ class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSet
         m_settings.setNullValue(m_nullValue.getText());
         m_settings.setDateFormat(getSelection(m_dateFormat));
         StringHistory.getInstance("dateFormat").add(getSelection(m_dateFormat));
-        super.saveSettingsTo(settings);
+        super.saveAdditionalSparkSettingsTo(settings);
     }
 }

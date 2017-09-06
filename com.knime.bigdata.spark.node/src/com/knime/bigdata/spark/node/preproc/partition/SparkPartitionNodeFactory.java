@@ -58,7 +58,7 @@ public class SparkPartitionNodeFactory extends DefaultSparkNodeFactory<SparkPart
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkSamplingNodeDialog();
     }
 

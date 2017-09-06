@@ -69,8 +69,8 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
-        super.loadSettingsFrom(settings, specs);
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+        super.loadAdditionalSparkSettingsFrom(settings, specs);
         m_header.setSelected(m_settings.withHeader());
         updateHistory("delimiter", m_delimiter, Spark2CSVSettings.DELIMITER_EXAMPLES);
         m_delimiter.setSelectedItem(m_settings.getDelimiter());
@@ -85,7 +85,7 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setHeader(m_header.isSelected());
         m_settings.setDelimiter(getSelection(m_delimiter));
         StringHistory.getInstance("delimiter", 15).add(getSelection(m_delimiter));
@@ -96,6 +96,6 @@ class Spark2CSVNodeDialog extends Spark2GenericDataSourceNodeDialog<Spark2CSVSet
         StringHistory.getInstance("dateFormat", 15).add(getSelection(m_dateFormat));
         m_settings.setCompressionCodec((String)m_compressionCodec.getSelectedItem());
         m_settings.setQuoteMode((String)m_quoteMode.getSelectedItem());
-        super.saveSettingsTo(settings);
+        super.saveAdditionalSparkSettingsTo(settings);
     }
 }

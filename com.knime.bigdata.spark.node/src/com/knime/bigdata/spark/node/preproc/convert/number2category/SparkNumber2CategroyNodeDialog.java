@@ -23,17 +23,18 @@ package com.knime.bigdata.spark.node.preproc.convert.number2category;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkNumber2CategroyNodeDialog extends DefaultNodeSettingsPane {
+public class SparkNumber2CategroyNodeDialog extends SparkDefaultNodeSettingsPane {
 
     SparkNumber2CategroyNodeDialog() {
         final SettingsModelBoolean keepModel = SparkNumber2CategoryNodeModel.createKeepOriginalColsModel();

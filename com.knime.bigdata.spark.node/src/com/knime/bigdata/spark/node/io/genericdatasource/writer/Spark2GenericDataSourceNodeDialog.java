@@ -55,7 +55,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.FlowVariableModelButton;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -65,6 +64,7 @@ import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
 
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.SparkContextProvider;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
@@ -75,7 +75,7 @@ import com.knime.bigdata.spark.node.SparkSaveMode;
  * @author Sascha Wolke, KNIME.com
  * @param <T> Settings type used by this node
  */
-public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSourceSettings> extends NodeDialogPane implements ActionListener {
+public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSourceSettings> extends AbstractSparkNodeDialogPane implements ActionListener {
 
     /** Internal settings model */
     protected final T m_settings;
@@ -233,7 +233,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
         ConnectionInformation connInfo = null;
@@ -274,7 +274,7 @@ public class Spark2GenericDataSourceNodeDialog<T extends Spark2GenericDataSource
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setDirectory(m_directoryChooser.getSelection());
         m_settings.setName(getSelection(m_outputName));
         StringHistory.getInstance("outputDirSpark_" + m_settings.getFormat(), 15).add(getSelection(m_outputName));

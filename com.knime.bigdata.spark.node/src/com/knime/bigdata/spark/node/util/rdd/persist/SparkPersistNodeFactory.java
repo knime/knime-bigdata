@@ -55,7 +55,7 @@ public class SparkPersistNodeFactory extends DefaultSparkNodeFactory<SparkPersis
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkPersistNodeDialog();
     }
 }

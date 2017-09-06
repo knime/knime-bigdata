@@ -69,7 +69,7 @@ public abstract class AbstractLinearMethodsNodeFactory extends DefaultSparkNodeF
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new LinearMethodsNodeDialog(m_supportsLBFGS);
     }
 

@@ -63,6 +63,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 
 /**
@@ -71,7 +72,7 @@ import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
  *
  * @author Nicolas Cebron, University of Konstanz
  */
-public class SparkSorterNodeDialog extends NodeDialogPane {
+public class SparkSorterNodeDialog extends AbstractSparkNodeDialogPane {
     //TK_TODO: Copied over from KNIME sorter due to access restrictions. Original version needs to be adapted to allow hiding of RowKey
     private static final NodeLogger LOGGER = NodeLogger
             .getLogger(SparkSorterNodeDialog.class);
@@ -115,7 +116,7 @@ public class SparkSorterNodeDialog extends NodeDialogPane {
      * @throws NotConfigurableException if the dialog cannot be opened.
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs.length == 0 || specs[0] == null) {
             throw new NotConfigurableException("No columns to sort.");
@@ -166,7 +167,7 @@ public class SparkSorterNodeDialog extends NodeDialogPane {
      * @see NodeDialogPane#saveSettingsTo(NodeSettingsWO)
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
         assert (settings != null);
         m_panel.checkValid();

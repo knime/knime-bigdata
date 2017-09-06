@@ -29,19 +29,19 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LinearMethodsNodeDialog extends NodeDialogPane {
+public class LinearMethodsNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final LinearMethodsSettings m_settings = new LinearMethodsSettings();
     private final LinearMethodsComponents m_components = new LinearMethodsComponents(m_settings);
@@ -137,7 +137,7 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] specs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
         m_components.loadSettingsFrom(settings, specs[0]);
@@ -147,7 +147,7 @@ public class LinearMethodsNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
         m_components.saveSettingsTo(settings);
     }

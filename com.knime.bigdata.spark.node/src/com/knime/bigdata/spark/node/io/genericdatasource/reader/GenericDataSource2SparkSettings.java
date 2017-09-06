@@ -26,7 +26,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.osgi.framework.Version;
 
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
+import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -46,8 +46,6 @@ public class GenericDataSource2SparkSettings {
      * The version of KNIME Spark Executor that these settings were created with.
      * @since 2.1.0
      */
-    private static final String CFG_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
-    private static final String LEGACY_KNIME_SPARK_EXECUTOR_VERSION = SparkPluginVersion.VERSION_2_0_1.toString();
     private Version m_knimeSparkExecutorVersion;
 
     /** This data source has needs an additional driver jar. */
@@ -126,7 +124,7 @@ public class GenericDataSource2SparkSettings {
         settings.addString(CFG_INPUT_PATH, m_path);
         settings.addBoolean(CFG_UPLOAD_DRIVER, m_uploadDriver);
         // added with 2.1.0
-        settings.addString(CFG_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
+        SparkNodeModel.saveKNIMESparkExecutorVersionTo(settings, m_knimeSparkExecutorVersion);
     }
 
     /**
@@ -160,12 +158,13 @@ public class GenericDataSource2SparkSettings {
     /**
      * Loads the settings from the given settings object using default values for invalid or missing settings.
      * @param settings - Settings to load
+     * @throws InvalidSettingsException If invalid settings were encountered.
      */
-    public void loadSettings(final NodeSettingsRO settings) {
+    public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_path = settings.getString(CFG_INPUT_PATH, DEFAULT_INPUT_PATH);
         m_uploadDriver = settings.getBoolean(CFG_UPLOAD_DRIVER, DEFAULT_UPLOAD_DRIVER);
-     // added with 2.1.0
-        m_knimeSparkExecutorVersion = Version.valueOf(settings.getString(CFG_KNIME_SPARK_EXECUTOR_VERSION, LEGACY_KNIME_SPARK_EXECUTOR_VERSION));
+        // added with 2.1.0
+        m_knimeSparkExecutorVersion = SparkNodeModel.loadKNIMESparkExecutorVersionFrom(settings);
     }
 
     /** @param jobInput - Job input to add custom reader options */

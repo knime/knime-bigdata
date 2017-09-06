@@ -20,7 +20,6 @@
  */
 package com.knime.bigdata.spark.node.io.hive.reader;
 
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
@@ -61,21 +60,4 @@ public class Hive2SparkNodeFactory extends DefaultSparkNodeFactory<Hive2SparkNod
     public NodeView<Hive2SparkNodeModel> createNodeView(final int viewIndex, final Hive2SparkNodeModel nodeModel) {
         return null;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return null;
-    }
-
 }

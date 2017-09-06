@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -37,12 +36,13 @@ import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
+public class MLlibNaiveBayesNodeDialog extends AbstractSparkNodeDialogPane {
     private final DialogComponentNumber m_lambda =
             new DialogComponentNumber(MLlibNaiveBayesNodeModel.createLambdaModel(), "Lambda: ", 0.05);
 
@@ -81,7 +81,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
         m_lambda.saveSettingsTo(settings);
         m_components.saveSettingsTo(settings);
@@ -91,7 +91,7 @@ public class MLlibNaiveBayesNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
         m_lambda.loadSettingsFrom(settings, tableSpecs);

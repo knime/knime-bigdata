@@ -57,7 +57,7 @@ public class MLlibCollaborativeFilteringNodeFactory extends DefaultSparkNodeFact
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibCollaborativeFilteringNodeDialog();
     }
 

@@ -46,7 +46,6 @@ package com.knime.bigdata.spark.node.preproc.filter.column;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -54,6 +53,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -64,12 +64,12 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  *
  * @author Tobias Koetter, KNIME.com AG, Zurich
  */
-public class SparkColumnFilterNodeDialog extends NodeDialogPane {
+public class SparkColumnFilterNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final DataColumnSpecFilterPanel m_filterPanel;
 
     /**
-     * Creates a new {@link NodeDialogPane} for the column filter in order to
+     * Creates a new dialog pane for the column filter in order to
      * set the desired columns.
      */
     public SparkColumnFilterNodeDialog() {
@@ -85,7 +85,7 @@ public class SparkColumnFilterNodeDialog extends NodeDialogPane {
      *             filtering
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs == null || specs.length <= 0 || specs[0] == null) {
             throw new NotConfigurableException("No input Spark RDD available");
@@ -108,7 +108,7 @@ public class SparkColumnFilterNodeDialog extends NodeDialogPane {
      * @throws InvalidSettingsException if one of the settings is not valid
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
         final DataColumnSpecFilterConfiguration config = SparkColumnFilterNodeModel.createDCSFilterConfiguration();
         m_filterPanel.saveConfiguration(config);

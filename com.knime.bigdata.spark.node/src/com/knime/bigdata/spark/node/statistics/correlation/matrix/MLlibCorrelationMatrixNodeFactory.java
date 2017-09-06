@@ -73,7 +73,7 @@ public class MLlibCorrelationMatrixNodeFactory extends DefaultSparkNodeFactory<M
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibCorrelationMatrixNodeDialog();
     }
 }

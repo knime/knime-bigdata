@@ -20,7 +20,6 @@
  */
 package com.knime.bigdata.spark.node.pmml.converter;
 
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 
 import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
@@ -60,21 +59,4 @@ public class MLlib2PMMLNodeFactory extends DefaultSparkNodeFactory<MLlib2PMMLNod
         createNodeView(final int viewIndex, final MLlib2PMMLNodeModel nodeModel) {
         return null;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return null;
-    }
-
 }

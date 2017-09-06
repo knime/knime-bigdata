@@ -45,7 +45,6 @@ import org.knime.base.node.util.KnimeSyntaxTextArea;
 import org.knime.base.util.flowvariable.FlowVariableResolver;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -56,6 +55,7 @@ import org.knime.core.node.util.FlowVariableListCellRenderer;
 import org.knime.core.node.workflow.FlowVariable;
 
 import com.knime.bigdata.spark.core.exception.MissingJobException;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -63,7 +63,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  *
  * @author Sascha Wolke, KNIME.com
  */
-class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
+class SparkSQLNodeDialog extends AbstractSparkNodeDialogPane implements MouseListener {
 
     private static final Dimension MINIMUM_PANEL_SIZE = new Dimension(100, 100);
 
@@ -145,7 +145,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
         m_settings.loadSettingsFrom(settings);
@@ -223,7 +223,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setQuery(m_query.getText());
         m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);

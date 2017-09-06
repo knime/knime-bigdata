@@ -20,15 +20,16 @@
  */
 package com.knime.bigdata.spark.node.io.hive.writer;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
 
 /**
  *
  * @author koetter
  */
-public class Spark2HiveNodeDialog extends DefaultNodeSettingsPane {
+public class Spark2HiveNodeDialog extends SparkDefaultNodeSettingsPane {
 
     /**
      *

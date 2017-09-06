@@ -31,12 +31,12 @@ import javax.swing.JTextField;
 
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
@@ -44,7 +44,7 @@ import com.knime.bigdata.spark.node.SparkSaveMode;
  *
  * @author Sascha Wolke, KNIME.com
  */
-class Spark2DatabaseNodeDialog extends NodeDialogPane {
+class Spark2DatabaseNodeDialog extends AbstractSparkNodeDialogPane {
     private final Spark2DatabaseSettings m_settings = new Spark2DatabaseSettings();
 
     private final JCheckBox m_uploadDriver;
@@ -95,7 +95,7 @@ class Spark2DatabaseNodeDialog extends NodeDialogPane {
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
         m_settings.loadSettings(settings);
@@ -105,7 +105,7 @@ class Spark2DatabaseNodeDialog extends NodeDialogPane {
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setUploadDriver(m_uploadDriver.isSelected());
         m_settings.setTable(m_table.getText());
         m_settings.setSaveMode(getSaveModeSelection());

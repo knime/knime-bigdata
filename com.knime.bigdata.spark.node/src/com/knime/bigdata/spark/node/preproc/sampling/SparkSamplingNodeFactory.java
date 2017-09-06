@@ -57,7 +57,7 @@ public class SparkSamplingNodeFactory extends DefaultSparkNodeFactory<SparkSampl
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkSamplingNodeDialog();
     }
 

@@ -57,7 +57,7 @@ public class MLlibKMeansNodeFactory extends DefaultSparkNodeFactory<MLlibKMeansN
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibKMeansNodeDialog();
     }
 

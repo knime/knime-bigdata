@@ -28,12 +28,12 @@ import javax.swing.JPanel;
 import org.knime.base.node.mine.scorer.numeric.NumericScorerDialogComponents;
 import org.knime.base.node.mine.scorer.numeric.NumericScorerSettings;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
@@ -48,7 +48,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class SparkNumericScorerNodeDialog extends NodeDialogPane {
+public class SparkNumericScorerNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final NumericScorerSettings m_settings = new NumericScorerSettings();
     private final NumericScorerDialogComponents m_numericScorerDialogComponents = new NumericScorerDialogComponents(m_settings);
@@ -109,7 +109,7 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
        m_numericScorerDialogComponents.saveSettingsTo(settings);
     }
 
@@ -117,7 +117,7 @@ public class SparkNumericScorerNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
         final PortObjectSpec[] tableSpec = new PortObjectSpec[]{((SparkDataPortObjectSpec)specs[0]).getTableSpec()};
         m_numericScorerDialogComponents.loadSettingsFrom(settings, tableSpec);

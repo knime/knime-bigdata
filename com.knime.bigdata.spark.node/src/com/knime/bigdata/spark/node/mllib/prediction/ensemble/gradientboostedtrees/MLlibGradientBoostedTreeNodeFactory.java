@@ -56,7 +56,7 @@ public class MLlibGradientBoostedTreeNodeFactory extends DefaultSparkNodeFactory
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibGradientBoostedTreeNodeDialog();
     }
 

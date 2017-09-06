@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -37,12 +36,13 @@ import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author koetter
  */
-public class MLlibKMeansNodeDialog extends NodeDialogPane {
+public class MLlibKMeansNodeDialog extends AbstractSparkNodeDialogPane {
     private final SettingsModelIntegerBounded m_noOfClusterModel = MLlibKMeansNodeModel.createNoOfClusterModel();
     private final DialogComponentNumber m_noOfCluster = new DialogComponentNumber(m_noOfClusterModel,
         "Number of clusters: ", 1, createFlowVariableModel(m_noOfClusterModel));
@@ -80,7 +80,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIterations.saveSettingsTo(settings);
         m_components.saveSettingsTo(settings);
@@ -90,7 +90,7 @@ public class MLlibKMeansNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_noOfCluster.loadSettingsFrom(settings, tableSpecs);
         m_noOfIterations.loadSettingsFrom(settings, tableSpecs);

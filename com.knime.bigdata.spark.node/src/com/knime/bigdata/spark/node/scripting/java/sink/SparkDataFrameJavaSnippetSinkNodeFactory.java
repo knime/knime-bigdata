@@ -60,7 +60,7 @@ public class SparkDataFrameJavaSnippetSinkNodeFactory extends DefaultSparkNodeFa
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.SINK, JavaDataFrameSnippetHelperRegistry.getInstance());
     }
 }

@@ -65,8 +65,8 @@ class Json2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<Json2SparkS
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
-        super.loadSettingsFrom(settings, specs);
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+        super.loadAdditionalSparkSettingsFrom(settings, specs);
         m_samplingRatio.setValue(m_settings.getSchemaSamplingRatio());
         m_primitivesAsString.setSelected(m_settings.primitivesAsString());
         m_allowComments.setSelected(m_settings.allowComments());
@@ -77,7 +77,7 @@ class Json2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<Json2SparkS
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setSchemaSamplingRatio(((SpinnerNumberModel) m_samplingRatio.getModel()).getNumber().doubleValue());
         m_settings.setPrimitivesAsString(m_primitivesAsString.isSelected());
         m_settings.setAllowComments(m_allowComments.isSelected());
@@ -85,6 +85,6 @@ class Json2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<Json2SparkS
         m_settings.setAllowSingleQuotes(m_allowSingleQuotes.isSelected());
         m_settings.setAllowNumericLeadingZeros(m_allowNumericLeadingZeros.isSelected());
         m_settings.setAllowNonNumericNumbers(m_allowNonNumericNumbers.isSelected());
-        super.saveSettingsTo(settings);
+        super.saveAdditionalSparkSettingsTo(settings);
     }
 }

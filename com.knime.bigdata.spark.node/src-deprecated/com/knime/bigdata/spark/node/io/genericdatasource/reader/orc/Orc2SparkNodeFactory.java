@@ -46,7 +46,7 @@ public class Orc2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Gen
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new GenericDataSource2SparkNodeDialog<>(getSettings());
     }
 }

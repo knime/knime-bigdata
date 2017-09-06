@@ -20,14 +20,15 @@
  */
 package com.knime.bigdata.spark.node.mllib.prediction.predictor;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
 
 /**
  *
  * @author koetter
  */
-public class MLLibPredictorNodeDialog extends DefaultNodeSettingsPane {
+public class MLLibPredictorNodeDialog extends SparkDefaultNodeSettingsPane {
 
     MLLibPredictorNodeDialog() {
         addDialogComponent(new DialogComponentString(MLlibPredictorNodeModel.createColumnNameModel(),

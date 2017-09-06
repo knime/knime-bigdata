@@ -45,7 +45,7 @@ public class CSV2SparkNodeFactory extends GenericDataSource2SparkNodeFactory<Gen
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new CSV2SparkNodeDialog(getSettings());
     }
 }

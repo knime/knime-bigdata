@@ -57,7 +57,7 @@ public class MLlibStatisticsNodeFactory extends DefaultSparkNodeFactory<MLlibSta
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibStatisticsNodeDialog();
     }
 

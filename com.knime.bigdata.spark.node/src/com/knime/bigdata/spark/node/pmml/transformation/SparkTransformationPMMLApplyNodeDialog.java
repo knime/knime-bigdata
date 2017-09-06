@@ -20,14 +20,15 @@
  */
 package com.knime.bigdata.spark.node.pmml.transformation;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkTransformationPMMLApplyNodeDialog extends DefaultNodeSettingsPane {
+public class SparkTransformationPMMLApplyNodeDialog extends SparkDefaultNodeSettingsPane {
 
 
     /**

@@ -38,19 +38,20 @@ import org.knime.base.filehandling.NodeUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
+
 /**
  * Dialog for the JDBC to Spark node.
  *
  * @author Sascha Wolke, KNIME.com
  */
-class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener {
+class Database2SparkNodeDialog extends AbstractSparkNodeDialogPane implements ActionListener {
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
 
     private final JCheckBox m_uploadDriver;
@@ -180,7 +181,7 @@ class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener 
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
 
         m_settings.loadSettingsFrom(settings);
@@ -224,7 +225,7 @@ class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener 
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setUploadDriver(m_uploadDriver.isSelected());
 
         m_settings.setUseDefaultFetchSize(m_useDefaultFetchSize.isSelected());

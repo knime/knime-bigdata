@@ -57,7 +57,7 @@ public class SparkCategory2NumberNodeFactory extends DefaultSparkNodeFactory<Spa
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkCategory2NumberNodeDialog();
     }
 

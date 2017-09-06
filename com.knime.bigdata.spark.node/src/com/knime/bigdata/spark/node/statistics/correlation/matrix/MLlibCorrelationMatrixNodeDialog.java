@@ -29,7 +29,6 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -39,13 +38,14 @@ import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 
 /**
  *
  * @author koetter
  */
-public class MLlibCorrelationMatrixNodeDialog extends NodeDialogPane {
+public class MLlibCorrelationMatrixNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
     private final MLlibNodeComponents<MLlibNodeSettings> m_components =
@@ -85,7 +85,7 @@ public class MLlibCorrelationMatrixNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_method.saveSettingsTo(settings);
         m_components.saveSettingsTo(settings);
     }
@@ -94,7 +94,7 @@ public class MLlibCorrelationMatrixNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_method.loadSettingsFrom(settings, tableSpecs);
         m_components.loadSettingsFrom(settings, tableSpecs[0]);

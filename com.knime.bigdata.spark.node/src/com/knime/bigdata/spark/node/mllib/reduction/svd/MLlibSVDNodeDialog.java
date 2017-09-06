@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -37,12 +36,13 @@ import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author koetter
  */
-public class MLlibSVDNodeDialog extends NodeDialogPane {
+public class MLlibSVDNodeDialog extends AbstractSparkNodeDialogPane {
     private final DialogComponentNumber m_noOfSingularValues =
             new DialogComponentNumber(MLlibSVDNodeModel.createNoSingularValuesModel(), "Number of leading singular values: ", 10);
     private final DialogComponentNumber m_reciprocalCondition =
@@ -85,7 +85,7 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_noOfSingularValues.saveSettingsTo(settings);
         m_reciprocalCondition.saveSettingsTo(settings);
         m_computeU.saveSettingsTo(settings);
@@ -96,7 +96,7 @@ public class MLlibSVDNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_noOfSingularValues.loadSettingsFrom(settings, tableSpecs);
         m_reciprocalCondition.loadSettingsFrom(settings, tableSpecs);

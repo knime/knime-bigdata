@@ -29,7 +29,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.IntValue;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -39,12 +38,13 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author koetter
  */
-public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
+public class MLlibCollaborativeFilteringNodeDialog extends AbstractSparkNodeDialogPane {
     @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_userCol = new DialogComponentColumnNameSelection(
         MLlibCollaborativeFilteringNodeModel.createUserColModel(), "User column: ", 0, IntValue.class);
@@ -109,7 +109,7 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_userCol.saveSettingsTo(settings);
         m_productCol.saveSettingsTo(settings);
         m_ratingCol.saveSettingsTo(settings);
@@ -125,7 +125,7 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, specs);
         m_userCol.loadSettingsFrom(settings, tableSpecs);
         m_productCol.loadSettingsFrom(settings, tableSpecs);

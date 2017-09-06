@@ -20,14 +20,15 @@
  */
 package com.knime.bigdata.spark.node.mllib.clustering.assigner;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
 
 /**
  *
  * @author koetter
  */
-public class MLLibClusterAssignerNodeDialog extends DefaultNodeSettingsPane {
+public class MLLibClusterAssignerNodeDialog extends SparkDefaultNodeSettingsPane {
 
     MLLibClusterAssignerNodeDialog() {
         addDialogComponent(new DialogComponentString(MLlibClusterAssignerNodeModel.createColumnNameModel(),

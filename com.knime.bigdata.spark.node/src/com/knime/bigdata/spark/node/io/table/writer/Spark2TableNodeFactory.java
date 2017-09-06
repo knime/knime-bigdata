@@ -57,7 +57,7 @@ public class Spark2TableNodeFactory extends DefaultSparkNodeFactory<Spark2TableN
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2TableNodeDialog();
     }
 

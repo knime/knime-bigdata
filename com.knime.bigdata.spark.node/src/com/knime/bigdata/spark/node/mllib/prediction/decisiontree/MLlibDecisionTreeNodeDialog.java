@@ -28,19 +28,19 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author koetter
  */
-public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
+public class MLlibDecisionTreeNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final DecisionTreeSettings m_settings = new DecisionTreeSettings();
     private final DecisionTreeComponents<DecisionTreeSettings> m_components = new DecisionTreeComponents<>(m_settings);
@@ -83,7 +83,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings,
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings,
             final PortObjectSpec[] ports) throws NotConfigurableException {
         final DataTableSpec[] tableSpecs = MLlibNodeSettings.getTableSpecInDialog(0, ports);
         m_components.loadSettingsFrom(settings, tableSpecs[0]);
@@ -93,7 +93,7 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings)
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings)
             throws InvalidSettingsException {
         m_components.saveSettingsTo(settings);
     }

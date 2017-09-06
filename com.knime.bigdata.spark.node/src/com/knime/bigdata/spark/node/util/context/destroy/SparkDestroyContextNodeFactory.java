@@ -55,7 +55,7 @@ public class SparkDestroyContextNodeFactory extends DefaultSparkNodeFactory<Spar
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkDestroyContextNodeDialog();
     }
 

@@ -23,7 +23,6 @@ package com.knime.bigdata.spark.node.util.rdd.persist;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -31,11 +30,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkPersistNodeDialog extends DefaultNodeSettingsPane {
+public class SparkPersistNodeDialog extends SparkDefaultNodeSettingsPane {
 
     SparkPersistNodeDialog() {
         final SettingsModelString level = SparkPersistNodeModel.createStorageLevelModel();

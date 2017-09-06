@@ -60,7 +60,7 @@ public class SparkDataFrameJavaSnippetNodeFactory extends DefaultSparkNodeFactor
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.INNER, JavaDataFrameSnippetHelperRegistry.getInstance());
     }
 }

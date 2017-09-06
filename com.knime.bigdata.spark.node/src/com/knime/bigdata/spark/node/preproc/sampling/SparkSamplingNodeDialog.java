@@ -21,19 +21,19 @@
 package com.knime.bigdata.spark.node.preproc.sampling;
 
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *
  * @author koetter
  */
-public class SparkSamplingNodeDialog extends NodeDialogPane {
+public class SparkSamplingNodeDialog extends AbstractSparkNodeDialogPane {
     private final SparkSamplingNodeDialogPanel m_panel;
     /**
      * Creates the dialog.
@@ -48,7 +48,7 @@ public class SparkSamplingNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] inSpecs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] inSpecs)
             throws NotConfigurableException {
         if (inSpecs == null || inSpecs.length != 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
             throw new NotConfigurableException("Not connected");
@@ -61,7 +61,7 @@ public class SparkSamplingNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_panel.saveSettingsTo(settings);
     }
 }

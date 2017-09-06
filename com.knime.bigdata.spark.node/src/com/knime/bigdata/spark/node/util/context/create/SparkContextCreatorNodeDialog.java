@@ -28,7 +28,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -42,6 +41,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.port.PortObjectSpec;
 
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -49,7 +49,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
+class SparkContextCreatorNodeDialog extends AbstractSparkNodeDialogPane implements ChangeListener {
 
     private ContextSettings m_settings = new ContextSettings();
 
@@ -147,7 +147,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.validateSettings();
         m_settings.saveSettingsTo(settings);
     }
@@ -156,7 +156,7 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         try {
             m_authenticationComp.loadCredentials(getCredentialsProvider());
             m_settings.loadSettingsFrom(settings);

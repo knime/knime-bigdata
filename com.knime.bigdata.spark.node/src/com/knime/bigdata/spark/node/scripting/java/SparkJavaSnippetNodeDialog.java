@@ -104,7 +104,6 @@ import org.knime.base.node.jsnippet.ui.OutFieldsTable;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
@@ -115,6 +114,7 @@ import org.knime.core.node.util.ViewUtils;
 import org.knime.core.node.workflow.FlowVariable;
 
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.port.SparkContextProvider;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
@@ -131,7 +131,7 @@ import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippe
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements TemplateNodeDialog<SparkJavaSnippetTemplate> {
+public class SparkJavaSnippetNodeDialog extends AbstractSparkNodeDialogPane implements TemplateNodeDialog<SparkJavaSnippetTemplate> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkJavaSnippetNodeDialog.class);
 
@@ -574,7 +574,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
 
         try {
@@ -751,7 +751,7 @@ public class SparkJavaSnippetNodeDialog extends NodeDialogPane implements Templa
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         ViewUtils.invokeAndWaitInEDT(new Runnable() {
 
             @Override

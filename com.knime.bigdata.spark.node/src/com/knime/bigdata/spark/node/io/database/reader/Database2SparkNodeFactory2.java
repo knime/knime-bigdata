@@ -56,7 +56,7 @@ public class Database2SparkNodeFactory2 extends DefaultSparkNodeFactory<Database
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Database2SparkNodeDialog();
     }
 }

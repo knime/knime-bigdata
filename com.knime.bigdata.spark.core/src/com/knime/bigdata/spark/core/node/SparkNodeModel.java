@@ -143,7 +143,7 @@ public abstract class SparkNodeModel extends NodeModel {
      * Key to load the version of KNIME Spark Executor that the node was created with.
      * @since 2.1.0
      */
-    private static final String CFG_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
+    public static final String CFG_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
 
     private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
@@ -438,7 +438,7 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     @Override
     protected final void saveSettingsTo(final NodeSettingsWO settings) {
-        settings.addString(CFG_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
+        saveKNIMESparkExecutorVersionTo(settings, m_knimeSparkExecutorVersion);
         saveAdditionalSettingsTo(settings);
     }
 
@@ -460,15 +460,44 @@ public abstract class SparkNodeModel extends NodeModel {
     protected final void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
-        if (settings.containsKey(CFG_KNIME_SPARK_EXECUTOR_VERSION)) {
-            m_knimeSparkExecutorVersion = SparkPluginVersion.fromString(settings.getString(CFG_KNIME_SPARK_EXECUTOR_VERSION));
-        } else {
-            // node model was created with KNIME Spark Executor version <= 2.0.1
-            m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_2_0_1;
-        }
+        m_knimeSparkExecutorVersion = loadKNIMESparkExecutorVersionFrom(settings);
         loadAdditionalValidatedSettingsFrom(settings);
     }
 
+    /**
+     * Utility method for nodes and node dialogs, to load the version of KNIME Spark Executor from a config object. It
+     * expects the version to have previously been saved with
+     * {@link #saveKNIMESparkExecutorVersionTo(ConfigWO, Version)}, otherwise it returns a default version (2.0.1).
+     *
+     * @param config The config object to read from.
+     * @return @return the version as an OSGI {@link Version}.
+     * @throws InvalidSettingsException
+     * @since 2.1.0
+     */
+    public static Version loadKNIMESparkExecutorVersionFrom(final ConfigRO config) throws InvalidSettingsException {
+        final Version toReturn;
+
+        if (config.containsKey(SparkNodeModel.CFG_KNIME_SPARK_EXECUTOR_VERSION)) {
+            toReturn = SparkPluginVersion.fromString(config.getString(SparkNodeModel.CFG_KNIME_SPARK_EXECUTOR_VERSION));
+        } else {
+            // settings were first instantiated with KNIME Spark Executor version <= 2.0.1
+            toReturn = SparkPluginVersion.VERSION_2_0_1;
+        }
+
+        return toReturn;
+    }
+
+    /**
+     * Utility method for nodes and node dialogs to save the version of KNIME Spark Executor. The version can then later
+     * be loaded with {@link #loadKNIMESparkExecutorVersionFrom(ConfigRO)}.
+     *
+     * @param config The config object to save to.
+     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to save.
+     * @since 2.1.0
+     */
+    public static void saveKNIMESparkExecutorVersionTo(final ConfigWO config, final Version knimeSparkExecutorVersion) {
+        config.addString(CFG_KNIME_SPARK_EXECUTOR_VERSION, knimeSparkExecutorVersion.toString());
+    }
 
     /**
      * Override this method to save additional node settings. This method is called by

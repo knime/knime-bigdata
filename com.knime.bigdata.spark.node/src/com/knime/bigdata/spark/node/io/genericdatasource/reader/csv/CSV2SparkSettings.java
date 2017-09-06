@@ -223,7 +223,7 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     }
 
     @Override
-    public void loadSettings(final NodeSettingsRO settings) {
+    public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_header = settings.getBoolean(CFG_HEADER, DEFAULT_HEADER);
         m_delimiter = settings.getString(CFG_DELIMITER, DEFAULT_DELIMITER);
         m_quote = settings.getString(CFG_QUOTE, DEFAULT_QUOTE);

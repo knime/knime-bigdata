@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -41,12 +40,13 @@ import org.knime.core.node.port.PortObjectSpec;
 import com.knime.bigdata.spark.core.job.util.EnumContainer;
 import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkCategory2NumberNodeDialog extends NodeDialogPane {
+class SparkCategory2NumberNodeDialog extends AbstractSparkNodeDialogPane {
 
     private final DialogComponentColumnFilter2 m_cols =
     new DialogComponentColumnFilter2(SparkCategory2NumberNodeModel.createColumnsModel(), 0);
@@ -95,7 +95,7 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
         if (specs == null || specs.length < 1 || specs[0] == null) {
             throw new NotConfigurableException("No input spec available");
         }
@@ -110,7 +110,7 @@ class SparkCategory2NumberNodeDialog extends NodeDialogPane {
      * {@inheritDoc}
      */
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_cols.saveSettingsTo(settings);
         m_mappingType.saveSettingsTo(settings);
         m_keepOrigCols.saveSettingsTo(settings);

@@ -78,7 +78,7 @@ public class SparkNumericScorerNodeFactory extends DefaultSparkNodeFactory<Spark
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkNumericScorerNodeDialog();
     }
 }

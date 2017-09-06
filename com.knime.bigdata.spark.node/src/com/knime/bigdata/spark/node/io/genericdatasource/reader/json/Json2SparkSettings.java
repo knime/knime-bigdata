@@ -136,7 +136,7 @@ public class Json2SparkSettings extends GenericDataSource2SparkSettings {
     }
 
     @Override
-    public void loadSettings(final NodeSettingsRO settings) {
+    public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_samplingRatio = settings.getDouble(CFG_SCHEMA_SAMPLING_RATIO, DEFAULT_SCHEMA_SAMPLING_RATIO);
         m_primitivesAsString = settings.getBoolean(CFG_PRIMITIVE_AS_STRING, DEFAULT_PRIMITIVE_AS_STRING);
         m_allowComments = settings.getBoolean(CFG_ALLOW_COMMENTS, DEFAULT_ALLOW_COMMENTS);

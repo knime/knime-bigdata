@@ -56,7 +56,7 @@ public class SparkSorterNodeFactory extends DefaultSparkNodeFactory<SparkSorterN
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkSorterNodeDialog(false);
     }
 

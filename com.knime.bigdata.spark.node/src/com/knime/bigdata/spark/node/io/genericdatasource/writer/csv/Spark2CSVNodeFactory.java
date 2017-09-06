@@ -45,7 +45,7 @@ public class Spark2CSVNodeFactory extends Spark2GenericDataSourceNodeFactory<Spa
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2CSVNodeDialog(getSettings());
     }
 }

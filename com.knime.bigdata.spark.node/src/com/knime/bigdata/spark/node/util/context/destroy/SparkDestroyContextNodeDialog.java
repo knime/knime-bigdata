@@ -20,14 +20,15 @@
  */
 package com.knime.bigdata.spark.node.util.context.destroy;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SparkDestroyContextNodeDialog extends DefaultNodeSettingsPane {
+public class SparkDestroyContextNodeDialog extends SparkDefaultNodeSettingsPane {
 
     /**
      *Constructor.

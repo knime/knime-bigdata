@@ -56,7 +56,7 @@ public class Spark2DatabaseNodeFactory extends DefaultSparkNodeFactory<Spark2Dat
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2DatabaseNodeDialog();
     }
 }

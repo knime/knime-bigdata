@@ -57,7 +57,7 @@ public class MLlibPCANodeFactory extends DefaultSparkNodeFactory<MLlibPCANodeMod
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibPCANodeDialog();
     }
 

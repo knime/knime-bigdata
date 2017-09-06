@@ -47,7 +47,7 @@ public class Spark2TextNodeFactory extends Spark2GenericDataSourceNodeFactory<Sp
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }

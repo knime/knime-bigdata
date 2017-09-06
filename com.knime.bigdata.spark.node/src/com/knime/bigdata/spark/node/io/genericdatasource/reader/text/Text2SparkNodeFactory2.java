@@ -47,7 +47,7 @@ public class Text2SparkNodeFactory2 extends GenericDataSource2SparkNodeFactory<G
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new GenericDataSource2SparkNodeDialog<>(getSettings());
     }
 }

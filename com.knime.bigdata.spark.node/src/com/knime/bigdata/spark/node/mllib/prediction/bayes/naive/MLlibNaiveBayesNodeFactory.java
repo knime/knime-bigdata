@@ -57,7 +57,7 @@ public class MLlibNaiveBayesNodeFactory extends DefaultSparkNodeFactory<MLlibNai
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibNaiveBayesNodeDialog();
     }
 

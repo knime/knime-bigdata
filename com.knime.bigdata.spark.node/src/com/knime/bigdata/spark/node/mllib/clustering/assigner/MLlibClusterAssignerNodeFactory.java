@@ -58,7 +58,7 @@ public class MLlibClusterAssignerNodeFactory extends DefaultSparkNodeFactory<MLl
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLLibClusterAssignerNodeDialog();
     }
 }

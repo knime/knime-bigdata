@@ -57,7 +57,7 @@ public class MLlibDecisionTreeNodeFactory extends DefaultSparkNodeFactory<MLlibD
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibDecisionTreeNodeDialog();
     }
 

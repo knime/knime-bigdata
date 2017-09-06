@@ -57,7 +57,7 @@ public class MLlibRandomForestNodeFactory extends DefaultSparkNodeFactory<MLlibR
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibRandomForestNodeDialog();
     }
 

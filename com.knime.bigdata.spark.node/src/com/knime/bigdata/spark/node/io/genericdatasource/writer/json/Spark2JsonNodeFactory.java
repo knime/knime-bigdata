@@ -47,7 +47,7 @@ public class Spark2JsonNodeFactory extends Spark2GenericDataSourceNodeFactory<Sp
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }

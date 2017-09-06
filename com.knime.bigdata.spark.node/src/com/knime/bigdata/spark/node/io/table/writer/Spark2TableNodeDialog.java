@@ -23,17 +23,18 @@ package com.knime.bigdata.spark.node.io.table.writer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
+import com.knime.bigdata.spark.core.node.SparkDefaultNodeSettingsPane;
+
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark2TableNodeDialog extends DefaultNodeSettingsPane {
+public class Spark2TableNodeDialog extends SparkDefaultNodeSettingsPane {
 
     /**
      *

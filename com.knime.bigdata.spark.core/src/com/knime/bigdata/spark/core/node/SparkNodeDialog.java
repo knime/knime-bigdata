@@ -16,49 +16,18 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 12.02.2015 by koetter
+ *   Created on Sep 5, 2017 by bjoern
  */
-package com.knime.bigdata.spark.node.mllib.prediction.predictor;
+package com.knime.bigdata.spark.core.node;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-
 /**
+ * Marker interface for Spark node dialog. Implementations of this interface
+ * must (1) be derived from {@link NodeDialogPane} and (2) must
  *
- * @author koetter
+ * @author Bjoern, KNIME GmbH
  */
-public class MLlibPredictorNodeFactory extends DefaultSparkNodeFactory<MLlibPredictorNodeModel> {
-
-    /**
-     * Constructor.
-     */
-    public MLlibPredictorNodeFactory() {
-        super("mining/prediction");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MLlibPredictorNodeModel createNodeModel() {
-        return new MLlibPredictorNodeModel();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createSparkNodeDialogPane() {
-        return new MLLibPredictorNodeDialog();
-    }
+public interface SparkNodeDialog {
 
 }

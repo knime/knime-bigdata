@@ -75,7 +75,7 @@ public class Spark2ImpalaNodeFactory extends DefaultSparkNodeFactory<Spark2Impal
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new Spark2HiveNodeDialog();
     }
 

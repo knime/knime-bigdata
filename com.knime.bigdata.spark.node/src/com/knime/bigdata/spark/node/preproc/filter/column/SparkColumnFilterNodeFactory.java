@@ -57,7 +57,7 @@ public class SparkColumnFilterNodeFactory extends DefaultSparkNodeFactory<SparkC
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkColumnFilterNodeDialog();
     }
 }

@@ -41,7 +41,6 @@ import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -51,6 +50,7 @@ import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.workflow.FlowVariable;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
+import com.knime.bigdata.spark.core.node.AbstractSparkNodeDialogPane;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPreviewPanel;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
@@ -59,7 +59,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataTable;
  * @author Sascha Wolke, KNIME.com
  * @param <T> Settings type.
  */
-public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2SparkSettings> extends NodeDialogPane {
+public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2SparkSettings> extends AbstractSparkNodeDialogPane {
 
     /** Internal settings model */
     protected final T m_settings;
@@ -154,14 +154,18 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+    protected void loadAdditionalSparkSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
 
         if (specs.length > 0 && specs[0] != null) {
             m_connectionInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
         }
 
-        m_settings.loadSettings(settings);
+        try {
+            m_settings.loadSettings(settings);
+        } catch (InvalidSettingsException e) {
+            throw new NotConfigurableException(e.getMessage(), e);
+        }
         m_filenameChooser.setConnectionInformation(m_connectionInfo);
         m_filenameChooser.setSelection(m_settings.getInputPath());
 
@@ -174,7 +178,7 @@ public class GenericDataSource2SparkNodeDialog<T extends GenericDataSource2Spark
     }
 
     @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+    protected void saveAdditionalSparkSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.setInputPath(m_filenameChooser.getSelection());
 
         if (m_settings.hasDriver()) {

@@ -53,7 +53,7 @@ public class SparkSQLNodeFactory extends DefaultSparkNodeFactory<SparkSQLNodeMod
     }
 
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkSQLNodeDialog();
     }
 }

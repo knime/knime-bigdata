@@ -45,7 +45,7 @@ public class Spark2ParquetNodeFactory extends Spark2GenericDataSourceNodeFactory
     }
 
     @Override
-    protected Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings> createNodeDialogPane() {
+    protected Spark2GenericDataSourceNodeDialog<Spark2GenericDataSourceSettings> createSparkNodeDialogPane() {
         return new Spark2GenericDataSourceNodeDialog<>(getSettings());
     }
 }

@@ -146,13 +146,31 @@ implements SparkNodeFactory<M> {
     }
 
     /**
-     * Spark nodes with a dialog need to overwrite this method.
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected final NodeDialogPane createNodeDialogPane() {
+        final NodeDialogPane toReturn = createSparkNodeDialogPane();
+        if (toReturn != null
+                && !(toReturn instanceof AbstractSparkNodeDialogPane)
+                && !(toReturn instanceof SparkDefaultNodeSettingsPane)) {
+            throw new RuntimeException(
+                "Node dialog must be subclass of either SparkNodeDialogPane or SparkDefaultNodeSettingsPane");
+        }
+        return toReturn;
+    }
+
+    /**
+     * Invoked by {@link #createNodeDialogPane()}. Spark nodes with a dialog need to override this method and return an
+     * instance of either {@link AbstractSparkNodeDialogPane} or {@link SparkDefaultNodeSettingsPane}. Otherwise
+     * {@link #createNodeDialogPane()} throws a {@link RuntimeException}.
+     *
+     * @return A new node dialog instance
+     */
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return null;
     }
+
     /**
      * Looks for a XML file with the name of the factory class within the same page. Overwrite this method if you
      * want to provide another {@link NodeDescription}.

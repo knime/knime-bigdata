@@ -60,7 +60,7 @@ public class SparkJavaSnippetSourceNodeFactory2 extends DefaultSparkNodeFactory<
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new SparkJavaSnippetNodeDialog(this.getClass(), SnippetType.SOURCE, JavaSnippetHelperRegistry.getInstance());
     }
 }

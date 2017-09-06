@@ -57,7 +57,7 @@ public class MLlibSVDNodeFactory extends DefaultSparkNodeFactory<MLlibSVDNodeMod
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
+    protected NodeDialogPane createSparkNodeDialogPane() {
         return new MLlibSVDNodeDialog();
     }
 
