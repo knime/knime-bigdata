@@ -34,9 +34,16 @@ spark {
     #   spark.jobserver.io.JobSqlDAO uses an SQL database for persistence
     #
     jobdao = spark.jobserver.io.JobSqlDAO
+
+    # client driver mode
     sqldao {
       rootdir = "/tmp/%JSLINKNAME%/sqldao/data"
+
+      # client driver mode
       jdbc.url = "jdbc:h2:/tmp/%JSLINKNAME%/sqldao/data/h2-db;AUTO_SERVER=TRUE;AUTO_RECONNECT=TRUE"
+
+      # cluster driver mode: replace FRONT-END-IP with IP runnning spark-job-server
+      # jdbc.url = "jdbc:h2:tcp://FRONT-END-IP:9092/h2-db;AUTO_RECONNECT=TRUE"
 
       dbcp {
         enabled = true
@@ -47,6 +54,9 @@ spark {
         initialsize = 10
       }
     }
+
+    # launch a H2 DB server (use this in yarn cluster mode)
+    # startH2Server = true
 
     # Storage directory for files that are uploaded to the server
     # via POST/data commands
@@ -80,9 +90,13 @@ spark {
   # Sets the "spark.master" property in the SparkConf. KNIME recommends
   # "yarn-client" for production use and "local[4]" for debugging purposes.
   master = "local[4]"           # Run Spark locally with 4 worker threads
-  # master = "yarn-client"      # Connect to a YARN cluster in client mode. The
-                                # cluster location will be found based on the
-                                # HADOOP_CONF_DIR environment variable.
+  # master = "yarn"               # Connect to a YARN cluster in client mode. The
+  # submit.deployMode = "client"  # cluster location will be found based on the
+                                  # cluster location will be found based on the
+                                  # HADOOP_CONF_DIR environment variable.
+  # master = "yarn"               # Connect to a YARN cluster in cluster mode. The
+  # submit.deployMode = "cluster" # cluster location will be found based on the
+                                  # HADOOP_CONF_DIR environment variable.
   # master = "spark://HOST:PORT"  # Connect to a Spark standalone cluster master.
 
   # Default settings for Spark contexts. These settings can be overridden on a
@@ -165,6 +179,9 @@ akka {
   remote.netty.tcp {
     # This controls the maximum message size, including job results, that can be sent
     maximum-frame-size = 100 MiB
+
+    # cluster driver mode: replace FRONT-END-IP with IP runnning spark-job-server
+    # hostname = "FRONT-END-IP"
   }
 }
 

@@ -69,6 +69,9 @@ Please follow the Spark Job Server installation manual provided as PDF by KNIME.
  you should start from scratch with a fresh default environment.conf and merge in the
  changes you have done.
 
- 2017-07-24
+ 2017-09-11
   - New version: 0.7.0.2-KNIME
-  - Enhancements: Spark YARN cluster driver mode support added
+  - Enhancements: Added preview for YARN cluster deployment mode. The default
+    is still YARN client deployment mode. YARN cluster deployment is undocumented
+    and not yet recommended for production use. However, if you want to try it,
+    please contact us at bigdata@knime.com
