@@ -94,6 +94,7 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new GradientBoostedTreesJobRunFactory(),
             new RandomForestJobRunFactory(),
             new LinearRegressionJobRunFactory(),
+            new com.knime.bigdata.spark2_0.jobs.ml.prediction.linear.regression.LinearRegressionJobRunFactory(),
             new LogisticRegressionJobRunFactory(),
             new SVMJobRunFactory(),
             new PredictorSparkJobRunFactory(),

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
+    type="Learner" icon="icon.png">
+    <name>Spark Linear Regression Learner (ML)</name>
+	<shortDescription>Linear regression model learning performed in Spark.</shortDescription>
+	<fullDescription>
+		<intro>
+			This node applies the Apache Spark 
+			<a href="https://spark.apache.org/docs/2.0.0/ml-classification-regression.html#linear-regression">Linear Regression</a> algorithm.
+			It outputs the learned model for later application.
+			<p>
+            Please note that all data must be numeric or of type string, the label column must be numeric, 
+            all numeric features must be normalized (use the 'Spark Normalizer') 
+            </p>
+            <p>
+            Use the Spark Predictor node to apply the learned model to unseen data.
+            </p>
+		</intro>
+    	       
+        <option name="Solver">
+             Set the solver algorithm used for optimization.
+             In case of linear regression, this can be "l-bfgs", "normal" and "auto".
+             "l-bfgs" denotes Limited-memory BFGS which is a limited-memory quasi-Newton optimization method.
+             "normal" denotes using Normal Equation as an analytical solution to the linear regression problem.
+             The default value is "auto" which means that the solver algorithm is selected automatically.
+        </option>
+        <option name="Elastic Net Param">
+        Set the ElasticNet mixing parameter.
+            For a value of 0, the penalty is an L2 penalty.
+            For a value of 1, it is an L1 penalty.
+            For a value between 0 and 1, the penalty is a combination of L1 and L2.
+            Default is 0.0 which is an L2 penalty.
+            
+        <option name="Regularization">
+            The fixed regularization parameter r &gt;= 0 defines the trade-off between the two goals 
+            of minimizing the loss (i.e., training error) and minimizing model complexity (i.e., to avoid overfitting).
+        </option>
+        
+        </option>
+        <option name="Number of iterations">
+            The number of iterations the method should run.
+        </option>
+                
+        <option name="Add intercept">Select this option to add intercept.</option>
+                
+        <option name="Tolerance">
+            Set the convergence tolerance of iterations. A smaller value will lead to higher accuracy with the cost of more iterations. Default is 1E-6.
+        </option>        
+
+        <option name="Use feature scaling">
+            Select this option to use feature scaling before model training to reduce the condition numbers which can 
+            significantly help the optimizer converging faster.
+            Whether to perform feature scaling before model training to reduce the condition numbers
+            which can significantly help the optimizer converging faster. The scaling correction will be
+            translated back to resulting model weights, so it's transparent to users.
+        </option>
+        
+        <option name="Class column">The classification column. Must be numeric.</option>
+        <option name="Feature Columns">The feature columns to learn the model from. Supports only numeric or string columns.</option>
+    
+	</fullDescription>
+
+    <ports>
+		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+        <outPort index="0" name="Linear Regression Model">Spark ML Linear Regression Model</outPort>
+    </ports>
+</knimeNode>

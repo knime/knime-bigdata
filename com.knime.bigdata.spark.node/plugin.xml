@@ -254,6 +254,11 @@
             id="com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory">
       </node>
       <node
+            category-path="/toolintegration/spark/mining/prediction/ml"
+            factory-class="com.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionNodeFactory"
+            id="com.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionNodeFactory">
+      </node>
+      <node
             category-path="/toolintegration/spark/mining/prediction"
             factory-class="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory"
             id="com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory">

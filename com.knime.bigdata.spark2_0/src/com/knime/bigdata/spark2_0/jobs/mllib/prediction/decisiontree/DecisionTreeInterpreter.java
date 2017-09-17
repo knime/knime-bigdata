@@ -32,6 +32,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.tree.Node;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeView;
@@ -88,8 +92,22 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
      */
     @Override
     public String getSummary(final SparkModel model) {
-        final DecisionTreeModel treeModel = (DecisionTreeModel)model.getModel();
-        return "Tree depth: " + treeModel.depth() + " Number of nodes: " + treeModel.numNodes();
+        if (model.getModel() instanceof DecisionTreeModel) {
+            final DecisionTreeModel treeModel = (DecisionTreeModel)model.getModel();
+            return "Tree depth: " + treeModel.depth() + " Number of nodes: " + treeModel.numNodes();
+        } else if (model.getModel() instanceof PipelineModel) {
+            final PipelineModel treeModel = (PipelineModel)model.getModel();
+            for (Transformer stage : treeModel.stages()) {
+                if (stage instanceof DecisionTreeClassificationModel) {
+                     Node tmpRootNode = ((DecisionTreeClassificationModel)stage).rootNode();
+                     return "Tree depth: " + tmpRootNode.subtreeDepth() + " Number of nodes: " + tmpRootNode.numDescendants();
+                }
+            }
+            return "not sure";
+        } else {
+            throw new RuntimeException("Unsupported model type: " + model.getModel().getClass().getName());
+        }
+
     }
 
     /**
@@ -112,7 +130,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
     public static JComponent getTreeView(final TreeNode rootNode, final List<String> aColNames,
         final String aClassColName, final ColumnBasedValueMapping metaData) {
         final Map<Integer, String> features = new HashMap<>();
-        int ctr =0;
+        int ctr = 0;
         for (String col : aColNames) {
             features.put(ctr++, col);
         }
@@ -125,7 +143,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
     }
 
     private JComponent getTreePanel(final SparkModel aDecisionTreeModel) {
-        final DecisionTreeModel treeModel = (DecisionTreeModel) aDecisionTreeModel.getModel();
+
         final ColumnBasedValueMapping metaData = (ColumnBasedValueMapping)aDecisionTreeModel.getMetaData();
         final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
         final String classColName = aDecisionTreeModel.getClassColumnName();
@@ -145,7 +163,24 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
         treePanel.add(new JLabel("Converting decision tree ..."), BorderLayout.NORTH);
         treePanel.repaint();
         treePanel.revalidate();
-        final TreeNode rootNode = getRootNode(treeModel);
+        final TreeNode rootNode;
+        if (aDecisionTreeModel.getModel() instanceof PipelineModel) {
+            final PipelineModel treeModel = (PipelineModel)aDecisionTreeModel.getModel();
+            TreeNode tmpRootNode = null;
+            for (Transformer stage : treeModel.stages()) {
+                if (stage instanceof DecisionTreeClassificationModel) {
+                    tmpRootNode = getRootNode(((DecisionTreeClassificationModel)stage).rootNode());
+                }
+            }
+            if (tmpRootNode == null) {
+                throw new RuntimeException("No root node found in pipeline model.");
+            }
+            rootNode = tmpRootNode;
+        } else {
+            final DecisionTreeModel treeModel = (DecisionTreeModel)aDecisionTreeModel.getModel();
+            rootNode = getRootNode(treeModel);
+        }
+
         //TK_TODO: Add job cancel button to the dialog to allow users to stop the fetching job
         final SwingWorker<JComponent, Void> worker = new SwingWorker<JComponent, Void>() {
             /** {@inheritDoc} */
@@ -192,6 +227,15 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
         };
         worker.execute();
         return component;
+    }
+
+    /**
+     * @param aRootNode the root node of a DecisionTreeClassificationModel
+     * @return
+     */
+    private TreeNode getRootNode(final Node aRootNode) {
+        final TreeNode rootNode = new com.knime.bigdata.spark2_0.jobs.ml.prediction.decisiontree.TreeNode2_0(aRootNode);
+        return rootNode;
     }
 
     /**

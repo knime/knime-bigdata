@@ -52,6 +52,7 @@ import com.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import com.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
+import com.knime.bigdata.spark.node.ml.prediction.linear.regression.MLLinearRegressionNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
 import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory;
 import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory;
@@ -140,6 +141,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibRandomForestNodeFactory(),
             new MLlibLogisticRegressionNodeFactory(),
             new MLlibLinearRegressionNodeFactory(),
+            new MLLinearRegressionNodeFactory(),
             new MLlibSVMNodeFactory(),
             new MLlibPredictorNodeFactory(),
             new MLlibPCANodeFactory(),

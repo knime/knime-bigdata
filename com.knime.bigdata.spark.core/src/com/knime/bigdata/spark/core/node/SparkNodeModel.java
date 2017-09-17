@@ -642,6 +642,23 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     /**
+     * @param data the input {@link SparkDataPortObject} to get the {@link SparkVersion}
+     * @param modelName the unique name of the model
+     * @param origSpec the {@link DataTableSpec} of the original input table
+     * @param classColName the name of the class column if appropriate otherwise <code>null</code>
+     * @param featureColNames the names of the feature columns in the order they where used when learning the model
+     * @param model the {@link ModelJobOutput} to get the model
+     * @return the {@link SparkModelPortObject}
+     * @throws MissingSparkModelHelperException
+     */
+    public static SparkModelPortObject createSparkModelPortObject(final SparkDataPortObject data,
+        final String modelName, final DataTableSpec origSpec, final String classColName,
+        final List<String> featureColNames, final ModelJobOutput model)
+        throws MissingSparkModelHelperException {
+        return new SparkModelPortObject(new SparkModel(getSparkVersion(data), modelName, model.getModel(), origSpec, classColName, featureColNames));
+    }
+
+    /**
      * @param data the {@link SparkDataPortObject} to get the {@link SparkContextID} from
      * @param jobId the unique job id of the {@link JobRunFactory}
      * @return the corresponding {@link JobRunFactory}

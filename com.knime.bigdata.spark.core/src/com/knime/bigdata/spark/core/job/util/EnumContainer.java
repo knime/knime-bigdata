@@ -129,6 +129,21 @@ public class EnumContainer {
     }
 
     /**
+     * Defines the solver method for regression optimization,
+     * <a href="https://spark.apache.org/docs/2.0.0/api/java/index.html">see </a>.
+     * @author dwk
+     */
+    public enum RegressionSolver {
+        /**  In case of linear regression, this can be "l-bfgs", "normal" and "auto".*/
+        /**  "l-bfgs" denotes Limited-memory BFGS which is a limited-memory quasi-Newton optimization method.*/
+        l_bfgs,
+        /**  "normal" denotes using Normal Equation as an analytical solution to the linear regression problem. */
+        normal,
+        /**  The default value is "auto" which means that the solver algorithm is selected automatically.*/
+        auto;
+    }
+
+    /**
      * Defines the
      * <a href="http://spark.apache.org/docs/1.2.1/mllib-linear-methods.html#regularizers">linear methods regularizer</a>.
      * @author dwk

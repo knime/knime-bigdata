@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -80,6 +81,10 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
             LOGGER.info("Predicting using clusters from KMeans model.");
             outputDataset = KMeansJob.transform(input, inputDataset, (KMeansModel) model);
 
+        } else if (model instanceof PipelineModel) {
+            LOGGER.info("Predicting using ML pipeline.");
+            final PipelineModel pipeline = (PipelineModel)model;
+            outputDataset = pipeline.transform(inputDataset);
         } else {
             final StructType predictSchema = TypeConverters.convertSpec(input.getSpec(outputKey));
             final JavaRDD<Row> predictedData = ModelUtils.predict(input.getIncludeColumnIndices(), inputDataset.javaRDD(), model);

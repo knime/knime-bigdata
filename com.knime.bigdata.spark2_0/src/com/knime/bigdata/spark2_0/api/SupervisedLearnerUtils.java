@@ -21,12 +21,25 @@
 package com.knime.bigdata.spark2_0.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.ml.Pipeline;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PipelineStage;
+import org.apache.spark.ml.PredictionModel;
+import org.apache.spark.ml.Predictor;
+import org.apache.spark.ml.feature.ColumnPruner;
+import org.apache.spark.ml.feature.IndexToString;
+import org.apache.spark.ml.feature.StringIndexer;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Dataset;
@@ -34,11 +47,15 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 
+import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.ClassificationJobInput;
 import com.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
 import com.knime.bigdata.spark.core.job.JobInput;
+import com.knime.bigdata.spark.core.job.ModelJobOutput;
 import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+
+import scala.collection.immutable.Set;
 
 /**
  *
@@ -46,6 +63,9 @@ import com.knime.bigdata.spark.jobserver.server.RDDUtils;
  */
 @SparkClass
 public class SupervisedLearnerUtils {
+
+    private final static Logger LOGGER = Logger.getLogger(SupervisedLearnerUtils.class.getName());
+
     /**
      * array with the indices of the nominal columns
      */
@@ -59,12 +79,100 @@ public class SupervisedLearnerUtils {
      * @param aRowRDD
      * @return LabeledPoint RDD with training data
      */
-    public static JavaRDD<LabeledPoint> getTrainingData(final ClassificationJobInput input, final JavaRDD<Row> aRowRDD) {
+    public static JavaRDD<LabeledPoint> getTrainingData(final ClassificationJobInput input,
+        final JavaRDD<Row> aRowRDD) {
         final List<Integer> colIdxs = input.getColumnIdxs();
         //note: requires that all features (including the label) are numeric !!!
         final Integer labelIndex = input.getClassColIdx();
         final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(aRowRDD, colIdxs, labelIndex);
         return inputRdd;
+    }
+
+    /**
+     *
+     * @param aSparkContext spark context
+     * @param aConfigurationInput configuration of the classification job
+     * @param aUnprocessedTrainingData - data to fit model to
+     * @param aConfiguredClassifier - a pre-configured classifier as part of the training pipeline
+     * @param aIndexLabelColumn convert label column to a (numeric) index, not required for regression tasks
+     * @return ModelJobOutput the wrapped PipelineModel
+     * @throws KNIMESparkException
+     */
+    public static <FeaturesType, Learner extends Predictor<FeaturesType, Learner, M>, M extends PredictionModel<FeaturesType, M>>
+        ModelJobOutput constructAndExecutePipeline(final SparkContext aSparkContext,
+            final ClassificationWithNominalFeatureInfoJobInput aConfigurationInput,
+            final Dataset<Row> aUnprocessedTrainingData,
+            final Predictor<FeaturesType, Learner, M> aConfiguredClassifier, final boolean aIndexLabelColumn)
+            throws KNIMESparkException {
+
+        final List<PipelineStage> pipelineStages = new ArrayList<>();
+
+        final Integer labelIndex = aConfigurationInput.getClassColIdx();
+        final String labelColumnName = aUnprocessedTrainingData.columns()[labelIndex];
+
+        final String[] featureNames = aConfigurationInput.getColumnNames(aUnprocessedTrainingData.columns());
+
+        final String featureColumn = ModelUtils.getTemporaryColumnName("features");
+
+        // Automatically identify categorical features, and index them - needs to be done before vector is created
+        // key: nominal feature index, value: number of distinct values
+        final Map<Integer, Integer> nominalFeatureInfo = aConfigurationInput.getNominalFeatureInfo().getMap();
+        if (nominalFeatureInfo.size() > 0) {
+            LOGGER.log(Level.INFO,
+                "Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
+            System.err.println("Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
+
+        }
+        for (Integer nominalFeatureIndex : nominalFeatureInfo.keySet()) {
+            String nominalColName = featureNames[nominalFeatureIndex];
+            String newNominalColName = nominalColName + "_i";
+            pipelineStages.add(new StringIndexer().setInputCol(nominalColName).setOutputCol(newNominalColName).fit(aUnprocessedTrainingData));
+            // overwrite name so that vector assembly processes the correct column:
+            featureNames[nominalFeatureIndex] = newNominalColName;
+        }
+
+        //TODO - column names must contain special chars like '(', ')', or '_'
+        final VectorAssembler va = new VectorAssembler().setInputCols(featureNames).setOutputCol(featureColumn);
+        pipelineStages.add(va);
+
+        final String tmpClassColumn;
+        final StringIndexerModel labelIndexer;
+        if (aIndexLabelColumn) {
+            tmpClassColumn = ModelUtils.getTemporaryColumnName("label");
+            // Index labels, adding metadata to the label column.
+            labelIndexer = new StringIndexer().setInputCol(labelColumnName).setOutputCol(tmpClassColumn)
+                .fit(aUnprocessedTrainingData);
+            pipelineStages.add(labelIndexer);
+        } else {
+            tmpClassColumn = labelColumnName;
+            labelIndexer = null;
+        }
+
+        LOGGER.log(Level.INFO, "Constructing classification training pipeline");
+
+        // this is only necessary if there are categorical features and then it appears a bit tricky with
+        // the global 'max categories' parameter....
+        //        pipelineStages.add(
+        //            new VectorIndexer().setInputCol(featureColumn).setOutputCol(featureColumn + "_i").setMaxCategories(10));
+        //         featureColumn = featureColumn + "_i";
+        pipelineStages.add(aConfiguredClassifier.setLabelCol(tmpClassColumn).setFeaturesCol(featureColumn));
+
+        // appears not to have any effect: .setPredictionCol("colp")
+
+        if (labelIndexer != null) {
+            // Convert indexed labels back to original labels.
+            pipelineStages.add(new IndexToString().setInputCol("prediction").setOutputCol("predictedLabel")
+                .setLabels(labelIndexer.labels()));
+        }
+
+        pipelineStages.add(new ColumnPruner(new Set.Set1<String>(featureColumn)));
+
+        // Chain indexers and classifier in a Pipeline.
+        Pipeline pipeline = new Pipeline().setStages(pipelineStages.toArray(new PipelineStage[pipelineStages.size()]));
+
+        // Train model. This also runs the indexers.
+        PipelineModel model = pipeline.fit(aUnprocessedTrainingData);
+        return new ModelJobOutput(model);
     }
 
     /**
@@ -77,9 +185,10 @@ public class SupervisedLearnerUtils {
      * @throws Exception
      */
     public static void storePredictions(final SparkContext sparkContext, final NamedObjects namedObjects,
-        final JobInput input, final JavaRDD<Row> rowRDD, final JavaRDD<LabeledPoint> inputRdd,
-        final Serializable model) throws Exception {
-        storePredictions(sparkContext, input, namedObjects, rowRDD, RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model);
+        final JobInput input, final JavaRDD<Row> rowRDD, final JavaRDD<LabeledPoint> inputRdd, final Serializable model)
+        throws Exception {
+        storePredictions(sparkContext, input, namedObjects, rowRDD, RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd),
+            model);
     }
 
     /**
@@ -92,8 +201,7 @@ public class SupervisedLearnerUtils {
      * @throws Exception
      */
     public static void storePredictions(final SparkContext sc, final JobInput input, final NamedObjects namedObjects,
-            final JavaRDD<Row> aInputRdd, final JavaRDD<Vector> aFeatures, final Serializable aModel)
-            throws Exception {
+        final JavaRDD<Row> aInputRdd, final JavaRDD<Vector> aFeatures, final Serializable aModel) throws Exception {
 
         if (!input.getNamedOutputObjects().isEmpty()) {
             final SparkSession spark = SparkSession.builder().sparkContext(sc).getOrCreate();
@@ -102,12 +210,13 @@ public class SupervisedLearnerUtils {
             final JavaRDD<Row> predictedData = ModelUtils.predict(aFeatures, aInputRdd, aModel);
             final StructType schema = TypeConverters.convertSpec(input.getSpec(namedOutputObject));
             final Dataset<Row> predictedDataset = spark.createDataFrame(predictedData, schema);
-            namedObjects.addDataFrame(namedOutputObject , predictedDataset);
+            namedObjects.addDataFrame(namedOutputObject, predictedDataset);
         }
     }
 
     /**
      * compute the number of classes (or distinct values of a feature)
+     *
      * @param aRDD
      * @param aColumn
      * @return the number of distinct values for the given column index
@@ -125,6 +234,7 @@ public class SupervisedLearnerUtils {
 
     /**
      * find the distinct values of a column
+     *
      * @param aRDD
      * @param aColumn
      * @return the distinct values for the given column index
@@ -142,6 +252,7 @@ public class SupervisedLearnerUtils {
 
     /**
      * compute the number of classes
+     *
      * @param aRDD
      * @return the number of distinct labels
      */
@@ -158,8 +269,8 @@ public class SupervisedLearnerUtils {
 
     /**
      * @param input {@link ClassificationWithNominalFeatureInfoJobInput} to get the number of classes from
-     * @param aInputData the input named object that contains the classification column to get the unique
-     * values from if it is not present in the job input object
+     * @param aInputData the input named object that contains the classification column to get the unique values from if
+     *            it is not present in the job input object
      * @return the number of unique values in the classification column
      */
     public static Long getNoOfClasses(final ClassificationWithNominalFeatureInfoJobInput input,

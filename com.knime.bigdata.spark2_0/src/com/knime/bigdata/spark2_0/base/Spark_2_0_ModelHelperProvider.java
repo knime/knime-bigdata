@@ -46,6 +46,7 @@ public class Spark_2_0_ModelHelperProvider extends DefaultModelHelperProvider {
             new KMeansModelHelper(),
             new CollaborativeFilteringModelHelper(),
             new LinearRegressionModelHelper(),
+            new com.knime.bigdata.spark2_0.jobs.ml.prediction.linear.regression.LinearRegressionModelHelper(),
             new LogisticRegressionModelHelper(),
             new SVMModelHelper(),
             new NaiveBayesModelHelper(),

@@ -16,25 +16,28 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 29.01.2016 by koetter
+ *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package com.knime.bigdata.spark2_0.jobs.ml.prediction.linear;
 
 import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import com.knime.bigdata.spark.node.ml.prediction.linear.LinearLearnerJobInput;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class DecisionTreeJobRunFactory extends DefaultJobRunFactory<DecisionTreeJobInput, ModelJobOutput> {
+public class DefaultRegularizationJobRunFactory extends DefaultJobRunFactory<LinearLearnerJobInput, ModelJobOutput> {
 
-    /** Constructor. */
-    public DecisionTreeJobRunFactory() {
-        //TODO - add switch for ML or MLLib here
-      // super(MLlibDecisionTreeNodeModel.JOB_ID, com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.DecisionTreeJob.class, ModelJobOutput.class);
-       super(MLlibDecisionTreeNodeModel.JOB_ID, com.knime.bigdata.spark2_0.jobs.ml.prediction.decisiontree.DecisionTreeJob.class, ModelJobOutput.class);
+    /**
+     * Constructor.
+     *
+     * @param jobId Unique identifier for job.
+     * @param jobClass The class that implements the job.
+     */
+    protected DefaultRegularizationJobRunFactory(final String jobId,
+        final Class<? extends AbstractRegularizationJob<LinearLearnerJobInput>> jobClass) {
+        super(jobId, jobClass, ModelJobOutput.class);
     }
 }
