@@ -75,7 +75,7 @@ class JobserverJobController implements JobController {
      * and authentication is on, then job submission will use a context name of the form userName~contextName
      * instead of just contextName.
      */
-    private boolean m_prependUserToContextName;
+    private volatile boolean m_prependUserToContextName;
 
     JobserverJobController(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName,
         final RestClient restClient, final String jobserverJobClass) {
@@ -227,12 +227,15 @@ class JobserverJobController implements JobController {
 
         JsonObject jsonResponse;
 
+        // use a local copy to prevent race conditions
+        final boolean prependUserToContextName = m_prependUserToContextName;
+
         try {
             jsonResponse =
                 new StartJobRequest(m_contextId,
                     m_contextConfig,
                     m_jobserverAppName,
-                    m_prependUserToContextName,
+                    prependUserToContextName,
                     m_restClient,
                     m_jobserverJobClass,
                     jobClassName,
@@ -248,7 +251,7 @@ class JobserverJobController implements JobController {
                 jsonResponse = new StartJobRequest(m_contextId,
                     m_contextConfig,
                     m_jobserverAppName,
-                    !m_prependUserToContextName,
+                    !prependUserToContextName,
                     m_restClient,
                     m_jobserverJobClass,
                     jobClassName,
@@ -256,7 +259,7 @@ class JobserverJobController implements JobController {
                     inputFilesOnServer).send();
 
                 // if we are here, toggling m_prependUserToContextName worked, so we memorize that
-                m_prependUserToContextName = !m_prependUserToContextName;
+                m_prependUserToContextName = !prependUserToContextName;
             } catch (SparkContextNotFoundException toIgnore) {
                 // if we are here, toggling m_prependUserToContextName did NOT work.
                 // The context apparently does not exist anymore, hence we rethrow the original exception
