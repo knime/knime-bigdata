@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor jobs for Spark 1.6 on CDH 5.9 and later
 Bundle-SymbolicName: com.knime.bigdata.spark1_6_cdh5_9;singleton:=true
-Bundle-Version: 2.1.0.qualifier
+Bundle-Version: 2.2.0.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Vendor: KNIME.com, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark1_6_cdh5_9.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",
- com.knime.bigdata.spark.core;bundle-version="[2.1.0,2.2.0)",
- com.knime.bigdata.spark.node;bundle-version="[2.1.0,2.2.0)",
+ com.knime.bigdata.spark.core;bundle-version="[2.2.0,2.3.0)",
+ com.knime.bigdata.spark.node;bundle-version="[2.2.0,2.3.0)",
  org.apache.hadoop.client;bundle-version="[2.2.0,3.0.0)",
  org.apache.spark_2.10;bundle-version="[1.6.0.cdh5_9_3,1.6.0.cdh6)",
  org.knime.jsnippets;bundle-version="[3.3.0,4.0.0)",
