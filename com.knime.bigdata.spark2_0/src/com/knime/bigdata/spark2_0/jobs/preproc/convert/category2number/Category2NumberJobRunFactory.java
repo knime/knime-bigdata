@@ -38,4 +38,12 @@ public class Category2NumberJobRunFactory
     public Category2NumberJobRunFactory() {
         super(SparkCategory2NumberNodeModel.JOB_ID, Category2NumberJob.class, Category2NumberJobOutput.class);
     }
+
+    /**
+     * @param aMl - ignored
+     */
+    public Category2NumberJobRunFactory(final String aMl) {
+        super(com.knime.bigdata.spark.node.preproc.convert.category2number.ml.SparkCategory2NumberNodeModel.JOB_ID, Category2NumberMLJob.class, Category2NumberJobOutput.class);
+    }
+
 }

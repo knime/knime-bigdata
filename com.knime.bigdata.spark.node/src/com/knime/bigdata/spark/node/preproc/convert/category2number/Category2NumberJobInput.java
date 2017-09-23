@@ -46,6 +46,8 @@ public class Category2NumberJobInput extends JobInput {
 
     private static final String KEEP_ORIGINAL = "keepOriginal";
 
+    private static final String DROP_LAST = "dropLastValue";
+
     /**
      * Paramless constructor for automatic deserialization.
      */
@@ -59,11 +61,14 @@ public class Category2NumberJobInput extends JobInput {
      * @param includedColsNames
      * @param mappingType - type of value mapping (global, per column or binary)
      * @param keepOriginalColumns  keep original columns or not, default is true
+     * @param dropLastValue - last category is not included by default (configurable via OneHotEncoder!.dropLast because it makes the
+     *  vector entries sum up to one, and hence linearly dependent. So an input value of 4.0 maps to [0.0, 0.0, 0.0, 0.0]
      * @param colSuffix the column name suffix to use for none binary mappings
      * @param namedOutputObject - table identifier (output data)
      */
     public Category2NumberJobInput(final String namedInputObject, final Integer[] includeColIdxs,
             final String[] includedColsNames, final MappingType mappingType, final boolean keepOriginalColumns,
+            final boolean dropLastValue,
             final String colSuffix, final String namedOutputObject) {
 
         addNamedInputObject(namedInputObject);
@@ -72,6 +77,7 @@ public class Category2NumberJobInput extends JobInput {
         set(INCLUDE_COL_NAMES, includedColsNames);
         set(MAPPING_TYPE, mappingType.name());
         set(KEEP_ORIGINAL, keepOriginalColumns);
+        set(DROP_LAST, dropLastValue);
         set(COL_SUFFIX, colSuffix);
     }
 
@@ -109,5 +115,14 @@ public class Category2NumberJobInput extends JobInput {
      */
     public String getColSuffix() {
         return get(COL_SUFFIX);
+    }
+
+    /**
+     *  The last category is not included by default (configurable via OneHotEncoder!.dropLast because it makes the
+     *  vector entries sum up to one, and hence linearly dependent. So an input value of 4.0 maps to [0.0, 0.0, 0.0, 0.0]
+     * @return whether or not to drop the last value
+     */
+    public boolean isDropLast() {
+        return get(DROP_LAST);
     }
 }

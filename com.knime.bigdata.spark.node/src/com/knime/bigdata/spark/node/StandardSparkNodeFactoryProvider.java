@@ -148,6 +148,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibSVDNodeFactory(),
             new SparkConcatenateNodeFactory(),
             new SparkCategory2NumberNodeFactory(),
+            new com.knime.bigdata.spark.node.preproc.convert.category2number.ml.SparkCategory2NumberNodeFactory(),
             new SparkNumber2CategoryNodeFactory(),
             new SparkColumnFilterNodeFactory(),
             new SparkJoinerNodeFactory(),

@@ -104,6 +104,7 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new PrepareContextJobRunFactory(),
             new ConcatenateDataFramesJobRunFactory(),
             new Category2NumberJobRunFactory(),
+            new Category2NumberJobRunFactory("ml"),
             new Number2CategoryJobRunFactory(),
             new ColumnFilterJobRunFactory(),
             new JoinJobRunFactory(),

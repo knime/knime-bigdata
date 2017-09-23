@@ -176,6 +176,7 @@ public class EnumContainer {
         /**
          * use one map for all columns so that the same value in different columns is mapped to the same number
          */
+        @Deprecated
         GLOBAL,
         /**
          * use a separate map for each column to that the distinct values in each column are always numbered from 1 to N

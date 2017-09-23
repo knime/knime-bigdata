@@ -150,11 +150,6 @@ public class SupervisedLearnerUtils {
 
         LOGGER.log(Level.INFO, "Constructing classification training pipeline");
 
-        // this is only necessary if there are categorical features and then it appears a bit tricky with
-        // the global 'max categories' parameter....
-        //        pipelineStages.add(
-        //            new VectorIndexer().setInputCol(featureColumn).setOutputCol(featureColumn + "_i").setMaxCategories(10));
-        //         featureColumn = featureColumn + "_i";
         pipelineStages.add(aConfiguredClassifier.setLabelCol(tmpClassColumn).setFeaturesCol(featureColumn));
 
         // appears not to have any effect: .setPredictionCol("colp")
