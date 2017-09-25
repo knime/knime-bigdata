@@ -72,7 +72,7 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
         final SparkContextProvider provider = (SparkContextProvider)inData[0];
         exec.setMessage("Destroying ingoing Spark context");
 
-        if (!m_noDialog.getBooleanValue()) {
+        if (!m_noDialog.getBooleanValue() && !Boolean.getBoolean("java.awt.headless")) {
             exec.setMessage("Confirmation dialog opened. Waiting for user response...");
             final int n = JOptionPane.showConfirmDialog(null, "Do you really want to destroy the Spark context?",
                 "Destroy Spark Context", JOptionPane.OK_CANCEL_OPTION);
