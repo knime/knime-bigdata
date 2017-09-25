@@ -184,6 +184,20 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         }
     }
 
+    @Override
+    protected void onDisposeInternal() {
+        if (m_settings.deleteContextOnDispose()) {
+            final SparkContextID id = m_settings.getSparkContextID();
+
+            try {
+                LOGGER.info("In onDispose() of SparkContextCreateNodeModel. Removing context: " + id);
+                SparkContextManager.ensureDestroyedCustomContext(id);
+            } catch (KNIMESparkException e) {
+                LOGGER.error("Failed to destroy context " + id + " on dispose.", e);
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -110,6 +110,11 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         panel.add(new DialogComponentString(m_settings.getContextNameModel(), "Context name: ", true, 30).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
+        panel.add(new DialogComponentBoolean(m_settings.getDeleteContextOnDisposeModel(),
+                "Delete context on dispose").getComponentPanel(), gbc);
+        m_settings.getDeleteContextOnDisposeModel().addChangeListener(this);
+        gbc.gridx = 0;
+        gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteObjectsOnDisposeModel(),
                 "Delete objects on dispose").getComponentPanel(), gbc);
         gbc.gridx = 0;
@@ -140,6 +145,11 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
     public void stateChanged(final ChangeEvent e) {
         if (e.getSource().equals(m_settings.getOverrideSparkSettingsModel())) {
             m_settings.getCustomSparkSettingsModel().setEnabled(m_settings.getOverrideSparkSettingsModel().getBooleanValue());
+        }
+
+        if (e.getSource().equals(m_settings.getDeleteContextOnDisposeModel())) {
+            m_settings.getDeleteObjectsOnDisposeModel().setBooleanValue(m_settings.getDeleteContextOnDisposeModel().getBooleanValue());
+            m_settings.getDeleteObjectsOnDisposeModel().setEnabled(!m_settings.getDeleteContextOnDisposeModel().getBooleanValue());
         }
     }
 
