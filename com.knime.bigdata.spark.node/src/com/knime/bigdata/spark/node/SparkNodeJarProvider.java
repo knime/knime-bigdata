@@ -28,10 +28,13 @@ import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 /**
  * Jar provider implementation for spark.node plugin. This jar provider is a {@link BaseSparkJarProvider}.
  *
- * @author Bjoern Lohrmann
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkNodeJarProvider extends DefaultSparkJarProvider implements BaseSparkJarProvider {
 
+    /**
+     * Constructor.
+     */
     public SparkNodeJarProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE, KNIMEPluginScanPredicates.KNIME_JAR_PREDICATE,
             KNIMEPluginScanPredicates.KNIME_NODE_PLUGIN_PREDICATE);

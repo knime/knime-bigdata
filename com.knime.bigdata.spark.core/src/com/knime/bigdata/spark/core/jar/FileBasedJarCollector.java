@@ -187,14 +187,32 @@ public class FileBasedJarCollector implements JarCollector {
             throw new IllegalStateException("Job jar has already been finalized");
         }
 
+        if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("The provided file must a directory");
+        }
+        addDirectoryRecursively(dir, dir.getAbsolutePath());
+    }
+
+    /**
+     * Recursively adds all files in the given directory to the jar. To generate names for the zip file entries, this
+     * method takes the absolute (local) path of a file and removes a prefix of the length of the given base directory.
+     *
+     * @param dir The current directory to walk.
+     * @param baseDir The base directory to assume when generating zip file entries.
+     */
+    protected void addDirectoryRecursively(final File dir, final String baseDir) {
+
         final String[] fileNames = dir.list();
         for (final String fileName : fileNames) {
             final File file = new File(dir, fileName);
             if (file.isDirectory()) {
-                //only look at the bin directories
-                addDirectory(file);
+                addDirectoryRecursively(file, baseDir);
             } else {
-                addFile(file.getPath(), file);
+                //always use / as path separator in the zip entry name
+                //see https://bugs.openjdk.java.net/browse/JDK-6303716?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
+                final String zipEntryName =
+                    file.getAbsolutePath().substring(baseDir.length() + 1).replace(File.separatorChar, '/');
+                addFile(zipEntryName, file);
             }
         }
     }

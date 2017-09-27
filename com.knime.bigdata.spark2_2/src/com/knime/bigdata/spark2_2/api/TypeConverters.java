@@ -80,6 +80,10 @@ public class TypeConverters {
         return getConverter(IntermediateDataTypes.ANY);
     }
 
+    public static synchronized List<IntermediateToSparkConverter<DataType>> getAllConverters() {
+        return new LinkedList<>(toSparkConverterMap.values());
+    }
+
     public static IntermediateToSparkConverter<? extends DataType> getConverter(
         final IntermediateDataType intermediateType) {
         if (intermediateType instanceof IntermediateArrayDataType) {

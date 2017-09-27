@@ -36,7 +36,6 @@ public class SparkCoreJarProvider extends DefaultSparkJarProvider implements Bas
      * Jar provider implementation for spark.core plugin.
      */
     public SparkCoreJarProvider() {
-        super(AllVersionCompatibilityChecker.INSTANCE, KNIMEPluginScanPredicates.KNIME_JAR_PREDICATE,
-            KNIMEPluginScanPredicates.KNIME_CORE_PLUGIN_PREDICATE);
+        super(AllVersionCompatibilityChecker.INSTANCE, KNIMEPluginScanPredicates.KNIME_JAR_PREDICATE, KNIMEPluginScanPredicates.KNIME_CORE_PLUGIN_PREDICATE);
     }
 }

@@ -25,21 +25,31 @@ import com.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
+ * Job input for the Table to Spark job.
  *
  * @author Bjoern Lohrman, KNIME.com
  */
 @SparkClass
 public class Table2SparkJobInput extends JobInput {
+
     /**
      * For serialization.
      */
     public Table2SparkJobInput() {
     }
 
-    public static Table2SparkJobInput create(final String namedObjectId, final IntermediateSpec intermediateSpec) {
+    /**
+     * Factory method.
+     *
+     * @param namedOutputObjectId The ID of the named output object to create.
+     * @param intermediateSpec The spec of the output object to create.
+     * @return a new instance that hold the given values.
+     */
+    public static Table2SparkJobInput create(final String namedOutputObjectId,
+        final IntermediateSpec intermediateSpec) {
         Table2SparkJobInput input = new Table2SparkJobInput();
-        input.addNamedOutputObject(namedObjectId);
-        input.withSpec(namedObjectId, intermediateSpec);
+        input.addNamedOutputObject(namedOutputObjectId);
+        input.withSpec(namedOutputObjectId, intermediateSpec);
         return input;
     }
 }

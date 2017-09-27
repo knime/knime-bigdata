@@ -298,10 +298,8 @@ public class SparkModel {
             final String classColumnName = (String)os.readObject();
             final Serializable legacyModel = (Serializable)os.readObject();
 
-            // FIXME modularization: this tries to read an model interpreter. this will not work because model interpreter class have been changed and moved during refactoring.
-            // we need to package all old model interpreter classes (including SparkModel and all the crap it depends on) into a jar file and put it
-            // into spark1_2. use this jar file for the ObjectInputStream in LegacySparkModelHelper so we can read old workflows with Spark models that were saved in an executed state
-            // Then we can read the object (and throw it away because we don't need it).
+            // this reads an old model interpreter and throws it away because we don't actually need it (however we need what
+            // comes after it).
             os.readObject();
 
             final String modelName = legacySparkModelHelper.tryToGuessModelName(legacyModel);

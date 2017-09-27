@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.core.port.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.RowKey;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.osgi.framework.Version;
@@ -55,6 +57,38 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
  * @author Tobias Koetter, KNIME.com
  */
 public final class SparkDataTableUtil {
+
+
+    /**
+     * Retrieves all rows of the given {@link SparkDataTable} and converts them into a KNIME data table.
+     * Converts a {@link DataTableSpec} from a KNIME {@link DataTable} into a {@link DataTableSpec} for a
+     * {@link SparkDataTable}. These might differ, when there is no proper type converter for a KNIME data type, in
+     * which case a default converter will be taken.
+     *
+     * @param knimeDataTableSpec input {@link DataTableSpec}
+    * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to use for spec conversion (type mappings
+    *            may change over time).
+     * @return the {@link DataTableSpec} based on the available {@link KNIMEToIntermediateConverter}s.
+     */
+    public static DataTableSpec getSparkDataTableSpec(final DataTableSpec knimeDataTableSpec,
+        final Version knimeSparkExecutorVersion) {
+        final List<DataColumnSpec> specs = new ArrayList<>(knimeDataTableSpec.getNumColumns());
+        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("DUMMY", StringCell.TYPE);
+        for (DataColumnSpec colSpec : knimeDataTableSpec) {
+            final KNIMEToIntermediateConverter converter =
+                KNIMEToIntermediateConverterRegistry.get(colSpec.getType(), knimeSparkExecutorVersion);
+            final DataType converterDataType = converter.getKNIMEDataType();
+            if (converterDataType.equals(colSpec.getType())) {
+                specs.add(colSpec);
+            } else {
+                specCreator.setName(colSpec.getName());
+                specCreator.setType(converterDataType);
+                specs.add(specCreator.createSpec());
+            }
+        }
+        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
+    }
+
 
     /**
      * Retrieves all rows of the given {@link SparkDataTable} and converts them into a KNIME data table.

@@ -20,45 +20,43 @@
  */
 package com.knime.bigdata.spark.node.io.table.reader;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Collections;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataRow;
+import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.streamable.DataTableRowInput;
+import org.knime.core.node.streamable.InputPortRole;
+import org.knime.core.node.streamable.PartitionInfo;
+import org.knime.core.node.streamable.StreamableOperator;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import com.knime.bigdata.spark.node.SparkNodePlugin;
 
 /**
+ * Node model that uploads a a KNIME {@link DataTable} into a Spark cluster and provides a {@link SparkDataTable} that
+ * references the (now remote) data.
+ * <p>/
+ * The input port of this node is streamable. Also, this node behaves differently when executed in KNIME-on-Spark mode.
  *
  * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
@@ -66,6 +64,8 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
     /**The unique Spark job id.*/
     public static final String JOB_ID = "Table2SparkJob";
+
+    private final SettingsModelString m_knospOutputID = new SettingsModelString("knospOutputID", null);
 
     /**
      * Default constructor.
@@ -86,12 +86,18 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // convert KNIME spec into spark spec and back into KNIME spec
         final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
+        @SuppressWarnings("deprecation")
+        // if you change this, you also need to change the behavior in the streamable operator implementation and in executeInternal()
         final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec, getKNIMESparkExecutorVersion());
         final SparkDataPortObjectSpec resultSpec =
             new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec, getKNIMESparkExecutorVersion());
         setConverterWarningMessage(inputSpec, outputSpec);
 
         return new PortObjectSpec[]{resultSpec};
+    }
+
+	private boolean isKNOSPMode() {
+        return m_knospOutputID.getStringValue() != null;
     }
 
     /**
@@ -104,78 +110,18 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         }
         //Check that the context is available before doing all the work
         final SparkContextID contextID = getContextID(inData);
-        ensureContextIsOpen(contextID);
+        final BufferedDataTable inputTable = (BufferedDataTable)inData[0];
 
-        exec.setMessage("Converting data table...");
-        final ExecutionMonitor subExec = exec.createSubProgress(0.9);
-        final BufferedDataTable table = (BufferedDataTable)inData[0];
-        final File convertedInputTable = writeBufferedDataTable(table, subExec);
+        // if you change this, you also need to change the behavior in the streamable operator implementation and in configureInternal()
+        @SuppressWarnings("deprecation")
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputTable.getDataTableSpec(), getKNIMESparkExecutorVersion());
+        setConverterWarningMessage(inputTable.getDataTableSpec(), outputSpec);
 
-        exec.setMessage("Importing data into Spark...");
+        final AbstractTable2SparkStreamableOperator streamableOp = createStreamableOperatorInternal(contextID);
+        streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec);
 
-        // convert KNIME spec into spark spec and back into KNIME spec
-        final DataTableSpec inputSpec = table.getDataTableSpec();
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec, getKNIMESparkExecutorVersion());
-        final SparkDataTable resultTable = new SparkDataTable(contextID, outputSpec, getKNIMESparkExecutorVersion());
-        setConverterWarningMessage(inputSpec, outputSpec);
-        executeSparkJob(contextID, exec, convertedInputTable, resultTable);
-
-        exec.setProgress(1, "Spark data object created");
-        return new PortObject[]{new SparkDataPortObject(resultTable)};
-    }
-
-    private void executeSparkJob(final SparkContextID contextID, final ExecutionContext exec,
-        final File serializedTableFile, final SparkDataTable resultTable) throws KNIMESparkException, CanceledExecutionException {
-
-        final Table2SparkJobInput input = Table2SparkJobInput.create(resultTable.getID(),
-            SparkDataTableUtil.toIntermediateSpec(resultTable.getTableSpec(), getKNIMESparkExecutorVersion()));
-
-        final JobWithFilesRunFactory<Table2SparkJobInput, EmptyJobOutput> execProvider =
-            SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);
-
-        execProvider.createRun(input, Collections.singletonList(serializedTableFile)).run(contextID,
-            exec);
-    }
-
-    private File writeBufferedDataTable(final BufferedDataTable inputTable, final ExecutionMonitor exec)
-        throws IOException, KNIMESparkException, CanceledExecutionException {
-
-        final KNIMEToIntermediateConverter[] converters = KNIMEToIntermediateConverterRegistry.getConverters(inputTable.getDataTableSpec(), getKNIMESparkExecutorVersion());
-
-        final File outFile = File.createTempFile("knime-table2spark", ".tmp");
-        addFileToDeleteAfterExecute(outFile);
-
-        LOGGER.debugWithFormat("Serializing data table to file %s", outFile.getAbsolutePath());
-
-        try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)))) {
-            final long rowCount = inputTable.size();
-            final DataTableSpec spec = inputTable.getSpec();
-
-            out.writeLong(rowCount);
-            out.writeInt(spec.getNumColumns());
-            long rowIdx = 0;
-            for (final DataRow row : inputTable) {
-
-                if (rowIdx % 100 == 0) {
-                    exec.checkCanceled();
-                    exec.setProgress(rowIdx / (double)rowCount, "Processing row " + rowIdx + " of " + rowCount);
-                    //call reset to clear the object cache periodically which otherwise would result in high memory
-                    //consumption since each object is kept in memory to prevent duplicate serialization
-                    out.reset();
-                }
-
-                int colIdx = 0;
-                for (final DataCell cell : row) {
-                    out.writeObject(converters[colIdx].convert(cell));
-                    colIdx++;
-                }
-                rowIdx++;
-            }
-        }
-
-        exec.setProgress(1);
-
-        return outFile;
+        return new PortObject[]{new SparkDataPortObject(new SparkDataTable(contextID,
+            streamableOp.getNamedOutputObjectId(), outputSpec, getKNIMESparkExecutorVersion()))};
     }
 
     /**
@@ -216,6 +162,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
      */
     @Override
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+    	m_knospOutputID.saveSettingsTo(settings);
     }
 
     /**
@@ -223,6 +170,9 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
      */
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+		if (settings.containsKey(m_knospOutputID.getKey())) {
+            m_knospOutputID.validateSettings(settings);
+        }
     }
 
     /**
@@ -230,6 +180,56 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
      */
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+		if (settings.containsKey(m_knospOutputID.getKey())) {
+            m_knospOutputID.loadSettingsFrom(settings);
+        }
     }
 
+    @Override
+    public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+
+        return createStreamableOperatorInternal(getContextID(inSpecs));
+    }
+
+    private AbstractTable2SparkStreamableOperator createStreamableOperatorInternal(final SparkContextID contextID) {
+        if (isKNOSPMode()) {
+            // KNIME-on-Spark mode (running inside a JVM of a Spark executor in a cluster)
+            return SparkNodePlugin.getKNOSPHelper().createTable2SparkStreamableOperator(m_knospOutputID.getStringValue(), getKNIMESparkExecutorVersion());
+        } else {
+            final File tmpFile = createTempFile();
+            return new Table2SparkStreamableOperator(contextID, tmpFile, getKNIMESparkExecutorVersion());
+        }
+    }
+
+    private File createTempFile() {
+        // first we need to create a temp file that is deleted after executing this node
+        final File tmpFile;
+        try {
+            tmpFile = File.createTempFile("knime-table2spark", ".tmp");
+            LOGGER.debugWithFormat("Serializing data table to file %s", tmpFile.getAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create temp file: " + e.getMessage(), e);
+        }
+        addFileToDeleteAfterExecute(tmpFile);
+        return tmpFile;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputPortRole[] getInputPortRoles() {
+        return new InputPortRole[]{InputPortRole.NONDISTRIBUTED_STREAMABLE, InputPortRole.NONDISTRIBUTED_NONSTREAMABLE};
+    }
+
+    /**
+     * Puts this node model into KNIME-on-Spark (KNOSP) mode. In KNOSP mode, the ingoing KNIME data table will
+     * not be uploaded to Spark, but written out to an in-memory data structure obtained using the provided key.
+     *
+     * @param knospOutputID a unique key under which an output queue will be looked up
+     */
+    public void activateKNOSPMode(final String knospOutputID) {
+        m_knospOutputID.setStringValue(knospOutputID);
+    }
 }

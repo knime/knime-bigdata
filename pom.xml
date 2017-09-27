@@ -2,11 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.knime.bigdata</groupId>
-	<artifactId>bigdata-externals-parent</artifactId>
+	<artifactId>bigdata-parent</artifactId>
 	<version>2.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Parent pom for building the com.knime.bigdata.externals update site</name>
-
+	<name>Parent pom for building the com.knime.update.bigdata update site locally on a developer laptop. NOT FOR USE IN JENKINS!</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,11 +14,31 @@
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
 		a file:// or http:// URL pointing to org.knime.update.org  -->
 		<knime-p2>REPLACE_ME_WITH_URL</knime-p2>
+    <compiledpmml-p2>REPLACE_ME_WITH_URL</compiledpmml-p2>
 	</properties>
 
 	<modules>
-		<module>../com.knime.features.bigdata.externals</module>
-		<module>../com.knime.update.bigdata.externals</module>
+    <module>com.knime.features.bigdata.externals</module>
+    <module>com.knime.update.bigdata.externals</module>
+		<module>com.knime.bigdata.commons</module>
+		<module>com.knime.bigdata.cdh5</module>
+    <module>com.knime.bigdata.filehandling</module>
+    <module>com.knime.bigdata.hive</module>
+    <module>com.knime.bigdata.impala</module>
+    <module>com.knime.bigdata.scripting</module>
+    <module>com.knime.bigdata.spark.core</module>
+    <module>com.knime.bigdata.spark.node</module>
+    <module>com.knime.bigdata.spark1_2</module>
+    <module>com.knime.bigdata.spark1_3</module>
+    <module>com.knime.bigdata.spark1_5</module>
+    <module>com.knime.bigdata.spark1_6</module>
+    <module>com.knime.bigdata.spark1_6_cdh5_9</module>
+    <module>com.knime.bigdata.spark2_0</module>
+    <module>com.knime.bigdata.spark2_1</module>
+    <module>com.knime.bigdata.spark2_2</module>
+    <module>com.knime.features.bigdata</module>
+    <module>com.knime.features.bigdata.spark</module>
+    <module>com.knime.update.bigdata</module>
 	</modules>
 
 	<build>
@@ -100,8 +119,6 @@
 		</pluginManagement>
 	</build>
 
-
-
 	<repositories>
 		<repository>
 			<id>com.knime.tpbuilder</id>
@@ -113,6 +130,12 @@
 			<id>org.knime.update.org</id>
 			<layout>p2</layout>
 			<url>${knime-p2}</url>
+		</repository>
+
+    <repository>
+			<id>com.knime.update.pmml.compilation</id>
+			<layout>p2</layout>
+			<url>${compiledpmml-p2}</url>
 		</repository>
 	</repositories>
 

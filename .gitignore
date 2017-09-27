@@ -1,5 +1,6 @@
 */bin/
 */target/
 */build/
+*/knime.jar
 com.knime.*.bigdata.externals/.settings*
 com.knime.bigdata.tycho/.settings*

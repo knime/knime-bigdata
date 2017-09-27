@@ -74,9 +74,15 @@ public class BundleSparkJarProvider implements SparkJarProvider {
     @Override
     public void collect(final JarCollector collector) {
         try {
-            File bundleFile = FileLocator.getBundleFile(m_bundle);
+            final File bundleFile = FileLocator.getBundleFile(m_bundle);
+
             if (bundleFile.isDirectory()) {
-                collector.addDirectory(bundleFile);
+                final File binDir = new File(bundleFile, "bin");
+                if (binDir.isDirectory()) {
+                    collector.addDirectory(binDir);
+                } else {
+                    collector.addDirectory(bundleFile);
+                }
             } else {
                 collector.addJar(bundleFile, META_FILTER);
             }
@@ -89,5 +95,4 @@ public class BundleSparkJarProvider implements SparkJarProvider {
     public String getProviderID() {
         return String.format("%s:%s", m_bundle.getSymbolicName(), m_bundle.getVersion().toString());
     }
-
 }
