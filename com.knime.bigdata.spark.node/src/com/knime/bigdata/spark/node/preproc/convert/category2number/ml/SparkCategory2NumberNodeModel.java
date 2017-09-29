@@ -216,7 +216,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         final PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(pmmlSpec);
         final PMMLPortObject outPMMLPort = new PMMLPortObject(creator.createSpec());
         final Collection<TransformationDictionary> dicts =
-            getTransformations(inputTableSpec, jobOutput.getMappings(), keepOriginalColumns, suffix);
+            getTransformations(inputTableSpec, jobOutput.getMappings(), suffix);
         for (final TransformationDictionary dict : dicts) {
             outPMMLPort.addGlobalTransformations(dict);
         }
@@ -268,7 +268,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
     }
 
     private Collection<TransformationDictionary> getTransformations(final DataTableSpec inputTableSpec,
-        final NominalValueMapping mappings, final boolean keepOriginalCols, final String suffix) {
+        final NominalValueMapping mappings, final String suffix) {
         final Collection<TransformationDictionary> dicts = new LinkedList<>();
         final Iterator<MyRecord> records = mappings.iterator();
         if (MappingType.BINARY.equals(mappings.getType())) {
@@ -325,11 +325,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
             for (Entry<String, Map<DataCell, DoubleCell>> col : colValMap.entrySet()) {
                 final String origColName = col.getKey();
                 final String mapColName;
-                //                if (keepOriginalCols) {
                 mapColName = DataTableSpec.getUniqueColumnName(inputTableSpec, origColName + suffix);
-                //                } else {
-                //                    mapColName = origColName;
-                //                }
                 final MapValuesConfiguration config =
                     new MapValuesConfiguration(origColName, mapColName, col.getValue()) {
                         /** {@inheritDoc} */

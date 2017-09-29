@@ -88,4 +88,13 @@ public class ClassificationWithNominalFeatureInfoJobInput extends Classification
         //we assume that there are no nominal (input) features
         return NominalFeatureInfo.EMPTY;
     }
+
+    /**
+     *
+     * @return true if nominal feature are to be encoded as binary columns (recommended for example
+     * for regression learning)
+     */
+    public boolean getUseOneHotEncoding() {
+        return true;
+    }
 }

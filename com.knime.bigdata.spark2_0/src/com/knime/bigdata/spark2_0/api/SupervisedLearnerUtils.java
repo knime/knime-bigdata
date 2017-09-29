@@ -37,9 +37,11 @@ import org.apache.spark.ml.PredictionModel;
 import org.apache.spark.ml.Predictor;
 import org.apache.spark.ml.feature.ColumnPruner;
 import org.apache.spark.ml.feature.IndexToString;
+import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.feature.VectorDisassembler;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Dataset;
@@ -110,7 +112,10 @@ public class SupervisedLearnerUtils {
         final Integer labelIndex = aConfigurationInput.getClassColIdx();
         final String labelColumnName = aUnprocessedTrainingData.columns()[labelIndex];
 
-        final String[] featureNames = aConfigurationInput.getColumnNames(aUnprocessedTrainingData.columns());
+        final List<String> featureNames = new ArrayList<>();
+        for (String col : aConfigurationInput.getColumnNames(aUnprocessedTrainingData.columns())) {
+            featureNames.add(col);
+        }
 
         final String featureColumn = ModelUtils.getTemporaryColumnName("features");
 
@@ -120,19 +125,29 @@ public class SupervisedLearnerUtils {
         if (nominalFeatureInfo.size() > 0) {
             LOGGER.log(Level.INFO,
                 "Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
-            System.err.println("Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
+            System.err
+                .println("Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
+
+            for (Integer nominalFeatureIndex : nominalFeatureInfo.keySet()) {
+                String nominalColName = featureNames.get(nominalFeatureIndex);
+                if (aConfigurationInput.getUseOneHotEncoding()) {
+                    featureNames.remove(nominalFeatureIndex);
+                    featureNames.addAll(addToPipelineAsOneHotEncodingMapping(nominalFeatureIndex, nominalColName, true,
+                        null, pipelineStages, aUnprocessedTrainingData));
+                } else {
+                    String newNominalColName = nominalColName + "_i";
+                    pipelineStages.add(new StringIndexer().setInputCol(nominalColName).setOutputCol(newNominalColName)
+                        .fit(aUnprocessedTrainingData));
+                    // overwrite name so that vector assembly processes the correct column:
+                    featureNames.set(nominalFeatureIndex, newNominalColName);
+                }
+            }
 
         }
-        for (Integer nominalFeatureIndex : nominalFeatureInfo.keySet()) {
-            String nominalColName = featureNames[nominalFeatureIndex];
-            String newNominalColName = nominalColName + "_i";
-            pipelineStages.add(new StringIndexer().setInputCol(nominalColName).setOutputCol(newNominalColName).fit(aUnprocessedTrainingData));
-            // overwrite name so that vector assembly processes the correct column:
-            featureNames[nominalFeatureIndex] = newNominalColName;
-        }
 
-        //TODO - column names must contain special chars like '(', ')', or '_'
-        final VectorAssembler va = new VectorAssembler().setInputCols(featureNames).setOutputCol(featureColumn);
+        //TODO - column names must not contain special chars like '(', ')', or '_'
+        final VectorAssembler va = new VectorAssembler()
+            .setInputCols(featureNames.toArray(new String[featureNames.size()])).setOutputCol(featureColumn);
         pipelineStages.add(va);
 
         final String tmpClassColumn;
@@ -168,6 +183,56 @@ public class SupervisedLearnerUtils {
         // Train model. This also runs the indexers.
         PipelineModel model = pipeline.fit(aUnprocessedTrainingData);
         return new ModelJobOutput(model);
+    }
+
+    /**
+     * @param dataset - the dataset to be processed
+     * @param pipelineStages - existing pipeline stages, new stages will be added
+     * @param indexers - optional map of indexers
+     * @param nominalColName - name of column to be converted
+     * @param colIndex - index of column to be converted
+     * @param aDropLast - drop last value (if true then a column with N values will be mapped onto N-1 boolean columns,
+     *            all 0 indicates then implicitly the last value)
+     * @return list of added (temporary) column names
+     *
+     */
+    public static List<String> addToPipelineAsOneHotEncodingMapping(final Integer colIndex, final String nominalColName,
+        final boolean aDropLast, final Map<Integer, StringIndexerModel> indexers,
+        final List<PipelineStage> pipelineStages, final Dataset<Row> dataset) {
+
+        final String stringIndexerOutputColumn = ModelUtils.getTemporaryColumnName("feature");
+
+        final StringIndexerModel indexer =
+            new StringIndexer().setInputCol(nominalColName).setOutputCol(stringIndexerOutputColumn).fit(dataset);
+        pipelineStages.add(indexer);
+        if (indexers != null) {
+            indexers.put(colIndex, indexer);
+        }
+
+        final String oneHotOutputColumn = ModelUtils.getTemporaryColumnName("feature");
+        //use one-hot encoding
+        OneHotEncoder oneHotEncoder = new OneHotEncoder().setInputCol(stringIndexerOutputColumn)
+            .setOutputCol(oneHotOutputColumn).setDropLast(aDropLast);
+        pipelineStages.add(oneHotEncoder);
+        pipelineStages
+            .add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(stringIndexerOutputColumn)));
+
+        //OneHotEncoder produces a column with a Vector
+        // as of Spark ??? there exists a VectorDisassembler, here we use a local copy
+        VectorDisassembler df = new VectorDisassembler();
+        df.setInputCol(oneHotOutputColumn);
+        pipelineStages.add(df);
+        pipelineStages.add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(oneHotOutputColumn)));
+
+        final List<String> appendedColumnNames = new ArrayList<>();
+        //target columns are now, for each value:  nominalColName + "_" + value
+        final String[] labels = indexer.labels();
+        for (int ix = 0; ix < labels.length; ix++) {
+            if (!aDropLast || ix < labels.length - 1) {
+                appendedColumnNames.add(nominalColName + "_" + labels[ix]);
+            }
+        }
+        return appendedColumnNames;
     }
 
     /**

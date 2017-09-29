@@ -36,10 +36,8 @@ import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.feature.ColumnPruner;
-import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
-import org.apache.spark.ml.feature.VectorDisassembler;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
@@ -50,8 +48,8 @@ import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
 import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
 import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
-import com.knime.bigdata.spark2_0.api.ModelUtils;
 import com.knime.bigdata.spark2_0.api.NamedObjects;
+import com.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns
@@ -78,12 +76,13 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
         for (Integer colIndex : colIds) {
             String nominalColName = colNames[colIndex];
             if (mappingType == MappingType.COLUMN) {
-                pipelineAsIntMapping(colIndex, nominalColName, appendedColumnNames, indexers, pipelineStages, dataset);
+                appendedColumnNames
+                    .add(pipelineAsIntMapping(colIndex, nominalColName, indexers, pipelineStages, dataset));
             } else if (mappingType == MappingType.BINARY) {
-                pipelineAsOneHotEncodingMapping(colIndex, nominalColName, input.isDropLast(), appendedColumnNames, indexers, pipelineStages,
-                    dataset);
+                appendedColumnNames.addAll(SupervisedLearnerUtils.addToPipelineAsOneHotEncodingMapping(colIndex,
+                    nominalColName, input.isDropLast(), indexers, pipelineStages, dataset));
             } else {
-                throw new RuntimeException("Unsupported mapping type: "+mappingType);
+                throw new RuntimeException("Unsupported mapping type: " + mappingType);
             }
 
             if (!input.keepOriginalCols()) {
@@ -99,7 +98,7 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
 
         namedObjects.addDataFrame(outputName, model.transform(dataset));
 
-        NominalValueMapping mapping = new Category2NumberNominalValueMapping(indexers, mappingType, colIds);
+        NominalValueMapping mapping = new Category2NumberNominalValueMapping(indexers, mappingType, colIds, input.isDropLast());
 
         return new Category2NumberJobOutput(appendedColumnNames.toArray(new String[appendedColumnNames.size()]),
             mapping);
@@ -114,62 +113,16 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
      * @param dataset
      *
      */
-    private void pipelineAsIntMapping(final Integer colIndex, final String nominalColName,
-        final List<String> appendedColumnNames, final Map<Integer, StringIndexerModel> indexers,
-        final List<PipelineStage> pipelineStages, final Dataset<Row> dataset) {
+    private static String pipelineAsIntMapping(final Integer colIndex, final String nominalColName,
+        final Map<Integer, StringIndexerModel> indexers, final List<PipelineStage> pipelineStages,
+        final Dataset<Row> dataset) {
         final String newNominalColName = nominalColName + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
-
-        appendedColumnNames.add(newNominalColName);
 
         final StringIndexerModel indexer =
             new StringIndexer().setInputCol(nominalColName).setOutputCol(newNominalColName).fit(dataset);
         pipelineStages.add(indexer);
         indexers.put(colIndex, indexer);
-    }
-
-    /**
-     * @param dataset
-     * @param pipelineStages
-     * @param indexers
-     * @param appendedColumnNames
-     * @param nominalColName
-     * @param colIndex
-     *
-     */
-    private void pipelineAsOneHotEncodingMapping(final Integer colIndex, final String nominalColName,
-        final boolean aDropLast,
-        final List<String> appendedColumnNames, final Map<Integer, StringIndexerModel> indexers,
-        final List<PipelineStage> pipelineStages, final Dataset<Row> dataset) {
-
-        final String stringIndexerOutputColumn = ModelUtils.getTemporaryColumnName("feature");
-
-        final StringIndexerModel indexer =
-            new StringIndexer().setInputCol(nominalColName).setOutputCol(stringIndexerOutputColumn).fit(dataset);
-        pipelineStages.add(indexer);
-        indexers.put(colIndex, indexer);
-
-        final String oneHotOutputColumn = ModelUtils.getTemporaryColumnName("feature");
-        //use one-hot encoding
-        OneHotEncoder oneHotEncoder = new OneHotEncoder().setInputCol(stringIndexerOutputColumn)
-            .setOutputCol(oneHotOutputColumn).setDropLast(aDropLast);
-        pipelineStages.add(oneHotEncoder);
-        pipelineStages
-        .add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(stringIndexerOutputColumn)));
-
-        //OneHotEncoder produces a column with a Vector
-        // as of Spark ??? there exists a VectorDisassembler, here we use a local copy
-        VectorDisassembler df = new VectorDisassembler();
-        df.setInputCol(oneHotOutputColumn);
-        pipelineStages.add(df);
-        pipelineStages
-        .add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(oneHotOutputColumn)));
-
-        //target columns are now, for each value:  nominalColName + "_" + value
-        for (String label : indexer.labels()) {
-            appendedColumnNames.add(nominalColName + "_" + label);
-        }
-
-
+        return newNominalColName;
     }
 
     static class Category2NumberNominalValueMapping implements NominalValueMapping {
@@ -193,7 +146,7 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
          *
          */
         Category2NumberNominalValueMapping(final Map<Integer, StringIndexerModel> aIndexers,
-            final MappingType aMappingType, final int[] colIds) {
+            final MappingType aMappingType, final int[] colIds, final boolean aDropLast) {
             m_indexers = aIndexers;
             for (int colId : colIds) {
                 mappedColumnIndices.add(colId);
@@ -206,9 +159,10 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
 
                 String[] labels = indexer.labels();
                 for (int ix = 0; ix < labels.length; ix++) {
-                    m_records.add(new MyRecord(colIx, labels[ix], ix));
+                    if (!aDropLast || ix < labels.length - 1) {
+                        m_records.add(new MyRecord(colIx, labels[ix], ix));
+                    }
                 }
-
             }
         }
 
