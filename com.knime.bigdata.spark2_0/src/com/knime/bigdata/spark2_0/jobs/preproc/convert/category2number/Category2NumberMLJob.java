@@ -80,7 +80,7 @@ public class Category2NumberMLJob extends AbstractStringMapperJob {
                     .add(pipelineAsIntMapping(colIndex, nominalColName, indexers, pipelineStages, dataset));
             } else if (mappingType == MappingType.BINARY) {
                 appendedColumnNames.addAll(SupervisedLearnerUtils.addToPipelineAsOneHotEncodingMapping(colIndex,
-                    nominalColName, input.isDropLast(), indexers, pipelineStages, dataset));
+                    nominalColName, input.isDropLast(), indexers, pipelineStages, dataset, true));
             } else {
                 throw new RuntimeException("Unsupported mapping type: " + mappingType);
             }

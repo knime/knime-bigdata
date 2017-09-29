@@ -122,24 +122,26 @@ public class SupervisedLearnerUtils {
         // Automatically identify categorical features, and index them - needs to be done before vector is created
         // key: nominal feature index, value: number of distinct values
         final Map<Integer, Integer> nominalFeatureInfo = aConfigurationInput.getNominalFeatureInfo().getMap();
+        final List<String> columnsToRemove = new ArrayList<>();
         if (nominalFeatureInfo.size() > 0) {
             LOGGER.log(Level.INFO,
                 "Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
-            System.err
-                .println("Adding string indexers for " + nominalFeatureInfo.size() + " nominal features to pipeline.");
 
             for (Integer nominalFeatureIndex : nominalFeatureInfo.keySet()) {
                 String nominalColName = featureNames.get(nominalFeatureIndex);
                 if (aConfigurationInput.getUseOneHotEncoding()) {
-                    featureNames.remove(nominalFeatureIndex);
-                    featureNames.addAll(addToPipelineAsOneHotEncodingMapping(nominalFeatureIndex, nominalColName, true,
-                        null, pipelineStages, aUnprocessedTrainingData));
+                    featureNames.remove(nominalColName);
+                    List<String> oneHotColumns = addToPipelineAsOneHotEncodingMapping(nominalFeatureIndex, nominalColName, true,
+                        null, pipelineStages, aUnprocessedTrainingData, false);
+                    featureNames.addAll(oneHotColumns);
+                    columnsToRemove.addAll(oneHotColumns);
                 } else {
                     String newNominalColName = nominalColName + "_i";
                     pipelineStages.add(new StringIndexer().setInputCol(nominalColName).setOutputCol(newNominalColName)
                         .fit(aUnprocessedTrainingData));
-                    // overwrite name so that vector assembly processes the correct column:
+                    // overwrite name so that vector assembler processes the correct column:
                     featureNames.set(nominalFeatureIndex, newNominalColName);
+                    columnsToRemove.add(newNominalColName);
                 }
             }
 
@@ -150,6 +152,12 @@ public class SupervisedLearnerUtils {
             .setInputCols(featureNames.toArray(new String[featureNames.size()])).setOutputCol(featureColumn);
         pipelineStages.add(va);
 
+        if (!columnsToRemove.isEmpty()) {
+            //TODO - this can be done in one stage
+            for (String tmpCol : columnsToRemove) {
+                pipelineStages.add(new ColumnPruner(new Set.Set1<String>(tmpCol)));
+            }
+        }
         final String tmpClassColumn;
         final StringIndexerModel labelIndexer;
         if (aIndexLabelColumn) {
@@ -198,7 +206,7 @@ public class SupervisedLearnerUtils {
      */
     public static List<String> addToPipelineAsOneHotEncodingMapping(final Integer colIndex, final String nominalColName,
         final boolean aDropLast, final Map<Integer, StringIndexerModel> indexers,
-        final List<PipelineStage> pipelineStages, final Dataset<Row> dataset) {
+        final List<PipelineStage> pipelineStages, final Dataset<Row> dataset, final boolean aDisassemble) {
 
         final String stringIndexerOutputColumn = ModelUtils.getTemporaryColumnName("feature");
 
@@ -217,21 +225,26 @@ public class SupervisedLearnerUtils {
         pipelineStages
             .add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(stringIndexerOutputColumn)));
 
-        //OneHotEncoder produces a column with a Vector
-        // as of Spark ??? there exists a VectorDisassembler, here we use a local copy
-        VectorDisassembler df = new VectorDisassembler();
-        df.setInputCol(oneHotOutputColumn);
-        pipelineStages.add(df);
-        pipelineStages.add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(oneHotOutputColumn)));
-
         final List<String> appendedColumnNames = new ArrayList<>();
-        //target columns are now, for each value:  nominalColName + "_" + value
-        final String[] labels = indexer.labels();
-        for (int ix = 0; ix < labels.length; ix++) {
-            if (!aDropLast || ix < labels.length - 1) {
-                appendedColumnNames.add(nominalColName + "_" + labels[ix]);
+
+        //OneHotEncoder produces a column with a Vector
+        if (aDisassemble) {
+            // as of Spark ??? there exists a VectorDisassembler, here we use a local copy
+            VectorDisassembler df = new VectorDisassembler();
+            df.setInputCol(oneHotOutputColumn);
+            pipelineStages.add(df);
+            pipelineStages.add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(oneHotOutputColumn)));
+            //target columns are now, for each value:  nominalColName + "_" + value
+            final String[] labels = indexer.labels();
+            for (int ix = 0; ix < labels.length; ix++) {
+                if (!aDropLast || ix < labels.length - 1) {
+                    appendedColumnNames.add(nominalColName + "_" + labels[ix]);
+                }
             }
+        } else {
+            appendedColumnNames.add(oneHotOutputColumn);
         }
+
         return appendedColumnNames;
     }
 
