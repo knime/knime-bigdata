@@ -1,7 +1,5 @@
 package com.knime.bigdata.spark2_0.jobs.ml.prediction.linear;
 
-import java.io.Serializable;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.regression.LinearRegression;
@@ -41,7 +39,7 @@ public abstract class AbstractRegularizationJob<I extends LinearLearnerJobInput>
         ModelJobOutput model = SupervisedLearnerUtils.constructAndExecutePipeline(aSparkContext, input, trainingData,
             getConfiguredRegressor(input), false);
 
-        evaluateModel(trainingData, model.getModel());
+        //evaluateModel(trainingData, model.getModel());
 
         trainingData.unpersist();
 
@@ -50,9 +48,13 @@ public abstract class AbstractRegularizationJob<I extends LinearLearnerJobInput>
         return model;
     }
 
+    /**
+     * @param input
+     * @return configured regressor
+     */
     protected abstract LinearRegression getConfiguredRegressor(final I input);
 
-    protected abstract double evaluateModel(final Dataset<Row> aData, final Serializable aModel);
+    //protected abstract double evaluateModel(final Dataset<Row> aData, final Serializable aModel);
 
     /**
      * @return the configured logger

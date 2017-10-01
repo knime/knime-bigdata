@@ -73,8 +73,7 @@ public class LinearRegressionJob extends AbstractRegularizationJob<LinearLearner
      * @param aModel
      * @return Mean squared error
      */
-    @Override
-    protected double evaluateModel(final Dataset<Row> aData, final Serializable aModel) {
+    private double evaluateModel(final Dataset<Row> aData, final Serializable aModel) {
         // Evaluate model on training examples and compute training error
         if (aModel instanceof LinearRegressionModel) {
             LinearRegressionModel model = (LinearRegressionModel)aModel;

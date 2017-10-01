@@ -21,10 +21,12 @@
 package com.knime.bigdata.spark2_0.jobs.ml.prediction.linear;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
+import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 
@@ -78,14 +80,43 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
         throw new RuntimeException("SparkModel "+sparkModel.getModelName() + " is not of type 'ml.LinearRegressionModel'");
     }
 
+    private List<String> getLearningFeatureNames(final SparkModel sparkModel) {
+        final PipelineModel regressionModel = (PipelineModel)sparkModel.getModel();
+        for (PipelineStage stage : regressionModel.stages()) {
+            if (stage instanceof VectorAssembler) {
+                String[] cols = ((VectorAssembler)stage).getInputCols();
+                List<String> allCols = new ArrayList<>();
+                for (String col : cols) {
+                    //TODO - is there a better way? Set as param on PipelineModel?
+                    if (col.startsWith("feature_") && col.indexOf("_", 10) > 0) {
+                        String[] cols2 = col.substring(col.indexOf("_", 10)).split("_");
+                        // first non-empty elem is name of original feature, further elems are values
+                        final String origFeatureName = cols2[1];
+                        for (int ix = 2; ix < cols2.length; ix++) {
+                            allCols.add(origFeatureName + "_" + cols2[ix]);
+                        }
+                    } else {
+                        allCols.add(col);
+                    }
+                }
+                return allCols;
+            }
+        }
+        throw new RuntimeException("SparkModel "+sparkModel.getModelName() + " does not contain a vector assembler of type 'ml.VectorAssembler'");
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected String getHTMLDescription(final SparkModel sparkModel) {
         final LinearRegressionModel regressionModel = getRegressionModelStage(sparkModel);
-        final List<String> columnNames = sparkModel.getLearningColumnNames();
+
+        List<String> columnNames = sparkModel.getLearningColumnNames();
         final double[] weights = regressionModel.coefficients().toArray();
+        if (columnNames.size() != weights.length) {
+            columnNames = getLearningFeatureNames(sparkModel);
+        }
         return printWeightedColumnHTMLList("Weight", columnNames, NF, weights);
     }
 

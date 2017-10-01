@@ -147,7 +147,7 @@ public class SupervisedLearnerUtils {
 
         }
 
-        //TODO - column names must not contain special chars like '(', ')', or '_'
+        //TODO - column names must not contain special chars like '(', ')' or '.'
         final VectorAssembler va = new VectorAssembler()
             .setInputCols(featureNames.toArray(new String[featureNames.size()])).setOutputCol(featureColumn);
         pipelineStages.add(va);
@@ -201,6 +201,8 @@ public class SupervisedLearnerUtils {
      * @param colIndex - index of column to be converted
      * @param aDropLast - drop last value (if true then a column with N values will be mapped onto N-1 boolean columns,
      *            all 0 indicates then implicitly the last value)
+     * @param aDisassemble - add pipeline stages to disassemble (temporary) vector columns, not required when columns are later
+     * combined into another vector anyway
      * @return list of added (temporary) column names
      *
      */
@@ -217,7 +219,14 @@ public class SupervisedLearnerUtils {
             indexers.put(colIndex, indexer);
         }
 
-        final String oneHotOutputColumn = ModelUtils.getTemporaryColumnName("feature");
+        String oneHotOutputColumn = ModelUtils.getTemporaryColumnName("feature")+ "_" + nominalColName;
+        final String[] labels = indexer.labels();
+        for (int ix = 0; ix < labels.length; ix++) {
+            if (!aDropLast || ix < labels.length - 1) {
+                oneHotOutputColumn = oneHotOutputColumn + "_" + labels[ix];
+            }
+        }
+
         //use one-hot encoding
         OneHotEncoder oneHotEncoder = new OneHotEncoder().setInputCol(stringIndexerOutputColumn)
             .setOutputCol(oneHotOutputColumn).setDropLast(aDropLast);
@@ -235,7 +244,7 @@ public class SupervisedLearnerUtils {
             pipelineStages.add(df);
             pipelineStages.add(new ColumnPruner(new scala.collection.immutable.Set.Set1<String>(oneHotOutputColumn)));
             //target columns are now, for each value:  nominalColName + "_" + value
-            final String[] labels = indexer.labels();
+            //final String[] labels = indexer.labels();
             for (int ix = 0; ix < labels.length; ix++) {
                 if (!aDropLast || ix < labels.length - 1) {
                     appendedColumnNames.add(nominalColName + "_" + labels[ix]);
