@@ -85,6 +85,7 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
             LOGGER.info("Predicting using ML pipeline.");
             final PipelineModel pipeline = (PipelineModel)model;
             outputDataset = pipeline.transform(inputDataset);
+            //LOGGER.info("prediction data set columns: "+Arrays.toString(outputDataset.columns()));
         } else {
             final StructType predictSchema = TypeConverters.convertSpec(input.getSpec(outputKey));
             final JavaRDD<Row> predictedData = ModelUtils.predict(input.getIncludeColumnIndices(), inputDataset.javaRDD(), model);

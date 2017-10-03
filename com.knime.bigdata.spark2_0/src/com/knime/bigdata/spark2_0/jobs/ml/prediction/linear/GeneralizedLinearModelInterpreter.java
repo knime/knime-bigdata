@@ -117,7 +117,7 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
         if (columnNames.size() != weights.length) {
             columnNames = getLearningFeatureNames(sparkModel);
         }
-        return printWeightedColumnHTMLList("Weight", columnNames, NF, weights);
+        return printWeightedColumnHTMLList("Weight", columnNames, NF, weights, regressionModel.intercept());
     }
 
     /**
@@ -146,7 +146,7 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
      * @return a string of an HTML list with the columns and their weight
      */
     public static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
-        final NumberFormat nf, final double[] weights) {
+        final NumberFormat nf, final double[] weights, final double intercept) {
         final StringBuilder buf = new StringBuilder();
         //        for (String string : columnNames) {
         //            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
@@ -166,6 +166,16 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
             }
             buf.append("<th align='left'>").append(colName).append("</th>");
             buf.append("<td align='right'>&nbsp;&nbsp;").append(nf.format(weights[idx++])).append("</td>");
+            buf.append("</tr>");
+        }
+        if (intercept != 0.0) {
+            if (idx % 2 == 0) {
+                buf.append("<tr>");
+            } else {
+                buf.append("<tr bgcolor='#EEEEEE'>");
+            }
+            buf.append("<th align='left'>").append("Intercept").append("</th>");
+            buf.append("<td align='right'>&nbsp;&nbsp;").append(nf.format(intercept)).append("</td>");
             buf.append("</tr>");
         }
         buf.append("</table>");
