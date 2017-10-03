@@ -83,12 +83,12 @@ import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
 import com.knime.bigdata.spark.core.context.SparkContext;
+import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextManager;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.exception.MissingJobException;
 import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import com.knime.bigdata.spark.core.job.JobInput;
 import com.knime.bigdata.spark.core.job.JobOutput;
 import com.knime.bigdata.spark.core.job.JobRunFactory;
@@ -604,22 +604,26 @@ public abstract class SparkNodeModel extends NodeModel {
                             LOGGER.debug("Deleting Spark data objects: " + toDelete);
                         }
                         for (final Entry<SparkContextID, String[]> e : toDelete.entrySet()) {
+                            final SparkContextID contextID = e.getKey();
                             try {
-                                final SparkContext context = SparkContextManager.getOrCreateSparkContext(e.getKey());
-                                context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
-                            } catch (final SparkContextNotFoundException ex) {
-                                // ignore this exception since the context is either removed or the job server restarted
-                                // in both cases we no longer need to delete the Spark data objects
+                                final SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
+                                if (KNIMEConfigContainer.verboseLogging()) {
+                                    LOGGER.debug("Deleting named Spark data objects for context: "
+                                            + contextID + " with status: " + context.getStatus());
+                                }
+                                if (SparkContextStatus.OPEN.equals(context.getStatus())) {
+                                    context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
+                                }
                             } catch (final Throwable ex) {
-                                LOGGER.error("Exception while deleting named Spark data objects for context: " + e.getKey()
-                                    + " Exception: " + ex.getMessage(), ex);
+                                LOGGER.warn("Exception while deleting named Spark data objects for context: "
+                                        + contextID + " Exception: " + ex.getMessage(), ex);
                             }
                         }
                         if (KNIMEConfigContainer.verboseLogging()) {
                             final long endTime = System.currentTimeMillis();
                             final long durationTime = endTime - startTime;
-                            LOGGER
-                                .debug("Time deleting " + toDelete.size() + " Spark data object(s): " + durationTime + " ms");
+                            LOGGER.debug("Time deleting " + toDelete.size() + " Spark data object(s): "
+                                    + durationTime + " ms");
                         }
                     }
                 });
