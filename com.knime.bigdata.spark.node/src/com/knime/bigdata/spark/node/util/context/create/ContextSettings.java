@@ -84,6 +84,9 @@ public class ContextSettings {
     private final SettingsModelString m_contextName =
             new SettingsModelString("v1_6.contextName", KNIMEConfigContainer.getSparkContext());
 
+    private final SettingsModelBoolean m_deleteContextOnDispose =
+            new SettingsModelBoolean("v1_6.deleteContextOnDispose", false);
+
     private final SettingsModelBoolean m_deleteObjectsOnDispose =
             new SettingsModelBoolean("v1_6.deleteObjectsOnDispose", KNIMEConfigContainer.deleteSparkObjectsOnDispose());
 
@@ -156,6 +159,10 @@ public class ContextSettings {
         return m_contextName;
     }
 
+    protected SettingsModelBoolean getDeleteContextOnDisposeModel() {
+        return m_deleteContextOnDispose;
+    }
+
     protected SettingsModelBoolean getDeleteObjectsOnDisposeModel() {
         return m_deleteObjectsOnDispose;
     }
@@ -197,6 +204,10 @@ public class ContextSettings {
 
     public String getContextName() {
         return m_contextName.getStringValue();
+    }
+
+    public boolean deleteContextOnDispose() {
+        return m_deleteContextOnDispose.getBooleanValue();
     }
 
     public boolean deleteObjectsOnDispose() {
@@ -265,6 +276,7 @@ public class ContextSettings {
 
         m_sparkVersion.saveSettingsTo(settings);
         m_contextName.saveSettingsTo(settings);
+        m_deleteContextOnDispose.saveSettingsTo(settings);
         m_deleteObjectsOnDispose.saveSettingsTo(settings);
         m_sparkJobLogLevel.saveSettingsTo(settings);
         m_overrideSparkSettings.saveSettingsTo(settings);
@@ -438,6 +450,12 @@ public class ContextSettings {
         m_customSparkSettings.loadSettingsFrom(settings);
 
         try {
+            m_deleteContextOnDispose.loadSettingsFrom(settings);
+        } catch(InvalidSettingsException e) {
+            // optional setting, nothing to do if it does not exists in given settings
+        }
+
+        try {
             m_hideExistsWarning.loadSettingsFrom(settings);
         } catch(InvalidSettingsException e) {
             // optional setting, nothing to do if it does not exists in given settings
@@ -515,6 +533,8 @@ public class ContextSettings {
         builder.append(getSparkVersion());
         builder.append(", contextName=");
         builder.append(getContextName());
+        builder.append(", deleteContextOnDispose=");
+        builder.append(deleteContextOnDispose());
         builder.append(", deleteObjectsOnDispose=");
         builder.append(deleteObjectsOnDispose());
         builder.append(", sparkJobLogLevel=");

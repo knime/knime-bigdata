@@ -99,9 +99,9 @@ public class SparkContextManager {
 
     /**
      * Destroys the {@link SparkContext} with the given {@link SparkContextID}.
-     * If the context does not exists the method simply returns. The method does not remove the context and the 
-     * context id from the list of available contexts but simply destroys the context which changes its state to 
-     * configured. To also remove the id and the context from the list call 
+     * If the context does not exists the method simply returns. The method does not remove the context and the
+     * context id from the list of available contexts but simply destroys the context which changes its state to
+     * configured. To also remove the id and the context from the list call
      * {@link #disposeCustomContext(SparkContextID)}.
      *
      * @param contextID the {@link SparkContextID} to destroy
@@ -111,6 +111,23 @@ public class SparkContextManager {
         final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.destroy();
+        }
+    }
+
+    /**
+     * Destroys the {@link SparkContext} with the given {@link SparkContextID} if the context is known and in open
+     * state. If the context does not exists or is in another state the method simply returns. The method does not
+     * remove the context and the context id from the list of available contexts but simply destroys the context which
+     * changes its state to configured. To also remove the id and the context from the list call
+     * {@link #disposeCustomContext(SparkContextID)}.
+     *
+     * @param contextID the {@link SparkContextID} to destroy
+     * @throws KNIMESparkException
+     */
+    public static void ensureDestroyedCustomContext(final SparkContextID contextID) throws KNIMESparkException {
+        final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
+        if (context != null) {
+            context.ensureDestroyed();
         }
     }
 
