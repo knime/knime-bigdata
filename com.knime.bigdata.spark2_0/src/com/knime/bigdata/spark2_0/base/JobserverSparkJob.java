@@ -75,7 +75,13 @@ public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
         } catch (KNIMESparkException e) {
             toReturn = JobserverJobOutput.failure(e);
         } catch (Throwable t) {
-            toReturn = JobserverJobOutput.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
+            if (t.getMessage().contains("scala.MatchError: [") &&
+                    t.getMessage().contains("of class org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema")) {
+                toReturn = JobserverJobOutput.failure(new KNIMESparkException("Data format error, possible cause: unnormalized numeric data. "+
+                    "Please normalize numeric data with the 'Spark Normalizer' node.", t));
+            } else {
+                toReturn = JobserverJobOutput.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
+            }
         }
 
         if (appender != null) {

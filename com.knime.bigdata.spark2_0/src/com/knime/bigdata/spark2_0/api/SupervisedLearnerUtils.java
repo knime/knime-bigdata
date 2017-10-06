@@ -173,19 +173,20 @@ public class SupervisedLearnerUtils {
 
         LOGGER.log(Level.INFO, "Constructing classification training pipeline");
 
+        final String tmpPredictionColumn = ModelUtils.getTemporaryColumnName("prediction");
         Learner configuredClassifier = aConfiguredClassifier.
                 setLabelCol(tmpClassColumn).
-                setFeaturesCol(featureColumn);
-                //this works, but is overwritten in
-                // com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel.createSpec(DataTableSpec)
-                // setPredictionCol("knimePredictionColumnName");
+                setFeaturesCol(featureColumn).
+                //note that this is overwritten
+                // by the PredictionJob
+                setPredictionCol(tmpPredictionColumn);
         pipelineStages.add(configuredClassifier);
 
         //LOGGER.log(Level.INFO, "Prediction column: "+configuredClassifier.getPredictionCol());
 
         if (labelIndexer != null) {
             // Convert indexed labels back to original labels.
-            pipelineStages.add(new IndexToString().setInputCol(configuredClassifier.getPredictionCol()).setOutputCol("predictedLabel")
+            pipelineStages.add(new IndexToString().setInputCol(configuredClassifier.getPredictionCol())
                 .setLabels(labelIndexer.labels()));
         }
 

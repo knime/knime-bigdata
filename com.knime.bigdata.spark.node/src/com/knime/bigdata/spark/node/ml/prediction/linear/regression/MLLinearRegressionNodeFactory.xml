@@ -24,6 +24,7 @@
              "l-bfgs" denotes Limited-memory BFGS which is a limited-memory quasi-Newton optimization method.
              "normal" denotes using Normal Equation as an analytical solution to the linear regression problem.
              The default value is "auto" which means that the solver algorithm is selected automatically.
+             Please note that some solvers and some settings of the 'Elastic Net Param' require that the data is normalized before the algorithm is run. Use the 'Spark Normalizer' node in such cases.
         </option>
         <option name="Elastic Net Param">
         Set the ElasticNet mixing parameter.

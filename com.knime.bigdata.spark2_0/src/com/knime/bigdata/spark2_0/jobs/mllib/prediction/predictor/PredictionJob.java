@@ -113,14 +113,11 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
         // - that should be our prediction column (possibly with the re-mapped index labels)
         String outputColName = null;
         for (PipelineStage stage : aModel.stages()) {
-            LOGGER.info("Stage: "+stage.logName());
             if (stage instanceof HasOutputCol) {
                 outputColName = ((HasOutputCol)stage).getOutputCol();
-                LOGGER.info("Output column name: "+ outputColName);
             }
             if (stage instanceof HasPredictionCol) {
                 outputColName = ((HasPredictionCol)stage).getPredictionCol();
-                LOGGER.info("Prediction column name: "+ outputColName);
             }
 
         }
