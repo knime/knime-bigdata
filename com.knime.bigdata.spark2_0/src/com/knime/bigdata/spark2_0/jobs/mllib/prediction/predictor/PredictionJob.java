@@ -28,7 +28,10 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.param.shared.HasOutputCol;
+import org.apache.spark.ml.param.shared.HasPredictionCol;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -84,7 +87,7 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
         } else if (model instanceof PipelineModel) {
             LOGGER.info("Predicting using ML pipeline.");
             final PipelineModel pipeline = (PipelineModel)model;
-            outputDataset = pipeline.transform(inputDataset);
+            outputDataset = renamePredictionColumn(pipeline, pipeline.transform(inputDataset), input.getPredictionColumnName());
             //LOGGER.info("prediction data set columns: "+Arrays.toString(outputDataset.columns()));
         } else {
             final StructType predictSchema = TypeConverters.convertSpec(input.getSpec(outputKey));
@@ -98,5 +101,33 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
         return EmptyJobOutput.getInstance();
     }
 
+    /**
+     * @param aModel
+     * @param aDataset
+     * @param aNewPredictionColumnName
+     * @return aDataset with a renamed prediction column if one can be found or the original Dataset
+     */
+    private static Dataset<Row>  renamePredictionColumn(final PipelineModel aModel, final Dataset<Row> aDataset,
+        final String aNewPredictionColumnName) {
+        //find the last stage in the pipeline that has a outputColumn parameter or a prediction column
+        // - that should be our prediction column (possibly with the re-mapped index labels)
+        String outputColName = null;
+        for (PipelineStage stage : aModel.stages()) {
+            LOGGER.info("Stage: "+stage.logName());
+            if (stage instanceof HasOutputCol) {
+                outputColName = ((HasOutputCol)stage).getOutputCol();
+                LOGGER.info("Output column name: "+ outputColName);
+            }
+            if (stage instanceof HasPredictionCol) {
+                outputColName = ((HasPredictionCol)stage).getPredictionCol();
+                LOGGER.info("Prediction column name: "+ outputColName);
+            }
 
+        }
+        if (outputColName != null) {
+            return aDataset.withColumnRenamed(outputColName, aNewPredictionColumnName);
+        }
+        return aDataset;
+
+    }
 }

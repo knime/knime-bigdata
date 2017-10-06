@@ -21,17 +21,15 @@
 package com.knime.bigdata.spark2_0.jobs.ml.prediction.linear;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.PipelineStage;
-import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
+import com.knime.bigdata.spark2_0.api.PipelineUtils;
 
 /**
  *
@@ -71,38 +69,11 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
     }
 
     private LinearRegressionModel getRegressionModelStage(final SparkModel sparkModel) {
-        final PipelineModel regressionModel = (PipelineModel)sparkModel.getModel();
-        for (PipelineStage stage : regressionModel.stages()) {
-            if (stage instanceof LinearRegressionModel) {
-                return (LinearRegressionModel)stage;
-            }
-        }
-        throw new RuntimeException("SparkModel "+sparkModel.getModelName() + " is not of type 'ml.LinearRegressionModel'");
+        return PipelineUtils.getRegressionModelStage((PipelineModel)sparkModel.getModel(), sparkModel.getModelName());
     }
 
     private List<String> getLearningFeatureNames(final SparkModel sparkModel) {
-        final PipelineModel regressionModel = (PipelineModel)sparkModel.getModel();
-        for (PipelineStage stage : regressionModel.stages()) {
-            if (stage instanceof VectorAssembler) {
-                String[] cols = ((VectorAssembler)stage).getInputCols();
-                List<String> allCols = new ArrayList<>();
-                for (String col : cols) {
-                    //TODO - is there a better way? Set as param on PipelineModel?
-                    if (col.startsWith("feature_") && col.indexOf("_", 10) > 0) {
-                        String[] cols2 = col.substring(col.indexOf("_", 10)).split("_");
-                        // first non-empty elem is name of original feature, further elems are values
-                        final String origFeatureName = cols2[1];
-                        for (int ix = 2; ix < cols2.length; ix++) {
-                            allCols.add(origFeatureName + "_" + cols2[ix]);
-                        }
-                    } else {
-                        allCols.add(col);
-                    }
-                }
-                return allCols;
-            }
-        }
-        throw new RuntimeException("SparkModel "+sparkModel.getModelName() + " does not contain a vector assembler of type 'ml.VectorAssembler'");
+        return PipelineUtils.getLearningFeatureNamesFromVectorAssembler((PipelineModel)sparkModel.getModel(), sparkModel.getModelName());
     }
 
     /**
@@ -145,13 +116,9 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
      * @param weights the weight of each column
      * @return a string of an HTML list with the columns and their weight
      */
-    public static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
+    static String printWeightedColumnHTMLList(final String numericColName, final List<String> columnNames,
         final NumberFormat nf, final double[] weights, final double intercept) {
         final StringBuilder buf = new StringBuilder();
-        //        for (String string : columnNames) {
-        //            buf.append("&nbsp;&nbsp;<tt>").append(string).append(":</tt>");
-        //            buf.append("&nbsp;").append(weights[idx++]).append("<br>");
-        //        }
         buf.append("<table border ='0'>");
         buf.append("<tr>");
         buf.append("<th>").append("Column Name").append("</th>");
@@ -179,12 +146,6 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
             buf.append("</tr>");
         }
         buf.append("</table>");
-        //        buf.append("<dl>");
-        //        for (String string : columnNames) {
-        //            buf.append("<dt>&nbsp;&nbsp;").append(string).append("</dt>");
-        //            buf.append("<dd>").append(weights[idx++]).append("</dd>");
-        //        }
-        //        buf.append("</dl>");
         return buf.toString();
     }
 
