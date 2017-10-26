@@ -1,20 +1,26 @@
 package com.knime.tpbuilder.osgi
 
-import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter
-import org.osgi.framework.Version
-import aQute.lib.osgi.Analyzer
-import java.util.jar.JarFile
-import org.apache.maven.artifact.versioning.VersionRange
 import java.io.File
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
-import org.apache.maven.artifact.handler.DefaultArtifactHandler
 import java.nio.file.Paths
 import java.util.jar.Attributes.Name
-import com.knime.tpbuilder.TPConfigReader.TPConfig
-import org.apache.maven.artifact.{ DefaultArtifact, Artifact => MavenArtifact }
+import java.util.jar.JarFile
+
+import org.apache.maven.artifact.{ Artifact => MavenArtifact }
+import org.apache.maven.artifact.DefaultArtifact
+import org.apache.maven.artifact.handler.DefaultArtifactHandler
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
+import org.apache.maven.artifact.versioning.VersionRange
+import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter
+import org.osgi.framework.Version
+
 import com.knime.tpbuilder.Artifact
 import com.knime.tpbuilder.BundleInfo
-import java.util.regex.Pattern
+import com.knime.tpbuilder.TPConfigReader.TPConfig
+
+import aQute.lib.osgi.Analyzer
+
+import scala.collection.mutable.Map
+import scala.collection.Set
 
 object OsgiUtil {
 
@@ -155,5 +161,42 @@ object OsgiUtil {
         // never happens
         throw new RuntimeException("Prebundled artifact does not contain manifest!?")
     }
+  }
+  
+  private case class ReqBundleClause(bundleSymbolicName: String, parameters: Set[String]) {
+    override def toString(): String = {
+      return bundleSymbolicName + parameters.map(";" + _).mkString
+    }
+  }
+  
+  private object ReqBundleClause {
+    def parse(clause: String) : ReqBundleClause = {
+        val components = clause.split(";")
+        val paramSet =
+          if (components.size > 1)
+            components.slice(1, components.size).toSet
+          else
+            Set[String]()
+        
+        ReqBundleClause(components(0), paramSet)
+    }
+  }
+  
+  /**
+   * Makes sure that we don't require the same bundle twice but with different parameters
+   */
+  def sanitizeRequireBundleHeaderClauses(clauses: Set[String]) : Set[String] = {
+    val parsedClauses = Map[String,ReqBundleClause]()
+    
+    for(clause <- clauses) {
+      val parsedClause = ReqBundleClause.parse(clause)
+      if (parsedClauses.contains(parsedClause.bundleSymbolicName)) {
+        throw new IllegalArgumentException(s"Found two conflicting Require-Bundle clauses: ${clause} and ${parsedClauses(parsedClause.bundleSymbolicName).toString}")
+      }
+      
+      parsedClauses += (parsedClause.bundleSymbolicName -> parsedClause)
+    }
+    
+    parsedClauses.values.map(_.toString).toSet
   }
 }

@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.hive.utility;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,8 +83,9 @@ public class HiveUtility extends DatabaseUtility {
     /**
      * Constructor.
      * @throws LicenseException
+     * @throws IOException
      */
-    public HiveUtility() throws LicenseException {
+    public HiveUtility() throws LicenseException, IOException {
         super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new HiveDriverFactory(),
             new CountDistinctDBAggregationFunction.Factory(), new SumDistinctDBAggregationFunction.Factory(),
             new AvgDistinctDBAggregationFunction.Factory(), new MinDBAggregationFunction.Factory(),

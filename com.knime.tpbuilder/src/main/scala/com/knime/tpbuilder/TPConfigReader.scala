@@ -96,9 +96,21 @@ object TPConfigReader {
       return None
     }
   }
+  
+  case class TPMergeOverrides(var whitelist: Seq[String],
+      var blacklist: Seq[String])
+      
+  object TPMergeOverrides {
+    def isWhitelisted(overrides: TPMergeOverrides, art: Artifact) = 
+      mvnCoordinateMatches(overrides.whitelist, art)
+      
+    def isBlacklisted(overrides: TPMergeOverrides, art: Artifact) = 
+      mvnCoordinateMatches(overrides.blacklist, art)
+  }
 
   case class TPBundleInstruction(var coordPattern: String,
     var fileExcludes: Seq[String],
+    var requireBundleInjections: Seq[String],
     var instructions: Map[String, String])
     
   case class TPMavenRepo(var id: String,
@@ -114,34 +126,21 @@ object TPConfigReader {
     var duplicateRemovalBlacklist: Seq[String],
     var requireBundleOverrides: Seq[TPMavenOverride],
     var importPackageOverrides: Seq[TPMavenOverride],
+    var mergeOverrides: TPMergeOverrides,
     var bundleInstructions: Seq[TPBundleInstruction],
     var mavenRepositories: Seq[TPMavenRepo],
     var artifactGroups: Seq[TPArtifactGroup])
 
   object TPConfig {
 
-    private def isOnMavenBlacklist(blacklist: Seq[String], art: Artifact): Boolean = {
-      val mvnCoord = art.mvnCoordinate
+    def isMavenArtifactBlacklisted(config: TPConfig)(art: Artifact) = 
+      mvnCoordinateMatches(config.mavenBlacklist, art)
 
-      for (patternStr <- blacklist) {
-        if (Pattern.compile(patternStr).matcher(mvnCoord).matches())
-          return true
-      }
-
-      return false
-    }
-
-    def isMavenArtifactBlacklisted(config: TPConfig)(art: Artifact): Boolean = {
-      isOnMavenBlacklist(config.mavenBlacklist, art)
-    }
-
-    def isMavenDependencyBlacklisted(config: TPConfig)(dep: Artifact): Boolean = {
-      isOnMavenBlacklist(config.mavenDependencyBlacklist, dep)
-    }
-
-    def isDuplicateRemovalBlacklisted(config: TPConfig)(art: Artifact): Boolean = {
-      isOnMavenBlacklist(config.duplicateRemovalBlacklist, art)
-    }
+    def isMavenDependencyBlacklisted(config: TPConfig)(dep: Artifact) = 
+      mvnCoordinateMatches(config.mavenDependencyBlacklist, dep)
+      
+    def isDuplicateRemovalBlacklisted(config: TPConfig)(art: Artifact) = 
+      mvnCoordinateMatches(config.duplicateRemovalBlacklist, art)
 
     def getBundleInstructions(config: TPConfig)(art: Artifact): Option[Map[String, String]] = {
       val mvnCoord = art.mvnCoordinate
@@ -162,17 +161,30 @@ object TPConfigReader {
       }
       Seq()
     }
+    
+    def getRequireBundleInjections(config: TPConfig)(art: Artifact): Seq[String] = {
+      val mvnCoord = art.mvnCoordinate
 
-    def evalBundleVars(bundle: BundleInfo, instructionMap: Map[String, String]): Map[String, String] = {
-      Map() ++= instructionMap.mapValues(evalBundleVars(bundle))
+      for (instruction <- config.bundleInstructions) {
+        if (Pattern.compile(instruction.coordPattern).matcher(mvnCoord).matches())
+          return instruction.requireBundleInjections
+      }
+      Seq()
     }
 
-    def evalBundleVars(bundle: BundleInfo)(instructionValue: String): String = {
+
+    def evalVars(art: Artifact, config: TPConfig, instructionMap: Map[String, String]): Map[String, String] = {
+      Map() ++= instructionMap.mapValues(evalVars(art, config))
+    }
+
+    def evalVars(art: Artifact, config: TPConfig)(someString: String): String = {
+      val bundle = art.bundle.get
       val resolveMap = Map(
+        "${tp.version}" -> config.version,
         "${bundle.symbolicName}" -> bundle.bundleSymbolicName,
         "${bundle.version}" -> bundle.bundleVersion.toString())
 
-      eval(resolveMap)(instructionValue)
+      eval(resolveMap)(someString)
     }
     
     def getArtifactCoordsWithSource(depGraph: Map[Artifact, Set[Artifact]], config: TPConfig): Set[Artifact] = {
@@ -251,10 +263,13 @@ object TPConfigReader {
     require(numericProps.isEmpty,
       s"Numeric property names are reserved. Please change property name(s) ${numericProps.map(p => s"'${p}'").mkString(", ")} to include letters.")
 
-    require(config.properties.keys.filter(prop => Pattern.compile("bundle.symbolicName").matcher(prop).matches()).isEmpty,
+    require(config.properties.keys.filter(prop => Pattern.compile("bundle\\.symbolicName").matcher(prop).matches()).isEmpty,
       "Property name 'bundle.symbolicName' is reserved. Please use a different property name.")
 
-    require(config.properties.keys.filter(prop => Pattern.compile("bundle.version").matcher(prop).matches()).isEmpty,
+    require(config.properties.keys.filter(prop => Pattern.compile("bundle\\.version").matcher(prop).matches()).isEmpty,
+      "Property name 'bundle.version' is reserved. Please use a different property name.")
+      
+    require(config.properties.keys.filter(prop => Pattern.compile("tp\\.version").matcher(prop).matches()).isEmpty,
       "Property name 'bundle.version' is reserved. Please use a different property name.")
 
     config.requireBundleOverrides = Option(config.requireBundleOverrides).getOrElse(Seq())
@@ -272,11 +287,16 @@ object TPConfigReader {
       require(o.coordPattern != null && o.replacement != null,
         "Each override under mavenDependencyOverrides must specify coordPattern regex and a replacement"))
 
+    config.mergeOverrides = Option(config.mergeOverrides).getOrElse(TPMergeOverrides(Seq(), Seq()))
+    config.mergeOverrides.whitelist = Option(config.mergeOverrides.whitelist).getOrElse(Seq())
+    config.mergeOverrides.blacklist = Option(config.mergeOverrides.blacklist).getOrElse(Seq())
+        
     config.bundleInstructions.foreach(i => {
       require(i.coordPattern != null || !i.coordPattern.isEmpty,
         "Each bundle instruction must specify a bundleCoordPattern regex")
 
       i.fileExcludes = Option(i.fileExcludes).getOrElse(Seq())
+      i.requireBundleInjections = Option(i.requireBundleInjections).getOrElse(Seq())
       i.instructions = Option(i.instructions).getOrElse(Map())
 
       require(!i.instructions.isEmpty || i.fileExcludes.isEmpty,
@@ -345,6 +365,9 @@ object TPConfigReader {
       o.coordPattern = eval(resolveMap)(o.coordPattern)
       o.replacement = eval(resolveMap)(o.replacement)
     })
+    
+    config.mergeOverrides.whitelist = config.mergeOverrides.whitelist.map(eval(resolveMap))
+    config.mergeOverrides.blacklist = config.mergeOverrides.blacklist.map(eval(resolveMap))
 
     config.bundleInstructions.foreach(i => {
       i.coordPattern = eval(resolveMap)(i.coordPattern)
@@ -379,5 +402,17 @@ object TPConfigReader {
       case Some(str) => Some(eval(properties)(str))
       case None => None
     }
+  }
+  
+  private def mvnCoordinateMatches(regexes: Seq[String], art: Artifact): Boolean = {
+      val mvnCoord = art.mvnCoordinate
+      
+      for (regex <- regexes) {
+        if (Pattern.compile(regex).matcher(mvnCoord).matches()) {
+          return true
+        }
+      }
+      
+      return false
   }
 }

@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.impala.utility;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import org.knime.core.data.StringValue;
@@ -66,8 +67,9 @@ public class ImpalaUtility extends DatabaseUtility {
 
     /**
      * Constructor.
+     * @throws IOException
      */
-    public ImpalaUtility() {
+    public ImpalaUtility() throws IOException {
         super(DATABASE_IDENTIFIER, new ImpalaStatementManipulator(), new ImpalaDriverFactory(),
             new AvgDistinctDBAggregationFunction.Factory(), new CountDistinctDBAggregationFunction.Factory(),
             new GroupConcatDBAggregationFunction.Factory(StringValue.class), new MaxDBAggregationFunction.Factory(),

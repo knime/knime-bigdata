@@ -17,21 +17,15 @@ All rights reserved.
    <license url="">
       Terms for License of the KNIME Big Data Connectors Feature
 All rights reserved.
-Copyright by 
+Copyright by
 KNIME.com, Zurich, Switzerland
 You may not use, modify, publish, transmit, transfer or sell,
 reproduce, create derivative works from, distribute, perform,
-display, or in any way exploit any of the content, in whole 
+display, or in any way exploit any of the content, in whole
 or in part, except as otherwise expressly permitted in writing
 by the copyright owner.
 In case of any questions, please contact KNIME.com at contact@knime.com
    </license>
-
-   <plugin
-         id="com.knime.bigdata.cdh5"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="com.knime.bigdata.filehandling"

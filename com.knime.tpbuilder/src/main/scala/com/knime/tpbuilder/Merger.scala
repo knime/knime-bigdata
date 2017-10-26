@@ -9,11 +9,12 @@ import com.knime.tpbuilder.TPConfigReader.TPConfig
 import java.util.regex.Pattern
 import com.knime.tpbuilder.osgi.OsgiUtil
 import aQute.lib.osgi.Analyzer
+import com.knime.tpbuilder.TPConfigReader.TPMergeOverrides
 
 object Merger {
 
   def merge(depGraph: Map[Artifact, Set[Artifact]], config: TPConfig) = {
-    for (mergeUnit <- computeMergeableUnits(depGraph.keys)) {
+    for (mergeUnit <- computeMergeableUnits(depGraph.keys, config)) {
       
       var mergedArt = Artifact(group = mergeUnit.commonGroup,
         artifact = "merged" + (mergeUnit.commonScalaVersion match {
@@ -46,13 +47,17 @@ object Merger {
     commonScalaVersion: Option[String],
     artifacts: Set[Artifact])
 
-  def computeMergeableUnits(artifacts: Iterable[Artifact]): Seq[MergeableUnit] = {
+  def computeMergeableUnits(artifacts: Iterable[Artifact], config: TPConfig): Seq[MergeableUnit] = {
     // group, version, scalaVersion (None for Java artifacts)
     val units = HashMap[(String, String, Option[String]), Set[Artifact]]()
 
     for (art <- artifacts) {
       // only consider artifacts for merging that are not prebundled
-      if (!art.bundle.get.isPrebundled) {
+      
+    	def isNeitherPrebundledNorBlacklisted = !(art.bundle.get.isPrebundled || TPMergeOverrides.isBlacklisted(config.mergeOverrides, art))
+      def isPrebundledAndWhitelisted = art.bundle.get.isPrebundled && TPMergeOverrides.isWhitelisted(config.mergeOverrides, art)
+      
+      if (isNeitherPrebundledNorBlacklisted || isPrebundledAndWhitelisted) {
         units.getOrElseUpdate((art.group, art.version, deriveScalaVersion(art)), HashSet[Artifact]()).add(art)
       }
     }

@@ -36,11 +36,10 @@ object DepGraphBuilder {
   private def newRepoSession(root: Dependency): DefaultRepositorySystemSession = {
     val session = AetherUtils.repoSession
 
-    //    println("Eclusions: " + root.getExclusions.asScala.map(_.toString).mkString(", "))
     val exclusionSelector = new ExclusionDependencySelector(root.getExclusions)
     session.setDependencySelector(new AndDependencySelector(exclusionSelector, new DependencySelector() {
       def selectDependency(dependency: Dependency): Boolean = {
-        if (dependency.getScope().equals("test")) {
+        if (dependency.getScope().equals("test") || dependency.getScope().equals("system")) {
           return false
         }
 
@@ -124,7 +123,7 @@ object DepGraphBuilder {
         require(TPMavenOverride.maybeOverride(config.requireBundleOverrides, depArt).isDefined ||
           TPMavenOverride.maybeOverride(config.importPackageOverrides, depArt).isDefined ||
           TPConfig.isMavenDependencyBlacklisted(config)(depArt),
-          s"Artifact ${depArt.mvnCoordinate} is blacklisted but there is not matching entry under mavenDependencyBlacklist, " +
+          s"Artifact ${depArt.mvnCoordinate} is blacklisted but there is no matching entry under mavenDependencyBlacklist, " +
             "requireBundleOverrides, or importPackageOverrides. Please provide one so we can either discard the dependency or generate a Require-Bundle/" +
             "Import-Package clause for it.")
       } else if (!depGraph.contains(depArt)) {
@@ -137,15 +136,10 @@ object DepGraphBuilder {
 
         if (transitive) {
           for (nextLevelDep <- nextLevelDeps) {
-
-            val exclusionDependencySelector = new ExclusionDependencySelector(dep.getExclusions)
-
-            if (!exclusionDependencySelector.selectDependency(nextLevelDep)) {
-              println(s"  Excluding dependency ${AetherUtils.depToArt(nextLevelDep).mvnCoordinate()} (reason: maven exclusion)")
-            } else if (nextLevelDep.isOptional()) {
-              println(s"  Excluding dependency ${AetherUtils.depToArt(nextLevelDep).mvnCoordinate()} (reason: marked as optional)")
+            if (nextLevelDep.isOptional()) {
+              println(s"  Ignoring dependency ${AetherUtils.depToArt(nextLevelDep).mvnCoordinate()} (reason: marked as optional)")
             } else if (nextLevelDep.getScope.equals("provided")) {
-              println(s"  Excluding dependency ${AetherUtils.depToArt(nextLevelDep).mvnCoordinate()} (reason: scoped as provided)")
+              println(s"  Ignoring dependency ${AetherUtils.depToArt(nextLevelDep).mvnCoordinate()} (reason: scoped as provided)")
             } else {
               queue.enqueue(nextLevelDep)
             }
@@ -155,6 +149,16 @@ object DepGraphBuilder {
     }
   }
 
+  /**
+   * Collects all direct dependencies of the artifact inside the given root dependency. Filters out all
+   * dependencies that are 
+   *  - on the mavenDependencyBlacklist
+   *  - or scoped as "test"
+   *  - or scoped as "system"
+   *  - or marked as excluded in the exclusion list inside the given root dependency. 
+   * 
+   * Also, if a dependency has a mavenDependencyOverride, this method already rewrites the dependency accordingly.
+   */
   private def collectDirectDeps(root: Dependency, config: TPConfig): Buffer[Dependency] = {
 
     val session = newRepoSession(root)

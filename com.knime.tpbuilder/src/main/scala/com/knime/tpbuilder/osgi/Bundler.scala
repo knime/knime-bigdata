@@ -1,28 +1,34 @@
 package com.knime.tpbuilder.osgi
 
 import java.io.File
-import scala.collection.mutable.Map
-import scala.collection.mutable.Set
+
+import scala.collection.JavaConverters.asScalaSetConverter
+import scala.collection.JavaConverters.mutableMapAsJavaMapConverter
+import scala.collection.Map
+import scala.collection.mutable.Buffer
+import scala.collection.mutable.{ Map => MutableMap }
 import scala.collection.mutable.Seq
-import org.reficio.p2.bundler.impl.AquteBundler
-import org.reficio.p2.bundler.ArtifactBundlerInstructions
-import org.reficio.p2.bundler.ArtifactBundlerRequest
-import org.reficio.p2.logger.Logger
+import scala.collection.mutable.Set
+
+import org.apache.commons.io.FileUtils
 import org.apache.maven.plugin.logging.SystemStreamLog
 import org.osgi.framework.Version
-import collection.JavaConverters._
-import aQute.lib.osgi.Analyzer
-import aQute.lib.osgi.Jar
-import com.knime.tpbuilder.TPConfigReader.TPConfig
-import com.knime.tpbuilder.TPConfigReader.TPMavenOverride
-import aQute.bnd.header.OSGiHeader
-import aQute.bnd.osgi.Instructions
+import org.reficio.p2.bundler.ArtifactBundlerInstructions
+import org.reficio.p2.bundler.ArtifactBundlerRequest
+import org.reficio.p2.bundler.impl.AquteBundler
+import org.reficio.p2.logger.Logger
 import org.reficio.p2.utils.{ JarUtils => ReficioJarUtils }
-import aQute.libg.glob.Glob
-import org.apache.commons.io.FileUtils
-import scala.collection.mutable.Buffer
+
 import com.knime.tpbuilder.Artifact
 import com.knime.tpbuilder.BundleInfo
+import com.knime.tpbuilder.TPConfigReader.TPConfig
+import com.knime.tpbuilder.TPConfigReader.TPMavenOverride
+
+import aQute.bnd.header.OSGiHeader
+import aQute.bnd.osgi.Instructions
+import aQute.lib.osgi.Analyzer
+import aQute.lib.osgi.Jar
+import aQute.libg.glob.Glob
 
 object Bundler {
 
@@ -48,15 +54,7 @@ object Bundler {
     }
   }
 
-  private def mergeJars(outputFile: File, jarsToMerge: Iterable[File]) {
-    val jar = new Jar("dummy")
-    for (jarToMerge <- jarsToMerge) {
-      jar.addAll(new Jar(jarToMerge))
-    }
-
-    jar.write(outputFile)
-    jar.close()
-  }
+  
 
   private def removeBundleFileExcludes(origJar: File, bundleFileExcludes: scala.collection.Seq[String]): File = {
     if (!bundleFileExcludes.isEmpty) {
@@ -104,7 +102,7 @@ object Bundler {
       if (mergedJar.exists())
         require(mergedJar.delete(), "Failed to delete preexisting file " + mergedJar.getAbsolutePath)
       filesToCleanUp += mergedJar
-      mergeJars(mergedJar, art.mergedArtifacts.get.map(art => art.file.get))
+      JarMerger.mergeJars(mergedJar, art.mergedArtifacts.get.map(art => art.file.get))
 
       // filter out any excluded files
       val filteredJar = removeBundleFileExcludes(mergedJar, TPConfig.getBundleFileExcludes(config)(art))
@@ -114,7 +112,7 @@ object Bundler {
       val mergedSourceJar =
         if (!sourceJars.isEmpty) {
           val srcJar = new File(outputJar.getAbsolutePath + ".src.tmp")
-          mergeJars(srcJar, sourceJars)
+          JarMerger.mergeJars(srcJar, sourceJars)
           filesToCleanUp += srcJar
           Some(srcJar)
         } else None
@@ -183,14 +181,17 @@ object Bundler {
     config: TPConfig): Unit = {
 
     // create instructions with substitutions
-    val instr = TPConfig.evalBundleVars(art.bundle.get, TPConfig.getBundleInstructions(config)(art).getOrElse(Map()))
+    val instr: Map[String, String]  =  TPConfig.getBundleInstructions(config)(art) match {
+      case Some(rawInstr) => rawInstr.mapValues(TPConfig.evalVars(art, config))
+      case _ => Map()
+    }
 
     doCreateBundle(art, depGraph, instr, inputJar, srcInputJar, outputJar, srcOutputJar, config)
   }
 
   private def mkDependencyInstructions(art: Artifact,
     depGraph: Map[Artifact, Set[Artifact]],
-    instr: Map[String, String],
+    instr: scala.collection.Map[String, String],
     config: TPConfig): Seq[Tuple2[String, String]] = {
 
     val deps = depGraph(art)
@@ -206,8 +207,10 @@ object Bundler {
       .filter(_._2.isDefined)
       .map(t => t._1 -> t._2.get)
       .toMap
+      
+    val requireBundleInjections = TPConfig.getRequireBundleInjections(config)(art)
 
-    val reqBundleInstrOption = mkRequireBundle(art, depGraph, instr, importPackageOverrides, requireBundleOverrides)
+    val reqBundleInstrOption = mkRequireBundle(art, depGraph, instr, importPackageOverrides, requireBundleOverrides, requireBundleInjections)
     val importPkgInstr = mkImportPackage(art, deps, instr, importPackageOverrides)
 
     reqBundleInstrOption match {
@@ -219,7 +222,7 @@ object Bundler {
 
   private def mkImportPackage(art: Artifact,
     deps: Set[Artifact],
-    instr: Map[String, String],
+    instr: scala.collection.Map[String, String],
     importPackageOverrides: scala.collection.Map[Artifact, String]): String = {
 
     // handle Import-Package instructions
@@ -241,9 +244,10 @@ object Bundler {
 
   private def mkRequireBundle(art: Artifact,
     depGraph: Map[Artifact, Set[Artifact]],
-    instr: Map[String, String],
+    instr: scala.collection.Map[String, String],
     importPackageOverrides: scala.collection.Map[Artifact, String],
-    requireBundleOverrides: scala.collection.Map[Artifact, String]): Option[String] = {
+    requireBundleOverrides: scala.collection.Map[Artifact, String],
+    requireBundleInjections: scala.collection.Seq[String]): Option[String] = {
 
     val deps = depGraph(art)
     val effectiveDeps = deps -- importPackageOverrides.keys
@@ -255,8 +259,8 @@ object Bundler {
         println(s"Ignoring Require-Bundle override(s) due to manually defined Require-Bundle directive ${instr(Analyzer.REQUIRE_BUNDLE)}")
       }
       return Some(instr(Analyzer.REQUIRE_BUNDLE))
-    } else if (!instr.contains(Analyzer.IMPORT_PACKAGE) && !effectiveDeps.isEmpty) {
-      return Some(toRequireBundleHeaderValue(effectiveDeps, effectiveReqBundeOverrides, depGraph))
+    } else if (!instr.contains(Analyzer.IMPORT_PACKAGE) && (!effectiveDeps.isEmpty || !requireBundleInjections.isEmpty)) {
+      return Some(toRequireBundleHeaderValue(effectiveDeps, effectiveReqBundeOverrides, requireBundleInjections, depGraph))
     } else {
       if (!requireBundleOverrides.isEmpty) {
         println(s"Ignoring Require-Bundle override(s) due to manually defined Import-Package directive")
@@ -271,9 +275,10 @@ object Bundler {
 
   private def toRequireBundleHeaderValue(deps: Set[Artifact],
     requireBundleOverrides: scala.collection.Map[Artifact, String],
+    requireBundleInjections: scala.collection.Seq[String],
     depGraph: Map[Artifact, Set[Artifact]]): String = {
 
-    deps.map(dep => {
+    val generatedClauses = deps.map(dep => {
       requireBundleOverrides.get(dep) match {
         case Some(reqBundleClause) =>
           println(s"Overriding maven dependency on ${dep.mvnCoordinate} with Require-Bundle clause ${reqBundleClause}")
@@ -288,12 +293,14 @@ object Bundler {
             clause
           }
       }
-    }).mkString(",")
+    })
+    
+    OsgiUtil.sanitizeRequireBundleHeaderClauses(generatedClauses ++ requireBundleInjections).mkString(",")
   }
 
   private def doCreateBundle(art: Artifact,
     depGraph: Map[Artifact, Set[Artifact]],
-    instr: Map[String, String],
+    instr: scala.collection.Map[String, String],
     inputJar: File,
     srcInputJar: Option[File],
     outputJar: File,
@@ -303,7 +310,7 @@ object Bundler {
     val bundleInfo = art.bundle.get
     val bundleName = instr.getOrElse(Analyzer.BUNDLE_NAME, bundleInfo.bundleSymbolicName)
 
-    val bndInstructions = Map(Analyzer.BUNDLE_DESCRIPTION ->
+    val bndInstructions = MutableMap(Analyzer.BUNDLE_DESCRIPTION ->
       instr.getOrElse(Analyzer.BUNDLE_DESCRIPTION, createBundleDescription(art)))
 
     bndInstructions ++= mkDependencyInstructions(art, depGraph, instr, config)
@@ -316,7 +323,7 @@ object Bundler {
       println(s"Overriding default Export-Package instruction with ${instr(Analyzer.EXPORT_PACKAGE)}")
       bndInstructions += (Analyzer.EXPORT_PACKAGE -> instr(Analyzer.EXPORT_PACKAGE))
     } else {
-      bndInstructions += (Analyzer.EXPORT_PACKAGE -> TPConfig.evalBundleVars(bundleInfo)("*;version=${bundle.version}"))
+      bndInstructions += (Analyzer.EXPORT_PACKAGE -> TPConfig.evalVars(art, config)("*;version=${bundle.version}"))
     }
 
     bndInstructions ++= (instr -- Seq(Analyzer.IMPORT_PACKAGE,
