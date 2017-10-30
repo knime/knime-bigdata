@@ -62,7 +62,8 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
     public String getSummary(final SparkModel sparkModel) {
         final GeneralizedLinearModel regressionModel = (GeneralizedLinearModel)sparkModel.getModel();
         final Vector weightsVec = regressionModel.weights();
-        final String weightString = printWeights(weightsVec, NF);
+        final NumberFormat nf = getNumberFormat();
+        final String weightString = printWeights(weightsVec, nf);
         return "Model weights: " + weightString;
     }
 
@@ -73,8 +74,9 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
     protected String getHTMLDescription(final SparkModel sparkModel) {
         final GeneralizedLinearModel model = (GeneralizedLinearModel)sparkModel.getModel();
         final List<String> columnNames = sparkModel.getLearningColumnNames();
+        final NumberFormat nf = getNumberFormat();
         final double[] weights = model.weights().toArray();
-        return printWeightedColumnHTMLList("Weight", columnNames, NF, weights);
+        return printWeightedColumnHTMLList("Weight", columnNames, nf, weights);
     }
 
     /**

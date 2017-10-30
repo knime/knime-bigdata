@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark1_6.jobs.mllib.clustering.kmeans;
 
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -82,6 +83,7 @@ public class KMeansInterpreter extends HTMLModelInterpreter {
     @Override
     public String getHTMLDescription(final SparkModel model) {
         final Vector[] clusterCenters = ((KMeansModel)model.getModel()).clusterCenters();
+        final NumberFormat nf = getNumberFormat();
         final StringBuilder buf = new StringBuilder();
         //        buf.append("<b>No of cluster centers: </b>").append(clusterCenters.length).append("<br>");
         List<String> columnNames = model.getLearningColumnNames();
@@ -102,7 +104,7 @@ public class KMeansInterpreter extends HTMLModelInterpreter {
             buf.append("<th>").append(idx++).append("</th>");
             double[] dims = center.toArray();
             for (double dim : dims) {
-                buf.append("<td>").append(NF.format(dim)).append("</td>");
+                buf.append("<td>").append(nf.format(dim)).append("</td>");
             }
             buf.append("</tr>");
         }

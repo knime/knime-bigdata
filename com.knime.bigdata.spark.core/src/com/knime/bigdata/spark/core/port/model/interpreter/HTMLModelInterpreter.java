@@ -37,8 +37,10 @@ public abstract class HTMLModelInterpreter implements ModelInterpreter {
 
     private static final long serialVersionUID = 1L;
 
-    /**Standard number formatter.*/
-    public static final NumberFormat NF = NumberFormat.getNumberInstance(Locale.US);
+    /** @return Standard number formatter. */
+    public static final NumberFormat getNumberFormat() {
+        return NumberFormat.getNumberInstance(Locale.US);
+    }
 
     /**
      * {@inheritDoc}

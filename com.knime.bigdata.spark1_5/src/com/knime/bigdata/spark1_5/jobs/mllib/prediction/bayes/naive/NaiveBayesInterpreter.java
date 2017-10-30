@@ -20,6 +20,7 @@
  */
 package com.knime.bigdata.spark1_5.jobs.mllib.prediction.bayes.naive;
 
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
@@ -84,6 +85,7 @@ public class NaiveBayesInterpreter extends HTMLModelInterpreter {
         List<String> featureColumnNames = model.getLearningColumnNames();
         double[] classLabels = naiveBayesModel.labels();
         double[] pi = naiveBayesModel.pi();
+        final NumberFormat nf = getNumberFormat();
         StringBuilder buf = new StringBuilder();
         final String tdTag = "<td align='center' bgcolor='#F0F0F0'>";
         buf.append("<table width='100%'>");
@@ -97,9 +99,9 @@ public class NaiveBayesInterpreter extends HTMLModelInterpreter {
         for (int i = 0; i < classLabels.length; i++) {
             buf.append("<tr>");
             buf.append("<th>").append(classLabels[i]).append("</th>");
-            buf.append("<td>").append(NF.format(pi[i])).append("</td>");
+            buf.append("<td>").append(nf.format(pi[i])).append("</td>");
             for (int j = 0; j < featureColumnNames.size(); j++) {
-                buf.append(tdTag).append(NF.format(theta[i][j])).append("</td>");
+                buf.append(tdTag).append(nf.format(theta[i][j])).append("</td>");
             }
             buf.append("</tr>");
         }
