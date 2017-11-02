@@ -2,7 +2,7 @@
  * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
  *
- * Copyright by KNIME.com, Zurich, Switzerland
+ * Copyright by KNIME AG, Zurich, Switzerland
  *
  * You may not modify, publish, transmit, transfer or sell, reproduce,
  * create derivative works from, distribute, perform, display, or in
@@ -45,7 +45,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
     /**
      * A serializer for {@link SparkModelPortObjectSpec}s.
      *
-     * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+     * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
      */
     public static final class Serializer extends PortObjectSpecSerializer<SparkModelPortObjectSpec> {
         @Override

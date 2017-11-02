@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor Nodes
 Bundle-SymbolicName: com.knime.bigdata.spark.node;singleton:=true
 Bundle-Version: 2.2.0.qualifier
-Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.node.io.database.reader,
  com.knime.bigdata.spark.node.io.database.writer,
  com.knime.bigdata.spark.node.io.genericdatasource.reader,

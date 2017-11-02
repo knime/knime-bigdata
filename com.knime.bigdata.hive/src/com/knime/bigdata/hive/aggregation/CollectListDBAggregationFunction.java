@@ -2,7 +2,7 @@
  * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
  *
- * Copyright by KNIME.com, Zurich, Switzerland
+ * Copyright by KNIME AG, Zurich, Switzerland
  *
  * You may not modify, publish, transmit, transfer or sell, reproduce,
  * create derivative works from, distribute, perform, display, or in
@@ -28,7 +28,7 @@ import org.knime.core.node.port.database.aggregation.SimpleDBAggregationFunction
 
 /**
  * Supported as of Hive 0.13.0.
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 public final class CollectListDBAggregationFunction extends SimpleDBAggregationFunction {
     private static final String ID = "COLLECT_LIST";

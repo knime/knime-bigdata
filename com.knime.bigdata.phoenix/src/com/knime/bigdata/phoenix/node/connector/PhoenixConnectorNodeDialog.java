@@ -2,7 +2,7 @@
  * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
  *
- * Copyright by KNIME.com, Zurich, Switzerland
+ * Copyright by KNIME AG, Zurich, Switzerland
  *
  * You may not modify, publish, transmit, transfer or sell, reproduce,
  * create derivative works from, distribute, perform, display, or in
@@ -41,8 +41,8 @@ import org.knime.core.node.port.database.DatabaseConnectionSettings;
 /**
  * Dialog for the Impala Connector node.
  *
- * @author Thorsten Meinl, KNIME.com, Zurich, Switzerland
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 class PhoenixConnectorNodeDialog extends NodeDialogPane {
     private static class ImpalaConnectionPanel extends DBConnectionPanel<PhoenixConnectorSettings> {

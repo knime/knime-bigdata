@@ -2,7 +2,7 @@
  * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
  *
- * Copyright by KNIME.com, Zurich, Switzerland
+ * Copyright by KNIME AG, Zurich, Switzerland
  *
  * You may not modify, publish, transmit, transfer or sell, reproduce,
  * create derivative works from, distribute, perform, display, or in
@@ -48,7 +48,7 @@ import com.knime.bigdata.phoenix.utility.PhoenixUtility;
 /**
  * Model for the Impala connector node.
  *
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 class PhoenixConnectorNodeModel extends NodeModel {
     private final PhoenixConnectorSettings m_settings = new PhoenixConnectorSettings();

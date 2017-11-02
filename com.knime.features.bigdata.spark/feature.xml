@@ -3,14 +3,14 @@
       id="com.knime.features.bigdata.spark"
       label="KNIME Spark Executor"
       version="2.2.0.qualifier"
-      provider-name="KNIME.com, Zurich, Switzerland">
+      provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
       KNIME nodes for assembling, executing and managing Apache Spark applications.
    </description>
 
    <copyright>
-      Copyright by KNIME.com, Zurich, Switzerland
+      Copyright by KNIME AG, Zurich, Switzerland
 All rights reserved.
    </copyright>
 
@@ -18,13 +18,13 @@ All rights reserved.
       Terms for License of the KNIME Spark Executor Feature
 All rights reserved.
 Copyright by
-KNIME.com, Zurich, Switzerland
+KNIME AG, Zurich, Switzerland
 You may not use, modify, publish, transmit, transfer or sell,
 reproduce, create derivative works from, distribute, perform,
 display, or in any way exploit any of the content, in whole
 or in part, except as otherwise expressly permitted in writing
 by the copyright owner.
-In case of any questions, please contact KNIME.com at contact@knime.com
+In case of any questions, please contact KNIME at contact@knime.com
    </license>
 
    <plugin

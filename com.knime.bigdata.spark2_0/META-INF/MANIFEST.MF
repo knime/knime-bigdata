@@ -6,7 +6,7 @@ Bundle-Version: 2.2.0.qualifier
 Bundle-ClassPath: knime.jar,
  lib/job-server-api_2.11-0.7.0.1-KNIME_spark-2.0.jar,
  lib/knime-jobserver-utils-0.7.0.1-KNIME_spark-2.0.jar
-Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark2_0.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",

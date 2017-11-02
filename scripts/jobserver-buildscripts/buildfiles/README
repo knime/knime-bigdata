@@ -7,7 +7,7 @@ Apache Spark jobs, jars, and job contexts. It was originally developed at Ooyala
 but the main development repository is now on GitHub:
  https://github.com/spark-jobserver/spark-jobserver
 
-This is a binary build of the Spark Job Server, provided by KNIME.com AG
+This is a binary build of the Spark Job Server, provided by KNIME AG
 (http://www.knime.com/). It contains minor modifications to improve
 compatibility of the Spark Job Server with major Hadoop distributions e.g
 Hortonworks or Cloudera. The source code for this build can be found here:

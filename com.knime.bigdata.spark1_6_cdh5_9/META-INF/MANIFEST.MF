@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Spark Executor jobs for Spark 1.6 on CDH 5.9 and later
 Bundle-SymbolicName: com.knime.bigdata.spark1_6_cdh5_9;singleton:=true
 Bundle-Version: 2.2.0.qualifier
-Bundle-Vendor: KNIME.com, Zurich, Switzerland
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark1_6_cdh5_9.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",

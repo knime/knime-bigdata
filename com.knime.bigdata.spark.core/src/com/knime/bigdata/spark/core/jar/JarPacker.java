@@ -170,7 +170,7 @@ public class JarPacker {
     public static Manifest createManifest() {
         final Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VENDOR, "KNIME.com");
+        manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VENDOR, "KNIME AG, Zurich, Switzerland");
         manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VERSION,
             FrameworkUtil.getBundle(JarPacker.class).getVersion().toString());
         return manifest;

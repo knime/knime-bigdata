@@ -2,7 +2,7 @@ package com.knime.bigdata.hdfs.node.connector;
 
 /*
  * ------------------------------------------------------------------------
- *  Copyright by KNIME GmbH, Konstanz, Germany
+ *  Copyright by KNIME AG, Zurich, Switzerland
  *  Website: http://www.knime.com; Email: contact@knime.com
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
  * <code>NodeFactory</code> for node.
  *
  *
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 public class WebHDFSConnectionInformationNodeFactory extends NodeFactory<ConnectionInformationNodeModel> {
 
