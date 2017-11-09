@@ -5,6 +5,7 @@
    <extension-point id="JavaSnippetHelper" name="JavaSnippetHelper" schema="schema/JavaSnippetHelper.exsd"/>
    <extension-point id="JavaDataFrameSnippetHelper" name="Java Data Frame Snippet Helper" schema="schema/JavaDataFrameSnippetHelper.exsd"/>
    <extension-point id="PMMLPortObjectFactoryProvider" name="PMMLPortObjectFactoryProvider" schema="schema/PMMLPortObjectFactoryProvider.exsd"/>
+   <extension-point id="SparkMissingValueHandler" name="SparkMissingValueHandler" schema="schema/SparkMissingValueHandler.exsd"/>
    <extension
          point="org.knime.workbench.repository.categories">
       <category
@@ -40,6 +41,13 @@
             level-id="split"
             locked="true"
             name="Split &amp; Combine"
+            path="/toolintegration/spark/column">
+      </category>
+      <category
+            icon="icons/missing.gif"
+            level-id="transform"
+            locked="true"
+            name="Transform"
             path="/toolintegration/spark/column">
       </category>
       <category
@@ -160,6 +168,59 @@
       <SparkJarProvider
             ProviderClass="com.knime.bigdata.spark.node.SparkNodeJarProvider">
       </SparkJarProvider>
+   </extension>
+   <extension
+         point="com.knime.bigdata.spark.node.SparkMissingValueHandler">
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedBooleanTrueMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedBooleanFalseMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedDoubleMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedIntegerMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedLocalDateMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedLocalDateTimeMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedLongMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.FixedStringMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MaxMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MeanMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MedianApproxMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MedianExactMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MinMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.MostFrequentMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <!-- not PMML 4.2 conform:
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.RemoveRowMissingSparkValueHandlerFactory">
+     </SparkMissingValueHandler>
+     -->
+     <SparkMissingValueHandler
+         FactoryClass="com.knime.bigdata.spark.node.preproc.missingval.handler.RoundedMeanMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
    </extension>
 <!--   <extension
          point="org.knime.workbench.repository.nodes">

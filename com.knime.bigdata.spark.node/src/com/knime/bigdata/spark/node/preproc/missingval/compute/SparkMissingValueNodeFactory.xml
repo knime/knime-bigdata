@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
+    type="Other" icon="icon.png">
+
+    <name>Spark Missing Value</name>    
+    <shortDescription> Filters or replaces missing values.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            This node helps handle missing values found in the ingoing Spark data.
+            The first tab in the dialog (labeled <i>Default</i>) provides 
+            default handling options for all columns of a given type. 
+            These settings apply to all columns in the input table that are not
+            explicitly mentioned in the second tab (labeled <i>Individual</i>). This
+            second tab permits individual settings for each available column 
+            (thus, overriding the default). To make use of this second approach,
+            select a column or a list of columns which needs
+            extra handling, click "Add", and set the parameters. Click on the 
+            label with the column name(s), will select all covered columns 
+            in the column list. To remove this extra handling (and instead use 
+            the default handling), click the "Remove" button for this column.<br/>
+        </intro>      
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Spark Data">Spark data with missing values</inPort>
+        <outPort index="0" name="Spark Data">Spark data with replaced values</outPort>
+        <outPort index="1" name="PMML Model">PMML documenting the missing value replacements</outPort>
+    </ports>    
+</knimeNode>

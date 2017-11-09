@@ -50,6 +50,7 @@ import com.knime.bigdata.spark2_0.jobs.preproc.convert.category2number.Category2
 import com.knime.bigdata.spark2_0.jobs.preproc.convert.number2category.Number2CategoryJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.joiner.JoinJobRunFactory;
+import com.knime.bigdata.spark2_0.jobs.preproc.missingval.MissingValueJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.partition.PartitionJobRunFactory;
 import com.knime.bigdata.spark2_0.jobs.preproc.rename.RenameColumnJobRunFactory;
@@ -106,6 +107,7 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new Number2CategoryJobRunFactory(),
             new ColumnFilterJobRunFactory(),
             new JoinJobRunFactory(),
+            new MissingValueJobRunFactory(),
             new NormalizeColumnsJobRunFactory(),
             new RenameColumnJobRunFactory(),
             new PartitionJobRunFactory(),

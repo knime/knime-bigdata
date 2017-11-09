@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<missingcellhandler name="Median (approximated, target precision 0.001)" xmlns="http://knime.org/missingval/v1.0">
+            Finds the column's approximated median value and replaces all missing values with it.
+            Implementation use space-efficient Online Computation of Quantile Summaries with a relative error of <i>0.0001</i>.
+            This missing value handler produces valid PMML 4.2.
+</missingcellhandler>
