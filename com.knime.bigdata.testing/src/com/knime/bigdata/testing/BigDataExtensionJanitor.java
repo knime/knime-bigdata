@@ -191,7 +191,7 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
         m_flowVariables.add(new FlowVariable("ssh.keyfile", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("ssh.port", 22));
 
-        m_flowVariables.add(new FlowVariable("spark.version", "1.6"));
+        m_flowVariables.add(new FlowVariable("spark.version", "2.2"));
         m_flowVariables.add(new FlowVariable("spark.context", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.jobserver.url", "http://execute-testflow-conf-node:123/"));
         m_flowVariables.add(new FlowVariable("spark.settings.override", "false"));
