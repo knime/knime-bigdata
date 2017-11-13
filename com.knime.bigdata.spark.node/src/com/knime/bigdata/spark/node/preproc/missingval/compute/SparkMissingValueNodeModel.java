@@ -79,7 +79,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
 
         final SparkVersion version = SparkContextUtil.getSparkVersion(sparkPortSpec.getContextID());
-        if (version.compareTo(SparkVersion.V_2_0) <= 0) {
+        if (SparkVersion.V_2_0.compareTo(version) > 0) {
             throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark 2.0.");
         }
 

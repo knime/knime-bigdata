@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -133,7 +134,10 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
             final StructField fields[] = result.schema().fields();
             for(int i = 0; i < fields.length; i++) {
                 String column = fields[i].name();
-                if (rounded.contains(column)) {
+                if (row.isNullAt(i)) {
+                    final String agg = input.getConfig(column).get(KEY_OP_TYPE).toString().toLowerCase();
+                    throw new KNIMESparkException("Unable to compute " + agg + " for column " + column + ", possibly because there were no values in the column.");
+                } else if (rounded.contains(column)) {
                     double value = Math.round(row.getDouble(i));
                     fixedValues.put(column, fixedSparkValue(schema, column, value));
                     outputValues.put(column, intermediateValue(schema, column, value));
@@ -158,13 +162,18 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
             final String tmpColumn = ModelUtils.getTemporaryColumnName("most-freq");
             for (String column : mostFreqColumns) {
                 LOGGER.info("Calculating most frequent on " + column);
-                Object result = outputDF.na().drop("any", new String[] { column })
+                List<Row> results = outputDF.na().drop("any", new String[] { column })
                         .groupBy(column)
                         .agg(count("*").name(tmpColumn))
                         .sort(desc(tmpColumn))
-                        .first().get(0);
-                fixedValues.put(column, fixedSparkValue(schema, column, result));
-                outputValues.put(column, intermediateValue(schema, column, result));
+                        .limit(1).collectAsList();
+                if (results.isEmpty()) {
+                    throw new KNIMESparkException("Unable to compute most frequent value for column " + column + ", possibly because there were no values in the column.");
+                } else {
+                    Object result = results.get(0).get(0);
+                    fixedValues.put(column, fixedSparkValue(schema, column, result));
+                    outputValues.put(column, intermediateValue(schema, column, result));
+                }
             }
         }
 
@@ -210,7 +219,7 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
      * Available since Spark 2.0, multiple at once since 2.2
      */
     private void calcMedian(final Dataset<Row> input, final Map<String, Object> fixedValues,
-        final Map<String, Serializable> outputValues, final Set<String> medianColumns, final double relativeError) {
+        final Map<String, Serializable> outputValues, final Set<String> medianColumns, final double relativeError) throws KNIMESparkException {
 
         final String columns[] = medianColumns.toArray(new String[0]);
         final StructField fields[] = input.schema().fields();
@@ -219,7 +228,9 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
         for(int i = 0; i < medians.length; i++) {
             final int fieldIndex = input.schema().fieldIndex(columns[i]);
             final double value;
-            if (fields[fieldIndex].dataType() instanceof IntegerType) {
+            if (medians[i].length == 0) {
+                throw new KNIMESparkException("Unable to compute median for column " + columns[i] + ", possibly because there were no values in the column.");
+            } else if (fields[fieldIndex].dataType() instanceof IntegerType) {
                 value = new Double(medians[i][0]).intValue();
             } else if (fields[fieldIndex].dataType() instanceof LongType) {
                 value = new Double(medians[i][0]).longValue();
