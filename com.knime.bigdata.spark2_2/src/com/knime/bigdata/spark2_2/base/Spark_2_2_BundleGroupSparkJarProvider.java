@@ -37,6 +37,6 @@ public class Spark_2_2_BundleGroupSparkJarProvider extends DefaultBundleGroupSpa
     public Spark_2_2_BundleGroupSparkJarProvider() {
         super(SparkVersion.V_2_2, ImmutableMap.of(
             "com.databricks.spark.avro", new Bundle[] {
-                    getBundle("com.databricks.spark-avro_2.11", "3.3.0", "4.0.0") }));
+                    getBundle("com.databricks.spark-avro_2.11", "4.0.0") }));
     }
 }

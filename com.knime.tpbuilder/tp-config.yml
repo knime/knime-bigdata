@@ -463,12 +463,6 @@ mavenRepositories:
   # Cloudera repository is required for Spark 1.6 support CDH 5.9+ and for Hive 1.1 JDBC drivers
   - id: Cloudera Maven Repo
     url: https://repository.cloudera.com/artifactory/cloudera-repos/
-  # JitPack "repository" checks out github code, builds it and serves the build artifacts
-  # Currently used for Spark 2.2 support in spark-avro.
-  - id: Jitpack.io Maven Repo (spark-avro snapshot)
-    url: https://jitpack.io
-
-
 
 # The default merge behavior during the merge phase is that all maven artifacts that
 #   (1) are not prebundled
@@ -689,14 +683,6 @@ bundleInstructions:
         ch.epfl.lamp.*                       ;version="[2.10,2.11)",
         *
 
-  # We are building the spark-avro master branch at 204864b6cf via jitpack, because
-  # spark 2.2 support for spark-avro is not yet released. This fixes the bundle name
-  # and version to be consistent with the other spark-avro releases.
-  - coordPattern: com\.github\.databricks:spark-avro:jar:204864b6cf
-    instructions:
-      Bundle-SymbolicName: com.databricks.spark-avro_2.11
-      Bundle-Version: 3.3.0.204864b6cf
-      
   # and version to be consistent with the other spark-avro releases.
   - coordPattern: commons-beanutils:commons-beanutils:jar:.*
     instructions:
@@ -1029,7 +1015,6 @@ artifactGroups:
       - id: org.scalanlp:breeze_2.11:0.13.1
         source: false
       
-      # spark-avro with Spark 2.2 support is not yet released (as of 2017-08-29).
-      # This fetches a spark-avro master branch build (master@204864b6cf) with has Spark 2.2+ support
-      - id: com.github.databricks:spark-avro:204864b6cf
+      # avro support for spark-sql 2.2
+      - id: com.databricks:spark-avro_2.11:4.0.0
         transitive: false
