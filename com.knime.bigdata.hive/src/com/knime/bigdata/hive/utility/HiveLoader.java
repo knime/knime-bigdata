@@ -35,6 +35,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
@@ -219,7 +220,7 @@ public final class HiveLoader {
             LOGGER.debug("Executing '" + nonStrictStmt + "'");
             st.execute(nonStrictStmt);
             String insertCmd =
-                buildInsertCommand(remoteFile, tempTableName, settings.tableName(), normalColumns,
+                buildInsertCommand(tempTableName, settings.tableName(), normalColumns,
                     settings.partitionColumns(), manip);
             LOGGER.debug("Executing '" + insertCmd + "'");
             st.execute(insertCmd);
@@ -265,18 +266,26 @@ public final class HiveLoader {
 
     private static String buildLoadCommand(final RemoteFile<? extends Connection> remoteFile, final String tableName)
             throws Exception {
-
-        if (HDFSRemoteFileHandler.isSupportedConnection(remoteFile.getConnectionInformation())) {
+        if (remoteFile instanceof CloudRemoteFile) {
+            LOGGER.debug("Load data from cloud file system");
+            final CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>)remoteFile;
+            final String clusterInputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
+            // Hive handles load via move, use the full URI for cloud file systems e.g S3 and Azure BlobStore
+            return "LOAD DATA INPATH '" + clusterInputPath + "' INTO TABLE " + tableName;
+        }
+        else if (HDFSRemoteFileHandler.isSupportedConnection(remoteFile.getConnectionInformation())) {
+            LOGGER.debug("Load data from hdfs");
             // Hive handles load via move, use Hive default FS URI and provide only input file path
             return "LOAD DATA INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
 
         } else {
+            LOGGER.debug("Load data from local file system");
             return "LOAD DATA LOCAL INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
         }
     }
 
-    private static String buildInsertCommand(final RemoteFile<? extends Connection> remoteFile, final String sourceTableName,
-        final String destTableName, final Collection<String> normalColumns, final Collection<String> partitionColumns,
+    private static String buildInsertCommand(final String sourceTableName, final String destTableName,
+        final Collection<String> normalColumns, final Collection<String> partitionColumns,
         final StatementManipulator manip) {
 
         StringBuilder buf = new StringBuilder();
