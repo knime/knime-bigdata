@@ -63,21 +63,21 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
     }
 
     /**
-     * @return
+     * @return whether to replace or not
      */
     public boolean replace() {
         return get(REPLACE);
     }
 
     /**
-     * @return
+     * @return a list of additional column indices
      */
     public List<Integer> getAdditionalColIdxs() {
         return get(ADD_COLS);
     }
 
     /**
-     * @return
+     * @return a list of columnd indices to skip
      */
     public List<Integer> getSkippedColIdxs() {
         return get(SKIP_COLS);

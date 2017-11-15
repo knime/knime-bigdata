@@ -28,17 +28,17 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.time.localdate.LocalDateCell;
 import org.knime.core.data.time.localdate.LocalDateCellFactory;
 import org.knime.core.data.time.localdate.LocalDateValue;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  * Converts between LocalDate and Date without time shifts.
  *
- * @author Sascha Wolke, KNIME.com
- * @since 2.1.0
+ * NOTE: This converter is currently unused becaused LocalDateTime support has been postponed.
+ *
+ * @author Sascha Wolke, KNIME GmbH
+ * @since 2.2.0
  */
 public class LocalDateType extends AbstractKNIMEToIntermediateConverter {
 
@@ -76,14 +76,5 @@ public class LocalDateType extends AbstractKNIMEToIntermediateConverter {
         }
 
         throw incompatibleSerializableException(intermediateTypeObject);
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Version getLowestSupportedVersion() {
-        return SparkPluginVersion.VERSION_2_1_0;
     }
 }

@@ -98,7 +98,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(data.getTableSpec(), cms,
             colIdxs, addCols, m_replace.getBooleanValue(), skipCols);
         final String aOutputTableName = SparkIDs.createSparkDataObjectID();
-        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
         final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), colIdxs,
@@ -108,7 +108,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
         execProvider.createRun(input, Collections.singletonList(jobFile)).run(data.getContextID(), exec);
         return new PortObject[]{
-            createSparkPortObject(data, resultSpec, aOutputTableName, getKNIMESparkExecutorVersion())};
+            createSparkPortObject(data, resultSpec, aOutputTableName)};
     }
 
     /**

@@ -31,10 +31,8 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
@@ -46,6 +44,7 @@ import com.knime.bigdata.spark.core.util.SparkIDs;
  * Instances of this class are immutable.
  *
  * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkDataTable extends DefaultSparkData {
 
@@ -58,13 +57,9 @@ public class SparkDataTable extends DefaultSparkData {
      *
      * @param contextID The ID of the context the Spark data table lives in.
      * @param spec The {@link DataTableSpec} of the Spark data table.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
-     *            this Spark data table.
      */
-    public SparkDataTable(final SparkContextID contextID, final DataTableSpec spec,
-        final Version knimeSparkExecutorVersion) {
-
-        this(contextID, SparkIDs.createSparkDataObjectID(), spec, knimeSparkExecutorVersion);
+    public SparkDataTable(final SparkContextID contextID, final DataTableSpec spec) {
+        this(contextID, SparkIDs.createSparkDataObjectID(), spec);
     }
 
     /**
@@ -73,13 +68,10 @@ public class SparkDataTable extends DefaultSparkData {
      * @param contextID The ID of context the Spark data table lives in.
      * @param id The unique id of the data object in Spark (e.g. a UUID).
      * @param spec The {@link DataTableSpec} of the Spark data table.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
-     *            this Spark data table.
      */
-    public SparkDataTable(final SparkContextID contextID, final String id, final DataTableSpec spec,
-        final Version knimeSparkExecutorVersion) {
+    public SparkDataTable(final SparkContextID contextID, final String id, final DataTableSpec spec) {
 
-        super(contextID, id, knimeSparkExecutorVersion);
+        super(contextID, id);
         if (spec == null) {
             throw new NullPointerException("spec must not be null");
         }

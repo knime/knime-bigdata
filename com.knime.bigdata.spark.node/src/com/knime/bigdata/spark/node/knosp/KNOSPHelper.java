@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.node.knosp;
 
 import org.knime.core.node.streamable.StreamableOperator;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.node.io.table.reader.AbstractTable2SparkStreamableOperator;
 import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
@@ -45,12 +44,9 @@ public interface KNOSPHelper {
      *
      * @param knospOutputID An ID under which the streamable operator should register itself (this ID is looked up
      *            inside Spark).
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to assume when mapping types and values
-     *            between the KNIME and intermediate type domains.
      * @return A {@link AbstractTable2SparkStreamableOperator} that streams rows to Spark within the same JVM.
      */
-    public AbstractTable2SparkStreamableOperator createTable2SparkStreamableOperator(final String knospOutputID,
-        final Version knimeSparkExecutorVersion);
+    public AbstractTable2SparkStreamableOperator createTable2SparkStreamableOperator(final String knospOutputID);
 
     /**
      * Provides a {@link StreamableOperator} that streams rows from plain-java Spark to the KNOSP Executor, all within

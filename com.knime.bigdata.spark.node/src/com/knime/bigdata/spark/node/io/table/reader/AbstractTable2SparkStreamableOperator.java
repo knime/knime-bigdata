@@ -37,7 +37,6 @@ import org.knime.core.node.streamable.PortObjectOutput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
@@ -55,18 +54,12 @@ import com.knime.bigdata.spark.core.util.SparkIDs;
  */
 public abstract class AbstractTable2SparkStreamableOperator extends StreamableOperator {
 
-    private final Version m_knimeSparkExecutorVersion;
-
     private final String m_namedOutputObjectId;
 
     /**
      * Constructor.
-     *
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to assume when converting the ingoing table
-     *            spec and values.
      */
-    protected AbstractTable2SparkStreamableOperator(final Version knimeSparkExecutorVersion) {
-        m_knimeSparkExecutorVersion = knimeSparkExecutorVersion;
+    protected AbstractTable2SparkStreamableOperator() {
         m_namedOutputObjectId = SparkIDs.createSparkDataObjectID();
     }
 
@@ -87,11 +80,10 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
         // and Table2SparkNodeModel#executeInternal()
         @SuppressWarnings("deprecation")
         final DataTableSpec outputSpec =
-            SparkDataTableUtil.toSparkOutputSpec(rowInput.getDataTableSpec(), getKNIMESparkExecutorVersion());
+            SparkDataTableUtil.toSparkOutputSpec(rowInput.getDataTableSpec());
 
-        final SparkDataPortObject outPortObject =
-            new SparkDataPortObject(new SparkDataTable(contextPortObject.getContextID(), getNamedOutputObjectId(),
-                outputSpec, getKNIMESparkExecutorVersion()));
+        final SparkDataPortObject outPortObject = new SparkDataPortObject(
+            new SparkDataTable(contextPortObject.getContextID(), getNamedOutputObjectId(), outputSpec));
 
         ((PortObjectOutput)outputs[0]).setPortObject(outPortObject);
     }
@@ -137,7 +129,7 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
         throws InterruptedException, CanceledExecutionException {
 
         KNIMEToIntermediateConverter[] m_converters = KNIMEToIntermediateConverterRegistry
-            .getConverters(rowInput.getDataTableSpec(), m_knimeSparkExecutorVersion);
+            .getConverters(rowInput.getDataTableSpec());
 
         final int noColums = rowInput.getDataTableSpec().getNumColumns();
 
@@ -166,14 +158,6 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
 
         // this indicates the end of the table
         queue.put(new Serializable[0]);
-    }
-
-    /**
-     *
-     * @return the version of KNIME Spark Executor to assume when converting the ingoing table spec and values.
-     */
-    public Version getKNIMESparkExecutorVersion() {
-        return m_knimeSparkExecutorVersion;
     }
 
     /**

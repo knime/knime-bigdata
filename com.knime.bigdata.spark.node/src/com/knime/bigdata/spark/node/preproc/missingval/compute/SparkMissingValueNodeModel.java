@@ -34,7 +34,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -92,11 +91,10 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Preparing job input");
         final SparkDataPortObject inputPort = (SparkDataPortObject)inData[0];
-        final Version executorVersion = inputPort.getData().getKNIMESparkExecutorVersion();
         final SparkContextID contextID = inputPort.getContextID();
         final DataTableSpec inputSpec = inputPort.getTableSpec();
         final KNIMEToIntermediateConverter converters[] =
-            KNIMEToIntermediateConverterRegistry.getConverters(inputSpec, executorVersion);
+            KNIMEToIntermediateConverterRegistry.getConverters(inputSpec);
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
@@ -126,7 +124,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         final SparkMissingValueJobOutput jobOutput = factory.createRun(jobInput).run(contextID, exec);
 
         final SparkDataPortObject sparkOutputPort =
-            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, inputSpec, executorVersion));
+            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, inputSpec));
 
         // convert fixed values (including aggregation results)
         final Map<String, Serializable> intermediateOutput = jobOutput.getValues();

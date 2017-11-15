@@ -151,7 +151,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         //check that all columns are present in the input data
         createMLlibSettings(tableSpec);
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
             new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME)};
     }
 
@@ -187,7 +187,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
         //vMatrix is the prediction result
         final DataTableSpec vMatrixSpec = createResultTableSpec(tableSpec);
-        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec);
         exec.checkCanceled();
         final CollaborativeFilteringJobInput jobInput = new CollaborativeFilteringJobInput(data.getTableName(),
             vMatrixRDD.getID(), userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,

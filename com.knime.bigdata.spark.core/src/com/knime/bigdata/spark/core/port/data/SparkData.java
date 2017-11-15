@@ -20,21 +20,19 @@
  */
 package com.knime.bigdata.spark.core.port.data;
 
-import org.osgi.framework.Version;
-
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 
 /**
  * This class represents a data object within Spark. The object is identified by the Spark context
  * ({@link #getContextID()}) it lives in and its unique id ({@link #getID()}).
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public interface SparkData {
 
     /**
-     * @return the unique id of the Spark object
+     * @return the unique ID of the Spark object
      */
     public abstract String getID();
 
@@ -48,17 +46,5 @@ public interface SparkData {
      * @return <code>true</code> if both are compatible e.g. live in the same context
      */
     public boolean compatible(final SparkData other);
-
-
-    /**
-     * Each {@link SparkData} object is created by a KNIME node. This method returns the version of KNIME Spark Executor
-     * that the respective node model was first instantiated with. This is relevant for example when retrieving type
-     * converters with {@link KNIMEToIntermediateConverterRegistry#get(org.knime.core.data.DataType, Version)}.
-     *
-     * @return The OSGI {@link Version} of KNIME Spark Executor with which this data object was created.
-     * @since 2.1.0
-     * @see KNIMEToIntermediateConverterRegistry#get(org.knime.core.data.DataType, Version)
-     */
-    public Version getKNIMESparkExecutorVersion();
 
 }

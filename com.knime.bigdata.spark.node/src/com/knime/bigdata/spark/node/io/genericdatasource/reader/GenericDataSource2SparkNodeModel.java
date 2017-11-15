@@ -184,9 +184,9 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
                 jobOutput = runFactory.createRun(jobInput, toUpload).run(contextID);
             }
 
-            final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
-                .convertSpec(jobOutput.getSpec(namedOutputObject), settings.getKNIMESparkExecutorVersion());
-            return new SparkDataTable(contextID, namedOutputObject, outputSpec, settings.getKNIMESparkExecutorVersion());
+            final DataTableSpec outputSpec =
+                KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(namedOutputObject));
+            return new SparkDataTable(contextID, namedOutputObject, outputSpec);
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Reason: Failed to find data source:")) {

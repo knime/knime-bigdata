@@ -34,14 +34,12 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.streamable.DataTableRowInput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
 import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.job.EmptyJobOutput;
 import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 
@@ -63,12 +61,9 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
      *
      * @param contextID
      * @param tempFile
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
-     *            this Spark data table.
      */
-    public Table2SparkStreamableOperator(final SparkContextID contextID, final File tempFile,
-        final Version knimeSparkExecutorVersion) {
-        super(knimeSparkExecutorVersion);
+    public Table2SparkStreamableOperator(final SparkContextID contextID, final File tempFile) {
+        super();
 
         m_contextID = contextID;
         m_tmpFile = tempFile;
@@ -95,7 +90,7 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
         exec.setMessage("Importing data into Spark...");
 
         final Table2SparkJobInput input = Table2SparkJobInput.create(getNamedOutputObjectId(),
-            SparkDataTableUtil.toIntermediateSpec(spec, getKNIMESparkExecutorVersion()));
+            SparkDataTableUtil.toIntermediateSpec(spec));
 
         final JobWithFilesRunFactory<Table2SparkJobInput, EmptyJobOutput> execProvider =
             SparkContextUtil.getJobWithFilesRunFactory(m_contextID, Table2SparkNodeModel.JOB_ID);

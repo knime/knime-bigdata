@@ -83,8 +83,8 @@ public class MLlibPCANodeModel extends SparkNodeModel {
         m_settings.check(tableSpec);
         final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "PCA dimension ");
         final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component ");
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), projectedSpec, getKNIMESparkExecutorVersion()),
-            new SparkDataPortObjectSpec(spec.getContextID(), matrixSpec, getKNIMESparkExecutorVersion())};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), projectedSpec),
+            new SparkDataPortObjectSpec(spec.getContextID(), matrixSpec)};
     }
 
     /**
@@ -122,8 +122,8 @@ public class MLlibPCANodeModel extends SparkNodeModel {
             matrixName, projectionMatrixName);
         SparkContextUtil.getSimpleRunFactory(data.getContextID(), JOB_ID).createRun(jobInput).run(data.getContextID());
         exec.setMessage("PCA (SPARK) done.");
-        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName, getKNIMESparkExecutorVersion()),
-            createSparkPortObject(data, matrixSpec, matrixName, getKNIMESparkExecutorVersion())};
+        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName),
+            createSparkPortObject(data, matrixSpec, matrixName)};
     }
 
     /**

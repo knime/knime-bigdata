@@ -53,7 +53,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[0];
         final DataTableSpec outSpec = createNewSpec(sparkSpec.getTableSpec());
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec, getKNIMESparkExecutorVersion())};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec)};
     }
 
     /**
@@ -64,7 +64,7 @@ public class SparkColumnRenameRegexNodeModel extends SparkNodeModel {
         final SparkDataPortObject inputPort = (SparkDataPortObject) inObjects[0];
         final DataTableSpec outputTableSpec = createNewSpec(inputPort.getTableSpec());
         return new PortObject[] {
-            SparkRenameColumnNodeModel.executeRenameColumnJob(inputPort, outputTableSpec, getKNIMESparkExecutorVersion(), exec)
+            SparkRenameColumnNodeModel.executeRenameColumnJob(inputPort, outputTableSpec, exec)
         };
     }
 

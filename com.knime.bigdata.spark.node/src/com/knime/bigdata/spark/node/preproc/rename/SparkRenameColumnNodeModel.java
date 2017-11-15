@@ -60,7 +60,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.ConvenienceMethods;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -73,8 +72,8 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import com.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
- * @author Tobias Koetter, KNIME.com
- * @author Sascha Wolke, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkRenameColumnNodeModel extends SparkNodeModel {
 
@@ -112,7 +111,7 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
             setWarningMessage("The following columns are configured but no longer exist: "
                 + ConvenienceMethods.getShortStringFrom(missingColumnNames, 5));
         }
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec, getKNIMESparkExecutorVersion())};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkSpec.getContextID(), outSpec)};
     }
 
     /**
@@ -122,32 +121,31 @@ public class SparkRenameColumnNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject inputPort = (SparkDataPortObject) inObjects[0];
         final DataTableSpec outputTableSpec = m_config.getNewSpec(inputPort.getTableSpec());
-        return new PortObject[] { executeRenameColumnJob(inputPort, outputTableSpec, getKNIMESparkExecutorVersion(), exec) };
+        return new PortObject[] { executeRenameColumnJob(inputPort, outputTableSpec, exec) };
     }
 
     /**
      * Executes the rename column spark job.
      * @param inputPort - input RDD/data frame
      * @param outputTableSpec - output table spec with renamed columns
-     * @param knimeparkExecutorVersion
      * @param exec
      * @return output port with renamed columns
      * @throws Exception
      */
     public static PortObject executeRenameColumnJob(final SparkDataPortObject inputPort,
-        final DataTableSpec outputTableSpec, final Version knimeparkExecutorVersion, final ExecutionContext exec)
+        final DataTableSpec outputTableSpec, final ExecutionContext exec)
         throws Exception {
 
         final SparkContextID contextID = inputPort.getContextID();
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final IntermediateSpec outputSpec =
-            SparkDataTableUtil.toIntermediateSpec(outputTableSpec, knimeparkExecutorVersion);
+            SparkDataTableUtil.toIntermediateSpec(outputTableSpec);
 
         final RenameColumnJobInput jobInput = new RenameColumnJobInput(namedInputObject, namedOutputObject, outputSpec);
         SparkContextUtil.getJobRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
 
-        final SparkDataTable outputTable = new SparkDataTable(contextID, namedOutputObject, outputTableSpec, knimeparkExecutorVersion);
+        final SparkDataTable outputTable = new SparkDataTable(contextID, namedOutputObject, outputTableSpec);
         final SparkDataPortObject outputPort = new SparkDataPortObject(outputTable);
         return outputPort;
     }

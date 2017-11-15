@@ -162,7 +162,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
         final SparkDataPortObjectSpec resultSpec;
         if (tableSpec != null) {
             resultSpec =
-                new SparkDataPortObjectSpec(sparkSpec.getContextID(), tableSpec, getKNIMESparkExecutorVersion());
+                new SparkDataPortObjectSpec(sparkSpec.getContextID(), tableSpec);
         } else {
             resultSpec = null;
         }
@@ -220,7 +220,7 @@ public class SparkCategory2NumberNodeModel extends SparkNodeModel {
             outPMMLPort.addGlobalTransformations(dict);
         }
         final SparkDataTable resultTable =
-            new SparkDataTable(contextID, resultTableName, resultSpec, getKNIMESparkExecutorVersion());
+            new SparkDataTable(contextID, resultTableName, resultSpec);
         return new PortObject[]{new SparkDataPortObject(resultTable), outPMMLPort};
     }
 

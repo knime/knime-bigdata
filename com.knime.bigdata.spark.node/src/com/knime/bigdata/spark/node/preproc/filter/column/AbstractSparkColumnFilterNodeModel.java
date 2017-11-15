@@ -82,7 +82,7 @@ public abstract class AbstractSparkColumnFilterNodeModel extends SparkNodeModel 
         }
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec)inSpecs[m_sparkInputIdx];
         return new PortObjectSpec[]{
-            new SparkDataPortObjectSpec(sparkSpec.getContextID(), c.createSpec(), getKNIMESparkExecutorVersion())};
+            new SparkDataPortObjectSpec(sparkSpec.getContextID(), c.createSpec())};
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class AbstractSparkColumnFilterNodeModel extends SparkNodeModel 
         final Integer[] columnIndices =
                 SparkUtil.getColumnIndices(rdd.getTableSpec(), c.createSpec().getColumnNames());
         final DataTableSpec resultSpec = c.createSpec();
-        final SparkDataTable resultTable = new SparkDataTable(context, resultSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(context, resultSpec);
         final SimpleJobRunFactory<ColumnsJobInput> runfactory =
                 SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
         final ColumnsJobInput jobInput = new ColumnsJobInput(sparkRDD.getID(), resultTable.getID(), columnIndices);

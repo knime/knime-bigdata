@@ -28,9 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.osgi.framework.Version;
 
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
@@ -116,13 +114,13 @@ public class CSV2SparkSettings extends GenericDataSource2SparkSettings {
     };
 
     /** @see GenericDataSource2SparkSettings#GenericDataSource2SparkSettings(String, SparkVersion, boolean) */
-    public CSV2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver, final Version knimeSparkExecutorVersion) {
-        super(format, minSparkVersion, hasDriver, knimeSparkExecutorVersion);
+    public CSV2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver) {
+        super(format, minSparkVersion, hasDriver);
     }
 
     @Override
     protected GenericDataSource2SparkSettings newInstance() {
-        return new CSV2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver(), SparkPluginVersion.VERSION_CURRENT);
+        return new CSV2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver());
     }
 
     /** @return true if first line contains column names */

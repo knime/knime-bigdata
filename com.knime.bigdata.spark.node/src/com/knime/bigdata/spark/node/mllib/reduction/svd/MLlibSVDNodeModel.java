@@ -111,8 +111,8 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         final DataTableSpec svSpec = createSVSpec();
         final DataTableSpec vSpec = getVSpec(tableSpec);
         final DataTableSpec uSpec = getUSpec();
-        return new PortObjectSpec[]{svSpec, new SparkDataPortObjectSpec(spec.getContextID(), vSpec, getKNIMESparkExecutorVersion()),
-            uSpec == null ? null : new SparkDataPortObjectSpec(spec.getContextID(), uSpec, getKNIMESparkExecutorVersion())};
+        return new PortObjectSpec[]{svSpec, new SparkDataPortObjectSpec(spec.getContextID(), vSpec),
+            uSpec == null ? null : new SparkDataPortObjectSpec(spec.getContextID(), uSpec)};
     }
 
     /**
@@ -196,9 +196,9 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         exec.setMessage("SVD (SPARK) done.");
         SparkDataTable uMatixRDD = null;
         if (computeU) {
-            uMatixRDD = new SparkDataTable(data.getContextID(), uMatrixName, uSpec, getKNIMESparkExecutorVersion());
+            uMatixRDD = new SparkDataTable(data.getContextID(), uMatrixName, uSpec);
         }
-        return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName, getKNIMESparkExecutorVersion()),
+        return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName),
             uMatixRDD == null ? null : new SparkDataPortObject(uMatixRDD)};
     }
 

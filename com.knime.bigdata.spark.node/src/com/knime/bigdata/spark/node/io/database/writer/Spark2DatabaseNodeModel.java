@@ -135,7 +135,7 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
         final CredentialsProvider cp = getCredentialsProvider();
         final Properties conProperties = new Properties();
         final String namedInputObject = rdd.getData().getID();
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
         final Spark2DatabaseJobInput input = new Spark2DatabaseJobInput(namedInputObject, schema,
             settings.getJDBCUrl(), m_settings.getTable(), m_settings.getSaveMode(), conProperties);
 

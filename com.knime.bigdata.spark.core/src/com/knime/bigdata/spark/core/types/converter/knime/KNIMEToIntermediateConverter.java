@@ -24,7 +24,6 @@ import java.io.Serializable;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.TypeConverter;
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
@@ -40,12 +39,6 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
  * <li>Invoking {@link #convert(Serializable)} always returns a {@link DataCell} with type {@link #getKNIMEDataType()}
  * </li>
  * </ul>
- *
- * <p>
- * Implementations must also supply a version range of KNIME Spark Executor that they are compatible with. This allows
- * old KNIME workflows still to produce identical results with newer versions of KNIME Spark Executor, even though type
- * converters may have changed.
- * </p>
  *
  * <p>
  * Implementations can be registered via the <em>KNIMEToIntermediateConverter</em> extension point. It is not possible
@@ -90,29 +83,4 @@ public interface KNIMEToIntermediateConverter extends TypeConverter {
      * @return the corresponding value from the intermediate type domain (see {@link #getIntermediateDataType()})
      */
     public Serializable convert(DataCell cell);
-
-    /**
-     * Returns the lowest version (inclusive) of KNIME Spark Executor supported by this converter.
-     *
-     * @return the lowest version (inclusive) as an OSGI {@link Version}
-     * @since 2.1.0
-     */
-    public Version getLowestSupportedVersion();
-
-    /**
-     * Returns the highest version (exclusive) of KNIME Spark Executor supported by this converter.
-     *
-     * @return the highest version (exclusive) as an OSGI {@link Version}
-     * @since 2.1.0
-     */
-    public Version getHighestSupportedVersion();
-
-    /**
-     * Checks whether the given version of KNIME Spark Executor is supported by this converter.
-     *
-     * @param knimeSparkExecutorVersion The OSGI {@link Version} version of KNIME Spark Executor to check
-     * @return true if the given version of KNIME Spark Executor is supported by this converter, false otherwise.
-     * @since 2.1.0
-     */
-    public boolean supportsVersion(Version knimeSparkExecutorVersion);
 }

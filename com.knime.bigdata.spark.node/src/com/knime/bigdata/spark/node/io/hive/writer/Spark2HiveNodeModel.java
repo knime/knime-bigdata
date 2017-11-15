@@ -145,7 +145,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
                 }
             }
         }
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
         final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema);
         runFactory.createRun(jobInput).run(rdd.getContextID());
         try (final Connection connection = settings.createConnection(getCredentialsProvider());) {

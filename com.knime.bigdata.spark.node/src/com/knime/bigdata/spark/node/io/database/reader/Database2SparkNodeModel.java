@@ -127,10 +127,10 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
                 .createRun(jobInput, jarFiles)
                 .run(contextID, exec);
             final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
-                .convertSpec(jobOutput.getSpec(namedOutputObject), getKNIMESparkExecutorVersion());
+                .convertSpec(jobOutput.getSpec(namedOutputObject));
 
             return new PortObject[]{new SparkDataPortObject(
-                new SparkDataTable(contextID, namedOutputObject, outputSpec, getKNIMESparkExecutorVersion()))};
+                new SparkDataTable(contextID, namedOutputObject, outputSpec))};
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
             if (message != null && message.contains("Failed to load JDBC data: No suitable driver")) {

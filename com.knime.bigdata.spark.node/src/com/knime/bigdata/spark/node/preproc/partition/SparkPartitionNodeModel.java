@@ -64,8 +64,8 @@ public class SparkPartitionNodeModel extends SparkSamplingNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
         SparkContextID contextID = rdd.getContextID();
-        final SparkDataTable resultTable1 = new SparkDataTable(contextID, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
-        final SparkDataTable resultTable2 = new SparkDataTable(contextID, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable1 = new SparkDataTable(contextID, rdd.getData().getTableSpec());
+        final SparkDataTable resultTable2 = new SparkDataTable(contextID, rdd.getData().getTableSpec());
         exec.setMessage("Start Spark partitioning job...");
         final boolean samplesRddIsInputRdd = runJob(exec, PARTITION_JOB_ID, rdd, resultTable1.getID(), resultTable2.getID());
         SparkDataTable firstOutput;

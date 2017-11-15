@@ -90,7 +90,7 @@ public class SparkSamplingNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[0];
         final SparkContextID context = rdd.getContextID();
-        final SparkDataTable resultTable = new SparkDataTable(context, rdd.getData().getTableSpec(), getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(context, rdd.getData().getTableSpec());
         exec.setMessage("Start Spark sampling job...");
         final boolean samplesRddIsInputRdd = runJob(exec, JOB_ID, rdd, resultTable.getID(), null);
         final SparkDataTable output;

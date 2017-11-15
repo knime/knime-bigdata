@@ -37,7 +37,6 @@ import org.knime.core.data.RowKey;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import com.knime.bigdata.spark.core.context.SparkContextConstants;
@@ -54,29 +53,26 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 /**
  * Class with utility functions for {@link SparkDataTable}.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public final class SparkDataTableUtil {
 
 
     /**
-     * Retrieves all rows of the given {@link SparkDataTable} and converts them into a KNIME data table.
      * Converts a {@link DataTableSpec} from a KNIME {@link DataTable} into a {@link DataTableSpec} for a
      * {@link SparkDataTable}. These might differ, when there is no proper type converter for a KNIME data type, in
      * which case a default converter will be taken.
      *
      * @param knimeDataTableSpec input {@link DataTableSpec}
-    * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to use for spec conversion (type mappings
-    *            may change over time).
      * @return the {@link DataTableSpec} based on the available {@link KNIMEToIntermediateConverter}s.
      */
-    public static DataTableSpec getSparkDataTableSpec(final DataTableSpec knimeDataTableSpec,
-        final Version knimeSparkExecutorVersion) {
+    public static DataTableSpec getSparkDataTableSpec(final DataTableSpec knimeDataTableSpec) {
         final List<DataColumnSpec> specs = new ArrayList<>(knimeDataTableSpec.getNumColumns());
         final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("DUMMY", StringCell.TYPE);
         for (DataColumnSpec colSpec : knimeDataTableSpec) {
             final KNIMEToIntermediateConverter converter =
-                KNIMEToIntermediateConverterRegistry.get(colSpec.getType(), knimeSparkExecutorVersion);
+                KNIMEToIntermediateConverterRegistry.get(colSpec.getType());
             final DataType converterDataType = converter.getKNIMEDataType();
             if (converterDataType.equals(colSpec.getType())) {
                 specs.add(colSpec);
@@ -88,6 +84,43 @@ public final class SparkDataTableUtil {
         }
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
     }
+
+    /**
+     * Converts the given KNIME spec into an intermediate spec and back again. The resulting KNIME spec may differ from
+     * the given one insofar as default converters may be used to convert certain KNIME types. For columns where the
+     * given and resulting KNIME types are identical, all column attributes are passed through to the resulting column
+     * spec. Otherwise, only name and properties passed through.
+     *
+     * @param inputSpec A {@link DataTableSpec} to convert.
+     * @return a {@link DataTableSpec} that results from converting the given KNIME spec into an intermediate spec and
+     *         back again
+     * @deprecated This implementation uses the first available type converter. See
+     *             {@link KNIMEToIntermediateConverterRegistry#convertSpec(IntermediateSpec)}.
+     */
+    @Deprecated
+    public static DataTableSpec toSparkOutputSpec(final DataTableSpec inputSpec) {
+        final IntermediateSpec intermediateSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
+        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(intermediateSpec);
+        final DataColumnSpec[] outputColumns = new DataColumnSpec[inputSpec.getNumColumns()];
+
+        for (int i = 0; i < inputSpec.getNumColumns(); i++) {
+            final DataColumnSpec inputCol = inputSpec.getColumnSpec(i);
+            final DataType outputType = outputSpec.getColumnSpec(i).getType();
+            final DataColumnSpecCreator creator;
+
+            if (inputCol.getType().equals(outputType)) {
+                creator = new DataColumnSpecCreator(inputCol);
+            } else {
+                creator = new DataColumnSpecCreator(inputCol.getName(), outputType);
+                creator.setProperties(inputCol.getProperties());
+            }
+
+            outputColumns[i] = creator.createSpec();
+        }
+
+        return new DataTableSpec(outputColumns);
+    }
+
 
 
     /**
@@ -167,7 +200,7 @@ public final class SparkDataTableUtil {
 
         final DataTableSpec spec = sparkDataTabe.getTableSpec();
         final KNIMEToIntermediateConverter[] converter =
-            KNIMEToIntermediateConverterRegistry.getConverters(spec, sparkDataTabe.getKNIMESparkExecutorVersion());
+            KNIMEToIntermediateConverterRegistry.getConverters(spec);
         final DataCell[][] rows = new DataCell[intermediateTypeRows.size()][spec.getNumColumns()];
 
         int rowIndex = 0;
@@ -261,64 +294,24 @@ public final class SparkDataTableUtil {
      * @return the {@link IntermediateSpec} derived from the spec of the given {@link SparkDataTable}.
      */
     public static IntermediateSpec getIntermediateSpec(final SparkDataTable sparkDataTable) {
-        return toIntermediateSpec(sparkDataTable.getTableSpec(), sparkDataTable.getKNIMESparkExecutorVersion());
+        return toIntermediateSpec(sparkDataTable.getTableSpec());
     }
 
     /**
      * Creates an intermediate spec for the given {@link DataTableSpec}.
      *
      * @param spec The {@link DataTableSpec} for which to get an intermediate spec.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to use for spec conversion (type mappings
-     *            may change over time).
      * @return the {@link IntermediateSpec} derived from the spec of the given {@link DataTableSpec}.
      */
-    public static IntermediateSpec toIntermediateSpec(final DataTableSpec spec, final Version knimeSparkExecutorVersion) {
+    public static IntermediateSpec toIntermediateSpec(final DataTableSpec spec) {
         final IntermediateField[] fields = new IntermediateField[spec.getNumColumns()];
         int idx = 0;
         for (final DataColumnSpec knimeColumnSpec : spec) {
             final IntermediateDataType intermediateType =
-                    KNIMEToIntermediateConverterRegistry.get(knimeColumnSpec.getType(), knimeSparkExecutorVersion).getIntermediateDataType();
+                    KNIMEToIntermediateConverterRegistry.get(knimeColumnSpec.getType()).getIntermediateDataType();
             fields[idx++] = new IntermediateField(knimeColumnSpec.getName(), intermediateType);
         }
         return new IntermediateSpec(fields);
 
-    }
-
-    /**
-     * Converts the given KNIME spec into an intermediate spec and back again. The resulting KNIME spec may differ from
-     * the given one insofar as default converters may be used to convert certain KNIME types. For columns where the
-     * given and resulting KNIME types are identical, all column attributes are passed through to the resulting column
-     * spec. Otherwise, only name and properties passed through.
-     *
-     * @param inputSpec A {@link DataTableSpec} to convert.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor to use for spec conversion (type mappings
-     *            may change over time).
-     * @return a {@link DataTableSpec} that results from converting the given KNIME spec into an intermediate spec and
-     *         back again
-     * @deprecated This implementation uses the first available type converter. See
-     *             {@link KNIMEToIntermediateConverterRegistry#convertSpec(IntermediateSpec, Version)}.
-     */
-    @Deprecated
-    public static DataTableSpec toSparkOutputSpec(final DataTableSpec inputSpec, final Version knimeSparkExecutorVersion) {
-        final IntermediateSpec intermediateSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec, knimeSparkExecutorVersion);
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(intermediateSpec, knimeSparkExecutorVersion);
-        final DataColumnSpec[] outputColumns = new DataColumnSpec[inputSpec.getNumColumns()];
-
-        for (int i = 0; i < inputSpec.getNumColumns(); i++) {
-            final DataColumnSpec inputCol = inputSpec.getColumnSpec(i);
-            final DataType outputType = outputSpec.getColumnSpec(i).getType();
-            final DataColumnSpecCreator creator;
-
-            if (inputCol.getType().equals(outputType)) {
-                creator = new DataColumnSpecCreator(inputCol);
-            } else {
-                creator = new DataColumnSpecCreator(inputCol.getName(), outputType);
-                creator.setProperties(inputCol.getProperties());
-            }
-
-            outputColumns[i] = creator.createSpec();
-        }
-
-        return new DataTableSpec(outputColumns);
     }
 }

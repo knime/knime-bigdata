@@ -103,7 +103,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = spec.getTableSpec();
         m_settings.check(tableSpec);
         final SparkDataPortObjectSpec asignedSpec =
-            new SparkDataPortObjectSpec(spec.getContextID(), createResultTableSpec(tableSpec), getKNIMESparkExecutorVersion());
+            new SparkDataPortObjectSpec(spec.getContextID(), createResultTableSpec(tableSpec));
         final SparkModelPortObjectSpec modelSpec = new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME);
         return new PortObjectSpec[]{asignedSpec, modelSpec};
     }
@@ -128,13 +128,12 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
-        final IntermediateSpec resultInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
+        final IntermediateSpec resultInterSpec = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final KMeansJobInput jobInput = createJobInput(inObjects, resultInterSpec);
         final ModelJobOutput result = runFactory.createRun(jobInput).run(data.getContextID(), exec);
         exec.setMessage("KMeans (SPARK) Learner done.");
         return new PortObject[]{
-            createSparkPortObject(data, resultSpec, jobInput.getFirstNamedOutputObject(),
-                getKNIMESparkExecutorVersion()),
+            createSparkPortObject(data, resultSpec, jobInput.getFirstNamedOutputObject()),
             createSparkModelPortObject(data, MODEL_NAME, m_settings.getSettings(data), result)};
     }
 

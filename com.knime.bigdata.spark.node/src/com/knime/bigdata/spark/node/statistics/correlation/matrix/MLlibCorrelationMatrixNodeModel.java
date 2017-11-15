@@ -96,7 +96,7 @@ public class MLlibCorrelationMatrixNodeModel extends SparkNodeModel implements B
         final String[] includes = settings.getFatureColNames().toArray(new String[0]);
         final DataTableSpec resultSpec = createSpec(settings);
         return new PortObjectSpec[]{
-            new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
+            new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
             PMCCPortObjectAndSpec.createOutSpec(includes), new PMCCPortObjectAndSpec(includes)};
     }
 
@@ -110,7 +110,7 @@ public class MLlibCorrelationMatrixNodeModel extends SparkNodeModel implements B
         final MLlibSettings settings = m_settings.getSettings(data.getTableSpec());
 
         final SparkDataTable resultTable =
-            new SparkDataTable(data.getContextID(), createSpec(settings), getKNIMESparkExecutorVersion());
+            new SparkDataTable(data.getContextID(), createSpec(settings));
 
         final MLlibCorrelationMethod method = MLlibCorrelationMethod.get(m_method.getStringValue());
         final CorrelationJobInput input =

@@ -22,7 +22,6 @@ package com.knime.bigdata.spark.node.io.genericdatasource.reader.avro;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeFactory;
@@ -38,7 +37,7 @@ public class Avro2SparkNodeFactory2 extends GenericDataSource2SparkNodeFactory<G
 
     @Override
     public GenericDataSource2SparkSettings getSettings() {
-        return new GenericDataSource2SparkSettings(FORMAT, SparkVersion.V_1_5, HAS_DRIVER, SparkPluginVersion.VERSION_CURRENT);
+        return new GenericDataSource2SparkSettings(FORMAT, SparkVersion.V_1_5, HAS_DRIVER);
     }
 
     @Override

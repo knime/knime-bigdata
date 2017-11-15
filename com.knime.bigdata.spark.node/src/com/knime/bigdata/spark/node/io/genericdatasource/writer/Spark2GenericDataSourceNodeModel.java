@@ -143,7 +143,7 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         final boolean uploadDriver = m_settings.uploadDriver();
 
         final SparkDataPortObject rdd = (SparkDataPortObject) inData[1];
-        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec(), getKNIMESparkExecutorVersion());
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
 
         LOGGER.info("Writing " + rdd.getData().getID() + " rdd into " + outputPath);
         final JobWithFilesRunFactory<Spark2GenericDataSourceJobInput, EmptyJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(rdd.getContextID(), JOB_ID);

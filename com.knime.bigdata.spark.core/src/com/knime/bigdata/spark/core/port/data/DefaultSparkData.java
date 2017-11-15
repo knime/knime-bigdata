@@ -30,16 +30,15 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  * Default implementation of {@link SparkData}.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @auhor Bjoern Lohrmann, KNIME GmbH
  */
 public class DefaultSparkData implements SparkData {
 
@@ -57,42 +56,25 @@ public class DefaultSparkData implements SparkData {
      */
     private static final String KEY_CONTEXT_ID = "contextID";
 
-
-    /**
-     * Key to load the version of KNIME Spark Executor that this data object was created with.
-     *
-     * @since 2.1.0
-     */
-    private static final String KEY_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
-
     private final String m_id;
 
     private final SparkContextID m_contextID;
-
-    private final Version m_knimeSparkExecutorVersion;
 
     /**
      * Initializes a new instance.
      *
      * @param id The unique id of the data object in Spark (e.g. a UUID).
      * @param context The ID of the Spark context where the data resides.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor that the data object in Spark was created
-     *            with.
-     *
      */
-    protected DefaultSparkData(final SparkContextID context, final String id, final Version knimeSparkExecutorVersion) {
+    protected DefaultSparkData(final SparkContextID context, final String id) {
         if (context == null) {
             throw new NullPointerException("context must not be null");
         }
         if (id == null) {
             throw new NullPointerException("tableName must not be null");
         }
-        if (knimeSparkExecutorVersion == null) {
-            throw  new NullPointerException("knimeSparkExecutorVersion must not be null");
-        }
         m_contextID = context;
         m_id = id;
-        m_knimeSparkExecutorVersion = knimeSparkExecutorVersion;
     }
 
     /**
@@ -119,13 +101,6 @@ public class DefaultSparkData implements SparkData {
             }
 
             m_id = sparkModel.getString(KEY_TABLE_NAME);
-
-            if (sparkModel.containsKey(KEY_KNIME_SPARK_EXECUTOR_VERSION)) {
-                m_knimeSparkExecutorVersion = Version.valueOf(sparkModel.getString(KEY_KNIME_SPARK_EXECUTOR_VERSION));
-            } else {
-                // data object was created with a version <= 2.0.1
-                m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_2_0_1;
-            }
         } catch (InvalidSettingsException ise) {
             throw new IOException(ise);
         }
@@ -139,7 +114,6 @@ public class DefaultSparkData implements SparkData {
         final ModelContent sparkModel = new ModelContent(SPARK_DATA);
         m_contextID.saveToConfigWO(sparkModel.addConfig(KEY_CONTEXT_ID));
         sparkModel.addString(KEY_TABLE_NAME, m_id);
-        sparkModel.addString(KEY_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
         out.putNextEntry(new ZipEntry(SPARK_DATA));
         sparkModel.saveToXML(new NonClosableOutputStream.Zip(out));
     }
@@ -166,13 +140,5 @@ public class DefaultSparkData implements SparkData {
     @Override
     public boolean compatible(final SparkData otherSparkDataObject) {
         return m_contextID.equals(otherSparkDataObject.getContextID());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Version getKNIMESparkExecutorVersion() {
-        return m_knimeSparkExecutorVersion;
     }
 }

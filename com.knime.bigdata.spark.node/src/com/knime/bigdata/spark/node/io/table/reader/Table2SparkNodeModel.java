@@ -88,9 +88,9 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
         @SuppressWarnings("deprecation")
         // if you change this, you also need to change the behavior in the streamable operator implementation and in executeInternal()
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec, getKNIMESparkExecutorVersion());
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
         final SparkDataPortObjectSpec resultSpec =
-            new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec, getKNIMESparkExecutorVersion());
+            new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec);
         setConverterWarningMessage(inputSpec, outputSpec);
 
         return new PortObjectSpec[]{resultSpec};
@@ -114,14 +114,14 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // if you change this, you also need to change the behavior in the streamable operator implementation and in configureInternal()
         @SuppressWarnings("deprecation")
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputTable.getDataTableSpec(), getKNIMESparkExecutorVersion());
+        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputTable.getDataTableSpec());
         setConverterWarningMessage(inputTable.getDataTableSpec(), outputSpec);
 
         final AbstractTable2SparkStreamableOperator streamableOp = createStreamableOperatorInternal(contextID);
         streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec);
 
         return new PortObject[]{new SparkDataPortObject(new SparkDataTable(contextID,
-            streamableOp.getNamedOutputObjectId(), outputSpec, getKNIMESparkExecutorVersion()))};
+            streamableOp.getNamedOutputObjectId(), outputSpec))};
     }
 
     /**
@@ -195,10 +195,10 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
     private AbstractTable2SparkStreamableOperator createStreamableOperatorInternal(final SparkContextID contextID) {
         if (isKNOSPMode()) {
             // KNIME-on-Spark mode (running inside a JVM of a Spark executor in a cluster)
-            return SparkNodePlugin.getKNOSPHelper().createTable2SparkStreamableOperator(m_knospOutputID.getStringValue(), getKNIMESparkExecutorVersion());
+            return SparkNodePlugin.getKNOSPHelper().createTable2SparkStreamableOperator(m_knospOutputID.getStringValue());
         } else {
             final File tmpFile = createTempFile();
-            return new Table2SparkStreamableOperator(contextID, tmpFile, getKNIMESparkExecutorVersion());
+            return new Table2SparkStreamableOperator(contextID, tmpFile);
         }
     }
 

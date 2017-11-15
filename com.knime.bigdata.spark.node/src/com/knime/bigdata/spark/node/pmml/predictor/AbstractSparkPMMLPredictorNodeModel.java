@@ -106,7 +106,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         if (resultSpec == null) {
             return new PortObjectSpec[] {null};
         }
-        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec, getKNIMESparkExecutorVersion())};
+        return new PortObjectSpec[] {new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec)};
     }
     /**
      * @param pmmlSpec
@@ -131,7 +131,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
             predColName, m_outputProbabilities.getBooleanValue(), m_suffix.getStringValue());
         final String aOutputTableName = SparkIDs.createSparkDataObjectID();
-        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec, getKNIMESparkExecutorVersion());
+        final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
         final File jobFile = createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
@@ -140,7 +140,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final JobWithFilesRunFactory<PMMLPredictionJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
         execProvider.createRun(input, Collections.singletonList(jobFile)).run(data.getContextID(), exec);
-        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName, getKNIMESparkExecutorVersion())};
+        return new PortObject[] {createSparkPortObject(data, resultSpec, aOutputTableName)};
     }
 
     /**

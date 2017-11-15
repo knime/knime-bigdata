@@ -96,7 +96,7 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
         final DataTableSpec resultSpec = createResultSpec(rdd.getTableSpec(), pmml, m_colSuffix.getStringValue(),
             m_keepOriginalCols.getBooleanValue());
         return new PortObjectSpec[]{
-            new SparkDataPortObjectSpec(rdd.getContextID(), resultSpec, getKNIMESparkExecutorVersion())};
+            new SparkDataPortObjectSpec(rdd.getContextID(), resultSpec)};
     }
 
     private static DataTableSpec createResultSpec(final DataTableSpec tableSpec, final PMMLPortObjectSpec pmml,
@@ -153,7 +153,7 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
             final DataTableSpec resultSpec = createResultSpec(rdd.getTableSpec(), pmml.getSpec(),
                 m_colSuffix.getStringValue(), keepOriginalColumns);
             resultTable =
-                new SparkDataTable(rdd.getContextID(), outputTableName, resultSpec, getKNIMESparkExecutorVersion());
+                new SparkDataTable(rdd.getContextID(), outputTableName, resultSpec);
         }
         return new PortObject[] {new SparkDataPortObject(resultTable)};
     }

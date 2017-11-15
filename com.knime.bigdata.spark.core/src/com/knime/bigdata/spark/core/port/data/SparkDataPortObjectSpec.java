@@ -28,17 +28,16 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.workflow.DataTableSpecView;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 
 /**
  * Spark data port object specification, which is uniquely described by a {@link SparkContextID}, a
  * {@link DataTableSpec} and the version of KNIME Spark Executor it was created with.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkDataPortObjectSpec extends SparkContextPortObjectSpec {
 
@@ -78,13 +77,9 @@ public class SparkDataPortObjectSpec extends SparkContextPortObjectSpec {
      *
      * @param contextID The ID of the underlying Spark context.
      * @param spec The {@link DataTableSpec} of the respective Spark data table.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
-     *            this Spark data table.
      */
-    public SparkDataPortObjectSpec(final SparkContextID contextID, final DataTableSpec spec,
-        final Version knimeSparkExecutorVersion) {
-
-        this(new SparkDataTable(contextID, "dummy", spec, knimeSparkExecutorVersion));
+    public SparkDataPortObjectSpec(final SparkContextID contextID, final DataTableSpec spec) {
+        this(new SparkDataTable(contextID, "dummy", spec));
     }
 
     /**
@@ -100,16 +95,6 @@ public class SparkDataPortObjectSpec extends SparkContextPortObjectSpec {
      */
     public DataTableSpec getTableSpec() {
         return m_data.getTableSpec();
-    }
-
-    /**
-     * Returns the version of KNIME Spark Executor that this port object spec
-     * was created with.
-     *
-     * @return the version as an OSGI {@link Version}.
-     */
-    public Version getKNIMESparkExecutorVersion() {
-        return m_data.getKNIMESparkExecutorVersion();
     }
 
     /**

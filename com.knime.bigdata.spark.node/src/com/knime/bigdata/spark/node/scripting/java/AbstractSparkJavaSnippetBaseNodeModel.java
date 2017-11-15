@@ -204,9 +204,9 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
         PortObject[] toReturn = new PortObject[0];
         if (createOutputObject) {
             final DataTableSpec knimeOutputSpec =
-                KNIMEToIntermediateConverterRegistry.convertSpec(output.getSpec(namedOutputObject), getKNIMESparkExecutorVersion());
+                KNIMEToIntermediateConverterRegistry.convertSpec(output.getSpec(namedOutputObject));
             final SparkDataTable resultTable =
-                new SparkDataTable(contextID, namedOutputObject, knimeOutputSpec, getKNIMESparkExecutorVersion());
+                new SparkDataTable(contextID, namedOutputObject, knimeOutputSpec);
             toReturn = new PortObject[]{new SparkDataPortObject(resultTable)};
         }
 

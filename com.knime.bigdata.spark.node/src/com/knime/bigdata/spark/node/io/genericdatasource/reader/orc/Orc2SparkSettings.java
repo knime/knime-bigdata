@@ -20,9 +20,6 @@
  */
 package com.knime.bigdata.spark.node.io.genericdatasource.reader.orc;
 
-import org.osgi.framework.Version;
-
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
@@ -34,13 +31,13 @@ import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSourc
 public class Orc2SparkSettings extends GenericDataSource2SparkSettings {
 
     /** @see GenericDataSource2SparkSettings#GenericDataSource2SparkSettings(String, boolean) */
-    public Orc2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver, final Version knimeSparkExecutorVersion) {
-        super(format, minSparkVersion, hasDriver, knimeSparkExecutorVersion);
+    public Orc2SparkSettings(final String format, final SparkVersion minSparkVersion, final boolean hasDriver) {
+        super(format, minSparkVersion, hasDriver);
     }
 
     @Override
     protected GenericDataSource2SparkSettings newInstance() {
-        return new Orc2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver(), SparkPluginVersion.VERSION_CURRENT);
+        return new Orc2SparkSettings(getFormat(), getMinSparkVersion(), hasDriver());
     }
 
     @Override

@@ -113,7 +113,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         }
         final DataTableSpec resultSpec = Normalizer2.generateNewSpec(dataSpec, includes);
         final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec, getKNIMESparkExecutorVersion()),
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
             pmmlSpecCreator.createSpec()};
     }
 
@@ -163,7 +163,7 @@ public class SparkNormalizerPMMLNodeModel extends SparkNodeModel {
         }
 
         final DataTableSpec resultSpec = Normalizer2.generateNewSpec(spec, includes);
-        final SparkDataTable resultTable = new SparkDataTable(contextID, resultSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(contextID, resultSpec);
 
         final JobRunFactory<NormalizeJobInput, NormalizeJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final NormalizeJobInput jobInput =

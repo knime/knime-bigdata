@@ -78,7 +78,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         }
         final Joiner joiner = new Joiner(left.getTableSpec(), right.getTableSpec(), m_settings);
         final PortObjectSpec[] spec =
-                new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec(), getKNIMESparkExecutorVersion())};
+                new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec())};
 
         if (!joiner.getConfigWarnings().isEmpty()) {
             for (String warning : joiner.getConfigWarnings()) {
@@ -124,8 +124,8 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final com.knime.bigdata.spark.node.preproc.joiner.JoinMode sparkJoinMode =
                 com.knime.bigdata.spark.node.preproc.joiner.JoinMode.fromKnimeJoinMode(joinMode.toString());
         final DataTableSpec outputSpec = joiner.getOutputSpec();
-        final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec, getKNIMESparkExecutorVersion());
-        final SparkDataTable resultTable = new SparkDataTable(context, outputSpec, getKNIMESparkExecutorVersion());
+        final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec);
+        final SparkDataTable resultTable = new SparkDataTable(context, outputSpec);
 
         final SimpleJobRunFactory<SparkJoinerJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
         final SparkJoinerJobInput jobInput = new SparkJoinerJobInput(left.getData().getID(), right.getData().getID(), sparkJoinMode,

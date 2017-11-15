@@ -75,7 +75,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         checkDatabaseIdentifier(spec);
 
         final SparkDataPortObjectSpec resultSpec =
-                new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec(), getKNIMESparkExecutorVersion());
+                new SparkDataPortObjectSpec(getContextID(inSpecs), spec.getDataTableSpec());
         return new PortObjectSpec[] {resultSpec};
     }
 
@@ -104,7 +104,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
         final String hiveQuery = settings.getQuery();
-        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableSpec, getKNIMESparkExecutorVersion());
+        final SparkDataTable resultTable = new SparkDataTable(contextID, resultTableSpec);
         LOGGER.debug("Original sql: " + hiveQuery);
         final Hive2SparkJobInput jobInput = new Hive2SparkJobInput(resultTable.getID(), hiveQuery);
         LOGGER.debug("Cleaned sql: " + jobInput.getQuery());

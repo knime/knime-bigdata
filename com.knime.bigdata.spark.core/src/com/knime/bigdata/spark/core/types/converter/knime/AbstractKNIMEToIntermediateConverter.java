@@ -25,10 +25,8 @@ import java.util.Arrays;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 
 /**
  * Abstract base class for all {@link KNIMEToIntermediateConverter} implementations.
@@ -212,32 +210,5 @@ public abstract class AbstractKNIMEToIntermediateConverter implements KNIMEToInt
     protected IllegalArgumentException incompatibleSerializableException(final Serializable intermediateTypeObject) {
         return new IllegalArgumentException(
             "IntermediateTypeObject " + intermediateTypeObject + " not compatible with " + getClass().getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Version getLowestSupportedVersion() {
-        return SparkPluginVersion.VERSION_ZERO;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Version getHighestSupportedVersion() {
-        return SparkPluginVersion.VERSION_INFINITY;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean supportsVersion(final Version knimeSparkExecutorVersion) {
-        int lowerCmpResult = getLowestSupportedVersion().compareTo(knimeSparkExecutorVersion);
-        int higherCmpResult = getHighestSupportedVersion().compareTo(knimeSparkExecutorVersion);
-
-        return (lowerCmpResult <= 0) && (higherCmpResult > 0);
     }
 }

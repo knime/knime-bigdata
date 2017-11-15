@@ -79,7 +79,6 @@ import org.knime.core.node.config.ConfigWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.osgi.framework.Version;
 
 import com.knime.bigdata.spark.core.SparkPlugin;
 import com.knime.bigdata.spark.core.context.SparkContext;
@@ -103,13 +102,13 @@ import com.knime.bigdata.spark.core.port.data.SparkDataTable;
 import com.knime.bigdata.spark.core.port.model.SparkModel;
 import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.SparkPluginVersion;
 import com.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Basic class that all NodeModel classes need to extend if they work with Spark data/model/etc objects.
  *
- * @author Tobias Koetter, University of Konstanz
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public abstract class SparkNodeModel extends NodeModel {
 
@@ -139,12 +138,6 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private static final String CFG_DELETE_ON_RESET = "deleteRDDsOnReset";
 
-    /**
-     * Key to load the version of KNIME Spark Executor that the node was created with.
-     * @since 2.1.0
-     */
-    private static final String CFG_KNIME_SPARK_EXECUTOR_VERSION = "knimeSparkExecutorVersion";
-
     private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
     private final Map<SparkContextID, List<String>> m_sparkDataObjects = new LinkedHashMap<>();
@@ -154,16 +147,6 @@ public abstract class SparkNodeModel extends NodeModel {
     private final List<File> m_filesToDeleteAfterExecute = new LinkedList<>();
 
     private boolean m_automaticHandling = true;
-
-    /**
-     * The OSGI version of KNIME Spark Executor (technically, of com.knime.bigdata.spark.core) that this particular node
-     * model instance was instantiated with. This value must only every be defined when a new node model is instantiated
-     * or has its node settings loaded. It must remain constant over other lifecycle operations (configure, execute,
-     * reset, ...).
-     *
-     * @since 2.1.0
-     */
-    private Version m_knimeSparkExecutorVersion;
 
     /**
      * Constructor for SparkNodeModel.
@@ -187,7 +170,6 @@ public abstract class SparkNodeModel extends NodeModel {
     protected SparkNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, final boolean deleteOnReset) {
         super(inPortTypes, outPortTypes);
         m_deleteOnReset = deleteOnReset;
-        m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_CURRENT;
     }
 
     /**
@@ -228,19 +210,6 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     protected boolean isDeleteOnReset() {
         return m_deleteOnReset;
-    }
-
-    /**
-     * Provides the version of KNIME Spark Executor (technically, of com.knime.bigdata.spark.core) that this particular
-     * node model instance was first instantiated with. This value must only every be defined when a new node model is
-     * instantiated or has its node settings loaded. It remains constant over other lifecycle operations (configure,
-     * execute, reset, ...).
-     *
-     * @return the version as an OSGI {@link Version}.
-     * @since 2.1.0
-     */
-    public Version getKNIMESparkExecutorVersion() {
-        return m_knimeSparkExecutorVersion;
     }
 
     /**
@@ -312,7 +281,7 @@ public abstract class SparkNodeModel extends NodeModel {
      *
      * @param automaticHandling Whether automatic handling of deletion of {@link SparkData} objects should be enabled or not.
      * @see #addAdditionalSparkDataObjectsToDelete(SparkContextID, String...)
-     * @since 2.1.0 (renamed from setAutomticRDDHandling)
+     * @since 2.2.0 (renamed from setAutomticRDDHandling)
      */
     protected void setAutomaticSparkDataHandling(final boolean automaticHandling) {
         m_automaticHandling = automaticHandling;
@@ -321,7 +290,7 @@ public abstract class SparkNodeModel extends NodeModel {
     /**
      * @param context the {@link SparkContextConfig} the respective Spark data objects live in.
      * @param ids the Spark data object IDs to delete when the node is reset or disposed.
-     * @since 2.1.0 (renamed from additionalRDDs2Delete)
+     * @since 2.2.0 (renamed from additionalRDDs2Delete)
      */
     protected final void addAdditionalSparkDataObjectsToDelete(final SparkContextID context, final String... ids) {
         addSparkDataObjects(context, ids);
@@ -438,7 +407,8 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     @Override
     protected final void saveSettingsTo(final NodeSettingsWO settings) {
-        settings.addString(CFG_KNIME_SPARK_EXECUTOR_VERSION, m_knimeSparkExecutorVersion.toString());
+        // doing nothing right now, reserved for future use
+
         saveAdditionalSettingsTo(settings);
     }
 
@@ -460,12 +430,8 @@ public abstract class SparkNodeModel extends NodeModel {
     protected final void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
-        if (settings.containsKey(CFG_KNIME_SPARK_EXECUTOR_VERSION)) {
-            m_knimeSparkExecutorVersion = SparkPluginVersion.fromString(settings.getString(CFG_KNIME_SPARK_EXECUTOR_VERSION));
-        } else {
-            // node model was created with KNIME Spark Executor version <= 2.0.1
-            m_knimeSparkExecutorVersion = SparkPluginVersion.VERSION_2_0_1;
-        }
+        // doing nothing right now, reserved for future use
+
         loadAdditionalValidatedSettingsFrom(settings);
     }
 
@@ -483,7 +449,7 @@ public abstract class SparkNodeModel extends NodeModel {
      * @see #validateAdditionalSettings(NodeSettingsRO)
      * @see #saveSettingsTo(NodeSettingsWO)
      *
-     * @since 2.1.0
+     * @since 2.2.0
      */
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         // empty implementation, expected to be overriden by subclasses
@@ -503,7 +469,7 @@ public abstract class SparkNodeModel extends NodeModel {
      * @see #saveAdditionalSettingsTo(NodeSettingsWO)
      * @see #loadAdditionalValidatedSettingsFrom(NodeSettingsRO)
      *
-     * @since 2.1.0
+     * @since 2.2.0
      */
     protected void validateAdditionalSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
@@ -526,7 +492,7 @@ public abstract class SparkNodeModel extends NodeModel {
      * @see #validateAdditionalSettings(NodeSettingsRO)
      * @see #loadValidatedSettingsFrom(NodeSettingsRO)
      *
-     * @since 2.1.0
+     * @since 2.2.0
      */
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
@@ -679,16 +645,13 @@ public abstract class SparkNodeModel extends NodeModel {
      * @param sparkDataPortObject The original {@link SparkDataPortObject} to inherit the Spark context from.
      * @param newSpec The {@link DataTableSpec} of the new {@link SparkDataTable} to wrap.
      * @param newSparkObjectID The ID of the new {@link SparkDataTable} to wrap.
-     * @param knimeSparkExecutorVersion The version of KNIME Spark Executor of the {@link SparkNodeModel} that creates
-     *            this Spark data table.
      * @return a new {@link SparkDataPortObject}.
-     * @since 2.1.0
+     * @since 2.2.0
      */
     public static PortObject createSparkPortObject(final SparkDataPortObject sparkDataPortObject,
-        final DataTableSpec newSpec, final String newSparkObjectID, final Version knimeSparkExecutorVersion) {
+        final DataTableSpec newSpec, final String newSparkObjectID) {
 
-        return new SparkDataPortObject(new SparkDataTable(sparkDataPortObject.getContextID(), newSparkObjectID, newSpec,
-            knimeSparkExecutorVersion));
+        return new SparkDataPortObject(new SparkDataTable(sparkDataPortObject.getContextID(), newSparkObjectID, newSpec));
     }
 
     /**
@@ -700,6 +663,6 @@ public abstract class SparkNodeModel extends NodeModel {
     public SparkDataPortObject createSparkPortObject(final SparkDataPortObject sparkDataPortObject,
         final String newSparkObjectID) {
         return new SparkDataPortObject(new SparkDataTable(sparkDataPortObject.getContextID(), newSparkObjectID,
-            sparkDataPortObject.getTableSpec(), getKNIMESparkExecutorVersion()));
+            sparkDataPortObject.getTableSpec()));
     }
 }

@@ -102,7 +102,7 @@ public class SparkConcatenateNodeModel extends SparkNodeModel {
             resultTable = rdds.get(0);
             setDeleteOnReset(false);
         } else {
-            resultTable = new SparkDataTable(context, spec, getKNIMESparkExecutorVersion());
+            resultTable = new SparkDataTable(context, spec);
             final SimpleJobRunFactory<ConcatenateRDDsJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
             final ConcatenateRDDsJobInput jobInput = new ConcatenateRDDsJobInput(rddIds.toArray(new String[0]), resultTable.getID());
             runFactory.createRun(jobInput).run(context, exec);
