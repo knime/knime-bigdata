@@ -56,6 +56,7 @@ import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueSettings
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkMissingValueNodeModel extends SparkNodeModel {
+
     private MVSettings m_settings = new SparkMissingValueSettings();
 
     /** The unique Spark job id. */

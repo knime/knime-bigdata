@@ -61,7 +61,7 @@ import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 /**
  * Dialog for the Spark SQL Executor node.
  *
- * @author Sascha Wolke, KNIME.com
+ * @author Sascha Wolke, KNIME GmbH
  */
 class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
 
@@ -252,7 +252,6 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
 
                 if (o instanceof String) {
                     m_query.setCaretPosition(m_query.getCaretPosition() - 1);
-                    System.err.println("Fixi");
                 }
             }
         }

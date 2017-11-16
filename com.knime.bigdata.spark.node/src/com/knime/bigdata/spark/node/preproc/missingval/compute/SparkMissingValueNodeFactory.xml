@@ -20,6 +20,7 @@
             label with the column name(s), will select all covered columns 
             in the column list. To remove this extra handling (and instead use 
             the default handling), click the "Remove" button for this column.<br/>
+            <p><i>This node requires at least Spark 2.</i></p>
         </intro>      
     </fullDescription>
     

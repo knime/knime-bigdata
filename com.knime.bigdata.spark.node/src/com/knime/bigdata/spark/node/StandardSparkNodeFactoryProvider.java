@@ -74,6 +74,7 @@ import com.knime.bigdata.spark.node.preproc.concatenate.SparkConcatenateNodeFact
 import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeFactory;
 import com.knime.bigdata.spark.node.preproc.convert.number2category.SparkNumber2CategoryNodeFactory;
 import com.knime.bigdata.spark.node.preproc.filter.column.SparkColumnFilterNodeFactory;
+import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeFactory;
 import com.knime.bigdata.spark.node.preproc.joiner.SparkJoinerNodeFactory;
 import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeFactory;
 import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory;
@@ -149,6 +150,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkCategory2NumberNodeFactory(),
             new SparkNumber2CategoryNodeFactory(),
             new SparkColumnFilterNodeFactory(),
+            new SparkGroupByNodeFactory(),
             new SparkJoinerNodeFactory(),
             new SparkNormalizerPMMLNodeFactory(),
             new SparkPartitionNodeFactory(),

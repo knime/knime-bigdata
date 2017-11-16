@@ -49,6 +49,7 @@ import com.knime.bigdata.spark2_2.jobs.preproc.concatenate.ConcatenateDataFrames
 import com.knime.bigdata.spark2_2.jobs.preproc.convert.category2number.Category2NumberJobRunFactory;
 import com.knime.bigdata.spark2_2.jobs.preproc.convert.number2category.Number2CategoryJobRunFactory;
 import com.knime.bigdata.spark2_2.jobs.preproc.filter.column.ColumnFilterJobRunFactory;
+import com.knime.bigdata.spark2_2.jobs.preproc.groupby.GroupByJobFactory;
 import com.knime.bigdata.spark2_2.jobs.preproc.joiner.JoinJobRunFactory;
 import com.knime.bigdata.spark2_2.jobs.preproc.missingval.MissingValueJobRunFactory;
 import com.knime.bigdata.spark2_2.jobs.preproc.normalize.NormalizeColumnsJobRunFactory;
@@ -106,6 +107,7 @@ public class Spark_2_2_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new Category2NumberJobRunFactory(),
             new Number2CategoryJobRunFactory(),
             new ColumnFilterJobRunFactory(),
+            new GroupByJobFactory(),
             new JoinJobRunFactory(),
             new MissingValueJobRunFactory(),
             new NormalizeColumnsJobRunFactory(),

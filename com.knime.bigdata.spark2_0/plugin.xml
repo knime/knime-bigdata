@@ -7,6 +7,12 @@
             ProviderClass="com.knime.bigdata.spark2_0.base.Spark_2_0_JarProvider">
       </SparkJarProvider>
    </extension>
+   <extension
+         point="com.knime.bigdata.spark.core.SparkSQLFunctionProvider">
+      <SparkSQLFunctionProvider
+            ProviderClass="com.knime.bigdata.spark2_0.base.Spark_2_0_SQLFunctionFactoryProvider">
+      </SparkSQLFunctionProvider>
+   </extension>
    <extension point="com.knime.bigdata.spark.core.JobRunFactoryProvider">
       <JobRunFactoryProvider
             ProviderClass="com.knime.bigdata.spark2_0.base.Spark_2_0_JobRunFactoryProvider">
