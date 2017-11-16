@@ -21,6 +21,7 @@
 package com.knime.bigdata.spark.node.io.table.writer;
 
 import org.knime.core.data.DataTable;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -41,6 +42,7 @@ import com.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
+import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.node.SparkNodePlugin;
 
 /**
@@ -93,7 +95,7 @@ public class Spark2TableNodeModel extends SparkNodeModel {
             setWarningMessage("Fetching only first " + m_fetchSize.getIntValue() + " rows");
         }
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        return new PortObjectSpec[] { spec.getTableSpec() };
+        return new PortObjectSpec[] { SparkDataTableUtil.getTransferredSparkDataTableSpec(spec.getTableSpec()) };
     }
 
     /**
@@ -105,11 +107,13 @@ public class Spark2TableNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("Please connect the input port");
         }
 
-        final SparkDataPortObject dataObject = (SparkDataPortObject)inData[0];
-        final BufferedDataTableRowOutput rowOutput = new BufferedDataTableRowOutput(exec.createDataContainer(dataObject.getTableSpec()));
+        final SparkDataPortObject sparkData = (SparkDataPortObject)inData[0];
+        final DataTableSpec sparkDataSpec = sparkData.getTableSpec();
+        final BufferedDataTableRowOutput rowOutput = new BufferedDataTableRowOutput(
+            exec.createDataContainer(SparkDataTableUtil.getTransferredSparkDataTableSpec(sparkDataSpec)));
 
         // this fetches the rows and pushes them into rowOutput
-        createStreamableOperatorInternal().runWithRowOutput(dataObject.getData(), rowOutput, exec);
+        createStreamableOperatorInternal().runWithRowOutput(sparkData.getData(), rowOutput, exec);
 
         exec.setMessage("Creating a buffered data table...");
         return new PortObject[]{rowOutput.getDataTable()};

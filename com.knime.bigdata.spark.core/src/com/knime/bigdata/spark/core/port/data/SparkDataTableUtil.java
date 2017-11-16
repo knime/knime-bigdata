@@ -21,7 +21,6 @@
 package com.knime.bigdata.spark.core.port.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,7 +33,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.RowKey;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
@@ -60,32 +58,6 @@ public final class SparkDataTableUtil {
 
 
     /**
-     * Converts a {@link DataTableSpec} from a KNIME {@link DataTable} into a {@link DataTableSpec} for a
-     * {@link SparkDataTable}. These might differ, when there is no proper type converter for a KNIME data type, in
-     * which case a default converter will be taken.
-     *
-     * @param knimeDataTableSpec input {@link DataTableSpec}
-     * @return the {@link DataTableSpec} based on the available {@link KNIMEToIntermediateConverter}s.
-     */
-    public static DataTableSpec getSparkDataTableSpec(final DataTableSpec knimeDataTableSpec) {
-        final List<DataColumnSpec> specs = new ArrayList<>(knimeDataTableSpec.getNumColumns());
-        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("DUMMY", StringCell.TYPE);
-        for (DataColumnSpec colSpec : knimeDataTableSpec) {
-            final KNIMEToIntermediateConverter converter =
-                KNIMEToIntermediateConverterRegistry.get(colSpec.getType());
-            final DataType converterDataType = converter.getKNIMEDataType();
-            if (converterDataType.equals(colSpec.getType())) {
-                specs.add(colSpec);
-            } else {
-                specCreator.setName(colSpec.getName());
-                specCreator.setType(converterDataType);
-                specs.add(specCreator.createSpec());
-            }
-        }
-        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
-    }
-
-    /**
      * Converts the given KNIME spec into an intermediate spec and back again. The resulting KNIME spec may differ from
      * the given one insofar as default converters may be used to convert certain KNIME types. For columns where the
      * given and resulting KNIME types are identical, all column attributes are passed through to the resulting column
@@ -98,7 +70,7 @@ public final class SparkDataTableUtil {
      *             {@link KNIMEToIntermediateConverterRegistry#convertSpec(IntermediateSpec)}.
      */
     @Deprecated
-    public static DataTableSpec toSparkOutputSpec(final DataTableSpec inputSpec) {
+    public static DataTableSpec getTransferredSparkDataTableSpec(final DataTableSpec inputSpec) {
         final IntermediateSpec intermediateSpec = SparkDataTableUtil.toIntermediateSpec(inputSpec);
         final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(intermediateSpec);
         final DataColumnSpec[] outputColumns = new DataColumnSpec[inputSpec.getNumColumns()];
@@ -120,7 +92,6 @@ public final class SparkDataTableUtil {
 
         return new DataTableSpec(outputColumns);
     }
-
 
 
     /**
@@ -171,7 +142,7 @@ public final class SparkDataTableUtil {
 
                 @Override
                 public DataTableSpec getDataTableSpec() {
-                    return data.getTableSpec();
+                    return getTransferredSparkDataTableSpec(data.getTableSpec());
                 }
             };
         }
@@ -183,6 +154,7 @@ public final class SparkDataTableUtil {
 
     private static DataTable fetchDataTable(final SparkDataTable data, final int noOfRows, final ExecutionMonitor exec)
             throws KNIMESparkException, CanceledExecutionException {
+
         final IntermediateSpec intermediateSpec = getIntermediateSpec(data);
         final FetchRowsJobInput input = FetchRowsJobInput.create(noOfRows, data.getID(), intermediateSpec);
         if (SparkContextManager.getOrCreateSparkContext(data.getContextID()).getStatus() != SparkContextStatus.OPEN) {
@@ -198,7 +170,7 @@ public final class SparkDataTableUtil {
     private static DataTable convertResultToDataTable(final List<List<Serializable>> intermediateTypeRows,
         final SparkDataTable sparkDataTabe) throws KNIMESparkException {
 
-        final DataTableSpec spec = sparkDataTabe.getTableSpec();
+        final DataTableSpec spec = getTransferredSparkDataTableSpec(sparkDataTabe.getTableSpec());
         final KNIMEToIntermediateConverter[] converter =
             KNIMEToIntermediateConverterRegistry.getConverters(spec);
         final DataCell[][] rows = new DataCell[intermediateTypeRows.size()][spec.getNumColumns()];
@@ -212,7 +184,7 @@ public final class SparkDataTableUtil {
             }
             rowIndex++;
         }
-        return wrapAsDataTable(sparkDataTabe.getTableSpec(), rows);
+        return wrapAsDataTable(spec, rows);
     }
 
     private static DataTable wrapAsDataTable(final DataTableSpec spec, final DataCell[][] rows) {

@@ -42,7 +42,6 @@ import com.knime.bigdata.spark.core.exception.KNIMESparkException;
 import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
 import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import com.knime.bigdata.spark.core.util.SparkIDs;
@@ -78,9 +77,7 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
 
         // if you change this, you also need to change the behavior in Table2SparkNodeModel#configureInternal()
         // and Table2SparkNodeModel#executeInternal()
-        @SuppressWarnings("deprecation")
-        final DataTableSpec outputSpec =
-            SparkDataTableUtil.toSparkOutputSpec(rowInput.getDataTableSpec());
+        final DataTableSpec outputSpec = rowInput.getDataTableSpec();
 
         final SparkDataPortObject outPortObject = new SparkDataPortObject(
             new SparkDataTable(contextPortObject.getContextID(), getNamedOutputObjectId(), outputSpec));

@@ -25,7 +25,6 @@ import java.io.IOException;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -46,7 +45,6 @@ import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import com.knime.bigdata.spark.node.SparkNodePlugin;
 
 /**
@@ -84,16 +82,10 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
             throw new InvalidSettingsException("Please connect the input port");
         }
 
-        // convert KNIME spec into spark spec and back into KNIME spec
-        final DataTableSpec inputSpec = (DataTableSpec)inSpecs[0];
-        @SuppressWarnings("deprecation")
-        // if you change this, you also need to change the behavior in the streamable operator implementation and in executeInternal()
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputSpec);
-        final SparkDataPortObjectSpec resultSpec =
-            new SparkDataPortObjectSpec(getContextID(inSpecs), outputSpec);
-        setConverterWarningMessage(inputSpec, outputSpec);
-
-        return new PortObjectSpec[]{resultSpec};
+        // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation(s)
+        // and in executeInternal()
+        final DataTableSpec spec = (DataTableSpec)inSpecs[0];
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(getContextID(inSpecs), spec)};
     }
 
 	private boolean isKNOSPMode() {
@@ -112,49 +104,12 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         final SparkContextID contextID = getContextID(inData);
         final BufferedDataTable inputTable = (BufferedDataTable)inData[0];
 
-        // if you change this, you also need to change the behavior in the streamable operator implementation and in configureInternal()
-        @SuppressWarnings("deprecation")
-        final DataTableSpec outputSpec = SparkDataTableUtil.toSparkOutputSpec(inputTable.getDataTableSpec());
-        setConverterWarningMessage(inputTable.getDataTableSpec(), outputSpec);
-
         final AbstractTable2SparkStreamableOperator streamableOp = createStreamableOperatorInternal(contextID);
         streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec);
 
+        // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation and in configureInternal()
         return new PortObject[]{new SparkDataPortObject(new SparkDataTable(contextID,
-            streamableOp.getNamedOutputObjectId(), outputSpec))};
-    }
-
-    /**
-     * Clears or sets the warning node messages if type converters are missing.
-     * @param inSpec current KNIME spec
-     * @param outSpec KNIME spec after converting to Spark and back to KNIME
-     */
-    private void setConverterWarningMessage(final DataTableSpec inSpec, final DataTableSpec outSpec) {
-        StringBuilder sb = new StringBuilder();
-        int nodeWarnings = 0;
-
-        for (int i = 0; i < inSpec.getNumColumns(); i++) {
-            final DataType inType = inSpec.getColumnSpec(i).getType();
-            final DataType outType = outSpec.getColumnSpec(i).getType();
-            if (!inType.equals(outType)) {
-                final String warning = String.format(
-                    "Data type of column '%s' changes between Spark and KNIME (type before: %s, after: %s).\n",
-                    inSpec.getColumnNames()[i], inType, outType);
-
-                if (nodeWarnings < 5) { // limit warning messages
-                    sb.append(warning);
-                    nodeWarnings++;
-                } else {
-                    LOGGER.warn(warning);
-                }
-            }
-        }
-
-        if (sb.length() > 0) {
-            setWarningMessage(sb.toString());
-        } else {
-            setWarningMessage(null);
-        }
+            streamableOp.getNamedOutputObjectId(), inputTable.getDataTableSpec()))};
     }
 
     /**
