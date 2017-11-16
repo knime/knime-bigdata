@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: KNIME Spark Executor Nodes
+Bundle-Name: KNIME Extension for Apache Spark Nodes
 Bundle-SymbolicName: com.knime.bigdata.spark.node;singleton:=true
 Bundle-Version: 2.2.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland

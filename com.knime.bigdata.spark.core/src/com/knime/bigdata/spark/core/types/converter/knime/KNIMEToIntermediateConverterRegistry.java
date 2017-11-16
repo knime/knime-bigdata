@@ -199,14 +199,14 @@ public class KNIMEToIntermediateConverterRegistry {
      *
      * <p>
      * Note there may be multiple type converters that match. This method returns the "first" one, so this may change
-     * between versions of KNIME Spark Executor (which is why this method is deprecated).
+     * between versions of the KNIME Extension for Apache Spark (which is why this method is deprecated).
      * </p>
      *
      * @param type The {@link IntermediateDataType} to get the converter for.
      * @return the {@link KNIMEToIntermediateConverter} to use or the default converter
      * @see #getDefaultConverter()
-     * @deprecated This implementation returns the first available converter, which may change between versions of KNIME
-     *             Spark Executor. New code should use {@link #getAll(IntermediateDataType)} instead.
+     * @deprecated This implementation returns the first available converter, which may change between versions of the
+     *             KNIME Extension for Apache Spark. New code should use {@link #getAll(IntermediateDataType)} instead.
      */
     @Deprecated
     public static KNIMEToIntermediateConverter get(final IntermediateDataType type) {

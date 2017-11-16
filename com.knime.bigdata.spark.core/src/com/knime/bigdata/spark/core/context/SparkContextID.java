@@ -30,7 +30,7 @@ import org.knime.core.node.config.ConfigWO;
 import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
- * Uniquely identifies a {@link SparkContext} in the KNIME Spark Executor extension.
+ * Uniquely identifies a {@link SparkContext} in the KNIME Extension for Apache Spark.
  *
  * @see SparkContext
  * @see SparkContextManager

@@ -115,7 +115,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
      */
     public SparkPreferencePage() {
         super();
-        setDescription("KNIME Spark Executor Preferences");
+        setDescription("KNIME Extension for Apache Spark Preferences");
     }
 
     @Override

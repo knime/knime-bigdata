@@ -39,7 +39,7 @@ public class MissingJobException extends KNIMESparkException {
      */
     public MissingJobException(final String jobId, final SparkVersion sparkVersion) {
         super("Could not find required Spark job for Spark version: " + sparkVersion.getLabel()
-            +". Possible reason: The extension that provides the KNIME Spark Executor jobs for your Spark version is not installed."
+            +". Possible reason: The KNIME Extension for Apache Spark that provides the jobs for your Spark version is not installed."
             + " Job id: " + jobId);
         m_jobId = jobId;
         m_sparkVersion = sparkVersion;

@@ -28,7 +28,7 @@ USAGE="Usage: $(basename $0) [--version <knime-version>|--basefiles <folder>] [-
 
 You have to specify exactly one of --version, --basefiles or --help.
 
-This script builds a KNIME AP installation file (tar.gz) for 64bit Linux, that has a the KNIME Spark Executor
+This script builds a KNIME AP installation file (tar.gz) for 64bit Linux, that has a the KNIME Extension for Apache Spark
 as well as a configurable list of features installed and possibly includes a license.
 
 You can use this script for example to prepare the KNIME installation on Hadoop cluster nodes that are supposed
@@ -143,7 +143,7 @@ echo "-Djava.awt.headless=true" >>"${KNIMEDIR}/knime.ini"
 echo
 
 pushd "${KNIMEDIR}" >/dev/null
-echo "#### Installing KNIME Spark Executor and streaming extensions"
+echo "#### Installing KNIME Extension for Apache Spark and streaming extensions"
 ./knime -data workspace -nosplash --launcher.suppressErrors -application org.eclipse.equinox.p2.director \
  -repository "${UPDATE_URL}" \
  -repository "${STORE_URL}" \

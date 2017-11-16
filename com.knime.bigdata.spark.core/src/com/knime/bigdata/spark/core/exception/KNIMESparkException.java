@@ -8,7 +8,7 @@ import java.io.StringWriter;
 import com.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * This class shall be used to indicate failures in the KNIME Spark Executor extension. The message of this exception
+ * This class shall be used to indicate failures in the KNIME Extension for Apache Spark. The message of this exception
  * class will be presented to a user e.g. in the tooltip text of a failed node in KNIME Analytics Platform. Therefore,
  * the message should provide an explanation or instruction that a user can act upon, e.g. change a setting, reset all
  * nodes. In those cases where this is not possible, e.g. if there was a NullPointerException, a class

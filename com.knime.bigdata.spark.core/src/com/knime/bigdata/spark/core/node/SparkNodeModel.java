@@ -122,13 +122,13 @@ public abstract class SparkNodeModel extends NodeModel {
     private static final String CFG_SPARK_DATA_OBJECTS = "RDDs";
 
     /**
-     * Key required to load legacy workflows (KNIME Spark Executor <= v1.3)
+     * Key required to load legacy workflows (KNIME Extension for Apache Spark <= v1.3)
      * @since 1.6.0
      */
     private static final String CFG_CONTEXT_LEGACY = "context";
 
     /**
-     * Key required to load current workflows (KNIME Spark Executor >v1.3)
+     * Key required to load current workflows (KNIME Extension for Apache Spark >v1.3)
      * @since 1.6.0
      */
     private static final String CFG_CONTEXT_ID = "contextID";
@@ -353,7 +353,7 @@ public abstract class SparkNodeModel extends NodeModel {
                     final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
                     m_sparkDataObjects.put(contextID, new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
                 } else if (sparkDataObjectsConfig.containsKey(CFG_CONTEXT_LEGACY + i)) {
-                    // Load legacy workflow (KNIME Spark Executor <= v1.3)
+                    // Load legacy workflow (KNIME Extension for Apache Spark <= v1.3)
                     final ConfigRO contextConfig = sparkDataObjectsConfig.getConfig(CFG_CONTEXT_LEGACY + i);
                     final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
                     m_sparkDataObjects.put(

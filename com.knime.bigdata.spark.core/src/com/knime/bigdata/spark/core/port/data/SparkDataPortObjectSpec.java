@@ -34,7 +34,7 @@ import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 
 /**
  * Spark data port object specification, which is uniquely described by a {@link SparkContextID}, a
- * {@link DataTableSpec} and the version of KNIME Spark Executor it was created with.
+ * {@link DataTableSpec} and the version of the KNIME Extension for Apache Spark it was created with.
  *
  * @author Tobias Koetter, KNIME GmbH
  * @author Bjoern Lohrmann, KNIME GmbH

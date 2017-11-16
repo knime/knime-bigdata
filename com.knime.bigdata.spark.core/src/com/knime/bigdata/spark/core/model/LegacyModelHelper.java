@@ -54,9 +54,9 @@ public interface LegacyModelHelper extends ModelHelper {
     /**
      * Inspects the given model instance and, if necessary, converts it into the current model. If the given model
      * instance does not need to be converted, this method does nothing.
-     * 
+     *
      * Converting legacy models may be necessary when loading KNIME workflows with Spark nodes, that were saved before
-     * KNIME Spark Executor 1.6.0 (an example would be the collaborative filtering models).
+     * KNIME Extension for Apache Spark 1.6.0 (an example would be the collaborative filtering models).
      */
     Object convertLegacyToNewModel(final Object modelInstance);
 }

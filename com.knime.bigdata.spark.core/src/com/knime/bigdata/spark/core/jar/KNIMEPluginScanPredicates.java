@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 import com.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * Common predicates to determine, which folders and jars of KNIME Spark Executor plugins should be scanned for classes
- * annotated with {@link SparkClass}. Use these in conjunction with the
+ * Common predicates to determine, which folders and jars of KNIME Extension for Apache Spark plugins should be scanned
+ * for classes annotated with {@link SparkClass}. Use these in conjunction with the
  * {@link DefaultSparkJarProvider#DefaultSparkJarProvider(com.knime.bigdata.spark.core.version.CompatibilityChecker, java.util.Collection)}
  * constructor.
  *

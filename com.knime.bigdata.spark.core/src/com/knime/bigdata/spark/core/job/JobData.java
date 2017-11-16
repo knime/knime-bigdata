@@ -30,7 +30,7 @@ import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 /**
  *
  * This class is a thin wrapper around a map (the "internal map") and meant to simplify data exchange between the KNIME
- * Spark Executor extension and Spark jobs running in a Spark environment (possibly on a remote server). Do not use this
+ * Extension for Apache Spark and Spark jobs running in a Spark environment (possibly on a remote server). Do not use this
  * class directly, please make a subclass of {@link JobInput} to ship parameters to your Spark job, and one of
  * {@link JobOutput} to ship output back into KNIME.
  *

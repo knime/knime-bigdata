@@ -175,7 +175,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
                 store.setValue(PREF_SPARK_PREFERENCES_INITIALIZED, true);
             } catch (Exception e) {
                 Logger.getLogger(SparkPreferenceInitializer.class)
-                    .error("Error when trying to import old Spark Executor preferences. Falling back to defaults.", e);
+                    .error("Error when trying to import old KNIME Extension for Apache Spark preferences. Falling back to defaults.", e);
             }
         }
     }
@@ -275,7 +275,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_OVERRIDE_SPARK_SETTINGS, getPresetBoolean(config, "jobserver.context.overrideSettings"));
         store.setDefault(PREF_CUSTOM_SPARK_SETTINGS, getPresetString(config, "jobserver.context.customSettings"));
 
-        // setup general KNIME Spark Executor settings
+        // setup general KNIME Extension for Apache Spark settings
         store.setDefault(PREF_DELETE_OBJECTS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteObjectsOnDispose"));
         store.setDefault(PREF_JOB_LOG_LEVEL, getPresetString(config, "knime.jobLogLevel"));
         store.setDefault(PREF_VERBOSE_LOGGING, getPresetBoolean(config, "knime.verboseLogging"));

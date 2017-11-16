@@ -38,7 +38,7 @@ import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
  * Default implementation of {@link SparkData}.
  *
  * @author Tobias Koetter, KNIME GmbH
- * @auhor Bjoern Lohrmann, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class DefaultSparkData implements SparkData {
 
@@ -47,12 +47,12 @@ public class DefaultSparkData implements SparkData {
     private static final String KEY_TABLE_NAME = "tableName";
 
     /**
-     * Key required to load legacy workflows (KNIME Spark Executor <= v1.3)
+     * Key required to load legacy workflows (KNIME Extension for Apache Spark <= v1.3)
      */
     private static final String KEY_CONTEXT_LEGACY = "context";
 
     /**
-     * Key required to load current workflows (KNIME Spark Executor >v1.3)
+     * Key required to load current workflows (KNIME Extension for Apache Spark >v1.3)
      */
     private static final String KEY_CONTEXT_ID = "contextID";
 
@@ -91,10 +91,10 @@ public class DefaultSparkData implements SparkData {
             final ModelContentRO sparkModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
 
             if (sparkModel.containsKey(KEY_CONTEXT_ID)) {
-                // Load current workflow (KNIME Spark Executor >v1.3)
+                // Load current workflow (KNIME Extension for Apache Spark >v1.3)
                 m_contextID = SparkContextID.fromConfigRO(sparkModel.getConfig(KEY_CONTEXT_ID));
             } else if (sparkModel.containsKey(KEY_CONTEXT_LEGACY)) {
-                // Load legacy workflow (KNIME Spark Executor <= v1.3)
+                // Load legacy workflow (KNIME Extension for Apache Spark <= v1.3)
                 m_contextID = SparkContextConfig.createSparkContextIDFromLegacyConfig(sparkModel.getConfig(KEY_CONTEXT_LEGACY));
             } else {
                 throw new IOException(String.format("Did not find one of the expected keys \"%s\" and \"%s\"", KEY_CONTEXT_LEGACY, KEY_CONTEXT_ID));

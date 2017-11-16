@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: KNIME Spark Executor jobs for Spark 1.6
+Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 1.6
 Bundle-SymbolicName: com.knime.bigdata.spark1_6;singleton:=true
 Bundle-Version: 2.2.0.qualifier
 Bundle-ClassPath: knime.jar,
