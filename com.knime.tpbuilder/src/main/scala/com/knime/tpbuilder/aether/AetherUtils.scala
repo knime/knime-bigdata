@@ -24,6 +24,10 @@ import com.knime.tpbuilder.Artifact
 import com.knime.tpbuilder.osgi.OsgiUtil
 import java.io.File
 import com.knime.tpbuilder.TPConfigReader.TPConfig
+import org.apache.maven.artifact.resolver.ArtifactResolver
+import org.eclipse.aether.impl.VersionRangeResolver
+import org.eclipse.aether.impl.RemoteRepositoryManager
+import org.eclipse.aether.impl.ArtifactDescriptorReader
 
 object AetherUtils {
   val localRepo = new LocalRepository(Paths.get(System.getProperty("user.home"), ".m2", "repository").toFile())
@@ -40,6 +44,14 @@ object AetherUtils {
     locator.getService(classOf[RepositorySystem])
   }
 
+  val artifactResolver = locator.getService(classOf[ArtifactResolver])
+  
+  val versionRangeResolver = locator.getService(classOf[VersionRangeResolver])
+  
+  val remoteRepositoryResolver = locator.getService(classOf[RemoteRepositoryManager])
+  
+  val artDescriptorReader = locator.getService(classOf[ArtifactDescriptorReader])
+  
   val repoSession = {
     val session = MavenRepositorySystemUtils.newSession().asInstanceOf[DefaultRepositorySystemSession]
     session.setLocalRepositoryManager(repoSys.newLocalRepositoryManager(session, AetherUtils.localRepo))

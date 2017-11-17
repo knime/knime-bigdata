@@ -1,21 +1,24 @@
 package com.knime.tpbuilder.aether
 
-import collection.JavaConverters._
+import java.io.File
+
+import scala.collection.JavaConverters.seqAsJavaListConverter
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
-import org.eclipse.aether.resolution.ArtifactRequest
-import com.knime.tpbuilder.Artifact
-import org.eclipse.aether.resolution.ArtifactResult
+
 import org.eclipse.aether.RepositorySystemSession
-import org.eclipse.aether.repository.RemoteRepository
-import scala.collection.mutable.HashSet
-import org.eclipse.aether.resolution.ArtifactResolutionException
-import com.knime.tpbuilder.osgi.OsgiUtil
-import com.knime.tpbuilder.TPConfigReader.TPConfig
-import org.eclipse.aether.util.artifact.SubArtifact
 import org.eclipse.aether.artifact.{ Artifact => AetherArtifact }
-import java.io.File
+import org.eclipse.aether.repository.RemoteRepository
+import org.eclipse.aether.resolution.ArtifactRequest
+import org.eclipse.aether.resolution.ArtifactResolutionException
+import org.eclipse.aether.util.artifact.SubArtifact
+
+import com.knime.tpbuilder.Artifact
+import com.knime.tpbuilder.TPConfigReader.TPConfig
+import com.knime.tpbuilder.maven.MavenHelper
+import com.knime.tpbuilder.osgi.OsgiUtil
+import com.knime.tpbuilder.License
 
 object DepGraphResolver {
 
@@ -58,7 +61,9 @@ object DepGraphResolver {
         val result = AetherUtils.repoSys.resolveArtifact(session,
           new ArtifactRequest(aetherArt, remoteRepos.asJava, null))
 
-        val resolvedArt = OsgiUtil.withBundleAndVersion(AetherUtils.aetherArtToArt(result.getArtifact), None, config)
+        val licenses = getLicenses(result.getArtifact, config)
+          
+        val resolvedArt = OsgiUtil.withBundleAndVersion(AetherUtils.aetherArtToArt(result.getArtifact), None, licenses, config)
         println(s"    Bundle-SymbolicName ${resolvedArt.bundle.get.bundleSymbolicName} / Bundle-Version: ${resolvedArt.bundle.get.bundleVersion}")
 
         // only grab the source for jars where this is explicitly requested
@@ -95,6 +100,13 @@ object DepGraphResolver {
         System.err.println(s"    Could not resolve source for: ${AetherUtils.aetherArtToArt(aetherArt).mvnCoordinate}")
         return None
       }
+    }
+  }
+
+  private def getLicenses(art: AetherArtifact, config: TPConfig): Seq[License] = {
+    TPConfig.getLicense(config)(AetherUtils.aetherArtToArt(art)) match {
+      case Some(license) => Seq(license)
+      case _ => MavenHelper.getLicenses(art).map(l => License(l.getName, l.getUrl, l.getDistribution, l.getComments))
     }
   }
 }

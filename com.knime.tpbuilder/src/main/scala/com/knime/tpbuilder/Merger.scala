@@ -29,13 +29,22 @@ object Merger {
       val mergedBundleName = proposeMergedBundleSymbolicName(mergedArt, mergeUnit, config)
       val mergedBundleVersion = proposeMergedBundleVersion(mergedArt, mergeUnit, config)
       
-      mergedArt = OsgiUtil.withBundle(mergedArt, 
-          BundleInfo(mergedBundleName, Version.parseVersion(mergedBundleVersion), false))
 
-      println(s"  Merge info: ${mergedArt.mvnCoordinate} (bundle: ${mergedArt.bundle.get.bundleSymbolicName} version: ${mergedArt.bundle.get.bundleVersion.toString}):\n" + 
-          mergeUnit.artifacts.map(artToMerge => "    " + artToMerge.mvnCoordinate).mkString("\n"))
-
-      doReplace(mergeUnit.artifacts, mergedArt, depGraph)
+      if (mergeUnit.artifacts.groupBy(_.bundle.get.licenses).size != 1) {
+        System.err.println(s"  NOT MERGING due to mixed licenses: ${mergedArt.mvnCoordinate} (bundle: ${mergedArt.bundle.get.bundleSymbolicName} version: ${mergedArt.bundle.get.bundleVersion.toString}):")
+        System.err.println(mergeUnit.artifacts.map(artToMerge => s"    ${artToMerge.mvnCoordinate} (Licenses: ${artToMerge.bundle.get.licenses.map(_.toString).mkString(", ")})").mkString("\n"))
+      } else {
+        mergedArt = OsgiUtil.withBundle(mergedArt, 
+            BundleInfo(mergedBundleName, 
+                Version.parseVersion(mergedBundleVersion), 
+                false, 
+                mergeUnit.artifacts.head.bundle.get.licenses))
+  
+        println(s"  Merge info: ${mergedArt.mvnCoordinate} (bundle: ${mergedArt.bundle.get.bundleSymbolicName} version: ${mergedArt.bundle.get.bundleVersion.toString}):\n" + 
+            mergeUnit.artifacts.map(artToMerge => "    " + artToMerge.mvnCoordinate).mkString("\n"))
+  
+        doReplace(mergeUnit.artifacts, mergedArt, depGraph)
+      }
     }
 
     Base.assertValidDepGraph(depGraph, config)
@@ -61,6 +70,8 @@ object Merger {
         units.getOrElseUpdate((art.group, art.version, deriveScalaVersion(art)), HashSet[Artifact]()).add(art)
       }
     }
+    
+    
 
     units
       .filter(entry => entry._2.size > 1)

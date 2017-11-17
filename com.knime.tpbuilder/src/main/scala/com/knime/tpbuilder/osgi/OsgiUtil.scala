@@ -21,6 +21,8 @@ import aQute.lib.osgi.Analyzer
 
 import scala.collection.mutable.Map
 import scala.collection.Set
+import com.knime.tpbuilder.maven.MavenHelper
+import com.knime.tpbuilder.License
 
 object OsgiUtil {
 
@@ -31,7 +33,7 @@ object OsgiUtil {
 
   val maven2Osgi = new DefaultMaven2OsgiConverter()
 
-  def withBundleAndVersion(art: Artifact, srcFile: Option[File], config: TPConfig): Artifact = {
+  def withBundleAndVersion(art: Artifact, srcFile: Option[File], licenses: Seq[License], config: TPConfig): Artifact = {
 
     val mavenArtifact = artToMavenArt(art)
 
@@ -43,7 +45,8 @@ object OsgiUtil {
     val bundleInfo = BundleInfo(
       osgiName,
       Version.parseVersion(osgiVersion),
-      isPrebundled)
+      isPrebundled,
+      licenses)
 
     withBundle(art, bundleInfo, Some(mavenArtifact.getFile), srcFile)
   }

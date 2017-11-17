@@ -1,14 +1,14 @@
 package com.knime.tpbuilder
 
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.jar.JarFile
-import org.apache.commons.io.FileUtils
+
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Set
-import com.knime.tpbuilder.TPConfigReader.TPArtifactGroup
-import com.knime.tpbuilder.aether.{DepGraphBuilder, DepGraphResolver}
+
+import org.apache.commons.io.FileUtils
+
+import com.knime.tpbuilder.aether.DepGraphBuilder
+import com.knime.tpbuilder.aether.DepGraphResolver
 import com.knime.tpbuilder.osgi.Bundler
 import com.knime.tpbuilder.osgi.P2SiteMaker
 
@@ -58,6 +58,11 @@ object Main extends App {
   println("=== Resolving all artifacts from dependency graph ===")
   DepGraphResolver.resolveDepGraph(depGraph, config)
   println()
+  
+  println("=== Checking licenses of maven artifacts ===")
+  LicenseChecker.checkLicenses(depGraph, config)
+  println()
+
   
   println("=== Merging artifacts by group ===")
   Merger.merge(depGraph, config)

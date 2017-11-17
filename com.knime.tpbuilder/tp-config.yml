@@ -698,6 +698,36 @@ bundleInstructions:
       "-noee": true
 
 
+# License specifications/overrides for maven artifacts whose maven metadata lacks
+# license information. 
+#
+# licenses:
+#   - coord: <maven-coordinate>
+#     name: <license-name>
+#     url: <license-URL>
+licenses:
+  - coord: asm:asm:jar:3.1
+    name: 3-Clause BSD License
+    url: http://asm.ow2.org/license.html
+    
+  - coord: jline:jline:jar:0.9.94
+    name: 3-Clause BSD License
+    url: https://raw.githubusercontent.com/jline/jline1/master/LICENSE.txt
+    
+  - coord: com.thoughtworks.paranamer:paranamer:jar:2.3
+    name: 3-Clause BSD License
+    url: https://github.com/paul-hammant/paranamer/raw/1ebd7271772d22399a145024d5672d7679c3856a/LICENSE.txt
+    
+  - coord: com.thoughtworks.paranamer:paranamer:jar:2.6
+    name: 3-Clause BSD License
+    url: https://raw.githubusercontent.com/paul-hammant/paranamer/4b7e215b9d1117fd4c5c1290aadcbd2e3ec76d20/LICENSE.txt
+
+  - coord: org.apache.zookeeper:zookeeper:jar:3.4.6
+    name: Apache License, Version 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
+
+
+
 #  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0
 #    instructions:
 #      Manifest-Version: 1.0

@@ -8,10 +8,34 @@ import scala.collection.Set
 import scala.collection.mutable.HashSet
 import com.knime.tpbuilder.TPConfigReader.TPConfig
 
+case class License(
+  name: String,
+  url: String,
+  distribution: String,
+  comments: String) {
+
+  override def toString(): String = {
+    val buf = new StringBuilder()
+    buf ++= name
+
+    if (url != null) {
+      buf ++= " "
+      buf ++= url
+    }
+
+    if (distribution != null) {
+      buf ++= s" (${distribution})"
+    }
+
+    buf.toString()
+  }
+}
+
 case class BundleInfo(
   bundleSymbolicName: String,
   bundleVersion: Version,
-  isPrebundled: Boolean)
+  isPrebundled: Boolean,
+  licenses: Seq[License])
 
 case class Artifact(
     group: String,
@@ -25,9 +49,7 @@ case class Artifact(
     isMerged: Boolean = false,
     mergedArtifacts: Option[Set[Artifact]] = None) {
 
-  override def toString(): String = {
-    mvnCoordinate()
-  }
+  override def toString = mvnCoordinate
 
   def mvnCoordinate(): String = {
     this match {

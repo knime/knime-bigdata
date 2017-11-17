@@ -115,6 +115,10 @@ object TPConfigReader {
     
   case class TPMavenRepo(var id: String,
     var url: String)
+    
+  case class TPLicense(var coord: String,
+    var name: String,
+    var url: String)
 
   case class TPConfig(
     var version: String,
@@ -129,6 +133,7 @@ object TPConfigReader {
     var mergeOverrides: TPMergeOverrides,
     var bundleInstructions: Seq[TPBundleInstruction],
     var mavenRepositories: Seq[TPMavenRepo],
+    var licenses: Seq[TPLicense],
     var artifactGroups: Seq[TPArtifactGroup])
 
   object TPConfig {
@@ -170,6 +175,14 @@ object TPConfigReader {
           return instruction.requireBundleInjections
       }
       Seq()
+    }
+    
+    def getLicense(config: TPConfig)(art: Artifact): Option[License] = {
+      val mvnCoord = art.mvnCoordinate
+      config.licenses.filter(_.coord == mvnCoord).headOption match {
+        case Some(license) => Some(License(license.name, license.url, null, null))
+        case _ => None
+      }
     }
 
 
@@ -313,6 +326,12 @@ object TPConfigReader {
           "The IDs of your maven repositories are not unique.")
     })
 
+    config.licenses = Option(config.licenses).getOrElse(Seq())
+    config.licenses.foreach(l => {
+      require(l.coord != null, "There is a license entry that does not specify a maven coordinate (coord attribute).")
+      require(l.name != null, "There is a license entry that does not specify a license name (name attribute).")
+      require(l.name != null, "There is a license entry that does not specify a license URL (url attribute).")
+    })
 
     config.artifactGroups = Option(config.artifactGroups).getOrElse(Seq())
 
