@@ -60,7 +60,8 @@ public class Spark_2_2_JavaDataFrameSnippetHelper extends Spark_2_2_AbstractJava
     @Override
     protected String[] getSystemImports() {
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
-            "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*", "org.apache.spark.sql.types.*","org.apache.spark.sql.*",
+            "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*",
+            "org.apache.spark.sql.types.*", "org.apache.spark.sql.*", "static org.apache.spark.sql.functions.*",
             "com.knime.bigdata.spark.core.exception.*",
             "com.knime.bigdata.spark2_2.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
