@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 29, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_3.converter.type;
+package org.knime.bigdata.spark1_3.converter.type;
 
 import java.io.Serializable;
 
@@ -38,8 +38,8 @@ import org.apache.spark.sql.types.ShortType;
 import org.apache.spark.sql.types.StringType;
 import org.apache.spark.sql.types.TimestampType;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
 
 /**
  *

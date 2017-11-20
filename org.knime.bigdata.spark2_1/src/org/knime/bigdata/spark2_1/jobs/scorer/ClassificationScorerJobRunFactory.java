@@ -18,12 +18,12 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.scorer;
+package org.knime.bigdata.spark2_1.jobs.scorer;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
-import com.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
+import org.knime.bigdata.spark.node.scorer.accuracy.SparkAccuracyScorerNodeModel;
 
 /**
  *

@@ -15,12 +15,12 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark1_6.jobs.sql;
+package org.knime.bigdata.spark1_6.jobs.sql;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.sql.SparkSQLJobInput;
-import com.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
-import com.knime.bigdata.spark.node.sql.SparkSQLNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.sql.SparkSQLJobInput;
+import org.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
+import org.knime.bigdata.spark.node.sql.SparkSQLNodeModel;
 
 /**
  * @author Sascha Wolke, KNIME.com

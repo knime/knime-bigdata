@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_3.api;
+package org.knime.bigdata.spark1_3.api;
 
 
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 
 /**

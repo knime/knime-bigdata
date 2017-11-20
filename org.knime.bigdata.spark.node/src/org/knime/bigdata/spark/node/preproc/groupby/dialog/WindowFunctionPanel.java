@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 
 import java.awt.Color;
 
@@ -40,7 +40,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * Panel representing time based window settings.

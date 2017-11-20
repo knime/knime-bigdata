@@ -18,9 +18,9 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.rdd.unpersist;
+package org.knime.bigdata.spark.node.util.rdd.unpersist;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

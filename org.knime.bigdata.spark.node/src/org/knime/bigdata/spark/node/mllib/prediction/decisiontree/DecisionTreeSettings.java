@@ -18,7 +18,7 @@
  * History
  *   Created on 27.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -33,9 +33,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

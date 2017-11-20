@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 29, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.types.converter.spark;
+package org.knime.bigdata.spark.core.types.converter.spark;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * For explanations see {@link DefaultIntermediateToSparkConverter}.

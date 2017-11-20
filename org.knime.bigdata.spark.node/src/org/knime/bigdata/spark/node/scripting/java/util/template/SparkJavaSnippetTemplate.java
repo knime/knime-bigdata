@@ -45,7 +45,7 @@
  * History
  *   02.04.2012 (hofer): created
  */
-package com.knime.bigdata.spark.node.scripting.java.util.template;
+package org.knime.bigdata.spark.node.scripting.java.util.template;
 
 import org.knime.base.node.jsnippet.template.JavaSnippetTemplate;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;

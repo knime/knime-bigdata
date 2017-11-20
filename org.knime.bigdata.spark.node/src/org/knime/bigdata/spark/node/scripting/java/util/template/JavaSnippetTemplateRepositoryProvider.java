@@ -18,11 +18,11 @@
  * History
  *   Created on May 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util.template;
+package org.knime.bigdata.spark.node.scripting.java.util.template;
 
 import org.knime.base.node.jsnippet.template.TemplateRepositoryProvider;
 
-import com.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**
  *

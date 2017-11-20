@@ -18,7 +18,7 @@
  * History
  *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.correlation.column;
+package org.knime.bigdata.spark.node.statistics.correlation.column;
 
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -36,14 +36,14 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
-import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
-import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
+import org.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
+import org.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 
 /**
  *

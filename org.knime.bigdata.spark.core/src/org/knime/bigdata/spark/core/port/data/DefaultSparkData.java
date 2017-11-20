@@ -18,7 +18,7 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -31,8 +31,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * Default implementation of {@link SparkData}.

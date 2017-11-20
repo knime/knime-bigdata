@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_5.jobs.mllib.prediction.linear.regression;
+package org.knime.bigdata.spark1_5.jobs.mllib.prediction.linear.regression;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -13,9 +13,9 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.regression.LinearRegressionWithSGD;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark1_5.jobs.mllib.prediction.linear.AbstractRegularizationJob;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
+import org.knime.bigdata.spark1_5.jobs.mllib.prediction.linear.AbstractRegularizationJob;
 
 import scala.Tuple2;
 

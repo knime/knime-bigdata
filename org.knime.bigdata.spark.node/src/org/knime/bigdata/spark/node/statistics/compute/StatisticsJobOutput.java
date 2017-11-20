@@ -18,10 +18,10 @@
  * History
  *   Created on 11.09.2015 by dwk
  */
-package com.knime.bigdata.spark.node.statistics.compute;
+package org.knime.bigdata.spark.node.statistics.compute;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 03.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.context.create;
+package org.knime.bigdata.spark.node.util.context.create;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +36,14 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.ViewUtils;
 
-import com.knime.bigdata.spark.core.context.SparkContext;
-import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 
 /**
  *

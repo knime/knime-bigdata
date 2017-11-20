@@ -18,11 +18,11 @@
  * History
  *   Created on 08.02.2016 by koetter
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *

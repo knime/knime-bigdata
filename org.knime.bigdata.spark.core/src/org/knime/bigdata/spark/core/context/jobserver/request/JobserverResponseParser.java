@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 8, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -39,8 +39,8 @@ import javax.json.JsonValue.ValueType;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
 
-import com.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 
 /**
  * The Spark jobserver reports errors quite inconsistently (different ways of indicating failure cause, in some failure

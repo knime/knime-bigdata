@@ -18,7 +18,7 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util.helper;
+package org.knime.bigdata.spark.node.scripting.java.util.helper;
 
 /**
  * Extension point registry for {@link JavaSnippetHelper}s.
@@ -28,7 +28,7 @@ package com.knime.bigdata.spark.node.scripting.java.util.helper;
 public class JavaDataFrameSnippetHelperRegistry extends AbstractJavaSnippetHelperRegistry {
 
     /** The id of the converter extension point. */
-    private static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.JavaDataFrameSnippetHelper";
+    private static final String EXT_POINT_ID = "org.knime.bigdata.spark.node.JavaDataFrameSnippetHelper";
 
     /**The attribute of the extension point.*/
     private static final String EXT_POINT_ATTR_DF = "HelperClass";

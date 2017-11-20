@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_3.jobs.scripting.java;
+package org.knime.bigdata.spark1_3.jobs.scripting.java;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * This class can be used to handle the loading of jars into a {@link SparkContext}, and to track which jars are already

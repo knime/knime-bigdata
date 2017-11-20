@@ -18,12 +18,12 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.linear;
+package org.knime.bigdata.spark.node.mllib.prediction.linear;
 
-import com.knime.bigdata.spark.core.job.ClassificationJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
+import org.knime.bigdata.spark.core.job.ClassificationJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
 
 /**
  * @author Tobias Koetter, KNIME.com, dwk

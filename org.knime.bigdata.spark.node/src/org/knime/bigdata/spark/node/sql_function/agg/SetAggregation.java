@@ -18,14 +18,14 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.sql_function.agg;
+package org.knime.bigdata.spark.node.sql_function.agg;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.collection.SetCell;
 
-import com.knime.bigdata.spark.node.sql_function.NoSettingsFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
+import org.knime.bigdata.spark.node.sql_function.NoSettingsFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 
 /**
  * Aggregates all values of a given column into a set.

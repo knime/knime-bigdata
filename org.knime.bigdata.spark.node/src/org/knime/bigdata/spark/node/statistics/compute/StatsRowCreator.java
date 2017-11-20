@@ -18,7 +18,7 @@
  * History
  *   Created on 26.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.compute;
+package org.knime.bigdata.spark.node.statistics.compute;
 
 import java.util.Iterator;
 
@@ -37,7 +37,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
-import com.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 
 /**
  *

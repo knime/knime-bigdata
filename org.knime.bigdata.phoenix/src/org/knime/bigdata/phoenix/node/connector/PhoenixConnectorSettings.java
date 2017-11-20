@@ -18,11 +18,11 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.phoenix.node.connector;
+package org.knime.bigdata.phoenix.node.connector;
 
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
 
-import com.knime.bigdata.phoenix.utility.PhoenixUtility;
+import org.knime.bigdata.phoenix.utility.PhoenixUtility;
 
 /**
  * Settings for the Impala connector node.

@@ -42,14 +42,14 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.commons.config.eclipse;
+package org.knime.bigdata.commons.config.eclipse;
 
 import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.core.node.NodeLogger.LEVEL;
 
-import com.knime.bigdata.commons.CommonsPlugin;
+import org.knime.bigdata.commons.CommonsPlugin;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -57,49 +57,49 @@ import com.knime.bigdata.commons.CommonsPlugin;
 public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
 
     /** Preference key for the core-site.xml. */
-    public static final String PREF_CORE_SITE_FILE = "com.knime.bigdata.config.core-site.file";
+    public static final String PREF_CORE_SITE_FILE = "org.knime.bigdata.config.core-site.file";
     /** Preference key for the hdfs-site.xml. */
-    public static final String PREF_HDFS_SITE_FILE = "com.knime.bigdata.config.hdfs-site.file";
+    public static final String PREF_HDFS_SITE_FILE = "org.knime.bigdata.config.hdfs-site.file";
 
     /** Enable SSL trust store configuration (verify server). */
-    public static final String PREF_TRUSTSTORE_ENABLE = "com.knime.bigdata.config.truststore.enable";
+    public static final String PREF_TRUSTSTORE_ENABLE = "org.knime.bigdata.config.truststore.enable";
     /** Preference key for hostname verifier */
-    public static final String PREF_TRUSTSTORE_HOSTNAME_VERIFIER = "com.knime.bigdata.config.truststore.hostname-verifier";
+    public static final String PREF_TRUSTSTORE_HOSTNAME_VERIFIER = "org.knime.bigdata.config.truststore.hostname-verifier";
     /** Preference key for truststore location */
-    public static final String PREF_TRUSTSTORE_LOCATION = "com.knime.bigdata.config.truststore.location";
+    public static final String PREF_TRUSTSTORE_LOCATION = "org.knime.bigdata.config.truststore.location";
     /** Preference key for truststore password */
-    public static final String PREF_TRUSTSTORE_PASSWORD = "com.knime.bigdata.config.truststore.password";
+    public static final String PREF_TRUSTSTORE_PASSWORD = "org.knime.bigdata.config.truststore.password";
     /** Preference key for truststore type */
-    public static final String PREF_TRUSTSTORE_TYPE = "com.knime.bigdata.config.truststore.type";
+    public static final String PREF_TRUSTSTORE_TYPE = "org.knime.bigdata.config.truststore.type";
     /** Preference key for truststore reload interval */
-    public static final String PREF_TRUSTSTORE_RELOAD_INTERVAL = "com.knime.bigdata.config.truststore.reload-interval";
+    public static final String PREF_TRUSTSTORE_RELOAD_INTERVAL = "org.knime.bigdata.config.truststore.reload-interval";
 
     /** Enable client SSL certificates (verify client). */
-    public static final String PREF_KEYSTORE_ENABLE = "com.knime.bigdata.config.keystore.enable";
+    public static final String PREF_KEYSTORE_ENABLE = "org.knime.bigdata.config.keystore.enable";
     /** Preference key for keystore location */
-    public static final String PREF_KEYSTORE_LOCATION = "com.knime.bigdata.config.keystore.location";
+    public static final String PREF_KEYSTORE_LOCATION = "org.knime.bigdata.config.keystore.location";
     /** Preference key for keystore password */
-    public static final String PREF_KEYSTORE_PASSWORD = "com.knime.bigdata.config.keystore.password";
+    public static final String PREF_KEYSTORE_PASSWORD = "org.knime.bigdata.config.keystore.password";
     /** Preference key for keystore key password */
-    public static final String PREF_KEYSTORE_KEYPASSWORD = "com.knime.bigdata.config.keystore.keypassword";
+    public static final String PREF_KEYSTORE_KEYPASSWORD = "org.knime.bigdata.config.keystore.keypassword";
     /** Preference key for keystore type */
-    public static final String PREF_KEYSTORE_TYPE = "com.knime.bigdata.config.keystore.type";
+    public static final String PREF_KEYSTORE_TYPE = "org.knime.bigdata.config.keystore.type";
     /** Preference key for custom kerberos user. */
-    public static final String PREF_KERBEROS_USER = "com.knime.bigdata.config.kerberos.user";
+    public static final String PREF_KERBEROS_USER = "org.knime.bigdata.config.kerberos.user";
     /** Preference key for custom kerberos keytab file. */
-    public static final String PREF_KERBEROS_KEYTAB_FILE = "com.knime.bigdata.config.kerberos.keytab.file";
+    public static final String PREF_KERBEROS_KEYTAB_FILE = "org.knime.bigdata.config.kerberos.keytab.file";
 
     /**Kerberos logging flag.*/
-    public static final String PREF_KERBEROS_LOGGING_ENABLED = "com.knime.bigdata.config.kerberos.logging.enabled";
+    public static final String PREF_KERBEROS_LOGGING_ENABLED = "org.knime.bigdata.config.kerberos.logging.enabled";
     /**Kerberos logging level.*/
-    public static final String PREF_KERBEROS_LOGGING_LEVEL = "com.knime.bigdata.config.kerberos.logging.level";
+    public static final String PREF_KERBEROS_LOGGING_LEVEL = "org.knime.bigdata.config.kerberos.logging.level";
 
     /** Preference key for JDBC impersonation parameter flag. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG =
-            "com.knime.bigdata.config.kerberos.jdbc.impersonation.flag";
+            "org.knime.bigdata.config.kerberos.jdbc.impersonation.flag";
     /** Preference key for JDBC impersonation parameter. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM =
-            "com.knime.bigdata.config.kerberos.jdbc.impersonation.param";
+            "org.knime.bigdata.config.kerberos.jdbc.impersonation.param";
     /**The place holder for the workflow user in the JDBC impersonation parameter.*/
     public static final String JDBC_IMPERSONATION_PLACEHOLDER = "{1}";
 

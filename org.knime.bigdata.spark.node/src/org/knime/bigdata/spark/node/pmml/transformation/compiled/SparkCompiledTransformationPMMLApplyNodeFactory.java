@@ -18,9 +18,9 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.pmml.transformation.compiled;
+package org.knime.bigdata.spark.node.pmml.transformation.compiled;
 
-import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeFactory;
+import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeFactory;
 
 /**
  *

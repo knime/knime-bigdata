@@ -18,7 +18,7 @@
  * History
  *   Created on 08.05.2014 by thor
  */
-package com.knime.bigdata.impala.utility;
+package org.knime.bigdata.impala.utility;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -41,8 +41,8 @@ import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
-import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
-import com.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
 import com.knime.licenses.LicenseFeatures;

@@ -46,7 +46,7 @@
  *    23.07.2008 (Tobias Koetter): created
  */
 
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,29 +80,29 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.SparkPlugin;
-import com.knime.bigdata.spark.core.context.SparkContext;
-import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.MissingJobException;
-import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.util.MLlibSettings;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.port.data.SparkData;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.SparkPlugin;
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.MissingJobException;
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.data.SparkData;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Basic class that all NodeModel classes need to extend if they work with Spark data/model/etc objects.

@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,9 +58,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import com.knime.bigdata.spark.node.preproc.groupby.dialog.AbstractAggregationFunctionRow;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.AbstractAggregationFunctionRow;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 27.08.2015 by dwk
  */
-package com.knime.bigdata.spark.core.context.jobserver;
+package org.knime.bigdata.spark.core.context.jobserver;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -26,12 +26,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
-import com.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;
-import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
+import org.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;
+import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * Simple utility that uploads some file to the jobserver and can clean up afterwards

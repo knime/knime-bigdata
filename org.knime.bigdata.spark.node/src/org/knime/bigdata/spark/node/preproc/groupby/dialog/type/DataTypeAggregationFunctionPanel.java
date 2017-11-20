@@ -43,7 +43,7 @@
  * -------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog.type;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog.type;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -85,8 +85,8 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
 import org.knime.core.node.util.DataTypeListCellRenderer;
 
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 
 /**

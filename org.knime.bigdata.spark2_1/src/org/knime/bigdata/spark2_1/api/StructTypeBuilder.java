@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_1.api;
+package org.knime.bigdata.spark2_1.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.InvalidSchemaException;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.InvalidSchemaException;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Builder for Spark {@link StructType} objects.

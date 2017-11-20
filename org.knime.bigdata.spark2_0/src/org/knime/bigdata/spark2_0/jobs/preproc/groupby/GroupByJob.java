@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.groupby;
+package org.knime.bigdata.spark2_0.jobs.preproc.groupby;
 
 import static scala.collection.JavaConversions.asScalaBuffer;
 
@@ -28,16 +28,16 @@ import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobInput;
-import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobInput;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobOutput;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.SparkJob;
+import org.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
  * Executes a Spark group by and/or aggregation.

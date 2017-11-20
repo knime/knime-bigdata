@@ -18,12 +18,12 @@
  * History
  *   Created on 08.02.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.fetchrows;
+package org.knime.bigdata.spark2_1.jobs.fetchrows;
 
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
-import com.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
+import org.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
 
 /**
  *

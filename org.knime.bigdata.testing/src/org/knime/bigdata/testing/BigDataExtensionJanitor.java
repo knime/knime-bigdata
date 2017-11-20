@@ -46,7 +46,7 @@
  * History
  *   Nov 7, 2016 (Sascha Wolke, KNIME.com): created
  */
-package com.knime.bigdata.testing;
+package org.knime.bigdata.testing;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -382,7 +382,7 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
     @Override
     public String getID() {
-        return "com.knime.bigdata.testing.BigDataExtensionJanitor";
+        return "org.knime.bigdata.testing.BigDataExtensionJanitor";
     }
 
     @Override

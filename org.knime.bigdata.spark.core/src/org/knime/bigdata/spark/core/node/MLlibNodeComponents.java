@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 15, 2016 by oole
  */
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;

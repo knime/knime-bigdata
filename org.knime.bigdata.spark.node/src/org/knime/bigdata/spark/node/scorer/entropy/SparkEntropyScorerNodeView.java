@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 30, 2015 by bjoern
  */
-package com.knime.bigdata.spark.node.scorer.entropy;
+package org.knime.bigdata.spark.node.scorer.entropy;
 
 import org.knime.base.node.mine.scorer.entrop.AbstractEntropyNodeView;
 

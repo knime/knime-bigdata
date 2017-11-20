@@ -18,7 +18,7 @@
  * History
  *   Created on Oct 11, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.node.preproc.missingval.handler;
+package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
 import org.knime.base.node.preproc.pmml.missingval.DefaultMissingValueHandlerPanel;
 import org.knime.time.util.DialogComponentDateTimeSelection;

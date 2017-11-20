@@ -18,14 +18,14 @@
  * History
  *   Created on May 9, 2016 by oole
  */
-package com.knime.bigdata.spark.node.preproc.sampling;
+package org.knime.bigdata.spark.node.preproc.sampling;
 
 import java.util.Arrays;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.CountMethod;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.SamplingMethod;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.CountMethod;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.SamplingMethod;
 
 /**
  *

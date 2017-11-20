@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.api;
+package org.knime.bigdata.spark1_6.api;
 
 import java.util.Set;
 
@@ -27,7 +27,7 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

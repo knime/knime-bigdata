@@ -45,7 +45,7 @@
  * History
  *   Sep 25, 2014 (Patrick Winter): created
  */
-package com.knime.bigdata.scripting.nodes.python.hive;
+package org.knime.bigdata.scripting.nodes.python.hive;
 
 import org.knime.base.node.util.exttool.ExtToolStderrNodeView;
 import org.knime.base.node.util.exttool.ExtToolStdoutNodeView;

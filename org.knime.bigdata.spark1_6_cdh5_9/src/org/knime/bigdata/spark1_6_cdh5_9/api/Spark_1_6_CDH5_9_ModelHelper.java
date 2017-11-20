@@ -18,9 +18,9 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6_cdh5_9.api;
+package org.knime.bigdata.spark1_6_cdh5_9.api;
 
-import com.knime.bigdata.spark.core.model.DefaultModelHelper;
+import org.knime.bigdata.spark.core.model.DefaultModelHelper;
 
 /**
  *

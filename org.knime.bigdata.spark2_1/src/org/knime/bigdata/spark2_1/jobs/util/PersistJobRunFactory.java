@@ -18,11 +18,11 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.util;
+package org.knime.bigdata.spark2_1.jobs.util;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
-import com.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
+import org.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeModel;
 
 /**
  *

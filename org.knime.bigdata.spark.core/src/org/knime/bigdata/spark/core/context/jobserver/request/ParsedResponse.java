@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 7, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import javax.json.JsonStructure;
 import javax.json.JsonValue.ValueType;

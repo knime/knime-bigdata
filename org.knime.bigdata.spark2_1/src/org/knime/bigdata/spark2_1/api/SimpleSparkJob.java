@@ -18,15 +18,15 @@
  * History
  *   Created on May 3, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_1.api;
+package org.knime.bigdata.spark2_1.api;
 
 import java.io.Serializable;
 
 import org.apache.spark.SparkContext;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Interface for simple Spark jobs that only take a {@link JobInput} object, but do not return anything to the client

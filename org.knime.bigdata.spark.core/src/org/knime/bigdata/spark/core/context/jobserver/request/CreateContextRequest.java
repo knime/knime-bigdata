@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 7, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import java.util.ArrayList;
 
@@ -27,11 +27,11 @@ import javax.ws.rs.core.Response;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
-import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
+import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * Request to create a new Spark context. The return value of {@link #send()} is true if the context was created

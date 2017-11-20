@@ -18,7 +18,7 @@
  * History
  *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.filter.column;
+package org.knime.bigdata.spark.node.preproc.filter.column;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.container.ColumnRearranger;
@@ -31,8 +31,8 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *

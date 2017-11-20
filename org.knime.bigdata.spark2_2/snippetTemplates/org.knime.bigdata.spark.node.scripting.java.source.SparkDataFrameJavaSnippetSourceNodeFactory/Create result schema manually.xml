@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Create result schema_54069b77-6fee-4373-ab87-baf91edaebe3.xml">
-<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory"/>
+<entry key="Meta category" type="xstring" value="org.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="Create result schema manually"/>
 <entry key="Description" type="xstring" value="This template shows you how to manually create the StructType of the result data frame."/>

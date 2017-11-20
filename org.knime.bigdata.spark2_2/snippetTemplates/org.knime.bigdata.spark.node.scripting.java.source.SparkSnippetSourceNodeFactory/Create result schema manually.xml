@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="Create result schema manually.xml">
-<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"/>
+<entry key="Meta category" type="xstring" value="org.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="Create result schema manually"/>
 <entry key="Description" type="xstring" value="This template shows you how to overwrite the getSchema() method to manually create the StructType of the result RDD. The template returns a StructType that defines four result columns of different types."/>

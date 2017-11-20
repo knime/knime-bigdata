@@ -18,16 +18,16 @@
  * History
  *   Created on Apr 19, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.types.converter.knime;
+package org.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 
-import com.knime.bigdata.spark.core.types.TypeConverter;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.TypeConverter;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 
 /**
  * Interface for all {@link TypeConverter}s, that convert from KNIME {@link DataType}s to {@link IntermediateDataType}s.

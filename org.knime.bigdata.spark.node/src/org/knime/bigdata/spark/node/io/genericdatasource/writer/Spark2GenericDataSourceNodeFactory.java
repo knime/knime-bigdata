@@ -18,11 +18,11 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer;
 
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  * Default spark 2 generic data source node factory.

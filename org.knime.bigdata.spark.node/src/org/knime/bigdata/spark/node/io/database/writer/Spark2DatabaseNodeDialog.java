@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.database.writer;
+package org.knime.bigdata.spark.node.io.database.writer;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -37,7 +37,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
  * Dialog for the Spark to JDBC node.

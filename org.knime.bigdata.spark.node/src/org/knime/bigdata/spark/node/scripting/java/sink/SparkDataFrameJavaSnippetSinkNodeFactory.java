@@ -18,14 +18,14 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java.sink;
+package org.knime.bigdata.spark.node.scripting.java.sink;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 
 /**
  *

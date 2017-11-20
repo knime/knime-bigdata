@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 2, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context;
+package org.knime.bigdata.spark.core.context;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,7 +27,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * Uniquely identifies a {@link SparkContext} in the KNIME Extension for Apache Spark.

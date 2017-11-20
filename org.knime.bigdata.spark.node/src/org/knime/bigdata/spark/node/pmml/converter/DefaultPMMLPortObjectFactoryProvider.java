@@ -18,10 +18,10 @@
  * History
  *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.converter;
+package org.knime.bigdata.spark.node.pmml.converter;
 
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
 
 /**
  *

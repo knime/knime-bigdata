@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
 import java.io.File;
 import java.net.URI;
@@ -45,18 +45,18 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
-import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.jar.bundle.BundleGroupSparkJarRegistry;
+import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * @author Sascha Wolke, KNIME.com

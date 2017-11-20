@@ -18,11 +18,11 @@
  * History
  *   Created on May 9, 2016 by oole
  */
-package com.knime.bigdata.spark.node.preproc.convert.category2number;
+package org.knime.bigdata.spark.node.preproc.convert.category2number;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
  *

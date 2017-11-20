@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor;
+package org.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor;
 
 import java.io.File;
 import java.io.Serializable;
@@ -33,17 +33,17 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark2_1.api.ModelUtils;
-import com.knime.bigdata.spark2_1.api.NamedObjects;
-import com.knime.bigdata.spark2_1.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_1.api.TypeConverters;
-import com.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJob;
-import com.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringJob;
-import com.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
+import org.knime.bigdata.spark2_1.api.ModelUtils;
+import org.knime.bigdata.spark2_1.api.NamedObjects;
+import org.knime.bigdata.spark2_1.api.SparkJobWithFiles;
+import org.knime.bigdata.spark2_1.api.TypeConverters;
+import org.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJob;
+import org.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringJob;
+import org.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
 
 /**
  * applies previously learned MLlib model to given data frame, predictions are inserted into a new data frame and (temporarily)

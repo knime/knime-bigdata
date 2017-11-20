@@ -18,12 +18,12 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.core.sql_function;
+package org.knime.bigdata.spark.core.sql_function;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Spark SQL function job input.

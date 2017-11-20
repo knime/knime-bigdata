@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.category2number;
+package org.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -38,9 +38,9 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

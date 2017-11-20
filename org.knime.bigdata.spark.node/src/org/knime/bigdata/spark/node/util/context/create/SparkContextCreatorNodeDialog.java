@@ -18,7 +18,7 @@
  * History
  *   Created on 03.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.context.create;
+package org.knime.bigdata.spark.node.util.context.create;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -42,8 +42,8 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *

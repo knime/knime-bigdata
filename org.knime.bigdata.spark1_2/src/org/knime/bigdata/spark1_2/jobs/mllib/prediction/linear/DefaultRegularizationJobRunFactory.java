@@ -18,11 +18,11 @@
  * History
  *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.linear;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.linear;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
 
 /**
  *

@@ -18,12 +18,12 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.preproc.convert.category2number;
+package org.knime.bigdata.spark2_1.jobs.preproc.convert.category2number;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.SparkCategory2NumberNodeModel;
 
 /**
  *

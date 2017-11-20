@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.connector;
+package org.knime.bigdata.hive.node.connector;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -40,9 +40,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.util.StringHistoryPanel;
 
-import com.knime.bigdata.commons.icons.BigDataIcons;
-import com.knime.bigdata.hive.utility.HiveDriverDetector;
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.commons.icons.BigDataIcons;
+import org.knime.bigdata.hive.utility.HiveDriverDetector;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Dialog for the Hive Connector node.

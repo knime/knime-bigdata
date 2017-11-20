@@ -18,7 +18,7 @@
  * History
  *   Created on 04.10.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.context;
+package org.knime.bigdata.spark.core.port.context;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -33,8 +33,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
 
 /**
  *

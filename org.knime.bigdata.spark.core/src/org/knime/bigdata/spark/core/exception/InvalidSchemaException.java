@@ -1,6 +1,6 @@
-package com.knime.bigdata.spark.core.exception;
+package org.knime.bigdata.spark.core.exception;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 23.06.2016 by oole
  */
-package com.knime.bigdata.spark.node.io.impala.writer;
+package org.knime.bigdata.spark.node.io.impala.writer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,8 +28,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 
-import com.knime.bigdata.impala.utility.ImpalaUtility;
-import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
+import org.knime.bigdata.impala.utility.ImpalaUtility;
+import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
 
 /**
  *

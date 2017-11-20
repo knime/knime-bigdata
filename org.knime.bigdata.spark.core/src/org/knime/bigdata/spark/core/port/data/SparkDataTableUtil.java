@@ -18,7 +18,7 @@
  * History
  *   Created on 28.05.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -36,17 +36,17 @@ import org.knime.core.data.RowKey;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
-import com.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * Class with utility functions for {@link SparkDataTable}.

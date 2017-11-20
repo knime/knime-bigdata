@@ -18,7 +18,7 @@
  * History
  *   Created on May 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util.template;
+package org.knime.bigdata.spark.node.scripting.java.util.template;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,8 +28,8 @@ import org.knime.base.node.jsnippet.template.AbstractJSnippetTemplateProvider;
 import org.knime.base.node.jsnippet.template.TemplateProvider;
 import org.knime.base.node.jsnippet.template.TemplateRepository;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *
@@ -41,7 +41,7 @@ public class JavaSnippetTemplateProviderRegistry extends SparkProviderRegistry<J
         new WorkspaceTemplateRepositoryProvider().getRepository();
 
     /** The id of the converter extension point. */
-    private static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.JavaSnippetTemplateRepository";
+    private static final String EXT_POINT_ID = "org.knime.bigdata.spark.node.JavaSnippetTemplateRepository";
 
     private static class AggregateTemplateRepository
         extends AbstractJSnippetTemplateProvider<SparkJavaSnippetTemplate> {

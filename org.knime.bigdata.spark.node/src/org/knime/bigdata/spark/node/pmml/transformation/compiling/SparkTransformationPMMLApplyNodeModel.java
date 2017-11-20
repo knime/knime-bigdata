@@ -18,7 +18,7 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.pmml.transformation.compiling;
+package org.knime.bigdata.spark.node.pmml.transformation.compiling;
 
 import java.io.IOException;
 
@@ -36,8 +36,8 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 import net.sf.saxon.s9api.MessageListener;

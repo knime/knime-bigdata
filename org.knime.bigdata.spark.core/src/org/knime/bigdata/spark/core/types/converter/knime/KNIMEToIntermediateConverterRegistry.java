@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.knime;
+package org.knime.bigdata.spark.core.types.converter.knime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,10 +39,10 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * Registry class by which to obtain the {@link KNIMEToIntermediateConverter}s registered at the
@@ -56,7 +56,7 @@ public class KNIMEToIntermediateConverterRegistry {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(KNIMEToIntermediateConverterRegistry.class);
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.KNIMEToIntermediateConverter";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.KNIMEToIntermediateConverter";
 
     /** The attribute of the converter extension point. */
     public static final String EXT_POINT_ATTR_DF = "ProviderClass";

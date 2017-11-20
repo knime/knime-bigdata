@@ -18,12 +18,12 @@
  * History
  *   Created on 28.01.2016 by koetter
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 import java.io.File;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContext;
 
 /**
  * This interface describes a Spark job run that requires input files. These input files are expected to be provided by

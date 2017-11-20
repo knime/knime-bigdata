@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.core.context.jobserver.rest;
+package org.knime.bigdata.spark.core.context.jobserver.rest;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * creates and handles REST requests

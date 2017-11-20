@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.node.mllib.clustering.kmeans;
+package org.knime.bigdata.spark.node.mllib.clustering.kmeans;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,20 +33,20 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
 
 /**
  *

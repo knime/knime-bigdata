@@ -18,7 +18,7 @@
  * History
  *   Created on 28.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.linear;
+package org.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -35,9 +35,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

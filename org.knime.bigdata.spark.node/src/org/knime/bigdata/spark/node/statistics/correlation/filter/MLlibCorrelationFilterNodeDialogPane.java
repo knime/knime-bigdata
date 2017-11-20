@@ -45,13 +45,13 @@
  * History
  *   18.02.2007 (wiswedel): created
  */
-package com.knime.bigdata.spark.node.statistics.correlation.filter;
+package org.knime.bigdata.spark.node.statistics.correlation.filter;
 
 import org.knime.base.node.preproc.correlation.filter.CorrelationFilterNodeDialogPane;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *  Extends the {@link CorrelationFilterNodeDialogPane} for the {@link MLlibCorrelationFilterNodeModel}.

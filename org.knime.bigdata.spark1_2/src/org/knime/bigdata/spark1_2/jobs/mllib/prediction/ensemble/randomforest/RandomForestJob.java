@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.randomforest;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.randomforest;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,13 +32,13 @@ import org.apache.spark.mllib.tree.RandomForest;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.RandomForestJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SparkJob;
-import com.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.RandomForestJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SparkJob;
+import org.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
 
 /**
  * runs MLlib RandomForest on a given RDD to create a random forest, model is returned as result

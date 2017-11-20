@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns="http://www.knime.org/2008/09/XMLConfig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.knime.org/2008/09/XMLConfig http://www.knime.org/XMLConfig_2008_09.xsd" key="RDD row count.xml">
-<entry key="Meta category" type="xstring" value="com.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
+<entry key="Meta category" type="xstring" value="org.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory"/>
 <entry key="Category" type="xstring" value="KNIME"/>
 <entry key="Name" type="xstring" value="RDD row count"/>
 <entry key="Description" type="xstring" value="Returns the number of rows of the first RDD as new RDD."/>

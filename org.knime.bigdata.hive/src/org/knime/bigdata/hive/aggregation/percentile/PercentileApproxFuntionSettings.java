@@ -43,7 +43,7 @@
  * -------------------------------------------------------------------
  */
 
-package com.knime.bigdata.hive.aggregation.percentile;
+package org.knime.bigdata.hive.aggregation.percentile;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;

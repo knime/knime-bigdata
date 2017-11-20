@@ -18,12 +18,12 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.spark;
+package org.knime.bigdata.spark.core.types.converter.spark;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Default converter between {@link IntermediateDataType} and a Spark type given by the generic type parameter T.

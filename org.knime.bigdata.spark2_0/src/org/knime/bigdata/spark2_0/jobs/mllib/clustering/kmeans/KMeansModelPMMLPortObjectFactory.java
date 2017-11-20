@@ -18,7 +18,7 @@
  * History
  *   Created on 16 ott 2015 by Stefano
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
+package org.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans;
 
 import java.util.LinkedHashSet;
 
@@ -31,9 +31,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
-import com.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
+import org.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 11, 2016 by sascha
  */
-package com.knime.bigdata.spark1_6.jobs.genericdatasource;
+package org.knime.bigdata.spark1_6.jobs.genericdatasource;
 
 import java.io.File;
 import java.util.List;
@@ -36,17 +36,17 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
-import com.knime.bigdata.spark1_6.api.TypeConverters;
-import com.knime.bigdata.spark1_6.hive.HiveContextProvider;
-import com.knime.bigdata.spark1_6.hive.HiveContextProvider.HiveContextAction;
-import com.knime.bigdata.spark1_6.jobs.scripting.java.JarRegistry;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.SparkJobWithFiles;
+import org.knime.bigdata.spark1_6.api.TypeConverters;
+import org.knime.bigdata.spark1_6.hive.HiveContextProvider;
+import org.knime.bigdata.spark1_6.hive.HiveContextProvider.HiveContextAction;
+import org.knime.bigdata.spark1_6.jobs.scripting.java.JarRegistry;
 
 /**
  * Stores the given named RDD into a path.

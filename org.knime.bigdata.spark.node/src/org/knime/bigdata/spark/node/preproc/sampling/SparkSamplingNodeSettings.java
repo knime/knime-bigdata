@@ -18,7 +18,7 @@
  * History
  *   Created on 18.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.sampling;
+package org.knime.bigdata.spark.node.preproc.sampling;
 
 import java.text.NumberFormat;
 import java.util.Locale;

@@ -18,13 +18,13 @@
  * History
  *   Created on Mar 7, 2017 by sascha
  */
-package com.knime.bigdata.spark.node.scripting.java;
+package org.knime.bigdata.spark.node.scripting.java;
 
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 
 /**
  * DataFrame specific java snippet model

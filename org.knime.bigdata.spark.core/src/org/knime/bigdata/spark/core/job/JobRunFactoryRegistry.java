@@ -18,11 +18,11 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
-import com.knime.bigdata.spark.core.exception.MissingJobException;
-import com.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.exception.MissingJobException;
+import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *
@@ -32,7 +32,7 @@ public class JobRunFactoryRegistry
     extends DefaultSparkProviderRegistry<String, JobRunFactory<?, ?>, JobRunFactoryProvider> {
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.JobRunFactoryProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.JobRunFactoryProvider";
 
     private static volatile JobRunFactoryRegistry instance;
 

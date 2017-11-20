@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry that stores all {@link SparkNodeFactory}.
@@ -42,7 +42,7 @@ public class SparkNodeFactoryRegistry extends SparkProviderRegistry<SparkNodeFac
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkNodeFactoryRegistry.class);
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.SparkNodeFactoryProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.SparkNodeFactoryProvider";
 
     private static SparkNodeFactoryRegistry instance;
 

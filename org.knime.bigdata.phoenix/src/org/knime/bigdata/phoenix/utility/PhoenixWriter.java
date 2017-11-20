@@ -18,7 +18,7 @@
  * History
  *   Created on 07.11.2015 by koetter
  */
-package com.knime.bigdata.phoenix.utility;
+package org.knime.bigdata.phoenix.utility;
 
 import java.sql.Array;
 import java.sql.Connection;

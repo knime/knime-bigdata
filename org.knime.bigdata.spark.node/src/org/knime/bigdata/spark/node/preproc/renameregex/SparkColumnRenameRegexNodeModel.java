@@ -18,7 +18,7 @@
  * History
  *   Created on 28.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.renameregex;
+package org.knime.bigdata.spark.node.preproc.renameregex;
 
 import org.knime.base.node.preproc.columnrenameregex.ColumnRenameRegexConfiguration;
 import org.knime.core.data.DataTableSpec;
@@ -30,10 +30,10 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
 
 /**
  *

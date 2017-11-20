@@ -18,7 +18,7 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.rdd.list;
+package org.knime.bigdata.spark.node.util.rdd.list;
 
 import java.util.Set;
 
@@ -35,12 +35,12 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.context.SparkContext;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 
 /**
  *

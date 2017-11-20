@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.compute;
+package org.knime.bigdata.spark.node.preproc.missingval.compute;
 
 import java.io.IOException;
 
@@ -25,8 +25,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 import org.xml.sax.SAXException;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactoryManager;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactoryManager;
 
 /**
  * Missing value spark node factory.

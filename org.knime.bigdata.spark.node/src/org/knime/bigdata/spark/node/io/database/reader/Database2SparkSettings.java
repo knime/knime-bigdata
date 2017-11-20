@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.database.reader;
+package org.knime.bigdata.spark.node.io.database.reader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;

@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 27, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.jobs.prepare;
+package org.knime.bigdata.spark2_0.jobs.prepare;
 
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 
 /**
  *

@@ -18,7 +18,7 @@ O * This source code, its documentation and all appendant files
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -36,13 +36,13 @@ import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 
 /**
  * @author Ole Ostergaard

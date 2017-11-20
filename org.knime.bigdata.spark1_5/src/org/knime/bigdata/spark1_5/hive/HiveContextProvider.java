@@ -15,14 +15,14 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark1_5.hive;
+package org.knime.bigdata.spark1_5.hive;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.hive.HiveContext;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Provides a {@link HiveContext} singleton and runs hive actions synchronized. To disable the synchronization, set

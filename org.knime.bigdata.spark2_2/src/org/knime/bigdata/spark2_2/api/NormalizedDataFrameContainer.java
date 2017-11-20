@@ -18,7 +18,7 @@
  * History
  *   Created on 30.07.2015 by dwk
  */
-package com.knime.bigdata.spark2_2.api;
+package org.knime.bigdata.spark2_2.api;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * modifiable container for min/max values

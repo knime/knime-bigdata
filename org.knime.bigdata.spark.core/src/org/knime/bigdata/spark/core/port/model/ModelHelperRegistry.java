@@ -18,13 +18,13 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.model;
+package org.knime.bigdata.spark.core.port.model;
 
-import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import com.knime.bigdata.spark.core.model.ModelHelper;
-import com.knime.bigdata.spark.core.model.ModelHelperProvider;
-import com.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.model.ModelHelper;
+import org.knime.bigdata.spark.core.model.ModelHelperProvider;
+import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry for {@link ModelHelper} that allow the interpretation of Spark models.
@@ -34,7 +34,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, ModelHelper, ModelHelperProvider> {
 
     /** The id of the extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.ModelHelperProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.ModelHelperProvider";
 
     private static ModelHelperRegistry instance;
 

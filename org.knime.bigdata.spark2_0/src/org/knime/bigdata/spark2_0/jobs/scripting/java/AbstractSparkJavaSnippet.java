@@ -45,7 +45,7 @@
  * History
  *   25.11.2011 (hofer): created
  */
-package com.knime.bigdata.spark2_0.jobs.scripting.java;
+package org.knime.bigdata.spark2_0.jobs.scripting.java;
 
 import java.io.Serializable;
 import java.util.List;
@@ -57,9 +57,9 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.InvalidSchemaException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark2_0.api.StructTypeBuilder;
+import org.knime.bigdata.spark.core.exception.InvalidSchemaException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark2_0.api.StructTypeBuilder;
 
 /**
  *

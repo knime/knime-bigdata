@@ -18,7 +18,7 @@
  * History
  *   Created on May 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver;
+package org.knime.bigdata.spark.core.context.jobserver;
 
 import java.io.File;
 import java.util.HashMap;

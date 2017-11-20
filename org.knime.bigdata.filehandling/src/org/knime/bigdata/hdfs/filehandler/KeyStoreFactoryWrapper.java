@@ -15,12 +15,12 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.hdfs.filehandler;
+package org.knime.bigdata.hdfs.filehandler;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 
 /**
  * Wraps hadoop default key store and injects client configurations directly (instead of external configuration file).

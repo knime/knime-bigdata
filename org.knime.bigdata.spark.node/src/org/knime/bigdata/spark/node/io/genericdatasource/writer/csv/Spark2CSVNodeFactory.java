@@ -18,13 +18,13 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
 
 /**
  * @author Sascha Wolke, KNIME.com

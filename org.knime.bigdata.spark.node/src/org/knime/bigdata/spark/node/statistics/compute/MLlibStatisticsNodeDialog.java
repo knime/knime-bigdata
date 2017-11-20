@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.compute;
+package org.knime.bigdata.spark.node.statistics.compute;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,8 +33,8 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.node.MLlibNodeComponents;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

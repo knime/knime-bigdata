@@ -18,9 +18,9 @@
  * History
  *   Created on 30.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.transformation;
+package org.knime.bigdata.spark.node.pmml.transformation;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

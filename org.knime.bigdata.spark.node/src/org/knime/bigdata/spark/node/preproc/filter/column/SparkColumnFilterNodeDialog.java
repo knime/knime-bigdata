@@ -42,7 +42,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.filter.column;
+package org.knime.bigdata.spark.node.preproc.filter.column;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -54,7 +54,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * This is the dialog for the Spark column filter. The user can specify which columns

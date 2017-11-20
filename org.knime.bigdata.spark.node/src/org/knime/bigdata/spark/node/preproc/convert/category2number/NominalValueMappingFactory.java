@@ -18,7 +18,7 @@
  * History
  *   Created on 20.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.convert.category2number;
+package org.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.node.preproc.convert.MyRecord;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
  *

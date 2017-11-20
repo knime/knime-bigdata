@@ -42,7 +42,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.commons.config.eclipse;
+package org.knime.bigdata.commons.config.eclipse;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -62,9 +62,9 @@ import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.workbench.ui.preferences.HorizontalLineField;
 import org.knime.workbench.ui.preferences.LabelField;
 
-import com.knime.bigdata.commons.CommonsPlugin;
-import com.knime.bigdata.commons.config.CommonConfigContainer;
-import com.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
+import org.knime.bigdata.commons.CommonsPlugin;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
 
 /**
  * @author Tobias Koetter, KNIME.com

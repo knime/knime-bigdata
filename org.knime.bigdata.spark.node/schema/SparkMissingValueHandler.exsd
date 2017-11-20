@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.node" id="SparkMissingValueHandler" name="SparkMissingValueHandler"/>
+         <meta.schema plugin="org.knime.bigdata.spark.node" id="SparkMissingValueHandler" name="SparkMissingValueHandler"/>
       </appinfo>
       <documentation>
          Extension point to add a new missing value handler
@@ -52,7 +52,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory:"/>
+                  <meta.attribute kind="java" basedOn="org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory:"/>
                </appinfo>
             </annotation>
          </attribute>

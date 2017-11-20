@@ -18,13 +18,13 @@
  * History
  *   Created on Mar 1, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context;
+package org.knime.bigdata.spark.core.context;
 
 import java.util.HashMap;
 
-import com.knime.bigdata.spark.core.context.jobserver.JobserverSparkContext;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.jobserver.JobserverSparkContext;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  *

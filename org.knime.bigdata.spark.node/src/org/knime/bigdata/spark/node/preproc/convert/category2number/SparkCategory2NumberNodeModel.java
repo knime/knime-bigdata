@@ -18,7 +18,7 @@
  * History
  *   Created on 06.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.category2number;
+package org.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,18 +68,18 @@ import org.knime.core.node.port.pmml.preproc.PMMLPreprocTranslator;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import org.knime.core.util.Pair;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.core.util.SparkUtil;
-import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.bigdata.spark.node.preproc.convert.MyRecord;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 14, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import java.util.List;
 
@@ -28,14 +28,14 @@ import javax.ws.rs.core.Response;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
-import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.jobserver.JobserverJobInput;
-import com.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
+import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.jobserver.JobserverJobInput;
+import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import com.typesafe.config.ConfigRenderOptions;
 
 /**

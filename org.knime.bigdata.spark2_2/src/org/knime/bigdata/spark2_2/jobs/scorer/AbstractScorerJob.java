@@ -18,19 +18,19 @@
  * History
  *   Created on May 17, 2016 by oole
  */
-package com.knime.bigdata.spark2_2.jobs.scorer;
+package org.knime.bigdata.spark2_2.jobs.scorer;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
-import com.knime.bigdata.spark2_2.api.NamedObjects;
-import com.knime.bigdata.spark2_2.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
+import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  *

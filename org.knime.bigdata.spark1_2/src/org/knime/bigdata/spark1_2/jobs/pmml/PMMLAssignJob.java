@@ -18,7 +18,7 @@
  * History
  *   Created on 29.09.2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.pmml;
+package org.knime.bigdata.spark1_2.jobs.pmml;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -33,12 +33,12 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.pmml.PMMLAssignJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SparkJobWithFiles;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.pmml.PMMLAssignJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SparkJobWithFiles;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering;
+package org.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,15 +33,15 @@ import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark1_6.api.ModelUtils;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_6.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobOutput;
+import org.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
+import org.knime.bigdata.spark1_6.api.ModelUtils;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.RDDUtilsInJava;
+import org.knime.bigdata.spark1_6.api.SparkJob;
 
 import scala.Tuple2;
 

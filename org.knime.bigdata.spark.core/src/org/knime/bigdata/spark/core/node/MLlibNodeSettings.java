@@ -18,7 +18,7 @@
  * History
  *   Created on 23.08.2015 by koetter
  */
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -41,11 +41,11 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
-import com.knime.bigdata.spark.core.job.util.MLlibSettings;
-import com.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
  * Settings class that contains commonly used settings required to learn a Spark MLlib model such as

@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 2, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver;
+package org.knime.bigdata.spark.core.context.jobserver;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -35,32 +35,32 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.context.JobController;
-import com.knime.bigdata.spark.core.context.SparkContext;
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.context.jobserver.request.CreateContextRequest;
-import com.knime.bigdata.spark.core.context.jobserver.request.DestroyContextRequest;
-import com.knime.bigdata.spark.core.context.jobserver.request.GetContextsRequest;
-import com.knime.bigdata.spark.core.context.jobserver.request.GetJarsRequest;
-import com.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;
-import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
-import com.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import com.knime.bigdata.spark.core.jar.JobJar;
-import com.knime.bigdata.spark.core.jar.SparkJarRegistry;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.JobRun;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun;
-import com.knime.bigdata.spark.core.job.SimpleJobRun;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
-import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.context.JobController;
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.context.jobserver.request.CreateContextRequest;
+import org.knime.bigdata.spark.core.context.jobserver.request.DestroyContextRequest;
+import org.knime.bigdata.spark.core.context.jobserver.request.GetContextsRequest;
+import org.knime.bigdata.spark.core.context.jobserver.request.GetJarsRequest;
+import org.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;
+import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.jar.JobJar;
+import org.knime.bigdata.spark.core.jar.SparkJarRegistry;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.JobRun;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun;
+import org.knime.bigdata.spark.core.job.SimpleJobRun;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
+import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * TODO: move away from KNIMESparkContext

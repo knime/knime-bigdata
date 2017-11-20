@@ -18,9 +18,9 @@
  * History
  *   Created on May 3, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.exception;
+package org.knime.bigdata.spark.core.exception;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextID;
 
 /**
  * This exception indicates that the Job Server is still running fine but the Spark context no longer exists.

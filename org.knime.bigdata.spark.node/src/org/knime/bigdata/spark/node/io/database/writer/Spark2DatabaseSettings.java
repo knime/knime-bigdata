@@ -18,14 +18,14 @@
  * History
  *   Created on Sep 06, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.database.writer;
+package org.knime.bigdata.spark.node.io.database.writer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import com.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
  * Settings for the Spark to JDBC node.

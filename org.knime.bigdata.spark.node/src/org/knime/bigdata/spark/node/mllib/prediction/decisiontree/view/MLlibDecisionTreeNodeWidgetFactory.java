@@ -45,7 +45,7 @@
  * History
  *   22.07.2010 (hofer): created
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.util.ArrayList;
 import java.util.List;

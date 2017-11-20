@@ -18,10 +18,10 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.tfidf;
+package org.knime.bigdata.spark.node.preproc.tfidf;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * converts a single String column to a (sparse) Vector of terms and appends the Vector to the input RDD<Row>

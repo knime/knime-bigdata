@@ -18,11 +18,11 @@
  * History
  *   Created on 25.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.correlation;
+package org.knime.bigdata.spark.node.statistics.correlation;
 
 import org.knime.core.node.util.ButtonGroupEnumInterface;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer.CorrelationMethod;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.CorrelationMethod;
 
 /**
  *

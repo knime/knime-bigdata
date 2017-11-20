@@ -18,10 +18,10 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.linear.svm;
+package org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.linear.svm;
 
-import com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
-import com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.linear.GeneralizedLinearModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
+import org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.linear.GeneralizedLinearModelInterpreter;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.io.Serializable;
 
@@ -27,17 +27,17 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMappings;
-import com.knime.bigdata.spark.core.job.util.MLlibSettings;
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import com.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMappings;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 
 /**
  *

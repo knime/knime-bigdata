@@ -18,10 +18,10 @@
  * History
  *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.util.rdd.persist;
+package org.knime.bigdata.spark.node.util.rdd.persist;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

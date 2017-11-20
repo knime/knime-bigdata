@@ -18,7 +18,7 @@
  * History
  *   Created on Oct 28, 2015 by ste
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear;
+package org.knime.bigdata.spark2_0.jobs.mllib.prediction.linear;
 
 import java.util.List;
 
@@ -27,8 +27,8 @@ import org.knime.base.node.mine.regression.PMMLRegressionTranslator.NumericPredi
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
 import org.knime.core.node.InvalidSettingsException;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
 
 /**
  *

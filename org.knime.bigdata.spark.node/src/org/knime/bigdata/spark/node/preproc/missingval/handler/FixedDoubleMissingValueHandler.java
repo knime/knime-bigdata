@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.handler;
+package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -28,9 +28,9 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 
 /**
  * Replaces missing values with a fixed double value.

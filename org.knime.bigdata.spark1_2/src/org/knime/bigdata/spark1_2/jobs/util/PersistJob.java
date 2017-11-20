@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.util;
+package org.knime.bigdata.spark1_2.jobs.util;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -28,11 +28,11 @@ import org.apache.spark.api.java.StorageLevels;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.storage.StorageLevel;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.util.rdd.persist.PersistJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SimpleSparkJob;
 
 /**
  * (Un)persists the given named RDD using the defined storage level.

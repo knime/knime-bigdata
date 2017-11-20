@@ -45,7 +45,7 @@
  * History
  *   24.11.2011 (hofer): created
  */
-package com.knime.bigdata.spark.node.scripting.java;
+package org.knime.bigdata.spark.node.scripting.java;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -114,17 +114,17 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.template.JavaSnippetTemplateProviderRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.node.scripting.java.util.template.JavaSnippetTemplateProviderRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 
 /**
  * The dialog that is used in all Spark java snippet nodes.

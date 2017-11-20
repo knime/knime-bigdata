@@ -18,13 +18,13 @@
  * History
  *   Created on 27.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.impala.writer;
+package org.knime.bigdata.spark.node.io.impala.writer;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeDialog;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeDialog;
 
 /**
  *

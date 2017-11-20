@@ -18,14 +18,14 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 
 /**

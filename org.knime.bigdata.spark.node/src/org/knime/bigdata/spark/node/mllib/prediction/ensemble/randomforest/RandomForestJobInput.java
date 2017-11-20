@@ -18,13 +18,13 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
+package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import com.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
 
 /**
  *

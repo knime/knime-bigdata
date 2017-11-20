@@ -18,19 +18,19 @@
  * History
  *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.core.jar.bundle;
+package org.knime.bigdata.spark.core.jar.bundle;
 
 import java.util.ArrayList;
 
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.Bundle;
 
-import com.knime.bigdata.spark.core.jar.FileBasedJarCollector;
-import com.knime.bigdata.spark.core.jar.JarCollector;
-import com.knime.bigdata.spark.core.jar.JobJar;
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.jar.FileBasedJarCollector;
+import org.knime.bigdata.spark.core.jar.JarCollector;
+import org.knime.bigdata.spark.core.jar.JobJar;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Combines OSGi bundles into one driver jar file.

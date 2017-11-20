@@ -15,14 +15,14 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.compute;
+package org.knime.bigdata.spark.node.preproc.missingval.compute;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Missing value job input, containing configurations by column name or data type.

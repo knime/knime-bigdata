@@ -18,7 +18,7 @@
  * History
  *   Created on 07.08.2014 by koetter
  */
-package com.knime.bigdata.hdfs.node.filesettings;
+package org.knime.bigdata.hdfs.node.filesettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,9 +46,9 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSConnection;
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  *

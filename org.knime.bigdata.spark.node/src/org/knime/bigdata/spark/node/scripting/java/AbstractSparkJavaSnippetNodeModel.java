@@ -18,13 +18,13 @@
  * History
  *   Created on 24.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java;
+package org.knime.bigdata.spark.node.scripting.java;
 
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 
 /**
  * RDD specific java snippet model

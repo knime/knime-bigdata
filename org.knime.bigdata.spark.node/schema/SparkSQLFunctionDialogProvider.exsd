@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.node" id="SparkSQLFunctionDialogProvider" name="Spark SQL Function Dialog Provider"/>
+         <meta.schema plugin="org.knime.bigdata.spark.node" id="SparkSQLFunctionDialogProvider" name="Spark SQL Function Dialog Provider"/>
       </appinfo>
       <documentation>
          This extension point can be used to provide Spark-version specific function dialogs.
@@ -57,7 +57,7 @@
                   A provider for Spark-version specific Spark SQL Function Dialogs.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.node.sql.SparkSQLFunctionDialogProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.knime.bigdata.spark.node.sql.SparkSQLFunctionDialogProvider"/>
                </appinfo>
             </annotation>
          </attribute>

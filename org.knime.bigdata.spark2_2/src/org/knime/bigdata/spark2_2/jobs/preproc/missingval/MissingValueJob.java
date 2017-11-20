@@ -15,10 +15,10 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_2.jobs.preproc.missingval;
+package org.knime.bigdata.spark2_2.jobs.preproc.missingval;
 
-import static com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_FIXED_VALUE;
-import static com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OP_TYPE;
+import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_FIXED_VALUE;
+import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OP_TYPE;
 import static org.apache.spark.sql.functions.avg;
 import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.desc;
@@ -47,15 +47,15 @@ import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.ReplaceOperation;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
-import com.knime.bigdata.spark2_2.api.ModelUtils;
-import com.knime.bigdata.spark2_2.api.NamedObjects;
-import com.knime.bigdata.spark2_2.api.SparkJob;
-import com.knime.bigdata.spark2_2.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.ReplaceOperation;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
+import org.knime.bigdata.spark2_2.api.ModelUtils;
+import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.SparkJob;
+import org.knime.bigdata.spark2_2.api.TypeConverters;
 
 /**
  * Replace missing values job.

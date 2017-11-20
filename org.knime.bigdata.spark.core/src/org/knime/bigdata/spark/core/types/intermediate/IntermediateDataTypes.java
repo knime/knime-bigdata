@@ -18,9 +18,9 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.types.intermediate;
+package org.knime.bigdata.spark.core.types.intermediate;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Provides access to all predefined {@link IntermediateDataType} singletons as well as factory methods

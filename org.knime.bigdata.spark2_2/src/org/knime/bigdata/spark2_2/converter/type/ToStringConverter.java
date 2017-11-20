@@ -18,18 +18,18 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_2.converter.type;
+package org.knime.bigdata.spark2_2.converter.type;
 
 import java.io.Serializable;
 
 import org.apache.spark.sql.types.StringType;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.StringTypeProxy;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.StringTypeProxy;
 
 /**
  * Converter that converts any intermediate value to a string and vice versa.

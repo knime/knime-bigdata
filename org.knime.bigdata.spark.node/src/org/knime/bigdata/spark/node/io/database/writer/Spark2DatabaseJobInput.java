@@ -18,13 +18,13 @@
  * History
  *   Created on Sep 5, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.database.writer;
+package org.knime.bigdata.spark.node.io.database.writer;
 
 import java.util.Properties;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * @author Sascha Wolke, KNIME.com

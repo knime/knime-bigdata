@@ -18,13 +18,13 @@
  * History
  *   Created on May 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util;
+package org.knime.bigdata.spark.node.scripting.java.util;
 
 import java.util.Collections;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

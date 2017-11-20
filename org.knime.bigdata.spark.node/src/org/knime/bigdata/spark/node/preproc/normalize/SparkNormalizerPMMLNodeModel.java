@@ -18,7 +18,7 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
 import java.util.Arrays;
 
@@ -40,14 +40,14 @@ import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
 import org.knime.core.node.util.ConvenienceMethods;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
  * The NormalizeNodeModel normalizes the input RDD in Spark.

@@ -18,12 +18,12 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
-import com.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import com.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
 /**
  *
  * @author Tobias Koetter, KNIME.com

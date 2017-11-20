@@ -45,7 +45,7 @@
  * History
  *   18.02.2007 (wiswedel): created
  */
-package com.knime.bigdata.spark.node.statistics.correlation.filter;
+package org.knime.bigdata.spark.node.statistics.correlation.filter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,9 +68,9 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.node.preproc.filter.column.AbstractSparkColumnFilterNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.preproc.filter.column.AbstractSparkColumnFilterNodeModel;
 
 /**
  *

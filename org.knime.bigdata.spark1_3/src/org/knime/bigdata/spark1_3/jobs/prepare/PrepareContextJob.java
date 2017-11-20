@@ -18,20 +18,20 @@
  * History
  *   Created on Apr 26, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_3.jobs.prepare;
+package org.knime.bigdata.spark1_3.jobs.prepare;
 
 import java.io.IOException;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.types.DataType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.jar.JobJarDescriptor;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.util.PrepareContextJobInput;
-import com.knime.bigdata.spark1_3.api.NamedObjects;
-import com.knime.bigdata.spark1_3.api.SimpleSparkJob;
-import com.knime.bigdata.spark1_3.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
+import org.knime.bigdata.spark1_3.api.NamedObjects;
+import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark1_3.api.TypeConverters;
 
 /**
  *

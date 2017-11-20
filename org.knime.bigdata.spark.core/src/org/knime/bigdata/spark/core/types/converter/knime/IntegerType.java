@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.knime;
+package org.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
 
@@ -26,8 +26,8 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.IntValue;
 import org.knime.core.data.def.IntCell;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  *

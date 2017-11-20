@@ -18,7 +18,7 @@
  * History
  *   Created on 08.05.2014 by thor
  */
-package com.knime.bigdata.phoenix.utility;
+package org.knime.bigdata.phoenix.utility;
 
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
@@ -51,7 +51,7 @@ import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 import org.knime.core.node.port.database.writer.DBWriter;
 
-import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 
 
 /**

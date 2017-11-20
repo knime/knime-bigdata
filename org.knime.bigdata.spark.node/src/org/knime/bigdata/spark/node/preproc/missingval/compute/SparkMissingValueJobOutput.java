@@ -15,13 +15,13 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.compute;
+package org.knime.bigdata.spark.node.preproc.missingval.compute;
 
 import java.io.Serializable;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Output containing aggregation/statistic operations results.

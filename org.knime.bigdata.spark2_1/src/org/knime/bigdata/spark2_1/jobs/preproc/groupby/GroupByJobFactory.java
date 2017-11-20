@@ -16,12 +16,12 @@
  * ---------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark2_1.jobs.preproc.groupby;
+package org.knime.bigdata.spark2_1.jobs.preproc.groupby;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobInput;
-import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobOutput;
-import com.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobInput;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobOutput;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeModel;
 
 /**
  * Group by job factory.

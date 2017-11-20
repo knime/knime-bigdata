@@ -18,7 +18,7 @@
  * History
  *   Created on 24.07.2015 by dwk
  */
-package com.knime.bigdata.spark2_2.jobs.table2spark;
+package org.knime.bigdata.spark2_2.jobs.table2spark;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -36,16 +36,16 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
-import com.knime.bigdata.spark2_2.api.NamedObjects;
-import com.knime.bigdata.spark2_2.api.RowBuilder;
-import com.knime.bigdata.spark2_2.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_2.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
+import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.RowBuilder;
+import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
+import org.knime.bigdata.spark2_2.api.TypeConverters;
 
 /**
  * @author dwk, Bjoern Lohrmann, KNIME.com

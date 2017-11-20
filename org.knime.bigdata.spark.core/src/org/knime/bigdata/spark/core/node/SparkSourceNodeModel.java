@@ -18,18 +18,18 @@
  * History
  *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import com.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**
  * Abstract class for Spark source nodes. The node model adds an optional {@link SparkContextPortObject} to the

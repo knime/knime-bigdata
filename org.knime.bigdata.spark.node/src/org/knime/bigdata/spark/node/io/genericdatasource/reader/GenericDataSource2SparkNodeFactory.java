@@ -18,11 +18,11 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  * @author Sascha Wolke, KNIME.com

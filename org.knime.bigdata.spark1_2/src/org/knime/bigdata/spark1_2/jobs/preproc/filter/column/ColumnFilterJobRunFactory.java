@@ -18,11 +18,11 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.preproc.filter.column;
+package org.knime.bigdata.spark1_2.jobs.preproc.filter.column;
 
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.filter.column.AbstractSparkColumnFilterNodeModel;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.filter.column.AbstractSparkColumnFilterNodeModel;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 23.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
+package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import java.util.Random;
 
@@ -31,9 +31,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
 
 /**
  * @author Tobias Koetter, KNIME.com

@@ -18,10 +18,10 @@
  * History
  *   Created on 09.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.reduction.svd;
+package org.knime.bigdata.spark.node.mllib.reduction.svd;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

@@ -18,11 +18,11 @@
  * History
  *   Created on 04.03.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.base;
+package org.knime.bigdata.spark1_6.base;
 
-import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
-import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
-import com.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
+import org.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
+import org.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
+import org.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 
 /**
  * Implementation of the {@link DefaultSparkJarProvider} for Spark 1.6.

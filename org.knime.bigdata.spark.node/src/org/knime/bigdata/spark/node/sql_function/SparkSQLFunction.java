@@ -18,12 +18,12 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.sql_function;
+package org.knime.bigdata.spark.node.sql_function;
 
 import org.knime.core.data.DataTableSpec;
 
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
 
 /**
  * Spark SQL function.

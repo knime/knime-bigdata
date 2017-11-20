@@ -18,11 +18,11 @@
  * History
  *   Created on Oct 10, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader.orc;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader.orc;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
 
 /**
  * ORC reader specific settings.

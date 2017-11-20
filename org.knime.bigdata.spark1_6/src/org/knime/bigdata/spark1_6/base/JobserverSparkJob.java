@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_6.base;
+package org.knime.bigdata.spark1_6.base;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -6,18 +6,18 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.jobserver.JobserverJobInput;
+import org.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
+import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.SimpleSparkJob;
+import org.knime.bigdata.spark1_6.api.SparkJob;
+import org.knime.bigdata.spark1_6.api.SparkJobWithFiles;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.jobserver.JobserverJobInput;
-import com.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
-import com.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
 import com.knime.bigdata.spark.jobserver.server.KnimeSparkJobWithNamedRDD;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
-import com.knime.bigdata.spark1_6.api.SparkJob;
-import com.knime.bigdata.spark1_6.api.SparkJobWithFiles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
 

@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.core" id="IntermediateToSparkConverter" name="IntermediateToSparkConverter"/>
+         <meta.schema plugin="org.knime.bigdata.spark.core" id="IntermediateToSparkConverter" name="IntermediateToSparkConverter"/>
       </appinfo>
       <documentation>
          Extension point for type converters that can be used for type conversion between intermediate  and Spark type.
@@ -52,10 +52,10 @@
          <attribute name="ProviderClass" type="string" use="required">
             <annotation>
                <documentation>
-                  Specify an implementation of the com.knime.bigdata.spark.core.version.SparkProviderWithElements interface. Implementors must extend the existing base implementation com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider
+                  Specify an implementation of the org.knime.bigdata.spark.core.version.SparkProviderWithElements interface. Implementors must extend the existing base implementation org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider:"/>
+                  <meta.attribute kind="java" basedOn="org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

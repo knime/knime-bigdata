@@ -18,12 +18,12 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.preproc.normalize;
+package org.knime.bigdata.spark2_1.jobs.preproc.normalize;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
-import com.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
+import org.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeModel;
 
 /**
  *

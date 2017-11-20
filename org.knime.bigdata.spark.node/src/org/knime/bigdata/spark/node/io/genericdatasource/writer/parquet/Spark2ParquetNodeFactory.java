@@ -18,13 +18,13 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer.parquet;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer.parquet;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
 
 /**
  * @author Sascha Wolke, KNIME.com

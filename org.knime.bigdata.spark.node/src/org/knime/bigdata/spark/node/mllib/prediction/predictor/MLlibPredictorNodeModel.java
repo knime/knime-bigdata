@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.predictor;
+package org.knime.bigdata.spark.node.mllib.prediction.predictor;
 
 import java.io.File;
 import java.util.Collections;
@@ -36,18 +36,18 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *

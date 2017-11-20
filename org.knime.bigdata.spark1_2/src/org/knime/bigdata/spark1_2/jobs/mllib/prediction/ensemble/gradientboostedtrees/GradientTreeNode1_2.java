@@ -18,12 +18,12 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.apache.spark.mllib.tree.model.Node;
 
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
-import com.knime.bigdata.spark1_2.jobs.mllib.prediction.decisiontree.TreeNode1_2;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark1_2.jobs.mllib.prediction.decisiontree.TreeNode1_2;
 
 /**
  * TreeNodes have to be handled differently for Gradiend Boosted Trees since their prediction output needs to be interpreted differently

@@ -18,11 +18,11 @@
  * History
  *   Created on May 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.types.converter.spark;
+package org.knime.bigdata.spark.core.types.converter.spark;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Interface for {@link IntermediateToSparkConverter}s that convert {@link IntermediateDataTypes#ANY} to a Spark data

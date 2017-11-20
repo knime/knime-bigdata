@@ -18,7 +18,7 @@
  * History
  *   Created on 05.08.2014 by koetter
  */
-package com.knime.bigdata.hdfs.testing;
+package org.knime.bigdata.hdfs.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,7 +53,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSConnection;
+import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
 
 /**
  *
@@ -152,7 +152,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#getHDFSPath4URI(URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#getHDFSPath4URI(URI)}.
      * @throws URISyntaxException if the URI is invalid
      */
     @Test
@@ -168,7 +168,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#open()}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#open()}.
      */
     @Test
     public void testOpen() {
@@ -191,7 +191,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#isOpen()}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#isOpen()}.
      * @throws IOException
      */
     @Test
@@ -204,7 +204,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#close()}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#close()}.
      */
     @Test
     public void testClose() {
@@ -227,7 +227,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#getFileSystem()}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#getFileSystem()}.
      */
     @Test
     public void testGetFileSystem() {
@@ -239,7 +239,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#copyFromLocalFile(boolean, boolean, java.net.URI, java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#copyFromLocalFile(boolean, boolean, java.net.URI, java.net.URI)}.
      * @throws Exception if something went wrong
      */
     @Test
@@ -266,7 +266,7 @@ public class HDFSConnectionTest {
         return new URI(JUNIT_PATH + name);
     }
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#copyToLocalFile(boolean, java.net.URI, java.net.URI, boolean)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#copyToLocalFile(boolean, java.net.URI, java.net.URI, boolean)}.
      * @throws Exception if something went wrong
      */
     @Test
@@ -287,7 +287,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#delete(java.net.URI, boolean)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#delete(java.net.URI, boolean)}.
      * @throws Exception if something went wrong
      */
     @Test
@@ -319,7 +319,7 @@ public class HDFSConnectionTest {
 
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#mkDir(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#mkDir(java.net.URI)}.
      * @throws Exception if something went wrong
      */
     @Test
@@ -354,7 +354,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#open(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#open(java.net.URI)}.
      * @throws Exception
      */
     @Test
@@ -368,7 +368,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#create(java.net.URI, boolean)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#create(java.net.URI, boolean)}.
      * @throws Exception
      */
     @Test
@@ -385,7 +385,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#exists(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#exists(java.net.URI)}.
      * @throws Exception
      */
     @Test
@@ -401,7 +401,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#isDirectory(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#isDirectory(java.net.URI)}.
      * @throws Exception
      */
     @Test
@@ -419,7 +419,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#getFileStatus(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#getFileStatus(java.net.URI)}.
      * @throws Exception
      */
     @Test
@@ -443,7 +443,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#listFiles(java.net.URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#listFiles(java.net.URI)}.
      * @throws Exception
      */
     @Test
@@ -482,7 +482,7 @@ public class HDFSConnectionTest {
     }
 
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#getContentSummary(URI)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#getContentSummary(URI)}.
      * @throws Exception
      */
     @Test
@@ -495,7 +495,7 @@ public class HDFSConnectionTest {
         assertEquals(tempFile.length(), contentSummary.getLength());
     }
     /**
-     * Test method for {@link com.knime.bigdata.hdfs.filehandler.HDFSConnection#setPermission(URI, String)}.
+     * Test method for {@link org.knime.bigdata.hdfs.filehandler.HDFSConnection#setPermission(URI, String)}.
      * @throws Exception
      */
     @Test

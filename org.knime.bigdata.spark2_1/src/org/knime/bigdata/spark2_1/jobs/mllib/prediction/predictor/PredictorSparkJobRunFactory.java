@@ -18,13 +18,13 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor;
+package org.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor;
 
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
-import com.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
+import org.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+import org.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
 
 /**
  *

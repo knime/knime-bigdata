@@ -18,7 +18,7 @@
  * History
  *   Created on 20.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.sorter;
+package org.knime.bigdata.spark.node.preproc.sorter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +34,15 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.ConvenienceMethods;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.job.SimpleJobRunFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
  *

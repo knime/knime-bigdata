@@ -18,7 +18,7 @@
  * History
  *   Created on Oct 27, 2015 by ste
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression;
+package org.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.regression;
 
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
@@ -28,9 +28,9 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 import org.knime.core.node.port.pmml.PMMLTranslator;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import com.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.GeneralizedLinearModelPMMLPortObjectFactory;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
+import org.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.GeneralizedLinearModelPMMLPortObjectFactory;
 
 /**
  *

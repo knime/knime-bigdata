@@ -18,15 +18,15 @@
  * History
  *   Created on 16 ott 2015 by Stefano
  */
-package com.knime.bigdata.spark.node.pmml.converter;
+package org.knime.bigdata.spark.node.pmml.converter;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObject;
-import com.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry of all {@link PMMLPortObjectFactory} converter implementations across all {@link SparkVersion}s.
@@ -37,7 +37,7 @@ public class PMMLPortObjectFactoryProviderRegistry
     extends DefaultSparkProviderRegistry<String, PMMLPortObjectFactory, PMMLPortObjectFactoryProvider> {
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider";
 
     private static PMMLPortObjectFactoryProviderRegistry instance;
 

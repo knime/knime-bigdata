@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,8 +28,8 @@ import java.util.Set;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry for {@link JarCollector} that collect the java classes that should be send to a Spark job server.
@@ -83,7 +83,7 @@ public class SparkJarRegistry extends SparkProviderRegistry<SparkJarProvider> {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkJarRegistry.class);
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.SparkJarProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.SparkJarProvider";
 
     private static SparkJarRegistry instance;
 

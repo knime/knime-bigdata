@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.core.jar.bundle;
+package org.knime.bigdata.spark.core.jar.bundle;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,10 +27,10 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
-import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
+import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Default driver bundle provider.

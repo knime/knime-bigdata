@@ -18,7 +18,7 @@
  * History
  *   Created on 23.06.2016 by koetter
  */
-package com.knime.bigdata.commons.security.kerberos;
+package org.knime.bigdata.commons.security.kerberos;
 
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
@@ -37,8 +37,8 @@ import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.workflow.NodeContext;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
-import com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 import com.knime.licenses.License;
 
 /**

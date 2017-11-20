@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.compute;
+package org.knime.bigdata.spark.node.preproc.missingval.compute;
 
 import org.knime.base.node.preproc.pmml.missingval.MVSettings;
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;
@@ -24,9 +24,9 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactoryManager;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueSettings;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactoryManager;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueSettings;
 
 /**
  * Spark specific missing value handler dialog.

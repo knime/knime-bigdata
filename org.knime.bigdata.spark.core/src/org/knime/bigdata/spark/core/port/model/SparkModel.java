@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.core.port.model;
+package org.knime.bigdata.spark.core.port.model;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -41,12 +41,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
-import com.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import com.knime.bigdata.spark.core.job.util.MLlibSettings;
-import com.knime.bigdata.spark.core.model.LegacyModelHelper;
-import com.knime.bigdata.spark.core.model.ModelHelper;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.model.LegacyModelHelper;
+import org.knime.bigdata.spark.core.model.ModelHelper;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Spark model that encapsulates a learned Spark MLlib model.

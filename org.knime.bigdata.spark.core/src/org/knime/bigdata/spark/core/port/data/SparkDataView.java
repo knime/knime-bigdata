@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -28,8 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
 
 /**
  *

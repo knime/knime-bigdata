@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.core.context.jobserver.rest;
+package org.knime.bigdata.spark.core.context.jobserver.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -11,9 +11,9 @@ import javax.ws.rs.core.Response;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 
 /**
  * creates and handles REST requests

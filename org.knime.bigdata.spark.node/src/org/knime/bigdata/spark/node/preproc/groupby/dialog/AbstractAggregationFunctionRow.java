@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRow;
 import org.knime.core.data.DataTableSpec;
@@ -53,8 +53,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * Spark aggregation function table row. Based on AbstractDBAggregationFunctionRow.

@@ -12,15 +12,15 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="com.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer">
+            class="org.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            class="com.knime.bigdata.spark.core.preferences.SparkPreferencePage"
-            id="com.knime.bigdata.spark.preferences.SparkPreferencePage"
+            category="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            class="org.knime.bigdata.spark.core.preferences.SparkPreferencePage"
+            id="org.knime.bigdata.spark.preferences.SparkPreferencePage"
             name="Spark">
       </page>
    </extension>
@@ -29,54 +29,54 @@
       <portType
             hidden="false"
             name="Spark Context"
-            objectClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObject"
-            objectSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObject$ModelSerializer"
-            specClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec$SpecSerializer">
+            objectClass="org.knime.bigdata.spark.core.port.context.SparkContextPortObject"
+            objectSerializer="org.knime.bigdata.spark.core.port.context.SparkContextPortObject$ModelSerializer"
+            specClass="org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec$SpecSerializer">
       </portType>
       <portType
             color="#000000"
             hidden="false"
             name="Spark Data"
-            objectClass="com.knime.bigdata.spark.core.port.data.SparkDataPortObject"
-            objectSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObject$Serializer"
-            specClass="com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec$Serializer">
+            objectClass="org.knime.bigdata.spark.core.port.data.SparkDataPortObject"
+            objectSerializer="org.knime.bigdata.spark.core.port.data.SparkDataPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec$Serializer">
       </portType>
       <portType
             color="#000000"
             hidden="false"
             name="Spark Data Legacy"
-            objectClass="com.knime.bigdata.spark.port.data.SparkDataPortObject"
-            objectSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObject$Serializer"
-            specClass="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.port.data.SparkDataPortObjectSpec$Serializer">
+            objectClass="org.knime.bigdata.spark.port.data.SparkDataPortObject"
+            objectSerializer="org.knime.bigdata.spark.port.data.SparkDataPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.port.data.SparkDataPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.port.data.SparkDataPortObjectSpec$Serializer">
       </portType>
       <portType
             color="#7DBDFF"
             hidden="false"
             name="Spark Model"
-            objectClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObject"
-            objectSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
-            specClass="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
+            objectClass="org.knime.bigdata.spark.core.port.model.SparkModelPortObject"
+            objectSerializer="org.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
       </portType>
       <portType
             color="#7DBDFF"
             hidden="false"
             name="Spark Model Legacy"
-            objectClass="com.knime.bigdata.spark.port.model.SparkModelPortObject"
-            objectSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObject$Serializer"
-            specClass="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.port.model.SparkModelPortObjectSpec$Serializer">
+            objectClass="org.knime.bigdata.spark.port.model.SparkModelPortObject"
+            objectSerializer="org.knime.bigdata.spark.port.model.SparkModelPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.port.model.SparkModelPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.port.model.SparkModelPortObjectSpec$Serializer">
       </portType>
       <portType
             hidden="false"
             name="Spark Context Legacy"
-            objectClass="com.knime.bigdata.spark.port.context.SparkContextPortObject"
-            objectSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObject$Serializer"
-            specClass="com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.port.context.SparkContextPortObjectSpec$Serializer">
+            objectClass="org.knime.bigdata.spark.port.context.SparkContextPortObject"
+            objectSerializer="org.knime.bigdata.spark.port.context.SparkContextPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.port.context.SparkContextPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.port.context.SparkContextPortObjectSpec$Serializer">
       </portType>
    </extension>
    <extension
@@ -84,13 +84,13 @@
       <nodeset
             default-category-icon="icons/category.png"
             deprecated="false"
-            factory-class="com.knime.bigdata.spark.core.node.SparkNodeSetFactory">
+            factory-class="org.knime.bigdata.spark.core.node.SparkNodeSetFactory">
       </nodeset>
    </extension>
    <extension
-         point="com.knime.bigdata.spark.core.SparkJarProvider">
+         point="org.knime.bigdata.spark.core.SparkJarProvider">
       <SparkJarProvider
-            ProviderClass="com.knime.bigdata.spark.core.SparkCoreJarProvider">
+            ProviderClass="org.knime.bigdata.spark.core.SparkCoreJarProvider">
       </SparkJarProvider>
    </extension>
 </plugin>

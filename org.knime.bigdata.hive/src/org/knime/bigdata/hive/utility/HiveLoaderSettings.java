@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import java.util.ArrayList;
 import java.util.Collection;

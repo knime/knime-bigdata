@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 6, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_6.jobs;
+package org.knime.bigdata.spark1_6.jobs;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.knime.bigdata.spark1_6.api.RowBuilder;
+import org.knime.bigdata.spark1_6.api.RowBuilder;
 
 /**
  * Spark tests basis.

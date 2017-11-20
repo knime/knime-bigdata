@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -28,7 +28,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
 
 /**
  * Dialog for the Spark to CSV node.

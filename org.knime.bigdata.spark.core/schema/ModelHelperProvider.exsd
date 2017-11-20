@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.core" id="ModelHelperProvider" name="ModelHelperProvider"/>
+         <meta.schema plugin="org.knime.bigdata.spark.core" id="ModelHelperProvider" name="ModelHelperProvider"/>
       </appinfo>
       <documentation>
          This extension point allows to register routines that (de)serialize and visualize native Spark Models in KNIME Analytics Platform. Registered implementations will be used by Spark model ports.
@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.model.DefaultModelHelperProvider:"/>
+                  <meta.attribute kind="java" basedOn="org.knime.bigdata.spark.core.model.DefaultModelHelperProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

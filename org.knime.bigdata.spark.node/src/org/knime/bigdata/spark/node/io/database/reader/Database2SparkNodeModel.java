@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.database.reader;
+package org.knime.bigdata.spark.node.io.database.reader;
 
 import java.io.File;
 import java.sql.Connection;
@@ -46,15 +46,15 @@ import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.workflow.CredentialsProvider;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * @author Sascha Wolke, KNIME.com

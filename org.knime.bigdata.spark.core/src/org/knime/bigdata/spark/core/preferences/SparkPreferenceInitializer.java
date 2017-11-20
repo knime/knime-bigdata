@@ -42,7 +42,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.core.preferences;
+package org.knime.bigdata.spark.core.preferences;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -51,8 +51,8 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 
-import com.knime.bigdata.spark.core.SparkPlugin;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.SparkPlugin;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -65,97 +65,97 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     public static final String ALL_LOG_LEVELS[] = new String[]{"DEBUG", "INFO", "WARN", "ERROR"};
 
     /** Preference key to determine whether Spark preferences have already been initialized */
-    public static final String PREF_SPARK_PREFERENCES_INITIALIZED = "com.knime.bigdata.spark.v1_6.initialized";
+    public static final String PREF_SPARK_PREFERENCES_INITIALIZED = "org.knime.bigdata.spark.v1_6.initialized";
 
     /** Preference key for a Spark jobserver URL. */
-    public static final String PREF_JOB_SERVER_URL = "com.knime.bigdata.spark.v1_6.jobserver.connection.url";
+    public static final String PREF_JOB_SERVER_URL = "org.knime.bigdata.spark.v1_6.jobserver.connection.url";
 
     /** Preference key for enabling authentication (boolean). */
-    public static final String PREF_AUTHENTICATION = "com.knime.bigdata.spark.v1_6.jobserver.connection.authentication";
+    public static final String PREF_AUTHENTICATION = "org.knime.bigdata.spark.v1_6.jobserver.connection.authentication";
 
     /** Preference key for a Spark jobserver username. */
-    public static final String PREF_USER_NAME = "com.knime.bigdata.spark.v1_6.jobserver.connection.user";
+    public static final String PREF_USER_NAME = "org.knime.bigdata.spark.v1_6.jobserver.connection.user";
 
-    public static final String PREF_PWD = "com.knime.bigdata.spark.v1_6.jobserver.connection.pwd";
+    public static final String PREF_PWD = "org.knime.bigdata.spark.v1_6.jobserver.connection.pwd";
 
-    public static final String PREF_CONTEXT_NAME = "com.knime.bigdata.spark.v1_6.jobserver.context.name";
+    public static final String PREF_CONTEXT_NAME = "org.knime.bigdata.spark.v1_6.jobserver.context.name";
 
-    public static final String PREF_SPARK_VERSION = "com.knime.bigdata.spark.v1_6.jobserver.context.sparkVersion";
+    public static final String PREF_SPARK_VERSION = "org.knime.bigdata.spark.v1_6.jobserver.context.sparkVersion";
 
     /** Preference key for enabling custom spark settings. */
     public static final String PREF_OVERRIDE_SPARK_SETTINGS =
-        "com.knime.bigdata.spark.v1_6.jobserver.context.overrideSparkSetting";
+        "org.knime.bigdata.spark.v1_6.jobserver.context.overrideSparkSetting";
 
     public static final String PREF_CUSTOM_SPARK_SETTINGS =
-        "com.knime.bigdata.spark.v1_6.jobserver.context.customSparkSetting";
+        "org.knime.bigdata.spark.v1_6.jobserver.context.customSparkSetting";
 
     /** Preference key for client side job status polling in seconds (integer). */
     public static final String PREF_JOB_CHECK_FREQUENCY =
-        "com.knime.bigdata.spark.v1_6.jobserver.context.jobCheckFrequency";
+        "org.knime.bigdata.spark.v1_6.jobserver.context.jobCheckFrequency";
 
     /** Preference key for job timeout in seconds (integer). */
-    public static final String PREF_JOB_TIMEOUT = "com.knime.bigdata.spark.v1_6.jobserver.context.jobTimeout";
+    public static final String PREF_JOB_TIMEOUT = "org.knime.bigdata.spark.v1_6.jobserver.context.jobTimeout";
 
-    public static final String PREF_DELETE_OBJECTS_ON_DISPOSE = "com.knime.bigdata.spark.v1_6.deleteObjectsOnDispose";
+    public static final String PREF_DELETE_OBJECTS_ON_DISPOSE = "org.knime.bigdata.spark.v1_6.deleteObjectsOnDispose";
 
     /** Preference key for spark side log level (e.g. INFO, DEBUG...). */
-    public static final String PREF_JOB_LOG_LEVEL = "com.knime.bigdata.spark.v1_6.jobLogLevel";
+    public static final String PREF_JOB_LOG_LEVEL = "org.knime.bigdata.spark.v1_6.jobLogLevel";
 
     /** Preference key for verbose logging on KNIME/client side. */
-    public static final String PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.v1_6.verboseLogging";
+    public static final String PREF_VERBOSE_LOGGING = "org.knime.bigdata.spark.v1_6.verboseLogging";
 
     /** All context specific settings requiring context reset on change. */
     public static final String[] PREF_ALL_CONTEXT_SETTINGS = new String[]{PREF_SPARK_VERSION, PREF_CONTEXT_NAME,
         PREF_DELETE_OBJECTS_ON_DISPOSE, PREF_JOB_LOG_LEVEL, PREF_OVERRIDE_SPARK_SETTINGS, PREF_CUSTOM_SPARK_SETTINGS};
 
 
-    private static final String LEGACY_SPARK_1_2_PLUGIN = "com.knime.bigdata.spark";
+    private static final String LEGACY_SPARK_1_2_PLUGIN = "org.knime.bigdata.spark";
 
-    private static final String LEGACY_SPARK_1_3_PLUGIN = "com.knime.bigdata.spark1_3";
-
-    /** @deprecated use PREF_JOB_SERVER_URL instead */
-    @Deprecated
-    public static final String LEGACY_PREF_JOB_SERVER = "com.knime.bigdata.spark.jobServer";
+    private static final String LEGACY_SPARK_1_3_PLUGIN = "org.knime.bigdata.spark1_3";
 
     /** @deprecated use PREF_JOB_SERVER_URL instead */
     @Deprecated
-    public static final String LEGACY_PREF_JOB_SERVER_PORT = "com.knime.bigdata.spark.jobServer.port";
+    public static final String LEGACY_PREF_JOB_SERVER = "org.knime.bigdata.spark.jobServer";
 
     /** @deprecated use PREF_JOB_SERVER_URL instead */
     @Deprecated
-    public static final String LEGACY_PREF_JOB_SERVER_PROTOCOL = "com.knime.bigdata.spark.jobServer.protocol";
+    public static final String LEGACY_PREF_JOB_SERVER_PORT = "org.knime.bigdata.spark.jobServer.port";
+
+    /** @deprecated use PREF_JOB_SERVER_URL instead */
+    @Deprecated
+    public static final String LEGACY_PREF_JOB_SERVER_PROTOCOL = "org.knime.bigdata.spark.jobServer.protocol";
 
     /** @deprecated use PREF_CONTEXT_NAME instead */
     @Deprecated
-    public static final String LEGACY_PREF_CONTEXT_NAME = "com.knime.bigdata.spark.context";
+    public static final String LEGACY_PREF_CONTEXT_NAME = "org.knime.bigdata.spark.context";
 
     /** @deprecated use PREF_DELETE_OBJECTS_ON_DISPOSE instead */
     @Deprecated
-    public static final String LEGACY_PREF_DELETE_RDDS_ON_DISPOSE = "com.knime.bigdata.spark.deleteRDDsOnDispose";
+    public static final String LEGACY_PREF_DELETE_RDDS_ON_DISPOSE = "org.knime.bigdata.spark.deleteRDDsOnDispose";
 
     /** @deprecated use PREF_CUSTOM_SPARK_SETTINGS instead */
     @Deprecated
-    public static final String LEGACY_PREF_MEM_PER_NODE = "com.knime.bigdata.spark.memperNode";
+    public static final String LEGACY_PREF_MEM_PER_NODE = "org.knime.bigdata.spark.memperNode";
 
     /** @deprecated use PREF_USER_NAME instead */
     @Deprecated
-    public static final String LEGACY_PREF_USER_NAME = "com.knime.bigdata.spark.user";
+    public static final String LEGACY_PREF_USER_NAME = "org.knime.bigdata.spark.user";
 
     /** @deprecated use PREF_USER_PWD instead */
     @Deprecated
-    public static final String LEGACY_PREF_PWD = "com.knime.bigdata.spark.pwd";
+    public static final String LEGACY_PREF_PWD = "org.knime.bigdata.spark.pwd";
 
     /** @deprecated use PREF_USER_JOB_TIMEOUT instead */
     @Deprecated
-    public static final String LEGACY_PREF_JOB_TIMEOUT = "com.knime.bigdata.spark.jobTimeout";
+    public static final String LEGACY_PREF_JOB_TIMEOUT = "org.knime.bigdata.spark.jobTimeout";
 
     /** @deprecated use PREF_JOB_CHECK_FREQUENCY instead */
     @Deprecated
-    public static final String LEGACY_PREF_JOB_CHECK_FREQUENCY = "com.knime.bigdata.spark.jobCheckFrequency";
+    public static final String LEGACY_PREF_JOB_CHECK_FREQUENCY = "org.knime.bigdata.spark.jobCheckFrequency";
 
     /** @deprecated use PREF_VERBOSE_LOGGING instead */
     @Deprecated
-    public static final String LEGACY_PREF_VERBOSE_LOGGING = "com.knime.bigdata.spark.verboseLogging";
+    public static final String LEGACY_PREF_VERBOSE_LOGGING = "org.knime.bigdata.spark.verboseLogging";
 
     @Override
     public void initializeDefaultPreferences() {
@@ -192,7 +192,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     /**
-     * Imports existing legacy preferences (from com.knime.bigdata.spark and .spark1_3) into the new format.
+     * Imports existing legacy preferences (from org.knime.bigdata.spark and .spark1_3) into the new format.
      *
      * @param store The store for the new preferences.
      * @param oldPluginId The legacy plugin name.

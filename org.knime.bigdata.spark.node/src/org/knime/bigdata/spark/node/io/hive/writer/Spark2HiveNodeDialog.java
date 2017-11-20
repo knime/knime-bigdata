@@ -18,7 +18,7 @@
  * History
  *   Created on 07.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.hive.writer;
+package org.knime.bigdata.spark.node.io.hive.writer;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;

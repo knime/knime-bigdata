@@ -18,11 +18,11 @@
  * History
  *   Created on 16.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * normalization settings, type plus respective parameters for each type

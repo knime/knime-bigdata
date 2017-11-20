@@ -18,7 +18,7 @@
  * History
  *   Created on Jul 26, 2016 by sascha
  */
-package com.knime.bigdata.impala.utility;
+package org.knime.bigdata.impala.utility;
 
 import java.sql.Driver;
 

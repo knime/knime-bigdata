@@ -18,7 +18,7 @@
  * History
  *   Created on 28.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.version;
+package org.knime.bigdata.spark.core.version;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -27,7 +27,7 @@ import java.util.Map;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
 
-import com.knime.bigdata.spark.core.exception.DuplicateElementException;
+import org.knime.bigdata.spark.core.exception.DuplicateElementException;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 22.09.2015 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -47,7 +47,7 @@ import org.knime.core.node.NodeLogger;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * This is a file based jar collector.

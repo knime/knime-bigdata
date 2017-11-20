@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 15, 2016 by oole
  */
-package com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
+package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -29,8 +29,8 @@ import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeComponents;
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeComponents;
 
 /**
  *

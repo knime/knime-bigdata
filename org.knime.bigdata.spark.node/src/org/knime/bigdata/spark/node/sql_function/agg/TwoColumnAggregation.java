@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.sql_function.agg;
+package org.knime.bigdata.spark.node.sql_function.agg;
 
 import java.awt.Component;
 import java.io.Serializable;
@@ -35,11 +35,11 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 
 /**
  * Aggregate function with two input columns.

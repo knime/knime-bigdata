@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.core.jar.bundle;
+package org.knime.bigdata.spark.core.jar.bundle;
 
 import java.io.File;
 import java.util.Arrays;
@@ -28,9 +28,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkProviderWithElements;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * A jar registry based on OSGi bundles.
@@ -40,7 +40,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 public class BundleGroupSparkJarRegistry extends SparkProviderRegistry<SparkProviderWithElements<BundleGroupSparkJarProvider>> {
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.BundleGroupSparkJarProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.BundleGroupSparkJarProvider";
 
     private static BundleGroupSparkJarRegistry instance;
 

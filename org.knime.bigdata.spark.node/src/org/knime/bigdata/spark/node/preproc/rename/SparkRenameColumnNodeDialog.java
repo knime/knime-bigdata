@@ -46,7 +46,7 @@
  * History
  *   04.06.2015 (koetter): created
  */
-package com.knime.bigdata.spark.node.preproc.rename;
+package org.knime.bigdata.spark.node.preproc.rename;
 
 import org.knime.base.node.preproc.rename.RenameNodeDialogPane;
 import org.knime.core.data.DataTableSpec;
@@ -54,7 +54,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *

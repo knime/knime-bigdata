@@ -18,25 +18,24 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader.json;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader.json;
 
 import javax.swing.JCheckBox;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
-
 /**
  * Dialog for the JSON to Spark node.
  * @author Sascha Wolke, KNIME.com
  */
-class Json2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<Json2SparkSettings> {
+public class Json2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<Json2SparkSettings> {
 
     private final JSpinner m_samplingRatio;
     private final JCheckBox m_primitivesAsString;

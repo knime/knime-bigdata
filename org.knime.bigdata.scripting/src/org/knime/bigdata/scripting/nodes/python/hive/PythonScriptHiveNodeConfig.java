@@ -45,7 +45,7 @@
  * History
  *   Sep 25, 2014 (Patrick Winter): created
  */
-package com.knime.bigdata.scripting.nodes.python.hive;
+package org.knime.bigdata.scripting.nodes.python.hive;
 
 import org.knime.code.generic.SourceCodeConfig;
 import org.knime.code.generic.VariableNames;

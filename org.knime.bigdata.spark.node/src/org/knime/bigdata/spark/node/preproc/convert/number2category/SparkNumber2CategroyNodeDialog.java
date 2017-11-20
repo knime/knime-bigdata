@@ -18,7 +18,7 @@
  * History
  *   Created on 21.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.convert.number2category;
+package org.knime.bigdata.spark.node.preproc.convert.number2category;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

@@ -18,21 +18,21 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.sql_function;
+package org.knime.bigdata.spark.node.sql_function;
 
 import org.knime.core.data.DataType;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.def.DoubleCell;
 
-import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
-import com.knime.bigdata.spark.node.sql_function.agg.FirstAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.LastAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.ListAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.MultiColumnAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.SetAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.SimpleAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.SumAggregation;
-import com.knime.bigdata.spark.node.sql_function.agg.TwoColumnAggregation;
+import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
+import org.knime.bigdata.spark.node.sql_function.agg.FirstAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.LastAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.ListAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.MultiColumnAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.SetAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.SimpleAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.SumAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.TwoColumnAggregation;
 
 /**
  *

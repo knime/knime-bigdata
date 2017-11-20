@@ -18,7 +18,7 @@
  * History
  *   Created on 19.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java.util;
+package org.knime.bigdata.spark.node.scripting.java.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,11 +49,11 @@ import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 
 /**
  * {@link JSnippet} implementation for the Spark Java Snippet nodes. This class links the GUI components to the node

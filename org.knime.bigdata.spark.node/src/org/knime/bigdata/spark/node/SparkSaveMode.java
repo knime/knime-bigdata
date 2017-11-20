@@ -16,7 +16,7 @@
  * ---------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node;
+package org.knime.bigdata.spark.node;
 
 /**
  * Maps spark save modes into KNIME.

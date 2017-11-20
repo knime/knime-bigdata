@@ -18,9 +18,9 @@
  * History
  *   Created on 16.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.joiner;
+package org.knime.bigdata.spark.node.preproc.joiner;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * This enum holds all ways of joining the two tables.

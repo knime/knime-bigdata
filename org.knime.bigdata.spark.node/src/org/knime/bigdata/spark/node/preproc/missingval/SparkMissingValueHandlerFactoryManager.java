@@ -15,11 +15,11 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval;
+package org.knime.bigdata.spark.node.preproc.missingval;
 
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;
 
-import com.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
+import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
 
 /**
  * Manager for missing spark value handler factories that are provided by extensions.
@@ -30,7 +30,7 @@ import com.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingV
 public class SparkMissingValueHandlerFactoryManager extends MissingCellHandlerFactoryManager {
 
     /** The id of the extension point. */
-    private static final String EXT_POINT_ID = "com.knime.bigdata.spark.node.SparkMissingValueHandler";
+    private static final String EXT_POINT_ID = "org.knime.bigdata.spark.node.SparkMissingValueHandler";
 
     /** The attribute pointing to the factory class. */
     private static final String EXT_POINT_ATTR_DF = "FactoryClass";

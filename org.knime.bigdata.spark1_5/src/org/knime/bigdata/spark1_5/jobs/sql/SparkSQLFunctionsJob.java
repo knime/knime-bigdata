@@ -15,17 +15,17 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark1_5.jobs.sql;
+package org.knime.bigdata.spark1_5.jobs.sql;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.SQLContext;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.sql.SparkSQLFunctionsJobOutput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.sql.SparkSQLFunctionsJobOutput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.SparkJob;
 
 import scala.collection.Seq;
 

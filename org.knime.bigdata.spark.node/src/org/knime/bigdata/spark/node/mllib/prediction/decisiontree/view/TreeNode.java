@@ -18,7 +18,7 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.util.List;
 

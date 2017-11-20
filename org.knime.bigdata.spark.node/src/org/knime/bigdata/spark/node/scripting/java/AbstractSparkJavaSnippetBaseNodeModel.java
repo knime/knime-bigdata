@@ -18,7 +18,7 @@
  * History
  *   Created on 24.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.scripting.java;
+package org.knime.bigdata.spark.node.scripting.java;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,26 +51,26 @@ import org.knime.core.util.FileUtil;
 import org.knime.core.util.Pair;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.jar.JarPacker;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.SparkContextProvider;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.util.SparkIDs;
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
-import com.knime.bigdata.spark.node.scripting.java.util.SourceCompiler;
-import com.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
-import com.knime.bigdata.spark.node.scripting.java.util.SparkJSnippetValidator;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.jar.JarPacker;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
+import org.knime.bigdata.spark.node.scripting.java.util.SourceCompiler;
+import org.knime.bigdata.spark.node.scripting.java.util.SparkJSnippet;
+import org.knime.bigdata.spark.node.scripting.java.util.SparkJSnippetValidator;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 
 /**
  *

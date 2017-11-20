@@ -18,10 +18,10 @@
  * History
  *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port;
+package org.knime.bigdata.spark.core.port;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * All classes that use and store a {@link SparkContextConfig}.

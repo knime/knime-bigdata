@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.hive;
+package org.knime.bigdata.spark1_2.jobs.hive;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,13 +31,13 @@ import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SimpleSparkJob;
-import com.knime.bigdata.spark1_2.hive.HiveContextProvider;
-import com.knime.bigdata.spark1_2.hive.HiveContextProvider.HiveContextAction;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SimpleSparkJob;
+import org.knime.bigdata.spark1_2.hive.HiveContextProvider;
+import org.knime.bigdata.spark1_2.hive.HiveContextProvider.HiveContextAction;
 
 /**
  * executes given sql statement and puts result into a (named) JavaRDD

@@ -18,11 +18,11 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.preproc.groupby;
+package org.knime.bigdata.spark.node.preproc.groupby;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
 
 /**
  * Group by job input with aggregation functions.

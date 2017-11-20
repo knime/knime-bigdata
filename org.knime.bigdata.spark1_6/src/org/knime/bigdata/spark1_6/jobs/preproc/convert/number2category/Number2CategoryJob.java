@@ -18,7 +18,7 @@
  * History
  *   Created on 21.08.2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.preproc.convert.number2category;
+package org.knime.bigdata.spark1_6.jobs.preproc.convert.number2category;
 
 import java.util.List;
 
@@ -28,15 +28,15 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.node.preproc.convert.number2category.Number2CategoryJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_6.api.RowBuilder;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
-import com.knime.bigdata.spark1_6.jobs.fetchrows.FetchRowsJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.node.preproc.convert.number2category.Number2CategoryJobInput;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.RDDUtilsInJava;
+import org.knime.bigdata.spark1_6.api.RowBuilder;
+import org.knime.bigdata.spark1_6.api.SimpleSparkJob;
+import org.knime.bigdata.spark1_6.jobs.fetchrows.FetchRowsJob;
 
 /**
  *

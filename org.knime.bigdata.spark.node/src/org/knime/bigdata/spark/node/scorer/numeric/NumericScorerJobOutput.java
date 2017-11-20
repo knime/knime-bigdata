@@ -18,10 +18,10 @@
  * History
  *   Created on May 13, 2016 by oole
  */
-package com.knime.bigdata.spark.node.scorer.numeric;
+package org.knime.bigdata.spark.node.scorer.numeric;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

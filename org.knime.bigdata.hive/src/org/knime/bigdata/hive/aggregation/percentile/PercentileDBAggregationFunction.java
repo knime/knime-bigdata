@@ -18,7 +18,7 @@
  * History
  *   Created on 23.09.2014 by koetter
  */
-package com.knime.bigdata.hive.aggregation.percentile;
+package org.knime.bigdata.hive.aggregation.percentile;
 
 import java.awt.Component;
 

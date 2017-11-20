@@ -18,7 +18,7 @@
  * History
  *   Created on 20.05.2016 by koetter
  */
-package com.knime.bigdata.phoenix.utility;
+package org.knime.bigdata.phoenix.utility;
 
 import org.knime.core.node.port.database.connection.DefaultDBDriverFactory;
 

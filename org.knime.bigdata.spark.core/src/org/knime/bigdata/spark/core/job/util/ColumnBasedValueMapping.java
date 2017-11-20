@@ -18,7 +18,7 @@
  * History
  *   Created on 21.08.2015 by koetter
  */
-package com.knime.bigdata.spark.core.job.util;
+package org.knime.bigdata.spark.core.job.util;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

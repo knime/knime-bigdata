@@ -18,7 +18,7 @@
  * History
  *   Created on 30.09.2015 by Bjoern Lohrmann
  */
-package com.knime.bigdata.spark.node.scorer.accuracy;
+package org.knime.bigdata.spark.node.scorer.accuracy;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -54,12 +54,12 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Node model for Spark scorer. Provides the same settings as the regular {@link AccuracyScorerNodeModel}, except that it does not

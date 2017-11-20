@@ -18,16 +18,16 @@
  * History
  *   Created on May 30, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.prediction.decisiontree;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMappings;
-import com.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMappings;
+import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
 
 /**
  * Abstract super class for decision tree model helpers, that handles metadata loading/saving.

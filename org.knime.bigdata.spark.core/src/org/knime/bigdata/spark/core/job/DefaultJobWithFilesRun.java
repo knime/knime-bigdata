@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 12, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 import java.io.File;
 import java.util.List;
@@ -26,9 +26,9 @@ import java.util.List;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
  *

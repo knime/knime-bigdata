@@ -18,24 +18,24 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_2.converter.type;
+package org.knime.bigdata.spark2_2.converter.type;
 
-import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark2_2.api.Spark_2_2_CompatibilityChecker;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.BinaryTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.BooleanTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.ByteTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.DateTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.DoubleTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.FloatTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.IntegerTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.LongTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.NullTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.ShortTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.StringTypeProxy;
-import com.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.TimestampTypeProxy;
+import org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverterProvider;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark2_2.api.Spark_2_2_CompatibilityChecker;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.BinaryTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.BooleanTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.ByteTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.DateTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.DoubleTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.FloatTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.IntegerTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.LongTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.NullTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.ShortTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.StringTypeProxy;
+import org.knime.bigdata.spark2_2.converter.type.SerializableTypeProxies.TimestampTypeProxy;
 
 /**
  *

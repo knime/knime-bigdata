@@ -18,10 +18,10 @@
  * History
  *   Created on Apr 28, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 /**
- * Some plugins (e.g. com.knime.bigdata.spark.core and com.knime.bigdata.spark.node) are "base" jar providers, which
+ * Some plugins (e.g. org.knime.bigdata.spark.core and org.knime.bigdata.spark.node) are "base" jar providers, which
  * means they do not contain any Spark jobs, but provide classes that Spark jobs depend on. This interface is a marker
  * interface to indicate to {@link SparkJarRegistry} that a jar provider is a "base" jar provider. The difference
  * between "base" and "regular" jar providers, is that the "base" providers will not trigger Spark class collection by

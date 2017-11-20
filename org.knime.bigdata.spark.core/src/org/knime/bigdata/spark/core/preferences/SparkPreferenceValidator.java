@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 27, 2016 by Sascha Wolke
  */
-package com.knime.bigdata.spark.core.preferences;
+package org.knime.bigdata.spark.core.preferences;
 
 import java.net.URI;
 import java.net.URISyntaxException;

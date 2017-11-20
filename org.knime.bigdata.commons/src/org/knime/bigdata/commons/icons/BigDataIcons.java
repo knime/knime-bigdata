@@ -46,7 +46,7 @@
  * History
  *   Aug 16, 2016 (bjoern): created
  */
-package com.knime.bigdata.commons.icons;
+package org.knime.bigdata.commons.icons;
 
 import javax.swing.Icon;
 

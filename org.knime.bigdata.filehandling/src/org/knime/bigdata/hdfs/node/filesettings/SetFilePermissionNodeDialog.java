@@ -18,7 +18,7 @@
  * History
  *   Created on 07.08.2014 by koetter
  */
-package com.knime.bigdata.hdfs.node.filesettings;
+package org.knime.bigdata.hdfs.node.filesettings;
 
 import org.knime.core.data.uri.URIDataValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;

@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 5, 2017 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 /**
  * Instances of this class hold information (class, message and stack trace) about an exception that has been restored

@@ -18,19 +18,19 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.namedobjects;
+package org.knime.bigdata.spark2_0.jobs.namedobjects;
 
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
  * Helper job to manage named objects on the server side.

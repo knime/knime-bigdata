@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_2.jobs.sql;
+package org.knime.bigdata.spark2_2.jobs.sql;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,12 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.sql.SparkSQLFunctionsJobOutput;
-import com.knime.bigdata.spark2_2.api.NamedObjects;
-import com.knime.bigdata.spark2_2.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.sql.SparkSQLFunctionsJobOutput;
+import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.SparkJob;
 
 /**
  * Returns Spark SQL function names.

@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.node.sql_function;
+package org.knime.bigdata.spark.node.sql_function;
 
 /**
  * KNIME Side Function Factory.

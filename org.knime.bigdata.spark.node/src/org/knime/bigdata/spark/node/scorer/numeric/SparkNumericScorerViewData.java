@@ -18,7 +18,7 @@
  * History
  *   Created on Oct 1, 2015 by bjoern
  */
-package com.knime.bigdata.spark.node.scorer.numeric;
+package org.knime.bigdata.spark.node.scorer.numeric;
 
 /**
  * Holds the results of numeric scoring that are displayed in SparkNumericScorerNodeView

@@ -18,10 +18,10 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.core.sql_function;
+package org.knime.bigdata.spark.core.sql_function;
 
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
 
 /**
  * Provides spark function and a factory name to use them in spark jobs.

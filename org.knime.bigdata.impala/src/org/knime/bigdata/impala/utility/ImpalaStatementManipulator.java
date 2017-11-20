@@ -18,7 +18,7 @@
  * History
  *   Created on 01.08.2014 by koetter
  */
-package com.knime.bigdata.impala.utility;
+package org.knime.bigdata.impala.utility;
 
 import org.knime.core.node.port.database.StatementManipulator;
 

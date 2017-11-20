@@ -18,11 +18,11 @@
  * History
  *   Created on 23.09.2015 by dwk
  */
-package com.knime.bigdata.spark1_5.jobs.mllib.collaborativefiltering;
+package org.knime.bigdata.spark1_5.jobs.mllib.collaborativefiltering;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * a wrapper for a MatrixFactorizationModel that only contains references to the names of the named RDDs for

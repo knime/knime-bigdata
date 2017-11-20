@@ -18,7 +18,7 @@
  * History
  *   Created on May 12, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java;
+package org.knime.bigdata.spark.node.scripting.java;
 
 import java.io.File;
 import java.util.Objects;

@@ -18,12 +18,12 @@
  * History
  *   Created on 30.09.2015 by Bjoern Lohrmann
  */
-package com.knime.bigdata.spark.node.scorer.accuracy;
+package org.knime.bigdata.spark.node.scorer.accuracy;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

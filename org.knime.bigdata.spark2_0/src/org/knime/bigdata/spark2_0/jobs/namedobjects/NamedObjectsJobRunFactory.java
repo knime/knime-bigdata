@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.namedobjects;
+package org.knime.bigdata.spark2_0.jobs.namedobjects;
 
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 
 /**
  *

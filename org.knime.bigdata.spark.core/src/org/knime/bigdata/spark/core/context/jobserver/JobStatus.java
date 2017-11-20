@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.core.context.jobserver;
+package org.knime.bigdata.spark.core.context.jobserver;
 
 /**
  * enum that maps job-server job stati to Java

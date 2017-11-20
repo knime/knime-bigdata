@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval;
+package org.knime.bigdata.spark.node.preproc.missingval;
 
 import org.knime.base.node.preproc.pmml.missingval.MVSettings;
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;

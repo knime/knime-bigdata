@@ -18,11 +18,11 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.impala.node.connector;
+package org.knime.bigdata.impala.node.connector;
 
 import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
 
-import com.knime.bigdata.impala.utility.ImpalaUtility;
+import org.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
  * Settings for the Impala connector node.

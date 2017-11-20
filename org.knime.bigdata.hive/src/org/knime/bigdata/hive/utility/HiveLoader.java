@@ -18,7 +18,7 @@
  * History
  *   Created on 14.04.2015 by koetter
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import java.io.File;
 import java.net.URI;
@@ -43,7 +43,7 @@ import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import com.knime.licenses.LicenseException;
 
 /**

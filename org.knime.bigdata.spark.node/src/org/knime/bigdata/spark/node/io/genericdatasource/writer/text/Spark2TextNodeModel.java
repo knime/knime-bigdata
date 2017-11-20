@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer.text;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer.text;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.StringValue;
@@ -23,9 +23,9 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
 
 /**
  * @author Sascha Wolke, KNIME.com

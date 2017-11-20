@@ -2,43 +2,43 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="com.knime.bigdata.spark.core.SparkJarProvider">
+         point="org.knime.bigdata.spark.core.SparkJarProvider">
       <SparkJarProvider
-            ProviderClass="com.knime.bigdata.spark1_2.base.Spark_1_2_JarProvider">
+            ProviderClass="org.knime.bigdata.spark1_2.base.Spark_1_2_JarProvider">
       </SparkJarProvider>
    </extension>
-   <extension point="com.knime.bigdata.spark.core.JobRunFactoryProvider">
+   <extension point="org.knime.bigdata.spark.core.JobRunFactoryProvider">
       <JobRunFactoryProvider
-            ProviderClass="com.knime.bigdata.spark1_2.base.Spark_1_2_JobRunFactoryProvider">
+            ProviderClass="org.knime.bigdata.spark1_2.base.Spark_1_2_JobRunFactoryProvider">
       </JobRunFactoryProvider>
    </extension>
    <extension
-         point="com.knime.bigdata.spark.core.ModelHelperProvider">
+         point="org.knime.bigdata.spark.core.ModelHelperProvider">
       <ModelHelperProvider
-            ProviderClass="com.knime.bigdata.spark1_2.base.Spark_1_2_ModelHelperProvider">
+            ProviderClass="org.knime.bigdata.spark1_2.base.Spark_1_2_ModelHelperProvider">
       </ModelHelperProvider>
    </extension>
    <extension
-         point="com.knime.bigdata.spark.core.IntermediateToSparkConverterProvider">
+         point="org.knime.bigdata.spark.core.IntermediateToSparkConverterProvider">
       <IntermediateToSparkConverterProvider 
-      		ProviderClass="com.knime.bigdata.spark1_2.converter.type.DefaultSpark_1_2_IntermediateToSparkConverterProvider">
+      		ProviderClass="org.knime.bigdata.spark1_2.converter.type.DefaultSpark_1_2_IntermediateToSparkConverterProvider">
       </IntermediateToSparkConverterProvider>
    </extension>
    <extension
-         point="com.knime.bigdata.spark.node.JavaSnippetHelper">
+         point="org.knime.bigdata.spark.node.JavaSnippetHelper">
       <JavaSnippetHelper
-            HelperClass="com.knime.bigdata.spark1_2.base.Spark_1_2_JavaSnippetHelper">
+            HelperClass="org.knime.bigdata.spark1_2.base.Spark_1_2_JavaSnippetHelper">
       </JavaSnippetHelper>
    </extension>
    <extension
-         point="com.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
+         point="org.knime.bigdata.spark.node.JavaSnippetTemplateRepository">
       <JavaSnippetTemplateRepositoryProvider
-            ProviderClass="com.knime.bigdata.spark1_2.base.Spark_1_2_JavaSnippetTemplateRepositoryProvider">
+            ProviderClass="org.knime.bigdata.spark1_2.base.Spark_1_2_JavaSnippetTemplateRepositoryProvider">
       </JavaSnippetTemplateRepositoryProvider>
    </extension>
-   <extension point="com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
+   <extension point="org.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
       <PMMLPortObjectFactoryProvider
-            ProviderClass="com.knime.bigdata.spark1_2.base.Spark_1_2_PMMLPortObjectFactoryProvider">
+            ProviderClass="org.knime.bigdata.spark1_2.base.Spark_1_2_PMMLPortObjectFactoryProvider">
       </PMMLPortObjectFactoryProvider>
    </extension>
 </plugin>

@@ -18,12 +18,12 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.preproc.partition;
+package org.knime.bigdata.spark.node.preproc.partition;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeDialog;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeDialog;
 
 /**
  *

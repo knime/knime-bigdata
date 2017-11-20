@@ -18,7 +18,7 @@
  * History
  *   Created on 29.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.transformation;
+package org.knime.bigdata.spark.node.pmml.transformation;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;

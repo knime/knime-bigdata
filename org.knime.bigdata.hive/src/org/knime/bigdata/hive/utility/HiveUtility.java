@@ -18,7 +18,7 @@
  * History
  *   Created on 08.05.2014 by thor
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -47,10 +47,10 @@ import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
-import com.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
-import com.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
-import com.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
+import org.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
+import org.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
 import com.knime.licenses.LicenseFeatures;

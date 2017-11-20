@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_3.jobs.mllib.prediction.ensemble.randomforest;
+package org.knime.bigdata.spark1_3.jobs.mllib.prediction.ensemble.randomforest;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
-import com.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree.AbstractDecisionTreeModelHelper;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
+import org.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree.AbstractDecisionTreeModelHelper;
 
 /**
  *

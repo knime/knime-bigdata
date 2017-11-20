@@ -18,12 +18,12 @@
  * History
  *   Created on 22.09.2015 by dwk
  */
-package com.knime.bigdata.spark.node.scorer.entropy;
+package org.knime.bigdata.spark.node.scorer.entropy;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Utility class that stores some entropy and quality values for clustering results given a reference clustering.

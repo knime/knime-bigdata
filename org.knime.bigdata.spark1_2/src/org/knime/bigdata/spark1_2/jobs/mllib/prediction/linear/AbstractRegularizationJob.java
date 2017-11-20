@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.linear;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.linear;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -18,15 +18,15 @@ import org.apache.spark.mllib.optimization.Updater;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SparkJob;
-import com.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SparkJob;
+import org.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
 
 /**
  * @author dwk

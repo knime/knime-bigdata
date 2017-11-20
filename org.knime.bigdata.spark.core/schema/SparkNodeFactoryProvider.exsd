@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.core" id="SparkNodeFactoryProvider" name="SparkNodeFactoryProvider"/>
+         <meta.schema plugin="org.knime.bigdata.spark.core" id="SparkNodeFactoryProvider" name="SparkNodeFactoryProvider"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider:"/>
+                  <meta.attribute kind="java" basedOn="org.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -18,12 +18,12 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.statistics.correlation;
+package org.knime.bigdata.spark1_3.jobs.statistics.correlation;
 
 import org.apache.spark.mllib.linalg.Matrix;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
 
 /**
  * Computes a single correlation value

@@ -18,12 +18,12 @@
  * History
  *   Created on Apr 15, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 import java.io.File;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 
 /**
  * Default implementation of a {@link JobWithFilesRunFactory} for jobs that require input files to be uploaded.

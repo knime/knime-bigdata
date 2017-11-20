@@ -18,10 +18,10 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings.NormalizationMode;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings.NormalizationMode;
 
 /**
  *

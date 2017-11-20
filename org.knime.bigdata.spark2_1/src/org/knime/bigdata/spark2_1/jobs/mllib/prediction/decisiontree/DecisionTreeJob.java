@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,13 +31,13 @@ import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
-import com.knime.bigdata.spark2_1.api.NamedObjects;
-import com.knime.bigdata.spark2_1.api.SparkJob;
-import com.knime.bigdata.spark2_1.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
+import org.knime.bigdata.spark2_1.api.NamedObjects;
+import org.knime.bigdata.spark2_1.api.SparkJob;
+import org.knime.bigdata.spark2_1.api.SupervisedLearnerUtils;
 
 /**
  * runs MLlib DecisionTree on a given RDD to create a decision tree, model is returned as result

@@ -18,14 +18,14 @@
  * History
  *   Created on Jun 10, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Convenience class that generalizes the way {@link SparkClass}es are collected from KNIME's own Spark job plugins.

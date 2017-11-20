@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_3.api;
+package org.knime.bigdata.spark1_3.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,13 +27,13 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
 
 import com.google.common.base.Optional;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import com.knime.bigdata.spark.core.job.util.MyJoinKey;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.core.job.util.MyJoinKey;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.NominalValueMappingFactory;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.NominalValueMappingFactory;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
 
 import scala.Tuple2;
 

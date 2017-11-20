@@ -18,12 +18,12 @@
  * History
  *   Created on 27.05.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.hive.reader;
+package org.knime.bigdata.spark.node.io.hive.reader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

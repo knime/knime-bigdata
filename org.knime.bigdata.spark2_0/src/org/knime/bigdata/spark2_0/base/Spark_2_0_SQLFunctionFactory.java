@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark2_0.base;
+package org.knime.bigdata.spark2_0.base;
 
 import static org.apache.spark.sql.functions.approxCountDistinct;
 import static org.apache.spark.sql.functions.asc;
@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.types.DataType;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
-import com.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark2_0.api.TypeConverters;
 
 import scala.collection.Seq;
 

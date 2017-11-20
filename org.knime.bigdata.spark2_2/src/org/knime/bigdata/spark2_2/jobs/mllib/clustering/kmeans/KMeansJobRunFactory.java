@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_2.jobs.mllib.clustering.kmeans;
+package org.knime.bigdata.spark2_2.jobs.mllib.clustering.kmeans;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
+import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 
 /**
  *

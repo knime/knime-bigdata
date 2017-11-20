@@ -18,7 +18,7 @@
  * History
  *   Created on 02.10.2015 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.mllib.prediction.linear;
+package org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -26,8 +26,8 @@ import java.util.List;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.GeneralizedLinearModel;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *

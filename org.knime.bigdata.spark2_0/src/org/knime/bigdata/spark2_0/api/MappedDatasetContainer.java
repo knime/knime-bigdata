@@ -18,7 +18,7 @@
  * History
  *   Created on 17.07.2015 by dwk
  */
-package com.knime.bigdata.spark2_0.api;
+package org.knime.bigdata.spark2_0.api;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,10 +36,10 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import com.knime.bigdata.spark.node.preproc.convert.MyRecord;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.node.preproc.convert.MyRecord;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
  *

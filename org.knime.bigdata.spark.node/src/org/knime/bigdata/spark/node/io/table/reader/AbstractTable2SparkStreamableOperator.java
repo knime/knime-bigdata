@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 22, 2017 by bjoern
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package org.knime.bigdata.spark.node.io.table.reader;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -38,13 +38,13 @@ import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import com.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * Base class for streamable operators for the {@link Table2SparkNodeModel}.

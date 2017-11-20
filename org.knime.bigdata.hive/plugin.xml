@@ -4,17 +4,17 @@
      <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            factory-class="com.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"
+            factory-class="org.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"
             category-path="/database/database-connector"/>
       <node
             category-path="/database/database-io"
-            factory-class="com.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory">
+            factory-class="org.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory">
       </node>
     </extension>
      <extension
            point="org.knime.core.DatabaseUtility">
         <databaseUtility
-              class="com.knime.bigdata.hive.utility.HiveUtility"
+              class="org.knime.bigdata.hive.utility.HiveUtility"
               database="hive2">
         </databaseUtility>
      </extension>

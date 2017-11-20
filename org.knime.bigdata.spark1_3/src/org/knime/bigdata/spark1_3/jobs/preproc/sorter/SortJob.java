@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.preproc.sorter;
+package org.knime.bigdata.spark1_3.jobs.preproc.sorter;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -26,12 +26,12 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.MultiValueSortKey;
-import com.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
-import com.knime.bigdata.spark1_3.api.NamedObjects;
-import com.knime.bigdata.spark1_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.MultiValueSortKey;
+import org.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
+import org.knime.bigdata.spark1_3.api.NamedObjects;
+import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
 
 /**
  * sorts input RDD by given indices, in given order

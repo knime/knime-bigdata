@@ -18,9 +18,9 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.predictor.compiling;
+package org.knime.bigdata.spark.node.pmml.predictor.compiling;
 
-import com.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeFactory;
+import org.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeFactory;
 
 /**
  *

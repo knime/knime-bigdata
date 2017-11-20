@@ -18,7 +18,7 @@
  * History
  *   Created on 22.09.2015 by koetter
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 /**
  *

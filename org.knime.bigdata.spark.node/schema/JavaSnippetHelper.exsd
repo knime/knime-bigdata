@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.node" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.node" id="JavaSnippetHelper" name="Java Snippet Helper"/>
+         <meta.schema plugin="org.knime.bigdata.spark.node" id="JavaSnippetHelper" name="Java Snippet Helper"/>
       </appinfo>
       <documentation>
          Extension point to register Spark version-specific Java Snippet Helpers. These are used by the Spark Java snippet nodes to obtain pieces of code and other information required to write Spark version-specific snippets.
@@ -55,7 +55,7 @@
                   Name of the class that implements the Helper interface (which extends SparkProvider).
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper"/>
+                  <meta.attribute kind="java" basedOn=":org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper"/>
                </appinfo>
             </annotation>
          </attribute>

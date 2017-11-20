@@ -18,11 +18,11 @@
  * History
  *   Created on 17.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.convert;
+package org.knime.bigdata.spark.node.preproc.convert;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 7, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,11 +31,11 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Level;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 3, 2017 by bjoern
  */
-package com.knime.bigdata.spark.node.preproc.missingval.handler;
+package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -27,9 +27,9 @@ import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
 
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 
 /**
  * Replaces missing values with a fixed boolean false.

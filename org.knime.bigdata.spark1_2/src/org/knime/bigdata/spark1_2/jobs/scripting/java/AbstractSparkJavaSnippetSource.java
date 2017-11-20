@@ -18,13 +18,13 @@
  * History
  *   Created on 24.06.2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.scripting.java;
+package org.knime.bigdata.spark1_2.jobs.scripting.java;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

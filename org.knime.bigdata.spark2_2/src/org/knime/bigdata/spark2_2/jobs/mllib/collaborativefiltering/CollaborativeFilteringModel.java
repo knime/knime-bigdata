@@ -18,11 +18,11 @@
  * History
  *   Created on 23.09.2015 by dwk
  */
-package com.knime.bigdata.spark2_2.jobs.mllib.collaborativefiltering;
+package org.knime.bigdata.spark2_2.jobs.mllib.collaborativefiltering;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * A wrapper for a MatrixFactorizationModel/ALSModel that contains named object keys und column names for product and

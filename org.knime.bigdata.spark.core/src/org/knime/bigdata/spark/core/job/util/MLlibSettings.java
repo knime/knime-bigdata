@@ -18,7 +18,7 @@
  * History
  *   Created on 23.08.2015 by koetter
  */
-package com.knime.bigdata.spark.core.job.util;
+package org.knime.bigdata.spark.core.job.util;
 
 import java.util.Arrays;
 import java.util.LinkedList;

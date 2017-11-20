@@ -45,7 +45,7 @@
  * History
  *   02.02.2005 (cebron): created
  */
-package com.knime.bigdata.spark.node.preproc.sorter;
+package org.knime.bigdata.spark.node.preproc.sorter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +62,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 
 /**

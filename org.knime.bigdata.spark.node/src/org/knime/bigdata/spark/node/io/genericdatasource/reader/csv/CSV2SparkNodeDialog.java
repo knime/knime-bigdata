@@ -18,12 +18,13 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader.csv;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader.csv;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -31,14 +32,12 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
-
 /**
  * Dialog for the JDBC to Spark node.
  *
  * @author Sascha Wolke, KNIME.com
  */
-class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSettings> {
+public class CSV2SparkNodeDialog extends GenericDataSource2SparkNodeDialog<CSV2SparkSettings> {
 
     private final JCheckBox m_header;
     private final JComboBox<String> m_delimiter;

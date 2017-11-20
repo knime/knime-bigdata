@@ -18,12 +18,12 @@
  * History
  *   Created on 02.11.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.converter;
+package org.knime.bigdata.spark.node.pmml.converter;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
 
 /**
  * Interface of a SparkModel to PMML converter.

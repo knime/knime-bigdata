@@ -43,7 +43,7 @@
  * -------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -80,8 +80,8 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
 import org.knime.core.node.util.DataColumnSpecListCellRenderer;
 
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 
 /**

@@ -18,7 +18,7 @@
  * History
  *   Created on May 2, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.base;
+package org.knime.bigdata.spark1_6.base;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,8 @@ import org.apache.log4j.spi.ErrorHandler;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.jobserver.LogMessage;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.jobserver.LogMessage;
 
 /**
  *

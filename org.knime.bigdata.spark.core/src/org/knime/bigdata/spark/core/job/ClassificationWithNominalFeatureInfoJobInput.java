@@ -18,12 +18,12 @@
  * History
  *   Created on 08.05.2016 by koetter
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 import java.util.Arrays;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
 
 /**
  *

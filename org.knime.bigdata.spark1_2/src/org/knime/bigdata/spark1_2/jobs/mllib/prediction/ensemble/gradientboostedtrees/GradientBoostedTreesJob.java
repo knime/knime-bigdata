@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,14 +41,14 @@ import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobInput;
-import com.knime.bigdata.spark1_2.api.NamedObjects;
-import com.knime.bigdata.spark1_2.api.SparkJob;
-import com.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
+import org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobInput;
+import org.knime.bigdata.spark1_2.api.NamedObjects;
+import org.knime.bigdata.spark1_2.api.SparkJob;
+import org.knime.bigdata.spark1_2.api.SupervisedLearnerUtils;
 
 import scala.Enumeration.Value;
 

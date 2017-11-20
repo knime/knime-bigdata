@@ -18,11 +18,11 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.connector;
+package org.knime.bigdata.hive.node.connector;
 
 import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Settings for the Hive connector node.

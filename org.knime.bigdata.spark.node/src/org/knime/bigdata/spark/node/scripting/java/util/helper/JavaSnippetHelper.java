@@ -18,7 +18,7 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util.helper;
+package org.knime.bigdata.spark.node.scripting.java.util.helper;
 
 import java.io.File;
 import java.util.List;
@@ -27,7 +27,7 @@ import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 
-import com.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**
  * Instances of this class are used by the Spark Java snippet nodes to obtain everything that is required to write Spark

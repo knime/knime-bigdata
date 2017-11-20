@@ -18,7 +18,7 @@
  * History
  *   Created on Jan 17, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.rename;
+package org.knime.bigdata.spark2_0.jobs.preproc.rename;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Dataset;
@@ -26,12 +26,12 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SimpleSparkJob;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.SimpleSparkJob;
+import org.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
  * Renames columns via schema update.

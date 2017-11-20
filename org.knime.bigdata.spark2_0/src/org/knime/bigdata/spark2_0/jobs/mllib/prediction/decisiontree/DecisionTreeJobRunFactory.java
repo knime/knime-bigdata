@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 
 /**
  *

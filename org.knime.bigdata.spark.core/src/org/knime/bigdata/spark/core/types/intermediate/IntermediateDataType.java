@@ -18,11 +18,11 @@
  * History
  *   Created on 28.01.2016 by koetter
  */
-package com.knime.bigdata.spark.core.types.intermediate;
+package org.knime.bigdata.spark.core.types.intermediate;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Class that acts as an intermediate type between KNIME data types and Spark data types.

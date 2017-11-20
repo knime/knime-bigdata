@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 7, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jobserver;
+package org.knime.bigdata.spark.core.jobserver;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 22, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package org.knime.bigdata.spark.node.io.table.reader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,13 +35,13 @@ import org.knime.core.node.streamable.DataTableRowInput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextUtil;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 
 /**
  * A {@link StreamableOperator} implementation for the {@link Table2SparkNodeModel}. Rows consumed by this stremable

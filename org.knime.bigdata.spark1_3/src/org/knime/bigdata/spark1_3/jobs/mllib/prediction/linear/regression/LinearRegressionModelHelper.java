@@ -18,11 +18,11 @@
  * History
  *   Created on 06.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression;
+package org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import com.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
+import org.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
 
 /**
  *

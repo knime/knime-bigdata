@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.impala.node.connector;
+package org.knime.bigdata.impala.node.connector;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -40,8 +40,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.util.StringHistoryPanel;
 
-import com.knime.bigdata.commons.icons.BigDataIcons;
-import com.knime.bigdata.impala.utility.ImpalaDriverDetector;
+import org.knime.bigdata.commons.icons.BigDataIcons;
+import org.knime.bigdata.impala.utility.ImpalaDriverDetector;
 
 /**
  * Dialog for the Impala Connector node.

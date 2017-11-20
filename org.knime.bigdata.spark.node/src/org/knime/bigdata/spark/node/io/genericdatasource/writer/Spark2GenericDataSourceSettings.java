@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 10, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
@@ -27,8 +27,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
  * Settings for a generic spark writer node.

@@ -18,7 +18,7 @@
  * History
  *   Created on 28.08.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.rdd.persist;
+package org.knime.bigdata.spark.node.util.rdd.persist;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jobserver;
+package org.knime.bigdata.spark.core.jobserver;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,8 +33,8 @@ import java.io.ObjectOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

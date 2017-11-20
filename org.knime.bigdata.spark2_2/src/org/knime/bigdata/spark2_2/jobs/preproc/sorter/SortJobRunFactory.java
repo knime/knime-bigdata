@@ -18,11 +18,11 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_2.jobs.preproc.sorter;
+package org.knime.bigdata.spark2_2.jobs.preproc.sorter;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
-import com.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
+import org.knime.bigdata.spark.node.preproc.sorter.SparkSorterNodeModel;
 
 /**
  *

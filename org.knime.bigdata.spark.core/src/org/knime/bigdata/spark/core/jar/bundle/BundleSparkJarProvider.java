@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.core.jar.bundle;
+package org.knime.bigdata.spark.core.jar.bundle;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +27,11 @@ import java.util.jar.JarEntry;
 import org.eclipse.core.runtime.FileLocator;
 import org.osgi.framework.Bundle;
 
-import com.knime.bigdata.spark.core.jar.JarCollector;
-import com.knime.bigdata.spark.core.jar.JarPacker;
-import com.knime.bigdata.spark.core.jar.SparkJarProvider;
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.jar.JarCollector;
+import org.knime.bigdata.spark.core.jar.JarPacker;
+import org.knime.bigdata.spark.core.jar.SparkJarProvider;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Provides a OSGi bundle as Spark jar Provider.

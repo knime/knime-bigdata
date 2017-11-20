@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_1.base;
+package org.knime.bigdata.spark2_1.base;
 
 import java.io.File;
 import java.util.HashSet;
@@ -42,8 +42,8 @@ import org.knime.base.node.jsnippet.util.field.OutCol;
 import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
-import com.knime.bigdata.spark2_1.api.Spark_2_1_CompatibilityChecker;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
+import org.knime.bigdata.spark2_1.api.Spark_2_1_CompatibilityChecker;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
@@ -245,7 +245,7 @@ public abstract class Spark_2_1_AbstractJavaSnippetHelper extends DefaultJavaSni
             "scala.reflect.api",
             "org.apache.spark",
             "com.google.common.base",
-            "com.knime.bigdata.spark.core.exception",
+            "org.knime.bigdata.spark.core.exception",
             "org.apache.hadoop.conf",
             "org.apache.hadoop.mapred"
         };
@@ -255,7 +255,7 @@ public abstract class Spark_2_1_AbstractJavaSnippetHelper extends DefaultJavaSni
         final Set<String> classpathEntries = new HashSet<>();
 
         // scan over the imports and add all classpath entries that
-        // provide the classes from the imports (this adds com.knime.bigdata.spark.core and the spark libs)
+        // provide the classes from the imports (this adds org.knime.bigdata.spark.core and the spark libs)
         for (String pkg : packages) {
             final PackageSource packageSource = cl.getBundleLoader().getPackageSource(pkg);
 

@@ -18,12 +18,12 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.preproc.partition;
+package org.knime.bigdata.spark1_5.jobs.preproc.partition;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeModel;
-import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
-import com.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeModel;
+import org.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
+import org.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
 
 /**
  *

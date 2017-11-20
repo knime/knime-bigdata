@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 8, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jobserver;
+package org.knime.bigdata.spark.core.jobserver;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;

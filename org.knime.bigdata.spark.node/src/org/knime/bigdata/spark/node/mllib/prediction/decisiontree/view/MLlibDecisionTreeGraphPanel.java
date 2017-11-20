@@ -18,7 +18,7 @@
  * History
  *   Created on May 25, 2016 by oole
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -47,7 +47,7 @@ import org.knime.base.node.mine.decisiontree2.view.graph.ExpandBranchAction;
 import org.knime.core.data.property.ColorAttr;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 
 
 /**

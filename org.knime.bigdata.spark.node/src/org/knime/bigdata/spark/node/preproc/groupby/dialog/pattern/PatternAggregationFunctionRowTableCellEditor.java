@@ -44,7 +44,7 @@
  *
  */
 
-package com.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
 
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 
 
 /**

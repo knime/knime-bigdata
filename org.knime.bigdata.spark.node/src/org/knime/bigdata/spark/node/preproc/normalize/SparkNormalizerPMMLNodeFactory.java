@@ -18,11 +18,11 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

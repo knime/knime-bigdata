@@ -18,15 +18,15 @@
  * History
  *   Created on Jan 17, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_6.jobs.preproc.rename;
+package org.knime.bigdata.spark1_6.jobs.preproc.rename;
 
 import org.apache.spark.SparkContext;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
-import com.knime.bigdata.spark1_6.api.NamedObjects;
-import com.knime.bigdata.spark1_6.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.SimpleSparkJob;
 
 /**
  * Dummy job that stores input RDD as output RDD without any modification.

@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.predictor;
+package org.knime.bigdata.spark.node.mllib.prediction.predictor;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -32,11 +32,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.preproc.tfidf;
+package org.knime.bigdata.spark2_1.jobs.preproc.tfidf;
 
 import java.util.UUID;
 
@@ -31,11 +31,11 @@ import org.apache.spark.ml.feature.RegexTokenizer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
-import com.knime.bigdata.spark2_1.api.NamedObjects;
-import com.knime.bigdata.spark2_1.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
+import org.knime.bigdata.spark2_1.api.NamedObjects;
+import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
 
 /**
  * Splits a given string column into a word vector and adds the (rescaled) feature vector as a new column.

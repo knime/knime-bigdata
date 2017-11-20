@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 26, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_2.api;
+package org.knime.bigdata.spark1_2.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,16 +32,16 @@ import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark1_2.converter.type.SerializableTypeProxies;
-import com.knime.bigdata.spark1_2.converter.type.SerializableTypeProxies.ArrayTypeProxy;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark1_2.converter.type.SerializableTypeProxies;
+import org.knime.bigdata.spark1_2.converter.type.SerializableTypeProxies.ArrayTypeProxy;
 
 /**
  *

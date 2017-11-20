@@ -18,13 +18,13 @@
  * History
  *   Created on Apr 15, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_2.jobs.table2spark;
+package org.knime.bigdata.spark2_2.jobs.table2spark;
 
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
-import com.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
-import com.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+import org.knime.bigdata.spark.node.io.table.reader.Table2SparkJobInput;
+import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 
 /**
  *

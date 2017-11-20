@@ -18,9 +18,9 @@
  * History
  *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.converter;
+package org.knime.bigdata.spark.node.pmml.converter;
 
-import com.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
 
 /**
  * Interface that bundles all {@link PMMLPortObjectFactory} converter. This interface has to be implemented

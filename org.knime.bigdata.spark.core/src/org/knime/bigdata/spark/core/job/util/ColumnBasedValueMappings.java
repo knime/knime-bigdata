@@ -18,7 +18,7 @@
  * History
  *   Created on May 30, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.job.util;
+package org.knime.bigdata.spark.core.job.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,8 +36,8 @@ import org.dmg.pmml.RowDocument.Row;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 
 /**
  * This class provides load and save methods for {@link ColumnBasedValueMapping}. The reason why these methods are not

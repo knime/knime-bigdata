@@ -18,15 +18,15 @@
  * History
  *   Created on Apr 12, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.namedobjects;
+package org.knime.bigdata.spark.core.context.namedobjects;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

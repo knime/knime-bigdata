@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.mllib.prediction.bayes.naive;
+package org.knime.bigdata.spark1_3.jobs.mllib.prediction.bayes.naive;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobInput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.NaiveBayesJobInput;
 
 /**
  *

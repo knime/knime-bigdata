@@ -18,9 +18,9 @@
  * History
  *   Created on Mar 23, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver.request;
+package org.knime.bigdata.spark.core.context.jobserver.request;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
  * Thrown by implementation of {@link AbstractJobserverRequest#sendInternal()} to indicate that an

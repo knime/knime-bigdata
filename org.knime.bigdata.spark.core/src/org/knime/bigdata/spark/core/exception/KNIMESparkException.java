@@ -1,11 +1,11 @@
-package com.knime.bigdata.spark.core.exception;
+package org.knime.bigdata.spark.core.exception;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * This class shall be used to indicate failures in the KNIME Extension for Apache Spark. The message of this exception

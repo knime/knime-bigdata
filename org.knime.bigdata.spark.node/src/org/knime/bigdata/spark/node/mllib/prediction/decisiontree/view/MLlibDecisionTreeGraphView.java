@@ -45,7 +45,7 @@
  * History
  *   26.11.2010 (hofer): created
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -54,7 +54,7 @@ import java.util.Map;
 import org.knime.base.node.mine.decisiontree2.view.graph.HierarchicalGraphView;
 import org.knime.base.node.mine.decisiontree2.view.graph.NodeWidgetFactory;
 
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 
 /**
  * A hierarchical graph for decision trees.

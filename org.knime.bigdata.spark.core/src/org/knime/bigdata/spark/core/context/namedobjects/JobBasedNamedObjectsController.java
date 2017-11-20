@@ -18,19 +18,19 @@
  * History
  *   Created on Apr 11, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.namedobjects;
+package org.knime.bigdata.spark.core.context.namedobjects;
 
 import java.util.Collections;
 import java.util.Set;
 
 import org.knime.core.node.CanceledExecutionException;
 
-import com.knime.bigdata.spark.core.context.SparkContext;
-import com.knime.bigdata.spark.core.context.SparkContextConstants;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
 
 /**
  * Implements a {@link NamedObjectsController} that executes Spark jobs to list/delete named objects.

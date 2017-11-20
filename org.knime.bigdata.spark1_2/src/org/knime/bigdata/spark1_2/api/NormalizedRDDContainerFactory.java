@@ -18,15 +18,15 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark1_2.api;
+package org.knime.bigdata.spark1_2.api;
 
 import java.util.Arrays;
 
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
 
 /**
  *

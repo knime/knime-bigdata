@@ -18,13 +18,13 @@
  * History
  *   Created on Apr 26, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.util;
+package org.knime.bigdata.spark.core.util;
 
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
 
 /**
  *

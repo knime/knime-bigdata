@@ -18,9 +18,9 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.predictor;
+package org.knime.bigdata.spark.node.mllib.prediction.predictor;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *

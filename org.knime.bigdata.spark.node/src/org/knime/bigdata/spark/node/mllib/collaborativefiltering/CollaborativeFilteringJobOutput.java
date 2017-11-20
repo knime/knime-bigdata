@@ -18,12 +18,12 @@
  * History
  *   Created on 01.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.collaborativefiltering;
+package org.knime.bigdata.spark.node.mllib.collaborativefiltering;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.ModelJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ModelJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

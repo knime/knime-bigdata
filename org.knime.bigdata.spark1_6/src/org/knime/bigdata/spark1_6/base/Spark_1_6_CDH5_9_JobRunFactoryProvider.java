@@ -18,17 +18,17 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.base;
+package org.knime.bigdata.spark1_6.base;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider;
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_CompatibilityChecker;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactoryProvider;
+import org.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_CompatibilityChecker;
 
 /**
  *

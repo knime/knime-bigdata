@@ -45,7 +45,7 @@
  * History
  *   Apr 1, 2007 (wiswedel): created
  */
-package com.knime.bigdata.spark.node.statistics.correlation.matrix;
+package org.knime.bigdata.spark.node.statistics.correlation.matrix;
 
 import org.knime.base.node.preproc.correlation.compute.AbstractCorrelationComputeNodeView;
 import org.knime.core.data.DataTable;

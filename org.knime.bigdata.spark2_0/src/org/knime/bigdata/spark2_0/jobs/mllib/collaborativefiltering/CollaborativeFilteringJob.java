@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
+package org.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering;
 
 import java.util.UUID;
 
@@ -30,13 +30,13 @@ import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobOutput;
-import com.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobOutput;
+import org.knime.bigdata.spark.node.mllib.prediction.predictor.PredictionJobInput;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
  * Runs ML Collaborative Filtering on a given data frame.

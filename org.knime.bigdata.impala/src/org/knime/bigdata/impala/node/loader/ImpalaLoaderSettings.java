@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.impala.node.loader;
+package org.knime.bigdata.impala.node.loader;
 
 import java.util.ArrayList;
 import java.util.Collection;

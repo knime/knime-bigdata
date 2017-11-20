@@ -18,7 +18,7 @@
  * History
  *   Created on Jul 26, 2016 by sascha
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import java.sql.Driver;
 import java.util.Set;

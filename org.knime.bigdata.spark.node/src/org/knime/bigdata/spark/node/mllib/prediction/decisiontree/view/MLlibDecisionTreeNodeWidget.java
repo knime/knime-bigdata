@@ -45,7 +45,7 @@
  * History
  *   22.07.2010 (hofer): created
  */
-package com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -68,7 +68,7 @@ import org.knime.base.node.mine.decisiontree2.view.CollapsiblePanel;
 import org.knime.base.node.mine.decisiontree2.view.graph.ComponentNodeWidget;
 import org.knime.core.data.property.ColorAttr;
 
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 
 
 /**

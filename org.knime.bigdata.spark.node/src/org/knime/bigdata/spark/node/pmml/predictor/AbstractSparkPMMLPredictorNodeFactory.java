@@ -18,7 +18,7 @@
  * History
  *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.predictor;
+package org.knime.bigdata.spark.node.pmml.predictor;
 
 import java.awt.Dimension;
 
@@ -34,8 +34,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
 /**

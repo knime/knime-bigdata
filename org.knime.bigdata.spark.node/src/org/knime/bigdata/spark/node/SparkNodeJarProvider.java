@@ -18,12 +18,12 @@
  * History
  *   Created on Apr 28, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node;
+package org.knime.bigdata.spark.node;
 
-import com.knime.bigdata.spark.core.jar.BaseSparkJarProvider;
-import com.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
-import com.knime.bigdata.spark.core.jar.KNIMEPluginScanPredicates;
-import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.jar.BaseSparkJarProvider;
+import org.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
+import org.knime.bigdata.spark.core.jar.KNIMEPluginScanPredicates;
+import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 
 /**
  * Jar provider implementation for spark.node plugin. This jar provider is a {@link BaseSparkJarProvider}.

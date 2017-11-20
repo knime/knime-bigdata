@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.statistics.compute;
+package org.knime.bigdata.spark1_5.jobs.statistics.compute;
 
 import java.util.List;
 
@@ -31,13 +31,13 @@ import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.SparkJob;
+import org.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.SparkJob;
 
 /**
  * computes multivariate statistics from input RDD and given indices

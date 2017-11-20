@@ -18,7 +18,7 @@
  * History
  *   Created on 30.07.2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.predictor;
+package org.knime.bigdata.spark.node.mllib.prediction.predictor;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;

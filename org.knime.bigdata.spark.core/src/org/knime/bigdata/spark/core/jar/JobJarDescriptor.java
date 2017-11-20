@@ -18,7 +18,7 @@
  * History
  *   Created on 22.03.2016 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

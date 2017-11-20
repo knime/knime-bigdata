@@ -18,13 +18,13 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.scripting.java.util.helper;
+package org.knime.bigdata.spark.node.scripting.java.util.helper;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Extension point registry for {@link JavaSnippetHelper}s.

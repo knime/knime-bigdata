@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.pmml;
+package org.knime.bigdata.spark1_2.jobs.pmml;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -29,9 +29,9 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionJobInput;
-import com.knime.bigdata.spark1_2.api.RowBuilder;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionJobInput;
+import org.knime.bigdata.spark1_2.api.RowBuilder;
 
 /**
  * applies a compiled pmml model to the input data

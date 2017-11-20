@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 30, 2015 by bjoern
  */
-package com.knime.bigdata.spark.node.scorer.numeric;
+package org.knime.bigdata.spark.node.scorer.numeric;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,7 +34,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * <code>NodeDialog</code> for the "Spark Numeric Scorer" node.

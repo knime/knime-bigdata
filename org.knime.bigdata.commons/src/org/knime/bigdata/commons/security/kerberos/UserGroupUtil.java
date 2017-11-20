@@ -18,7 +18,7 @@
  * History
  *   Created on 24.06.2016 by koetter
  */
-package com.knime.bigdata.commons.security.kerberos;
+package org.knime.bigdata.commons.security.kerberos;
 
 import java.util.Optional;
 
@@ -27,7 +27,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.License;
 
 /**

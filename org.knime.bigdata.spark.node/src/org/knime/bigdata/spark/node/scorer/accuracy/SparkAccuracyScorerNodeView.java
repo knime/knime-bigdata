@@ -18,7 +18,7 @@
  * History
  *   Created on 30.09.2015 by Bjoern Lohrmann
  */
-package com.knime.bigdata.spark.node.scorer.accuracy;
+package org.knime.bigdata.spark.node.scorer.accuracy;
 
 import org.knime.base.node.mine.scorer.accuracy.AbstractAccuracyScorerNodeView;
 import org.knime.base.node.mine.scorer.accuracy.ScorerViewData;

@@ -4,29 +4,29 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer">
+            class="org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.knime.workbench.ui.preferences"
-            class="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            id="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            class="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            id="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
             name="KNIME Big Data Extensions">
       </page>
 
       <page
-            category="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            class="com.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
-            id="com.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
+            category="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            class="org.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
+            id="org.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
             name="Hadoop">
       </page>
 
       <page
-            category="com.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            class="com.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
-            id="com.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
+            category="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
+            class="org.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
+            id="org.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
             name="Kerberos">
       </page>
    </extension>

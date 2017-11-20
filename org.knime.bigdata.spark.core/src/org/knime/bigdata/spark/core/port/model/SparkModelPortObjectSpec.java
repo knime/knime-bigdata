@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.core.port.model;
+package org.knime.bigdata.spark.core.port.model;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -33,7 +33,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Spark model port object specification implementation. A Spark model could be a learned Spark MLlib model.

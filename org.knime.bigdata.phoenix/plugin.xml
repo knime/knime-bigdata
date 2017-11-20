@@ -5,13 +5,13 @@
          point="org.knime.workbench.repository.nodes">
         <node
               category-path="/database/database-connector"
-              factory-class="com.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
+              factory-class="org.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
         </node>
     </extension>
      <extension
            point="org.knime.core.DatabaseUtility">
         <databaseUtility
-              class="com.knime.bigdata.phoenix.utility.PhoenixUtility"
+              class="org.knime.bigdata.phoenix.utility.PhoenixUtility"
               database="phoenix">
         </databaseUtility>
      </extension>

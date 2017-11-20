@@ -18,14 +18,14 @@
  * History
  *   Created on Apr 8, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *

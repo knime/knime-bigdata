@@ -18,7 +18,7 @@
  * History
  *   Created on Aug 9, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -50,10 +50,10 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPreviewPanel;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPreviewPanel;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 
 /**
  * @author Sascha Wolke, KNIME.com

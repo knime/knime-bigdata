@@ -45,11 +45,11 @@
  * History
  *   18.02.2007 (wiswedel): created
  */
-package com.knime.bigdata.spark.node.statistics.correlation.filter;
+package org.knime.bigdata.spark.node.statistics.correlation.filter;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

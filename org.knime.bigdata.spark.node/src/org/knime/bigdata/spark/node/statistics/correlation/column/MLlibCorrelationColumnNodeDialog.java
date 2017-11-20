@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.correlation.column;
+package org.knime.bigdata.spark.node.statistics.correlation.column;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -39,8 +39,8 @@ import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import com.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 
 /**
  *

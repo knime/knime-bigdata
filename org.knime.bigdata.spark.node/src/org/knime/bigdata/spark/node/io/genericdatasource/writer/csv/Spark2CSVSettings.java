@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 29, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
+package org.knime.bigdata.spark.node.io.genericdatasource.writer.csv;
 
 import java.text.SimpleDateFormat;
 
@@ -28,9 +28,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
-import com.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceJobInput;
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceSettings;
 
 /**
  * CSV specific writer settings.

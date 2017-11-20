@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 27, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *

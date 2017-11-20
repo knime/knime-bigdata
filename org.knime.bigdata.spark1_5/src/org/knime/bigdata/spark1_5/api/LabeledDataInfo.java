@@ -7,16 +7,16 @@
  * questions please contact the copyright holder: website: www.knime.com email: contact@knime.com
  * --------------------------------------------------------------------- History Created on 04.06.2015 by dwk
  */
-package com.knime.bigdata.spark1_5.api;
+package org.knime.bigdata.spark1_5.api;
 
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 
 /**

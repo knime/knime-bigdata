@@ -18,12 +18,12 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.reduction.svd;
+package org.knime.bigdata.spark.node.mllib.reduction.svd;
 
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

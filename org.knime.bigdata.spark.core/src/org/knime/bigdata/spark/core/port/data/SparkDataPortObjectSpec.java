@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
 import java.io.IOException;
 
@@ -29,8 +29,8 @@ import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.workflow.DataTableSpecView;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 
 /**
  * Spark data port object specification, which is uniquely described by a {@link SparkContextID}, a

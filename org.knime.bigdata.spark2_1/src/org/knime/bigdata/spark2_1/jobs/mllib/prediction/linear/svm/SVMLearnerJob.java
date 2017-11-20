@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm;
+package org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm;
 
 import java.io.Serializable;
 
@@ -8,9 +8,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.classification.SVMWithSGD;
 import org.apache.spark.mllib.regression.LabeledPoint;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
-import com.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.AbstractRegularizationJob;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.AbstractRegularizationJob;
 
 /**
  * @author Tobias Koetter, KNIME.com

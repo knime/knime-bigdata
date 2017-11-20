@@ -18,10 +18,10 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
+package org.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 
-import com.knime.bigdata.spark.core.job.ClassificationJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ClassificationJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

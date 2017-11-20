@@ -18,9 +18,9 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.model;
+package org.knime.bigdata.spark.core.model;
 
-import com.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
 
 /**
  *

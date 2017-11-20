@@ -1,9 +1,9 @@
-package com.knime.bigdata.spark.core.preferences;
+package org.knime.bigdata.spark.core.preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import com.knime.bigdata.spark.core.SparkPlugin;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.SparkPlugin;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * @author Tobias Koetter, KNIME.com

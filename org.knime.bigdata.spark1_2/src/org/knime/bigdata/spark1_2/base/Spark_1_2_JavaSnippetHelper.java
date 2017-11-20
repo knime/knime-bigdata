@@ -18,7 +18,7 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_2.base;
+package org.knime.bigdata.spark1_2.base;
 
 import java.io.File;
 import java.util.HashSet;
@@ -45,11 +45,11 @@ import org.knime.base.node.jsnippet.util.field.OutCol;
 import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
-import com.knime.bigdata.spark1_2.api.Spark_1_2_CompatibilityChecker;
-import com.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippet;
-import com.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSink;
-import com.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSource;
+import org.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
+import org.knime.bigdata.spark1_2.api.Spark_1_2_CompatibilityChecker;
+import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippet;
+import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSink;
+import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSource;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
@@ -258,8 +258,8 @@ public class Spark_1_2_JavaSnippetHelper extends DefaultJavaSnippetHelper {
     protected static String[] getSystemImports() {
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
             "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*", "org.apache.spark.sql.api.java.*",
-            "com.knime.bigdata.spark.core.exception.*",
-            "com.knime.bigdata.spark1_2.api.RowBuilder",
+            "org.knime.bigdata.spark.core.exception.*",
+            "org.knime.bigdata.spark1_2.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
             SOURCE_SNIPPET_SUPERCLASS.getName(), SINK_SNIPPET_SUPERCLASS.getName()};
     }
@@ -300,7 +300,7 @@ public class Spark_1_2_JavaSnippetHelper extends DefaultJavaSnippetHelper {
             "scala.reflect.api",
             "org.apache.spark",
             "com.google.common.base",
-            "com.knime.bigdata.spark.core.exception",
+            "org.knime.bigdata.spark.core.exception",
             "org.apache.hadoop.conf",
             "org.apache.hadoop.mapred"
         };
@@ -310,7 +310,7 @@ public class Spark_1_2_JavaSnippetHelper extends DefaultJavaSnippetHelper {
         final Set<String> classpathEntries = new HashSet<>();
 
         // scan over the imports and add all classpath entries that
-        // provide the classes from the imports (this adds com.knime.bigdata.spark.core and the spark libs)
+        // provide the classes from the imports (this adds org.knime.bigdata.spark.core and the spark libs)
         for (String pkg : packages) {
             final PackageSource packageSource = cl.getBundleLoader().getPackageSource(pkg);
 

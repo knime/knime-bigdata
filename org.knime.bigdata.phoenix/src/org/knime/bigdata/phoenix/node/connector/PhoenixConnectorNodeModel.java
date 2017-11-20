@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.phoenix.node.connector;
+package org.knime.bigdata.phoenix.node.connector;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 
-import com.knime.bigdata.phoenix.utility.PhoenixUtility;
+import org.knime.bigdata.phoenix.utility.PhoenixUtility;
 
 /**
  * Model for the Impala connector node.

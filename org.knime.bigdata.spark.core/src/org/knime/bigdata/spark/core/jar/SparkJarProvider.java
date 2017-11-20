@@ -18,9 +18,9 @@
  * History
  *   Created on 13.02.2016 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
-import com.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**
  * This class has to be implemented by all plugins that provide Java classes that need to be present in a (remote)
@@ -40,7 +40,7 @@ public interface SparkJarProvider extends SparkProvider {
     /**
      * Invoked to build the job jar descriptor, that lists all the providers. A provider is usually an
      * OSGI bundle. The provider ID must also contain version information. An example provider ID
-     * would be: com.knime.bigdata.spark.core_1.6.0.v201607081132
+     * would be: org.knime.bigdata.spark.core_1.6.0.v201607081132
      *
      * @return the provider ID as a String.
      */

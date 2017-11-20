@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_1.jobs.fetchrows;
+package org.knime.bigdata.spark2_1.jobs.fetchrows;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,17 +10,17 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
-import com.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark2_1.api.NamedObjects;
-import com.knime.bigdata.spark2_1.api.SparkJob;
-import com.knime.bigdata.spark2_1.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.port.data.FetchRowsJobInput;
+import org.knime.bigdata.spark.core.port.data.FetchRowsJobOutput;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark2_1.api.NamedObjects;
+import org.knime.bigdata.spark2_1.api.SparkJob;
+import org.knime.bigdata.spark2_1.api.TypeConverters;
 
 /**
  * SparkJob that fetches and serializes a number of rows from the specified data frame.

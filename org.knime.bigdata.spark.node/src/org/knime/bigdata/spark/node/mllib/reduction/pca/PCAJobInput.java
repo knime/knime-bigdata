@@ -18,10 +18,10 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark.node.mllib.reduction.pca;
+package org.knime.bigdata.spark.node.mllib.reduction.pca;
 
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

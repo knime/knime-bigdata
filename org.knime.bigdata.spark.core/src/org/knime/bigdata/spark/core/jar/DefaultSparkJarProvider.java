@@ -18,7 +18,7 @@
  * History
  *   Created on 22.03.2016 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 import java.net.URL;
@@ -39,11 +39,11 @@ import org.knime.core.node.NodeLogger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Default provider

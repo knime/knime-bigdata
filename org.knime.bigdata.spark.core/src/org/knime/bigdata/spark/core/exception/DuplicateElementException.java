@@ -18,7 +18,7 @@
  * History
  *   Created on May 12, 2016 by oole
  */
-package com.knime.bigdata.spark.core.exception;
+package org.knime.bigdata.spark.core.exception;
 
 /**
  *

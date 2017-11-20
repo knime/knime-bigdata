@@ -18,11 +18,11 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.hive;
+package org.knime.bigdata.spark2_1.jobs.hive;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
-import com.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
 
 /**
  *

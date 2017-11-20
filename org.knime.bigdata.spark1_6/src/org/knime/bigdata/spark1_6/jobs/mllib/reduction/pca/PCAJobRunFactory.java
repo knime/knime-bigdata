@@ -18,11 +18,11 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.reduction.pca;
+package org.knime.bigdata.spark1_6.jobs.mllib.reduction.pca;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeModel;
-import com.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeModel;
+import org.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
 
 /**
  *

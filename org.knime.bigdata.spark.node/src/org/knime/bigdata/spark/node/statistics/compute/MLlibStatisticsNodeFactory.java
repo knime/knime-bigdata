@@ -18,11 +18,11 @@
  * History
  *   Created on 26.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.statistics.compute;
+package org.knime.bigdata.spark.node.statistics.compute;
 
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

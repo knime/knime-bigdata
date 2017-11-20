@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark1_5.jobs.sql;
+package org.knime.bigdata.spark1_5.jobs.sql;
 
 import java.util.UUID;
 
@@ -27,16 +27,16 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import com.knime.bigdata.spark.node.sql.SparkSQLJobInput;
-import com.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.SparkJob;
-import com.knime.bigdata.spark1_5.api.TypeConverters;
-import com.knime.bigdata.spark1_5.hive.HiveContextProvider;
-import com.knime.bigdata.spark1_5.hive.HiveContextProvider.HiveContextAction;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.node.sql.SparkSQLJobInput;
+import org.knime.bigdata.spark.node.sql.SparkSQLJobOutput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.SparkJob;
+import org.knime.bigdata.spark1_5.api.TypeConverters;
+import org.knime.bigdata.spark1_5.hive.HiveContextProvider;
+import org.knime.bigdata.spark1_5.hive.HiveContextProvider.HiveContextAction;
 
 /**
  * Executes a Spark SQL query.

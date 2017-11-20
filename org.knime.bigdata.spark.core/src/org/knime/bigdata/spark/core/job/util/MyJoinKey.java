@@ -18,12 +18,12 @@
  * History
  *   Created on 12.08.2015 by dwk
  */
-package com.knime.bigdata.spark.core.job.util;
+package org.knime.bigdata.spark.core.job.util;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

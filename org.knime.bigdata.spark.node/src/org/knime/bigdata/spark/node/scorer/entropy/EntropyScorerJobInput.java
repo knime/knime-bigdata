@@ -16,10 +16,10 @@
  * ---------------------------------------------------------------------
  *
  */
-package com.knime.bigdata.spark.node.scorer.entropy;
+package org.knime.bigdata.spark.node.scorer.entropy;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * computes classification / regression scores

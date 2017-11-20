@@ -18,10 +18,10 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_6.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark1_6.jobs.mllib.prediction.decisiontree;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_5.api;
+package org.knime.bigdata.spark1_5.api;
 
 import java.io.File;
 import java.io.Serializable;
@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.apache.spark.SparkContext;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * Interface for Spark jobs that take a {@link JobInput} object as well as a list of files, and return a

@@ -18,15 +18,15 @@
  * History
  *   Created on 23.08.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.model.interpreter;
+package org.knime.bigdata.spark.core.port.model.interpreter;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.JComponent;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
 
 /**
  * {@link ModelInterpreter} implementation that returns a single HTML panel with the

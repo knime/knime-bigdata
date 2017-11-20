@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 05, 2016 by Sascha
  */
-package com.knime.bigdata.spark.node.io.database.reader;
+package org.knime.bigdata.spark.node.io.database.reader;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -50,7 +50,7 @@ import org.knime.core.node.port.database.DatabasePortObjectSpec;
  *
  * @author Sascha Wolke, KNIME.com
  */
-class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener {
+public class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener {
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
 
     private final JCheckBox m_uploadDriver;
@@ -62,7 +62,7 @@ class Database2SparkNodeDialog extends NodeDialogPane implements ActionListener 
     private final JSpinner m_upperBound;
     private final JSpinner m_numPartitions;
 
-    Database2SparkNodeDialog() {
+    public Database2SparkNodeDialog() {
         m_uploadDriver = new JCheckBox("Upload local JDBC driver.");
         m_useDefaultFetchSize = new JCheckBox("Use driver default fetch size.");
         m_useDefaultFetchSize.addActionListener(this);

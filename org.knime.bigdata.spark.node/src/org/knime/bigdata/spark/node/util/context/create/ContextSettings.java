@@ -24,7 +24,7 @@
  *     - deleteRDDsOnDispose renamed to deleteObjectsOnDispose
  *     - memPerNode migrated into overrideSparkSettings+customSparkSettings
  */
-package com.knime.bigdata.spark.node.util.context.create;
+package org.knime.bigdata.spark.node.util.context.create;
 
 import java.util.Arrays;
 
@@ -41,11 +41,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.ICredentials;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Settings model that transfers Spark context information between the node model and its dialog.

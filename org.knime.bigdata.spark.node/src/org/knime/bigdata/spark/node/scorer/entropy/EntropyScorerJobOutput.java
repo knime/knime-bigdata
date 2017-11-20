@@ -18,13 +18,13 @@
  * History
  *   Created on May 13, 2016 by oole
  */
-package com.knime.bigdata.spark.node.scorer.entropy;
+package org.knime.bigdata.spark.node.scorer.entropy;
 
 import java.util.List;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
 
 /**
  *

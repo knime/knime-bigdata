@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_6.jobs.scorer;
+package org.knime.bigdata.spark1_6.jobs.scorer;
 
 import java.util.logging.Logger;
 
@@ -28,11 +28,11 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
-import com.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
 
 /**
  * computes classification / regression scores

@@ -18,7 +18,7 @@
  * History
  *   Created on 05.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.spark;
+package org.knime.bigdata.spark.core.types.converter.spark;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -26,11 +26,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkProviderWithElements;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *
@@ -39,7 +39,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
 public class IntermediateToSparkConverterRegistry extends SparkProviderRegistry<SparkProviderWithElements<IntermediateToSparkConverter<?>>> {
 
     /**The id of the converter extension point.*/
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.IntermediateToSparkConverterProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.IntermediateToSparkConverterProvider";
 
     private static IntermediateToSparkConverterRegistry instance;
 

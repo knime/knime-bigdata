@@ -18,7 +18,7 @@
  * History
  *   Created on 04.03.2016 by koetter
  */
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 import java.io.InputStream;

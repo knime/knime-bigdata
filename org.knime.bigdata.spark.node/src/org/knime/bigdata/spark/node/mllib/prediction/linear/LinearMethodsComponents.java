@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 15, 2016 by oole
  */
-package com.knime.bigdata.spark.node.mllib.prediction.linear;
+package org.knime.bigdata.spark.node.mllib.prediction.linear;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -30,10 +30,10 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 
-import com.knime.bigdata.spark.core.job.util.EnumContainer;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
-import com.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
-import com.knime.bigdata.spark.core.node.MLlibNodeComponents;
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
+import org.knime.bigdata.spark.core.node.MLlibNodeComponents;
 
 /**
  *

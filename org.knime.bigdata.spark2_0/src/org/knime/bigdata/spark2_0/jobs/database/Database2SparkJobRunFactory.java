@@ -18,13 +18,13 @@
  * History
  *   Created on Sep 06, 2016 by sascha
  */
-package com.knime.bigdata.spark2_0.jobs.database;
+package org.knime.bigdata.spark2_0.jobs.database;
 
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
-import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
-import com.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
-import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+import org.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
+import org.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
+import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeModel;
 
 /**
  * @author Sascha Wolke, KNIME.com

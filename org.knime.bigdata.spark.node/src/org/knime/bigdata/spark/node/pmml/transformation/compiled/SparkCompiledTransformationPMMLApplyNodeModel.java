@@ -18,7 +18,7 @@
  * History
  *   Created on 31.07.2015 by dwk
  */
-package com.knime.bigdata.spark.node.pmml.transformation.compiled;
+package org.knime.bigdata.spark.node.pmml.transformation.compiled;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,10 +30,10 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.util.SparkPMMLUtil;
-import com.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.util.SparkPMMLUtil;
+import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 

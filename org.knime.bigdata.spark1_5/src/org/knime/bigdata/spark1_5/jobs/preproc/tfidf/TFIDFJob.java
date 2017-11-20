@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.preproc.tfidf;
+package org.knime.bigdata.spark1_5.jobs.preproc.tfidf;
 
 import java.util.ArrayList;
 
@@ -32,12 +32,12 @@ import org.apache.spark.mllib.feature.IDFModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
+import org.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.SimpleSparkJob;
 
 /**
  * splits a given string column into a word vector and adds the vector to an RDD

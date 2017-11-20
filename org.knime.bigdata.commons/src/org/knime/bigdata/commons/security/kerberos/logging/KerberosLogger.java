@@ -46,7 +46,7 @@
  * History
  *   01.02.2017 (koetter): created
  */
-package com.knime.bigdata.commons.security.kerberos.logging;
+package org.knime.bigdata.commons.security.kerberos.logging;
 
 import java.io.PrintStream;
 

@@ -42,7 +42,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.core.preferences;
+package org.knime.bigdata.spark.core.preferences;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -65,12 +65,12 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.SparkPlugin;
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.context.SparkContextManager;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.SparkPlugin;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -78,7 +78,7 @@ import com.knime.bigdata.spark.core.version.SparkVersion;
  */
 public class SparkPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, Listener {
 
-    //TODO: Use the Big Data Extensions preference page in com.knime.bigdata.commons as parent for this page
+    //TODO: Use the Big Data Extensions preference page in org.knime.bigdata.commons as parent for this page
 
     private static final NodeLogger LOG = NodeLogger.getLogger(SparkPreferencePage.class);
 

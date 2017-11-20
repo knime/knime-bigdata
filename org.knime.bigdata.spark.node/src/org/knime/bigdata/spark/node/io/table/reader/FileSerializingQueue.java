@@ -18,7 +18,7 @@
  * History
  *   Created on Mar 18, 2016 by dietzc
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package org.knime.bigdata.spark.node.io.table.reader;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

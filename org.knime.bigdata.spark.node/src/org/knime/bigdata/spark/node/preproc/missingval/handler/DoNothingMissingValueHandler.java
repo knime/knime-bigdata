@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval.handler;
+package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -23,8 +23,8 @@ import java.util.Map;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.knime.core.data.DataColumnSpec;
 
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 
 /**
  * Does not replace missing values.

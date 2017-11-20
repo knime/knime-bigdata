@@ -18,16 +18,16 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.mllib.prediction.bayes.naive;
+package org.knime.bigdata.spark1_2.jobs.mllib.prediction.bayes.naive;
 
 import java.text.NumberFormat;
 import java.util.List;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
 
 /**
  *

@@ -18,7 +18,7 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.model.interpreter;
+package org.knime.bigdata.spark.core.port.model.interpreter;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -28,8 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 
 /**
  * HTML panel that describes the given {@link SparkModel}.

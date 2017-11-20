@@ -15,12 +15,12 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark2_0.jobs.preproc.missingval;
+package org.knime.bigdata.spark2_0.jobs.preproc.missingval;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeModel;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeModel;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
 
 /**
  * Missing value job factory.

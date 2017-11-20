@@ -18,10 +18,10 @@
  * History
  *   Created on May 10, 2016 by oole
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

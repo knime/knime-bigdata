@@ -18,7 +18,7 @@
  * History
  *   Created on 08.08.2014 by koetter
  */
-package com.knime.bigdata.hdfs.node.connector;
+package org.knime.bigdata.hdfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
 import org.knime.base.filehandling.remote.files.Protocol;
@@ -26,7 +26,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  *

@@ -18,11 +18,11 @@
  * History
  *   Created on 17.09.2015 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering;
+package org.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
 
 /**
  *

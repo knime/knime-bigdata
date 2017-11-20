@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark2_1.jobs.scorer;
+package org.knime.bigdata.spark2_1.jobs.scorer;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,13 +32,13 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
-import com.knime.bigdata.spark2_1.api.NamedObjects;
-import com.knime.bigdata.spark2_1.api.RDDUtilsInJava;
-import com.knime.bigdata.spark2_1.api.SparkJob;
-import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
-import com.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
+import org.knime.bigdata.spark2_1.api.NamedObjects;
+import org.knime.bigdata.spark2_1.api.RDDUtilsInJava;
+import org.knime.bigdata.spark2_1.api.SparkJob;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 
 import scala.Tuple2;
 

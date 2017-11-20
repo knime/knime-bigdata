@@ -18,7 +18,7 @@
  * History
  *   Created on 27.07.2015 by dwk
  */
-package com.knime.bigdata.spark1_2.api;
+package org.knime.bigdata.spark1_2.api;
 
 import java.io.Serializable;
 import java.util.List;
@@ -33,10 +33,10 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.api.java.Row;
 
-import com.knime.bigdata.spark.core.job.ClassificationJobInput;
-import com.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ClassificationJobInput;
+import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**

@@ -18,17 +18,17 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context;
+package org.knime.bigdata.spark.core.context;
 
-import com.knime.bigdata.spark.core.exception.MissingJobException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.JobRunFactory;
-import com.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
-import com.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.SimpleJobRunFactory;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.exception.MissingJobException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.job.JobRunFactoryRegistry;
+import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  *

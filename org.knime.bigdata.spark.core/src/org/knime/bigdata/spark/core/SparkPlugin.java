@@ -18,7 +18,7 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.spark.core;
+package org.knime.bigdata.spark.core;
 
 import java.io.File;
 import java.net.URL;
@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseFeatures;
 import com.knime.licenses.LicenseUtil;

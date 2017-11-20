@@ -1,4 +1,4 @@
-package com.knime.bigdata.hdfs.node.connector;
+package org.knime.bigdata.hdfs.node.connector;
 
 /*
  * ------------------------------------------------------------------------
@@ -55,7 +55,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  * <code>NodeFactory</code> for node.

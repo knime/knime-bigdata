@@ -1,4 +1,4 @@
-package com.knime.bigdata.hdfs.filehandler;
+package org.knime.bigdata.hdfs.filehandler;
 
 /* ------------------------------------------------------------------
  * This source code, its documentation and all appendant files
@@ -46,8 +46,8 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
-import com.knime.bigdata.commons.security.kerberos.UserGroupUtil;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import com.knime.licenses.LicenseException;
 
 /**

@@ -18,11 +18,11 @@
  * History
  *   Created on Jan 17, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.node.preproc.rename;
+package org.knime.bigdata.spark.node.preproc.rename;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * Rename column job input.

@@ -18,11 +18,11 @@
  * History
  *   Created on Aug 11, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.genericdatasource.reader;
+package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * @author Sascha Wolke, KNIME.com

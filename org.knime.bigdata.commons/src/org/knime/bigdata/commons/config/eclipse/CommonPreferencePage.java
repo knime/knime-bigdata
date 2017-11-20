@@ -42,14 +42,14 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
  */
-package com.knime.bigdata.commons.config.eclipse;
+package org.knime.bigdata.commons.config.eclipse;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.knime.bigdata.commons.CommonsPlugin;
+import org.knime.bigdata.commons.CommonsPlugin;
 
 /**
  * @author Tobias Koetter, KNIME.com

@@ -18,14 +18,14 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.model;
+package org.knime.bigdata.spark.core.model;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 
 /**
  *

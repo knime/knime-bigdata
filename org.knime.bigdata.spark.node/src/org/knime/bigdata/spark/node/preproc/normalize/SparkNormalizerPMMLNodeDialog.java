@@ -18,14 +18,14 @@
  * History
  *   Created on 03.08.2015 by dwk
  */
-package com.knime.bigdata.spark.node.preproc.normalize;
+package org.knime.bigdata.spark.node.preproc.normalize;
 
 import org.knime.base.node.preproc.normalize3.Normalizer3NodeDialog;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Extends the {@link Normalizer3NodeDialog} for the {@link SparkNormalizerPMMLNodeModel}.

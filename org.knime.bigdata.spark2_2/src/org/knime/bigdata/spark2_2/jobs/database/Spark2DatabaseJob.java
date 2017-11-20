@@ -18,7 +18,7 @@
  * History
  *   Created on Sep 06, 2016 by sascha
  */
-package com.knime.bigdata.spark2_2.jobs.database;
+package org.knime.bigdata.spark2_2.jobs.database;
 
 import java.io.File;
 import java.util.List;
@@ -29,13 +29,13 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.EmptyJobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
-import com.knime.bigdata.spark2_2.api.NamedObjects;
-import com.knime.bigdata.spark2_2.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_2.jobs.scripting.java.JarRegistry;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
+import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
+import org.knime.bigdata.spark2_2.jobs.scripting.java.JarRegistry;
 
 /**
  * Write given (named) data frame into a JDBC table.

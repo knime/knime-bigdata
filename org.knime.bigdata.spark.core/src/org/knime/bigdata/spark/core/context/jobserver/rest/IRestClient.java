@@ -18,7 +18,7 @@
  * History
  *   Created on 22.05.2015 by dwk
  */
-package com.knime.bigdata.spark.core.context.jobserver.rest;
+package org.knime.bigdata.spark.core.context.jobserver.rest;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;

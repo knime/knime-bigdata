@@ -18,13 +18,13 @@
  * History
  *   Created on May 5, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_5.jobs.scripting.java;
+package org.knime.bigdata.spark1_5.jobs.scripting.java;
 
-import com.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
-import com.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
-import com.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
+import org.knime.bigdata.spark.node.scripting.java.AbstractSparkJavaSnippetNodeModel;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
 
 /**
  *

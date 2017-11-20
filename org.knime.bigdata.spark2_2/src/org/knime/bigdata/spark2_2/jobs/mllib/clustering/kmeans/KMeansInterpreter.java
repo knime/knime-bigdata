@@ -18,7 +18,7 @@
  * History
  *   Created on 21.07.2015 by koetter
  */
-package com.knime.bigdata.spark2_2.jobs.mllib.clustering.kmeans;
+package org.knime.bigdata.spark2_2.jobs.mllib.clustering.kmeans;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -26,9 +26,9 @@ import java.util.List;
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.linalg.Vector;
 
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 
 /**
  *

@@ -18,12 +18,12 @@
  * History
  *   Created on Mar 3, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.jobserver;
+package org.knime.bigdata.spark.core.context.jobserver;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
  *

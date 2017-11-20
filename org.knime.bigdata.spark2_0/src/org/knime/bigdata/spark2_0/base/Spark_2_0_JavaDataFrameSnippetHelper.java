@@ -18,11 +18,11 @@
  * History
  *   Created on May 6, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.base;
+package org.knime.bigdata.spark2_0.base;
 
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippet;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSink;
-import com.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSource;
+import org.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippet;
+import org.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSink;
+import org.knime.bigdata.spark2_0.jobs.scripting.java.AbstractSparkDataFrameJavaSnippetSource;
 
 /**
  * @author Sascha Wolke, KNIME.com
@@ -62,8 +62,8 @@ public class Spark_2_0_JavaDataFrameSnippetHelper extends Spark_2_0_AbstractJava
         return new String[]{"org.apache.spark.SparkContext", "org.apache.spark.api.java.JavaSparkContext",
             "org.apache.spark.api.java.*", "org.apache.spark.api.java.function.*",
             "org.apache.spark.sql.types.*", "org.apache.spark.sql.*", "static org.apache.spark.sql.functions.*",
-            "com.knime.bigdata.spark.core.exception.*",
-            "com.knime.bigdata.spark2_0.api.RowBuilder",
+            "org.knime.bigdata.spark.core.exception.*",
+            "org.knime.bigdata.spark2_0.api.RowBuilder",
             INNER_SNIPPET_SUPERCLASS.getName(),
             SOURCE_SNIPPET_SUPERCLASS.getName(), SINK_SNIPPET_SUPERCLASS.getName()};
     }

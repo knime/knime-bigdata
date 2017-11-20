@@ -18,7 +18,7 @@
  * History
  *   Created on 30.07.2015 by dwk
  */
-package com.knime.bigdata.spark1_5.api;
+package org.knime.bigdata.spark1_5.api;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * modifiable container for min/max values

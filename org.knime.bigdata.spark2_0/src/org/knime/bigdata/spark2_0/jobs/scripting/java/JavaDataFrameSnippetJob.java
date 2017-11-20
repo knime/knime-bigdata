@@ -18,7 +18,7 @@
  * History
  *   Created on Jan 26, 2016 by bjoern
  */
-package com.knime.bigdata.spark2_0.jobs.scripting.java;
+package org.knime.bigdata.spark2_0.jobs.scripting.java;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -31,13 +31,13 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
-import com.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.SparkJobWithFiles;
-import com.knime.bigdata.spark2_0.api.TypeConverters;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobInput;
+import org.knime.bigdata.spark.node.scripting.java.util.JavaSnippetJobOutput;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.SparkJobWithFiles;
+import org.knime.bigdata.spark2_0.api.TypeConverters;
 
 /**
  *

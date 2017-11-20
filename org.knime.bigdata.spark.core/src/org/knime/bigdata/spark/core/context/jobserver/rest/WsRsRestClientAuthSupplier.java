@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.core.context.jobserver.rest;
+package org.knime.bigdata.spark.core.context.jobserver.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

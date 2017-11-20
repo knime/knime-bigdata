@@ -18,11 +18,17 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package org.knime.bigdata.spark.node.io.table.reader;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.node.SparkNodePlugin;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -39,13 +45,6 @@ import org.knime.core.node.streamable.DataTableRowInput;
 import org.knime.core.node.streamable.InputPortRole;
 import org.knime.core.node.streamable.PartitionInfo;
 import org.knime.core.node.streamable.StreamableOperator;
-
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.core.port.data.SparkDataTable;
-import com.knime.bigdata.spark.node.SparkNodePlugin;
 
 /**
  * Node model that uploads a a KNIME {@link DataTable} into a Spark cluster and provides a {@link SparkDataTable} that
@@ -69,7 +68,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
      * Default constructor.
      * @param optionalSparkPort true if input spark context port is optional
      */
-    Table2SparkNodeModel(final boolean optionalSparkPort) {
+    public Table2SparkNodeModel(final boolean optionalSparkPort) {
         super(new PortType[]{BufferedDataTable.TYPE}, optionalSparkPort, new PortType[]{SparkDataPortObject.TYPE});
     }
 

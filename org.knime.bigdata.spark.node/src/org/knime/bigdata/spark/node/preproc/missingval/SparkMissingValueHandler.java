@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.missingval;
+package org.knime.bigdata.spark.node.preproc.missingval;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -32,8 +32,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import com.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import com.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 
 /**
  * The base class of all missing value handlers for Spark. Since the actual handling

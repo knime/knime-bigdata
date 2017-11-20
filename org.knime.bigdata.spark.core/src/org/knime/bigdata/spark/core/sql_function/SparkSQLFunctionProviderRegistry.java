@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 16, 2017 by Sascha Wolke, KNIME GmbH
  */
-package com.knime.bigdata.spark.core.sql_function;
+package org.knime.bigdata.spark.core.sql_function;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,8 +28,8 @@ import java.util.Set;
 
 import org.knime.core.node.NodeLogger;
 
-import com.knime.bigdata.spark.core.version.SparkProviderRegistry;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Registry with spark functions providers.
@@ -40,7 +40,7 @@ public class SparkSQLFunctionProviderRegistry extends SparkProviderRegistry<Spar
     private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkSQLFunctionProviderRegistry.class);
 
     /** The id of the converter extension point. */
-    public static final String EXT_POINT_ID = "com.knime.bigdata.spark.core.SparkSQLFunctionProvider";
+    public static final String EXT_POINT_ID = "org.knime.bigdata.spark.core.SparkSQLFunctionProvider";
 
     private static SparkSQLFunctionProviderRegistry instance;
 

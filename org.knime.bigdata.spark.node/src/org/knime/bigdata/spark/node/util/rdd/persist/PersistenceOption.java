@@ -18,7 +18,7 @@
  * History
  *   Created on 13.09.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.rdd.persist;
+package org.knime.bigdata.spark.node.util.rdd.persist;
 
 import org.knime.core.node.util.ButtonGroupEnumInterface;
 

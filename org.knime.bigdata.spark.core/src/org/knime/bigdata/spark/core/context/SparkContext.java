@@ -18,13 +18,13 @@
  * History
  *   Created on Mar 2, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context;
+package org.knime.bigdata.spark.core.context;
 
-import com.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import com.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Superclass for all Spark context implementations.

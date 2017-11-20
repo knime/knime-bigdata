@@ -18,7 +18,7 @@
  * History
  *   Created on 18.08.2015 by Dietrich
  */
-package com.knime.bigdata.spark.core.context.jobserver.rest;
+package org.knime.bigdata.spark.core.context.jobserver.rest;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

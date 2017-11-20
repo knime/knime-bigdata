@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.preproc.filter.column;
+package org.knime.bigdata.spark1_3.jobs.preproc.filter.column;
 
 import java.util.List;
 
@@ -27,12 +27,12 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark1_3.api.NamedObjects;
-import com.knime.bigdata.spark1_3.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark1_3.api.NamedObjects;
+import org.knime.bigdata.spark1_3.api.RDDUtilsInJava;
+import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
 
 /**
  * select given columns from input table and store result in new RDD

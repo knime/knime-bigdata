@@ -18,11 +18,11 @@
  * History
  *   Created on Apr 27, 2016 by bjoern
  */
-package com.knime.bigdata.spark.node.io.table.reader;
+package org.knime.bigdata.spark.node.io.table.reader;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * Job input for the Table to Spark job.

@@ -18,7 +18,7 @@
  * History
  *   Created on 27.07.2015 by dwk
  */
-package com.knime.bigdata.spark2_2.api;
+package org.knime.bigdata.spark2_2.api;
 
 import java.io.Serializable;
 import java.util.List;
@@ -34,10 +34,10 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 
-import com.knime.bigdata.spark.core.job.ClassificationJobInput;
-import com.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.ClassificationJobInput;
+import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**

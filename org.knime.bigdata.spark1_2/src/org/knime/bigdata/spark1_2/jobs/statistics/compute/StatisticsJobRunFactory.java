@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark1_2.jobs.statistics.compute;
+package org.knime.bigdata.spark1_2.jobs.statistics.compute;
 
-import com.knime.bigdata.spark.core.job.ColumnsJobInput;
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeModel;
-import com.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
+import org.knime.bigdata.spark.core.job.ColumnsJobInput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeModel;
+import org.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
 
 /**
  *

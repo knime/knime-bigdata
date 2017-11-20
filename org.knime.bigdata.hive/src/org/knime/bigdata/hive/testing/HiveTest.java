@@ -18,7 +18,7 @@
  * History
  *   06.05.2014 (thor): created
  */
-package com.knime.bigdata.hive.testing;
+package org.knime.bigdata.hive.testing;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

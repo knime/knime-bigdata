@@ -18,19 +18,19 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_3.jobs.preproc.convert.category2number;
+package org.knime.bigdata.spark1_3.jobs.preproc.convert.category2number;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
-import com.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
-import com.knime.bigdata.spark1_3.api.NamedObjects;
-import com.knime.bigdata.spark1_3.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobInput;
+import org.knime.bigdata.spark.node.preproc.convert.category2number.Category2NumberJobOutput;
+import org.knime.bigdata.spark1_3.api.NamedObjects;
+import org.knime.bigdata.spark1_3.api.SparkJob;
 
 /**
  * converts nominal values from a set of columns to numbers and adds corresponding new columns

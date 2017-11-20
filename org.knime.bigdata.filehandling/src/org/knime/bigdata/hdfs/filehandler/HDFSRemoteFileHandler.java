@@ -1,4 +1,4 @@
-package com.knime.bigdata.hdfs.filehandler;
+package org.knime.bigdata.hdfs.filehandler;
 
 /* ------------------------------------------------------------------
  * This source code, its documentation and all appendant files

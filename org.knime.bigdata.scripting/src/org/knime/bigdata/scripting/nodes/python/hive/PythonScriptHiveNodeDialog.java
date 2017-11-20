@@ -45,7 +45,7 @@
  * History
  *   Sep 25, 2014 (Patrick Winter): created
  */
-package com.knime.bigdata.scripting.nodes.python.hive;
+package org.knime.bigdata.scripting.nodes.python.hive;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -75,7 +75,7 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.python.kernel.SQLEditorObjectWriter;
 
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * <code>NodeDialog</code> for the node.

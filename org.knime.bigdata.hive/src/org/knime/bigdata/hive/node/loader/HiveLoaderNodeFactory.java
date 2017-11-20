@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.loader;
+package org.knime.bigdata.hive.node.loader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

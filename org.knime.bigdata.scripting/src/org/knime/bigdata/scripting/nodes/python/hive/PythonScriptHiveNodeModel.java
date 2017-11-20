@@ -45,7 +45,7 @@
  * History
  *   Sep 25, 2014 (Patrick Winter): created
  */
-package com.knime.bigdata.scripting.nodes.python.hive;
+package org.knime.bigdata.scripting.nodes.python.hive;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,9 +78,9 @@ import org.knime.python.kernel.PythonKernel;
 import org.knime.python.kernel.SQLEditorObjectReader;
 import org.knime.python.kernel.SQLEditorObjectWriter;
 
-import com.knime.bigdata.hive.utility.HiveLoader;
-import com.knime.bigdata.hive.utility.HiveLoaderSettings;
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hive.utility.HiveLoader;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * This is the model implementation.

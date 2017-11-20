@@ -18,7 +18,7 @@
  * History
  *   Created on 29.05.2015 by koetter
  */
-package com.knime.bigdata.commons;
+package org.knime.bigdata.commons;
 
 import java.io.File;
 import java.net.URL;
@@ -28,8 +28,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.knime.bigdata.commons.config.CommonConfigContainer;
-import com.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
 
 
 /**

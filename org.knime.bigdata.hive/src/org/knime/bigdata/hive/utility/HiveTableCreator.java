@@ -18,7 +18,7 @@
  * History
  *   Created on 17.10.2016 by koetter
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.tablecreator.DBTableCreatorIfNotExistsImpl;

@@ -18,11 +18,11 @@
  * History
  *   Created on Jan 17, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_3.jobs.preproc.rename;
+package org.knime.bigdata.spark1_3.jobs.preproc.rename;
 
-import com.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import com.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
-import com.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
+import org.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
 
 /**
  * @author Sascha Wolke, KNIME.com

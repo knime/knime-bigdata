@@ -18,11 +18,11 @@
  * History
  *   Created on Mar 4, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.context.namedobjects;
+package org.knime.bigdata.spark.core.context.namedobjects;
 
 import java.util.Set;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 
 /**
  *

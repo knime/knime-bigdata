@@ -18,12 +18,12 @@
  * History
  *   Created on 16.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_3.base;
+package org.knime.bigdata.spark1_3.base;
 
-import com.knime.bigdata.spark.node.pmml.converter.DefaultPMMLPortObjectFactoryProvider;
-import com.knime.bigdata.spark1_3.api.Spark_1_3_CompatibilityChecker;
-import com.knime.bigdata.spark1_3.jobs.mllib.clustering.kmeans.KMeansModelPMMLPortObjectFactory;
-import com.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression.LinearRegressionModelPMMLPortObjectFactory;
+import org.knime.bigdata.spark.node.pmml.converter.DefaultPMMLPortObjectFactoryProvider;
+import org.knime.bigdata.spark1_3.api.Spark_1_3_CompatibilityChecker;
+import org.knime.bigdata.spark1_3.jobs.mllib.clustering.kmeans.KMeansModelPMMLPortObjectFactory;
+import org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression.LinearRegressionModelPMMLPortObjectFactory;
 
 /**
  *

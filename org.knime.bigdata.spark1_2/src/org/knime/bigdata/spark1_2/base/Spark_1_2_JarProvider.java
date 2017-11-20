@@ -18,10 +18,10 @@
  * History
  *   Created on 04.03.2016 by koetter
  */
-package com.knime.bigdata.spark1_2.base;
+package org.knime.bigdata.spark1_2.base;
 
-import com.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Implementation of the {@link JobsPluginJarProvider} for Spark 1.2.

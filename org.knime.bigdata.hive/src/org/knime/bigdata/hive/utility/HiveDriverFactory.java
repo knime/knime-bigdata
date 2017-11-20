@@ -18,7 +18,7 @@
  * History
  *   Created on 20.05.2016 by koetter
  */
-package com.knime.bigdata.hive.utility;
+package org.knime.bigdata.hive.utility;
 
 import java.io.IOException;
 

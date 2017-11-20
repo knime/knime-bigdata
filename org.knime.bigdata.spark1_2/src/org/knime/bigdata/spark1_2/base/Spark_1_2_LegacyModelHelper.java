@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 14, 2016 by bjoern
  */
-package com.knime.bigdata.spark1_2.base;
+package org.knime.bigdata.spark1_2.base;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,22 +37,22 @@ import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+import org.knime.bigdata.spark.core.jobserver.CustomClassLoadingObjectInputStream;
+import org.knime.bigdata.spark.core.model.LegacyModelHelper;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
+import org.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
+import org.knime.bigdata.spark1_2.api.Spark_1_2_ModelHelper;
 import org.osgi.framework.FrameworkUtil;
 
-import com.knime.bigdata.spark.core.jobserver.CustomClassLoadingObjectInputStream;
-import com.knime.bigdata.spark.core.model.LegacyModelHelper;
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
-import com.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
-import com.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import com.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
-import com.knime.bigdata.spark1_2.api.Spark_1_2_ModelHelper;
 
 /**
  * Class that helps with loading serialized Spark models from legacy workflows.
@@ -124,7 +124,7 @@ public class Spark_1_2_LegacyModelHelper extends Spark_1_2_ModelHelper implement
     public Object convertLegacyToNewModel(final Object legacyModelInstance) {
         if (legacyModelInstance instanceof CollaborativeFilteringModel) {
             CollaborativeFilteringModel toConvert = (CollaborativeFilteringModel) legacyModelInstance;
-            return new com.knime.bigdata.spark1_2.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel(toConvert.getRank(), toConvert.getUserFeaturesRDDID(), toConvert.getProductFeaturesRDDID());
+            return new org.knime.bigdata.spark1_2.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel(toConvert.getRank(), toConvert.getUserFeaturesRDDID(), toConvert.getProductFeaturesRDDID());
         } else {
             return legacyModelInstance;
         }

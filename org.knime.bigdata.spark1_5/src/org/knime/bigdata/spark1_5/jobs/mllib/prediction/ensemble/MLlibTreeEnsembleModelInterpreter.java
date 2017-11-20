@@ -18,7 +18,7 @@
  * History
  *   Created on 27.09.2015 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.mllib.prediction.ensemble;
+package org.knime.bigdata.spark1_5.jobs.mllib.prediction.ensemble;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,12 +41,12 @@ import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeView;
 
-import com.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import com.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import com.knime.bigdata.spark.core.port.model.SparkModel;
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
-import com.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
-import com.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.TreeNode1_5;
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
+import org.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.TreeNode1_5;
 
 import scala.Enumeration.Value;
 

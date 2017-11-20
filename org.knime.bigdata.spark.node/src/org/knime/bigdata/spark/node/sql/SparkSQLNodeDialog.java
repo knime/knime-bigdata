@@ -15,7 +15,7 @@
  * email: contact@knime.com
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.sql;
+package org.knime.bigdata.spark.node.sql;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -55,8 +55,8 @@ import org.knime.core.node.util.DataColumnSpecListCellRenderer;
 import org.knime.core.node.util.FlowVariableListCellRenderer;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.spark.core.exception.MissingJobException;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.exception.MissingJobException;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Dialog for the Spark SQL Executor node.

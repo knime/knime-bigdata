@@ -18,14 +18,14 @@
  * History
  *   Created on May 26, 2016 by oole
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.mllib.tree.model.Node;
 
-import com.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 
 import scala.collection.Iterator;
 

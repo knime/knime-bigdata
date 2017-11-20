@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 7, 2017 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_6.jobs;
+package org.knime.bigdata.spark1_6.jobs;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
 
-import com.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.NamedObjects;
 
 /**
  * Simple {@link HashMap} based named objects handler.

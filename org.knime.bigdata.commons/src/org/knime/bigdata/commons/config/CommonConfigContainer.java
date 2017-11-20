@@ -18,7 +18,7 @@
  * History
  *   Created on 24.06.2016 by koetter
  */
-package com.knime.bigdata.commons.config;
+package org.knime.bigdata.commons.config;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,8 +31,8 @@ import org.apache.hadoop.security.ssl.SSLFactory.Mode;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.core.node.NodeLogger.LEVEL;
 
-import com.knime.bigdata.commons.CommonsPlugin;
-import com.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
+import org.knime.bigdata.commons.CommonsPlugin;
+import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 
 /**
  * Container class that holds configuration information for the different Big Data Extensions.

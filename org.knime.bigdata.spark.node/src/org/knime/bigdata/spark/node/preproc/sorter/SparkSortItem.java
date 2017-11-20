@@ -45,7 +45,7 @@
  * History
  *   14.04.2005 (cebron): created
  */
-package com.knime.bigdata.spark.node.preproc.sorter;
+package org.knime.bigdata.spark.node.preproc.sorter;
 
 import java.awt.Dimension;
 import java.util.Vector;

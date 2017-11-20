@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.loader;
+package org.knime.bigdata.hive.node.loader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,10 +68,10 @@ import org.knime.core.node.port.database.DatabaseReaderConnection;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.FileUtil;
 
-import com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import com.knime.bigdata.hive.utility.HiveLoader;
-import com.knime.bigdata.hive.utility.HiveLoaderSettings;
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hive.utility.HiveLoader;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Model for the Hive Loader node.

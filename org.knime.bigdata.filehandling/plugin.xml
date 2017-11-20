@@ -4,38 +4,38 @@
    <extension
          point="org.knime.base.filehandling.RemoteFileHandler">
       <RemoteFileHandler
-            RemoteFileHandler="com.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler">
+            RemoteFileHandler="org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler">
       </RemoteFileHandler>
    </extension>
    <extension
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/io/filehandling/remote/connections"
-            factory-class="com.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.connector.HDFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote"
-            factory-class="com.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.filesettings.SetFilePermissionNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
-            factory-class="com.knime.bigdata.hdfs.node.connector.HttpFSConnectionInformationNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.connector.HttpFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
-            factory-class="com.knime.bigdata.hdfs.node.connector.HttpsFSConnectionInformationNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.connector.HttpsFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
-            factory-class="com.knime.bigdata.hdfs.node.connector.WebHDFSConnectionInformationNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.connector.WebHDFSConnectionInformationNodeFactory">
       </node>
       <node
             category-path="/io/filehandling/remote/connections"
             deprecated="false"
-            factory-class="com.knime.bigdata.hdfs.node.connector.SWebHDFSConnectionInformationNodeFactory">
+            factory-class="org.knime.bigdata.hdfs.node.connector.SWebHDFSConnectionInformationNodeFactory">
       </node>
    </extension>
 </plugin>

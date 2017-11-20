@@ -18,12 +18,12 @@
  * History
  *   Created on 29.01.2016 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.statistics.correlation;
+package org.knime.bigdata.spark1_5.jobs.statistics.correlation;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.core.job.HalfDoubleMatrixJobOutput;
-import com.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
-import com.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeModel;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.HalfDoubleMatrixJobOutput;
+import org.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
+import org.knime.bigdata.spark.node.statistics.correlation.matrix.MLlibCorrelationMatrixNodeModel;
 
 /**
  *

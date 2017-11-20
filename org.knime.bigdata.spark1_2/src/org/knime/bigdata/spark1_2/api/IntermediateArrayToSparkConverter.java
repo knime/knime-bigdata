@@ -18,15 +18,15 @@
  * History
  *   Created on 30.05.2016 by koetter
  */
-package com.knime.bigdata.spark1_2.api;
+package org.knime.bigdata.spark1_2.api;
 
 import java.io.Serializable;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
-import com.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 
 import scala.collection.mutable.WrappedArray;
 

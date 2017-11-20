@@ -45,14 +45,14 @@
  * History
  *   05.06.2012 (hofer): created
  */
-package com.knime.bigdata.spark.node.scripting.java.util.template;
+package org.knime.bigdata.spark.node.scripting.java.util.template;
 
 import org.knime.base.node.jsnippet.template.FileTemplateRepositoryProvider;
 import org.knime.base.node.jsnippet.template.SnippetTemplateFactory;
 import org.knime.base.node.jsnippet.template.TemplateRepository;
 import org.knime.core.node.NodeSettingsRO;
 
-import com.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
+import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 
 /**
  * A provider to the template repository in the KNIME workspace.

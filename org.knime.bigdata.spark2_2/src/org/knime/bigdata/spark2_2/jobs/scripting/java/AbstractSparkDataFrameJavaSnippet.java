@@ -45,7 +45,7 @@
  * History
  *   25.11.2011 (hofer): created
  */
-package com.knime.bigdata.spark2_2.jobs.scripting.java;
+package org.knime.bigdata.spark2_2.jobs.scripting.java;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -55,7 +55,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *

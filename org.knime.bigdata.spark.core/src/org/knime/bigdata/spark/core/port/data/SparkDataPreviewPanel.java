@@ -18,7 +18,7 @@
  * History
  *   Created on Oct 24, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark.core.port.data;
+package org.knime.bigdata.spark.core.port.data;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

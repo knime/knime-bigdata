@@ -18,7 +18,7 @@
  * History
  *   Created on 20.05.2016 by koetter
  */
-package com.knime.bigdata.impala.utility;
+package org.knime.bigdata.impala.utility;
 
 import java.io.IOException;
 

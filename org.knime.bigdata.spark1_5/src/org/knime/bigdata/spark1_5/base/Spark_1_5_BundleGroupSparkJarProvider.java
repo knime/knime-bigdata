@@ -18,13 +18,13 @@
  * History
  *   Created on Nov 1, 2016 by Sascha Wolke, KNIME.com
  */
-package com.knime.bigdata.spark1_5.base;
+package org.knime.bigdata.spark1_5.base;
 
 import org.osgi.framework.Bundle;
 
 import com.google.common.collect.ImmutableMap;
-import com.knime.bigdata.spark.core.jar.bundle.DefaultBundleGroupSparkJarProvider;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.jar.bundle.DefaultBundleGroupSparkJarProvider;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Spark 1.5 driver bundle provider.

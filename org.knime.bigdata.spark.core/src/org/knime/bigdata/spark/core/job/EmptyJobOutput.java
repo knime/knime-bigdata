@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 15, 2016 by bjoern
  */
-package com.knime.bigdata.spark.core.job;
+package org.knime.bigdata.spark.core.job;
 
 /**
  * This class is a {@link JobOutput} for jobs that do not produce any output, other than table specs.

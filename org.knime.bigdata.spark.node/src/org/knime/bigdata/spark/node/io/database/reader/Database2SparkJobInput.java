@@ -18,12 +18,12 @@
  * History
  *   Created on Sep 5, 2016 by sascha
  */
-package com.knime.bigdata.spark.node.io.database.reader;
+package org.knime.bigdata.spark.node.io.database.reader;
 
 import java.util.Properties;
 
-import com.knime.bigdata.spark.core.job.JobInput;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  * @author Sascha Wolke, KNIME.com

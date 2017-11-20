@@ -18,18 +18,18 @@
  * History
  *   Created on Feb 13, 2015 by koetter
  */
-package com.knime.bigdata.spark1_5.jobs.util;
+package org.knime.bigdata.spark1_5.jobs.util;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.util.rdd.unpersist.UnpersistJobInput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.SimpleSparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.util.rdd.unpersist.UnpersistJobInput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.SimpleSparkJob;
 
 /**
  * Unpersists the given named RDD and remove it from the named objects.

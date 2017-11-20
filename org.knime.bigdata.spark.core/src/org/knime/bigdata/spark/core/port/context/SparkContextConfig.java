@@ -18,7 +18,7 @@
  * History
  *   Created on 26.06.2015 by koetter
  */
-package com.knime.bigdata.spark.core.port.context;
+package org.knime.bigdata.spark.core.port.context;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -26,9 +26,9 @@ import java.util.Objects;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import com.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Class that holds all information about a SparkContext that is used in KNIME e.g. the id

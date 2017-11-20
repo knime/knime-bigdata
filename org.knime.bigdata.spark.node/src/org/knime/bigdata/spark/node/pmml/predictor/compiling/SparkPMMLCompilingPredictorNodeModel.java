@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package com.knime.bigdata.spark.node.pmml.predictor.compiling;
+package org.knime.bigdata.spark.node.pmml.predictor.compiling;
 
 import javax.xml.transform.SourceLocator;
 
@@ -34,9 +34,9 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import com.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import com.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.pmml.predictor.AbstractSparkPMMLPredictorNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 import net.sf.saxon.s9api.MessageListener;

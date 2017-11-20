@@ -18,7 +18,7 @@
  * History
  *   Created on Nov 17, 2017 by bjoern
  */
-package com.knime.bigdata.spark.node.preproc.groupby;
+package org.knime.bigdata.spark.node.preproc.groupby;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,11 +37,11 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 import org.knime.core.node.port.database.aggregation.InvalidAggregationFunction;
 
-import com.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionRow;
-import com.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionRow;
-import com.knime.bigdata.spark.node.preproc.groupby.dialog.type.DataTypeAggregationFunctionRow;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import com.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionRow;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionRow;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.type.DataTypeAggregationFunctionRow;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * Holds settings that specify which aggregation function to use for which column.

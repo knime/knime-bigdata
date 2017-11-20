@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark.core.jar;
+package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 import java.io.FileOutputStream;

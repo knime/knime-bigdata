@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark1_5.jobs.preproc.normalize;
+package org.knime.bigdata.spark1_5.jobs.preproc.normalize;
 
 import java.util.Arrays;
 
@@ -7,14 +7,14 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
-import com.knime.bigdata.spark1_5.api.NamedObjects;
-import com.knime.bigdata.spark1_5.api.NormalizedRDDContainer;
-import com.knime.bigdata.spark1_5.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_5.api.SparkJob;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
+import org.knime.bigdata.spark1_5.api.NamedObjects;
+import org.knime.bigdata.spark1_5.api.NormalizedRDDContainer;
+import org.knime.bigdata.spark1_5.api.RDDUtilsInJava;
+import org.knime.bigdata.spark1_5.api.SparkJob;
 
 /**
  * @author dwk

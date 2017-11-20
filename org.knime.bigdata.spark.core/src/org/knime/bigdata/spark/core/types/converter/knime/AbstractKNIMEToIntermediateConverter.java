@@ -18,7 +18,7 @@
  * History
  *   Created on 24.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.types.converter.knime;
+package org.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.util.Arrays;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 
-import com.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Abstract base class for all {@link KNIMEToIntermediateConverter} implementations.

@@ -18,10 +18,10 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package com.knime.bigdata.spark.core.node;
+package org.knime.bigdata.spark.core.node;
 
-import com.knime.bigdata.spark.core.version.CompatibilityChecker;
-import com.knime.bigdata.spark.core.version.DefaultSparkProvider;
+import org.knime.bigdata.spark.core.version.CompatibilityChecker;
+import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
 
 /**
  *

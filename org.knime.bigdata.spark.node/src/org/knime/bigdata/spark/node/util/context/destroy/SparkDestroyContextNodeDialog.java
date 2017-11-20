@@ -18,7 +18,7 @@
  * History
  *   Created on 01.10.2015 by koetter
  */
-package com.knime.bigdata.spark.node.util.context.destroy;
+package org.knime.bigdata.spark.node.util.context.destroy;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;

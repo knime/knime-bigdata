@@ -18,7 +18,7 @@
  * History
  *   Created on 09.05.2014 by thor
  */
-package com.knime.bigdata.hive.node.loader;
+package org.knime.bigdata.hive.node.loader;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -48,8 +48,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
 
-import com.knime.bigdata.hive.utility.HiveLoaderSettings;
-import com.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Dialog for the Hive Loader node.

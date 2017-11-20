@@ -18,7 +18,7 @@
  * History
  *   Created on 06.05.2014 by thor
  */
-package com.knime.bigdata.impala.node.connector;
+package org.knime.bigdata.impala.node.connector;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

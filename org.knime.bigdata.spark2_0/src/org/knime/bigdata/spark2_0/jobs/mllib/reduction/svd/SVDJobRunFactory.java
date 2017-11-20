@@ -18,12 +18,12 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package com.knime.bigdata.spark2_0.jobs.mllib.reduction.svd;
+package org.knime.bigdata.spark2_0.jobs.mllib.reduction.svd;
 
-import com.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import com.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeModel;
-import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobInput;
-import com.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobOutput;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeModel;
+import org.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobInput;
+import org.knime.bigdata.spark.node.mllib.reduction.svd.SVDJobOutput;
 
 /**
  *

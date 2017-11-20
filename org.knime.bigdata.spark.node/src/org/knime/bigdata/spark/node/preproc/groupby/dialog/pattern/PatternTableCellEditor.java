@@ -43,7 +43,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  */
-package com.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
+package org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern;
 
 import java.awt.Component;
 

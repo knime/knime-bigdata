@@ -1,4 +1,4 @@
-package com.knime.bigdata.spark2_0.jobs.preproc.normalize;
+package org.knime.bigdata.spark2_0.jobs.preproc.normalize;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,15 +16,15 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-import com.knime.bigdata.spark.core.exception.KNIMESparkException;
-import com.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
-import com.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
-import com.knime.bigdata.spark2_0.api.NamedObjects;
-import com.knime.bigdata.spark2_0.api.NormalizedDataFrameContainer;
-import com.knime.bigdata.spark2_0.api.NormalizedDataFrameContainerFactory;
-import com.knime.bigdata.spark2_0.api.SparkJob;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
+import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
+import org.knime.bigdata.spark2_0.api.NamedObjects;
+import org.knime.bigdata.spark2_0.api.NormalizedDataFrameContainer;
+import org.knime.bigdata.spark2_0.api.NormalizedDataFrameContainerFactory;
+import org.knime.bigdata.spark2_0.api.SparkJob;
 
 /**
  * @author dwk

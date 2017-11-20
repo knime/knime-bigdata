@@ -18,7 +18,7 @@
  * History
  *   Created on May 12, 2016 by oole
  */
-package com.knime.bigdata.spark1_5.jobs.scorer;
+package org.knime.bigdata.spark1_5.jobs.scorer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,12 +28,12 @@ import java.util.logging.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 
-import com.knime.bigdata.spark.core.job.JobOutput;
-import com.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
-import com.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
-import com.knime.bigdata.spark1_5.api.RDDUtilsInJava;
-import com.knime.bigdata.spark1_5.api.SupervisedLearnerUtils;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
+import org.knime.bigdata.spark1_5.api.RDDUtilsInJava;
+import org.knime.bigdata.spark1_5.api.SupervisedLearnerUtils;
 
 import scala.Tuple2;
 

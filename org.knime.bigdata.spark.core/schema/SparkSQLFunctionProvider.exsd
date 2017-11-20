@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="com.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.knime.bigdata.spark.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.knime.bigdata.spark.core" id="SparkSQLFunctionProvider" name="SparkSQLFunctionProvider"/>
+         <meta.schema plugin="org.knime.bigdata.spark.core" id="SparkSQLFunctionProvider" name="SparkSQLFunctionProvider"/>
       </appinfo>
       <documentation>
          Extension point for spark sql functions via OSGi.
@@ -52,10 +52,10 @@
          <attribute name="ProviderClass" type="string" use="required">
             <annotation>
                <documentation>
-                  Specify an extension of a com.knime.bigdata.spark.core.jar.bundle.BundleGroupJarProvider.
+                  Specify an extension of a org.knime.bigdata.spark.core.jar.bundle.BundleGroupJarProvider.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="com.knime.bigdata.spark.core.sql.SparkSQLFunctionProvider:"/>
+                  <meta.attribute kind="java" basedOn="org.knime.bigdata.spark.core.sql.SparkSQLFunctionProvider:"/>
                </appinfo>
             </annotation>
          </attribute>

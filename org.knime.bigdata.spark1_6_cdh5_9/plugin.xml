@@ -2,14 +2,14 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="com.knime.bigdata.spark.core.ModelHelperProvider">
+         point="org.knime.bigdata.spark.core.ModelHelperProvider">
       <ModelHelperProvider
-            ProviderClass="com.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_ModelHelperProvider">
+            ProviderClass="org.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_ModelHelperProvider">
       </ModelHelperProvider>
    </extension>
-   <extension point="com.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
+   <extension point="org.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">
       <PMMLPortObjectFactoryProvider
-            ProviderClass="com.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_PMMLPortObjectFactoryProvider">
+            ProviderClass="org.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_PMMLPortObjectFactoryProvider">
       </PMMLPortObjectFactoryProvider>
    </extension>
 </plugin>
