@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.knime.bigdata</groupId>
-		<artifactId>bigdata-externals-parent</artifactId>
+		<artifactId>externals-parent</artifactId>
 		<version>2.2.0-SNAPSHOT</version>
-		<relativePath>../org.knime.bigdata.bigdata-externals-parent/pom.xml</relativePath>
+		<relativePath>../org.knime.bigdata.externals-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.knime.features.bigdata.externals</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>Module that builds the org.knime.features.bigdata.externals feature</name>
+	<name>org.knime.features.bigdata.externals</name>
 
 </project>

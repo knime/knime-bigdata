@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.knime.bigdata</groupId>
-    <artifactId>bigdata-externals-parent</artifactId>
+    <artifactId>externals-parent</artifactId>
     <version>2.2.0-SNAPSHOT</version>
-    <relativePath>../org.knime.bigdata.bigdata-externals-parent/pom.xml</relativePath>
+    <relativePath>../org.knime.bigdata.externals-parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>org.knime.update.bigdata.externals</artifactId>
   <packaging>eclipse-repository</packaging>
-  <name>Module that builds the org.knime.update.bigdata.externals update site</name>
+  <name>org.knime.update.bigdata.externals</name>
 </project>

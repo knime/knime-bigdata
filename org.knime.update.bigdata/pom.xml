@@ -9,5 +9,5 @@
 
   <artifactId>org.knime.update.bigdata</artifactId>
   <packaging>eclipse-repository</packaging>
-  <name>Module that builds the org.knime.update.bigdata update site</name>
+  <name>org.knime.update.bigdata</name>
 </project>
