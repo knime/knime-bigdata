@@ -16,13 +16,14 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Jun 28, 2016 by bjoern
+ *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port.model;
+package com.knime.bigdata.spark.core.port.context;
 
 import java.io.IOException;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObjectSpec;
@@ -31,43 +32,46 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 
 /**
  * Class required to load legacy workflows. Please use
- * {@link org.knime.bigdata.spark.core.port.model.SparkModelPortObject} instead.
+ * {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObject} instead
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Tobias Koetter, KNIME
+ * @author Bjoern Lohrmann, KNIME
+ * @deprecated use {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObject} instead
  */
 @Deprecated
-public class SparkModelPortObject extends org.knime.bigdata.spark.core.port.model.SparkModelPortObject {
+public class SparkContextPortObject extends org.knime.bigdata.spark.core.port.context.SparkContextPortObject {
 
     /**
-     * Serializer used to save {@link SparkModelPortObject}s.
+     * Serializer used to save {@link SparkContextPortObject}s.
      */
-    public static final class Serializer extends PortObjectSerializer<SparkModelPortObject> {
+    public static final class Serializer extends PortObjectSerializer<SparkContextPortObject> {
         /**
          * {@inheritDoc}
          */
         @Override
-        public void savePortObject(final SparkModelPortObject portObject, final PortObjectZipOutputStream out,
+        public void savePortObject(final SparkContextPortObject portObject, final PortObjectZipOutputStream out,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 
-            new org.knime.bigdata.spark.core.port.model.SparkModelPortObject.Serializer().savePortObject(portObject,
-                out, exec);
+            new org.knime.bigdata.spark.core.port.context.SparkContextPortObject.ModelSerializer()
+                .savePortObject(portObject, out, exec);
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in, final PortObjectSpec spec,
+        public SparkContextPortObject loadPortObject(final PortObjectZipInputStream in, final PortObjectSpec spec,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-            SparkModel model = SparkModel.load(exec, in);
-            return new SparkModelPortObject(model);
+
+            final SparkContextID context = SparkContextPortObjectBase.load(in);
+            return new SparkContextPortObject(context);
         }
     }
 
     /**
-     * @param model
+     * @param contextID
      */
-    public SparkModelPortObject(final SparkModel model) {
-        super(model);
+    public SparkContextPortObject(final SparkContextID contextID) {
+        super(contextID);
     }
 }

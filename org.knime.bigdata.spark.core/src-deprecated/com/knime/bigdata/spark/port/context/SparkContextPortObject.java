@@ -22,23 +22,22 @@ package com.knime.bigdata.spark.port.context;
 
 import java.io.IOException;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 
-import com.knime.bigdata.spark.core.context.SparkContextID;
-import com.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
-
 /**
  * Class required to load legacy workflows. Please use
- * {@link com.knime.bigdata.spark.core.port.context.SparkContextPortObject} instead.
+ * {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObject} instead.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 @Deprecated
-public class SparkContextPortObject extends com.knime.bigdata.spark.core.port.context.SparkContextPortObject {
+public class SparkContextPortObject extends org.knime.bigdata.spark.core.port.context.SparkContextPortObject {
 
     /**
      * Serializer used to save {@link SparkContextPortObject}s.
@@ -51,7 +50,7 @@ public class SparkContextPortObject extends com.knime.bigdata.spark.core.port.co
         public void savePortObject(final SparkContextPortObject portObject, final PortObjectZipOutputStream out,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 
-            new com.knime.bigdata.spark.core.port.context.SparkContextPortObject.ModelSerializer()
+            new org.knime.bigdata.spark.core.port.context.SparkContextPortObject.ModelSerializer()
                 .savePortObject(portObject, out, exec);
         }
 

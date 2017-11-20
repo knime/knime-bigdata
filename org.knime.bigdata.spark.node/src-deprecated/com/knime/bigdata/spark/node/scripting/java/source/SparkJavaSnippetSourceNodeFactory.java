@@ -27,11 +27,6 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
 import org.knime.core.node.NodeDialogPane;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import com.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
-import com.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
-
 /**
  *
  * @author Tobias Koetter, KNIME.com

@@ -20,13 +20,12 @@
  */
 package com.knime.bigdata.spark.node.io.genericdatasource.reader.text;
 
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
 import org.knime.core.node.NodeDialogPane;
-
-import com.knime.bigdata.spark.core.version.SparkVersion;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeDialog;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeFactory;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkNodeModel;
-import com.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
 
 /**
  * @author Sascha Wolke, KNIME.com

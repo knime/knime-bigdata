@@ -20,10 +20,10 @@
  */
 package com.knime.bigdata.spark.node.io.impala.reader;
 
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeModel;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
-
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  *

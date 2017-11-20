@@ -20,7 +20,8 @@
  */
 package com.knime.bigdata.spark.node.io.table.reader;
 
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 
 /**
  *

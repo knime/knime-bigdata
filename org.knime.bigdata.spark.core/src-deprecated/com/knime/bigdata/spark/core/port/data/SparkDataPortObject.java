@@ -16,9 +16,9 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Jun 28, 2016 by bjoern
+ *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port.data;
+package com.knime.bigdata.spark.core.port.data;
 
 import java.io.IOException;
 
@@ -33,7 +33,9 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
  * Class required to load legacy workflows. Please use
  * {@link org.knime.bigdata.spark.core.port.data.SparkDataPortObject} instead.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Tobias Koetter, KNIME
+ * @author Bjoern Lohrmann, KNIME
+ * @deprecated use {@link org.knime.bigdata.spark.core.port.data.SparkDataPortObject} instead.
  */
 @Deprecated
 public class SparkDataPortObject extends org.knime.bigdata.spark.core.port.data.SparkDataPortObject {

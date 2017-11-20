@@ -20,10 +20,11 @@
  */
 package com.knime.bigdata.spark.node.io.database.reader;
 
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeDialog;
+import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeModel;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
-
-import com.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 
 /**
  * @author Sascha Wolke, KNIME.com

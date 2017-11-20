@@ -16,24 +16,26 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Jun 29, 2016 by bjoern
+ *   Created on Feb 12, 2015 by knime
  */
-package com.knime.bigdata.spark.port.context;
+package com.knime.bigdata.spark.core.port.context;
 
 import java.io.IOException;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectBase;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 
+import com.knime.bigdata.spark.port.context.SparkContextPortObject;
+
 /**
  * Class required to load legacy workflows. Please use
- * {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec} instead.
- *
- * @author Bjoern Lohrmann, KNIME.com
+ * {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec} instead
+ * @author Tobias Koetter, KNIME
+ * @author Bjoern Lohrmann, KNIME
+ * @deprecated  use {@link org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec} instead
  */
 @Deprecated
 public class SparkContextPortObjectSpec extends org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec {
