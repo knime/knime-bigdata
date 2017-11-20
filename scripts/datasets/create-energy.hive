@@ -1,9 +1,0 @@
-CREATE TABLE energy(meter_id INT, date_time STRING, kw_30 DOUBLE) COMMENT 'Energy meter table' STORED AS SEQUENCEFILE;
-
-CREATE EXTERNAL TABLE energy (meter_id INT, date_time STRING, kw_30 DOUBLE) 
- COMMENT 'Energy meter table'
- ROW FORMAT DELIMITED FIELDS TERMINATED BY '32'
- STORED AS TEXTFILE
- LOCATION '/tmp/energy-dataset/';
- 
-
