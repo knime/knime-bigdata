@@ -147,7 +147,7 @@ echo "#### Installing KNIME Extension for Apache Spark and streaming extensions"
 ./knime -data workspace -nosplash --launcher.suppressErrors -application org.eclipse.equinox.p2.director \
  -repository "${UPDATE_URL}" \
  -repository "${STORE_URL}" \
- -installIU 'com.knime.features.bigdata.spark.feature.group,org.knime.features.core.streaming.feature.group'
+ -installIU 'org.knime.features.bigdata.spark.feature.group,org.knime.features.core.streaming.feature.group'
 
 [ $? != 0 ] && { echo "Failure. Exiting." ; exit 1 ; }
 echo

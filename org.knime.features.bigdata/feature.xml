@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.knime.features.bigdata"
+      id="org.knime.features.bigdata"
       label="KNIME Big Data Connectors"
       version="3.5.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
@@ -28,28 +28,28 @@ In case of any questions, please contact KNIME at contact@knime.com
    </license>
 
    <plugin
-         id="com.knime.bigdata.filehandling"
+         id="org.knime.bigdata.filehandling"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.knime.bigdata.hive"
+         id="org.knime.bigdata.hive"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.knime.bigdata.impala"
+         id="org.knime.bigdata.impala"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.knime.bigdata.scripting"
+         id="org.knime.bigdata.scripting"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

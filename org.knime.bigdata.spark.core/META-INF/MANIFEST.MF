@@ -1,33 +1,33 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark core infrastructure
-Bundle-SymbolicName: com.knime.bigdata.spark.core;singleton:=true
+Bundle-SymbolicName: org.knime.bigdata.spark.core;singleton:=true
 Bundle-Version: 2.2.0.qualifier
-Bundle-Activator: com.knime.bigdata.spark.core.SparkPlugin
+Bundle-Activator: org.knime.bigdata.spark.core.SparkPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: com.knime.bigdata.spark.core.context,
- com.knime.bigdata.spark.core.context.namedobjects,
- com.knime.bigdata.spark.core.exception,
- com.knime.bigdata.spark.core.jar,
- com.knime.bigdata.spark.core.jar.bundle,
- com.knime.bigdata.spark.core.job,
- com.knime.bigdata.spark.core.job.util,
- com.knime.bigdata.spark.core.jobserver,
- com.knime.bigdata.spark.core.model,
- com.knime.bigdata.spark.core.node,
- com.knime.bigdata.spark.core.port,
- com.knime.bigdata.spark.core.port.context,
- com.knime.bigdata.spark.core.port.data,
- com.knime.bigdata.spark.core.port.model,
- com.knime.bigdata.spark.core.port.model.interpreter,
- com.knime.bigdata.spark.core.preferences,
- com.knime.bigdata.spark.core.sql_function,
- com.knime.bigdata.spark.core.types.converter.knime,
- com.knime.bigdata.spark.core.types.converter.spark,
- com.knime.bigdata.spark.core.types.intermediate,
- com.knime.bigdata.spark.core.util,
- com.knime.bigdata.spark.core.version
-Require-Bundle: com.knime.bigdata.commons;bundle-version="3.5.0",
+Export-Package: org.knime.bigdata.spark.core.context,
+ org.knime.bigdata.spark.core.context.namedobjects,
+ org.knime.bigdata.spark.core.exception,
+ org.knime.bigdata.spark.core.jar,
+ org.knime.bigdata.spark.core.jar.bundle,
+ org.knime.bigdata.spark.core.job,
+ org.knime.bigdata.spark.core.job.util,
+ org.knime.bigdata.spark.core.jobserver,
+ org.knime.bigdata.spark.core.model,
+ org.knime.bigdata.spark.core.node,
+ org.knime.bigdata.spark.core.port,
+ org.knime.bigdata.spark.core.port.context,
+ org.knime.bigdata.spark.core.port.data,
+ org.knime.bigdata.spark.core.port.model,
+ org.knime.bigdata.spark.core.port.model.interpreter,
+ org.knime.bigdata.spark.core.preferences,
+ org.knime.bigdata.spark.core.sql_function,
+ org.knime.bigdata.spark.core.types.converter.knime,
+ org.knime.bigdata.spark.core.types.converter.spark,
+ org.knime.bigdata.spark.core.types.intermediate,
+ org.knime.bigdata.spark.core.util,
+ org.knime.bigdata.spark.core.version
+Require-Bundle: org.knime.bigdata.commons;bundle-version="3.5.0",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
  org.knime.ext.sun;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.ui;bundle-version="[3.7.0,4.0.0)",

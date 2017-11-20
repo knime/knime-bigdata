@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Big Data Scripting
-Bundle-SymbolicName: com.knime.bigdata.scripting;singleton:=true
+Bundle-SymbolicName: org.knime.bigdata.scripting;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
- com.knime.bigdata.hive;bundle-version="[3.2.0,4.0.0)",
+ org.knime.bigdata.hive;bundle-version="[3.2.0,4.0.0)",
  org.knime.python;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
  com.knime.licenses;bundle-version="[5.4.2,6.0.0)"

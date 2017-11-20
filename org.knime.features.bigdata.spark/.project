@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.knime.features.bigdata.spark</name>
+	<name>org.knime.features.bigdata.spark</name>
 	<comment></comment>
 	<projects>
 	</projects>

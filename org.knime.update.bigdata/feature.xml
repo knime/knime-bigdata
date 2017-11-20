@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.knime.update.bigdata"
+      id="org.knime.update.bigdata"
       label="KNIME Big Data Extensions Update Site"
       version="2.2.0.qualifier">
 
    <includes
-         id="com.knime.features.bigdata"
+         id="org.knime.features.bigdata"
          version="0.0.0"/>
 
    <includes
-         id="com.knime.features.bigdata.spark"
+         id="org.knime.features.bigdata.spark"
          version="0.0.0"/>
 
    <includes
@@ -21,11 +21,11 @@
          version="0.0.0"/>
 
    <includes
-         id="com.knime.features.bigdata.externals"
+         id="org.knime.features.bigdata.externals"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.commons"
+         id="org.knime.bigdata.commons"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

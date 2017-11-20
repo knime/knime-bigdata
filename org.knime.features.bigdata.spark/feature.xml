@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.knime.features.bigdata.spark"
+      id="org.knime.features.bigdata.spark"
       label="KNIME Extension for Apache Spark"
       version="2.2.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
@@ -28,61 +28,61 @@ In case of any questions, please contact KNIME at contact@knime.com
    </license>
 
    <plugin
-         id="com.knime.bigdata.spark.core"
+         id="org.knime.bigdata.spark.core"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark.node"
+         id="org.knime.bigdata.spark.node"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_2"
+         id="org.knime.bigdata.spark1_2"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_3"
+         id="org.knime.bigdata.spark1_3"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_5"
+         id="org.knime.bigdata.spark1_5"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_6"
+         id="org.knime.bigdata.spark1_6"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark1_6_cdh5_9"
+         id="org.knime.bigdata.spark1_6_cdh5_9"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark2_0"
+         id="org.knime.bigdata.spark2_0"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark2_1"
+         id="org.knime.bigdata.spark2_1"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="com.knime.bigdata.spark2_2"
+         id="org.knime.bigdata.spark2_2"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

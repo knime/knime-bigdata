@@ -1,17 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 1.5
-Bundle-SymbolicName: com.knime.bigdata.spark1_5;singleton:=true
+Bundle-SymbolicName: org.knime.bigdata.spark1_5;singleton:=true
 Bundle-Version: 2.2.0.qualifier
 Bundle-ClassPath: knime.jar,
  lib/job-server-api_2.10-0.6.2-KNIME_spark-1.5.2.jar,
  lib/knime-jobserver-utils-0.6.2-KNIME_spark-1.5.2.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: com.knime.bigdata.spark1_5.api
+Export-Package: org.knime.bigdata.spark1_5.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",
- com.knime.bigdata.spark.core;bundle-version="[2.2.0,2.3.0)",
- com.knime.bigdata.spark.node;bundle-version="[2.2.0,2.3.0)",
+ org.knime.bigdata.spark.core;bundle-version="[2.2.0,2.3.0)",
+ org.knime.bigdata.spark.node;bundle-version="[2.2.0,2.3.0)",
  org.apache.spark_2.10;bundle-version="[1.5.0,1.6.0)",
  org.apache.hadoop.client;bundle-version="[2.2.0,3.0.0)",
  org.knime.jsnippets;bundle-version="[3.3.0,4.0.0)",

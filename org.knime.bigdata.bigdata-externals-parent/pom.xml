@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.knime.bigdata</groupId>
+	<groupId>org.knime.bigdata</groupId>
 	<artifactId>bigdata-externals-parent</artifactId>
 	<version>2.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Parent pom for building the com.knime.bigdata.externals update site</name>
+	<name>Parent pom for building the org.knime.bigdata.externals update site</name>
 
 
 	<properties>
@@ -18,8 +18,8 @@
 	</properties>
 
 	<modules>
-		<module>../com.knime.features.bigdata.externals</module>
-		<module>../com.knime.update.bigdata.externals</module>
+		<module>../org.knime.features.bigdata.externals</module>
+		<module>../org.knime.update.bigdata.externals</module>
 	</modules>
 
 	<build>

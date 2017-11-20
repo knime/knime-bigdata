@@ -9,7 +9,7 @@ fi
 
 FEATURE_XML_HEADER='<?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.knime.features.bigdata.externals"
+      id="org.knime.features.bigdata.externals"
       label="Feature with all external plug-ins for the KNIME Big Data Extension"
       version="2.2.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">

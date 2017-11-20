@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.knime.bigdata</groupId>
+	<groupId>org.knime.bigdata</groupId>
 	<artifactId>bigdata-parent</artifactId>
 	<version>2.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Parent pom for building the com.knime.update.bigdata update site locally on a developer laptop. NOT FOR USE IN JENKINS!</name>
+	<name>Parent pom for org.knime.update.bigdata</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,26 +18,26 @@
 	</properties>
 
 	<modules>
-    <module>com.knime.features.bigdata.externals</module>
-    <module>com.knime.update.bigdata.externals</module>
-		<module>com.knime.bigdata.commons</module>
-    <module>com.knime.bigdata.filehandling</module>
-    <module>com.knime.bigdata.hive</module>
-    <module>com.knime.bigdata.impala</module>
-    <module>com.knime.bigdata.scripting</module>
-    <module>com.knime.bigdata.spark.core</module>
-    <module>com.knime.bigdata.spark.node</module>
-    <module>com.knime.bigdata.spark1_2</module>
-    <module>com.knime.bigdata.spark1_3</module>
-    <module>com.knime.bigdata.spark1_5</module>
-    <module>com.knime.bigdata.spark1_6</module>
-    <module>com.knime.bigdata.spark1_6_cdh5_9</module>
-    <module>com.knime.bigdata.spark2_0</module>
-    <module>com.knime.bigdata.spark2_1</module>
-    <module>com.knime.bigdata.spark2_2</module>
-    <module>com.knime.features.bigdata</module>
-    <module>com.knime.features.bigdata.spark</module>
-    <module>com.knime.update.bigdata</module>
+    <module>org.knime.features.bigdata.externals</module>
+    <module>org.knime.update.bigdata.externals</module>
+		<module>org.knime.bigdata.commons</module>
+    <module>org.knime.bigdata.filehandling</module>
+    <module>org.knime.bigdata.hive</module>
+    <module>org.knime.bigdata.impala</module>
+    <module>org.knime.bigdata.scripting</module>
+    <module>org.knime.bigdata.spark.core</module>
+    <module>org.knime.bigdata.spark.node</module>
+    <module>org.knime.bigdata.spark1_2</module>
+    <module>org.knime.bigdata.spark1_3</module>
+    <module>org.knime.bigdata.spark1_5</module>
+    <module>org.knime.bigdata.spark1_6</module>
+    <module>org.knime.bigdata.spark1_6_cdh5_9</module>
+    <module>org.knime.bigdata.spark2_0</module>
+    <module>org.knime.bigdata.spark2_1</module>
+    <module>org.knime.bigdata.spark2_2</module>
+    <module>org.knime.features.bigdata</module>
+    <module>org.knime.features.bigdata.spark</module>
+    <module>org.knime.update.bigdata</module>
 	</modules>
 
 	<build>
