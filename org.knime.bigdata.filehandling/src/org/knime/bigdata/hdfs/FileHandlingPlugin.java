@@ -26,9 +26,8 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
-
 import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.osgi.framework.BundleContext;
 
 
 /**

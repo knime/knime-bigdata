@@ -25,15 +25,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.util.NonClosableInputStream;
 import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * This class represents tabular data in Spark, which has columns, rows and a {@link DataTableSpec}. In practice this is

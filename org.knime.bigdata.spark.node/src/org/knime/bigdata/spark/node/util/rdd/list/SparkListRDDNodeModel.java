@@ -22,6 +22,12 @@ package org.knime.bigdata.spark.node.util.rdd.list;
 
 import java.util.Set;
 
+import org.knime.bigdata.spark.core.context.SparkContext;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
@@ -34,13 +40,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-
-import org.knime.bigdata.spark.core.context.SparkContext;
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextManager;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.SparkContextProvider;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 
 /**
  *

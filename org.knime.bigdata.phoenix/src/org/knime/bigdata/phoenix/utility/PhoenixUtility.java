@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.phoenix.utility;
 
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
@@ -50,8 +51,6 @@ import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 import org.knime.core.node.port.database.writer.DBWriter;
-
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 
 
 /**

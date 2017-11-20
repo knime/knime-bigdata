@@ -26,10 +26,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
 
 /**
  * Registry for {@link JarCollector} that collect the java classes that should be send to a Spark job server.

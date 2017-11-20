@@ -38,15 +38,14 @@ import javax.swing.event.ChangeListener;
 import org.apache.spark.mllib.tree.configuration.Algo;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeView;
-
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 import org.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
 import org.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree.TreeNode1_3;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeView;
 
 import scala.Enumeration.Value;
 

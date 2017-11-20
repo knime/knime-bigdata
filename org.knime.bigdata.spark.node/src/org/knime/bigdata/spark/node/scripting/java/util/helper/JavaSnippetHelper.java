@@ -26,7 +26,6 @@ import java.util.List;
 import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
-
 import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**

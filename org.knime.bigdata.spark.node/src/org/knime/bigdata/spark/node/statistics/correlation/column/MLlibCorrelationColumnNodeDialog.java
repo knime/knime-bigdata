@@ -27,6 +27,8 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -38,9 +40,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import org.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
 
 /**
  *

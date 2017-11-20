@@ -35,7 +35,6 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import org.knime.bigdata.spark.node.preproc.convert.MyRecord;

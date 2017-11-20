@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark.node.statistics.correlation.column;
 
-import org.knime.core.node.NodeDialogPane;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  *

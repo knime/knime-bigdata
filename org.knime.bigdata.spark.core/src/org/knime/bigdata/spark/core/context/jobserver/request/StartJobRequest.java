@@ -26,8 +26,6 @@ import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
@@ -36,6 +34,8 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.jobserver.JobserverJobInput;
 import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.core.node.NodeLogger;
+
 import com.typesafe.config.ConfigRenderOptions;
 
 /**

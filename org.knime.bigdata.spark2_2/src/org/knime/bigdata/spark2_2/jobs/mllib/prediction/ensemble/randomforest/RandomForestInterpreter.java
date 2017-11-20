@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark2_2.jobs.mllib.prediction.ensemble.randomforest;
 
 import org.apache.spark.mllib.tree.model.RandomForestModel;
-
 import org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlibRandomForestNodeModel;
 import org.knime.bigdata.spark2_2.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
 

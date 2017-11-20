@@ -32,17 +32,16 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeLogger;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  * Registry class by which to obtain the {@link KNIMEToIntermediateConverter}s registered at the

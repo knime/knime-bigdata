@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark1_3.jobs.preproc.rename;
 
 import org.apache.spark.SparkContext;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;

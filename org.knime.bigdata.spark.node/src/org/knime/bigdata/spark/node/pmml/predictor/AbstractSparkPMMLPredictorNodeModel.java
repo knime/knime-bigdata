@@ -30,6 +30,16 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.knime.base.node.mine.util.PredictorHelper;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.EmptyJobOutput;
+import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.util.SparkPMMLUtil;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -41,16 +51,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.EmptyJobOutput;
-import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-import org.knime.bigdata.spark.core.util.SparkIDs;
-import org.knime.bigdata.spark.core.util.SparkPMMLUtil;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 

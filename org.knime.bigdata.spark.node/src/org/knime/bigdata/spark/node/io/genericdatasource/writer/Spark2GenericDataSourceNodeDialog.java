@@ -51,6 +51,12 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.SparkSaveMode;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.FlowVariableModelButton;
@@ -63,13 +69,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
-
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.port.SparkContextProvider;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
  * @author Sascha Wolke, KNIME.com

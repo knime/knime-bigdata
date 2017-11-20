@@ -64,6 +64,15 @@ import org.knime.base.data.aggregation.dialogutil.column.AggregationColumnPanel;
 import org.knime.base.data.aggregation.dialogutil.pattern.PatternAggregationPanel;
 import org.knime.base.data.aggregation.dialogutil.type.DataTypeAggregationPanel;
 import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionPanel;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionSettings;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionPanel;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionPanel;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.type.DataTypeAggregationFunctionPanel;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -80,16 +89,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnFilterPanel;
-
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionPanel;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionSettings;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionPanel;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionPanel;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.type.DataTypeAggregationFunctionPanel;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * The node dialog of the group by node.

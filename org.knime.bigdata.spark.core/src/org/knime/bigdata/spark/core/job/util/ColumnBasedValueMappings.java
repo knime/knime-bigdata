@@ -33,11 +33,10 @@ import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.InlineTableDocument.InlineTable;
 import org.dmg.pmml.MapValuesDocument.MapValues;
 import org.dmg.pmml.RowDocument.Row;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.port.pmml.PMMLPortObject;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 /**
  * This class provides load and save methods for {@link ColumnBasedValueMapping}. The reason why these methods are not

@@ -61,6 +61,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.code.generic.templates.SourceCodeTemplatesPanel;
 import org.knime.code.python.PythonSourceCodePanel;
 import org.knime.core.node.InvalidSettingsException;
@@ -74,8 +75,6 @@ import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.python.kernel.SQLEditorObjectWriter;
-
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * <code>NodeDialog</code> for the node.

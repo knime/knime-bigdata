@@ -23,11 +23,10 @@ package org.knime.bigdata.spark.core.context;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
-
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * Uniquely identifies a {@link SparkContext} in the KNIME Extension for Apache Spark.

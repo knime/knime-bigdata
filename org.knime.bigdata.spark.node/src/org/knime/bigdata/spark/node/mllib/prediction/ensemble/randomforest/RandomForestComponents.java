@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeComponents;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -29,10 +32,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-
-import org.knime.bigdata.spark.core.job.util.EnumContainer;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeComponents;
 
 /**
  *

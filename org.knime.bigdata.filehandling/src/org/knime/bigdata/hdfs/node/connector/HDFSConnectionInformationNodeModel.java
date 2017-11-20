@@ -22,11 +22,10 @@ package org.knime.bigdata.hdfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
 import org.knime.base.filehandling.remote.files.Protocol;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  *

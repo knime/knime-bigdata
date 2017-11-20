@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark.node.statistics.correlation;
 
-import org.knime.core.node.util.ButtonGroupEnumInterface;
-
 import org.knime.bigdata.spark.core.job.util.EnumContainer.CorrelationMethod;
+import org.knime.core.node.util.ButtonGroupEnumInterface;
 
 /**
  *

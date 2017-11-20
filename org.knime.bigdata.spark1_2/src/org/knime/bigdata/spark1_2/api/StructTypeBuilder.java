@@ -13,7 +13,6 @@ import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
-
 import org.knime.bigdata.spark.core.exception.InvalidSchemaException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 

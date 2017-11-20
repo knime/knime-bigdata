@@ -32,6 +32,12 @@ import org.knime.base.node.mine.scorer.accuracy.AccuracyScorerNodeModel;
 import org.knime.base.node.mine.scorer.accuracy.ScorerViewData;
 import org.knime.base.util.SortingOptionPanel;
 import org.knime.base.util.SortingStrategy;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -53,13 +59,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.JobRunFactory;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Node model for Spark scorer. Provides the same settings as the regular {@link AccuracyScorerNodeModel}, except that it does not

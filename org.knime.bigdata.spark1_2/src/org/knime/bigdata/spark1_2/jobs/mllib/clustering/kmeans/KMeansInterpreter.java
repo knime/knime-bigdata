@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
-
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;

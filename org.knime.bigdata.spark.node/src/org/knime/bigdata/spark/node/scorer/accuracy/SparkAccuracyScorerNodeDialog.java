@@ -22,13 +22,12 @@ package org.knime.bigdata.spark.node.scorer.accuracy;
 
 import org.knime.base.node.mine.scorer.accuracy.AccuracyScorerNodeDialog;
 import org.knime.base.util.SortingStrategy;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Extends the {@link AccuracyScorerNodeDialog} for the {@link SparkAccuracyScorerNodeModel}.

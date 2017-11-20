@@ -23,14 +23,13 @@ import java.time.LocalDate;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.time.localdate.LocalDateCell;
 import org.knime.core.data.time.localdate.LocalDateCellFactory;
 import org.knime.core.data.time.localdate.LocalDateValue;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Converts between LocalDate and Date without time shifts.

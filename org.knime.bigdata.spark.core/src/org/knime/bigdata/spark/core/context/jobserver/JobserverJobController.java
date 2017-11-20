@@ -9,10 +9,6 @@ import java.util.List;
 import javax.json.JsonObject;
 
 import org.apache.log4j.Priority;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
@@ -32,6 +28,10 @@ import org.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
 import org.knime.bigdata.spark.core.jobserver.LogMessage;
 import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.NodeLogger;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

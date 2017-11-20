@@ -31,13 +31,13 @@ import org.apache.spark.mllib.feature.IDF;
 import org.apache.spark.mllib.feature.IDFModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.api.java.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
 import org.knime.bigdata.spark1_2.api.NamedObjects;
 import org.knime.bigdata.spark1_2.api.SimpleSparkJob;
+
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * splits a given string column into a word vector and adds the vector to an RDD

@@ -21,7 +21,6 @@
 package org.knime.bigdata.hive.node.connector;
 
 import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
-
 import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**

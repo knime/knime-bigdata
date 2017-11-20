@@ -17,11 +17,10 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataType;
-
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataType;
 
 /**
  * Creates a handler that replace missing values with most frequent value.

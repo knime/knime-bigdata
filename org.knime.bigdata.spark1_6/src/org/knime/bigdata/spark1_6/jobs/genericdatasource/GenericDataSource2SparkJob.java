@@ -32,7 +32,6 @@ import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructField;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;

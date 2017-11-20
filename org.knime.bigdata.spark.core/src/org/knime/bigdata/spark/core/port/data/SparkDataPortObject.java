@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import javax.swing.JComponent;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
@@ -34,9 +36,6 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.workflow.DataTableSpecView;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 
 /**
  * {@link PortObject} implementation which holds a reference to a {@link SparkDataTable} object.

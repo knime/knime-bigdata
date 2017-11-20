@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;

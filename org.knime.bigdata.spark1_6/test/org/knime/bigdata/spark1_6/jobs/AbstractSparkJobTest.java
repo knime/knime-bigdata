@@ -34,7 +34,6 @@ import org.apache.spark.sql.Row;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-
 import org.knime.bigdata.spark1_6.api.RowBuilder;
 
 /**

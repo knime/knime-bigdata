@@ -23,6 +23,8 @@ package org.knime.bigdata.impala.utility;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
@@ -41,8 +43,6 @@ import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
-import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
 import com.knime.licenses.LicenseFeatures;

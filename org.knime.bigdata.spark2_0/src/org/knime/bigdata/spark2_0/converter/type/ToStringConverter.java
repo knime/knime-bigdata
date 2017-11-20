@@ -23,7 +23,6 @@ package org.knime.bigdata.spark2_0.converter.type;
 import java.io.Serializable;
 
 import org.apache.spark.sql.types.StringType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
 import org.knime.bigdata.spark.core.types.converter.spark.DefaultIntermediateToSparkConverter;

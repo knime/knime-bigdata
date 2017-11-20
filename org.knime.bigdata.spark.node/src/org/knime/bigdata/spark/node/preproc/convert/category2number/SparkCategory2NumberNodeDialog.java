@@ -26,6 +26,9 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -37,10 +40,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.job.util.EnumContainer;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

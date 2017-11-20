@@ -24,6 +24,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
@@ -37,14 +44,6 @@ import org.knime.core.node.streamable.PortObjectOutput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
-
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import org.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * Base class for streamable operators for the {@link Table2SparkNodeModel}.

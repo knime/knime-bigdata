@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequest;
 import org.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;

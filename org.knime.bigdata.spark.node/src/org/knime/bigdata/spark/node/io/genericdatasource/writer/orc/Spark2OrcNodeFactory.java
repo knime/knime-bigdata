@@ -20,12 +20,11 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.writer.orc;
 
-import org.knime.core.node.NodeDialogPane;
-
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeDialog;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.Spark2GenericDataSourceNodeModel;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  * @author Sascha Wolke, KNIME.com

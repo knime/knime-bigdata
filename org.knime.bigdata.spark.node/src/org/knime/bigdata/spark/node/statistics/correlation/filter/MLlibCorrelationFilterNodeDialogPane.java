@@ -48,10 +48,9 @@
 package org.knime.bigdata.spark.node.statistics.correlation.filter;
 
 import org.knime.base.node.preproc.correlation.filter.CorrelationFilterNodeDialogPane;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *  Extends the {@link CorrelationFilterNodeDialogPane} for the {@link MLlibCorrelationFilterNodeModel}.

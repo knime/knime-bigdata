@@ -20,12 +20,11 @@
  */
 package org.knime.bigdata.spark.node.knosp;
 
-import org.knime.core.node.streamable.StreamableOperator;
-
 import org.knime.bigdata.spark.node.io.table.reader.AbstractTable2SparkStreamableOperator;
 import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeModel;
 import org.knime.bigdata.spark.node.io.table.writer.AbstractSpark2TableStreamableOperator;
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeModel;
+import org.knime.core.node.streamable.StreamableOperator;
 
 /**
  * KNIME-on-Spark (KNOSP) helper interface. This is used by the {@link Table2SparkNodeModel} and

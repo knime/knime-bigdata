@@ -20,12 +20,11 @@
  */
 package org.knime.bigdata.spark.node.sql_function.agg;
 
-import org.knime.core.data.DataType;
-import org.knime.core.data.collection.SetCell;
-
 import org.knime.bigdata.spark.node.sql_function.NoSettingsFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
+import org.knime.core.data.DataType;
+import org.knime.core.data.collection.SetCell;
 
 /**
  * Aggregates all values of a given column into a set.

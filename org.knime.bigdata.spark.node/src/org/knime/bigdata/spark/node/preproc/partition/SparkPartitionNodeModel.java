@@ -20,16 +20,15 @@
  */
 package org.knime.bigdata.spark.node.preproc.partition;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeModel;
 
 /**
  *

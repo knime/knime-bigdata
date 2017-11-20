@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.mllib.tree.model.Node;
-
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 
 import scala.collection.Iterator;

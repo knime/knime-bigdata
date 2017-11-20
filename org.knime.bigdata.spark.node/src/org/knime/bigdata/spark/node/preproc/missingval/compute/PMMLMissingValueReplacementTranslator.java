@@ -23,11 +23,10 @@ import org.apache.xmlbeans.SchemaType;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.PMMLDocument;
 import org.dmg.pmml.TransformationDictionaryDocument.TransformationDictionary;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLTranslator;
 import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
-
-import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 
 /**
  * PMML translator using Spark missing value handlers.

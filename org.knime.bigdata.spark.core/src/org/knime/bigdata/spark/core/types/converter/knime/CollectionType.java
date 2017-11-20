@@ -24,6 +24,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.collection.CollectionCellFactory;
@@ -31,9 +33,6 @@ import org.knime.core.data.collection.CollectionDataValue;
 import org.knime.core.data.collection.ListCell;
 import org.knime.core.data.collection.SetCell;
 import org.knime.core.data.collection.SetDataValue;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  *

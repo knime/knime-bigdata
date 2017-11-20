@@ -1,8 +1,6 @@
 package org.knime.bigdata.spark.core.preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.knime.bigdata.spark.core.SparkPlugin;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
@@ -10,7 +8,7 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  */
 public class KNIMEConfigContainer {
 
-	private static IPreferenceStore PREFERENCE_STORE = SparkPlugin.getDefault().getPreferenceStore();
+	private static IPreferenceStore PREFERENCE_STORE = SparkPreferenceInitializer.getPreferenceStore();
 
     public static String getJobServerUrl() {
         return PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_JOB_SERVER_URL);

@@ -22,13 +22,12 @@ package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import javax.ws.rs.core.Response;
 
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.core.node.NodeLogger;
 
 /**
  *

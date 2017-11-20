@@ -21,6 +21,10 @@
 package org.knime.bigdata.spark.node.preproc.renameregex;
 
 import org.knime.base.node.preproc.columnrenameregex.ColumnRenameRegexConfiguration;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -29,11 +33,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeModel;
 
 /**
  *

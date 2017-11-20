@@ -22,12 +22,11 @@ package org.knime.bigdata.spark.core.types.converter.knime;
 
 import java.io.Serializable;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.data.BooleanValue;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  *

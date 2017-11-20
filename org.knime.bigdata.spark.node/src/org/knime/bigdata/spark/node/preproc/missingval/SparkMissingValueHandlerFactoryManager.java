@@ -18,7 +18,6 @@
 package org.knime.bigdata.spark.node.preproc.missingval;
 
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;
-
 import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
 
 /**

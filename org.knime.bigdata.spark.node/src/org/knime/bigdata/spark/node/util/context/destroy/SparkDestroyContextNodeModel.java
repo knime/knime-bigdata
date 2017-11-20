@@ -22,6 +22,10 @@ package org.knime.bigdata.spark.node.util.context.destroy;
 
 import javax.swing.JOptionPane;
 
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.SparkContextProvider;
+import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -31,11 +35,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-
-import org.knime.bigdata.spark.core.context.SparkContextManager;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.SparkContextProvider;
-import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 
 /**
  *

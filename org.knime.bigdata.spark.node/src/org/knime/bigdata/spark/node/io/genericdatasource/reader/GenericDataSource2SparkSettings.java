@@ -21,11 +21,10 @@
 package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Settings for the generic to spark node.

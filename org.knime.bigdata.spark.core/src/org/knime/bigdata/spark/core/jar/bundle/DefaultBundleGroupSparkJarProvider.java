@@ -24,13 +24,12 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
-
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 /**
  * Default driver bundle provider.

@@ -102,18 +102,6 @@ import org.knime.base.node.jsnippet.ui.JSnippetTextArea;
 import org.knime.base.node.jsnippet.ui.JarListPanel;
 import org.knime.base.node.jsnippet.ui.OutFieldsTable;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettings;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.util.ViewUtils;
-import org.knime.core.node.workflow.FlowVariable;
-
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
@@ -125,6 +113,17 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnipp
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 import org.knime.bigdata.spark.node.scripting.java.util.template.JavaSnippetTemplateProviderRegistry;
 import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeSettings;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.util.ViewUtils;
+import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * The dialog that is used in all Spark java snippet nodes.

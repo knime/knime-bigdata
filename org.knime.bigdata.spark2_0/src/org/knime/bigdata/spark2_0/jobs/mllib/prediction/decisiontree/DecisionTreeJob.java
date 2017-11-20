@@ -25,13 +25,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
-
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;

@@ -35,14 +35,14 @@ import org.knime.bigdata.spark.core.context.SparkContextManager;
  *
  * @author Tobias Koetter, KNIME.com
  */
-class SparkDataView extends JPanel {
+public class SparkDataView extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * @param sparkData the {@link SparkDataTable} to visualize
      */
-    SparkDataView(final SparkData sparkData) {
+    public SparkDataView(final SparkData sparkData) {
         super(new GridBagLayout());
         super.setName("Spark");
         final SparkContextID contextID = sparkData.getContextID();

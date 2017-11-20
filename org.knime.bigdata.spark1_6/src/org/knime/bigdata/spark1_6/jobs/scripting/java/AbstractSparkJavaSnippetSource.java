@@ -23,7 +23,6 @@ package org.knime.bigdata.spark1_6.jobs.scripting.java;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

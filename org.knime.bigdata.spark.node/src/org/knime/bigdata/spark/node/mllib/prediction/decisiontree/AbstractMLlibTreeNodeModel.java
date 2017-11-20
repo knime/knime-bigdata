@@ -22,11 +22,6 @@ package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import java.io.Serializable;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.pmml.PMMLPortObject;
-
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -38,6 +33,10 @@ import org.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 /**
  *

@@ -41,6 +41,18 @@ import org.dmg.pmml.OPTYPE.Enum;
 import org.dmg.pmml.TransformationDictionaryDocument.TransformationDictionary;
 import org.knime.base.node.preproc.colconvert.categorytonumber.MapValuesConfiguration;
 import org.knime.base.node.preproc.colconvert.categorytonumber.PMMLMapValuesTranslator;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.job.JobRunFactory;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.bigdata.spark.node.preproc.convert.MyRecord;
+import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -67,19 +79,6 @@ import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
 import org.knime.core.node.port.pmml.preproc.PMMLPreprocTranslator;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import org.knime.core.util.Pair;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.JobRunFactory;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.util.SparkIDs;
-import org.knime.bigdata.spark.core.util.SparkUtil;
-import org.knime.bigdata.spark.node.preproc.convert.MyRecord;
-import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 
 /**
  *

@@ -23,14 +23,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCell;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.data.time.localdatetime.LocalDateTimeValue;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Converts between LocalDateTime and Timestamps without time shifts.

@@ -25,15 +25,14 @@ import org.dmg.pmml.ExtensionDocument.Extension;
 import org.knime.base.data.statistics.Statistic;
 import org.knime.base.node.preproc.pmml.missingval.DataColumnWindow;
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandler;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
-import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 
 /**
  * The base class of all missing value handlers for Spark. Since the actual handling

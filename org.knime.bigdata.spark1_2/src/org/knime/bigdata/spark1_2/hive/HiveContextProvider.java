@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.hive.api.java.JavaHiveContext;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

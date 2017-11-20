@@ -25,6 +25,7 @@ import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
 
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.util.NonClosableInputStream;
 import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.ModelContent;
@@ -32,8 +33,6 @@ import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
-
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Spark model port object specification implementation. A Spark model could be a learned Spark MLlib model.

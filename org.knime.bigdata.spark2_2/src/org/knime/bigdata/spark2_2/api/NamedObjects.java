@@ -27,7 +27,6 @@ import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

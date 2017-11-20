@@ -53,7 +53,6 @@ import java.util.Map;
 
 import org.knime.base.node.mine.decisiontree2.view.graph.HierarchicalGraphView;
 import org.knime.base.node.mine.decisiontree2.view.graph.NodeWidgetFactory;
-
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 
 /**

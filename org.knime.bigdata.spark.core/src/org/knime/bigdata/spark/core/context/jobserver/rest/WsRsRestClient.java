@@ -25,12 +25,11 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
-
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
  * creates and handles REST requests

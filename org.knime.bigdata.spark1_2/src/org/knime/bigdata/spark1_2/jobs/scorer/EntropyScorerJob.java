@@ -31,14 +31,13 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.api.java.Row;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 import org.knime.bigdata.spark1_2.api.NamedObjects;
 import org.knime.bigdata.spark1_2.api.RDDUtilsInJava;
 import org.knime.bigdata.spark1_2.api.SparkJob;
-import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
-import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 
 import scala.Tuple2;
 

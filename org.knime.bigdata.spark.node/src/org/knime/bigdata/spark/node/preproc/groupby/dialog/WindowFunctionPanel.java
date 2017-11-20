@@ -30,6 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.date.DateAndTimeValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -39,8 +40,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * Panel representing time based window settings.

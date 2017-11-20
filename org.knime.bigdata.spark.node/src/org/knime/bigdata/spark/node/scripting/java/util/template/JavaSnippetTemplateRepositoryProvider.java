@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.node.scripting.java.util.template;
 
 import org.knime.base.node.jsnippet.template.TemplateRepositoryProvider;
-
 import org.knime.bigdata.spark.core.version.SparkProvider;
 
 /**

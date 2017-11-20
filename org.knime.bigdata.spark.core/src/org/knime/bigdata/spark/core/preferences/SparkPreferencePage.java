@@ -63,22 +63,18 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
-import org.knime.core.node.NodeLogger;
-
-import org.knime.bigdata.spark.core.SparkPlugin;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
 
 /**
  * @author Tobias Koetter, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
 public class SparkPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, Listener {
-
-    //TODO: Use the Big Data Extensions preference page in org.knime.bigdata.commons as parent for this page
 
     private static final NodeLogger LOG = NodeLogger.getLogger(SparkPreferencePage.class);
 
@@ -120,7 +116,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     @Override
     public void init(final IWorkbench workbench) {
-        final IPreferenceStore prefStore = SparkPlugin.getDefault().getPreferenceStore();
+        final IPreferenceStore prefStore = SparkPreferenceInitializer.getPreferenceStore();
         setPreferenceStore(prefStore);
     }
 

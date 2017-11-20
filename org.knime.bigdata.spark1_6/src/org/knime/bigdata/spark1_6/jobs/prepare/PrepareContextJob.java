@@ -35,7 +35,6 @@ import org.apache.hadoop.security.token.Token;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.types.DataType;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;

@@ -43,13 +43,12 @@ import org.knime.base.node.jsnippet.util.field.InVar;
 import org.knime.base.node.jsnippet.util.field.JavaField;
 import org.knime.base.node.jsnippet.util.field.OutCol;
 import org.knime.base.node.jsnippet.util.field.OutVar;
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
 import org.knime.bigdata.spark1_2.api.Spark_1_2_CompatibilityChecker;
 import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippet;
 import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSink;
 import org.knime.bigdata.spark1_2.jobs.scripting.java.AbstractSparkJavaSnippetSource;
+import org.knime.core.node.NodeLogger;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com

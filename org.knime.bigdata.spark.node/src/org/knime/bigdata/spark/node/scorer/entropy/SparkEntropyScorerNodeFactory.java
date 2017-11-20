@@ -21,15 +21,14 @@
 package org.knime.bigdata.spark.node.scorer.entropy;
 
 import org.knime.base.node.mine.scorer.entrop.EntropyNodeDialogPane;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeView;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *

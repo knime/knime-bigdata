@@ -28,8 +28,6 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
-
-import com.google.common.base.Optional;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.MyJoinKey;
@@ -38,6 +36,8 @@ import org.knime.bigdata.spark.node.preproc.joiner.SparkJoinerJobInput;
 import org.knime.bigdata.spark1_3.api.NamedObjects;
 import org.knime.bigdata.spark1_3.api.RDDUtilsInJava;
 import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
+
+import com.google.common.base.Optional;
 
 import scala.Tuple2;
 

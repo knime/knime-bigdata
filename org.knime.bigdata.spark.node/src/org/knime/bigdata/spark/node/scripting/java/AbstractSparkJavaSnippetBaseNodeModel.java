@@ -36,21 +36,6 @@ import org.knime.base.node.jsnippet.util.FlowVariableRepository;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.base.node.jsnippet.util.ValidationReport;
 import org.knime.base.node.jsnippet.util.field.InVar;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.KNIMEConstants;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
-import org.knime.core.node.workflow.FlowVariable;
-import org.knime.core.node.workflow.FlowVariable.Type;
-import org.knime.core.util.FileUtil;
-import org.knime.core.util.Pair;
-import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -71,6 +56,20 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnipp
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
+import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.node.workflow.FlowVariable.Type;
+import org.knime.core.util.FileUtil;
+import org.knime.core.util.Pair;
+import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 
 /**
  *

@@ -28,6 +28,11 @@ import java.util.Map;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
 import org.dmg.pmml.InlineTableDocument.InlineTable;
 import org.dmg.pmml.MapValuesDocument.MapValues;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.util.SparkUtil;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -40,12 +45,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
-
-import org.knime.bigdata.spark.core.job.util.MLlibSettings;
-import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.util.SparkUtil;
 
 /**
  * Settings class that contains commonly used settings required to learn a Spark MLlib model such as

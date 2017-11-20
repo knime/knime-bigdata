@@ -22,15 +22,14 @@ package org.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.regression;
 
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
+import org.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.GeneralizedLinearModelPMMLPortObjectFactory;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 import org.knime.core.node.port.pmml.PMMLTranslator;
-
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import org.knime.bigdata.spark1_6.jobs.mllib.prediction.linear.GeneralizedLinearModelPMMLPortObjectFactory;
 
 /**
  *

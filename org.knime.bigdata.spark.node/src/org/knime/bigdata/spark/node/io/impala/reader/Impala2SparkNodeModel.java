@@ -20,11 +20,10 @@
  */
 package org.knime.bigdata.spark.node.io.impala.reader;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
-
 import org.knime.bigdata.impala.utility.ImpalaUtility;
 import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.port.database.DatabasePortObjectSpec;
 
 /**
  *

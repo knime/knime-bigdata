@@ -26,6 +26,8 @@ import javax.swing.JPanel;
 
 import org.knime.base.node.mine.util.PredictorNodeDialog;
 import org.knime.base.pmml.translation.CompiledModel.MiningFunction;
+import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.DoubleCell;
@@ -34,8 +36,6 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.pmml.PMMLPortObjectSpec;
 
-import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
 
 /**

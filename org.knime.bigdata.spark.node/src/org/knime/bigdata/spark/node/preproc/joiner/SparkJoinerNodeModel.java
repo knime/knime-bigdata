@@ -25,15 +25,6 @@ import java.util.List;
 import org.knime.base.node.preproc.joiner.Joiner;
 import org.knime.base.node.preproc.joiner.Joiner2Settings;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
@@ -44,6 +35,14 @@ import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.util.SparkUtil;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
 
 /**
  *

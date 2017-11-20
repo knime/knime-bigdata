@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark.node.io.table.writer;
 
-import org.knime.core.node.NodeDialogPane;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  *

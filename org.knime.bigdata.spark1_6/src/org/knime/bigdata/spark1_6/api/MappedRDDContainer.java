@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import org.knime.bigdata.spark.node.preproc.convert.MyRecord;

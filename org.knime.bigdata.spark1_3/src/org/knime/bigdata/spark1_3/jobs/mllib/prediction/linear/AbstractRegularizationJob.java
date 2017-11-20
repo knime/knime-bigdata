@@ -17,7 +17,6 @@ import org.apache.spark.mllib.optimization.SquaredL2Updater;
 import org.apache.spark.mllib.optimization.Updater;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;

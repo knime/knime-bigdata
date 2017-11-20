@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.api.java.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;

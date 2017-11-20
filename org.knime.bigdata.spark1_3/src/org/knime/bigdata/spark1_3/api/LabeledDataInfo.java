@@ -13,10 +13,10 @@ package org.knime.bigdata.spark1_3.api;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
+
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 
 /**

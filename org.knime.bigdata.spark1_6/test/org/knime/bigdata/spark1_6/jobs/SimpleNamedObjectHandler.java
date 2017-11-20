@@ -28,7 +28,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
 import org.apache.spark.storage.StorageLevel;
-
 import org.knime.bigdata.spark1_6.api.NamedObjects;
 
 /**

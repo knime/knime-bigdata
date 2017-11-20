@@ -20,6 +20,12 @@
  */
 package org.knime.bigdata.spark.node.io.table.writer;
 
+import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.node.SparkNodePlugin;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -37,13 +43,6 @@ import org.knime.core.node.streamable.BufferedDataTableRowOutput;
 import org.knime.core.node.streamable.OutputPortRole;
 import org.knime.core.node.streamable.PartitionInfo;
 import org.knime.core.node.streamable.StreamableOperator;
-
-import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import org.knime.bigdata.spark.node.SparkNodePlugin;
 
 /**
  * Node model that downloads a {@link SparkDataTable} and converts it into a KNIME {@link DataTable}.

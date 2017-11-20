@@ -33,9 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeView;
-
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
@@ -43,6 +40,8 @@ import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionT
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeView;
 
 /**
  * @author Ole Ostergaard

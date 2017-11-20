@@ -40,7 +40,6 @@ import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;

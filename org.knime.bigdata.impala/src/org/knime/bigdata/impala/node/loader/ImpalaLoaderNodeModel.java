@@ -41,6 +41,10 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.impala.utility.ImpalaUtility;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
@@ -66,11 +70,6 @@ import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
 import org.knime.core.node.port.database.StatementManipulator;
-
-import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import org.knime.bigdata.impala.utility.ImpalaUtility;
 
 /**
  * Model for the Impala Loader node.

@@ -28,10 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
 
 /**
  * Spark aggregation function registry.

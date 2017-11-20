@@ -32,13 +32,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.workflow.NodeContext;
 
-import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 import com.knime.licenses.License;
 
 /**

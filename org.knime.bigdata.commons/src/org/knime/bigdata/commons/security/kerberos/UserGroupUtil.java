@@ -24,10 +24,10 @@ import java.util.Optional;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
 
-import org.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.License;
 
 /**

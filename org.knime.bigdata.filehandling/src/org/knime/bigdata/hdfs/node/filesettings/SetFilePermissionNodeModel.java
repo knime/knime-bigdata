@@ -28,6 +28,9 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
@@ -45,10 +48,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-
-import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  *

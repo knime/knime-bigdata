@@ -24,15 +24,14 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-
-import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Window Function Settings.

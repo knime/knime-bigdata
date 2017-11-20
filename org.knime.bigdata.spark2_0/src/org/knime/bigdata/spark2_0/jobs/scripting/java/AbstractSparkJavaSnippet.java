@@ -56,7 +56,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
-
 import org.knime.bigdata.spark.core.exception.InvalidSchemaException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark2_0.api.StructTypeBuilder;

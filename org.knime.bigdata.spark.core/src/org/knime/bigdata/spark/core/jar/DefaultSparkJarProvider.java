@@ -35,15 +35,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.osgi.internal.loader.EquinoxClassLoader;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
-import org.knime.core.node.NodeLogger;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Default provider

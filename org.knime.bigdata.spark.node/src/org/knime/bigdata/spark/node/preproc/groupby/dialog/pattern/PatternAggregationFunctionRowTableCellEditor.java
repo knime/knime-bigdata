@@ -52,12 +52,11 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 
 import org.knime.base.data.aggregation.dialogutil.AbstractAggregationFunctionTableCellEditor;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
-
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 
 
 /**

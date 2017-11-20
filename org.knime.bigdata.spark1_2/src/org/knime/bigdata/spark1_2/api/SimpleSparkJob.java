@@ -23,7 +23,6 @@ package org.knime.bigdata.spark1_2.api;
 import java.io.Serializable;
 
 import org.apache.spark.SparkContext;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;

@@ -53,12 +53,11 @@ import javax.swing.table.DefaultTableModel;
 
 import org.knime.base.data.aggregation.dialogutil.AbstractAggregationTableModel;
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRow;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.core.data.DataType;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
-
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 
 
 /**

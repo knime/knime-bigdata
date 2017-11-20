@@ -27,14 +27,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.streamable.DataTableRowInput;
-import org.knime.core.node.streamable.RowInput;
-import org.knime.core.node.streamable.StreamableOperator;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -42,6 +34,13 @@ import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.streamable.DataTableRowInput;
+import org.knime.core.node.streamable.RowInput;
+import org.knime.core.node.streamable.StreamableOperator;
 
 /**
  * A {@link StreamableOperator} implementation for the {@link Table2SparkNodeModel}. Rows consumed by this stremable

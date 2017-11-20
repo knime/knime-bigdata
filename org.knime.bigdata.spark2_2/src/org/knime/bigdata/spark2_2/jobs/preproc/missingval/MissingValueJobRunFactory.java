@@ -18,9 +18,9 @@
 package org.knime.bigdata.spark2_2.jobs.preproc.missingval;
 
 import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeModel;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeModel;
 
 /**
  * Missing value job factory.

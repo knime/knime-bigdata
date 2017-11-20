@@ -43,11 +43,10 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 import org.apache.commons.codec.binary.Hex;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
-
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * This is a file based jar collector.

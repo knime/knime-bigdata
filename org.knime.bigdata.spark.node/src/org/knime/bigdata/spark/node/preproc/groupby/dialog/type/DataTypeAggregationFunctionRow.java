@@ -50,15 +50,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.AbstractAggregationFunctionRow;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.AbstractAggregationFunctionRow;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  *

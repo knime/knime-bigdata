@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.statistics.compute;
 
 import java.util.Iterator;
 
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -36,8 +37,6 @@ import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-
-import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 
 /**
  *

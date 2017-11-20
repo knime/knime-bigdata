@@ -52,7 +52,6 @@ import java.util.ArrayList;
 
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.types.DataType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;

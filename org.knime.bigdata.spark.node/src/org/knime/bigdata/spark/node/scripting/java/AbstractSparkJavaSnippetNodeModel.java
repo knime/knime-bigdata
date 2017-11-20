@@ -20,11 +20,10 @@
  */
 package org.knime.bigdata.spark.node.scripting.java;
 
-import org.knime.core.node.port.PortType;
-
 import org.knime.bigdata.spark.node.scripting.java.util.helper.AbstractJavaSnippetHelperRegistry;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelperRegistry;
+import org.knime.core.node.port.PortType;
 
 /**
  * RDD specific java snippet model

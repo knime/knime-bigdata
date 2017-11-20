@@ -20,13 +20,12 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.reader.json;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkJobInput;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.GenericDataSource2SparkSettings;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 
 /**
  * JSON specific reader settings.

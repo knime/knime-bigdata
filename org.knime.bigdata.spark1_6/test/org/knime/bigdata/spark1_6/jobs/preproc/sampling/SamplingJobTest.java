@@ -31,7 +31,6 @@ import java.util.Arrays;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 import org.junit.Test;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.CountMethod;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.SamplingMethod;
@@ -39,7 +38,6 @@ import org.knime.bigdata.spark.node.preproc.sampling.SamplingJobInput;
 import org.knime.bigdata.spark.node.preproc.sampling.SamplingJobOutput;
 import org.knime.bigdata.spark1_6.api.SparkJob;
 import org.knime.bigdata.spark1_6.jobs.AbstractSparkJobTest;
-import org.knime.bigdata.spark1_6.jobs.preproc.sampling.SamplingJob;
 
 /**
  * {@link SamplingJob} Tests

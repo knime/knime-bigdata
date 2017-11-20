@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;

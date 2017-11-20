@@ -12,7 +12,6 @@ import org.apache.spark.mllib.regression.GeneralizedLinearAlgorithm;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.regression.LinearRegressionWithSGD;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
 import org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.AbstractRegularizationJob;

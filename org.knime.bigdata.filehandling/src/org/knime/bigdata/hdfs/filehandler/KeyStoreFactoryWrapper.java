@@ -19,7 +19,6 @@ package org.knime.bigdata.hdfs.filehandler;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
-
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 
 /**

@@ -38,6 +38,10 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPreviewPanel;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.FlowVariableModel;
 import org.knime.core.node.InvalidSettingsException;
@@ -49,11 +53,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.StringHistory;
 import org.knime.core.node.workflow.FlowVariable;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPreviewPanel;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 
 /**
  * @author Sascha Wolke, KNIME.com

@@ -46,15 +46,14 @@
 package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRow;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
-
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 /**
  * Spark aggregation function table row. Based on AbstractDBAggregationFunctionRow.

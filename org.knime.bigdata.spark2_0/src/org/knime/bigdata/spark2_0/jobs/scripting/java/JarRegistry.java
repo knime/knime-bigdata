@@ -32,7 +32,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.spark.SparkContext;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

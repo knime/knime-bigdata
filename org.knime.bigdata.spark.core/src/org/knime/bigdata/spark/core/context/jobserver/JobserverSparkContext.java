@@ -30,11 +30,6 @@ import java.util.Set;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.KNIMEConstants;
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
@@ -61,6 +56,10 @@ import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.KNIMEConstants;
+import org.knime.core.node.NodeLogger;
 
 /**
  * TODO: move away from KNIMESparkContext

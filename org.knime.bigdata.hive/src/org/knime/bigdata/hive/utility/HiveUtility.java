@@ -27,6 +27,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
+import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
+import org.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
+import org.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
@@ -47,10 +51,6 @@ import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
-import org.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
-import org.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
-import org.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseException;
 import com.knime.licenses.LicenseFeatures;

@@ -32,7 +32,6 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;

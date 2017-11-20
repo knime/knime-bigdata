@@ -31,6 +31,9 @@ import org.knime.base.node.io.database.connection.util.DBAuthenticationPanel;
 import org.knime.base.node.io.database.connection.util.DBConnectionPanel;
 import org.knime.base.node.io.database.connection.util.DBMiscPanel;
 import org.knime.base.node.io.database.connection.util.DBTimezonePanel;
+import org.knime.bigdata.commons.icons.BigDataIcons;
+import org.knime.bigdata.hive.utility.HiveDriverDetector;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -39,10 +42,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.util.StringHistoryPanel;
-
-import org.knime.bigdata.commons.icons.BigDataIcons;
-import org.knime.bigdata.hive.utility.HiveDriverDetector;
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Dialog for the Hive Connector node.

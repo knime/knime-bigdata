@@ -24,7 +24,6 @@ import java.text.NumberFormat;
 import java.util.List;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
-
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;

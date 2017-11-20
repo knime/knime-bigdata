@@ -22,15 +22,14 @@ package org.knime.bigdata.spark.core.jar.bundle;
 
 import java.util.ArrayList;
 
-import org.knime.core.node.NodeLogger;
-import org.osgi.framework.Bundle;
-
 import org.knime.bigdata.spark.core.jar.FileBasedJarCollector;
 import org.knime.bigdata.spark.core.jar.JarCollector;
 import org.knime.bigdata.spark.core.jar.JobJar;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
+import org.osgi.framework.Bundle;
 
 /**
  * Combines OSGi bundles into one driver jar file.

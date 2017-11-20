@@ -20,17 +20,16 @@
  */
 package org.knime.bigdata.spark.node.mllib.prediction.bayes.naive;
 
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
+import org.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.port.PortObject;
-
-import org.knime.bigdata.spark.core.job.util.MLlibSettings;
-import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
-import org.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 
 /**
  *

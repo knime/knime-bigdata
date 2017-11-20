@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark.node.io.table.writer;
 
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.core.data.RowIterator;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -28,10 +31,6 @@ import org.knime.core.node.streamable.PortObjectInput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableOperator;
-
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 
 /**
  * Base class for streamable operators for the {@link Spark2TableNodeModel}.

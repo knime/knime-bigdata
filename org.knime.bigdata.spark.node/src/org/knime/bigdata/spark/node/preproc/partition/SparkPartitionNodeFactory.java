@@ -20,10 +20,9 @@
  */
 package org.knime.bigdata.spark.node.preproc.partition;
 
-import org.knime.core.node.NodeDialogPane;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeDialog;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  *

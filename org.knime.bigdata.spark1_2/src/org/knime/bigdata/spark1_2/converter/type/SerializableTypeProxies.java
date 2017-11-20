@@ -36,7 +36,6 @@ import org.apache.spark.sql.api.java.NullType;
 import org.apache.spark.sql.api.java.ShortType;
 import org.apache.spark.sql.api.java.StringType;
 import org.apache.spark.sql.api.java.TimestampType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.converter.spark.SerializableProxyType;
 

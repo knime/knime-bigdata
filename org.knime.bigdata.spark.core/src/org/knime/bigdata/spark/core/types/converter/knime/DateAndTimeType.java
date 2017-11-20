@@ -24,12 +24,11 @@ import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.date.DateAndTimeCell;
 import org.knime.core.data.date.DateAndTimeValue;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Intermediate type for KNIMES {@link DateAndTimeType}.

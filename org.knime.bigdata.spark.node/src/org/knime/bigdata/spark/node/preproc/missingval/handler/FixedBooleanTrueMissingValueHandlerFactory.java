@@ -17,12 +17,11 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.BooleanCell;
-
-import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
-import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory;
 
 /**
  * Creates a handler that replaces missing values with a fixed boolean true.

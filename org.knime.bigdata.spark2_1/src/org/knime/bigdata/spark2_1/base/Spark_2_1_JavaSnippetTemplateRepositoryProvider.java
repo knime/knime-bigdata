@@ -50,12 +50,11 @@ package org.knime.bigdata.spark2_1.base;
 import org.knime.base.node.jsnippet.template.PluginTemplateRepositoryProvider;
 import org.knime.base.node.jsnippet.template.SnippetTemplateFactory;
 import org.knime.base.node.jsnippet.template.TemplateRepository;
-import org.knime.core.node.NodeSettingsRO;
-import org.osgi.framework.FrameworkUtil;
-
 import org.knime.bigdata.spark.node.scripting.java.util.template.AbstractJavaSnippetTemplateRepositoryProvider;
 import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 import org.knime.bigdata.spark2_1.api.Spark_2_1_CompatibilityChecker;
+import org.knime.core.node.NodeSettingsRO;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  *

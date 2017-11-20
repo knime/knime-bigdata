@@ -31,7 +31,6 @@ import org.apache.spark.sql.api.java.ArrayType;
 import org.apache.spark.sql.api.java.DataType;
 import org.apache.spark.sql.api.java.StructField;
 import org.apache.spark.sql.api.java.StructType;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;

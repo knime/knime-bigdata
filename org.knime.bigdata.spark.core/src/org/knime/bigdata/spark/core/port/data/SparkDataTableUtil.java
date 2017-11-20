@@ -24,18 +24,6 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTable;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
-import org.knime.core.data.RowIterator;
-import org.knime.core.data.RowKey;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
-
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
@@ -47,6 +35,17 @@ import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateCon
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
+import org.knime.core.data.DataTable;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.RowIterator;
+import org.knime.core.data.RowKey;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 
 /**
  * Class with utility functions for {@link SparkDataTable}.

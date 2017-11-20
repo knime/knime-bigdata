@@ -20,14 +20,13 @@
  */
 package org.knime.bigdata.spark.core.context;
 
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.JobRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 
 /**
  *

@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.spark.SparkContext;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.JobOutput;

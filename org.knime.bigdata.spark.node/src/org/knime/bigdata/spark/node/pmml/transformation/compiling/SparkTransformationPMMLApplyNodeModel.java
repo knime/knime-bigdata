@@ -26,6 +26,8 @@ import javax.xml.transform.SourceLocator;
 
 import org.knime.base.pmml.translation.PMMLTranslator;
 import org.knime.base.pmml.translation.TerminatingMessageException;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -36,8 +38,6 @@ import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 
 import net.sf.saxon.s9api.MessageListener;

@@ -30,14 +30,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.knime.base.filehandling.NodeUtils;
+import org.knime.bigdata.spark.node.SparkSaveMode;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.node.SparkSaveMode;
 
 /**
  * Dialog for the Spark to JDBC node.

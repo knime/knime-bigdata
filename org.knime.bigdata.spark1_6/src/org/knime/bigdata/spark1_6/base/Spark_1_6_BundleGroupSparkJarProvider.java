@@ -20,11 +20,11 @@
  */
 package org.knime.bigdata.spark1_6.base;
 
+import org.knime.bigdata.spark.core.jar.bundle.DefaultBundleGroupSparkJarProvider;
+import org.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 import org.osgi.framework.Bundle;
 
 import com.google.common.collect.ImmutableMap;
-import org.knime.bigdata.spark.core.jar.bundle.DefaultBundleGroupSparkJarProvider;
-import org.knime.bigdata.spark1_6.api.AllSpark_1_6_CompatibilityChecker;
 
 /**
  * Spark 1.6 driver bundle provider.

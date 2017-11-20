@@ -39,6 +39,10 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
+import org.knime.bigdata.hive.utility.HiveLoader;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
@@ -67,11 +71,6 @@ import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseReaderConnection;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.util.FileUtil;
-
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import org.knime.bigdata.hive.utility.HiveLoader;
-import org.knime.bigdata.hive.utility.HiveLoaderSettings;
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Model for the Hive Loader node.

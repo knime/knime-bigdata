@@ -27,10 +27,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.knime.core.node.NodeLogger;
-
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.NodeLogger;
 
 /**
  * Registry that stores all {@link SparkNodeFactory}.

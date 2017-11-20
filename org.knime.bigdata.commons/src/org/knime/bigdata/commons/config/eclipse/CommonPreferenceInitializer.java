@@ -47,9 +47,8 @@ package org.knime.bigdata.commons.config.eclipse;
 import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.knime.core.node.NodeLogger.LEVEL;
-
 import org.knime.bigdata.commons.CommonsPlugin;
+import org.knime.core.node.NodeLogger.LEVEL;
 
 /**
  * @author Tobias Koetter, KNIME.com

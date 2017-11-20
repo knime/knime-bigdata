@@ -27,14 +27,13 @@ import javax.swing.JPanel;
 
 import org.knime.base.node.mine.scorer.numeric.NumericScorerDialogComponents;
 import org.knime.base.node.mine.scorer.numeric.NumericScorerSettings;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * <code>NodeDialog</code> for the "Spark Numeric Scorer" node.

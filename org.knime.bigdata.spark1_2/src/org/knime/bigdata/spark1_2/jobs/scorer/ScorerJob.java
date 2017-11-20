@@ -27,12 +27,12 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.sql.api.java.Row;
-
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
+
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * computes classification / regression scores

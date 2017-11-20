@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.node.preproc.convert.category2number;
 
 import org.apache.commons.lang3.ArrayUtils;
-
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;

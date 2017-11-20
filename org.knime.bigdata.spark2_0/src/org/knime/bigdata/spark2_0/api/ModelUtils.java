@@ -21,9 +21,9 @@ import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.MyJoinKey;
+
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 import scala.Tuple2;

@@ -27,7 +27,6 @@ import java.util.Collection;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

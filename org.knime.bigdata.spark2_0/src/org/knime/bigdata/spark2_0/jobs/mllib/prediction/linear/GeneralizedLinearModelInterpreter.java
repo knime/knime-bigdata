@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.GeneralizedLinearModel;
-
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 

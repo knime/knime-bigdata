@@ -48,11 +48,10 @@ package org.knime.bigdata.hdfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeDialog;
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
-
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 
 /**
  * <code>NodeFactory</code> for encrypted webHDFS connection.

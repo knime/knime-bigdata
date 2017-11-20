@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobInput;
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsJobOutput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;

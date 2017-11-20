@@ -23,6 +23,9 @@ package org.knime.bigdata.spark.node.mllib.prediction.linear;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
+import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -34,10 +37,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-
-import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearLossFunction;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.LinearRegularizer;
-import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 
 /**
  *

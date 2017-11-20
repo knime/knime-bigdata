@@ -22,16 +22,15 @@ import java.util.Map;
 
 import org.dmg.pmml.DATATYPE;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
+import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
+import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelLong;
-
-import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
-import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
-import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 
 /**
  * Replaces missing values with a fixed long.

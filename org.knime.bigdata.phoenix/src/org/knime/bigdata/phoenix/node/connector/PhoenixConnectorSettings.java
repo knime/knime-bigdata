@@ -21,7 +21,6 @@
 package org.knime.bigdata.phoenix.node.connector;
 
 import org.knime.base.node.io.database.connection.util.DefaultDatabaseConnectionSettings;
-
 import org.knime.bigdata.phoenix.utility.PhoenixUtility;
 
 /**

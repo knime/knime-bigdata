@@ -25,6 +25,11 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -35,12 +40,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter;
 import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.util.ColumnFilter;
-
-import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 
 /**
  * Aggregate function with multiple input columns.

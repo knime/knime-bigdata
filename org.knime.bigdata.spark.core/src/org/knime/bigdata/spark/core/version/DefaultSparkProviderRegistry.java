@@ -24,10 +24,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.knime.bigdata.spark.core.exception.DuplicateElementException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
-
-import org.knime.bigdata.spark.core.exception.DuplicateElementException;
 
 /**
  *

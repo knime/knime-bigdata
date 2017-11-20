@@ -58,13 +58,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
-import org.knime.core.node.NodeLogger.LEVEL;
-import org.knime.workbench.ui.preferences.HorizontalLineField;
-import org.knime.workbench.ui.preferences.LabelField;
-
 import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
+import org.knime.core.node.NodeLogger.LEVEL;
+import org.knime.workbench.ui.preferences.HorizontalLineField;
+import org.knime.workbench.ui.preferences.LabelField;
 
 /**
  * @author Tobias Koetter, KNIME.com

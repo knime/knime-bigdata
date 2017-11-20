@@ -25,15 +25,15 @@ import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
-
-import com.google.common.base.Optional;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import org.knime.bigdata.spark.core.job.util.MyJoinKey;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
 import org.knime.bigdata.spark.node.preproc.convert.category2number.NominalValueMappingFactory;
 import org.knime.bigdata.spark.node.preproc.normalize.NormalizationSettings;
+
+import com.google.common.base.Optional;
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 import scala.Tuple2;
 

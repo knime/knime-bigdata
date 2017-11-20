@@ -44,10 +44,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.knime.base.node.mine.decisiontree2.view.graph.CollapseBranchAction;
 import org.knime.base.node.mine.decisiontree2.view.graph.ExpandBranchAction;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 import org.knime.core.data.property.ColorAttr;
 import org.knime.core.node.NodeLogger;
-
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 
 
 /**

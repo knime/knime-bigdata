@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.writer;
 
-import org.knime.core.node.NodeView;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.core.node.NodeView;
 
 /**
  * Default spark 2 generic data source node factory.

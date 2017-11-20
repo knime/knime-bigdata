@@ -7,7 +7,6 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.classification.SVMWithSGD;
 import org.apache.spark.mllib.regression.LabeledPoint;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.AbstractRegularizationJob;

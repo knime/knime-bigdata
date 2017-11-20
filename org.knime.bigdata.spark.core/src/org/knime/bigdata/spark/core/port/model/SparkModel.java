@@ -29,6 +29,12 @@ import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
 
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.model.LegacyModelHelper;
+import org.knime.bigdata.spark.core.model.ModelHelper;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -40,13 +46,6 @@ import org.knime.core.node.NodeSettings;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
-
-import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import org.knime.bigdata.spark.core.job.util.MLlibSettings;
-import org.knime.bigdata.spark.core.model.LegacyModelHelper;
-import org.knime.bigdata.spark.core.model.ModelHelper;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Spark model that encapsulates a learned Spark MLlib model.

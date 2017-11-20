@@ -23,7 +23,6 @@ package org.knime.bigdata.spark1_2.jobs.statistics.correlation;
 import java.io.Serializable;
 
 import org.apache.spark.mllib.linalg.Matrix;
-
 import org.knime.bigdata.spark.core.job.HalfDoubleMatrixJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 

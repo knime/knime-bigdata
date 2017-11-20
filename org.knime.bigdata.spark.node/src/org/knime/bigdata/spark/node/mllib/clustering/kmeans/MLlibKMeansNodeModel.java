@@ -23,16 +23,6 @@ package org.knime.bigdata.spark.node.mllib.clustering.kmeans;
 import java.util.Arrays;
 import java.util.List;
 
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.port.PortObject;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.PortType;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.job.JobRunFactory;
@@ -47,6 +37,15 @@ import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeModel;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
 
 /**
  *

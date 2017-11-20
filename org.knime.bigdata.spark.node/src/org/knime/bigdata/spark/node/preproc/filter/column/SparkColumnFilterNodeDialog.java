@@ -44,6 +44,7 @@
  */
 package org.knime.bigdata.spark.node.preproc.filter.column;
 
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -53,8 +54,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * This is the dialog for the Spark column filter. The user can specify which columns

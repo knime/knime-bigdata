@@ -23,12 +23,11 @@ package org.knime.bigdata.spark.core.port.context;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.config.ConfigRO;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.config.ConfigRO;
 
 /**
  * Class that holds all information about a SparkContext that is used in KNIME e.g. the id

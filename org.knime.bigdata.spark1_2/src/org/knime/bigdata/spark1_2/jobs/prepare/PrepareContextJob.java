@@ -24,7 +24,6 @@ import java.io.IOException;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.api.java.DataType;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;

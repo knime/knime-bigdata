@@ -24,12 +24,11 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
-
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverter;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
 
 /**
  * Replaces missing values with a fixed boolean false.

@@ -20,10 +20,9 @@
  */
 package org.knime.bigdata.spark.node.pmml.converter;
 
+import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
-
-import org.knime.bigdata.spark.core.port.model.SparkModel;
 
 /**
  * Interface of a SparkModel to PMML converter.

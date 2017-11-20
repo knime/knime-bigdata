@@ -31,15 +31,15 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_1.api.SparkJob;
+
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * Computes correlation

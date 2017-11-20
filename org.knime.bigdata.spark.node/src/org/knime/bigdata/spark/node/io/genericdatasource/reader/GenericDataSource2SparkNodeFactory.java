@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark.node.io.genericdatasource.reader;
 
-import org.knime.core.node.NodeView;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.core.node.NodeView;
 
 /**
  * @author Sascha Wolke, KNIME.com

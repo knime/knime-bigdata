@@ -36,11 +36,10 @@ import javax.json.JsonStructure;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
-import org.knime.core.node.NodeLogger;
-import org.knime.core.util.Pair;
-
 import org.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.util.Pair;
 
 /**
  * The Spark jobserver reports errors quite inconsistently (different ways of indicating failure cause, in some failure

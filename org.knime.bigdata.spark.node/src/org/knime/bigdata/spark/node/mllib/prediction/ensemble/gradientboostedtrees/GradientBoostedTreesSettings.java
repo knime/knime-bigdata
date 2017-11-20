@@ -20,6 +20,10 @@
  */
 package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
 
+import org.knime.bigdata.spark.core.job.util.EnumContainer;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
+import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -30,11 +34,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-
-import org.knime.bigdata.spark.core.job.util.EnumContainer;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
 
 /**
  * @author Tobias Koetter, KNIME.com

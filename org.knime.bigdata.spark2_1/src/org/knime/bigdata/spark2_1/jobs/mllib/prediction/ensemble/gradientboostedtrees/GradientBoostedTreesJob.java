@@ -38,7 +38,6 @@ import org.apache.spark.mllib.tree.loss.Loss;
 import org.apache.spark.mllib.tree.loss.SquaredError$;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;

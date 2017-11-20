@@ -21,12 +21,11 @@
 package org.knime.bigdata.spark.node.preproc.renameregex;
 
 import org.knime.base.node.preproc.columnrenameregex.ColumnRenameRegexNodeDialogPane;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  *

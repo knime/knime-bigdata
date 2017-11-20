@@ -35,6 +35,8 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.base.node.io.database.DBSQLTypesPanel;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.IntValue;
 import org.knime.core.data.StringValue;
@@ -47,9 +49,6 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnFilterPanel;
 import org.knime.core.node.workflow.FlowVariable;
-
-import org.knime.bigdata.hive.utility.HiveLoaderSettings;
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Dialog for the Hive Loader node.

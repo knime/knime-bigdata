@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.hive.HiveContext;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**

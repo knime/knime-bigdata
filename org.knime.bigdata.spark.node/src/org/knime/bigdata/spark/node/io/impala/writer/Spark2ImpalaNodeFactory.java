@@ -20,11 +20,10 @@
  */
 package org.knime.bigdata.spark.node.io.impala.writer;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeView;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeDialog;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeView;
 
 /**
  *

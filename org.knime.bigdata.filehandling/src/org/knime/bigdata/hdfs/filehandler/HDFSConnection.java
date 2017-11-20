@@ -43,11 +43,11 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.ssl.SSLFactory;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
-import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import com.knime.licenses.LicenseException;
 
 /**

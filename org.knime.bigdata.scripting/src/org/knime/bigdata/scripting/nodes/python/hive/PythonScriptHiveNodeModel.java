@@ -61,6 +61,9 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.node.util.exttool.ExtToolOutputNodeModel;
+import org.knime.bigdata.hive.utility.HiveLoader;
+import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -77,10 +80,6 @@ import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.python.kernel.PythonKernel;
 import org.knime.python.kernel.SQLEditorObjectReader;
 import org.knime.python.kernel.SQLEditorObjectWriter;
-
-import org.knime.bigdata.hive.utility.HiveLoader;
-import org.knime.bigdata.hive.utility.HiveLoaderSettings;
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * This is the model implementation.

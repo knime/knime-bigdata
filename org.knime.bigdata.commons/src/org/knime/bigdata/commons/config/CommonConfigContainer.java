@@ -29,10 +29,9 @@ import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.apache.hadoop.security.ssl.SSLFactory;
 import org.apache.hadoop.security.ssl.SSLFactory.Mode;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.knime.core.node.NodeLogger.LEVEL;
-
 import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
+import org.knime.core.node.NodeLogger.LEVEL;
 
 /**
  * Container class that holds configuration information for the different Big Data Extensions.

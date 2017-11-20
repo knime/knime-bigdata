@@ -29,7 +29,6 @@ import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS;
 import org.apache.spark.mllib.classification.LogisticRegressionWithSGD;
 import org.apache.spark.mllib.regression.GeneralizedLinearAlgorithm;
 import org.apache.spark.mllib.regression.LabeledPoint;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.LinearLearnerJobInput;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.linear.AbstractRegularizationJob;

@@ -66,9 +66,8 @@ import javax.swing.SwingConstants;
 
 import org.knime.base.node.mine.decisiontree2.view.CollapsiblePanel;
 import org.knime.base.node.mine.decisiontree2.view.graph.ComponentNodeWidget;
-import org.knime.core.data.property.ColorAttr;
-
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.core.data.property.ColorAttr;
 
 
 /**

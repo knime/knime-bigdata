@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark1_6.jobs.statistics.correlation;
 
 import org.apache.spark.mllib.linalg.Matrix;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
 

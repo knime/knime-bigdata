@@ -29,6 +29,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.knime.bigdata.hive.utility.HiveDriverDetector;
+import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -43,9 +45,6 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabaseConnectionPortObject;
 import org.knime.core.node.port.database.DatabaseConnectionPortObjectSpec;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
-
-import org.knime.bigdata.hive.utility.HiveDriverDetector;
-import org.knime.bigdata.hive.utility.HiveUtility;
 
 /**
  * Model for the Hive connector node.

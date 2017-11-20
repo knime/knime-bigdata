@@ -20,10 +20,9 @@
  */
 package org.knime.bigdata.spark.node.sql_function;
 
-import org.knime.core.data.DataTableSpec;
-
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.core.data.DataTableSpec;
 
 /**
  * Spark SQL function.

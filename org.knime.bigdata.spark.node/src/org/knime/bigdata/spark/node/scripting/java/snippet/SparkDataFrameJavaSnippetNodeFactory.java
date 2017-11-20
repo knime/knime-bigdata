@@ -20,12 +20,11 @@
  */
 package org.knime.bigdata.spark.node.scripting.java.snippet;
 
-import org.knime.core.node.NodeDialogPane;
-
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.scripting.java.SparkJavaSnippetNodeDialog;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaDataFrameSnippetHelperRegistry;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper.SnippetType;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  *

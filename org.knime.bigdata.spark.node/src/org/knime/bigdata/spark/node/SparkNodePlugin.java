@@ -21,11 +21,10 @@
 package org.knime.bigdata.spark.node;
 
 import org.eclipse.core.runtime.Plugin;
+import org.knime.bigdata.spark.node.knosp.KNOSPHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
-import org.knime.bigdata.spark.node.knosp.KNOSPHelper;
 
 /**
  *

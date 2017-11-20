@@ -49,10 +49,10 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.osgi.service.prefs.BackingStoreException;
-
 import org.knime.bigdata.spark.core.SparkPlugin;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.osgi.service.prefs.BackingStoreException;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -159,7 +159,8 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
     @Override
     public void initializeDefaultPreferences() {
-        final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
+//        final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
+        final IPreferenceStore store = getPreferenceStore();
 
         loadDefaultValues(store);
 
@@ -180,6 +181,13 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         }
     }
 
+    /**
+     * @return the {@link IPreferenceStore} to use
+     */
+    static synchronized IPreferenceStore getPreferenceStore() {
+        return SparkPlugin.getDefault().getPreferenceStore();
+    }
+
     /** @return true if given plugin has at least one preference key set. */
     private boolean hasPreferences(final String oldPluginId) {
         IEclipsePreferences oldPrefs = InstanceScope.INSTANCE.getNode(oldPluginId);
@@ -192,7 +200,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     }
 
     /**
-     * Imports existing legacy preferences (from org.knime.bigdata.spark and .spark1_3) into the new format.
+     * Imports existing legacy preferences (from com.knime.bigdata.spark and .spark1_3) into the new format.
      *
      * @param store The store for the new preferences.
      * @param oldPluginId The legacy plugin name.

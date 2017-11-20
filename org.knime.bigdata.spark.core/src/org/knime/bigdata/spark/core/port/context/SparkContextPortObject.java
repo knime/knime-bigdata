@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.port.context;
 
 import java.io.IOException;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObject;
@@ -30,8 +31,6 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
 
 /**
  *

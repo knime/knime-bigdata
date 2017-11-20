@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.Validate;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
-
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 

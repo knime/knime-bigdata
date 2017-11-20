@@ -28,6 +28,15 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
+import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -45,16 +54,6 @@ import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.workflow.CredentialsProvider;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.job.JobOutput;
-import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
-import org.knime.bigdata.spark.core.util.SparkIDs;
 
 /**
  * @author Sascha Wolke, KNIME.com

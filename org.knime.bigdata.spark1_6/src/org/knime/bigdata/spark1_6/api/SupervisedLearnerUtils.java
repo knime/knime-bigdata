@@ -32,11 +32,11 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Row;
-
 import org.knime.bigdata.spark.core.job.ClassificationJobInput;
 import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**

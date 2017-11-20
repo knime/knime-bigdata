@@ -27,7 +27,6 @@ import java.util.Map;
 import org.knime.base.node.jsnippet.template.AbstractJSnippetTemplateProvider;
 import org.knime.base.node.jsnippet.template.TemplateProvider;
 import org.knime.base.node.jsnippet.template.TemplateRepository;
-
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 

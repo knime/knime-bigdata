@@ -25,13 +25,12 @@ import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.osgi.framework.Bundle;
-
 import org.knime.bigdata.spark.core.jar.JarCollector;
 import org.knime.bigdata.spark.core.jar.JarPacker;
 import org.knime.bigdata.spark.core.jar.SparkJarProvider;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.osgi.framework.Bundle;
 
 /**
  * Provides a OSGi bundle as Spark jar Provider.

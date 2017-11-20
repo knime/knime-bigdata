@@ -52,7 +52,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
-
 import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
 
 /**

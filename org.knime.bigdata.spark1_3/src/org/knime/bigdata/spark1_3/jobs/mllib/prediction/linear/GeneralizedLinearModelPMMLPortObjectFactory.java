@@ -25,10 +25,9 @@ import java.util.List;
 import org.apache.spark.mllib.regression.GeneralizedLinearModel;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.NumericPredictor;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
-import org.knime.core.node.InvalidSettingsException;
-
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
+import org.knime.core.node.InvalidSettingsException;
 
 /**
  *

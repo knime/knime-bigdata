@@ -17,13 +17,13 @@
  */
 package org.knime.bigdata.spark2_2.jobs.preproc.missingval;
 
-import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_FIXED_VALUE;
-import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OP_TYPE;
 import static org.apache.spark.sql.functions.avg;
 import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.desc;
 import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.min;
+import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_FIXED_VALUE;
+import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OP_TYPE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,7 +46,6 @@ import org.apache.spark.sql.types.LongType;
 import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;

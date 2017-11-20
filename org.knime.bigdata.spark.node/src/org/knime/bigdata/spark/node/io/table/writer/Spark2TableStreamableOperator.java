@@ -20,16 +20,15 @@
  */
 package org.knime.bigdata.spark.node.io.table.writer;
 
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.RowIterator;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.streamable.StreamableOperator;
-
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 
 /**
  * A {@link StreamableOperator} implementation for the {@link Spark2TableNodeModel}. This class supports KNIME-on-Spark

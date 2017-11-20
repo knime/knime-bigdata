@@ -67,6 +67,8 @@ import org.knime.base.data.aggregation.dialogutil.AggregationFunctionAndRowTable
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRowTableCellRenderer;
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRowTableCellRenderer.ValueRenderer;
 import org.knime.base.data.aggregation.dialogutil.type.DataTypeNameSorter;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
+import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
@@ -84,9 +86,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
 import org.knime.core.node.util.DataTypeListCellRenderer;
-
-import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
-import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 
 
 /**

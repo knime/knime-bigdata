@@ -23,6 +23,9 @@ package org.knime.bigdata.spark.node.sql_function;
 import java.awt.Component;
 import java.io.Serializable;
 
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -31,10 +34,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
-
-import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 
 /**
  * Spark SQL function without additional settings.

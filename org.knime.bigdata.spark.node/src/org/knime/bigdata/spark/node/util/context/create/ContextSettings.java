@@ -29,6 +29,11 @@ package org.knime.bigdata.spark.node.util.context.create;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -40,12 +45,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.ICredentials;
-
-import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
-import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Settings model that transfers Spark context information between the node model and its dialog.

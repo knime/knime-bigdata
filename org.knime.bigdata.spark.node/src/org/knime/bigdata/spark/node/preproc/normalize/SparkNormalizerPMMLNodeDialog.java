@@ -21,11 +21,10 @@
 package org.knime.bigdata.spark.node.preproc.normalize;
 
 import org.knime.base.node.preproc.normalize3.Normalizer3NodeDialog;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-
-import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 
 /**
  * Extends the {@link Normalizer3NodeDialog} for the {@link SparkNormalizerPMMLNodeModel}.

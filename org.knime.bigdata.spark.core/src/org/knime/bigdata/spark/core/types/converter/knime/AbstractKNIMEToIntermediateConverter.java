@@ -23,10 +23,9 @@ package org.knime.bigdata.spark.core.types.converter.knime;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Abstract base class for all {@link KNIMEToIntermediateConverter} implementations.

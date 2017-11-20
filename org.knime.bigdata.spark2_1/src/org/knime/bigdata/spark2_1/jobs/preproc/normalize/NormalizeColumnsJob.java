@@ -15,16 +15,16 @@ import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobInput;
 import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.NormalizedDataFrameContainer;
 import org.knime.bigdata.spark2_1.api.NormalizedDataFrameContainerFactory;
 import org.knime.bigdata.spark2_1.api.SparkJob;
+
+import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * @author dwk

@@ -32,12 +32,11 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionProviderRegistry;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.database.aggregation.AggregationFunctionProvider;
-
-import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionProviderRegistry;
-import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Brings {@link SparkSQLFunctionProviderRegistry} and {@link SparkSQLFunctionDialogProviderRegistry} together.
