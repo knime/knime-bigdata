@@ -4,7 +4,7 @@
    <extension
          point="org.knime.testing.TestrunJanitor">
       <TestrunJanitor
-            class="org.knime.bigdata.testing.BigDataExtensionJanitor">
+            class="com.knime.bigdata.testing.BigDataExtensionJanitor">
       </TestrunJanitor>
    </extension>
 
