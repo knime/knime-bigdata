@@ -11,7 +11,7 @@ node {
 	stage('Clean workspace') {
 		cleanWorkspace()
 		try {
-			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target com.knime.update.bigdata.externals'
+			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target com.knime.update.bigdata.externals org.knime.update.bigdata.externals'
 		} catch (ex) {
 			currentBuild.result = 'FAILED'
 			emailext (
@@ -48,14 +48,14 @@ node {
 
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
-					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.bigdata.externals-parent
+					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.externals-parent
 					mvn -Dknime-p2="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.targetPlatform'].p2 + '''" clean package
 					popd
 				'''
 			}
 
 			sh '''
-				mv "$WORKSPACE"/git/knime-bigdata/com.knime.update.bigdata.externals/target/repository com.knime.update.bigdata.externals
+				mv "$WORKSPACE"/git/knime-bigdata/org.knime.update.bigdata.externals/target/repository org.knime.update.bigdata.externals
 				rm -rf .metadata buckminster.*
 			'''
 		} catch (ex) {
@@ -73,12 +73,12 @@ node {
 
 	stage('Build update site') {
 		buckminster (
-			component: 'com.knime.update.bigdata',
+			component: 'org.knime.update.bigdata',
 			baseline: [file: 'git/knime-config/org.knime.config/API-Baseline.target', name: 'Release 3.4'],
 			repos: [
 				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.analytics-platform'].p2}",
 				"$JENKINS_URL/jobs/${upstreamParams['com.knime.update.pmml.compilation'].p2}",
-				"file:///${WORKSPACE.replace('\\', '/')}/com.knime.update.bigdata.externals/"
+				"file:///${WORKSPACE.replace('\\', '/')}/org.knime.update.bigdata.externals/"
 			]
 		)
 
@@ -88,7 +88,7 @@ node {
 	stage('Archive artifacts') {
 		archive()
 		try {
-			archiveArtifacts artifacts: "com.knime.update.bigdata.externals/**", fingerprint: true
+			archiveArtifacts artifacts: "org.knime.update.bigdata.externals/**", fingerprint: true
 		} catch (ex) {
 			currentBuild.result = 'FAILED'
 			emailext (
