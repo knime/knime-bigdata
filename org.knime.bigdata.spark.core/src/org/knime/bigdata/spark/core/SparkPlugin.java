@@ -33,9 +33,10 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.osgi.framework.BundleContext;
 
-import org.knime.bigdata.commons.config.CommonConfigContainer;
 import com.knime.licenses.LicenseChecker;
 import com.knime.licenses.LicenseFeatures;
 import com.knime.licenses.LicenseUtil;
@@ -81,6 +82,7 @@ public class SparkPlugin extends AbstractUIPlugin {
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
         initializeJaxRSRuntime();
+        EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
     }
 
     /**

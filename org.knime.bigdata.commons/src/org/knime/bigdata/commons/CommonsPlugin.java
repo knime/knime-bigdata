@@ -26,10 +26,10 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
-
 import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
+import org.osgi.framework.BundleContext;
 
 
 /**
@@ -60,6 +60,7 @@ public class CommonsPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
+        EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
         checkConfiguration();
     }
 
