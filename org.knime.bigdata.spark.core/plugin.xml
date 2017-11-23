@@ -56,9 +56,9 @@
             hidden="false"
             name="Spark Context (legacy com)"
             objectClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObject"
-            objectSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObject$ModelSerializer"
+            objectSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObject$Serializer"
             specClass="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec"
-            specSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec$SpecSerializer">
+            specSerializer="com.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec$Serializer">
       </portType>
       <portType
             color="#000000"
