@@ -22,10 +22,7 @@ package org.knime.bigdata.hdfs.node.connector;
 
 import org.knime.base.filehandling.remote.connectioninformation.node.ConnectionInformationNodeModel;
 import org.knime.base.filehandling.remote.files.Protocol;
-import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.port.PortObjectSpec;
 
 /**
  *
@@ -39,15 +36,6 @@ public class HDFSConnectionInformationNodeModel extends ConnectionInformationNod
      */
     HDFSConnectionInformationNodeModel(final Protocol hdfsProtocol) {
         super(hdfsProtocol);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicenseInNode();
-        return super.configure(inSpecs);
     }
 
     /**

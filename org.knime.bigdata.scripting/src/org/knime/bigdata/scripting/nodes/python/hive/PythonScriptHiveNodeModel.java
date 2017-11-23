@@ -105,7 +105,6 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	 */
 	@Override
 	protected PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-	    HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
 		final PythonKernel kernel = new PythonKernel();
 		final ConnectionInformation fileInfo = ((ConnectionInformationPortObject)inData[0]).getConnectionInformation();
 		if (fileInfo == null) {
@@ -216,7 +215,6 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
 	 */
 	@Override
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-	    HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
 		final ConnectionInformationPortObjectSpec fileSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
 		if (fileSpec == null) {
 		    throw new InvalidSettingsException("No remote file port available");

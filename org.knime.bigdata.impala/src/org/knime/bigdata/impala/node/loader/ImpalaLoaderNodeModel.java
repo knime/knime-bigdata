@@ -90,8 +90,6 @@ class ImpalaLoaderNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
-
         checkDatabaseSettings(inSpecs);
         checkUploadSettings(inSpecs);
 

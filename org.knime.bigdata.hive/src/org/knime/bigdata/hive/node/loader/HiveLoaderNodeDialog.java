@@ -36,7 +36,6 @@ import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.base.node.io.database.DBSQLTypesPanel;
 import org.knime.bigdata.hive.utility.HiveLoaderSettings;
-import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.IntValue;
 import org.knime.core.data.StringValue;
@@ -128,7 +127,6 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
-        HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
         m_settings.loadSettingsForDialog(settings);
         try {
             m_settings.guessTypeMapping((DataTableSpec)specs[1], true);

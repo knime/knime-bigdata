@@ -30,21 +30,12 @@ import org.knime.base.filehandling.remote.files.Protocol;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileHandler;
 
-import com.knime.licenses.LicenseChecker;
-import com.knime.licenses.LicenseFeatures;
-import com.knime.licenses.LicenseUtil;
-
 /**
  * Hadoop file system (hdfs) implementation of the {@link RemoteFileHandler} interface.
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnection> {
-
-    /**
-     * Singleton instance.
-     */
-    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.HDFSFileHandling);
 
     /**The {@link Protocol} of this {@link RemoteFileHandler}.*/
     public static final Protocol HDFS_PROTOCOL =
@@ -116,7 +107,6 @@ public final class HDFSRemoteFileHandler implements RemoteFileHandler<HDFSConnec
     @Override
     public RemoteFile<HDFSConnection> createRemoteFile(final URI uri, final ConnectionInformation connectionInformation,
         final ConnectionMonitor<HDFSConnection> connectionMonitor) throws Exception {
-        LICENSE_CHECKER.checkLicense();
         final HDFSRemoteFile remoteFile = new HDFSRemoteFile(uri, connectionInformation, connectionMonitor);
         return remoteFile;
     }

@@ -91,8 +91,6 @@ class HiveLoaderNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-
         checkDatabaseSettings(inSpecs);
         checkUploadSettings(inSpecs);
 

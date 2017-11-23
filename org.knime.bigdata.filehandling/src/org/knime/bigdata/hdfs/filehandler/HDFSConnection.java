@@ -48,8 +48,6 @@ import org.knime.bigdata.commons.security.kerberos.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
-import com.knime.licenses.LicenseException;
-
 /**
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
@@ -69,11 +67,6 @@ public class HDFSConnection extends Connection {
      * @param connectionInformation the {@link ConnectionInformation}to use
      */
     public HDFSConnection(final ConnectionInformation connectionInformation) {
-        try {
-            HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
         m_connectionInformation = connectionInformation;
         m_conf = new Configuration();
         final String defaultName = createDefaultName(connectionInformation);

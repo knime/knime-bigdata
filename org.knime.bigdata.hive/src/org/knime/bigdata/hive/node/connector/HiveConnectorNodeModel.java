@@ -30,7 +30,6 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.bigdata.hive.utility.HiveDriverDetector;
-import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -64,8 +63,6 @@ class HiveConnectorNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        HiveUtility.LICENSE_CHECKER.checkLicenseInNode();
-
         if (!HiveDriverDetector.getDriverName().equals(m_settings.getDriver())) {
             setWarningMessage(String.format("Using %s\ninstead of %s",
                 HiveDriverDetector.mapToPrettyDriverName(HiveDriverDetector.getDriverName()),

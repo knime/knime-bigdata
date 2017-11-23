@@ -8,7 +8,6 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
  org.knime.bigdata.hive;bundle-version="[3.2.0,4.0.0)",
  org.knime.python;bundle-version="[3.0.0,4.0.0)",
- org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
- com.knime.licenses;bundle-version="[5.4.2,6.0.0)"
+ org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

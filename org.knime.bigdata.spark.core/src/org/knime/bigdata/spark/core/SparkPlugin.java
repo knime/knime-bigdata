@@ -37,10 +37,6 @@ import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.osgi.framework.BundleContext;
 
-import com.knime.licenses.LicenseChecker;
-import com.knime.licenses.LicenseFeatures;
-import com.knime.licenses.LicenseUtil;
-
 
 /**
  *
@@ -56,11 +52,6 @@ public class SparkPlugin extends AbstractUIPlugin {
     private String m_pluginRootPath;
 
     private final ExecutorService m_executor = Executors.newSingleThreadExecutor();
-
-    /**
-     * {@link LicenseChecker} to use.
-     */
-    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.SparkExecutor);
 
     /**
      * The constructor.

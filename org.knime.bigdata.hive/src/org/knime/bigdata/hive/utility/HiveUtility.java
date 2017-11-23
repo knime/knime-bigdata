@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 
 import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
@@ -33,8 +32,6 @@ import org.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregati
 import org.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseUtility;
-import org.knime.core.node.port.database.StatementManipulator;
-import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.CorrDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
@@ -50,11 +47,6 @@ import org.knime.core.node.port.database.aggregation.function.VarSampDBAggregati
 import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
-
-import com.knime.licenses.LicenseChecker;
-import com.knime.licenses.LicenseException;
-import com.knime.licenses.LicenseFeatures;
-import com.knime.licenses.LicenseUtil;
 
 /**
  * Database utility for Hive.
@@ -74,18 +66,11 @@ public class HiveUtility extends DatabaseUtility {
      */
     public static final String DRIVER = HiveDriverFactory.DRIVER;
 
-
-    /**
-     * {@link LicenseChecker} to use.
-     */
-    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.HiveConnector);
-
     /**
      * Constructor.
-     * @throws LicenseException
      * @throws IOException
      */
-    public HiveUtility() throws LicenseException, IOException {
+    public HiveUtility() throws IOException {
         super(DATABASE_IDENTIFIER, new HiveStatementManipulator(), new HiveDriverFactory(),
             new CountDistinctDBAggregationFunction.Factory(), new SumDistinctDBAggregationFunction.Factory(),
             new AvgDistinctDBAggregationFunction.Factory(), new MinDBAggregationFunction.Factory(),
@@ -104,45 +89,6 @@ public class HiveUtility extends DatabaseUtility {
     @Override
     protected DBConnectionFactory createConnectionFactory(final DBDriverFactory df) {
         return new KerberosConnectionFactory(df);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StatementManipulator getStatementManipulator() {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getStatementManipulator();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBAggregationFunction getAggregationFunction(final String id) {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getAggregationFunction(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<DBAggregationFunction> getAggregationFunctions() {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getAggregationFunctions();
     }
 
     /**

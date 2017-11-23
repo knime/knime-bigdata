@@ -216,7 +216,6 @@ public abstract class SparkNodeModel extends NodeModel {
      */
     @Override
     protected final PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
         return configureInternal(inSpecs);
     }
 
@@ -238,8 +237,6 @@ public abstract class SparkNodeModel extends NodeModel {
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Validate input data...");
-        SparkPlugin.LICENSE_CHECKER.checkLicenseInNode();
-
         try {
             exec.setMessage("Starting node execution...");
             final PortObject[] portObjects = executeInternal(inData, exec);

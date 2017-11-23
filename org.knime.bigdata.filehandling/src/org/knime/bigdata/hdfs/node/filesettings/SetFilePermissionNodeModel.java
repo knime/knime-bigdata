@@ -86,14 +86,13 @@ public class SetFilePermissionNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        HDFSRemoteFileHandler.LICENSE_CHECKER.checkLicenseInNode();
         final ConnectionInformationPortObjectSpec object = (ConnectionInformationPortObjectSpec)inSpecs[0];
         final ConnectionInformation connInfo = object.getConnectionInformation();
         // Check if the port object has connection information
         if (connInfo == null) {
             throw new InvalidSettingsException("No connection information available");
         }
-        if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol()) 
+        if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol())
         		&& !HDFSRemoteFileHandler.WEBHDFS_PROTOCOL.getName().equals(connInfo.getProtocol())) {
             throw new InvalidSettingsException("HDFS/webHDFS connection required");
         }

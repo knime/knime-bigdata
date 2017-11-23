@@ -61,7 +61,6 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
-import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.code.generic.templates.SourceCodeTemplatesPanel;
 import org.knime.code.python.PythonSourceCodePanel;
 import org.knime.core.node.InvalidSettingsException;
@@ -136,7 +135,6 @@ class PythonScriptHiveNodeDialog extends NodeDialogPane {
 	@Override
 	protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
 			throws NotConfigurableException {
-	    HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
 		if (specs == null || specs.length < 2 || specs[0] == null || specs[1] == null) {
 			throw new NotConfigurableException("Please connect the node");
 		}

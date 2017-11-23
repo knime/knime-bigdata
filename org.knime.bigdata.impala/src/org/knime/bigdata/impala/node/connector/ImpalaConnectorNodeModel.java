@@ -30,7 +30,6 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.bigdata.impala.utility.ImpalaDriverDetector;
-import org.knime.bigdata.impala.utility.ImpalaUtility;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -66,8 +65,6 @@ class ImpalaConnectorNodeModel extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        ImpalaUtility.LICENSE_CHECKER.checkLicenseInNode();
-
         if (!ImpalaDriverDetector.getDriverName().equals(m_settings.getDriver())) {
             setWarningMessage(String.format("Using %s\ninstead of %s",
                 ImpalaDriverDetector.mapToPrettyDriverName(ImpalaDriverDetector.getDriverName()),

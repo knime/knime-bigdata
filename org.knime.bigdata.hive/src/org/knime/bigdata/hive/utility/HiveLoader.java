@@ -44,8 +44,6 @@ import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
-import com.knime.licenses.LicenseException;
-
 /**
  *
  * @author Tobias Koetter, KNIME.com
@@ -54,25 +52,16 @@ public final class HiveLoader {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveLoader.class);
 
-    private static volatile HiveLoader instance;
+    private static HiveLoader instance = new HiveLoader();
 
-    private HiveLoader() throws LicenseException {
-        HiveUtility.LICENSE_CHECKER.checkLicense();
+    private HiveLoader() {
     }
 
     /**
      * Returns the only instance of this class.
      * @return the only instance
-     * @throws LicenseException if the user does not have the necessary licence
      */
-    public static HiveLoader getInstance() throws LicenseException {
-        if (instance == null) {
-            synchronized (HiveLoader.class) {
-                if (instance == null) {
-                    instance = new HiveLoader();
-                }
-            }
-        }
+    public static HiveLoader getInstance() {
         return instance;
     }
 

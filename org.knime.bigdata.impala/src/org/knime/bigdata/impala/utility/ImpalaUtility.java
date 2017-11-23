@@ -21,14 +21,11 @@
 package org.knime.bigdata.impala.utility;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.port.database.DatabaseUtility;
-import org.knime.core.node.port.database.StatementManipulator;
-import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.GroupConcatDBAggregationFunction;
@@ -43,11 +40,6 @@ import org.knime.core.node.port.database.connection.DBConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.port.database.tablecreator.DBTableCreator;
 
-import com.knime.licenses.LicenseChecker;
-import com.knime.licenses.LicenseException;
-import com.knime.licenses.LicenseFeatures;
-import com.knime.licenses.LicenseUtil;
-
 /**
  * Database utility for Impala.
  *
@@ -59,11 +51,6 @@ public class ImpalaUtility extends DatabaseUtility {
 
     /** The driver's class name. */
     public static final String DRIVER = ImpalaDriverFactory.DRIVER;
-
-    /**
-     * {@link LicenseChecker} to use.
-     */
-    public static final LicenseChecker LICENSE_CHECKER = new LicenseUtil(LicenseFeatures.ImpalaConnector);
 
     /**
      * Constructor.
@@ -85,45 +72,6 @@ public class ImpalaUtility extends DatabaseUtility {
     @Override
     protected DBConnectionFactory createConnectionFactory(final DBDriverFactory df) {
         return new KerberosConnectionFactory(df);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StatementManipulator getStatementManipulator() {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getStatementManipulator();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<DBAggregationFunction> getAggregationFunctions() {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getAggregationFunctions();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBAggregationFunction getAggregationFunction(final String id) {
-        try {
-            LICENSE_CHECKER.checkLicense();
-        } catch (LicenseException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        return super.getAggregationFunction(id);
     }
 
     /**

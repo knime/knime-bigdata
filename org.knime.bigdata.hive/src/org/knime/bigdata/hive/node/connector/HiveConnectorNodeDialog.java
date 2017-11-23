@@ -33,7 +33,6 @@ import org.knime.base.node.io.database.connection.util.DBMiscPanel;
 import org.knime.base.node.io.database.connection.util.DBTimezonePanel;
 import org.knime.bigdata.commons.icons.BigDataIcons;
 import org.knime.bigdata.hive.utility.HiveDriverDetector;
-import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -124,7 +123,6 @@ class HiveConnectorNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
         throws NotConfigurableException {
-        HiveUtility.LICENSE_CHECKER.checkLicenseInDialog();
         try {
             m_settings.loadValidatedConnection(settings, getCredentialsProvider());
         } catch (InvalidSettingsException ex) {
