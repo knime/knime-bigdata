@@ -22,8 +22,10 @@ package org.knime.bigdata.spark.node.preproc.joiner;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.preproc.joiner.Joiner;
 import org.knime.base.node.preproc.joiner.Joiner2Settings;
+import org.knime.base.node.preproc.joiner.Joiner2Settings.DuplicateHandling;
 import org.knime.base.node.preproc.joiner.Joiner2Settings.JoinMode;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -80,9 +82,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
                 new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec())};
 
         if (!joiner.getConfigWarnings().isEmpty()) {
-            for (String warning : joiner.getConfigWarnings()) {
-                setWarningMessage(warning);
-            }
+            setWarningMessage(StringUtils.join(joiner.getConfigWarnings(), "\n"));
         }
         return spec;
     }
@@ -105,19 +105,12 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
         final Integer[] leftJoinColumns = SparkUtil.getColumnIndices(leftSpec, m_settings.getLeftJoinColumns());
         final Integer[] rightJoinColumns = SparkUtil.getColumnIndices(rightSpec, m_settings.getRightJoinColumns());
         final List<String> leftIncluded = joiner.getLeftIncluded(leftSpec);
-        final Integer[] leftIncludCols;
-//        if (leftIncluded == null || leftIncluded.isEmpty()) {
-//            leftIncludCols = new Integer[0];
-//        } else {
-            leftIncludCols = SparkUtil.getColumnIndices(leftSpec, leftIncluded);
-//        }
+        final Integer[] leftIncludCols = SparkUtil.getColumnIndices(leftSpec, leftIncluded);
         final List<String> rightIncluded = joiner.getRightIncluded(rightSpec);
-        final Integer[] rightIncludCols;
-//        if (rightIncluded == null || rightIncluded.isEmpty()) {
-//            rightIncludCols = new Integer[0];
-//        } else {
-            rightIncludCols = SparkUtil.getColumnIndices(rightSpec, rightIncluded);
-//        }
+        if (m_settings.getDuplicateHandling().equals(DuplicateHandling.Filter)) {
+            rightIncluded.removeAll(leftIncluded);
+        }
+        final Integer[] rightIncludCols = SparkUtil.getColumnIndices(rightSpec, rightIncluded);
 
         final JoinMode joinMode = m_settings.getJoinMode();
         final org.knime.bigdata.spark.node.preproc.joiner.JoinMode sparkJoinMode =
