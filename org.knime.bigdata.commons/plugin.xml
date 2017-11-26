@@ -30,4 +30,10 @@
             name="Kerberos">
       </page>
    </extension>
+   <extension
+         point="org.knime.core.NodeFactoryClassMapper">
+      <NodeFactoryClassMapper
+            classMapper="org.knime.bigdata.commons.BigDataNodeFactoryClassMapper">
+      </NodeFactoryClassMapper>
+   </extension>
 </plugin>
