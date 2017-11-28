@@ -20,7 +20,7 @@
 	<modules>
     <module>org.knime.features.bigdata.externals</module>
     <module>org.knime.update.bigdata.externals</module>
-		<module>org.knime.bigdata.commons</module>
+    <module>org.knime.bigdata.commons</module>
     <module>org.knime.bigdata.filehandling</module>
     <module>org.knime.bigdata.hive</module>
     <module>org.knime.bigdata.impala</module>
@@ -35,7 +35,7 @@
     <module>org.knime.bigdata.spark2_0</module>
     <module>org.knime.bigdata.spark2_1</module>
     <module>org.knime.bigdata.spark2_2</module>
-    <module>org.knime.features.bigdata</module>
+    <module>org.knime.features.bigdata.connectors</module>
     <module>org.knime.features.bigdata.spark</module>
     <module>org.knime.update.bigdata</module>
 	</modules>

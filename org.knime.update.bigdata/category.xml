@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+
+   <feature id="org.knime.features.bigdata.connectors" />
+
+   <feature id="org.knime.features.bigdata.spark" />
+
+   <feature id="com.knime.features.licenses" />
+
+   <feature id="com.knime.features.pmml.compilation.java.jario" />
+
+   <feature id="org.knime.features.bigdata.externals" />
+
+</site>

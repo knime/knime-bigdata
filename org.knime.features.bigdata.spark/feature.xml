@@ -27,6 +27,10 @@ by the copyright owner.
 In case of any questions, please contact KNIME at contact@knime.com
    </license>
 
+   <includes
+         id="org.knime.features.bigdata.connectors"
+         version="0.0.0"/>
+
    <plugin
          id="org.knime.bigdata.spark.core"
          download-size="0"
