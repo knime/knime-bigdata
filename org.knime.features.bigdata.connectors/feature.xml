@@ -6,8 +6,7 @@
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for accessing Big Data infrastructure such as Apache
-Hive, Apache Impala, or HDFS.
+      KNIME nodes for accessing Big Data infrastructure such as Apache Hive, Apache Impala, or HDFS.
    </description>
 
    <copyright>
