@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.sql_function;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
@@ -49,6 +50,10 @@ public class SparkSQLFunctionJobInput implements Serializable {
      */
     public SparkSQLFunctionJobInput(final String function, final String factoryName, final String outputName,
         final Serializable args[], final IntermediateDataType argTypes[]) {
+
+        if (StringUtils.isBlank(function) || StringUtils.isBlank(factoryName) || StringUtils.isBlank(outputName)) {
+            throw new IllegalArgumentException("Function, factory and output column name required.");
+        }
 
         if (args.length != argTypes.length) {
             throw new IllegalArgumentException("Argument and type count does not match.");

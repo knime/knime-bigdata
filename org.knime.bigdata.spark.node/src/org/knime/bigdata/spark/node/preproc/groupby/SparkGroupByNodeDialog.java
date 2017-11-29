@@ -67,7 +67,6 @@ import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionSettings;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionPanel;
@@ -119,7 +118,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
 
     private final JTabbedPane m_tabs;
 
-    private final WindowFunctionPanel m_windowPanel = new WindowFunctionPanel(m_windowSettings);
+    // TODO: private final WindowFunctionPanel m_windowPanel = new WindowFunctionPanel(m_windowSettings);
 
     private final ColumnAggregationFunctionPanel m_manualAggPanel =
             new ColumnAggregationFunctionPanel();
@@ -175,7 +174,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         //The aggregation column box
-        m_tabs.addTab(WindowFunctionPanel.DEFAULT_TITLE, m_windowPanel.getComponentPanel());
+        // TODO: m_tabs.addTab(WindowFunctionPanel.DEFAULT_TITLE, m_windowPanel.getComponentPanel());
         m_tabs.addTab(AggregationColumnPanel.DEFAULT_TITLE, m_manualAggPanel.getComponentPanel());
         m_tabs.addTab(PatternAggregationPanel.DEFAULT_TITLE, m_patternAggPanel.getComponentPanel());
         m_tabs.addTab(DataTypeAggregationPanel.DEFAULT_TITLE, m_typeAggPanel.getComponentPanel());
@@ -267,7 +266,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
                     new SparkSQLFunctionCombinationProvider(sparkVersion);
 
             m_columnNamePolicy.loadSettingsFrom(settings);
-            m_windowPanel.loadSettingsFrom(settings, functionProvider, spec);
+            // TODO: m_windowPanel.loadSettingsFrom(settings, functionProvider, spec);
             m_addCountStar.loadSettingsFrom(settings);
             m_countStarColName.loadSettingsFrom(settings);
             m_descriptionTab.removeAll();
@@ -302,7 +301,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         validateSettings(settings);
         m_groupCol.saveSettingsTo(settings);
-        m_windowPanel.saveSettingsTo(settings);
+        // TODO: m_windowPanel.saveSettingsTo(settings);
         m_addCountStar.saveSettingsTo(settings);
         m_countStarColName.saveSettingsTo(settings);
         m_columnNamePolicy.saveSettingsTo(settings);
@@ -325,7 +324,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
         if (columnNamePolicy == null) {
             throw new InvalidSettingsException("Invalid column name policy");
         }
-        m_windowPanel.validate();
+        // TODO: m_windowPanel.validate();
         m_manualAggPanel.validate();
         m_patternAggPanel.validate();
         m_typeAggPanel.validate();

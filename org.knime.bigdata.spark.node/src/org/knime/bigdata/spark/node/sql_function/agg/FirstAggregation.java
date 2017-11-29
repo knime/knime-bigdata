@@ -68,11 +68,6 @@ public class FirstAggregation implements SparkSQLAggregationFunction {
     }
 
     @Override
-    public DataType getType(final DataType originalType) {
-        return originalType;
-    }
-
-    @Override
     public boolean isCompatible(final DataType type) {
         return true;
     }

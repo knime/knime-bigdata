@@ -32,7 +32,10 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionProviderRegistry;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
@@ -102,6 +105,18 @@ public class SparkSQLFunctionCombinationProvider implements AggregationFunctionP
      */
     public String getSparkSideFactory(final String id) {
         return m_sparkFactories.get(id);
+    }
+
+    /**
+     * Returns result field of a given input table spec and job config.
+     * @param sparkVersion spark version to work on
+     * @param inputSpec input table spec containing referenced columns from job input
+     * @param input function input
+     * @return result field of function or null if unable to compute
+     */
+    public IntermediateField getFunctionResultField(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+        final SparkSQLFunctionJobInput input) {
+        return SparkSQLFunctionProviderRegistry.getInstance().getFunctionResultField(sparkVersion, inputSpec, input);
     }
 
     /** @return true if a spark provider with count function was found */

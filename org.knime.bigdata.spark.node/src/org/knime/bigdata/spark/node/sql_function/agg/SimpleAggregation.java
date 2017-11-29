@@ -27,12 +27,11 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 
 /**
+ * Simple aggregation function without any settings.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SimpleAggregation extends NoSettingsFunction implements SparkSQLAggregationFunction {
-
-    private final DataType m_returnType;
     private final Class<DataValue> m_compatibleClass;
 
 
@@ -43,12 +42,10 @@ public class SimpleAggregation extends NoSettingsFunction implements SparkSQLAgg
         /**
          * @param id the name of the function
          * @param description the description
-         * @param returnType the return type or <code>null</code> if the original type is returned
          * @param compatibleClasses the compatible {@link DataValue} class or <code>null</code>
          */
-        public Factory(final String id, final String description,
-            final DataType returnType, final Class<? extends DataValue> compatibleClasses) {
-            m_instance = new SimpleAggregation(id, description, returnType, compatibleClasses);
+        public Factory(final String id, final String description, final Class<? extends DataValue> compatibleClasses) {
+            m_instance = new SimpleAggregation(id, description, compatibleClasses);
         }
 
         /**
@@ -70,16 +67,13 @@ public class SimpleAggregation extends NoSettingsFunction implements SparkSQLAgg
     /**
      * @param name the name of the function
      * @param description the description
-     * @param returnType the return type or <code>null</code> if the original type is returned
      * @param compatibleClass the compatible {@link DataValue} class or <code>null</code>
      *
      */
     @SuppressWarnings("unchecked")
-    public SimpleAggregation(final String name, final String description,
-        final DataType returnType, final Class<? extends DataValue> compatibleClass) {
+    public SimpleAggregation(final String name, final String description, final Class<? extends DataValue> compatibleClass) {
 
         super(name, description);
-        m_returnType = returnType;
         m_compatibleClass = (Class<DataValue>)compatibleClass;
     }
 
@@ -89,15 +83,7 @@ public class SimpleAggregation extends NoSettingsFunction implements SparkSQLAgg
      * @param description the description
      */
     public SimpleAggregation(final String name, final String description) {
-        this(name, description, null, null);
-    }
-
-    @Override
-    public DataType getType(final DataType originalType) {
-        if (m_returnType == null) {
-            return originalType;
-        }
-        return m_returnType;
+        this(name, description, null);
     }
 
     @Override

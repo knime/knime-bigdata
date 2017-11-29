@@ -48,7 +48,6 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
     private final String m_id;
     private final String m_label;
     private final String m_description;
-    private final DataType m_returnType;
     private final Class<DataValue> m_compatibleClass;
 
     private final SettingsModelString m_otherColumnModel;
@@ -58,22 +57,17 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
     public static class Factory implements SparkSQLFunctionDialogFactory<SparkSQLAggregationFunction> {
         private final String m_id;
         private final String m_description;
-        private final DataType m_returnType;
         private final Class<DataValue> m_compatibleClass;
 
         /**
          * @param id the id of the function
          * @param description the description
-         * @param returnType the return type or <code>null</code> if the original type is returned
          * @param compatibleClass the compatible {@link DataValue} class or <code>null</code>
          */
         @SuppressWarnings("unchecked")
-        public Factory(final String id, final String description,
-            final DataType returnType, final Class<? extends DataValue> compatibleClass) {
-
+        public Factory(final String id, final String description, final Class<? extends DataValue> compatibleClass) {
             m_id = id;
             m_description = description;
-            m_returnType = returnType;
             m_compatibleClass = (Class<DataValue>)compatibleClass;
         }
 
@@ -83,7 +77,7 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
          * @param description the description
          */
         public Factory(final String id, final String description) {
-            this(id, description, null, null);
+            this(id, description, null);
         }
 
         @Override
@@ -91,24 +85,20 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
 
         @Override
         public SparkSQLAggregationFunction getInstance() {
-            return new TwoColumnAggregation(m_id, m_description, m_returnType, m_compatibleClass);
+            return new TwoColumnAggregation(m_id, m_description, m_compatibleClass);
         }
     }
 
     /**
      * @param name the name of the function
      * @param description the description
-     * @param returnType the return type or <code>null</code> if the original type is returned
      * @param compatibleClass the compatible {@link DataValue} class or <code>null</code>
      */
     @SuppressWarnings("unchecked")
-    public TwoColumnAggregation(final String name, final String description,
-        final DataType returnType, final Class<? extends DataValue> compatibleClass) {
-
+    public TwoColumnAggregation(final String name, final String description, final Class<? extends DataValue> compatibleClass) {
         m_id = name;
         m_label = name;
         m_description = description;
-        m_returnType = returnType;
         m_compatibleClass = (Class<DataValue>)compatibleClass;
 
         m_otherColumnModel = new SettingsModelString("otherColumn", "");
@@ -122,19 +112,11 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
      * @param description the description
      */
     public TwoColumnAggregation(final String name, final String description) {
-        this(name, description, null, null);
+        this(name, description, null);
     }
 
     @Override
     public void setColumnSpec(final DataColumnSpec colSpec) {
-    }
-
-    @Override
-    public DataType getType(final DataType originalType) {
-        if (m_returnType == null) {
-            return originalType;
-        }
-        return m_returnType;
     }
 
     @Override

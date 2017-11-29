@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20171101
+version: knimebd-20171128
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -80,6 +80,7 @@ mavenBlacklist:
   - commons-httpclient:commons-httpclient:jar:.*
   - commons-logging:commons-logging:jar:.*
   - commons-lang:commons-lang:jar:.*
+  - org.apache.commons:commons-lang3:jar:.*
   - commons-codec:commons-codec:jar:.*
   - commons-collections:commons-collections:jar:.*
   - commons-io:commons-io:jar:.*
@@ -274,6 +275,9 @@ requireBundleOverrides:
     
   - coordPattern: commons-lang:commons-lang:jar:.*
     replacement: org.apache.commons.lang;bundle-version="[2.6,3)"
+
+  - coordPattern: org.apache.commons:commons-lang3:jar:.*
+    replacement: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)"
     
   - coordPattern: org.apache.commons:commons-compress:jar:.*
     replacement: org.apache.commons.compress;bundle-version="[1.12,2)"

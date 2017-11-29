@@ -26,6 +26,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.NodeLogger;
@@ -43,7 +45,11 @@ public class SparkSQLFunctionProviderRegistry extends SparkProviderRegistry<Spar
 
     private static SparkSQLFunctionProviderRegistry instance;
 
+    /** function name per factory per spark version */
     private static final Map<SparkVersion, HashMap<String, String>> m_functionsPerVersion = new LinkedHashMap<>();
+
+    /** factory provider per factory name per spark version */
+    private static final Map<SparkVersion, HashMap<String, SparkSQLFunctionProvider>> m_factoryProvider = new LinkedHashMap<>();
 
     private SparkSQLFunctionProviderRegistry() {}
 
@@ -62,25 +68,35 @@ public class SparkSQLFunctionProviderRegistry extends SparkProviderRegistry<Spar
 
     @Override
     protected void addProvider(final SparkSQLFunctionProvider provider) {
-        final String factoryNameClassName = provider.getFunctionFactoryClassName();
+        final String factoryClassName = provider.getFunctionFactoryClassName();
         final Set<SparkVersion> sparkVersions = provider.getSupportedSparkVersions();
 
         for (SparkVersion sparkVersion : sparkVersions) {
             if (!m_functionsPerVersion.containsKey(sparkVersion)) {
                 m_functionsPerVersion.put(sparkVersion, new HashMap<String, String>());
+                m_factoryProvider.put(sparkVersion, new HashMap<String, SparkSQLFunctionProvider>());
             }
 
             final HashMap<String, String> functionsPerVersion = m_functionsPerVersion.get(sparkVersion);
             for (String function : provider.get()) {
                 if (functionsPerVersion.containsKey(function)) {
                     String msg = "Duplicated Spark Function Provider detected on function " + function
-                            + " (Factories: " + functionsPerVersion.get(function) + " vs. " + factoryNameClassName + ")";
+                            + " (Factories: " + functionsPerVersion.get(function) + " vs. " + factoryClassName + ")";
                     LOGGER.warn(msg);
                     throw new IllegalStateException(msg);
                 }
 
-                functionsPerVersion.put(function, factoryNameClassName);
+                functionsPerVersion.put(function, factoryClassName);
             }
+
+            final HashMap<String, SparkSQLFunctionProvider> factoryProvider = m_factoryProvider.get(sparkVersion);
+            if (factoryProvider.containsKey(factoryClassName)) {
+                String msg = "Duplicated Spark Function Factory detected (Spark version: " + sparkVersion
+                    + ", factory: " + factoryClassName + ")";
+                LOGGER.warn(msg);
+                throw new IllegalStateException(msg);
+            }
+            factoryProvider.put(factoryClassName, provider);
         }
     }
 
@@ -94,5 +110,18 @@ public class SparkSQLFunctionProviderRegistry extends SparkProviderRegistry<Spar
         } else {
             return Collections.emptyMap();
         }
+    }
+
+    /**
+     * Returns result field of a given input table spec and job config.
+     * @param sparkVersion spark version to work on
+     * @param inputSpec input table spec containing referenced columns from job input
+     * @param input function input
+     * @return result field of function or null if unable to compute
+     */
+    public IntermediateField getFunctionResultField(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+        final SparkSQLFunctionJobInput input) {
+
+        return m_factoryProvider.get(sparkVersion).get(input.getFactoryName()).getFunctionResultField(sparkVersion, inputSpec, input);
     }
 }

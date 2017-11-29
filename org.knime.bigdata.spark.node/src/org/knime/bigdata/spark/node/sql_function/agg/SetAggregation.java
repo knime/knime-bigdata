@@ -24,7 +24,6 @@ import org.knime.bigdata.spark.node.sql_function.NoSettingsFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 import org.knime.core.data.DataType;
-import org.knime.core.data.collection.SetCell;
 
 /**
  * Aggregates all values of a given column into a set.
@@ -46,11 +45,6 @@ public class SetAggregation extends NoSettingsFunction implements SparkSQLAggreg
     /** Default constructor */
     public SetAggregation() {
         super(ID, DESC);
-    }
-
-    @Override
-    public DataType getType(final DataType originalType) {
-        return SetCell.getCollectionType(originalType);
     }
 
     @Override

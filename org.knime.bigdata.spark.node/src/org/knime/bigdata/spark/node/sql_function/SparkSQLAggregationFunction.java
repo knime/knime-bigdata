@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.node.sql_function;
 
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataType;
 import org.knime.core.node.port.database.aggregation.AggregationFunction;
 
 /**
@@ -29,13 +28,6 @@ import org.knime.core.node.port.database.aggregation.AggregationFunction;
  * @author Sascha Wolke, KNIME GmbH
  */
 public interface SparkSQLAggregationFunction extends SparkSQLFunction, AggregationFunction  {
-
-    /**
-     * Return type of this function.
-     * @param originalType Type of the column that will be aggregated
-     * @return The type of the aggregated column or null if unknown
-     */
-    public DataType getType(final DataType originalType);
 
     /**
      * Set column spec to aggregate on. This method might never be called if this function does not get associated with

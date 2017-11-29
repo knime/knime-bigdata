@@ -34,7 +34,7 @@ public class Spark_2_1_SQLFunctionFactoryProvider extends SparkSQLFunctionProvid
     /** Default constructor */
     public Spark_2_1_SQLFunctionFactoryProvider() {
         super(new FixedVersionCompatibilityChecker(SparkVersion.V_2_1),
-            Spark_2_1_SQLFunctionFactory.class,
+            new Spark_2_1_SQLFunctionFactory(),
             Spark_2_1_SQLFunctionFactory.SUPPORTED_FUNCTIONS);
     }
 }

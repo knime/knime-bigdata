@@ -78,6 +78,7 @@
                 The name of the COUNT(*) column. Only enabled if the "Add COUNT(*)" option is selected.
             </option>
         </tab>
+        <!--// TODO:
         <tab name="Time Based Window">
             <option name="Enable">
                 Enable row grouping by a time based window.
@@ -109,6 +110,7 @@
                 <i>start time</i> as <i>15 minutes</i>.
             </option>
         </tab>
+        -->
         <tab name="Manual Aggregation">
             <option name="Aggregation settings">
                 Select one or more column(s) for aggregation from the available 

@@ -35,11 +35,13 @@ import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.converter.spark.AnyIntermediateToSparkConverter;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverter;
+import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateArrayDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark2_0.converter.type.SerializableTypeProxies;
 import org.knime.bigdata.spark2_0.converter.type.SerializableTypeProxies.ArrayTypeProxy;
 
@@ -75,7 +77,19 @@ public class TypeConverters {
         }
     }
 
-    public IntermediateToSparkConverter<? extends DataType> getDefaultConverter() {
+    /**
+     * Ensure that all converters of given spark version from the registry are loaded.
+     * This method works only in KNIME and not on Spark side.
+     * @param sparkVersion
+     */
+    @SuppressWarnings("unchecked")
+    public static void ensureConvertersInitialized(final SparkVersion sparkVersion) {
+        TypeConverters.ensureConvertersInitialized(
+            (List<IntermediateToSparkConverter<DataType>>)
+                ((Object) IntermediateToSparkConverterRegistry.getConverters(sparkVersion)));
+    }
+
+    public static IntermediateToSparkConverter<? extends DataType> getDefaultConverter() {
         return getConverter(IntermediateDataTypes.ANY);
     }
 

@@ -21,6 +21,9 @@
 package org.knime.bigdata.spark.core.sql_function;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Factory of spark functions.
@@ -36,4 +39,13 @@ public interface SparkSQLFunctionFactory<T> {
      * @return spark column expression with requested function
      */
     public T getFunctionColumn(final SparkSQLFunctionJobInput input);
+
+    /**
+     * Returns result field of a given input table spec and job config.
+     * @param sparkVersion spark version to work on
+     * @param interSpec input table spec containing referenced columns from job input
+     * @param input function input
+     * @return result field of function or null if unable to compute
+     */
+    public IntermediateField getFunctionResultField(final SparkVersion sparkVersion, final IntermediateSpec interSpec, final SparkSQLFunctionJobInput input);
 }

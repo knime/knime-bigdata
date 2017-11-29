@@ -24,7 +24,6 @@ import org.knime.bigdata.spark.node.sql_function.NoSettingsFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 import org.knime.core.data.DataType;
-import org.knime.core.data.collection.ListCell;
 
 /**
  * Aggregates all values of a given column into a list.
@@ -46,11 +45,6 @@ public class ListAggregation extends NoSettingsFunction implements SparkSQLAggre
     /** Default constructor */
     public ListAggregation() {
         super(ID, DESC);
-    }
-
-    @Override
-    public DataType getType(final DataType originalType) {
-        return ListCell.getCollectionType(originalType);
     }
 
     @Override

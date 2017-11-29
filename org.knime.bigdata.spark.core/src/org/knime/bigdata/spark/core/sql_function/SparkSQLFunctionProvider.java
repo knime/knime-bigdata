@@ -20,8 +20,11 @@
  */
 package org.knime.bigdata.spark.core.sql_function;
 
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Provides spark function and a factory name to use them in spark jobs.
@@ -29,22 +32,35 @@ import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
  * @author Sascha Wolke, KNIME GmbH
  */
 public abstract class SparkSQLFunctionProvider extends DefaultSparkProvider<String> {
-    private final Class<? extends SparkSQLFunctionFactory<?>> m_factoryClass;
+    private final SparkSQLFunctionFactory<?> m_factory;
 
     /**
      * @param checker supported spark version checker
-     * @param factoryClass spark side factory class
+     * @param factory spark side factory
      * @param functions supported aggregation function identifiers
      */
     public SparkSQLFunctionProvider(final CompatibilityChecker checker,
-        final Class<? extends SparkSQLFunctionFactory<?>> factoryClass, final String functions[]) {
+        final SparkSQLFunctionFactory<?> factory, final String functions[]) {
 
         super(checker, functions);
-        m_factoryClass = factoryClass;
+        m_factory = factory;
     }
 
     /** @return class name of function factory */
     public String getFunctionFactoryClassName() {
-        return m_factoryClass.getCanonicalName();
+        return m_factory.getClass().getCanonicalName();
+    }
+
+    /**
+     * Returns result field of a given input table spec and job config.
+     * @param sparkVersion spark version to work on
+     * @param inputSpec input table spec containing referenced columns from job input
+     * @param input function input
+     * @return result field of function or null if unable to compute
+     */
+    public IntermediateField getFunctionResultField(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+        final SparkSQLFunctionJobInput input) {
+
+        return m_factory.getFunctionResultField(sparkVersion, inputSpec, input);
     }
 }

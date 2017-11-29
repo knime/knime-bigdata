@@ -60,11 +60,6 @@ public class SumAggregation extends NoSettingsFunction implements SparkSQLAggreg
     }
 
     @Override
-    public DataType getType(final DataType originalType) {
-        return originalType;
-    }
-
-    @Override
     public boolean isCompatible(final DataType type) {
         return type.isCompatible(DoubleValue.class);
     }

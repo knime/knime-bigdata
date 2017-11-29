@@ -52,27 +52,24 @@ import java.util.List;
 import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionJobInput;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionSettings;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionRow;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DataType;
-import org.knime.core.data.def.LongCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -91,7 +88,6 @@ import org.knime.core.node.port.PortType;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkGroupByNodeModel extends SparkNodeModel {
-
     /** The unique Spark job id. */
     public static final String JOB_ID = SparkGroupByNodeModel.class.getCanonicalName();
 
@@ -110,7 +106,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
      */
     static final String CFG_COLUMN_NAME_POLICY = "columnNamePolicy";
 
-    private final WindowFunctionSettings m_windowSettings = new WindowFunctionSettings();
+//    private final WindowFunctionSettings m_windowSettings = new WindowFunctionSettings();
 
     private final SettingsModelBoolean m_addCountStar = new SettingsModelBoolean(CFG_ADD_COUNT_STAR, false);
 
@@ -166,16 +162,19 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
             setWarningMessage("No Spark count(*) function provider exists.");
         }
 
-        if (m_windowSettings.isEnabled() && !functionProvider.hasWindowFunction()) {
-            setWarningMessage("No Spark window function provider exists.");
-        }
+//        if (m_windowSettings.isEnabled() && !functionProvider.hasWindowFunction()) {
+//            setWarningMessage("No Spark window function provider exists.");
+//        }
 
         if (!invalidColAggrs.isEmpty()) {
             setWarningMessage(invalidColAggrs.size() + " aggregation functions ignored due to incompatible columns.");
         }
 
-        return new PortObjectSpec[]{ new SparkDataPortObjectSpec(sparkSpec.getContextID(),
-            createOutSpec(tableSpec, functionProvider)) };
+        final IntermediateSpec inputSpec = SparkDataTableUtil.toIntermediateSpec(tableSpec);
+        final DataTableSpec outputSpec = createOutputSpec(sparkVersion, inputSpec,
+            createGroupByJobInput(tableSpec, functionProvider), createAggJobInput(tableSpec, functionProvider), functionProvider);
+
+        return new PortObjectSpec[] { new SparkDataPortObjectSpec(sparkSpec.getContextID(), outputSpec) };
     }
 
     @Override
@@ -183,21 +182,22 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         final SparkDataPortObject sparkPort = (SparkDataPortObject) inData[0];
         final SparkContextID contextID = sparkPort.getContextID();
         final DataTableSpec tableSpec = sparkPort.getTableSpec();
+        final IntermediateSpec inputSpec = SparkDataTableUtil.toIntermediateSpec(tableSpec);
         final SparkVersion sparkVersion = SparkContextUtil.getSparkVersion(sparkPort.getContextID());
         final SparkSQLFunctionCombinationProvider functionProvider = new SparkSQLFunctionCombinationProvider(sparkVersion);
         final String inputObject = sparkPort.getData().getID();
         final String outputObject = SparkIDs.createSparkDataObjectID();
-        final SparkGroupByJobInput jobInput = createjobInput(tableSpec, functionProvider, inputObject, outputObject);
+        final List<SparkSQLFunctionJobInput> groupByFunctions = createGroupByJobInput(tableSpec, functionProvider);
+        final List<SparkSQLFunctionJobInput> aggFunctions = createAggJobInput(tableSpec, functionProvider);
+        final DataTableSpec outputSpec = createOutputSpec(sparkVersion, inputSpec,
+            groupByFunctions, aggFunctions, functionProvider);
+        final SparkGroupByJobInput jobInput = new SparkGroupByJobInput(inputObject, outputObject,
+            groupByFunctions.toArray(new SparkSQLFunctionJobInput[0]),
+            aggFunctions.toArray(new SparkSQLFunctionJobInput[0]));
 
         exec.setMessage("Executing spark job...");
-        final JobOutput jobOutput = SparkContextUtil
-                .getJobRunFactory(contextID, JOB_ID)
-                .createRun(jobInput)
-                .run(contextID, exec);
-        final DataTableSpec outputSpec = KNIMEToIntermediateConverterRegistry
-                .convertSpec(jobOutput.getSpec(outputObject));
-        final SparkDataTable resultTable =
-            new SparkDataTable(contextID, outputObject, outputSpec);
+        SparkContextUtil.getJobRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
+        final SparkDataTable resultTable = new SparkDataTable(contextID, outputObject, outputSpec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
 
         return new PortObject[] { sparkObject };
@@ -209,7 +209,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         m_addCountStar.saveSettingsTo(settings);
         m_countStarColName.saveSettingsTo(settings);
         m_groupByCols.saveSettingsTo(settings);
-        m_windowSettings.saveSettingsTo(settings);
+//        m_windowSettings.saveSettingsTo(settings);
         m_columnNamePolicy.saveSettingsTo(settings);
         m_aggregationFunctionSettings.saveSettingsTo(settings);
     }
@@ -217,7 +217,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_groupByCols.loadSettingsFrom(settings);
-        m_windowSettings.loadSettingsFrom(settings);
+//        m_windowSettings.loadSettingsFrom(settings);
 
         m_addCountStar.loadSettingsFrom(settings);
         m_countStarColName.loadSettingsFrom(settings);
@@ -230,7 +230,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_groupByCols.validateSettings(settings);
-        m_windowSettings.validateSettings(settings);
+//        m_windowSettings.validateSettings(settings);
 
         final boolean addCountStar =
                 ((SettingsModelBoolean)m_addCountStar.createCloneWithValidatedValue(settings)).getBooleanValue();
@@ -250,69 +250,31 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
     }
 
     /**
-     * @param inSpec Spec of the input table
-     * @param functionProvider
-     * @return Spec of the output table
-     * @throws InvalidSettingsException if settings do not match the input specification
+     * @return output spec of the Spark GroupBy job
      */
-    private DataTableSpec createOutSpec(final DataTableSpec inSpec,
+    private DataTableSpec createOutputSpec(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+        final List<SparkSQLFunctionJobInput> groupByFunctions, final List<SparkSQLFunctionJobInput> aggFunctions,
         final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
 
-        final List<DataColumnSpec> colSpecs = new ArrayList<>();
-        final ColumnNamePolicy columnNamePolicy = ColumnNamePolicy.getPolicy4Label(m_columnNamePolicy.getStringValue());
-
-        // Add all group by columns
-        for (String col : m_groupByCols.getIncludeList()) {
-            final DataColumnSpec columnSpec = inSpec.getColumnSpec(col);
-            if (columnSpec == null) {
-                throw new InvalidSettingsException("Group column '" + col + "' not found in input table");
-            }
-            colSpecs.add(columnSpec);
+        final List<SparkSQLFunctionJobInput> allFunctions = new ArrayList<>();
+        allFunctions.addAll(groupByFunctions);
+        allFunctions.addAll(aggFunctions);
+        final SparkSQLFunctionJobInput functionInput[] = allFunctions.toArray(new SparkSQLFunctionJobInput[0]);
+        final IntermediateField outputFields[] = new IntermediateField[functionInput.length];
+        for (int i = 0; i < functionInput.length; i++) {
+            final SparkSQLFunctionJobInput funcInput = functionInput[i];
+            outputFields[i] = functionProvider
+                    .getFunctionResultField(sparkVersion, inputSpec, funcInput);
         }
 
-        // Window over time
-        if (m_windowSettings.isEnabled()) {
-            final String columnName = m_windowSettings.getColumnName(columnNamePolicy);
-            colSpecs.add(new DataColumnSpecCreator(columnName, StringCell.TYPE).createSpec());
-        }
-
-        // count(*)
-        if (m_addCountStar.getBooleanValue()) {
-            colSpecs.add(new DataColumnSpecCreator(m_countStarColName.getStringValue(), LongCell.TYPE).createSpec());
-        }
-
-        // Add aggregated columns
-        for (int i = 0; i < m_aggregationFunction2Use.size(); i++) {
-            final ColumnAggregationFunctionRow row = m_aggregationFunction2Use.get(i);
-            final String col = row.getColumnSpec().getName();
-
-            if (inSpec.getColumnSpec(col) == null) {
-                throw new InvalidSettingsException("Column '" + col + "' for aggregation function "
-                        + row.getFunction().getLabel() + " does not exist");
-            }
-
-            // Get type of column after aggregation
-            final DataType type = row.getFunction().getType(inSpec.getColumnSpec(col).getType());
-            colSpecs.add(new DataColumnSpecCreator(generateColumnName(columnNamePolicy, inSpec, row), type).createSpec());
-        }
-
-        return new DataTableSpec(colSpecs.toArray(new DataColumnSpec[colSpecs.size()]));
+        return KNIMEToIntermediateConverterRegistry.convertSpec(new IntermediateSpec(outputFields));
     }
 
-    /**
-     * Creates a job input for the Spark GroupBy job.
-     *
-     * @param inSpec Spec of the input table
-     * @param functionProvider
-     * @param checkRetrieveMetadata
-     * @return spark group by job input
-     * @throws InvalidSettingsException if settings do not match the input specification
-     */
-    private SparkGroupByJobInput createjobInput(final DataTableSpec inSpec, final SparkSQLFunctionCombinationProvider functionProvider,
-        final String inputObject, final String outputObject) throws InvalidSettingsException {
+    /** @return group by column function input */
+    private List<SparkSQLFunctionJobInput> createGroupByJobInput(final DataTableSpec inSpec,
+        final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
 
         final List<SparkSQLFunctionJobInput> groupBy = new ArrayList<>();
-        final List<SparkSQLFunctionJobInput> aggFunc = new ArrayList<>();
         final ColumnNamePolicy columnNamePolicy = ColumnNamePolicy.getPolicy4Label(m_columnNamePolicy.getStringValue());
 
         // Add all group by columns
@@ -326,11 +288,21 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         }
 
         // Window over Time
-        if (m_windowSettings.isEnabled()) {
-            final String columnName = m_windowSettings.getColumnName(columnNamePolicy);
-            final String factoryName = functionProvider.getSparkSideFactory("window");
-            groupBy.add(m_windowSettings.getSparkJobInput(factoryName, columnName));
-        }
+//        if (m_windowSettings.isEnabled()) {
+//            final String columnName = m_windowSettings.getColumnName(columnNamePolicy);
+//            final String factoryName = functionProvider.getSparkSideFactory("window");
+//            groupBy.add(m_windowSettings.getSparkJobInput(factoryName, columnName));
+//        }
+
+        return groupBy;
+    }
+
+    /** @return aggregation column function input */
+    private List<SparkSQLFunctionJobInput> createAggJobInput(final DataTableSpec inSpec,
+        final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
+
+        final List<SparkSQLFunctionJobInput> aggFunc = new ArrayList<>();
+        final ColumnNamePolicy columnNamePolicy = ColumnNamePolicy.getPolicy4Label(m_columnNamePolicy.getStringValue());
 
         // Add count(*) aggregations
         if (functionProvider.hasCountFunction() && m_addCountStar.getBooleanValue()) {
@@ -357,9 +329,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
             aggFunc.add(function.getSparkJobInput(factory, columnName, outputName, inSpec));
         }
 
-        return new SparkGroupByJobInput(inputObject, outputObject,
-            groupBy.toArray(new SparkSQLFunctionJobInput[0]),
-            aggFunc.toArray(new SparkSQLFunctionJobInput[0]));
+        return aggFunc;
     }
 
     private SparkSQLFunctionJobInput getColumnFuncInput(final SparkSQLFunctionCombinationProvider functionProvider, final String columnName) {
