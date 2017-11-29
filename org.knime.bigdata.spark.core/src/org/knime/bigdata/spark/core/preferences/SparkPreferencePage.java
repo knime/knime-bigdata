@@ -139,7 +139,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         image.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label text = new Label(deprecationContainer, SWT.NONE);
-        text.setText("Default spark context settings defined on this page are\nused as inital values in the Create Spark Context Node.");
+        text.setText("The settings on this page are only used as inital values in the Create Spark Context node.");
         text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
         /////////////// Connection settings ///////////////

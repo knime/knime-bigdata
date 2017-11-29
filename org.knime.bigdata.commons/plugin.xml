@@ -13,7 +13,7 @@
             category="org.knime.workbench.ui.preferences"
             class="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
             id="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            name="KNIME Big Data Extensions">
+            name="Big Data">
       </page>
 
       <page
