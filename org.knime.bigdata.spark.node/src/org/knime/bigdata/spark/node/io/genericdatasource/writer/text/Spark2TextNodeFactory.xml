@@ -8,7 +8,7 @@
 		<intro>
 			Writes a Spark DataFrame/RDD with a single string column into a text file.
 			
-			<p><b>Notice:</b> This feature requires at least Spark 1.6.</p>
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.6.</p>
 		</intro>
 
 		<option name="Save mode">How to handle existing data.</option>

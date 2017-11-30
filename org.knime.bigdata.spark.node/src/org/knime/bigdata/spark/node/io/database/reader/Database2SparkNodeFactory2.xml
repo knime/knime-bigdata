@@ -9,7 +9,7 @@
 			Reads a database query/table into a Spark RDD/DataFrame.
 			See <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#jdbc-to-other-databases">Spark documentation</a> for more information.
 			
-			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
 		</intro>
 		
 		<option name="Driver">

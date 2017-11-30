@@ -10,7 +10,7 @@
 			
 			See <a href="https://fasterxml.github.io/jackson-core/javadoc/2.4/com/fasterxml/jackson/core/JsonParser.Feature.html">Jackson JSON Parser documentation</a> for more information.
 			
-			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
 		</intro>
 		
 		<option name="Sampling ratio">

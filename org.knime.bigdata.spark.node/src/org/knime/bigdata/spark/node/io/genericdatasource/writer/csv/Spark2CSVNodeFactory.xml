@@ -9,7 +9,7 @@
 			Writes a Spark DataFrame/RDD into a CSV file.
 			See <a href="https://github.com/databricks/spark-csv">CSV Data Source documentation</a> for more information.
 			
-			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
+			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
 		</intro>
 
 		<option name="Save mode">How to handle existing data.</option>
