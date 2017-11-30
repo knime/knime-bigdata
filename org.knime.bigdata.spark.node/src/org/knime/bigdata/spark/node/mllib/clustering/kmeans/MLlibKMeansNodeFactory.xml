@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-clustering.html">K-means</a> clustering algorithm.
+			<a href="http://spark.apache.org/docs/latest/mllib-clustering.html">K-means</a> clustering algorithm.
 			It outputs the cluster centers for a predefined number of clusters (no
 			dynamic number of clusters). K-means performs a crisp clustering that
 			assigns a data vector to exactly one cluster. The data is not normalized by the node (if required, you

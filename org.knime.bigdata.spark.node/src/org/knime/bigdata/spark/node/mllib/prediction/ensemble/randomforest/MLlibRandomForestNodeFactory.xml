@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-ensembles.html#random-forests">Random Forests</a> algorithm.
+			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#random-forests">Random Forests</a> algorithm.
 			<p>
             Please note that all data must be numeric, including the label column. 
             Use the Spark Category To Number nodes to convert nominal values to
@@ -44,7 +44,7 @@
                  <li>entropy</li>
 			  </ul>
 			  For more details on the available methods see the 
-			  <a href="http://spark.apache.org/docs/1.2.0/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
+			  <a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
 			  Only available for classifications.
 		</option>
         <option name="Seed">Random seed for bootstrapping and choosing feature subsets.</option>        		

@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-naive-bayes.html">Naive Bayes</a> algorithm.
+			<a href="http://spark.apache.org/docs/latest/mllib-naive-bayes.html">Naive Bayes</a> algorithm.
 			It outputs the original data and the Naive Bayes predictions for the 
 			result preview as well as the learned model for later application.
 			<p>

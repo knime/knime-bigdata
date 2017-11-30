@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-ensembles.html#gradient-boosted-trees-gbts">Gradient-Boosted Trees</a> (GBTs) algorithm.
+			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#gradient-boosted-trees-gbts">Gradient-Boosted Trees</a> (GBTs) algorithm.
 			<p>
 			<b>Note:</b> GBTs do not yet support multiclass classification. The class column needs to contain 0 and 1
 			as class labels. For multiclass problems, please use decision trees or Random Forests.
@@ -32,7 +32,7 @@
 		<option name="Loss function">Loss function used for minimization during gradient boosting. 
 		Available functions: Log Loss, Squared Error and Absolute Error.
 		For details about the loss functions see the 
-		<a href="http://spark.apache.org/docs/1.2.0/mllib-ensembles.html#losses">Losses</a> documentation.
+		<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#losses">Losses</a> documentation.
 		</option>
         <option name="Is classification">Select this option for binary classification.</option>
         <option name="Learning rate">Learning rate for shrinking the contribution of each estimator. 

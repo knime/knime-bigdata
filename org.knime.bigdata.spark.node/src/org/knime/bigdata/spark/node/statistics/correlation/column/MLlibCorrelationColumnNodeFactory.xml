@@ -7,7 +7,7 @@
     <fullDescription>
         <intro>
             This node computes the correlation coefficient for two selected input columns using the 
-            <a href="http://spark.apache.org/docs/1.2.0/mllib-statistics.html#correlations">MLlib Statistics</a> package.
+            <a href="http://spark.apache.org/docs/latest/mllib-statistics.html#correlations">MLlib Statistics</a> package.
 		</intro>
         <option name="Correlation method">
           <ul>

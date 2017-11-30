@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#linear-support-vector-machines-svms">Linear SVM</a> algorithm.
+			<a href="http://spark.apache.org/docs/latest/mllib-linear-methods.html#linear-support-vector-machines-svms">Linear SVM</a> algorithm.
 			It outputs the the learned model for later application.
 			<p>
 			Please note that all data must be numeric, including the label column. 
@@ -22,7 +22,7 @@
         <option name="Regularizer">
             The purpose of the <a href="http://en.wikipedia.org/wiki/Regularization_(mathematics)">regularizer</a> is 
             to encourage simple models and avoid overfitting. For more details on supported regularizers see the 
-            <a href="http://spark.apache.org/docs/1.2.0/mllib-linear-methods.html#regularizers">Regularizers</a>
+            <a href="http://spark.apache.org/docs/latest/mllib-linear-methods.html#regularizers">Regularizers</a>
             section of the MLlib documentation.
         </option>
         <option name="Regularization">

@@ -7,7 +7,7 @@
 	<fullDescription>
 		<intro>
 			This node utilizes the Apache Spark 
-			<a href="http://spark.apache.org/docs/1.2.0/mllib-dimensionality-reduction.html#principal-component-analysis-pca">Principal component analysis (PCA)</a> implementation.
+			<a href="http://spark.apache.org/docs/latest/mllib-dimensionality-reduction.html#principal-component-analysis-pca">Principal component analysis (PCA)</a> implementation.
 			
 		</intro>
 

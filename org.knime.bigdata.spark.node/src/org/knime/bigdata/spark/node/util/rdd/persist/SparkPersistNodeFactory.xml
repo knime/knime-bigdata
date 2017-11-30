@@ -8,7 +8,7 @@
         <intro>
             This node persists (caches) the incoming SparkDataFrame/RDD using the specified persistence level. The different storage levels
             are described in detail in the 
-            <a href="http://spark.apache.org/docs/1.2.0/programming-guide.html#DataFrame/RDD-persistence">Spark documentation</a>.
+            <a href="http://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence">Spark documentation</a>.
             <p>
             Caching Spark DataFrames/RDDs might speed up operations that need to access the same DataFrame/RDD several times e.g. when 
             working with the same DataFrame/RDD within a loop body in a KNIME workflow.
@@ -25,7 +25,7 @@
                 </li>
                 <li><b>Memory only serialized:</b> Store DataFrame/RDD as serialized Java objects (one byte array per partition). 
                 This is generally more space-efficient than deserialized objects, especially when using a 
-                <a href="http://spark.apache.org/docs/1.2.0/tuning.html">fast serializer</a>, but more CPU-intensive 
+                <a href="http://spark.apache.org/docs/latest/tuning.html">fast serializer</a>, but more CPU-intensive 
                 to read.</li>
                 <li><b>Memory and disk serialized:</b> Similar to MEMORY_ONLY_SER, but spill partitions that don't fit 
                 in memory to disk instead of recomputing them on the fly each time they're needed.</li>
