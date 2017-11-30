@@ -42,7 +42,7 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Spark RDD">Spark RDD to take the sample from.</inPort>
+        <inPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD to take the sample from.</inPort>
         <outPort index="0" name="First partition (as defined in dialog)">
             First partition (as defined in dialog).</outPort>
         <outPort index="1" name="Second partition (remaining rows)">

@@ -28,7 +28,7 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Spark RDD">Spark RDD whose column names should be renamed.</inPort>
-        <outPort index="0" name="Spark RDD">Spark RDD whose column names have been renamed.</outPort>
+        <inPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD whose column names should be renamed.</inPort>
+        <outPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD whose column names have been renamed.</outPort>
     </ports>    
 </knimeNode>

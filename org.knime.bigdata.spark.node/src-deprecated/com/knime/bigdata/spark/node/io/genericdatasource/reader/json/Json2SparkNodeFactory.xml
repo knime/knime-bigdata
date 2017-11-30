@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" deprecated="true" icon="icon.png">
 	<name>JSON to Spark</name>
-	<shortDescription>Creates a Spark RDD from given JSON file.</shortDescription>
+	<shortDescription>Creates a Spark DataFrame/RDD from given JSON file.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from given JSON file.
+			Creates a Spark DataFrame/RDD from given JSON file.
 			
 			See <a href="https://fasterxml.github.io/jackson-core/javadoc/2.4/com/fasterxml/jackson/core/JsonParser.Feature.html">Jackson JSON Parser documentation</a> for more information.
 			
@@ -38,6 +38,6 @@
 		<inPort index="1" name="Spark context">
         	Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
         </inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

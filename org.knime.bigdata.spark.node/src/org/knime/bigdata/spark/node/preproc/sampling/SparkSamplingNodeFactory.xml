@@ -41,7 +41,7 @@
     </fullDescription>
 
     <ports>
-        <inPort index="0" name="Spark RDD">Spark RDD to take the sample from.</inPort>
-        <outPort index="0" name="Sampled Spark RDD">Sample of the input Spark RDD.</outPort>
+        <inPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD to take the sample from.</inPort>
+        <outPort index="0" name="Sampled Spark DataFrame/RDD">Sample of the input Spark DataFrame/RDD.</outPort>
     </ports>
 </knimeNode>

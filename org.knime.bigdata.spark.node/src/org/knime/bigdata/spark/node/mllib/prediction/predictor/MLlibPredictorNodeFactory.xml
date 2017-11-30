@@ -13,7 +13,7 @@
 
     <ports>
         <inPort index="0" name="Spark MLlib Model">Spark MLlib model</inPort>
-        <inPort index="1" name="Input Data">Spark RDD containing the input data to predict</inPort>
+        <inPort index="1" name="Input Data">Spark DataFrame/RDD containing the input data to predict</inPort>
         <outPort index="0" name="Labeled Data">Labeled input data</outPort>
     </ports>
 </knimeNode>

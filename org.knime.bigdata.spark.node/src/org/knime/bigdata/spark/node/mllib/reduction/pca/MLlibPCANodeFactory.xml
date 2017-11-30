@@ -18,8 +18,8 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Spark RDD">Input Spark RDD</inPort>
-        <outPort index="0" name="Projected Input RDD">The input RDD projected onto the principal components.</outPort>
+		<inPort index="0" name="Spark DataFrame/RDD">Input Spark DataFrame/RDD</inPort>
+        <outPort index="0" name="Projected Input DataFrame/RDD">The input DataFrame/RDD projected onto the principal components.</outPort>
         <outPort index="1" name="Principal Component Matrix">The principal component matrix.</outPort>
 	</ports>
 </knimeNode>

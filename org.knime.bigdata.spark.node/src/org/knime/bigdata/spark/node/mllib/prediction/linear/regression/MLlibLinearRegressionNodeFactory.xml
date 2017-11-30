@@ -65,7 +65,7 @@
 	</fullDescription>
 
     <ports>
-		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame/RDD</inPort>
         <outPort index="0" name="Linear Regression Model">Spark MLlib Linear Regression Model</outPort>
     </ports>
 </knimeNode>

@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Spark to Impala</name>
-	<shortDescription>Converts an incoming Spark RDD into a Impala table</shortDescription>
+	<shortDescription>Converts an incoming Spark DataFrame/RDD into a Impala table</shortDescription>
 	<fullDescription>
 		<intro>
-			Converts an incoming Spark RDD into a Impala table
+			Converts an incoming Spark DataFrame/RDD into a Impala table
 		</intro>
 		<option name="Table name">The name of the table to create</option>
 		<option name="Drop existing table">Select this option to drop an existing table</option>
@@ -15,7 +15,7 @@
 	<ports>
 		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
 		<inPort index="0" name="JDBC connection">JDBC connection</inPort>
-		<inPort index="1" name="Spark data">Spark RDD</inPort>
+		<inPort index="1" name="Spark data">Spark DataFrame/RDD</inPort>
 		<outPort index="0" name="Hive table">Impala table query</outPort>
 	</ports>
 </knimeNode>

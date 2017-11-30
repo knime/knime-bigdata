@@ -110,12 +110,12 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteContextOnDisposeModel(),
-                "Delete context on dispose").getComponentPanel(), gbc);
+                "Delete Spark context on dispose").getComponentPanel(), gbc);
         m_settings.getDeleteContextOnDisposeModel().addChangeListener(this);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteObjectsOnDisposeModel(),
-                "Delete objects on dispose").getComponentPanel(), gbc);
+                "Delete Spark objects on dispose").getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentButtonGroup(m_settings.getSparkJobLogLevelModel(), false,

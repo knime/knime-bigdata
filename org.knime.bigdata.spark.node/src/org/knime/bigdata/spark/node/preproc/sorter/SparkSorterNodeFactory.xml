@@ -20,7 +20,7 @@
 		they are smaller than any non-missing value.</option>
 		</fullDescription>
 		<ports>
-    <inPort index="0" name = "Input RDD">Spark RDD to be sorted.</inPort>
-    <outPort index="0" name = "Sorted RDD">A sorted Spark RDD.</outPort>
+    <inPort index="0" name = "Input DataFrame/RDD">Spark DataFrame/RDD to be sorted.</inPort>
+    <outPort index="0" name = "Sorted DataFrame/RDD">A sorted Spark DataFrame/RDD.</outPort>
     </ports>
     </knimeNode>

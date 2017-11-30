@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" deprecated="true" icon="icon.png">
 	<name>Parquet to Spark</name>
-	<shortDescription>Creates a Spark RDD from given parquet file.</shortDescription>
+	<shortDescription>Creates a Spark DataFrame/RDD from given parquet file.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from given parquet file.
+			Creates a Spark DataFrame/RDD from given parquet file.
 			
 			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>		
 		</intro>
@@ -17,6 +17,6 @@
 		<inPort index="1" name="Spark context">
         	Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
         </inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

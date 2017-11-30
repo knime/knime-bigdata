@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
 	type="Other" icon="icon.png">
 	<name>CSV to Spark</name>
-	<shortDescription>Creates a Spark RDD from given CSV file.</shortDescription>
+	<shortDescription>Creates a Spark DataFrame/RDD from given CSV file.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from given CSV file.
+			Creates a Spark DataFrame/RDD from given CSV file.
 			
 			See <a href="https://github.com/databricks/spark-csv">CSV Data Source documentation</a> for more information.
 			
@@ -38,6 +38,6 @@
 	<ports>
 		<inPort index="0" name="Remote file connection">Spark compatible connection (HDFS, WebHDFS, HttpFS, S3, Blob Storage, ...)</inPort>
 		<inPort index="1" name="Spark context">Required Spark context.</inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

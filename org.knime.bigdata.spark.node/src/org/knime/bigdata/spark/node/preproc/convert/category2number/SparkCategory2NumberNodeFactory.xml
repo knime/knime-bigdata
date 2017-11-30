@@ -22,8 +22,8 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Input data">Input Spark RDD.</inPort>
-		<outPort index="0" name="Mapped input data">Mapped input Spark RDD</outPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame/RDD.</inPort>
+		<outPort index="0" name="Mapped input data">Mapped input Spark DataFrame/RDD</outPort>
 		<outPort index="1" name="PMML mapping dictionary">PMML mapping dictionary</outPort>
 	</ports>
 </knimeNode>

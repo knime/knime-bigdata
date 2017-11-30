@@ -28,7 +28,7 @@
     
     <ports>
         <inPort index="0" name="Model">PMML document containing value mapping</inPort>
-        <inPort index="1" name="Spark RDD">Spark RDD to process</inPort>
-        <outPort index="0" name="Processed Spark RDD">Spark RDD with transformed columns</outPort>
+        <inPort index="1" name="Spark DataFrame/RDD">Spark DataFrame/RDD to process</inPort>
+        <outPort index="0" name="Processed Spark DataFrame/RDD">Spark DataFrame/RDD with transformed columns</outPort>
     </ports>    
 </knimeNode>

@@ -27,7 +27,7 @@
 
     <ports>
         <inPort index="0" name="Compiled model">The output of the PMML Compiler node</inPort>
-        <inPort index="1" name="Spark RDD">The Spark RDD with the data to be scored</inPort>
+        <inPort index="1" name="Spark DataFrame/RDD">The Spark DataFrame/RDD with the data to be scored</inPort>
         <outPort index="0" name="Scored Data">The scored data</outPort>
     </ports>
 </knimeNode>

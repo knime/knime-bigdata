@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" deprecated="true" icon="icon.png">
 	<name>Database to Spark</name>
-	<shortDescription>Reads a database query/table into a Spark RDD</shortDescription>
+	<shortDescription>Reads a database query/table into a Spark DataFrame/RDD</shortDescription>
 	<fullDescription>
 		<intro>
-			Reads a database query/table into a Spark RDD.
+			Reads a database query/table into a Spark DataFrame/RDD.
 			See <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#jdbc-to-other-databases">Spark documentation</a> for more information.
 			
 			<p><b>Notice:</b> This feature requires at least Spark 1.5.</p>
@@ -25,6 +25,6 @@
 		<inPort index="1" name="Spark context">
         	Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
         </inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

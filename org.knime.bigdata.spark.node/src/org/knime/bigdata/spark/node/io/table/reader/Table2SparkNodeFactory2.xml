@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Table to Spark</name>
-	<shortDescription>Creates a Spark RDD from the KNIME data table.</shortDescription>
+	<shortDescription>Creates a Spark DataFrame/RDD from the KNIME data table.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from the KNIME data table.
+			Creates a Spark DataFrame/RDD from the KNIME data table.
 
 			<p>KNIME's <i>LocalTime</i> and <i>ZonedDateAndTime</i> data types are not supported by Spark.
 			The <i>Modify Time Zone</i> Node can be used to convert them into e.g. a compatible <i>LocalDateTime</i>.</p>
@@ -16,6 +16,6 @@
 	<ports>
 		<inPort index="0" name="KNIME table">KNIME data table</inPort>
 		<inPort index="1" name="Spark context">Required Spark context.</inPort>
-		<outPort index="0" name="Spark RDD">Spark RDD</outPort>
+		<outPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

@@ -5,25 +5,25 @@
 	<name>Spark Column Filter</name>
 	
 	<shortDescription>
-		The Spark Column Filter allows columns to be excluded from the input Spark RDD.
+		The Spark Column Filter allows columns to be excluded from the input Spark DataFrame/RDD.
 	</shortDescription>
 	
 	<fullDescription>
 		<intro>
-			This node allows columns to be filtered from the input Spark RDD while 
-			only the remaining columns are passed to the output Spark RDD. Within 
+			This node allows columns to be filtered from the input Spark DataFrame/RDD while 
+			only the remaining columns are passed to the output Spark DataFrame/RDD. Within 
 			the dialog, columns can be moved between the Include and Exclude 
 			list.
 		</intro>
 		
 		<option name="Include">
 			This list contains the column names that are included in the 
-			output Spark RDD.
+			output Spark DataFrame/RDD.
 		</option>
 		
 		<option name="Enforce Inclusion">
 			Select this option to enforce the current inclusion list to stay
-			the same even if the input Spark RDD specification changes. If some
+			the same even if the input Spark DataFrame/RDD specification changes. If some
 			of the included columns are not available anymore, a warning
 			is displayed. (New columns will automatically be added to the
 			exclusion list.)
@@ -44,13 +44,13 @@
 		</option>
 		
 	    <option name="Exclude">
-	    	This list contains the column names of the input Spark RDD that are 
+	    	This list contains the column names of the input Spark DataFrame/RDD that are 
 	    	excluded at the output table.
 	    </option>
 
         <option name="Enforce Exclusion">
             Select this option to enforce the current exclusion list to stay
-            the same even if the input Spark RDD specification changes. If some
+            the same even if the input Spark DataFrame/RDD specification changes. If some
             of the excluded columns are not available anymore, a warning
             is displayed. (New columns will automatically be added to the
             inclusion list.)
@@ -59,11 +59,11 @@
 	</fullDescription>
 	
 	<ports>
-		<inPort index="0" name="Spark RDD to be filtered">
-			Spark RDD from which columns are to be excluded.
+		<inPort index="0" name="Spark DataFrame/RDD to be filtered">
+			Spark DataFrame/RDD from which columns are to be excluded.
 		</inPort>
-		<outPort index="0" name="Filtered Spark RDD">
-			Spark RDD excluding selected columns.
+		<outPort index="0" name="Filtered Spark DataFrame/RDD">
+			Spark DataFrame/RDD excluding selected columns.
 		</outPort>
 	</ports>	
 </knimeNode>

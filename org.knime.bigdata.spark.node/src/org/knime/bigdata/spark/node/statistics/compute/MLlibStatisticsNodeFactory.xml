@@ -27,7 +27,7 @@
 		<option name="Column filter">Select the columns to include in the calculation.</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute statistics for.</inPort>
+        <inPort index="0" name="Spark DataFrame/RDD to compute">Spark DataFrame/RDD to compute statistics for.</inPort>
         <outPort index="0" name="Statistics table">Table with numeric values.</outPort>
 	</ports>
 </knimeNode>

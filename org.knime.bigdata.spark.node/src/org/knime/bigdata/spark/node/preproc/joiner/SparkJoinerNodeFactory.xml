@@ -3,26 +3,26 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
     icon="icon.png" type="Manipulator">
     <name>Spark Joiner</name>
-    <shortDescription>Joins two Spark RDDs</shortDescription>
+    <shortDescription>Joins two Spark DataFrame/RDDs</shortDescription>
     <fullDescription>
         <intro>
-            This node joins two Spark RDDs in a database-like way. The join is based 
-            on the joining columns of both RDDs.
+            This node joins two Spark DataFrame/RDDs in a database-like way. The join is based 
+            on the joining columns of both DataFrame/RDDs.
         </intro>
         <tab name="Joiner settings">
             <option name="Join mode">
-                If a row from the top RDD cannot be joined with a row from the bottom RDD (and vice versa) there are
+                If a row from the top DataFrame/RDD cannot be joined with a row from the bottom DataFrame/RDD (and vice versa) there are
                 several options of handling this situation. After an
                 <b>Inner Join</b>
-                only matching rows will show up in the output RDD. A
+                only matching rows will show up in the output DataFrame/RDD. A
                 <b>Left Outer Join</b>
-                will fill up the columns that come from the bottom RDD with missing values if no matching row exists in
-                the bottom RDD. Likewise, a
+                will fill up the columns that come from the bottom DataFrame/RDD with missing values if no matching row exists in
+                the bottom DataFrame/RDD. Likewise, a
                 <b>Right Outer Join</b>
-                will fill up the columns from the top RDD with missing values if no matching row in the top RDD
+                will fill up the columns from the top DataFrame/RDD with missing values if no matching row in the top DataFrame/RDD
                 exists. A
                 <b>Full Outer Join</b>
-                will fill up columns from both the top and bottom RDD with missing values if a row cannot be joined.
+                will fill up columns from both the top and bottom DataFrame/RDD with missing values if a row cannot be joined.
             </option>        
             <option name="Joining columns">
                  Select the columns from the top input ('left' table) and the bottom input 
@@ -30,18 +30,18 @@
                 of selected columns matches.
                 <br/>
                 <b>Match all of the following:</b> 
-                A row of the top input RDD and a row of the bottom input RDD 
+                A row of the top input DataFrame/RDD and a row of the bottom input DataFrame/RDD 
                 match if they match in all specified column pairs.
                 <br/>
                 <b>Match any of the following:</b>
-                A row of the top input table and a row of the bottom input RDD 
+                A row of the top input table and a row of the bottom input DataFrame/RDD 
                 match if they match in at least one specified column pairs.            
             </option>        
         </tab>
         <tab name="Column selection">
             <option name="Column Selection (Top Input ('left' table) and Bottom Input ('right' table))">
                 <br/>
-                <b>Exclude:</b> This list contains the column names of the input RDD that are 
+                <b>Exclude:</b> This list contains the column names of the input DataFrame/RDD that are 
                 excluded.
                 <br/>
                 <b>Select:</b> Use these buttons to move columns between the Include and Exclude 
@@ -62,29 +62,29 @@
             </option>        
             <option name="Duplicate column handling">
                 The option allows you to change the behaviour if the include
-                lists of both input RDDs contain columns with the same name. 
+                lists of both input DataFrame/RDDs contain columns with the same name. 
                 <br/>
-                <b>Filter duplicates:</b> Only the columns from the top input RDD
-                will show up in the output RDD.
+                <b>Filter duplicates:</b> Only the columns from the top input DataFrame/RDD
+                will show up in the output DataFrame/RDD.
                 <br/>
                 <b>Don't execute:</b> Don't allow to execute this node if there are
                 duplicate column names in the include lists. 
                 <br/>
                 <b>Append suffix:</b> Append a suffix to the duplicate column names
-                from the bottom input RDD so that they also show up in the output
-                RDD.
+                from the bottom input DataFrame/RDD so that they also show up in the output
+                DataFrame/RDD.
             </option>
             <option name="Joining columns handling">
                 The option allows filtering the top/bottom joining columns, i.e. the
                 joining columns defined in the Joiner Settings tab will not show up
-                in the output RDD.
+                in the output DataFrame/RDD.
             </option>
         </tab>
 
     </fullDescription>
     <ports>
-        <inPort index="0" name="Top Input ('left' table)">RDD contributing to the left part of the output RDD</inPort>
-        <inPort index="1" name="Bottom Input ('right table)">RDD contributing to the right part of the output RDD</inPort>
-        <outPort index="0" name="Joined RDD">Joined RDD</outPort>
+        <inPort index="0" name="Top Input ('left' table)">DataFrame/RDD contributing to the left part of the output DataFrame/RDD</inPort>
+        <inPort index="1" name="Bottom Input ('right table)">DataFrame/RDD contributing to the right part of the output DataFrame/RDD</inPort>
+        <outPort index="0" name="Joined DataFrame/RDD">Joined DataFrame/RDD</outPort>
     </ports>
 </knimeNode>

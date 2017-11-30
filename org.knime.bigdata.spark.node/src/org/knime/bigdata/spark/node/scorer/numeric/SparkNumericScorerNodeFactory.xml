@@ -32,7 +32,7 @@ xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
     </fullDescription>
 
 	<ports>
-		<inPort index="0" name="Table">Arbitrary input Spark RDD with at least two numeric columns to compare.</inPort>
+		<inPort index="0" name="Table">Arbitrary input Spark DataFrame/RDD with at least two numeric columns to compare.</inPort>
 		<outPort index="0" name="Statistics">The computed statistical measures:
 			<ul>
 			<li>R&#xb2; - <a href="http://en.wikipedia.org/wiki/Coefficient_of_determination">coefficient of determination</a>, 1-SS_res/SS_tot</li>

@@ -19,7 +19,7 @@
         <option name="Column 2">The second column to compare</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation coefficient for.</inPort>
+        <inPort index="0" name="Spark DataFrame/RDD to compute">Spark DataFrame/RDD to compute correlation coefficient for.</inPort>
         <outPort index="0" name="Correlation coefficient">KNIME data table with the correlation coefficient of the two columns.</outPort>
 	</ports>
 </knimeNode>

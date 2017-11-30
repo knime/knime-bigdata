@@ -48,7 +48,7 @@
 	<ports>
 		<inPort name="Correlation Model" index="0">
 			The model from the correlation node.</inPort>
-		<inPort index="1" name="Spark RDD">Numeric input data to filter. 
+		<inPort index="1" name="Spark DataFrame/RDD">Numeric input data to filter. 
 			It must contain the set of columns that were used to create 
 			the correlation model. (Typically you connect the input data from the 
 			correlation node here.)</inPort>

@@ -2,16 +2,16 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
     type="Other" icon="icon.png">
-    <name>List Spark RDDs</name>
-    <shortDescription>Lists all Spark RDDs within the given Spark context.</shortDescription>
+    <name>List Spark DataFrames/RDDs</name>
+    <shortDescription>Lists all Spark DataFrames/RDDs within the given Spark context.</shortDescription>
     <fullDescription>
         <intro>
-            This node lists all named RDDs that are accessible via a unique ID within the given context. 
+            This node lists all named DataFrames/RDDs that are accessible via a unique ID within the given context. 
         </intro>
     </fullDescription>
 
     <ports>
         <inPort index="0" name="Spark context">The Spark context.</inPort>
-        <outPort index="0" name="Spark RDDs">The list of Spark RDDs.</outPort>
+        <outPort index="0" name="Spark DataFrames/RDDs">The list of Spark DataFrames/RDDs.</outPort>
     </ports>
 </knimeNode>

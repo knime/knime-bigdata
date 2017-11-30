@@ -27,7 +27,7 @@
 	</fullDescription>
 
 	<ports>
-	    <inPort index="0" name="Spark RDD">Input Spark RDD</inPort>
+	    <inPort index="0" name="Spark DataFrame/RDD">Input Spark DataFrame/RDD</inPort>
         <outPort index="0" name="Singular Values">The singular values vector.</outPort>
         <outPort index="1" name="V Matrix">The right singular vectors.</outPort>
         <outPort index="2" name="U Matrix">The left singular vectors.</outPort>

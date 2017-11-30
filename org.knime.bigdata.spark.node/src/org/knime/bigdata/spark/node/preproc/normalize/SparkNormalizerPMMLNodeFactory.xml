@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     icon="icon.png" type="Manipulator">
     <name>Spark Normalizer</name>
-    <shortDescription>Normalizes the attributes of a Spark RDD.</shortDescription>
+    <shortDescription>Normalizes the attributes of a Spark DataFrame/RDD.</shortDescription>
     <fullDescription>
         <intro>
 	        This node normalizes the values of all selected (numeric) columns.
@@ -25,8 +25,8 @@
 		</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD">Spark RDD requiring normalization of some or all columns.</inPort>
-        <outPort index="0" name="Normalized Spark RDD">Spark RDD with normalized columns.</outPort>
+        <inPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD requiring normalization of some or all columns.</inPort>
+        <outPort index="0" name="Normalized Spark DataFrame/RDD">Spark DataFrame/RDD with normalized columns.</outPort>
          <outPort index="1" name="PMML Model">PMML document containing normalization parameters, 
             which can be used in the "Spark Compiled Transformations Applier" node to normalize test data the same way 
             as the training data has been normalized.</outPort>

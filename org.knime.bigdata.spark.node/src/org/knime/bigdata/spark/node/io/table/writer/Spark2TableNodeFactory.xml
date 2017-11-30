@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Spark to Table</name>
-	<shortDescription>Loads the incoming Spark RDD into a KNIME data table.</shortDescription>
+	<shortDescription>Loads the incoming Spark DataFrame/RDD into a KNIME data table.</shortDescription>
 	<fullDescription>
 		<intro>
-			Loads the incoming Spark RDD into a KNIME data table.
+			Loads the incoming Spark DataFrame/RDD into a KNIME data table.
 		</intro>
 		<option name="Fetch all">Retrieves all rows from the Spark data object</option>
 		<option name="No of rows to fetch">Returns only the specified number of rows. 
@@ -14,7 +14,7 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Spark RDD">Spark RDD</inPort>
+		<inPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD</inPort>
 		<outPort index="0" name="KNIME table">KNIME data table</outPort>
 	</ports>
 </knimeNode>

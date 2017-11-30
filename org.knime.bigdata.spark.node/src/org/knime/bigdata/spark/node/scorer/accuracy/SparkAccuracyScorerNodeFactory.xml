@@ -28,7 +28,7 @@
         conflicts are resolved.</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD">Arbitrary input Spark RDD with at least two columns to compare.</inPort>
+        <inPort index="0" name="Spark DataFrame/RDD">Arbitrary input Spark DataFrame/RDD with at least two columns to compare.</inPort>
         <outPort index="0" name="Confusion matrix">The confusion matrix.</outPort>
         <outPort index="1" name="Accuracy statistics">The accuracy statistics table.</outPort>
 	</ports>

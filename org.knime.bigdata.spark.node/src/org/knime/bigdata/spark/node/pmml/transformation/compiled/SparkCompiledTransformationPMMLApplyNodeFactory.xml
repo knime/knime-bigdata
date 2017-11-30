@@ -18,7 +18,7 @@
 	</fullDescription>
     <ports>
         <inPort index="0" name="Compiled Model">The code generated from a PMML model</inPort>
-        <inPort index="1" name="Spark RDD">Spark RDD requiring transformation of some or all columns.</inPort>
-        <outPort index="0" name="Transformed Spark RDD">The input data transformed according to the input model.</outPort>
+        <inPort index="1" name="Spark DataFrame/RDD">Spark DataFrame/RDD requiring transformation of some or all columns.</inPort>
+        <outPort index="0" name="Transformed Spark DataFrame/RDD">The input data transformed according to the input model.</outPort>
 	</ports>
 </knimeNode>

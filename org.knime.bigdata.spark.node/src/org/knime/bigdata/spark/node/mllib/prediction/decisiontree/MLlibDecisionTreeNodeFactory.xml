@@ -37,7 +37,7 @@
 	</fullDescription>
 
     <ports>
-		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame/RDD</inPort>
 		<inPort optional="true" index="1" name="PMML mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
         <outPort index="0" name="Decision Tree Model">Spark MLlib Decision Tree Model</outPort>
     </ports>

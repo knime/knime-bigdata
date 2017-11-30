@@ -3,16 +3,16 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
 	<name>Impala to Spark</name>
-	<shortDescription>Converts an incoming Impala query into a Spark RDD</shortDescription>
+	<shortDescription>Converts an incoming Impala query into a Spark DataFrame/RDD</shortDescription>
 	<fullDescription>
 		<intro>
-			Converts an incoming Impala query into a Spark RDD.
+			Converts an incoming Impala query into a Spark DataFrame/RDD.
 		</intro>
 	</fullDescription>
 
 	<ports>
 		<inPort index="0" name="Impala query">Input data (Impala query).</inPort>
 		<inPort index="1" name="Spark context">Required Spark context.</inPort>
-		<outPort index="0" name="Spark data">Spark RDD</outPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

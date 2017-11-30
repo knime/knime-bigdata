@@ -18,8 +18,8 @@
 		<option name="Feature columns">Columns to compute the correlation for</option>
 	</fullDescription>
     <ports>
-        <inPort index="0" name="Spark RDD to compute">Spark RDD to compute correlation matrix for.</inPort>
-        <outPort index="0" name="Spark RDD correlation matrix">Spark RDD representing the correlation matrix.</outPort>
+        <inPort index="0" name="Spark DataFrame/RDD to compute">Spark DataFrame/RDD to compute correlation matrix for.</inPort>
+        <outPort index="0" name="Spark DataFrame/RDD correlation matrix">Spark DataFrame/RDD representing the correlation matrix.</outPort>
         <outPort index="1" name="Correlation measure">Correlation variables in a square matrix</outPort>
         <outPort name="Correlation Model" index="2"> A model containing the correlation measures. 
         This model is appropriate to be read by the Spark Correlation Filter node.</outPort>

@@ -18,7 +18,7 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Spark data">Spark RDD to use as query table</inPort>
-		<outPort index="0" name="Spark SQL result">Spark RDD with the result of the query</outPort>
+		<inPort index="0" name="Spark data">Spark DataFrame/RDD to use as query table</inPort>
+		<outPort index="0" name="Spark SQL result">Spark DataFrame/RDD with the result of the query</outPort>
 	</ports>
 </knimeNode>

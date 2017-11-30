@@ -6,7 +6,7 @@
     <shortDescription>Destroys the Spark context.</shortDescription>
     <fullDescription>
         <intro>
-            Destroys the Spark context and all RDDs that exists within the context.
+            Destroys the Spark context and all DataFrames/RDDs that exists within the context.
             <p>This node will open up a confirmation dialog as a safeguard which can be suppressed with 
             the 'Hide confirmation dialog' option.</p>
             <p>

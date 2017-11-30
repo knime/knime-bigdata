@@ -3,10 +3,10 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" deprecated="true" icon="icon.png">
 	<name>Table to Spark</name>
-	<shortDescription>Creates a Spark RDD from the KNIME data table.</shortDescription>
+	<shortDescription>Creates a Spark DataFrame/RDD from the KNIME data table.</shortDescription>
 	<fullDescription>
 		<intro>
-			Creates a Spark RDD from the KNIME data table.
+			Creates a Spark DataFrame/RDD from the KNIME data table.
 		</intro>
 	</fullDescription>
 
@@ -15,6 +15,6 @@
 	    <inPort index="1" name="Spark context">
 	    Optional Spark context. If not connected a context is created based on the settings in the Spark preferences page.
 	    </inPort>
-		<outPort index="0" name="Spark RDD">Spark RDD</outPort>
+		<outPort index="0" name="Spark DataFrame/RDD">Spark DataFrame/RDD</outPort>
 	</ports>
 </knimeNode>

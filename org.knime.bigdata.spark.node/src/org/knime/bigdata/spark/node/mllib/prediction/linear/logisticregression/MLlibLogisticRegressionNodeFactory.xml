@@ -96,7 +96,7 @@
 	</fullDescription>
 
     <ports>
-		<inPort index="0" name="Input data">Input Spark RDD</inPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame/RDD</inPort>
         <outPort index="0" name="Logistic Regression Model">Spark MLlib Logistic Regression Model</outPort>
     </ports>
 </knimeNode>
