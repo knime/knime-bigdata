@@ -23,19 +23,22 @@ package org.knime.bigdata.hdfs;
 import java.io.File;
 import java.net.URL;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.osgi.framework.BundleContext;
 
-
 /**
+ * Plugin activator for the big data filehandling plugin.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class FileHandlingPlugin extends AbstractUIPlugin {
- // The shared instance.
+    // The shared instance.
     private static FileHandlingPlugin plugin;
 
     private String m_pluginRootPath;
@@ -50,6 +53,7 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
 
     /**
      * This method is called upon plug-in activation.
+     *
      * @param context The bundle context.
      * @throws Exception If cause by super class.
      */
@@ -59,10 +63,15 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
+
+        // this quiets an error logged on Windows that winutils.exe cannot be found
+        // (see BD-552)
+        Logger.getLogger(org.apache.hadoop.util.Shell.class).setLevel(Level.FATAL);
     }
 
     /**
      * This method is called when the plug-in is stopped.
+     *
      * @param context The bundle context.
      * @throws Exception If cause by super class.
      */
