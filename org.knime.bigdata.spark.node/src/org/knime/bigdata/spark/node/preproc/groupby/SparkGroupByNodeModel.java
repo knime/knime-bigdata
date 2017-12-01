@@ -171,8 +171,12 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         }
 
         final IntermediateSpec inputSpec = SparkDataTableUtil.toIntermediateSpec(tableSpec);
+        final List<SparkSQLFunctionJobInput> aggFunctions = createAggJobInput(tableSpec, functionProvider);
+        if (aggFunctions == null || aggFunctions.isEmpty()) {
+            throw new InvalidSettingsException("No aggregation function defined");
+        }
         final DataTableSpec outputSpec = createOutputSpec(sparkVersion, inputSpec,
-            createGroupByJobInput(tableSpec, functionProvider), createAggJobInput(tableSpec, functionProvider), functionProvider);
+            createGroupByJobInput(tableSpec, functionProvider), aggFunctions, functionProvider);
 
         return new PortObjectSpec[] { new SparkDataPortObjectSpec(sparkSpec.getContextID(), outputSpec) };
     }

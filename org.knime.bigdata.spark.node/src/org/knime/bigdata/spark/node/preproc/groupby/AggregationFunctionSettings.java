@@ -65,11 +65,11 @@ public class AggregationFunctionSettings {
      */
     static final String CFG_TYPE_AGGREGATION_FUNCTIONS = "typeAggregationFunctions";
 
-    private NodeSettings m_manualAggregationSettings = null;
+    private NodeSettings m_manualAggregationSettings = new NodeSettings(CFG_MANUAL_AGGREGATION_FUNCTIONS);
 
-    private NodeSettings m_patternAggregationSettings = null;
+    private NodeSettings m_patternAggregationSettings = new NodeSettings(CFG_PATTERN_AGGREGATION_FUNCTIONS);
 
-    private NodeSettings m_typeAggregationSettings = null;
+    private NodeSettings m_typeAggregationSettings = new NodeSettings(CFG_TYPE_AGGREGATION_FUNCTIONS);
 
     /**
      * Computes the list of aggregation functions to use per column.
@@ -255,7 +255,7 @@ public class AggregationFunctionSettings {
         final SparkSQLFunctionCombinationProvider functionProvider, final DataTableSpec spec)
         throws InvalidSettingsException {
 
-        return PatternAggregationFunctionRow.loadFunctions(m_typeAggregationSettings, functionProvider, spec);
+        return PatternAggregationFunctionRow.loadFunctions(m_patternAggregationSettings, functionProvider, spec);
     }
 
 

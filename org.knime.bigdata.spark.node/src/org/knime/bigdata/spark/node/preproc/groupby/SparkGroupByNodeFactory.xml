@@ -42,9 +42,12 @@
            </p>
             <p>
             A detailed description of the available aggregation methods can be
-            found on the 'Description' tab in the node dialog.
+            found on the 'Description' tab in the node dialog. Further information can be also found on the
+            <a href="https://spark.apache.org/docs/latest/sql-programming-guide.html#aggregations">Spark documentation</a>
+             and the 
+            <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$">Spark API documentation</a>.
            </p>
-           <p><i>This node requires at least Spark 2.</i></p>
+           <p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
         <tab name="Groups">
     		<option name="Group settings">

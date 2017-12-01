@@ -62,7 +62,7 @@ public class StandardSparkSQLFunctionDialogProvider extends SparkSQLFunctionDial
             new SimpleAggregation.Factory(
                 "max", "Returns the maximum value of a column"),
             new SimpleAggregation.Factory(
-                "mean", "Returns the average of the values in a group (alias for avg)"),
+                "mean", "Returns the average of the values in a group (alias for avg)", DoubleValue.class),
             new SimpleAggregation.Factory(
                 "min", "Returns the minimum value of a column"),
             new SimpleAggregation.Factory(
