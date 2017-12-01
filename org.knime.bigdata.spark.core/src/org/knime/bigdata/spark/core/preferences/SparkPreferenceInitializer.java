@@ -62,6 +62,7 @@ import com.typesafe.config.ConfigFactory;
  */
 public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
+    /**All supported log levels.*/
     public static final String ALL_LOG_LEVELS[] = new String[]{"DEBUG", "INFO", "WARN", "ERROR"};
 
     /** Preference key to determine whether Spark preferences have already been initialized */
@@ -76,16 +77,19 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for a Spark jobserver username. */
     public static final String PREF_USER_NAME = "org.knime.bigdata.spark.v1_6.jobserver.connection.user";
 
+    /**Preference key for the password.*/
     public static final String PREF_PWD = "org.knime.bigdata.spark.v1_6.jobserver.connection.pwd";
 
+    /**Preference key for the context name.*/
     public static final String PREF_CONTEXT_NAME = "org.knime.bigdata.spark.v1_6.jobserver.context.name";
 
+    /**Preference key for the Spark version.*/
     public static final String PREF_SPARK_VERSION = "org.knime.bigdata.spark.v1_6.jobserver.context.sparkVersion";
 
     /** Preference key for enabling custom spark settings. */
     public static final String PREF_OVERRIDE_SPARK_SETTINGS =
         "org.knime.bigdata.spark.v1_6.jobserver.context.overrideSparkSetting";
-
+    /**Preference key for the custom Spark settings.*/
     public static final String PREF_CUSTOM_SPARK_SETTINGS =
         "org.knime.bigdata.spark.v1_6.jobserver.context.customSparkSetting";
 
@@ -96,6 +100,7 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for job timeout in seconds (integer). */
     public static final String PREF_JOB_TIMEOUT = "org.knime.bigdata.spark.v1_6.jobserver.context.jobTimeout";
 
+    /**Preference key to indicate that objects should be deleted on dispose.*/
     public static final String PREF_DELETE_OBJECTS_ON_DISPOSE = "org.knime.bigdata.spark.v1_6.deleteObjectsOnDispose";
 
     /** Preference key for spark side log level (e.g. INFO, DEBUG...). */

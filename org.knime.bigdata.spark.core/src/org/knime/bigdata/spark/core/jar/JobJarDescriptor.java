@@ -135,7 +135,7 @@ public class JobJarDescriptor {
     }
 
     private static Set<String> parseProviderIDs(final String providerIds) {
-        final Set<String> providerIDs = new HashSet<String>();
+        final Set<String> providerIDs = new HashSet<>();
 
         if (providerIds != null) {
             providerIDs.addAll(Arrays.asList(providerIds.split(",")));

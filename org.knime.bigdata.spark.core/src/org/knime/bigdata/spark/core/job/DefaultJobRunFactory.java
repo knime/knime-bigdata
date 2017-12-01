@@ -24,6 +24,8 @@ package org.knime.bigdata.spark.core.job;
  * Default implementation for a {@link JobRunFactory}.
  *
  * @author Tobias Koetter, KNIME.com
+ * @param <I> {@link JobInput}
+ * @param <O> {@link JobOutput}
  */
 public class DefaultJobRunFactory<I extends JobInput, O extends JobOutput> implements JobRunFactory<I, O> {
 
@@ -36,10 +38,21 @@ public class DefaultJobRunFactory<I extends JobInput, O extends JobOutput> imple
     private final ClassLoader m_jobOutputClassLoader;
 
 
+    /**
+     * @param jobId unique job id
+     * @param jobClass the name of the job class
+     * @param jobOutputClass the {@link JobOutput} class
+     */
     public DefaultJobRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass) {
         this(jobId, jobClass, jobOutputClass, jobClass.getClassLoader());
     }
 
+    /**
+     * @param jobId unique job id
+     * @param jobClass the name of the job class
+     * @param jobOutputClass the {@link JobOutput} class
+     * @param jobOutputClassLoader the {@link JobOutput} class loader
+     */
     public DefaultJobRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass,
         final ClassLoader jobOutputClassLoader) {
 
@@ -84,6 +97,6 @@ public class DefaultJobRunFactory<I extends JobInput, O extends JobOutput> imple
      */
     @Override
     public JobRun<I, O> createRun(final I input) {
-        return new DefaultJobRun<I, O>(input, m_jobClass, m_jobOutputClass, m_jobOutputClassLoader);
+        return new DefaultJobRun<>(input, m_jobClass, m_jobOutputClass, m_jobOutputClassLoader);
     }
 }

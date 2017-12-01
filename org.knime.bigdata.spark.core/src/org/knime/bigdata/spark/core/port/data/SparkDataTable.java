@@ -78,10 +78,10 @@ public class SparkDataTable extends DefaultSparkData {
     }
 
     /**
-     * Initializes a new instance from the given {@link ZipInputStream}.
+     * Initialises a new instance from the given {@link ZipInputStream}.
      *
      * @param in A {@link ZipInputStream} to initialize this instance from.
-     * @throws IOException when something goes wrong during initialization.
+     * @throws IOException when something goes wrong during initialisation.
      */
     public SparkDataTable(final ZipInputStream in) throws IOException {
         super(in);
@@ -91,6 +91,7 @@ public class SparkDataTable extends DefaultSparkData {
                 throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
                     + TABLE_SPEC + "\".");
             }
+            @SuppressWarnings("resource")
             final ModelContentRO specModel = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
             m_spec = DataTableSpec.load(specModel);
         } catch (InvalidSettingsException ise) {
@@ -104,6 +105,7 @@ public class SparkDataTable extends DefaultSparkData {
      * @param out An output stream to save to.
      * @throws IOException when something goes wrong during saving.
      */
+    @SuppressWarnings("resource")
     @Override
     public void save(final ZipOutputStream out) throws IOException {
         super.save(out);

@@ -28,25 +28,27 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 /**
  * Common predicates to determine, which folders and jars of KNIME Extension for Apache Spark plugins should be scanned
  * for classes annotated with {@link SparkClass}. Use these in conjunction with the
- * {@link DefaultSparkJarProvider#DefaultSparkJarProvider(org.knime.bigdata.spark.core.version.CompatibilityChecker, java.util.Collection)}
+ * {@link DefaultSparkJarProvider#DefaultSparkJarProvider(org.knime.bigdata.spark.core.version.CompatibilityChecker, Predicate...)}
  * constructor.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 public interface KNIMEPluginScanPredicates {
 
+    /**Class name matcher for classes within the Spark core package.*/
     public static final Predicate<String> KNIME_CORE_PLUGIN_PREDICATE =
         Pattern.compile("org\\.knime\\.bigdata\\.spark\\.core").asPredicate();
-
+    /**Class name matcher for classes within the Spark node package.*/
     public static final Predicate<String> KNIME_NODE_PLUGIN_PREDICATE =
         Pattern.compile("org\\.knime\\.bigdata\\.spark\\.node").asPredicate();
-
+    /**Class name matcher for classes within the Spark job packages.*/
     public static final Predicate<String> KNIME_JOBS_PLUGIN_PREDICATE =
         Pattern.compile("org\\.knime\\.bigdata\\.spark[0-9_]*+").asPredicate();
 
-    //The knime.jar predicate that is used to identify the knime.jar to search for Spark classes
+    /**The knime.jar predicate that is used to identify the knime.jar to search for Spark classes.*/
     public static final Predicate<String> KNIME_JAR_PREDICATE = Pattern.compile("knime\\.jar").asPredicate();
 
+    /**Class name matcher for the jobserver utils jar.*/
     public static final Predicate<String> KNIME_JOBSERVER_UTILS_JAR_PREDICATE =
         Pattern.compile("knime-jobserver-utils-.+\\.jar").asPredicate();
 }

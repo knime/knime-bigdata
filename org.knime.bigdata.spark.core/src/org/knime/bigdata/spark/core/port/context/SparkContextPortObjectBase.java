@@ -68,6 +68,7 @@ public abstract class SparkContextPortObjectBase implements SparkContextProvider
      * @return the {@link SparkContextID}
      * @throws IOException if an exception occurs
      */
+    @SuppressWarnings("resource")
     public static SparkContextID load(final ZipInputStream in) throws IOException {
         try {
             final ZipEntry ze = in.getNextEntry();
@@ -93,6 +94,7 @@ public abstract class SparkContextPortObjectBase implements SparkContextProvider
      * @param out {@link ZipOutputStream} to write to
      * @throws IOException if an exception occurred
      */
+    @SuppressWarnings("resource")
     protected static void save(final SparkContextID contextID, final ZipOutputStream out)
         throws IOException {
         final ModelContent specModel = new ModelContent(KEY_CONTEXT_ID);

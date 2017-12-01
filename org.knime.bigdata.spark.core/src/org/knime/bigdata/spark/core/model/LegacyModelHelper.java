@@ -30,6 +30,7 @@ import java.io.ObjectInputStream;
  */
 public interface LegacyModelHelper extends ModelHelper {
 
+    /***/
     public final static String LEGACY_MODEL_NAME = "legacy";
 
     /**
@@ -57,6 +58,8 @@ public interface LegacyModelHelper extends ModelHelper {
      *
      * Converting legacy models may be necessary when loading KNIME workflows with Spark nodes, that were saved before
      * KNIME Extension for Apache Spark 1.6.0 (an example would be the collaborative filtering models).
+     * @param modelInstance model instance to inspect
+     * @return converted model instance
      */
     Object convertLegacyToNewModel(final Object modelInstance);
 }

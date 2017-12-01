@@ -29,6 +29,8 @@ import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
  * Default implementation of a {@link JobWithFilesRunFactory} for jobs that require input files to be uploaded.
  *
  * @author Bjoern Lohrmann, KNIME.com
+ * @param <I> {@link JobInput}
+ * @param <O> {@link JobOutput}
  */
 public class DefaultJobWithFilesRunFactory<I extends JobInput, O extends JobOutput> extends DefaultJobRunFactory<I, O>
     implements JobWithFilesRunFactory<I, O> {
@@ -37,12 +39,27 @@ public class DefaultJobWithFilesRunFactory<I extends JobInput, O extends JobOutp
 
     private final boolean m_useInputFileCopyCache;
 
+    /**
+     * @param jobId the unique job id
+     * @param jobClass the job class name
+     * @param jobOutputClass the {@link JobOutput} class
+     * @param filesLifetime the {@link JobWithFilesRun.FileLifetime}
+     * @param useInputFileCopyCache <code>true</code> if the copy cache should be used for the input files
+     */
     public DefaultJobWithFilesRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass,
         final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
 
         this(jobId, jobClass, jobOutputClass, jobClass.getClassLoader(), filesLifetime, useInputFileCopyCache);
     }
 
+    /**
+     * @param jobId the unique job id
+     * @param jobClass the job class name
+     * @param jobOutputClass the {@link JobOutput} class
+     * @param jobOutputClassLoader the {@link JobOutput} {@link ClassLoader}
+     * @param filesLifetime the {@link JobWithFilesRun.FileLifetime}
+     * @param useInputFileCopyCache <code>true</code> if the copy cache should be used for the input files
+     */
     public DefaultJobWithFilesRunFactory(final String jobId, final Class<?> jobClass, final Class<O> jobOutputClass,
         final ClassLoader jobOutputClassLoader, final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
 
@@ -80,7 +97,7 @@ public class DefaultJobWithFilesRunFactory<I extends JobInput, O extends JobOutp
      */
     @Override
     public JobWithFilesRun<I, O> createRun(final I input, final List<File> localFiles) {
-        return new DefaultJobWithFilesRun<I, O>(input, getJobClass(), getJobOutputClass(), getJobOutputClassLoader(),
+        return new DefaultJobWithFilesRun<>(input, getJobClass(), getJobOutputClass(), getJobOutputClassLoader(),
             localFiles, m_filesLifetime, m_useInputFileCopyCache);
     }
 }

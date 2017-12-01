@@ -30,7 +30,15 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
  */
 public interface NamedObjectsController {
 
+    /**
+     * @return {@link Set} with the unique names of all named objects within the context
+     * @throws KNIMESparkException
+     */
     public Set<String> getNamedObjects() throws KNIMESparkException;
 
+    /**
+     * @param namedObjects the unique names of the named objects to delete
+     * @throws KNIMESparkException if the deletion failed
+     */
     public void deleteNamedObjects(Set<String> namedObjects) throws KNIMESparkException;
 }

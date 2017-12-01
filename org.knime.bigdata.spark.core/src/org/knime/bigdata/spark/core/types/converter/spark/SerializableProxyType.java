@@ -34,6 +34,9 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 @SparkClass
 public interface SerializableProxyType<T> extends Serializable {
 
+    /**
+     * @return serializable proxy for the spark type
+     */
     T getProxiedType();
 
 }

@@ -29,7 +29,7 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- *
+ * {@link JobInput} implementation to work with named objects e.g. list or delete.
  * @author Tobias Koetter, KNIME.com
  */
 @SparkClass
@@ -39,33 +39,53 @@ public class NamedObjectsJobInput extends JobInput {
 
     private final static String KEY_NAMED_OBJECTS_TO_DELETE = "namedObjectsToDelete";
 
+    /**
+     * The available named objects operations.
+     */
     public enum Operation {
             LIST, DELETE;
     }
 
+    /**
+     *
+     */
     public NamedObjectsJobInput() {
         super();
     }
 
+    /**
+     * @return the named objects operation to execute
+     * @see Operation
+     */
     public Operation getOperation() {
         final String op = get(KEY_NAMED_OBJECTS_OP);
         return Operation.valueOf(op);
     }
 
+    /**
+     * @return the unique names of the named objects to delete
+     */
     public Set<String> getNamedObjectsToDelete() {
-        return new HashSet<String>(getOrDefault(KEY_NAMED_OBJECTS_TO_DELETE, Collections.<String> emptyList()));
+        return new HashSet<>(getOrDefault(KEY_NAMED_OBJECTS_TO_DELETE, Collections.<String> emptyList()));
     }
 
+    /**
+     * @return {@link NamedObjectsJobInput}
+     */
     public static NamedObjectsJobInput createListOperation() {
         NamedObjectsJobInput toReturn = new NamedObjectsJobInput();
         toReturn.set(KEY_NAMED_OBJECTS_OP, Operation.LIST.toString());
         return toReturn;
     }
 
+    /**
+     * @param namedObjectIds {@link Set} with the unique names of the named objects to delete
+     * @return {@link NamedObjectsJobInput} to delete the given named objects
+     */
     public static NamedObjectsJobInput createDeleteOperation(final Set<String> namedObjectIds) {
         NamedObjectsJobInput toReturn = new NamedObjectsJobInput();
         toReturn.set(KEY_NAMED_OBJECTS_OP, Operation.DELETE.toString());
-        toReturn.set(KEY_NAMED_OBJECTS_TO_DELETE, new ArrayList<String>(namedObjectIds));
+        toReturn.set(KEY_NAMED_OBJECTS_TO_DELETE, new ArrayList<>(namedObjectIds));
         return toReturn;
     }
 }

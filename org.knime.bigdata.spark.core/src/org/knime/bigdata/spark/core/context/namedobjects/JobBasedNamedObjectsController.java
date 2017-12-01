@@ -40,6 +40,9 @@ public class JobBasedNamedObjectsController implements NamedObjectsController {
 
     private final SparkContextID m_sparkContextID;
 
+    /**
+     * @param sparkContextId
+     */
     public JobBasedNamedObjectsController(final SparkContextID sparkContextId) {
         this.m_sparkContextID = sparkContextId;
     }

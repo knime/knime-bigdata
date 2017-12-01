@@ -52,7 +52,7 @@ public final class SparkPMMLUtil {
 
     /**
      * @param inputSpec {@link DataTableSpec}
-     * @param model PMML {@link CompiledModel}
+     * @param model PMML {@link CompiledModelPortObjectSpec}
      * @return the indices of the columns required by the compiled PMML model
      * @throws InvalidSettingsException if a required column is not present in the input table
      */
@@ -63,7 +63,7 @@ public final class SparkPMMLUtil {
 
     /**
      * @param inputSpec {@link DataTableSpec}
-     * @param model PMML {@link CompiledModel}
+     * @param model PMML {@link CompiledModelPortObjectSpec}
      * @param missingFieldNames <code>null</code> if missing indices should raise an exception. If not <code>null</code>
      * the list will contain all missing fields
      * @return the indices of the columns required by the compiled PMML model
@@ -104,7 +104,7 @@ public final class SparkPMMLUtil {
         final DataColumnSpec[] pmmlResultColSpecs = cms.getTransformationsResultColSpecs(inSpec);
         final Integer[] matchingColIdxs = findMatchingCols(inSpec, cms);
         if (replace) {
-            final Set<Integer> skipColIdxs = new HashSet<Integer>(Arrays.asList(matchingColIdxs));
+            final Set<Integer> skipColIdxs = new HashSet<>(Arrays.asList(matchingColIdxs));
             List<DataColumnSpec> resultCols = new LinkedList<>();
             for (int i = 0; i < inSpec.getNumColumns(); i++) {
                 final Integer colIdx = Integer.valueOf(i);

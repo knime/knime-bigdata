@@ -30,6 +30,9 @@ public class MissingSparkModelHelperException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * @param message the error message
+     */
     public MissingSparkModelHelperException(final String message) {
         super(message);
     }

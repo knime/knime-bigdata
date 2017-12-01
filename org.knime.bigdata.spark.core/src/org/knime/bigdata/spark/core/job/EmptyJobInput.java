@@ -35,6 +35,9 @@ public final class EmptyJobInput extends JobInput {
         super();
     }
 
+    /**
+     * @return an {@link EmptyJobInput} instance
+     */
     public static EmptyJobInput create() {
         return new EmptyJobInput();
     }

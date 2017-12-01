@@ -36,6 +36,9 @@ public final class EmptyJobOutput extends JobOutput {
     public EmptyJobOutput() {
     }
 
+    /**
+     * @return the only instance
+     */
     public static EmptyJobOutput getInstance() {
         return SINGLETON_INSTANCE;
     }

@@ -21,8 +21,9 @@
 package org.knime.bigdata.spark.core.job;
 
 /**
- *
+ * {@link JobRunFactory} interface for jobs with no job output.
  * @author Bjoern Lohrmann, KNIME.com
+ * @param <I> {@link JobInput}
  */
 public interface SimpleJobRunFactory <I extends JobInput> extends JobRunFactory<I, EmptyJobOutput> {
 

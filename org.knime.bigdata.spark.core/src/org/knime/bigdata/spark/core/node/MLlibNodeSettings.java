@@ -231,7 +231,7 @@ public class MLlibNodeSettings {
      * to the MapValues Model
      */
     public static Map<String, DerivedField> getMapValues(final PMMLPortObject model) {
-        final Map<String, DerivedField> mapValues = new LinkedHashMap<String, DerivedField>();
+        final Map<String, DerivedField> mapValues = new LinkedHashMap<>();
         final DerivedField[] derivedFields = model.getDerivedFields();
         for (final DerivedField derivedField : derivedFields) {
             final MapValues map = derivedField.getMapValues();

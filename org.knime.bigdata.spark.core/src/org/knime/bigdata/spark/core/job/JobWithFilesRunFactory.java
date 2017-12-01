@@ -28,9 +28,16 @@ import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
+ * @param <I> {@link JobInput}
+ * @param <O> {@link JobOutput}
  */
 public interface JobWithFilesRunFactory<I extends JobInput, O extends JobOutput> extends JobRunFactory<I, O> {
 
+    /**
+     * @param input {@link JobInput}
+     * @param localFiles {@link List} of local files to send with the job
+     * @return the {@link JobWithFilesRun} instance
+     */
     public JobWithFilesRun<I, O> createRun(I input, List<File> localFiles);
 
     /**

@@ -36,12 +36,32 @@ import org.knime.core.node.ExecutionMonitor;
  */
 public interface JobController {
 
+    /**
+     * @param fileJob {@link JobWithFilesRun} instance
+     * @param exec {@link ExecutionMonitor} used for progress and cancellation
+     * @return {@link JobOutput}
+     * @throws KNIMESparkException if the job failed to execute
+     * @throws CanceledExecutionException if user has requested the cancellation of the job
+     */
     public <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> fileJob, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException;
 
+    /**
+     * @param job {@link JobRun} instance
+     * @param exec {@link ExecutionMonitor} used for progress and cancellation
+     * @return {@link JobOutput}
+     * @throws KNIMESparkException if the job failed to execute
+     * @throws CanceledExecutionException if user has requested the cancellation of the job
+     */
     public <O extends JobOutput> O startJobAndWaitForResult(final JobRun<?, O> job, final ExecutionMonitor exec)
             throws KNIMESparkException, CanceledExecutionException;
 
+    /**
+     * @param job {@link JobRun} instance
+     * @param exec {@link ExecutionMonitor} used for progress and cancellation
+     * @throws KNIMESparkException if the job failed to execute
+     * @throws CanceledExecutionException if user has requested the cancellation of the job
+     */
     public void startJobAndWaitForResult(final SimpleJobRun<?> job, final ExecutionMonitor exec)
             throws KNIMESparkException, CanceledExecutionException;
 }

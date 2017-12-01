@@ -35,10 +35,16 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  */
 public abstract class SparkContext implements JobController, NamedObjectsController {
 
+    /**
+     * Possible context states.
+     */
     public enum SparkContextStatus {
             NEW, CONFIGURED, OPEN
     }
 
+    /**
+     * @return the {@link SparkContextStatus}
+     */
     public abstract SparkContextStatus getStatus();
 
     /**
@@ -75,6 +81,9 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
         }
     }
 
+    /**
+     * @param config {@link SparkContextConfig} to use to configure the context
+     */
     public abstract void configure(SparkContextConfig config);
 
     /**
@@ -92,11 +101,11 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * </p>
      *
      * @param config The new configuration to apply.
-     * @param destroyIfNecessary Wether the remote context shall be destroyed if necessary.
+     * @param destroyIfNecessary Whether the remote context shall be destroyed if necessary.
      * @return true if the context was successfully (re)configured with the given config, false otherwise.
+     * @throws KNIMESparkException If something went wrong while destroying the context.
      */
-    public abstract boolean reconfigure(SparkContextConfig config, boolean destroyIfNecessary)
-        throws KNIMESparkException;
+    public abstract boolean reconfigure(SparkContextConfig config, boolean destroyIfNecessary) throws KNIMESparkException;
 
     /**
      * Opens the Spark context, creating a context if necessary and createRemoteContext is true.
@@ -110,10 +119,20 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      */
     public abstract void open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException;
 
+    /**
+     * Destroys the Spark context within the cluster and frees up all resources.
+     * @throws KNIMESparkException
+     */
     public abstract void destroy() throws KNIMESparkException;
 
+    /**
+     * @return the {@link SparkContextConfig}
+     */
     public abstract SparkContextConfig getConfiguration();
 
+    /**
+     * @return the {@link SparkContextID}
+     */
     public abstract SparkContextID getID();
 
     /**

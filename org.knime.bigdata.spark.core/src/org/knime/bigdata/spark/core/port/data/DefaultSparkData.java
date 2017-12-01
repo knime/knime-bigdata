@@ -60,7 +60,7 @@ public class DefaultSparkData implements SparkData {
     private final SparkContextID m_contextID;
 
     /**
-     * Initializes a new instance.
+     * Initialises a new instance.
      *
      * @param id The unique id of the data object in Spark (e.g. a UUID).
      * @param context The ID of the Spark context where the data resides.
@@ -80,6 +80,7 @@ public class DefaultSparkData implements SparkData {
      * @param in
      * @throws IOException
      */
+    @SuppressWarnings("resource")
     protected DefaultSparkData(final ZipInputStream in) throws IOException {
         try {
             final ZipEntry ze = in.getNextEntry();
@@ -109,6 +110,7 @@ public class DefaultSparkData implements SparkData {
      * @param out
      * @throws IOException
      */
+    @SuppressWarnings("resource")
     protected void save(final ZipOutputStream out) throws IOException {
         final ModelContent sparkModel = new ModelContent(SPARK_DATA);
         m_contextID.saveToConfigWO(sparkModel.addConfig(KEY_CONTEXT_ID));

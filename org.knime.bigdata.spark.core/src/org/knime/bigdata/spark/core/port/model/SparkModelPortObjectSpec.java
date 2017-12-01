@@ -66,6 +66,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
          * @return the model content containing the spec information
          * @throws IOException if an I/O error occurs
          */
+        @SuppressWarnings("resource")
         protected ModelContentRO loadModelContent(final PortObjectSpecZipInputStream in) throws IOException {
             ZipEntry ze = in.getNextEntry();
             if (!ze.getName().equals(SPARK_MODEL)) {
@@ -81,6 +82,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
          * @param portObjectSpec the port spec
          * @throws IOException if an I/O error occurs
          */
+        @SuppressWarnings("resource")
         protected void saveModelContent(final PortObjectSpecZipOutputStream os,
             final SparkModelPortObjectSpec portObjectSpec) throws IOException {
             os.putNextEntry(new ZipEntry(SPARK_MODEL));

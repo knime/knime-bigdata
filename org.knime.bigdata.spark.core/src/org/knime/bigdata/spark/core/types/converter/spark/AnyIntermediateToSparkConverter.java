@@ -30,6 +30,7 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
  * there must only be a single converter that implements this interface.
  *
  * @author Bjoern Lohrmann
+ * @param <T> the actual Spark data type which might be Spark version dependent
  */
 @SparkClass
 public interface AnyIntermediateToSparkConverter<T> extends IntermediateToSparkConverter<T> {

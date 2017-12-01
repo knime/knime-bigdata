@@ -9,7 +9,6 @@ import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.core.node.NodeLogger;
@@ -81,10 +80,8 @@ public class RestClient {
     /**
      * Send a HTTP DELETE request
      *
-     * @param aContextContainer context configuration container
      * @param aPath
      * @return server response
-     * @throws KNIMESparkException
      */
     public synchronized Response delete(final String aPath) {
         if (KNIMEConfigContainer.verboseLogging()) {

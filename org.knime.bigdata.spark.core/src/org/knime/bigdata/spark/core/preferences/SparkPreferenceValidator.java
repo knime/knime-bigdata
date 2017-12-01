@@ -24,10 +24,25 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+/**
+ * Class that validates the Spark preferences.
+ * @author Tobias Koetter, KNIME GmbH, Konstanz, Germany
+ */
 public class SparkPreferenceValidator {
 
     /**
-     * @returns null or error messages
+     * @param jobServerUrl Spark job server url
+     * @param withAuthentication <code>true</code> for authentication
+     * @param username login username
+     * @param password login password
+     * @param jobTimeout job timeout
+     * @param jobCheckFrequency job check frequency
+     * @param sparkVersion Spark version
+     * @param contextName context name
+     * @param deleteSparkObjectsOnDispose <code>true</code> if objects should be deleted on dispose
+     * @param overrideSettings <code>true</code> for custom Spark settings
+     * @param customSettings custom Spark settings
+     * @return null or error messages
      */
     public static String validate(final String jobServerUrl,
             final boolean withAuthentication, final String username, final String password,
@@ -50,7 +65,16 @@ public class SparkPreferenceValidator {
     }
 
     /**
-     * @returns null or error messages
+     * @param jobServerUrl Spark job server url
+     * @param credentials credentials name
+     * @param jobTimeout job timeout
+     * @param jobCheckFrequency job check frequency
+     * @param sparkVersion Spark version
+     * @param contextName context name
+     * @param deleteSparkObjectsOnDispose <code>true</code> if objects should be deleted on dispose
+     * @param overrideSettings <code>true</code> for custom Spark settings
+     * @param customSettings custom Spark settings
+     * @return null or error messages
      */
     public static String validate(final String jobServerUrl,
             final String credentials,
@@ -69,7 +93,15 @@ public class SparkPreferenceValidator {
     }
 
     /**
-     * @returns null or error messages
+     * @param jobServerUrl Spark job server url
+     * @param jobTimeout job timeout
+     * @param jobCheckFrequency job check frequency
+     * @param sparkVersion Spark version
+     * @param contextName context name
+     * @param deleteSparkObjectsOnDispose <code>true</code> if objects should be deleted on dispose
+     * @param overrideSettings <code>true</code> for custom Spark settings
+     * @param customSettings custom Spark settings
+     * @return null or error messages
      */
     public static String validate(final String jobServerUrl,
             final int jobTimeout, final int jobCheckFrequency,
@@ -87,7 +119,7 @@ public class SparkPreferenceValidator {
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
 
-        ArrayList<String> errors = new ArrayList<String>();
+        ArrayList<String> errors = new ArrayList<>();
 
         // Job server URL
         if (jobServerUrl == null || jobServerUrl.isEmpty()) {

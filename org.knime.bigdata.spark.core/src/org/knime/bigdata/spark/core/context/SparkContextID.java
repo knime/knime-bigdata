@@ -66,6 +66,9 @@ public class SparkContextID {
         return ((SparkContextID)other).m_stringID.equals(m_stringID);
     }
 
+    /**
+     * @return a nice String representation of the Spark cntext information
+     */
     public String toPrettyString() {
         if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
             return SparkContextManager.getDefaultSparkContext().getID().toPrettyString();
@@ -84,10 +87,19 @@ public class SparkContextID {
         return m_stringID.hashCode();
     }
 
+    /**
+     * @param config {@link SparkContextConfig} to read from
+     * @return {@link SparkContextID}
+     */
     public static SparkContextID fromContextConfig(final SparkContextConfig config) {
         return fromConnectionDetails(config.getJobServerUrl(), config.getContextName());
     }
 
+    /**
+     * @param jobServerUrl job server url
+     * @param contextName context name
+     * @return {@link SparkContextID}
+     */
     public static SparkContextID fromConnectionDetails(final String jobServerUrl, final String contextName) {
         try {
             final URI url = new URI(jobServerUrl);
@@ -97,10 +109,18 @@ public class SparkContextID {
         }
     }
 
+    /**
+     * @param conf {@link ConfigRO} to read from
+     * @return {@link SparkContextID}
+     * @throws InvalidSettingsException
+     */
     public static SparkContextID fromConfigRO(final ConfigRO conf) throws InvalidSettingsException {
         return new SparkContextID(conf.getString(CFG_CONTEXT_ID));
     }
 
+    /**
+     * @param configWO
+     */
     public void saveToConfigWO(final ConfigWO configWO) {
         configWO.addString(CFG_CONTEXT_ID, m_stringID);
     }

@@ -23,10 +23,19 @@ package org.knime.bigdata.spark.core.job;
 /**
  *
  * @author Tobias Koetter, KNIME.com
+ * @param <I> {@link JobInput}
+ * @param <O> {@link JobOutput}
  */
 public interface JobRunFactory<I extends JobInput, O extends JobOutput> {
 
+    /**
+     * @return the unique job id
+     */
     public String getJobID();
 
+    /**
+     * @param input {@link JobInput}
+     * @return {@link JobRun} instance
+     */
     public JobRun<I, O> createRun(I input);
 }

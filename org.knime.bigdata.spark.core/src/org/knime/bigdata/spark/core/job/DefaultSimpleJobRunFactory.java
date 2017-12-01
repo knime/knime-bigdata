@@ -21,11 +21,16 @@
 package org.knime.bigdata.spark.core.job;
 
 /**
- *
+ * {@link JobRunFactory} implementation with no output.
  * @author Bjoern Lohrmann, KNIME.com
+ * @param <I> {@link JobInput}
  */
 public abstract class DefaultSimpleJobRunFactory<I extends JobInput> extends DefaultJobRunFactory<I, EmptyJobOutput> implements SimpleJobRunFactory<I> {
 
+    /**
+     * @param jobId unique job id
+     * @param jobClass job class name
+     */
     public DefaultSimpleJobRunFactory(final String jobId, final Class<?> jobClass) {
         super(jobId, jobClass, EmptyJobOutput.class, jobClass.getClassLoader());
     }
@@ -35,6 +40,6 @@ public abstract class DefaultSimpleJobRunFactory<I extends JobInput> extends Def
      */
     @Override
     public SimpleJobRun<I> createRun(final I input) {
-        return new DefaultSimpleJobRun<I>(input, getJobClass());
+        return new DefaultSimpleJobRun<>(input, getJobClass());
     }
 }

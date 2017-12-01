@@ -84,7 +84,6 @@ public class SparkModelPortObject implements PortObject {
     /**
      * Serializer used to save {@link SparkModelPortObject}s.
      */
-    @SuppressWarnings("rawtypes")
     public static final class Serializer extends PortObjectSerializer<SparkModelPortObject> {
         /**
          * {@inheritDoc}

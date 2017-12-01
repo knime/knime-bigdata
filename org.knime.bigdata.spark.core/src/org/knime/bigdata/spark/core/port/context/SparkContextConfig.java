@@ -66,6 +66,20 @@ public class SparkContextConfig implements Serializable {
     }
 
 
+    /**
+     * @param jobServerUrl Spark job server url
+     * @param authentication <code>true</code> for authentication
+     * @param user login username
+     * @param password login password
+     * @param jobTimeout job timeout
+     * @param jobCheckFrequency job check frequency
+     * @param sparkVersion Spark version
+     * @param contextName context name
+     * @param deleteObjectsOnDispose <code>true</code> if objects should be deleted on dispose
+     * @param sparkJobLogLevel the log level for Spark jobs
+     * @param overrideSparkSettings <code>true</code> for custom Spark settings
+     * @param customSparkSettings custom Spark settings
+     */
     public SparkContextConfig(final String jobServerUrl,
         final boolean authentication, final String user, final String password,
         final int jobCheckFrequency, final int jobTimeout,
@@ -139,61 +153,99 @@ public class SparkContextConfig implements Serializable {
         return result;
     }
 
+    /**
+     * @return Spark job server url
+     */
     public String getJobServerUrl() {
         return m_jobServerUrl;
     }
 
 
+    /**
+     * @return <code>true</code> for authentication
+     */
     public boolean useAuthentication() {
         return m_authentication;
     }
 
 
+    /**
+     * @return the login user
+     */
     public String getUser() {
         return m_user;
     }
 
 
+    /**
+     * @return login password
+     */
     public String getPassword() {
         return m_password;
     }
 
 
+    /**
+     * @return job timeout in seconds
+     */
     public int getJobTimeout() {
         return m_jobTimeout;
     }
 
 
+    /**
+     * @return frequency to check job status in seconds
+     */
     public int getJobCheckFrequency() {
         return m_jobCheckFrequency;
     }
 
 
+    /**
+     * @return the Spark version
+     */
     public SparkVersion getSparkVersion() {
         return m_sparkVersion;
     }
 
 
+    /**
+     * @return Spark context name
+     */
     public String getContextName() {
         return m_contextName;
     }
 
 
+    /**
+     * @return <code>true</code> if Spark objectes e.g. RDDs should be deleted on dispose
+     */
     public boolean deleteObjectsOnDispose() {
         return m_deleteObjectsOnDispose;
     }
 
 
+    /**
+     * @return the Spark job log level
+     */
     public String getSparkJobLogLevel() {
         return m_sparkJobLogLevel;
     }
 
 
+    /**
+     * @return <code>true</code> for custom Spark settings
+     * @see #getCustomSparkSettings()
+     */
     public boolean overrideSparkSettings() {
         return m_overrideSparkSettings;
     }
 
 
+    /**
+     * @return custom Spark settings if any
+     * @see #overrideSparkSettings()
+     */
     public String getCustomSparkSettings() {
         return m_customSparkSettings;
     }
@@ -261,6 +313,11 @@ public class SparkContextConfig implements Serializable {
 
     private static final String LEGACY_CFG_CONTEXTNAME = "id";
 
+    /**
+     * @param conf legacy {@link ConfigRO}
+     * @return the {@link SparkContextID}
+     * @throws InvalidSettingsException if the config does not contain the Spark ID
+     */
     public static SparkContextID createSparkContextIDFromLegacyConfig(final ConfigRO conf)
         throws InvalidSettingsException {
 

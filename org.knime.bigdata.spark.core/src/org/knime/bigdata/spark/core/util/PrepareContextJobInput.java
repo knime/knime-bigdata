@@ -41,26 +41,48 @@ public class PrepareContextJobInput extends JobInput {
 
     private static final String KEY_JOB_JAR_HASH = "jobJarHash";
 
+    /**
+     *
+     */
     public PrepareContextJobInput() {
     }
 
+    /**
+     * @return the job jar hash for comparison
+     */
     public String getJobJarHash() {
         return get(KEY_JOB_JAR_HASH);
     }
 
+    /**
+     * @return the Spark version to check for compatibility
+     */
     public String getSparkVersion() {
         return get(KEY_SPARK_VERSION);
     }
 
+    /**
+     * @return the KNIME Spark plugin version to check for compatibility
+     */
     public String getKNIMEPluginVersion() {
         return get(KEY_KNIME_PLUGIN_VERSION);
     }
 
+    /**
+     * @return the {@link IntermediateToSparkConverter} to use
+     */
     @SuppressWarnings("unchecked")
     public <T> List<IntermediateToSparkConverter<T>> getTypeConverters() {
         return (List<IntermediateToSparkConverter<T>>) get(KEY_TYPE_CONVERTERS);
     }
 
+    /**
+     * @param jobJarHash the job jar hash
+     * @param sparkVersion the Spark version
+     * @param pluginVersion the KNIME Spark plugin version
+     * @param typeConverters the {@link IntermediateToSparkConverter} to use
+     * @return the {@link PrepareContextJobInput}
+     */
     public static PrepareContextJobInput create(final String jobJarHash, final String sparkVersion,
         final String pluginVersion, final List<IntermediateToSparkConverter<?>> typeConverters) {
         PrepareContextJobInput ret = new PrepareContextJobInput();

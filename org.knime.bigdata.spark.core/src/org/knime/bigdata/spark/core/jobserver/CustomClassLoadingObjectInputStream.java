@@ -36,6 +36,11 @@ public class CustomClassLoadingObjectInputStream extends ObjectInputStream {
 
     private final ClassLoader m_classLoader;
 
+    /**
+     * @param in {@link InputStream} to read from
+     * @param classLoader the {@link ClassLoader} to use while reading from the {@link InputStream}
+     * @throws IOException
+     */
     public CustomClassLoadingObjectInputStream(final InputStream in, final ClassLoader classLoader) throws IOException {
         super(in);
         m_classLoader = classLoader;

@@ -53,10 +53,16 @@ public class JobserverJobInput extends JobData {
         super(JOBSERVER_PREFIX, internalMap);
     }
 
+    /**
+     * @return the log level to use in Spark for the job
+     */
     public int getLog4jLogLevel() {
         return getInteger(KEY_LOG4JLOG_LEVEL);
     }
 
+    /**
+     * @return the Spark job class name
+     */
     public String getSparkJobClass() {
         return get(KEY_JOB_CLASS);
     }
@@ -66,8 +72,9 @@ public class JobserverJobInput extends JobData {
      *
      * @return The wrapped spark job input
      *
-     * @throws ClassNotFoundException, InstantiationException, IllegalAccessException If something went wrong during
-     *             instantiation.
+     * @throws ClassNotFoundException If something went wrong during instantiation.
+     * @throws InstantiationException If something went wrong during instantiation.
+     * @throws IllegalAccessException If something went wrong during instantiation.
      */
     @SuppressWarnings("unchecked")
     public <T extends JobInput> T getSparkJobInput()
@@ -79,14 +86,27 @@ public class JobserverJobInput extends JobData {
         return jobInput;
     }
 
+    /**
+     * @return <code>true</code> if the job input contains files
+     * @see #getFiles()
+     */
     public boolean isJobWithFiles() {
         return has(KEY_FILES);
     }
 
+    /**
+     * @return gets the file paths for the jobs
+     * @see #isJobWithFiles()
+     */
     public List<String> getFiles() {
         return getOrDefault(KEY_FILES, Collections.<String>emptyList());
     }
 
+    /**
+     * @param jobInput the {@link JobInput}
+     * @param sparkJobClass the Spark job class to use
+     * @return the {@link JobserverJobInput}
+     */
     public static JobserverJobInput createFromSparkJobInput(final JobInput jobInput,
         final String sparkJobClass) {
         JobserverJobInput jsInput = new JobserverJobInput(jobInput.getInternalMap());
@@ -95,16 +115,28 @@ public class JobserverJobInput extends JobData {
         return jsInput;
     }
 
+    /**
+     * @param internalMap of parameters
+     * @return the {@link JobserverJobInput}
+     */
     public static JobserverJobInput createFromMap(final Map<String, Object> internalMap) {
         JobserverJobInput jsInput = new JobserverJobInput(internalMap);
         return jsInput;
     }
 
+    /**
+     * @param log4jLogLevel the log level to use
+     * @return the {@link JobserverJobInput} itself
+     */
     public JobserverJobInput withLog4jLogLevel(final int log4jLogLevel) {
         set(KEY_LOG4JLOG_LEVEL, log4jLogLevel);
         return this;
     }
 
+    /**
+     * @param serverFilenames the path to the files
+     * @return the {@link JobserverJobInput} itself
+     */
     public JobserverJobInput withFiles(final List<String> serverFilenames) {
         set(KEY_FILES, serverFilenames);
         return this;

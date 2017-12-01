@@ -254,24 +254,40 @@ public abstract class JobInput extends JobData {
         super.set(NAMED_OUTPUT_OBJECTS_KEY, namedOutputObjects);
     }
 
+    /**
+     * @param name the unique name of the named input object e.g. DataFrame
+     * @return the {@link JobInput} itself
+     */
     @SuppressWarnings("unchecked")
     public <T extends JobInput> T withNamedInputObject(final String name) {
         addNamedInputObject(name);
         return (T) this;
     }
 
+    /**
+     * @param names unique names of the named input objects e.g. DataFrame
+     * @return the {@link JobInput} itself
+     */
     @SuppressWarnings("unchecked")
     public <T extends JobInput> T withNamedInputObjects(final Collection<String> names) {
         addNamedInputObjects(names);
         return (T) this;
     }
 
+    /**
+     * @param name the unique name of the named output object e.g. DataFrame
+     * @return the {@link JobInput} itself
+     */
     @SuppressWarnings("unchecked")
     public <T extends JobInput> T withNamedOutputObject(final String name) {
         addNamedOutputObject(name);
         return (T) this;
     }
 
+    /**
+     * @param names unique names of the named input objects e.g. DataFrame
+     * @return the {@link JobInput} itself
+     */
     @SuppressWarnings("unchecked")
     public <T extends JobInput> T withNamedOutputObjects(final Collection<String> names) {
         addNamedOutputObjects(names);

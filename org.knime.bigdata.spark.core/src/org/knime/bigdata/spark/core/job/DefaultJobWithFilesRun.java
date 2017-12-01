@@ -45,18 +45,28 @@ public class DefaultJobWithFilesRun<I extends JobInput, O extends JobOutput> ext
     private final boolean m_useInputFileCopyCache;
 
     /**
-     * @param input
-     * @param sparkJobClass
-     * @param jobOutputClass
-     * @param inputFiles
-     * @param filesLifetime
+     * @param input {@link JobInput}
+     * @param sparkJobClass Spark job class
+     * @param jobOutputClass the {@link JobOutput} class
+     * @param inputFiles the input file
+     * @param filesLifetime the {@link JobWithFilesRun.FileLifetime}
      */
     public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass, final List<File> inputFiles,
         final FileLifetime filesLifetime) {
         this(input, sparkJobClass, jobOutputClass, sparkJobClass.getClassLoader(), inputFiles, filesLifetime, false);
     }
 
-    public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass, final ClassLoader jobOutputClassLoader, final List<File> inputFiles,
+    /**
+     * @param input {@link JobInput}
+     * @param sparkJobClass Spark job class
+     * @param jobOutputClass the {@link JobOutput} class
+     * @param jobOutputClassLoader the {@link JobOutput} {@link ClassLoader}
+     * @param inputFiles the input file
+     * @param filesLifetime the {@link JobWithFilesRun.FileLifetime}
+     * @param useInputFileCopyCache <code>true</code> if the copy cache should be used for the input files
+     */
+    public DefaultJobWithFilesRun(final I input, final Class<?> sparkJobClass, final Class<O> jobOutputClass,
+        final ClassLoader jobOutputClassLoader, final List<File> inputFiles,
         final FileLifetime filesLifetime, final boolean useInputFileCopyCache) {
         super(input, sparkJobClass, jobOutputClass, jobOutputClassLoader);
         m_inputFiles = inputFiles;

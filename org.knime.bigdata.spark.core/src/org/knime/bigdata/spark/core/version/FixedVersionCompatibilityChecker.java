@@ -41,7 +41,7 @@ public class FixedVersionCompatibilityChecker implements CompatibilityChecker {
      *
      */
     public FixedVersionCompatibilityChecker(final SparkVersion... version) {
-        m_versions = Collections.unmodifiableSet(new HashSet<SparkVersion>(Arrays.asList(version)));
+        m_versions = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(version)));
     }
 
     /**

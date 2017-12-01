@@ -25,7 +25,6 @@ import java.io.Serializable;
 /**
  *
  * @author Tobias Koetter, KNIME.com
- * @param <M> A (serializable) MLlib model
  */
 @SparkClass
 public class ModelJobOutput extends JobOutput {

@@ -45,7 +45,7 @@ public interface IntermediateToSparkConverter<T> extends TypeConverter, Serializ
     public T getSparkDataType();
 
     /**
-     * @return
+     * @return the intermediate type
      */
     public Serializable getSerializableDataType();
 

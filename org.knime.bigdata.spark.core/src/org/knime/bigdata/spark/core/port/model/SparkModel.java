@@ -253,6 +253,7 @@ public class SparkModel {
         throw new IOException("Invalid zip entry");
     }
 
+    @SuppressWarnings("resource")
     private static SparkModel load_v1_6_model(final PortObjectZipInputStream in)
         throws IOException, InvalidSettingsException, MissingSparkModelHelperException {
 
@@ -321,6 +322,7 @@ public class SparkModel {
      * @param out
      * @throws IOException
      */
+    @SuppressWarnings("resource")
     public void write(final ExecutionMonitor exec, final PortObjectZipOutputStream out) throws IOException {
         out.putNextEntry(new ZipEntry(ZIP_KEY_MODEL_1_6_HEADER));
         NodeSettings header = new NodeSettings(ZIP_KEY_MODEL_1_6_HEADER);
