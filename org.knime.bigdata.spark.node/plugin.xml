@@ -13,7 +13,7 @@
             icon="icons/category.png"
             level-id="spark"
             locked="true"
-            name="Spark"
+            name="Apache Spark"
             path="/toolintegration">
       </category>
       <category
