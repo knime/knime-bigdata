@@ -38,7 +38,9 @@ object Merger {
             BundleInfo(mergedBundleName, 
                 Version.parseVersion(mergedBundleVersion), 
                 false, 
-                mergeUnit.artifacts.head.bundle.get.licenses))
+                mergeUnit.artifacts.head.bundle.get.licenses,
+                mergeUnit.artifacts.head.bundle.get.vendor,
+                mergeUnit.artifacts.head.bundle.get.docUrl))
   
         println(s"  Merge info: ${mergedArt.mvnCoordinate} (bundle: ${mergedArt.bundle.get.bundleSymbolicName} version: ${mergedArt.bundle.get.bundleVersion.toString}):\n" + 
             mergeUnit.artifacts.map(artToMerge => "    " + artToMerge.mvnCoordinate).mkString("\n"))

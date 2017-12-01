@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import java.util.regex.Pattern
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import aQute.lib.osgi.Analyzer
 
 object TPConfigReader {
 
@@ -116,9 +117,9 @@ object TPConfigReader {
   case class TPMavenRepo(var id: String,
     var url: String)
     
-  case class TPLicense(var coord: String,
-    var name: String,
-    var url: String)
+  case class TPLicense(var id: Seq[String],
+    var licenseName: String,
+    var licenseUrl: String)
 
   case class TPConfig(
     var version: String,
@@ -179,8 +180,8 @@ object TPConfigReader {
     
     def getLicense(config: TPConfig)(art: Artifact): Option[License] = {
       val mvnCoord = art.mvnCoordinate
-      config.licenses.filter(_.coord == mvnCoord).headOption match {
-        case Some(license) => Some(License(license.name, license.url, null, null))
+      config.licenses.filter(_.id.contains(mvnCoord)).headOption match {
+        case Some(license) => Some(License(license.licenseName, license.licenseUrl, null, null))
         case _ => None
       }
     }
@@ -314,6 +315,11 @@ object TPConfigReader {
 
       require(!i.instructions.isEmpty || i.fileExcludes.isEmpty,
         s"Bundle instruction with pattern ${i.coordPattern} must at least specify a map of instructions or a list of fileExcludes")
+
+      i.instructions.keys.foreach(instrName => {
+        require(instrName != Analyzer.BUNDLE_LICENSE, 
+            s"Bundle instructions for ${i.coordPattern} specify a Bundle-License. Please use the licenses section in the YAML config instead.")
+      })
     })
     
     config.mavenRepositories.foreach(r => {
@@ -328,9 +334,10 @@ object TPConfigReader {
 
     config.licenses = Option(config.licenses).getOrElse(Seq())
     config.licenses.foreach(l => {
-      require(l.coord != null, "There is a license entry that does not specify a maven coordinate (coord attribute).")
-      require(l.name != null, "There is a license entry that does not specify a license name (name attribute).")
-      require(l.name != null, "There is a license entry that does not specify a license URL (url attribute).")
+      require(l.id != null, "There is a license entry that does not specify a list of maven coordinates (id attribute).")
+      require(!l.id.isEmpty, "There is a license entry that does not specify a list of maven coordinates (id attribute).")
+      require(l.licenseName != null, "There is a license entry that does not specify a license name (name attribute).")
+      require(l.licenseUrl != null, "There is a license entry that does not specify a license URL (url attribute).")
     })
 
     config.artifactGroups = Option(config.artifactGroups).getOrElse(Seq())

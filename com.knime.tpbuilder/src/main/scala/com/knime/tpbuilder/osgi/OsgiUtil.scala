@@ -33,7 +33,12 @@ object OsgiUtil {
 
   val maven2Osgi = new DefaultMaven2OsgiConverter()
 
-  def withBundleAndVersion(art: Artifact, srcFile: Option[File], licenses: Seq[License], config: TPConfig): Artifact = {
+  def withBundle(art: Artifact,
+      srcFile: Option[File],
+      licenses: Seq[License],
+      vendor: Option[String],
+      docUrl: Option[String],
+      config: TPConfig): Artifact = {
 
     val mavenArtifact = artToMavenArt(art)
 
@@ -46,7 +51,9 @@ object OsgiUtil {
       osgiName,
       Version.parseVersion(osgiVersion),
       isPrebundled,
-      licenses)
+      licenses,
+      vendor,
+      docUrl)
 
     withBundle(art, bundleInfo, Some(mavenArtifact.getFile), srcFile)
   }

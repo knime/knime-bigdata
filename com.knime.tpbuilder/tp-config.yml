@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20171128
+version: knimebd-20171201
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -526,7 +526,6 @@ bundleInstructions:
       Bundle-SymbolicName: com.sun.jersey.jersey-core
       Bundle-Activator: com.sun.jersey.core.osgi.Activator
       DynamicImport-Package: "*"
-      Bundle-License: http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
       Import-Package: >-
         javax.ws.rs.*                         ;version="[1,2)",
         javax.mail.*                          ;resolution:=optional,
@@ -534,7 +533,6 @@ bundleInstructions:
   - coordPattern: com\.sun\.jersey:jersey-client:jar:.*
     instructions:
       Bundle-SymbolicName: com.sun.jersey.jersey-client
-      Bundle-License: http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
       Private-Package: com.sun.jersey.client.osgi
       Import-Package: >-
         com.sun.jersey.*                      ;version="[1.14,2)",
@@ -702,34 +700,56 @@ bundleInstructions:
       "-noee": true
 
 
-# License specifications/overrides for maven artifacts whose maven metadata lacks
-# license information. 
+# License specifications for maven artifacts. This can be used to specify a license
+# for artifacts that do not indicate a license in their maven metadata, or deal with
+# multi-license situations.
 #
 # licenses:
-#   - coord: <maven-coordinate>
-#     name: <license-name>
-#     url: <license-URL>
+#   - licenseName: <license-name>
+#     licenseUrl: <license-URL> 
+#     id: 
+#       - <maven-coordinate>
+#       - [...]
+#     
 licenses:
-  - coord: asm:asm:jar:3.1
-    name: 3-Clause BSD License
-    url: http://asm.ow2.org/license.html
+  - licenseName: 3-Clause BSD License
+    licenseUrl: http://asm.ow2.org/license.html
+    id: [ 'asm:asm:jar:3.1' ]
     
-  - coord: jline:jline:jar:0.9.94
-    name: 3-Clause BSD License
-    url: https://raw.githubusercontent.com/jline/jline1/master/LICENSE.txt
+  - licenseName: 3-Clause BSD License
+    licenseUrl: https://raw.githubusercontent.com/jline/jline1/master/LICENSE.txt
+    id: [ 'jline:jline:jar:0.9.94' ]
     
-  - coord: com.thoughtworks.paranamer:paranamer:jar:2.3
-    name: 3-Clause BSD License
-    url: https://github.com/paul-hammant/paranamer/raw/1ebd7271772d22399a145024d5672d7679c3856a/LICENSE.txt
+  - licenseName: 3-Clause BSD License
+    licenseUrl: https://github.com/paul-hammant/paranamer/raw/1ebd7271772d22399a145024d5672d7679c3856a/LICENSE.txt
+    id: [ 'com.thoughtworks.paranamer:paranamer:jar:2.3' ]
     
-  - coord: com.thoughtworks.paranamer:paranamer:jar:2.6
-    name: 3-Clause BSD License
-    url: https://raw.githubusercontent.com/paul-hammant/paranamer/4b7e215b9d1117fd4c5c1290aadcbd2e3ec76d20/LICENSE.txt
+  - licenseName: 3-Clause BSD License
+    licenseUrl: https://raw.githubusercontent.com/paul-hammant/paranamer/4b7e215b9d1117fd4c5c1290aadcbd2e3ec76d20/LICENSE.txt
+    id: [ 'com.thoughtworks.paranamer:paranamer:jar:2.6' ]
 
-  - coord: org.apache.zookeeper:zookeeper:jar:3.4.6
-    name: Apache License, Version 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0
+  - licenseName: Apache License, Version 2.0
+    licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
+    id:
+      - org.apache.zookeeper:zookeeper:jar:3.4.6
+      - org.codehaus.jackson:jackson-xc:jar:1.9.13
+      - org.codehaus.jackson:jackson-jaxrs:jar:1.9.13
+      
+  - licenseName: GNU General Public License, Version 2, with Classpath Exception
+    licenseUrl: http://glassfish.java.net/public/CDDL+GPL_1_1.html
+    id:
+      - com.sun.jersey:jersey-server:jar:1.14
+      - com.sun.jersey:jersey-servlet:jar:1.14
+      - com.sun.jersey:jersey-core:jar:1.14
+      - com.sun.jersey:jersey-client:jar:1.14
+      
+  - licenseName: GNU Lesser General Public License, Version 2.1
+    licenseUrl: http://www.gnu.org/licenses/lgpl-2.1.txt
+    id: [ 'com.github.rwl:jtransforms:jar:2.4.0' ]
 
+  - licenseName: GNU Lesser General Public License, Version 2.1
+    licenseUrl: http://www.gnu.org/licenses/lgpl-2.1.txt
+    id: [ 'com.github.rwl:jtransforms:jar:2.4.0' ]
 
 
 #  - coordPattern: com\.diffplug\.osgi:com\.diffplug\.osgi\.extension\.sun\.misc:jar:0\.0\.0

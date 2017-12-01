@@ -311,7 +311,14 @@ object Bundler {
     val bundleName = instr.getOrElse(Analyzer.BUNDLE_NAME, bundleInfo.bundleSymbolicName)
 
     val bndInstructions = MutableMap(Analyzer.BUNDLE_DESCRIPTION ->
-      instr.getOrElse(Analyzer.BUNDLE_DESCRIPTION, createBundleDescription(art)))
+      instr.getOrElse(Analyzer.BUNDLE_DESCRIPTION, createBundleDescription(art)),
+      Analyzer.BUNDLE_LICENSE -> mkBundleLicenseHeader(art))
+
+    if (bundleInfo.vendor.isDefined)
+      bndInstructions += (Analyzer.BUNDLE_VENDOR -> bundleInfo.vendor.get)
+
+    if (bundleInfo.docUrl.isDefined)
+      bndInstructions += (Analyzer.BUNDLE_DOCURL -> bundleInfo.docUrl.get)
 
     bndInstructions ++= mkDependencyInstructions(art, depGraph, instr, config)
 
@@ -370,6 +377,11 @@ object Bundler {
     } else {
       s"Bundle created from maven artifact ${art.mvnCoordinate} for use within KNIME Big Data target platform."
     }
+  }
+
+  private def mkBundleLicenseHeader(art: Artifact) = {
+    val license = art.bundle.get.licenses.head
+    s"${license.name};link=${license.url}"
   }
 
 }

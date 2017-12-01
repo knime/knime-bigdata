@@ -35,7 +35,9 @@ case class BundleInfo(
   bundleSymbolicName: String,
   bundleVersion: Version,
   isPrebundled: Boolean,
-  licenses: Seq[License])
+  licenses: Seq[License],
+  vendor: Option[String],
+  docUrl: Option[String])
 
 case class Artifact(
     group: String,
