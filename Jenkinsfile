@@ -3,7 +3,7 @@
 library "knime-pipeline@$BRANCH_NAME"
 
 node {
-	def upstreamParams = defaultProperties('org.knime.update.analytics-platform',
+	def upstreamParams = defaultProperties('org.knime.update.org',
 		'com.knime.update.pmml.compilation',
 		'org.knime.update.targetPlatform')
 
@@ -76,7 +76,7 @@ node {
 			component: 'org.knime.update.bigdata',
 			baseline: [file: 'git/knime-config/org.knime.config/API-Baseline.target', name: 'Release 3.4'],
 			repos: [
-				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.analytics-platform'].p2}",
+				"$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2}",
 				"$JENKINS_URL/jobs/${upstreamParams['com.knime.update.pmml.compilation'].p2}",
 				"file:///${WORKSPACE.replace('\\', '/')}/org.knime.update.bigdata.externals/"
 			]
