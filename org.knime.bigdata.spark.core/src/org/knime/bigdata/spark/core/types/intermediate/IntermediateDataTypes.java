@@ -62,6 +62,11 @@ public final class IntermediateDataTypes {
      * */
     public static final IntermediateDataType ANY = new IntermediateDataType("*");
 
+    /** Array with all data types. */
+    public static final IntermediateDataType ALL_TYPES[] = {
+        BINARY, BOOLEAN, BYTE, CALENDAR_INTERVAL, DATE, DOUBLE,
+        FLOAT, INTEGER, LONG, NULL, SHORT, STRING, TIMESTAMP, ANY };
+
     /**
      * @param baseType the base {@link IntermediateDataType}
      * @return the {@link IntermediateArrayDataType} for the given base type

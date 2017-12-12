@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark.core.types.intermediate;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -86,6 +87,18 @@ public class IntermediateDataType implements Serializable {
         return true;
     }
 
+    /**
+     * Replaces deserialized type with singleton from {@link IntermediateDataTypes} if available.
+     * @return matching singleton from {@link IntermediateDataTypes}
+     * @throws ObjectStreamException
+     */
+    public Object readResolve() throws ObjectStreamException {
+        for (IntermediateDataType type : IntermediateDataTypes.ALL_TYPES) {
+            if (this.equals(type)) {
+                return type;
+            }
+        }
 
-
+        return this;
+    }
 }
