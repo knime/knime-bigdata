@@ -51,6 +51,9 @@ import org.apache.spark.sql.Column;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.DecimalType;
+import org.apache.spark.sql.types.IntegralType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -177,6 +180,18 @@ public class Spark_2_0_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
 
         if ("count".equals(function) || "count_distinct".equals(function)) { // handle count(*) and count(distinct ...)
             return new IntermediateField(input.getOutputName(), IntermediateDataTypes.LONG);
+
+        } else if ("sum".equals(function) || "sum_distinct".equals(function)) { // SPARK-18622 fix
+            final DataType dataType = inputFields[inputSchema.fieldIndex(inputColName)].dataType();
+            if (dataType instanceof DecimalType) {
+                final DecimalType decimalType = (DecimalType) dataType;
+                outputExpr = Literal.create(null,
+                    DataTypes.createDecimalType(decimalType.precision() + 10, decimalType.scale()));
+            } else if (dataType instanceof IntegralType) {
+                outputExpr = Literal.create(null, DataTypes.LongType);
+            } else {
+                outputExpr = Literal.create(null, DataTypes.DoubleType);
+            }
 
         } else if ("covar_pop".equals(function) || "covar_samp".equals(function)) { // lookup second column argument
             final Column inputColumnA = new Column(
