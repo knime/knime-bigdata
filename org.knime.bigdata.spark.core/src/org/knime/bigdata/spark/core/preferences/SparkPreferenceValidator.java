@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.preferences;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.ArrayList;
 
 /**
@@ -35,7 +36,7 @@ public class SparkPreferenceValidator {
      * @param withAuthentication <code>true</code> for authentication
      * @param username login username
      * @param password login password
-     * @param jobTimeout job timeout
+     * @param receiveTimeout Spark job server REST receive timeout
      * @param jobCheckFrequency job check frequency
      * @param sparkVersion Spark version
      * @param contextName context name
@@ -46,11 +47,11 @@ public class SparkPreferenceValidator {
      */
     public static String validate(final String jobServerUrl,
             final boolean withAuthentication, final String username, final String password,
-            final int jobTimeout, final int jobCheckFrequency,
+            final Duration receiveTimeout, final int jobCheckFrequency,
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
 
-        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+        ArrayList<String> errors = validateInternal(jobServerUrl, receiveTimeout, jobCheckFrequency,
             sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
 
         if (withAuthentication && (username == null || username.isEmpty())) {
@@ -67,7 +68,7 @@ public class SparkPreferenceValidator {
     /**
      * @param jobServerUrl Spark job server url
      * @param credentials credentials name
-     * @param jobTimeout job timeout
+     * @param receiveTimeout Spark job server REST receive timeout
      * @param jobCheckFrequency job check frequency
      * @param sparkVersion Spark version
      * @param contextName context name
@@ -78,11 +79,11 @@ public class SparkPreferenceValidator {
      */
     public static String validate(final String jobServerUrl,
             final String credentials,
-            final int jobTimeout, final int jobCheckFrequency,
+            final Duration receiveTimeout, final int jobCheckFrequency,
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
 
-        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+        ArrayList<String> errors = validateInternal(jobServerUrl, receiveTimeout, jobCheckFrequency,
             sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
 
         if (credentials == null || credentials.isEmpty()) {
@@ -94,7 +95,7 @@ public class SparkPreferenceValidator {
 
     /**
      * @param jobServerUrl Spark job server url
-     * @param jobTimeout job timeout
+     * @param receiveTimeout Spark job server REST receive timeout
      * @param jobCheckFrequency job check frequency
      * @param sparkVersion Spark version
      * @param contextName context name
@@ -104,18 +105,18 @@ public class SparkPreferenceValidator {
      * @return null or error messages
      */
     public static String validate(final String jobServerUrl,
-            final int jobTimeout, final int jobCheckFrequency,
+            final Duration receiveTimeout, final int jobCheckFrequency,
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
 
-        ArrayList<String> errors = validateInternal(jobServerUrl, jobTimeout, jobCheckFrequency,
+        ArrayList<String> errors = validateInternal(jobServerUrl, receiveTimeout, jobCheckFrequency,
             sparkVersion, contextName, deleteSparkObjectsOnDispose, overrideSettings, customSettings);
 
         return mergeMessages(errors);
     }
 
     private static ArrayList<String> validateInternal(final String jobServerUrl,
-            final int jobTimeout, final int jobCheckFrequency,
+            final Duration receiveTimeout, final int jobCheckFrequency,
             final String sparkVersion, final String contextName, final boolean deleteSparkObjectsOnDispose,
             final boolean overrideSettings, final String customSettings) {
 
@@ -142,6 +143,11 @@ public class SparkPreferenceValidator {
             } catch(URISyntaxException | IllegalArgumentException e) {
                 errors.add("Invalid job server url: " + e.getMessage());
             }
+        }
+
+        // Receive timeout
+        if (receiveTimeout.toMillis() < 0) {
+            errors.add("Receive timeout must be positive.");
         }
 
         // Context name

@@ -483,7 +483,11 @@ public class JobserverSparkContext extends SparkContext {
             buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + m_config.getUser() + "</tt><br/>");
             buf.append("<strong>Password:</strong>&nbsp;&nbsp;<tt>" + (m_config.getPassword() != null) + "</tt><br/>");
         }
-        buf.append("<strong>Job timeout:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobTimeout() + " seconds</tt><br/>");
+        long receiveTimeout = m_config.getReceiveTimeout().getSeconds();
+        buf.append("<strong>Receive timeout:</strong>&nbsp;&nbsp;<tt>");
+        if (receiveTimeout == 0) { buf.append("infinite"); }
+        else { buf.append(receiveTimeout + " seconds"); }
+        buf.append("</tt><br/>");
         buf.append("<strong>Job check frequency:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobCheckFrequency()
             + " seconds</tt><br/>");
 
@@ -519,8 +523,8 @@ public class JobserverSparkContext extends SparkContext {
         builder.append(m_config.getPassword() != null);
         builder.append(", jobCheckFrequency=");
         builder.append(m_config.getJobCheckFrequency());
-        builder.append(", jobTimeout=");
-        builder.append(m_config.getJobTimeout());
+        builder.append(", receiveTimeout=");
+        builder.append(m_config.getReceiveTimeout().getSeconds());
         builder.append(", sparkVersion=");
         builder.append(m_config.getSparkVersion());
         builder.append(", contextName=");

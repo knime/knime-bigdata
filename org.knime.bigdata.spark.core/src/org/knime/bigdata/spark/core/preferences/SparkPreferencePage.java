@@ -44,6 +44,8 @@
  */
 package org.knime.bigdata.spark.core.preferences;
 
+import java.time.Duration;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -88,7 +90,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     private Text m_password;
 
-    private Spinner m_jobTimeout;
+    private Spinner m_receiveTimeout;
 
     private Spinner m_jobCheckFrequency;
 
@@ -177,7 +179,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_password.getParent().setLayoutData(userPasswordGroupLayoutData);
         m_password.addListener(SWT.CHANGED, this);
 
-        m_jobTimeout = createSpinnerWithLabel(connectionSettings, "Job timeout in seconds:", 1, 10);
+        m_receiveTimeout = createSpinnerWithLabel(connectionSettings, "Receive timeout in seconds:", 0, 10);
 
         m_jobCheckFrequency = createSpinnerWithLabel(connectionSettings, "Job check frequency in seconds:", 1, 1);
 
@@ -277,7 +279,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_username.setText(prefs.getString(SparkPreferenceInitializer.PREF_USER_NAME));
         m_password.setText(prefs.getString(SparkPreferenceInitializer.PREF_PWD));
         setUserPasswordFieldEnabled(prefs.getBoolean(SparkPreferenceInitializer.PREF_AUTHENTICATION));
-        m_jobTimeout.setSelection(prefs.getInt(SparkPreferenceInitializer.PREF_JOB_TIMEOUT));
+        m_receiveTimeout.setSelection(prefs.getInt(SparkPreferenceInitializer.PREF_RECEIVE_TIMEOUT));
         m_jobCheckFrequency.setSelection(prefs.getInt(SparkPreferenceInitializer.PREF_JOB_CHECK_FREQUENCY));
 
         setSparkVersionField(prefs.getString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
@@ -302,7 +304,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_username.setText(prefs.getDefaultString(SparkPreferenceInitializer.PREF_USER_NAME));
         m_password.setText(prefs.getDefaultString(SparkPreferenceInitializer.PREF_PWD));
         setUserPasswordFieldEnabled(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_AUTHENTICATION));
-        m_jobTimeout.setSelection(prefs.getDefaultInt(SparkPreferenceInitializer.PREF_JOB_TIMEOUT));
+        m_receiveTimeout.setSelection(prefs.getDefaultInt(SparkPreferenceInitializer.PREF_RECEIVE_TIMEOUT));
         m_jobCheckFrequency.setSelection(prefs.getDefaultInt(SparkPreferenceInitializer.PREF_JOB_CHECK_FREQUENCY));
 
         setSparkVersionField(prefs.getDefaultString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
@@ -331,7 +333,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         prefs.setValue(SparkPreferenceInitializer.PREF_AUTHENTICATION, m_withAuthentication.getSelection());
         prefs.setValue(SparkPreferenceInitializer.PREF_USER_NAME, m_username.getText());
         prefs.setValue(SparkPreferenceInitializer.PREF_PWD, m_password.getText());
-        prefs.setValue(SparkPreferenceInitializer.PREF_JOB_TIMEOUT, m_jobTimeout.getSelection());
+        prefs.setValue(SparkPreferenceInitializer.PREF_RECEIVE_TIMEOUT, m_receiveTimeout.getSelection());
         prefs.setValue(SparkPreferenceInitializer.PREF_JOB_CHECK_FREQUENCY, m_jobCheckFrequency.getSelection());
 
         if (m_sparkVersion.getSelectionIndex() >= 0) {
@@ -442,7 +444,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
     private void validateInputFields() {
         String errors = SparkPreferenceValidator.validate(m_jobServerUrl.getText(),
             m_withAuthentication.getSelection(), m_username.getText(), m_password.getText(),
-            m_jobTimeout.getSelection(), m_jobCheckFrequency.getSelection(),
+            Duration.ofSeconds(m_receiveTimeout.getSelection()), m_jobCheckFrequency.getSelection(),
             m_sparkVersion.getText(), m_contextName.getText(), m_deleteSparkObjectsOnDispose.getSelection(),
             m_overrideSettings.getSelection(), m_customSettings.getText());
 

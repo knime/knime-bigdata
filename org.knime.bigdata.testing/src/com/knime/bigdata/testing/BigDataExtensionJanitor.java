@@ -135,8 +135,9 @@ import org.knime.testing.core.TestrunJanitor;
  *     - v1_6.jobServerUrl = spark.jobserver.url
  *     - v1_6.authentication.credentials = spark.credentialsName
  *     - v1_6.authentication.selectType = spark.authMethod
+ *     - v1_6.sparkReceiveTimeout = spark.jobserver.receiveTimeout
  *     - v1_6.sparkVersion = spark.version
- *     - v1_6.spark.contextName = spark.context
+ *     - v1_6.contextName = spark.context
  *
  * @author Sascha Wolke, KNIME.com
  */
@@ -146,7 +147,7 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
     public final static String DEFAULT_VALUE = "execute-testflow-conf-node";
 
 	/** Integer variables. */
-    public final static String INT_VARIABLES[] = { "ssh.port" };
+    public final static String INT_VARIABLES[] = { "spark.jobserver.receiveTimeout", "ssh.port" };
 
     /** Default CSV file path if FLOWVARS is not set in ENV. */
     public final String DEFAULT_PATH_WORKFLOW = "knime://knime.workflow/../flowvariables.csv";
@@ -194,6 +195,7 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
         m_flowVariables.add(new FlowVariable("spark.version", "2.2"));
         m_flowVariables.add(new FlowVariable("spark.context", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.jobserver.url", "http://execute-testflow-conf-node:123/"));
+        m_flowVariables.add(new FlowVariable("spark.jobserver.receiveTimeout", 120));
         m_flowVariables.add(new FlowVariable("spark.settings.override", "false"));
         m_flowVariables.add(new FlowVariable("spark.settings.custom", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.authMethod", "NONE"));

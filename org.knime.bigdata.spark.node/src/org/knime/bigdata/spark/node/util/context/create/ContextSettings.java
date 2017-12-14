@@ -26,6 +26,7 @@
  */
 package org.knime.bigdata.spark.node.util.context.create;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,6 +43,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.Authe
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
+import org.knime.core.node.defaultnodesettings.SettingsModelLongBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.core.node.workflow.ICredentials;
@@ -57,6 +60,10 @@ import org.knime.core.node.workflow.ICredentials;
  *   - deleteRDDsOnDispose -> deleteObjectsOnDispose
  *   - memPerNode -> overrideSparkSettings+customSparkSettings
  *
+ * Changes in version 1.6:
+ *   - receive timeout added
+ *   - job timeout removed
+ *
  * @author Tobias Koetter, KNIME.com
  * @author Sascha Wolke, KNIME.com
  */
@@ -71,8 +78,8 @@ public class ContextSettings {
     private final SettingsModelAuthentication m_authentication =
             new SettingsModelAuthentication("v1_6.authentication", AuthenticationType.NONE, null, null, null);
 
-    private final SettingsModelInteger m_jobTimeout =
-            new SettingsModelIntegerBounded("v1_6.sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
+    private final SettingsModelLong m_receiveTimeout =
+            new SettingsModelLongBounded("v1_6.sparkReceiveTimeout", KNIMEConfigContainer.getReceiveTimeout().getSeconds(), 0, Integer.MAX_VALUE);
 
     private final SettingsModelInteger m_jobCheckFrequency =
             new SettingsModelIntegerBounded("v1_6.sparkJobCheckFrequency", KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
@@ -113,9 +120,6 @@ public class ContextSettings {
     /** @deprecated use m_password instead */
     @Deprecated private final SettingsModelString m_legacyPassword =
             new SettingsModelString("password", KNIMEConfigContainer.getPassword() == null ? null : String.valueOf(KNIMEConfigContainer.getUserName()));
-    /** @deprecated use m_jobTimeout instead */
-    @Deprecated private final SettingsModelInteger m_legacyJobTimeout =
-            new SettingsModelIntegerBounded("sparkJobTimeout", KNIMEConfigContainer.getJobTimeout(), 1, Integer.MAX_VALUE);
     /** @deprecated use m_jobCheckFrequency instead */
     @Deprecated private final SettingsModelInteger m_legacyJobCheckFrequency =
             new SettingsModelIntegerBounded("sparkJobCheckFrequency", KNIMEConfigContainer.getJobCheckFrequency(), 1, Integer.MAX_VALUE);
@@ -142,8 +146,8 @@ public class ContextSettings {
         return m_authentication;
     }
 
-    protected SettingsModelInteger getJobTimeoutModel() {
-        return m_jobTimeout;
+    protected SettingsModelLong getReceiveTimeoutModel() {
+        return m_receiveTimeout;
     }
 
     protected SettingsModelInteger getJobCheckFrequencyModel() {
@@ -188,8 +192,8 @@ public class ContextSettings {
         return m_jobServerUrl.getStringValue();
     }
 
-    public int getJobTimeout() {
-        return m_jobTimeout.getIntValue();
+    public Duration getReceiveTimeout() {
+        return Duration.ofSeconds(m_receiveTimeout.getLongValue());
     }
 
     public int getJobCheckFrequency() {
@@ -270,7 +274,7 @@ public class ContextSettings {
         m_settingsFormatVersion.saveSettingsTo(settings);
         m_jobServerUrl.saveSettingsTo(settings);
         m_authentication.saveSettingsTo(settings);
-        m_jobTimeout.saveSettingsTo(settings);
+        m_receiveTimeout.saveSettingsTo(settings);
         m_jobCheckFrequency.saveSettingsTo(settings);
 
         m_sparkVersion.saveSettingsTo(settings);
@@ -313,7 +317,6 @@ public class ContextSettings {
         m_legacyHost.validateSettings(settings);
         m_legacyPort.validateSettings(settings);
         m_legacyUser.validateSettings(settings);
-        m_legacyJobTimeout.validateSettings(settings);
         m_legacyJobCheckFrequency.validateSettings(settings);
 
         m_legacyContextName.validateSettings(settings);
@@ -324,7 +327,7 @@ public class ContextSettings {
     public void validateSettings_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_jobServerUrl.validateSettings(settings);
         m_authentication.validateSettings(settings);
-        m_jobTimeout.validateSettings(settings);
+        // optional: receive timeout
         m_jobCheckFrequency.validateSettings(settings);
 
         m_sparkVersion.validateSettings(settings);
@@ -343,28 +346,28 @@ public class ContextSettings {
 
         if (m_authentication.getAuthenticationType() == AuthenticationType.NONE) {
             errors = SparkPreferenceValidator.validate(getJobServerUrl(),
-                getJobTimeout(), getJobCheckFrequency(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
                 overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER) {
             errors = SparkPreferenceValidator.validate(getJobServerUrl(),
                 true, m_authentication.getUsername(), null,
-                getJobTimeout(), getJobCheckFrequency(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
                 overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
             errors = SparkPreferenceValidator.validate(getJobServerUrl(),
                 true, m_authentication.getUsername(), m_authentication.getPassword(),
-                getJobTimeout(), getJobCheckFrequency(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
                 overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
             SparkPreferenceValidator.validate(getJobServerUrl(),
                 m_authentication.getCredential(),
-                getJobTimeout(), getJobCheckFrequency(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
                 overrideSparkSettings(), getCustomSparkSettings());
         }
@@ -399,7 +402,6 @@ public class ContextSettings {
         m_legacyPort.loadSettingsFrom(settings);
         m_legacyUser.loadSettingsFrom(settings);
         m_legacyPassword.setStringValue(demix(settings.getPassword(m_legacyPassword.getKey(), String.valueOf(MY), null)));
-        m_legacyJobTimeout.loadSettingsFrom(settings);
         m_legacyJobCheckFrequency.loadSettingsFrom(settings);
 
         m_legacyContextName.loadSettingsFrom(settings);
@@ -419,7 +421,6 @@ public class ContextSettings {
         } else {
             m_authentication.setValues(AuthenticationType.NONE, null, null, null);
         }
-        m_jobTimeout.setIntValue(m_legacyJobTimeout.getIntValue());
         m_jobCheckFrequency.setIntValue(m_legacyJobCheckFrequency.getIntValue());
 
         // use default: m_sparkVersion
@@ -439,7 +440,11 @@ public class ContextSettings {
     public void loadSettingsFrom_v1_6(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_jobServerUrl.loadSettingsFrom(settings);
         m_authentication.loadSettingsFrom(settings);
-        m_jobTimeout.loadSettingsFrom(settings);
+        try {
+            m_receiveTimeout.loadSettingsFrom(settings);
+        } catch (InvalidSettingsException e) {
+            // setting can be empty on old workflows
+        }
         m_jobCheckFrequency.loadSettingsFrom(settings);
 
         m_sparkVersion.loadSettingsFrom(settings);
@@ -470,21 +475,21 @@ public class ContextSettings {
         if (authType == AuthenticationType.NONE) {
             return new SparkContextConfig(
                 getJobServerUrl(), false, null, null,
-                getJobCheckFrequency(), getJobTimeout(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER) {
             return new SparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), "",
-                getJobCheckFrequency(), getJobTimeout(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER_PWD) {
             return new SparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), m_authentication.getPassword(),
-                getJobCheckFrequency(), getJobTimeout(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
@@ -493,7 +498,7 @@ public class ContextSettings {
 
             return new SparkContextConfig(
                 getJobServerUrl(), true, cred.getLogin(), cred.getPassword(),
-                getJobCheckFrequency(), getJobTimeout(),
+                getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
@@ -526,8 +531,8 @@ public class ContextSettings {
         }
         builder.append(", jobCheckFrequency=");
         builder.append(getJobCheckFrequency());
-        builder.append(", jobTimeout=");
-        builder.append(getJobTimeout());
+        builder.append(", receiveTimeout=");
+        builder.append(getReceiveTimeout().getSeconds());
         builder.append(", sparkVersion=");
         builder.append(getSparkVersion());
         builder.append(", contextName=");

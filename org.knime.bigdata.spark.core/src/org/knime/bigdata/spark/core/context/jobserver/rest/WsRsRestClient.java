@@ -105,6 +105,7 @@ class WsRsRestClient implements IRestClient {
         m_clientPolicy.setAllowChunking(true);
         m_clientPolicy.setChunkingThreshold(CHUNK_THRESHOLD);
         m_clientPolicy.setChunkLength(CHUNK_LENGTH);
+        m_clientPolicy.setReceiveTimeout(contextConfig.getReceiveTimeout().toMillis());
 
         configureProxyIfNecessary(contextConfig);
     }

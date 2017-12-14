@@ -97,7 +97,7 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * nothing and returns false. However, for new/configured contexts, it is still possible to change all other
      * settings. For contexts that are already open, it depends on the actual setting that has changed, e.g. it may not
      * be possible to change the {@link SparkVersion} without destroying the remote context first, but it may be
-     * possible to change the job timeout.
+     * possible to change the job check frequency.
      * </p>
      *
      * @param config The new configuration to apply.

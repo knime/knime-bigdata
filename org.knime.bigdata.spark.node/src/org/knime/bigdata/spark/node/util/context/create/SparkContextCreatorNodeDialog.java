@@ -83,8 +83,8 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         m_settings.getAuthenticateModel().addChangeListener(this);
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new DialogComponentNumber(m_settings.getJobTimeoutModel(),
-            "Spark job timeout (seconds): ", 1, 5).getComponentPanel(), gbc);
+        panel.add(new DialogComponentNumber(m_settings.getReceiveTimeoutModel(),
+            "Job server receive timeout (seconds): ", 10, 5).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentNumber(m_settings.getJobCheckFrequencyModel(),
@@ -110,12 +110,12 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteContextOnDisposeModel(),
-                "Delete Spark context on dispose").getComponentPanel(), gbc);
+                "<html>Delete Spark <i>context</i> on dispose</html>").getComponentPanel(), gbc);
         m_settings.getDeleteContextOnDisposeModel().addChangeListener(this);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteObjectsOnDisposeModel(),
-                "Delete Spark objects on dispose").getComponentPanel(), gbc);
+                "<html>Delete Spark <i>objects</i> on dispose</html>").getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentButtonGroup(m_settings.getSparkJobLogLevelModel(), false,

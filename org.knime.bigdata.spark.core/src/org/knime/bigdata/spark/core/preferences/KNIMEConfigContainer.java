@@ -1,5 +1,7 @@
 package org.knime.bigdata.spark.core.preferences;
 
+import java.time.Duration;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -43,10 +45,10 @@ public class KNIMEConfigContainer {
     }
 
     /**
-     * @return the job timeout
+     * @return the job server REST receive timeout
      */
-    public static int getJobTimeout() {
-        return PREFERENCE_STORE.getInt(SparkPreferenceInitializer.PREF_JOB_TIMEOUT);
+    public static Duration getReceiveTimeout() {
+        return Duration.ofSeconds(PREFERENCE_STORE.getInt(SparkPreferenceInitializer.PREF_RECEIVE_TIMEOUT));
     }
 
     /**

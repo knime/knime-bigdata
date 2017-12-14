@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.core.port.context;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -43,7 +44,7 @@ public class SparkContextConfig implements Serializable {
     private final boolean m_authentication;
     private final String m_user;
     private final String m_password;
-    private final int m_jobTimeout;
+    private final Duration m_receiveTimeout;
     private final int m_jobCheckFrequency;
 
     private final SparkVersion m_sparkVersion;
@@ -60,7 +61,7 @@ public class SparkContextConfig implements Serializable {
     public SparkContextConfig() {
         this(KNIMEConfigContainer.getJobServerUrl(),
             KNIMEConfigContainer.useAuthentication(), KNIMEConfigContainer.getUserName(), KNIMEConfigContainer.getPassword(),
-            KNIMEConfigContainer.getJobCheckFrequency(), KNIMEConfigContainer.getJobTimeout(),
+            KNIMEConfigContainer.getReceiveTimeout(), KNIMEConfigContainer.getJobCheckFrequency(),
             KNIMEConfigContainer.getSparkVersion(), KNIMEConfigContainer.getSparkContext(), KNIMEConfigContainer.deleteSparkObjectsOnDispose(),
             KNIMEConfigContainer.getSparkJobLogLevel(), KNIMEConfigContainer.overrideSparkSettings(), KNIMEConfigContainer.getCustomSparkSettings());
     }
@@ -71,7 +72,7 @@ public class SparkContextConfig implements Serializable {
      * @param authentication <code>true</code> for authentication
      * @param user login username
      * @param password login password
-     * @param jobTimeout job timeout
+     * @param receiveTimeout Spark job server REST receive timeout
      * @param jobCheckFrequency job check frequency
      * @param sparkVersion Spark version
      * @param contextName context name
@@ -82,7 +83,7 @@ public class SparkContextConfig implements Serializable {
      */
     public SparkContextConfig(final String jobServerUrl,
         final boolean authentication, final String user, final String password,
-        final int jobCheckFrequency, final int jobTimeout,
+        final Duration receiveTimeout, final int jobCheckFrequency,
         final SparkVersion sparkVersion, final String contextName, final boolean deleteObjectsOnDispose,
         final String sparkJobLogLevel, final boolean overrideSparkSettings, final String customSparkSettings) {
 
@@ -94,12 +95,12 @@ public class SparkContextConfig implements Serializable {
             throw new IllegalArgumentException("can't use authentication with empty user");
         }
 
-        if (jobCheckFrequency < 0) {
-            throw new IllegalArgumentException("Spark job check frequency must be positive");
+        if (receiveTimeout.toMillis() < 0) {
+            throw new IllegalArgumentException("Receive timeout must be positive");
         }
 
-        if (jobTimeout < 0) {
-            throw new IllegalArgumentException("Spark job timeout must be positive");
+        if (jobCheckFrequency < 0) {
+            throw new IllegalArgumentException("Spark job check frequency must be positive");
         }
 
         if (sparkVersion == null) {
@@ -122,8 +123,8 @@ public class SparkContextConfig implements Serializable {
         this.m_authentication = authentication;
         this.m_user = user;
         this.m_password = password;
+        this.m_receiveTimeout = receiveTimeout;
         this.m_jobCheckFrequency = jobCheckFrequency;
-        this.m_jobTimeout = jobTimeout;
 
         this.m_sparkVersion = sparkVersion;
         this.m_contextName = contextName;
@@ -141,8 +142,8 @@ public class SparkContextConfig implements Serializable {
         result = prime * result + m_jobServerUrl.hashCode();
         result = prime * result + (m_authentication ? m_user.hashCode() : 0);
         result = prime * result + (m_authentication ? m_password.hashCode() : 0);
+        result = prime * result + m_receiveTimeout.hashCode();
         result = prime * result + m_jobCheckFrequency;
-        result = prime * result + m_jobTimeout;
 
         result = prime * result + m_sparkVersion.hashCode();
         result = prime * result + m_contextName.hashCode();
@@ -186,10 +187,10 @@ public class SparkContextConfig implements Serializable {
 
 
     /**
-     * @return job timeout in seconds
+     * @return job server REST receive timeout in seconds
      */
-    public int getJobTimeout() {
-        return m_jobTimeout;
+    public Duration getReceiveTimeout() {
+        return m_receiveTimeout;
     }
 
 
@@ -276,7 +277,7 @@ public class SparkContextConfig implements Serializable {
         if (m_authentication && !Objects.equals(m_password, other.m_password)) {
             return false;
         }
-        if (m_jobTimeout != other.m_jobTimeout) {
+        if (m_receiveTimeout != other.m_receiveTimeout) {
             return false;
         }
         if (m_jobCheckFrequency != other.m_jobCheckFrequency) {

@@ -301,20 +301,18 @@ class JobserverJobController implements JobController {
     private JobserverJobOutput waitForJob(final JobRun<?, ?> jobRun, final String jobID,
         final ExecutionMonitor exec) throws CanceledExecutionException, KNIMESparkException {
 
-        final int aTimeoutInSeconds = m_contextConfig.getJobTimeout();
         final int aCheckFrequencyInSeconds = m_contextConfig.getJobCheckFrequency();
 
         LOGGER.debug("Start waiting for job...");
         exec.setMessage("Waiting for Spark job to finish...");
 
         final long timeOfStart = System.currentTimeMillis();
-        final long timeOfTimeout = timeOfStart + (aTimeoutInSeconds * 1000);
 
         int checkCounter = 0;
         JobStatus status = null;
 
-        while (System.currentTimeMillis() <= timeOfTimeout) {
-            sleepSafely(computeSleepTime(checkCounter, timeOfTimeout, aCheckFrequencyInSeconds));
+        while (true) {
+            sleepSafely(computeSleepTime(checkCounter, aCheckFrequencyInSeconds));
             checkCounter++;
 
             // (re)throws CanceledExecutionException if a *running* job was killed
@@ -327,7 +325,7 @@ class JobserverJobController implements JobController {
 
             switch (status) {
                 case RUNNING:
-                    exec.setMessage(String.format("Waiting for Spark job to finish (Execution time: %d seconds",
+                    exec.setMessage(String.format("Waiting for Spark job to finish (Execution time: %d seconds)",
                         (System.currentTimeMillis() - timeOfStart) / 1000));
                     break;
                 case DONE:
@@ -350,16 +348,6 @@ class JobserverJobController implements JobController {
                     throw new KNIMESparkException("Spark job was cancelled");
             }
         }
-
-        if (status != JobStatus.RUNNING) { // no result received
-            throw new KNIMESparkException("Unable to fetch job result, might be removed from result cache."
-                    + " See spark.jobserver.job-result-cache-size in environment.conf to increase cache size.");
-        }
-
-        killJobSafely(jobID);
-        throw new KNIMESparkException("Canceled job due to timeout. You might want to increase the "
-            + "job timeout for this Spark context in File > Preferences > KNIME > Spark "
-            + "(or the 'Create Spark Context node', if you are not using the default Spark context).");
     }
 
     private void killRunningJobIfCanceled(final ExecutionMonitor exec, final String jobID)
@@ -390,14 +378,12 @@ class JobserverJobController implements JobController {
         }
     }
 
-    private long computeSleepTime(final int checkCounter, final long timeOfTimeout, final int checkFrequencyInSeconds) {
-
-        long sleepTime = checkFrequencyInSeconds * 1000;
+    private long computeSleepTime(final int checkCounter, final int checkFrequencyInSeconds) {
         if (checkCounter < INITIAL_JOB_CHECK_WAIT_TIMES.length) {
-            sleepTime = INITIAL_JOB_CHECK_WAIT_TIMES[checkCounter];
+            return INITIAL_JOB_CHECK_WAIT_TIMES[checkCounter];
+        } else {
+            return checkFrequencyInSeconds * 1000;
         }
-
-        return Math.max(0, Math.min(sleepTime, timeOfTimeout - System.currentTimeMillis()));
     }
 
     private void sleepSafely(final long sleepTimeMillis) {

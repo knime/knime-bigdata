@@ -31,7 +31,7 @@
         <tab name="Connection Settings">
         <option name="Job server URL">The URL of the Spark job server including protocol and port e.g. http://localhost:8090.</option>
         <option name="Authentication">Either none  or user name and password which is required if authentication is enabled in the Spark job server.</option>
-        <option name="Spark job timeout (seconds)">The timeout of a Spark job.</option>
+        <option name="Job server receive timeout (seconds)">Time to wait on a Spark job server REST request for a response (0 is infinite).</option>
         <option name="Spark job check frequency (seconds)">The frequency KNIME has to check the job status.</option>        
         </tab>
     </fullDescription>

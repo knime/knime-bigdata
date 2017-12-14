@@ -80,6 +80,9 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /**Preference key for the password.*/
     public static final String PREF_PWD = "org.knime.bigdata.spark.v1_6.jobserver.connection.pwd";
 
+    /**Preference key for the receive timeout.*/
+    public static final String PREF_RECEIVE_TIMEOUT = "org.knime.bigdata.spark.v1_6.jobserver.connection.receiveTimeout";
+
     /**Preference key for the context name.*/
     public static final String PREF_CONTEXT_NAME = "org.knime.bigdata.spark.v1_6.jobserver.context.name";
 
@@ -96,9 +99,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for client side job status polling in seconds (integer). */
     public static final String PREF_JOB_CHECK_FREQUENCY =
         "org.knime.bigdata.spark.v1_6.jobserver.context.jobCheckFrequency";
-
-    /** Preference key for job timeout in seconds (integer). */
-    public static final String PREF_JOB_TIMEOUT = "org.knime.bigdata.spark.v1_6.jobserver.context.jobTimeout";
 
     /**Preference key to indicate that objects should be deleted on dispose.*/
     public static final String PREF_DELETE_OBJECTS_ON_DISPOSE = "org.knime.bigdata.spark.v1_6.deleteObjectsOnDispose";
@@ -149,10 +149,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /** @deprecated use PREF_USER_PWD instead */
     @Deprecated
     public static final String LEGACY_PREF_PWD = "org.knime.bigdata.spark.pwd";
-
-    /** @deprecated use PREF_USER_JOB_TIMEOUT instead */
-    @Deprecated
-    public static final String LEGACY_PREF_JOB_TIMEOUT = "org.knime.bigdata.spark.jobTimeout";
 
     /** @deprecated use PREF_JOB_CHECK_FREQUENCY instead */
     @Deprecated
@@ -224,7 +220,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         final String jobserverContextName = oldPrefs.get(LEGACY_PREF_CONTEXT_NAME, "knimeSparkContext");
         final String memPerNode = oldPrefs.get(LEGACY_PREF_MEM_PER_NODE, "512m");
 
-        final int jobTimeout = oldPrefs.getInt(LEGACY_PREF_JOB_TIMEOUT, -1);
         final int jobCheckFreq = oldPrefs.getInt(LEGACY_PREF_JOB_CHECK_FREQUENCY, -1);
 
         final boolean deleteRDDsOnDispose = oldPrefs.getBoolean(LEGACY_PREF_DELETE_RDDS_ON_DISPOSE,
@@ -245,10 +240,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
         if (jobserverContextName != null && !jobserverContextName.equals(store.getDefaultString(PREF_CONTEXT_NAME))) {
             store.setValue(PREF_CONTEXT_NAME, jobserverContextName);
-        }
-
-        if (jobTimeout != -1 && jobTimeout != store.getDefaultInt(PREF_JOB_TIMEOUT)) {
-            store.setValue(PREF_JOB_TIMEOUT, jobTimeout);
         }
 
         if (jobCheckFreq != -1 && jobCheckFreq != 5) {
@@ -279,11 +270,11 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_AUTHENTICATION, getPresetBoolean(config, "jobserver.connection.authentication"));
         store.setDefault(PREF_USER_NAME, getPresetString(config, "jobserver.connection.userName"));
         store.setDefault(PREF_PWD, getPresetString(config, "jobserver.connection.password"));
+        store.setDefault(PREF_RECEIVE_TIMEOUT, getPresetString(config, "jobserver.connection.receiveTimeout"));
 
         // setup jobserver context defaults
         store.setDefault(PREF_SPARK_VERSION, getPresetString(config, "jobserver.context.sparkVersion"));
         store.setDefault(PREF_CONTEXT_NAME, getPresetString(config, "jobserver.context.name"));
-        store.setDefault(PREF_JOB_TIMEOUT, getPresetInt(config, "jobserver.context.jobTimeout"));
         store.setDefault(PREF_JOB_CHECK_FREQUENCY, getPresetInt(config, "jobserver.context.jobCheckFrequency"));
         store.setDefault(PREF_OVERRIDE_SPARK_SETTINGS, getPresetBoolean(config, "jobserver.context.overrideSettings"));
         store.setDefault(PREF_CUSTOM_SPARK_SETTINGS, getPresetString(config, "jobserver.context.customSettings"));
