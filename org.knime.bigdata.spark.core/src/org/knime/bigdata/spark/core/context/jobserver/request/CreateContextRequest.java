@@ -20,8 +20,10 @@
  */
 package org.knime.bigdata.spark.core.context.jobserver.request;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
@@ -36,7 +38,7 @@ import org.knime.core.node.NodeLogger;
  * Request to create a new Spark context. The return value of {@link #send()} is true if the context was created
  * successfully, false if the context existed already. The method throws an exception if something else went wrong.
  *
- * @author Bjoern Lohrmann, KNIME.COM
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
 
@@ -58,25 +60,36 @@ public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
     @Override
     protected Boolean sendInternal() throws KNIMESparkException {
 
-        final Response response = m_client.post(JobserverConstants.buildContextPath(m_config.getContextName()),
-            getCustomSettings(), Entity.text(""));
+        try {
+            final Response response = m_client.post(JobserverConstants.buildContextPath(m_config.getContextName()),
+                getCustomSettings(), Entity.text(""));
 
-        final ParsedResponse parsedResponse =
-            JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
+            final ParsedResponse parsedResponse =
+                    JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
 
-        boolean contextWasCreatedSuccessfully = true;
+                boolean contextWasCreatedSuccessfully = true;
 
-        if (parsedResponse.isFailure()) {
-            contextWasCreatedSuccessfully = false;
+                if (parsedResponse.isFailure()) {
+                    contextWasCreatedSuccessfully = false;
 
-            // throws exception if it handles the error
-            handleGeneralFailures(parsedResponse);
+                    // throws exception if it handles the error
+                    handleGeneralFailures(parsedResponse);
 
-            // throws exception if it handles the error
-            handleRequestSpecificFailures(parsedResponse);
+                    // throws exception if it handles the error
+                    handleRequestSpecificFailures(parsedResponse);
+                }
+
+                return contextWasCreatedSuccessfully;
+
+        } catch (ProcessingException e) {
+            if (e.getCause() != null && e.getCause() instanceof SocketTimeoutException) {
+                throw new KNIMESparkException(
+                    "Timeout while creating Spark context. Please increase the \"Jobserver response timeout\"\n"
+                        + "in the \"Connection Settings\" of the \"Create Spark Context\" node.");
+            } else {
+                throw e;
+            }
         }
-
-        return contextWasCreatedSuccessfully;
     }
 
     private String[] getCustomSettings() {

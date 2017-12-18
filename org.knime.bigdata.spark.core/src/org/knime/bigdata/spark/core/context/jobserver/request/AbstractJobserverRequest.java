@@ -125,12 +125,10 @@ public abstract class AbstractJobserverRequest<T> {
                 throw new KNIMESparkException("Request to Spark Jobserver timed out.");
             case AUTHENTICATION_REQUIRED:
                 throw new KNIMESparkException(
-                    "Spark Jobserver requires authentication. Please configure credentials in File > Preferences > KNIME > Spark "
-                        + "(or in the respective 'Create Spark Context' node).");
+                    "Spark Jobserver requires authentication. Please configure credentials in the respective 'Create Spark Context' node.");
             case AUTHENTICATION_FAILED:
                 throw new KNIMESparkException(
-                    "Spark Jobserver authentication failed. Please correct the credentials in File > Preferences > KNIME > Spark "
-                        + "(or in the respective 'Create Spark Context' node).");
+                    "Spark Jobserver authentication failed. Please correct the credentials in the respective 'Create Spark Context' node.");
             case PROXY_AUTHENTICATION_REQUIRED:
                 throw new KNIMESparkException(
                     "You are connecting to Spark Jobserver via a proxy that requires authentication. Please configure proxy credentials in File > "

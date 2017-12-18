@@ -141,7 +141,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         image.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Label text = new Label(deprecationContainer, SWT.NONE);
-        text.setText("The settings on this page are only used as inital values in the Create Spark Context node.");
+        text.setText("The settings on this page are only used as inital values in the 'Create Spark Context' node.");
         text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
         /////////////// Connection settings ///////////////
@@ -179,9 +179,9 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_password.getParent().setLayoutData(userPasswordGroupLayoutData);
         m_password.addListener(SWT.CHANGED, this);
 
-        m_receiveTimeout = createSpinnerWithLabel(connectionSettings, "Receive timeout in seconds:", 0, 10);
+        m_receiveTimeout = createSpinnerWithLabel(connectionSettings, "Jobserver response timeout (seconds):", 0, 10);
 
-        m_jobCheckFrequency = createSpinnerWithLabel(connectionSettings, "Job check frequency in seconds:", 1, 1);
+        m_jobCheckFrequency = createSpinnerWithLabel(connectionSettings, "Job check frequency (seconds):", 1, 1);
 
         /////////////// Context settings ///////////////
         Group contextSettings = new Group(mainContainer, SWT.NONE);
@@ -199,7 +199,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_contextName.addListener(SWT.CHANGED, this);
 
         m_deleteSparkObjectsOnDispose = new Button(contextSettings, SWT.CHECK);
-        m_deleteSparkObjectsOnDispose.setText("Delete Spark objects on dispose.");
+        m_deleteSparkObjectsOnDispose.setText("Delete Spark DataFrames/RDDs on dispose");
 
         Composite logLevelContainer =
             createGridLayoutContainer(contextSettings, SparkPreferenceInitializer.ALL_LOG_LEVELS.length + 1);
@@ -212,7 +212,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         }
 
         m_overrideSettings = new Button(contextSettings, SWT.CHECK);
-        m_overrideSettings.setText("Override spark settings:");
+        m_overrideSettings.setText("Override Spark settings:");
         m_overrideSettings.addListener(SWT.Selection, this);
         m_customSettings = new Text(contextSettings, SWT.BORDER | SWT.MULTI);
         GridData customSettingsLayoutData = new GridData(SWT.FILL, SWT.FILL, true, true);

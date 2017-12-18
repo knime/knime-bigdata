@@ -7,33 +7,60 @@
     
     <fullDescription>
         <intro>
-            Creates a new Spark Context. The settings e.g. dispose on reset affect all connected Spark nodes and 
+            Creates a new Spark context. The settings affect all connected Spark nodes and 
             their successors.
             <p>The default values of the node are taken from the Spark preference page which
             you can open via <i>File->Preferences->KNIME->Spark</i>.</p>
         </intro>
         <tab name="Context Settings">
         <option name="Spark version">
-        	The Spark version the Job Server is working with.
+        	The Spark version used on Spark Jobserver.
         </option>
         <option name="Context name">The unique name of the context.</option>
-        <option name="Delete Spark context on dispose">If selected KNIME deletes the Spark context when the workflow or
-        KNIME is closed. This way resources on the Spark job server are released but ALL nodes have to be re-executed
-        the next time the workflow is opened.</option>
-        <option name="Delete Spark objects on dispose">If selected KNIME deletes the created Spark objects e.g. 
-        DataFrames/RDDs when the workflow or KNIME is closed. This way resources within the corresponding Spark context 
-        are released but ALL nodes have to be re-executed the next time the workflow is opened.</option>
+        <option name="Destroy Spark context on dispose">If selected, the Spark context will be destroyed when the workflow or
+        KNIME is closed. This way, resources on the cluster are released, but all data cached inside the Spark context
+        are lost, unless they have been saved to persistent storage such as HDFS.
+        </option>
+        <option name="Delete Spark DataFrames/RDDs on dispose">If selected, KNIME deletes the created RDDs/DataFrames when 
+        the workflow or KNIME is closed. This way, resources on the cluster are released, but all data that the current workflow
+        holds in the Spark context are lost, unless they have been saved to persistent storage such as HDFS.
+        </option>
         <option name="Spark job log level">The log level to use for Spark jobs within the Spark runtime.</option>
-        <option name="Override spark settings">Select this option to enable user specific Spark context settings.</option>
-        <option name="Custom spark settings">Custom settings to use in addition or to overwrite the default context settings defined in the Spark Job Server.</option>
-        <option name="Hide context exists warning">Enable this option to suppress context exists warning messages.</option>
+        <option name="Override Spark settings">Select this option to set custom Spark settings.</option>
+        <option name="Custom Spark settings">Custom Spark settings to add to or overwrite the default settings defined by Spark Jobserver. 
+        See <a href="https://spark.apache.org/docs/latest/configuration.html">Spark documentation</a> for more information.
+        </option>
+	<option name="Hide warning about an existing Spark context">Enable this option to suppress a warning message
+		shown when the Spark context to be created by this node already
+		exists.
+		</option>
         </tab>
         <tab name="Connection Settings">
-        <option name="Job server URL">The URL of the Spark job server including protocol and port e.g. http://localhost:8090.</option>
-        <option name="Authentication">Either none  or user name and password which is required if authentication is enabled in the Spark job server.</option>
-        <option name="Job server receive timeout (seconds)">Time to wait on a Spark job server REST request for a response (0 is infinite).</option>
-        <option name="Spark job check frequency (seconds)">The frequency KNIME has to check the job status.</option>        
-        </tab>
+        <option name="Jobserver URL">The URL of the Spark Jobserver including protocol and port e.g. http://localhost:8090.</option>
+	<option name="Authentication">
+		Select
+		<ul>
+			<li>
+				<i>None</i>, if Spark jobserver does not require any credentials.
+			</li>
+			<li>
+				<i>Username &amp; password</i>
+				and enter the respective credentials, which will be saved with the
+				workflow.
+			</li>
+			<li>
+				<i>Credentials</i>
+				and select from the available credentials.
+			</li>
+		</ul>
+	</option>
+	<option name="Jobserver response timeout (seconds)">Time to wait for a response when making a request
+		to Spark Jobserver (0 is infinite).
+	</option>
+	<option name="Spark job check frequency (seconds)">The frequency with which KNIME polls the status of
+		a job.
+	</option>        
+    </tab>
     </fullDescription>
     
     <ports>
