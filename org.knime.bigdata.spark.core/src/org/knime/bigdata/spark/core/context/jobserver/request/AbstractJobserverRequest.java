@@ -38,7 +38,7 @@ import org.knime.core.node.NodeLogger;
 
 /**
  *
- * @author Bjoern Lohrmann, KNIME.COM
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public abstract class AbstractJobserverRequest<T> {
 
@@ -73,7 +73,11 @@ public abstract class AbstractJobserverRequest<T> {
             } catch (ProcessingException e) {
                 // Thrown by Java REST API when something went wrong while sending the request
                 // e.g. connection refused
-                throw new KNIMESparkException("Error connecting to Spark Jobserver. Possible reasons: Spark Jobserver is down or invalid connection settings " + KNIMESparkException.SEE_LOG_SNIPPET, e);
+                if (e.getCause() != null) {
+                    throw new KNIMESparkException(e.getCause().getMessage(), e);
+                } else {
+                    throw new KNIMESparkException("Request to Spark Jobserver failed " + KNIMESparkException.SEE_LOG_SNIPPET, e);
+                }
             } catch (RetryableKNIMESparkException e) {
                 // Thrown by the request class to indicate that an error has been returned by the Jobserver
                 // but that it might make sense to repeat the request (up to maxAttempts times).
@@ -135,7 +139,7 @@ public abstract class AbstractJobserverRequest<T> {
                         + "Preferences > General > Network Connections.");
             case ENTITY_TOO_LARGE:
                 throw new KNIMESparkException(
-                    "Request to Spark Jobserver failed, because the uploaded data exceeded that allowed by the Spark Jobserver. "
+                    "Request to Spark Jobserver failed, because the uploaded data exceeded the amount allowed by the Spark Jobserver. "
                     + "For instructions to change this please see the installation guide (https://www.knime.org/knime-spark-executor#install).");
             case UNKNOWN:
                 logResponseAsError(parsedResponse);
@@ -151,7 +155,9 @@ public abstract class AbstractJobserverRequest<T> {
 
     protected KNIMESparkException createUnexpectedResponseException(final ParsedResponse parsedResponse) {
         logResponseAsError(parsedResponse);
-        return new KNIMESparkException(String.format("Spark Jobserver gave unexpected response %s. Possible reason: Incompatible Jobserver version, malconfigured Spark Jobserver", KNIMESparkException.SEE_LOG_SNIPPET));
+        return new KNIMESparkException(String.format(
+            "Spark Jobserver gave unexpected response %s. Possible reason: Incompatible Jobserver version, malconfigured Spark Jobserver",
+            KNIMESparkException.SEE_LOG_SNIPPET));
     }
 
     protected String formatMessage(final String msg) {

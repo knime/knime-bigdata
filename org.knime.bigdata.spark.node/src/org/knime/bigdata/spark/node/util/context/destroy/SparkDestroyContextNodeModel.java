@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.util.context.destroy;
 
 import javax.swing.JOptionPane;
 
+import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
@@ -81,14 +82,8 @@ public class SparkDestroyContextNodeModel extends SparkNodeModel {
         }
         exec.checkCanceled();
 
-        switch(SparkContextManager.getOrCreateSparkContext(provider.getContextID()).getStatus()) {
-            case NEW:
-            case CONFIGURED:
-                setWarningMessage("Spark context is not open. Doing nothing.");
-                break;
-            case OPEN:
-                SparkContextManager.destroyCustomContext(provider.getContextID());
-        }
+        final SparkContext context = SparkContextManager.getOrCreateSparkContext(provider.getContextID());
+        context.ensureDestroyed();
 
         return new PortObject[0];
     }

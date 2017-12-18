@@ -360,7 +360,11 @@ public abstract class SparkNodeModel extends NodeModel {
             }
             loadAdditionalInternals(nodeInternDir, exec);
         } catch (final InvalidSettingsException | RuntimeException e) {
-            throw new IOException("Failed to load settings.", e.getCause());
+            if(e.getMessage() != null) {
+                throw new IOException(e.getMessage(), e);
+            } else {
+                throw new IOException("Failed to load internals", e);
+            }
         }
     }
 
@@ -577,8 +581,11 @@ public abstract class SparkNodeModel extends NodeModel {
                                     context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
                                 }
                             } catch (final Throwable ex) {
-                                LOGGER.warn("Exception while deleting named Spark data objects for context: "
-                                        + contextID + " Exception: " + ex.getMessage(), ex);
+                                // this does not log the full exception on purpose. In large workflows
+                                // where the deletion fails for some reason, logging the exception results
+                                // in a lot of not-so-useful logspam.
+                                LOGGER.debug("Exception while deleting named Spark data objects for context: "
+                                        + contextID + " Exception: " + ex.getMessage());
                             }
                         }
                         if (KNIMEConfigContainer.verboseLogging()) {

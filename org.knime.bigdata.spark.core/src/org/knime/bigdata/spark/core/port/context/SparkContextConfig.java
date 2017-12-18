@@ -135,13 +135,69 @@ public class SparkContextConfig implements Serializable {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final SparkContextConfig other = (SparkContextConfig)obj;
+        if (!m_jobServerUrl.equals(other.m_jobServerUrl)) {
+            return false;
+        }
+        if (m_authentication != other.m_authentication) {
+            return false;
+        }
+        if (m_authentication && !m_user.equals(other.m_user)) {
+            return false;
+        }
+        if (m_authentication && !Objects.equals(m_password, other.m_password)) {
+            return false;
+        }
+        if (m_receiveTimeout != other.m_receiveTimeout) {
+            return false;
+        }
+        if (m_jobCheckFrequency != other.m_jobCheckFrequency) {
+            return false;
+        }
+
+        if (!m_sparkVersion.equals(other.m_sparkVersion)) {
+            return false;
+        }
+        if (!m_contextName.equals(other.m_contextName)) {
+            return false;
+        }
+        if (m_deleteObjectsOnDispose != other.m_deleteObjectsOnDispose) {
+            return false;
+        }
+        if (!m_sparkJobLogLevel.equals(other.m_sparkJobLogLevel)) {
+            return false;
+        }
+        if (m_overrideSparkSettings != other.m_overrideSparkSettings) {
+            return false;
+        }
+        if (m_overrideSparkSettings && !m_customSparkSettings.equals(other.m_customSparkSettings)) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
 
         result = prime * result + m_jobServerUrl.hashCode();
+        result = prime * result + (m_authentication ? 1 : 0);
         result = prime * result + (m_authentication ? m_user.hashCode() : 0);
-        result = prime * result + (m_authentication ? m_password.hashCode() : 0);
+        result = prime * result + (m_authentication ? ((m_password != null) ? m_password.hashCode() : 0) : 0);
         result = prime * result + m_receiveTimeout.hashCode();
         result = prime * result + m_jobCheckFrequency;
 
@@ -149,6 +205,7 @@ public class SparkContextConfig implements Serializable {
         result = prime * result + m_contextName.hashCode();
         result = prime * result + (m_deleteObjectsOnDispose ? 1231 : 1237);
         result = prime * result + m_sparkJobLogLevel.hashCode();
+        result = prime * result + (m_overrideSparkSettings ? 1 : 0);
         result = prime * result + (m_overrideSparkSettings ? m_customSparkSettings.hashCode() : 0);
 
         return result;
@@ -249,61 +306,6 @@ public class SparkContextConfig implements Serializable {
      */
     public String getCustomSparkSettings() {
         return m_customSparkSettings;
-    }
-
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final SparkContextConfig other = (SparkContextConfig)obj;
-        if (!m_jobServerUrl.equals(other.m_jobServerUrl)) {
-            return false;
-        }
-        if (m_authentication != other.m_authentication) {
-            return false;
-        }
-        if (m_authentication && !m_user.equals(other.m_user)) {
-            return false;
-        }
-        if (m_authentication && !Objects.equals(m_password, other.m_password)) {
-            return false;
-        }
-        if (m_receiveTimeout != other.m_receiveTimeout) {
-            return false;
-        }
-        if (m_jobCheckFrequency != other.m_jobCheckFrequency) {
-            return false;
-        }
-
-        if (!m_sparkVersion.equals(other.m_sparkVersion)) {
-            return false;
-        }
-        if (!m_contextName.equals(other.m_contextName)) {
-            return false;
-        }
-        if (m_deleteObjectsOnDispose != other.m_deleteObjectsOnDispose) {
-            return false;
-        }
-        if (!m_sparkJobLogLevel.equals(other.m_sparkJobLogLevel)) {
-            return false;
-        }
-        if (m_overrideSparkSettings != other.m_overrideSparkSettings) {
-            return false;
-        }
-        if (m_overrideSparkSettings && !m_customSparkSettings.equals(other.m_customSparkSettings)) {
-            return false;
-        }
-
-        return true;
     }
 
     private static final String LEGACY_CFG_HOST = "host";

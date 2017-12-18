@@ -67,7 +67,7 @@ public class SparkContextManager {
         SparkContextID actualDefaultContextID =
             SparkContextID.fromConnectionDetails(defaultConfig.getJobServerUrl(), defaultConfig.getContextName());
         defaultSparkContext = new JobserverSparkContext(actualDefaultContextID);
-        defaultSparkContext.configure(defaultConfig);
+        defaultSparkContext.ensureConfigured(defaultConfig, true);
         sparkContexts.put(DEFAULT_SPARK_CONTEXT_ID, defaultSparkContext);
         sparkContexts.put(actualDefaultContextID, defaultSparkContext);
     }
@@ -156,24 +156,7 @@ public class SparkContextManager {
             return true;
         } else {
             // otherwise try to reconfigure
-            return reconfigureContext(DEFAULT_SPARK_CONTEXT_ID, newDefaultConfig, destroyIfNecessary);
+            return getOrCreateSparkContext(DEFAULT_SPARK_CONTEXT_ID).ensureConfigured(newDefaultConfig, true, destroyIfNecessary);
         }
-    }
-
-    /**
-     * Tries to reconfigure the {@link SparkContext} identified by the given ID with the given configuration. Returns
-     * false if reconfiguration could not be performed, e.g. if destroyIfNecessary=false but a setting has changed that
-     * can only be changed by restarting the context.
-     *
-     * @param contextID The id of the context to reconfigure.
-     * @param newConfig
-     * @param destroyIfNecessary When set to true, the context will be destroyed if a setting has changed that can only
-     *            be changed by restarting the context.
-     * @return true, when reconfiguration was successful, false otherwise.
-     * @throws KNIMESparkException When something went wrong while destroying the context.
-     */
-    public static boolean reconfigureContext(final SparkContextID contextID,
-        final SparkContextConfig newConfig, final boolean destroyIfNecessary) throws KNIMESparkException {
-        return getOrCreateSparkContext(contextID).reconfigure(newConfig, destroyIfNecessary);
     }
 }

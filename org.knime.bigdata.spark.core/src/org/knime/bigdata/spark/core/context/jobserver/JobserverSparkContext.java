@@ -20,8 +20,11 @@
  */
 package org.knime.bigdata.spark.core.context.jobserver;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
@@ -108,30 +111,14 @@ public class JobserverSparkContext extends SparkContext {
         return m_status;
     }
 
-    private boolean canReconfigureWithoutDestroy(final SparkContextConfig config) {
+    private boolean canReconfigureWithoutDestroy(final SparkContextConfig newConfig) {
         if (m_config == null) {
             return true;
         }
-        return m_config.getSparkVersion().equals(config.getSparkVersion())
-            && (m_config.overrideSparkSettings() == config.overrideSparkSettings())
+        return m_config.getSparkVersion().equals(newConfig.getSparkVersion())
+            && (m_config.overrideSparkSettings() == newConfig.overrideSparkSettings())
             && ((m_config.overrideSparkSettings())
-                ? Objects.equals(m_config.getCustomSparkSettings(), config.getCustomSparkSettings()) : true);
-    }
-
-    private boolean canReconfigure(final SparkContextConfig config, final boolean destroyIfNecessary) {
-        // we can never change the id of an existing context
-        if (!SparkContextID.fromConnectionDetails(config.getJobServerUrl(), config.getContextName())
-            .equals(m_contextID)) {
-            return false;
-        }
-
-        switch (getStatus()) {
-            case NEW:
-            case CONFIGURED:
-                return true;
-            default:
-                return canReconfigureWithoutDestroy(config) || destroyIfNecessary;
-        }
+                ? Objects.equals(m_config.getCustomSparkSettings(), newConfig.getCustomSparkSettings()) : true);
     }
 
     /**
@@ -147,43 +134,61 @@ public class JobserverSparkContext extends SparkContext {
 
     /**
      * {@inheritDoc}
-     *
-     * @throws KNIMESparkException If something went wrong while destroying the context.
      */
     @Override
-    public synchronized boolean reconfigure(final SparkContextConfig config, final boolean destroyIfNecessary)
-        throws KNIMESparkException {
+    public synchronized boolean ensureConfigured(final SparkContextConfig newConfig,
+        final boolean overwriteExistingConfig, final boolean destroyIfNecessary) throws KNIMESparkException {
 
-        if (!canReconfigure(config, destroyIfNecessary)) {
+        // we can never change the id of an existing context
+        if (!SparkContextID.fromConnectionDetails(newConfig.getJobServerUrl(), newConfig.getContextName())
+            .equals(m_contextID)) {
             return false;
         }
 
-        if (!canReconfigureWithoutDestroy(config)) {
-            ensureDestroyed();
+        boolean toReturn = false;
+        boolean doApply = false;
+
+        switch (getStatus()) {
+            case NEW:
+                doApply = toReturn = true;
+                break;
+            case CONFIGURED:
+                doApply = toReturn = newConfig.equals(m_config) || overwriteExistingConfig;
+                break;
+            default: // OPEN
+                final boolean canReconfigureWithoutDestroy = canReconfigureWithoutDestroy(newConfig);
+
+                // make sure we only apply the config (and switch to CONFIGURED) if the new config is different from
+                // the existing one
+                doApply = !newConfig.equals(m_config) && overwriteExistingConfig
+                    && (canReconfigureWithoutDestroy || destroyIfNecessary);
+                toReturn = doApply || newConfig.equals(m_config);
+
+                if (doApply && !canReconfigureWithoutDestroy) {
+                    ensureDestroyed();
+                }
+                break;
         }
 
-        applyConfig(config);
-        return true;
+        if (doApply) {
+            applyConfig(newConfig);
+            setStatus(SparkContextStatus.CONFIGURED);
+        }
+
+        return toReturn;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void configure(final SparkContextConfig config) {
-        switch (getStatus()) {
-            case NEW:
-            case CONFIGURED:
-                applyConfig(config);
-                setStatus(SparkContextStatus.CONFIGURED);
-                break;
-            default:
-                if (canReconfigure(config, false)) {
-                    applyConfig(config);
-                } else {
-                    throw new RuntimeException(String.format(
-                        "Trying to configure Spark context which is in status: %s. This is a bug.", getStatus()));
-                }
+    public synchronized boolean ensureConfigured(final SparkContextConfig newConfig,
+        final boolean overwriteExistingConfig) {
+        try {
+            return ensureConfigured(newConfig, overwriteExistingConfig, false);
+        } catch (KNIMESparkException e) {
+            // should never happen because we are not actually destroying a pre-existing remote context
+            return false;
         }
     }
 
@@ -216,7 +221,6 @@ public class JobserverSparkContext extends SparkContext {
         m_namedObjectsController = null;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -243,9 +247,8 @@ public class JobserverSparkContext extends SparkContext {
                         } else {
                             throw new SparkContextNotFoundException(m_contextID);
                         }
-                    } else if (m_config.overrideSparkSettings()) {
-                        LOGGER.warn("Remote Spark context already exists, cannot apply custom Spark context settings.");
                     }
+
                     // regardless of of contextWasCreated is true or not we can assume that the context exists now
                     // (somebody else may have created it before us)
                     if (!isJobJarUploaded()) {
@@ -287,8 +290,7 @@ public class JobserverSparkContext extends SparkContext {
     private String createJobserverAppname(final SparkVersion sparkVersion, final String jobJarHash) {
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
         return String.format("knimeJobs_%s_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
-            jobJarHash,
-            m_config.getSparkVersion().toString());
+            jobJarHash, m_config.getSparkVersion().toString());
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
@@ -306,30 +308,30 @@ public class JobserverSparkContext extends SparkContext {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void destroy() throws KNIMESparkException {
-        if (getStatus() != SparkContextStatus.OPEN) {
+    protected synchronized void destroy() throws KNIMESparkException {
+        if (getStatus() == SparkContextStatus.NEW) {
             throw new RuntimeException(
-                String.format("Trying to destroy Spark context which is in status: %s. This is a bug.", getStatus()));
+                String.format("Cannot destroy unconfigured Spark context. This is a bug.", getStatus()));
         }
 
         doDestroy();
     }
 
     private void doDestroy() throws KNIMESparkException {
+
         runWithResetOnFailure(new Task() {
             @Override
             public void run() throws Exception {
                 ensureRestClient();
                 LOGGER.info("Destroying context " + m_config.getContextName());
-                try {
-                    new DestroyContextRequest(m_contextID, m_config, m_restClient).send();
+                new DestroyContextRequest(m_contextID, m_config, m_restClient).send();
 
-                    // wait up to 10s until context is removed from running list
-                    for (int i = 0; i < 50 && remoteSparkContextExists(); i++) {
-                        try { Thread.sleep(200); } catch (InterruptedException e) {}
+                // wait up to 10s until context is removed from running list
+                for (int i = 0; i < 50 && remoteSparkContextExists(); i++) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
                     }
-                } catch (SparkContextNotFoundException e) {
-                    LOGGER.info("Context not found, nothing to destroy: " + m_config.getContextName());
                 }
                 setStatus(SparkContextStatus.CONFIGURED);
             }
@@ -359,7 +361,7 @@ public class JobserverSparkContext extends SparkContext {
     }
 
     private synchronized JobController getJobController() throws KNIMESparkException {
-        ensureOpened(true);
+        ensureOpened(false);
 
         if (m_jobController == null) {
             ensureRestClient();
@@ -465,6 +467,18 @@ public class JobserverSparkContext extends SparkContext {
         return new CreateContextRequest(m_contextID, m_config, m_restClient).send();
     }
 
+    private void replace(final StringBuilder buf, final String pattern, final String value) {
+        final String realPattern = String.format("${%s}", pattern);
+        int start = buf.indexOf(realPattern);
+
+        if (start == -1) {
+            throw new IllegalArgumentException(String.format("Pattern %s does not appear in template", realPattern));
+        }
+
+        buf.replace(start, start + realPattern.length(), value);
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -474,37 +488,67 @@ public class JobserverSparkContext extends SparkContext {
             return "<strong>Spark context is currently unconfigured.</strong>";
         }
 
-        StringBuilder buf = new StringBuilder();
-        buf.append("<strong>Connection settings</strong><hr/>");
-        buf.append("<strong>Url:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobServerUrl() + "</tt><br/>");
-        buf.append(
-            "<strong>Use authentication:</strong>&nbsp;&nbsp;<tt>" + m_config.useAuthentication() + "</tt><br/>");
-        if (m_config.useAuthentication()) {
-            buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + m_config.getUser() + "</tt><br/>");
-            buf.append("<strong>Password:</strong>&nbsp;&nbsp;<tt>" + (m_config.getPassword() != null) + "</tt><br/>");
-        }
-        long receiveTimeout = m_config.getReceiveTimeout().getSeconds();
-        buf.append("<strong>Receive timeout:</strong>&nbsp;&nbsp;<tt>");
-        if (receiveTimeout == 0) { buf.append("infinite"); }
-        else { buf.append(receiveTimeout + " seconds"); }
-        buf.append("</tt><br/>");
-        buf.append("<strong>Job check frequency:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobCheckFrequency()
-            + " seconds</tt><br/>");
-
-        buf.append("<br/>");
-        buf.append("<strong>Context settings</strong><hr/>");
-        buf.append("<strong>Spark version:</strong>&nbsp;&nbsp;<tt>" + m_config.getSparkVersion() + "</tt><br>");
-        buf.append("<strong>Context name:</strong>&nbsp;&nbsp;<tt>" + m_config.getContextName() + "</tt><br>");
-        buf.append("<strong>Delete objects on dispose:</strong>&nbsp;&nbsp;<tt>" + m_config.deleteObjectsOnDispose()
-            + "</tt><br>");
-        buf.append("<strong>Override spark settings:</strong>&nbsp;&nbsp;<tt>" + m_config.overrideSparkSettings()
-            + "</tt><br>");
-        if (m_config.overrideSparkSettings()) {
-            buf.append(
-                "<strong>Custom settings:</strong>&nbsp;&nbsp;<tt>" + m_config.getCustomSparkSettings() + "</tt><br>");
+        final String template;
+        try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
+            final byte[] bytes = new byte[r.available()];
+            r.read(bytes);
+            template = new String(bytes, Charset.forName("UTF8"));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read context description template");
         }
 
+
+        StringBuilder buf = new StringBuilder(template);
+        replace(buf, "url", m_config.getJobServerUrl());
+        replace(buf, "use_authentication", m_config.useAuthentication()
+            ? String.format("true (user: %s)", m_config.getUser())
+            : "false");
+        replace(buf, "receive_timeout", (m_config.getReceiveTimeout().getSeconds() == 0)
+            ? "infinite"
+            : Long.toString(m_config.getReceiveTimeout().getSeconds()));
+        replace(buf, "job_check_frequency", Integer.toString(m_config.getJobCheckFrequency()));
+        replace(buf, "spark_version", m_config.getSparkVersion().toString());
+        replace(buf, "context_name", m_config.getContextName());
+        replace(buf, "delete_data_on_dispose", Boolean.toString(m_config.deleteObjectsOnDispose()));
+        replace(buf, "override_settings", Boolean.toString(m_config.overrideSparkSettings()));
+        replace(buf, "custom_settings",m_config.overrideSparkSettings()
+            ? m_config.getCustomSparkSettings()
+            : "(not applicable)");
+        replace(buf, "context_state", getStatus().toString());
         return buf.toString();
+//
+//
+//        buf.append("<strong>Connection settings</strong><hr/>");
+//        buf.append("<strong>Url:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobServerUrl() + "</tt><br/>");
+//        buf.append(
+//            "<strong>Use authentication:</strong>&nbsp;&nbsp;<tt>" + m_config.useAuthentication() + "</tt><br/>");
+//        if (m_config.useAuthentication()) {
+//            buf.append("<strong>User:</strong>&nbsp;&nbsp;<tt>" + m_config.getUser() + "</tt><br/>");
+//            buf.append("<strong>Password:</strong>&nbsp;&nbsp;<tt>" + (m_config.getPassword() != null) + "</tt><br/>");
+//        }
+//        long receiveTimeout = m_config.getReceiveTimeout().getSeconds();
+//        buf.append("<strong>Receive timeout:</strong>&nbsp;&nbsp;<tt>");
+//        if (receiveTimeout == 0) { buf.append("infinite"); }
+//        else { buf.append(receiveTimeout + " seconds"); }
+//        buf.append("</tt><br/>");
+//        buf.append("<strong>Job check frequency:</strong>&nbsp;&nbsp;<tt>" + m_config.getJobCheckFrequency()
+//            + " seconds</tt><br/>");
+//
+//        buf.append("<br/>");
+//        buf.append("<strong>Context settings</strong><hr/>");
+//        buf.append("<strong>Spark version:</strong>&nbsp;&nbsp;<tt>" + m_config.getSparkVersion() + "</tt><br>");
+//        buf.append("<strong>Context name:</strong>&nbsp;&nbsp;<tt>" + m_config.getContextName() + "</tt><br>");
+//        buf.append("<strong>Delete objects on dispose:</strong>&nbsp;&nbsp;<tt>" + m_config.deleteObjectsOnDispose()
+//            + "</tt><br>");
+//        buf.append("<strong>Override spark settings:</strong>&nbsp;&nbsp;<tt>" + m_config.overrideSparkSettings()
+//            + "</tt><br>");
+//        if (m_config.overrideSparkSettings()) {
+//            buf.append(
+//                "<strong>Custom settings:</strong>&nbsp;&nbsp;<tt>" + m_config.getCustomSparkSettings() + "</tt><br>");
+//        }
+//
+//        System.out.println(buf.toString());
+
     }
 
     /**
