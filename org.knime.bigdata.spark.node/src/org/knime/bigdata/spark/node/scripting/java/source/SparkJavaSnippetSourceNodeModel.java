@@ -31,18 +31,21 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 /**
+ * RDD-based Spark Java Snippt source node model.
  *
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkJavaSnippetSourceNodeModel extends AbstractSparkJavaSnippetNodeModel {
 
     /**
-     * Default constructor.
-     * @param optionalSparkPort true if input spark context port is optional
+     * Protected constructor to be used by deprecated nodes that are derived from this one.
+     *
+     * @param isDeprecatedNode Indicates whether this node model instance belongs to one of the deprecated Java snippet
+     *            nodes.
      */
-    public SparkJavaSnippetSourceNodeModel(final boolean optionalSparkPort) {
-        super(SparkSourceNodeModel.addContextPort(null, optionalSparkPort),
-            new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE);
+    public SparkJavaSnippetSourceNodeModel(final boolean isDeprecatedNode) {
+        super(SparkSourceNodeModel.addContextPort(null, isDeprecatedNode),
+            new PortType[]{SparkDataPortObject.TYPE}, SnippetType.SOURCE, isDeprecatedNode);
     }
 
     /**

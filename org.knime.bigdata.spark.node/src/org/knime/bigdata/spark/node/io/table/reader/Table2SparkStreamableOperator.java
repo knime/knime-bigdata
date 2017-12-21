@@ -54,18 +54,22 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
 
     private final File m_tmpFile;
 
+    private final boolean m_ensureSparkContext;
+
     /**
      * Creates a new streamable operator that writes the ingoing KNIME data table to a temporary file, which is then
      * transfered that to the given remote Spark context.
      *
      * @param contextID
      * @param tempFile
+     * @param ensureSparkContext
      */
-    public Table2SparkStreamableOperator(final SparkContextID contextID, final File tempFile) {
+    public Table2SparkStreamableOperator(final SparkContextID contextID, final File tempFile, final boolean ensureSparkContext) {
         super();
 
         m_contextID = contextID;
         m_tmpFile = tempFile;
+        m_ensureSparkContext = ensureSparkContext;
     }
 
     /**
@@ -84,7 +88,10 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
     private void executeSparkJob(final ExecutionMonitor exec, final DataTableSpec spec)
         throws KNIMESparkException, CanceledExecutionException {
 
-        SparkSourceNodeModel.ensureContextIsOpen(m_contextID);
+        if (m_ensureSparkContext) {
+            exec.setMessage("Creating a Spark context...");
+            SparkSourceNodeModel.ensureContextIsOpen(m_contextID);
+        }
 
         exec.setMessage("Importing data into Spark...");
 

@@ -53,12 +53,17 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
     /**The unique Spark job id.*/
     public static final String JOB_ID = Hive2SparkNodeModel.class.getCanonicalName();
 
+    private final boolean m_isDeprecatedNode;
+
     /**
      * Constructor.
-     * @param optionalSparkPort true if input spark context port is optional
+     *
+     * @param isDeprecatedNode Whether this node model instance should emulate the behavior of the deprecated
+     *            table2spark node model.
      */
-    public Hive2SparkNodeModel(final boolean optionalSparkPort) {
-        super(new PortType[] {DatabasePortObject.TYPE}, optionalSparkPort, new PortType[] {SparkDataPortObject.TYPE});
+    public Hive2SparkNodeModel(final boolean isDeprecatedNode) {
+        super(new PortType[] {DatabasePortObject.TYPE}, isDeprecatedNode, new PortType[] {SparkDataPortObject.TYPE});
+        m_isDeprecatedNode = isDeprecatedNode;
     }
 
     /**
@@ -97,7 +102,12 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
         final SparkContextID contextID = getContextID(inData);
-        ensureContextIsOpen(contextID);
+
+        if (m_isDeprecatedNode) {
+            exec.setMessage("Creating a Spark context...");
+            ensureContextIsOpen(contextID);
+        }
+
         final SimpleJobRunFactory<JobInput> runFactory = SparkContextUtil.getSimpleRunFactory(contextID, JOB_ID);
         final DatabasePortObject db = (DatabasePortObject)inData[0];
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());

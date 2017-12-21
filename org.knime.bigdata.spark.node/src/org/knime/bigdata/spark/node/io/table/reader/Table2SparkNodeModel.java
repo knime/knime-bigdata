@@ -64,12 +64,17 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
     private final SettingsModelString m_knospOutputID = new SettingsModelString("knospOutputID", null);
 
+    private final boolean m_isDeprecatedNode;
+
     /**
      * Default constructor.
-     * @param optionalSparkPort true if input spark context port is optional
+     *
+     * @param isDeprecatedNode Whether this node model instance should emulate the behavior of the deprecated
+     *            table2spark node model.
      */
-    public Table2SparkNodeModel(final boolean optionalSparkPort) {
-        super(new PortType[]{BufferedDataTable.TYPE}, optionalSparkPort, new PortType[]{SparkDataPortObject.TYPE});
+    public Table2SparkNodeModel(final boolean isDeprecatedNode) {
+        super(new PortType[]{BufferedDataTable.TYPE}, isDeprecatedNode, new PortType[]{SparkDataPortObject.TYPE});
+        m_isDeprecatedNode = isDeprecatedNode;
     }
 
     /**
@@ -152,7 +157,9 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
             return SparkNodePlugin.getKNOSPHelper().createTable2SparkStreamableOperator(m_knospOutputID.getStringValue());
         } else {
             final File tmpFile = createTempFile();
-            return new Table2SparkStreamableOperator(contextID, tmpFile);
+            // the deprecated table table2spark node did create a Spark context when necessary, the
+            // current does not anymore, hence ensureSparkContext = m_isDeprecatedNode
+            return new Table2SparkStreamableOperator(contextID, tmpFile, m_isDeprecatedNode);
         }
     }
 

@@ -26,8 +26,9 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
 import org.knime.core.node.port.PortType;
 
 /**
- * DataFrame specific java snippet model
- * @author Sascha Wolke, KNIME.com
+ * DataFrame-based Spark Java Snippet node model.
+ *
+ * @author Sascha Wolke, KNIME GmbH
  */
 public abstract class AbstractSparkDataFrameJavaSnippetNodeModel extends AbstractSparkJavaSnippetBaseNodeModel {
 
@@ -35,14 +36,15 @@ public abstract class AbstractSparkDataFrameJavaSnippetNodeModel extends Abstrac
     public static final String JOB_ID = "JavaDataFrameSnippetJob";
 
     /**
-     * Default constructor
+     * Default constructor.
+     *
      * @param inPortTypes
      * @param outPortTypes
      * @param snippetType Type of the snippet node (e.g. source, sink, ...)
      */
     protected AbstractSparkDataFrameJavaSnippetNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
             final SnippetType snippetType) {
-        super(inPortTypes, outPortTypes, snippetType);
+        super(inPortTypes, outPortTypes, snippetType, false);
     }
 
     /** @return snippet helper registry */

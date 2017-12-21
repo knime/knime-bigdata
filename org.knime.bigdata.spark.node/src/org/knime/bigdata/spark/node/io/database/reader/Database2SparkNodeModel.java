@@ -66,13 +66,19 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
 
     private final Database2SparkSettings m_settings = new Database2SparkSettings();
 
+    private final boolean m_isDeprecatedNode;
+
     /**
      * Default constructor.
-     * @param optionalSparkPort true if input spark context port is optional
+     *
+     * @param isDeprecatedNode Whether this node model instance should emulate the behavior of the deprecated
+     *            table2spark node model.
      */
-    public Database2SparkNodeModel(final boolean optionalSparkPort) {
-        super(new PortType[] {DatabasePortObject.TYPE}, optionalSparkPort,
+    public Database2SparkNodeModel(final boolean isDeprecatedNode) {
+        super(new PortType[] {DatabasePortObject.TYPE}, isDeprecatedNode,
               new PortType[] {SparkDataPortObject.TYPE});
+
+        m_isDeprecatedNode = isDeprecatedNode;
     }
 
     @Override
@@ -108,7 +114,11 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         final DatabasePortObject dbPort = (DatabasePortObject) inData[0];
         final DatabaseQueryConnectionSettings dbSettings = dbPort.getConnectionSettings(getCredentialsProvider());
         final SparkContextID contextID = getContextID(inData);
-        ensureContextIsOpen(contextID);
+
+        if (m_isDeprecatedNode) {
+            exec.setMessage("Creating a Spark context...");
+            ensureContextIsOpen(contextID);
+        }
 
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final ArrayList<File> jarFiles = new ArrayList<>();

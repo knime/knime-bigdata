@@ -41,6 +41,7 @@ import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.jar.JarPacker;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
+import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
@@ -81,6 +82,8 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
 
     private final SnippetType m_snippetType;
 
+    private final boolean m_isDeprecatedNode;
+
     private SparkJSnippet m_sparkJavaSnippet;
 
     /**
@@ -96,11 +99,14 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
      * @param inPortTypes
      * @param outPortTypes
      * @param snippetType Type of the snippet node (e.g. source, sink, ...)
+     * @param isDeprecatedNode Indicates whether this node model instance belongs to one of the deprecated Java snippet
+     *            nodes.
      */
     public AbstractSparkJavaSnippetBaseNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-        final SnippetType snippetType) {
+        final SnippetType snippetType, final boolean isDeprecatedNode) {
         super(inPortTypes, outPortTypes);
         m_snippetType = snippetType;
+        m_isDeprecatedNode = isDeprecatedNode;
     }
 
     /**
@@ -195,6 +201,10 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
             compiledSnippet.getFirst(), getRequiredFlowVariables());
 
         final SparkContextID contextID = getContextID(inData);
+
+        if (m_snippetType == SnippetType.SOURCE && m_isDeprecatedNode) {
+            SparkSourceNodeModel.ensureContextIsOpen(contextID);
+        }
 
         final JavaSnippetJobOutput output =
             SparkContextUtil.<JavaSnippetJobInput, JavaSnippetJobOutput> getJobWithFilesRunFactory(contextID, jobId)

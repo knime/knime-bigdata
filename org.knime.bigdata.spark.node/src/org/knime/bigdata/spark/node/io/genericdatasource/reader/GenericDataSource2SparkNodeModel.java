@@ -71,14 +71,18 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
     /** Internal settings object. */
     private final T m_settings;
 
+    private final boolean m_isDeprecatedNode;
+
     /**
      * Default constructor.
      * @param settings - Initial settings
-     * @param optionalSparkPort true if input spark context port is optional
+     * @param isDeprecatedNode Whether this node model instance should emulate the behavior of the deprecated
+     *            table2spark node model.
      */
-    public GenericDataSource2SparkNodeModel(final T settings, final boolean optionalSparkPort) {
-        super(new PortType[] {ConnectionInformationPortObject.TYPE}, optionalSparkPort, new PortType[] {SparkDataPortObject.TYPE});
+    public GenericDataSource2SparkNodeModel(final T settings, final boolean isDeprecatedNode) {
+        super(new PortType[] {ConnectionInformationPortObject.TYPE}, isDeprecatedNode, new PortType[] {SparkDataPortObject.TYPE});
         m_settings = settings;
+        m_isDeprecatedNode = isDeprecatedNode;
     }
 
     @Override
@@ -116,7 +120,7 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
         final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
         final ConnectionInformation connInfo = object.getConnectionInformation();
         final SparkContextID contextID = getContextID(inData);
-        final SparkDataTable resultTable = runJob(m_settings, contextID, connInfo, exec);
+        final SparkDataTable resultTable = runJob(m_settings, m_isDeprecatedNode, contextID, connInfo, exec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
 
         return new PortObject[] { sparkObject };
@@ -135,15 +139,21 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
             final ConnectionInformation connectionInfo, final ExecutionMonitor exec) throws Exception {
 
         exec.setMessage("Running spark job and fetching preview");
-        return runJob(settings, contextID, connectionInfo, exec);
+        return runJob(settings, false, contextID, connectionInfo, exec);
     }
 
-    private static <T extends GenericDataSource2SparkSettings> SparkDataTable runJob(final T settings, final SparkContextID contextID,
-            final ConnectionInformation connectionInfo, final ExecutionMonitor exec) throws Exception {
+    private static <T extends GenericDataSource2SparkSettings> SparkDataTable runJob(final T settings,
+        final boolean isDeprecatedNode, final SparkContextID contextID, final ConnectionInformation connectionInfo,
+        final ExecutionMonitor exec) throws Exception {
 
         final String format = settings.getFormat();
         final boolean uploadDriver = settings.uploadDriver();
-        ensureContextIsOpen(contextID);
+
+        if (isDeprecatedNode) {
+            exec.setMessage("Creating a Spark context...");
+            ensureContextIsOpen(contextID);
+        }
+
         final JobWithFilesRunFactory<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);
 
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();

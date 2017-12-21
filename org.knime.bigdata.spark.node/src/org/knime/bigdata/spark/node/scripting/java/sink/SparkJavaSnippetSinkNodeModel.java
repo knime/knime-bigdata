@@ -39,7 +39,7 @@ public class SparkJavaSnippetSinkNodeModel extends AbstractSparkJavaSnippetNodeM
 
     /** Constructor.*/
     public SparkJavaSnippetSinkNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{}, SnippetType.SINK);
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{}, SnippetType.SINK, false);
     }
 
     /**

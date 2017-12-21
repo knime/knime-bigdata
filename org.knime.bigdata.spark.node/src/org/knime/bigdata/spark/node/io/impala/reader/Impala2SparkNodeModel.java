@@ -33,10 +33,12 @@ public class Impala2SparkNodeModel extends Hive2SparkNodeModel {
 
     /**
      * Default constructor.
-     * @param optionalSparkPort true if input spark context port is optional
+     *
+     * @param isDeprecatedNode Whether this node model instance should emulate the behavior of the deprecated
+     *            table2spark node model.
      */
-    public Impala2SparkNodeModel(final boolean optionalSparkPort) {
-        super(optionalSparkPort);
+    public Impala2SparkNodeModel(final boolean isDeprecatedNode) {
+        super(isDeprecatedNode);
     }
 
     @Override

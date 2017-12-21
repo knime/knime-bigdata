@@ -31,15 +31,16 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 /**
+ * RDD-based Spark Java snippet node model.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Tobias Koetter, KNIME GmbH
  */
 public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel {
 
-    /** Constructor.*/
+    /** Constructor. */
     public SparkJavaSnippetNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE_OPTIONAL},
-            new PortType[]{SparkDataPortObject.TYPE}, SnippetType.INNER);
+            new PortType[]{SparkDataPortObject.TYPE}, SnippetType.INNER, false);
     }
 
     /**
@@ -48,7 +49,7 @@ public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || !(inSpecs[0] instanceof SparkDataPortObjectSpec)) {
-            throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
+            throw new InvalidSettingsException("Please connect the first inport of the node with a Spark Data outport");
         }
         super.configureInternal(inSpecs);
         return new PortObjectSpec[] {null};
@@ -60,7 +61,7 @@ public class SparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetNodeModel
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         if (inData == null || inData.length < 1 || !(inData[0] instanceof SparkDataPortObject)) {
-            throw new InvalidSettingsException("Please connect the first inport of the node with an RDD outport");
+            throw new InvalidSettingsException("Please connect the first inport of the node with a Spark Data outport");
         }
         return super.executeSnippetJob(inData, true, exec, JOB_ID);
     }

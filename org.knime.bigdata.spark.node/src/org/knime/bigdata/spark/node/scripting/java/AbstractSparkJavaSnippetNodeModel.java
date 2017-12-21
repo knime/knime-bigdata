@@ -26,8 +26,9 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
 import org.knime.core.node.port.PortType;
 
 /**
- * RDD specific java snippet model
- * @author Tobias Koetter, KNIME.com
+ * RDD specific java snippet model.
+ *
+ * @author Tobias Koetter, KNIME GmbH
  */
 public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkJavaSnippetBaseNodeModel {
 
@@ -39,10 +40,12 @@ public abstract class AbstractSparkJavaSnippetNodeModel extends AbstractSparkJav
      * @param inPortTypes
      * @param outPortTypes
      * @param snippetType Type of the snippet node (e.g. source, sink, ...)
+     * @param isDeprecatedNode Indicates whether this node model instance belongs to one of the deprecated Java snippet
+     *            nodes.
      */
     protected AbstractSparkJavaSnippetNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-            final SnippetType snippetType) {
-        super(inPortTypes, outPortTypes, snippetType);
+            final SnippetType snippetType, final boolean isDeprecatedNode) {
+        super(inPortTypes, outPortTypes, snippetType, isDeprecatedNode);
     }
 
     /** @return snippet helper registry */
