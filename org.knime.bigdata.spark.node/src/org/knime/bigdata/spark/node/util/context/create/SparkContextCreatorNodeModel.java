@@ -22,11 +22,6 @@ package org.knime.bigdata.spark.node.util.context.create;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.swing.JOptionPane;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
@@ -47,7 +42,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.ViewUtils;
 
 /**
  *
@@ -85,53 +79,16 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         }
 
         boolean configApplied = sparkContext.ensureConfigured(config, true);
-        if (!configApplied) {
+        if (!configApplied && !m_settings.hideExistsWarning()) {
             // this means context was OPEN and we are changing settings that cannot become active without
-            // destroying and recreating the remote context.
-            final boolean mayDestroyContext = askUserToDestroyContext();
-
-            if (mayDestroyContext) {
-                LOGGER.info("Destroying remote context and configuring new one.");
-                try {
-                    configApplied = sparkContext.ensureConfigured(config, true, true);
-                } catch (KNIMESparkException e) {
-                    setWarningMessage("Failed to destroy remote Spark context"
-                            + ((e.getMessage() != null) ? ": " + e.getMessage() : ""));
-                    LOGGER.error("Failed to destroy remote Spark context", e);
-                }
-            } else {
-                throw new InvalidSettingsException("Spark context configuration was not applied (by user choice).");
-            }
+            // destroying and recreating the remote context. Furthermore the node settings say that
+            // there should be a warning about this situation
+            setWarningMessage("Spark context exists already in the cluster. Settings were not applied.");
         }
 
         m_lastContextID = newContextID;
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_settings.getSparkContextID())};
     }
-
-    private boolean askUserToDestroyContext() throws InvalidSettingsException {
-        if (Boolean.getBoolean("java.awt.headless")) {
-            // if running on the server we should not destroy an existing context. Chances are high
-            // that some other workflow is using the context and we will disturb this context.
-            throw new InvalidSettingsException(
-                "Spark context configuration could not be applied because a context with different configuration already exists in the cluster.");
-        }
-
-        final AtomicInteger choice = new AtomicInteger();
-
-        ViewUtils.invokeAndWaitInEDT(new Runnable() {
-            @Override
-            public void run() {
-                choice.set(JOptionPane.showConfirmDialog(null,
-                    "New settings can only be applied after destroying the existing remote Spark context. "
-                            + "Should the existing context be destroyed?\n\n"
-                            + "WARNING: This deletes all cached data such as DataFrames/RDDs in the context.",
-                    "Spark context settings have changed", JOptionPane.OK_CANCEL_OPTION));
-            }
-        });
-
-        return choice.get() == JOptionPane.OK_OPTION;
-    }
-
 
     /**
      * {@inheritDoc}
@@ -141,43 +98,23 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
 
         final SparkContextID contextID = m_settings.getSparkContextID();
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
-        final List<String> warnings = new ArrayList<>();
 
         exec.setMessage("Configuring Spark context");
         final SparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
 
-        //try to open the context
-        exec.setMessage("Opening Spark context");
-        boolean configApplied = sparkContext.ensureConfigured(config, true);
-
-        if (!configApplied) {
-            // this means context was OPEN and we are changing settings that cannot become effective without recreating
-            // the context.
-            if (!m_settings.hideExistsWarning()) {
-                warnings.add("Spark context exists already in the cluster. Settings were not applied.");
-            }
+        final boolean configApplied = sparkContext.ensureConfigured(config, true);
+        if (!configApplied && !m_settings.hideExistsWarning()) {
+            // this means context was OPEN and we are changing settings that cannot become active without
+            // destroying and recreating the remote context. Furthermore the node settings say that
+            // there should be a warning about this situation
+            setWarningMessage("Spark context exists already in the cluster. Settings were not applied.");
         }
 
+        // try to open the context
+        exec.setMessage("Opening Spark context");
         sparkContext.ensureOpened(true);
 
-        setWarningMessages(warnings);
-
         return new PortObject[]{new SparkContextPortObject(contextID)};
-    }
-
-    private void setWarningMessages(final List<String> warnings) {
-        if (warnings.size() == 1) {
-            setWarningMessage(warnings.get(0));
-        } else if (warnings.size() > 1){
-            StringBuilder buf = new StringBuilder("Warnings:\n");
-            for (String warning : warnings) {
-                buf.append("- ");
-                buf.append(warning);
-                buf.append('\n');
-            }
-            buf.deleteCharAt(buf.length() - 1);
-            setWarningMessage(buf.toString());
-        }
     }
 
     @Override
@@ -186,10 +123,10 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
             final SparkContextID id = m_settings.getSparkContextID();
 
             try {
-                LOGGER.info("In onDispose() of SparkContextCreateNodeModel. Removing context: " + id);
+                LOGGER.debug("In onDispose() of SparkContextCreateNodeModel. Removing context: " + id);
                 SparkContextManager.ensureDestroyedCustomContext(id);
             } catch (KNIMESparkException e) {
-                LOGGER.error("Failed to destroy context " + id + " on dispose.", e);
+                LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
             }
         }
     }

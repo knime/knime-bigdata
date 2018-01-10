@@ -159,7 +159,7 @@ public class SparkContextConfig implements Serializable {
         if (m_authentication && !Objects.equals(m_password, other.m_password)) {
             return false;
         }
-        if (m_receiveTimeout != other.m_receiveTimeout) {
+        if (!m_receiveTimeout.equals(other.m_receiveTimeout)) {
             return false;
         }
         if (m_jobCheckFrequency != other.m_jobCheckFrequency) {

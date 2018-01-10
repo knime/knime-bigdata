@@ -63,20 +63,21 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      *
      * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
      *            context leads to a {@link KNIMESparkException}.
+     * @return true when a new context was created, false, if a a context with the same name already existed in the
+     *         cluster.
      *
      * @throws KNIMESparkException Thrown if Spark context was non-existent and createRemoteContext=false, or if
      *             something went wrong while creating a Spark context, or if context was not in state configured.
      */
-    public synchronized void ensureOpened(final boolean createRemoteContext) throws KNIMESparkException {
+    public synchronized boolean ensureOpened(final boolean createRemoteContext) throws KNIMESparkException {
         switch (getStatus()) {
             case NEW:
                 throw new KNIMESparkException("Spark context needs to be configured before opening.");
             case CONFIGURED:
-                open(createRemoteContext);
-                break;
-            case OPEN:
-                // all is good
-                break;
+                return open(createRemoteContext);
+            default: // this is actually OPEN
+                // all is good, but we did not actually create a new context
+                return false;
         }
     }
 
@@ -158,16 +159,20 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     public abstract boolean ensureConfigured(SparkContextConfig config, boolean overwriteExistingConfig);
 
     /**
-     * Opens the Spark context, creating a context if necessary and createRemoteContext is true.
+     * Opens the Spark context, creating a a new remote context if necessary and createRemoteContext is true.
      *
      * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
-     *            context leads to a {@link SparkContextNotFoundException}.
+     *            context leads to a {@link SparkContextNotFoundException}. Setting this parameter to false is useful in
+     *            situations where you want to sync the status (see {@link #getStatus()}) to (re)attach to an existing
+     *            remote Spark context, but not necessarily create a new one.
+     * @return true when a new context was created, false, if a a context with the same name already existed in the
+     *         cluster.
      *
-     * @throws KNIMESparkException Thrown if something went wrong while creating a Spark context, or if context was
-     * not in state configured.
+     * @throws KNIMESparkException Thrown if something went wrong while creating a Spark context, or if context was not
+     *             in state configured.
      * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
-    protected abstract void open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException;
+    protected abstract boolean open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException;
 
     /**
      * Destroys the Spark context within the cluster and frees up all resources.

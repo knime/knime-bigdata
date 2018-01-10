@@ -29,6 +29,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -65,9 +66,9 @@ import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 
 /**
- * TODO: move away from KNIMESparkContext
+ * Spark context implementation for Spark Jobserver.
  *
- * @author Bjoern Lohrmann, KNIME.COM
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class JobserverSparkContext extends SparkContext {
 
@@ -171,8 +172,25 @@ public class JobserverSparkContext extends SparkContext {
         }
 
         if (doApply) {
+            // this clears most internal fields
             applyConfig(newConfig);
-            setStatus(SparkContextStatus.CONFIGURED);
+
+            switch (getStatus()) {
+                case NEW:
+                    setStatus(SparkContextStatus.CONFIGURED);
+                    break;
+                case CONFIGURED:
+                    // do nothing. status is supposed to stay in CONFIGURED
+                    break;
+                default: // OPEN
+                    // since applyConfig() has been called we need to
+                    // repopulate some fields
+                    // (i.e. the rest client and the job jar).
+                    // Note: status is supposed to stay in OPEN
+                    ensureRestClient();
+                    ensureJobJar();
+                    break;
+            }
         }
 
         return toReturn;
@@ -225,17 +243,17 @@ public class JobserverSparkContext extends SparkContext {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void open(final boolean createRemoteContext) throws KNIMESparkException {
+    public synchronized boolean open(final boolean createRemoteContext) throws KNIMESparkException {
         if (getStatus() != SparkContextStatus.CONFIGURED) {
             throw new RuntimeException(
                 String.format("Trying to open Spark context which is in status: %s. This is a bug.", getStatus()));
         }
 
+        final AtomicBoolean contextWasCreated = new AtomicBoolean(false);
+
         runWithResetOnFailure(new Task() {
             @Override
             public void run() throws Exception {
-
-                boolean contextWasCreated = false;
 
                 try {
                     ensureRestClient();
@@ -243,7 +261,7 @@ public class JobserverSparkContext extends SparkContext {
 
                     if (!remoteSparkContextExists()) {
                         if (createRemoteContext) {
-                            contextWasCreated = createRemoteSparkContext();
+                            contextWasCreated.set(createRemoteSparkContext());
                         } else {
                             throw new SparkContextNotFoundException(m_contextID);
                         }
@@ -258,7 +276,7 @@ public class JobserverSparkContext extends SparkContext {
                     setStatus(SparkContextStatus.OPEN);
                     validateAndPrepareContext();
                 } catch (KNIMESparkException e) {
-                    if (contextWasCreated) {
+                    if (contextWasCreated.get()) {
                         try {
                             doDestroy();
                         } catch (KNIMESparkException toIgnore) {
@@ -269,6 +287,8 @@ public class JobserverSparkContext extends SparkContext {
                 }
             }
         });
+
+        return contextWasCreated.get();
     }
 
     private void ensureJobJar() throws KNIMESparkException {
