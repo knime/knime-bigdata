@@ -24,6 +24,7 @@
 			The maximal number of iterations after which the algorithm terminates,
 			independent of the accuracy improvement of the cluster centers.
 		</option>
+		<option name="Initialization seed">Random seed for cluster initialization (requires Apache Spark 1.3 or later). </option>
 		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
 	</fullDescription>
 

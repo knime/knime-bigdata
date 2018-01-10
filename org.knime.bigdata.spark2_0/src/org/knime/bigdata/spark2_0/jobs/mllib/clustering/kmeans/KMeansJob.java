@@ -63,7 +63,8 @@ public class KMeansJob implements SparkJob<KMeansJobInput, ModelJobOutput> {
                 .setFeaturesCol(tmpFeatureColumn)
                 .setPredictionCol(input.getPredictionColumnName())
                 .setK(input.getNoOfClusters())
-                .setMaxIter(input.getNoOfIterations());
+                .setMaxIter(input.getNoOfIterations())
+                .setSeed(input.getSeed());
         final KMeansModel model = kMeans.fit(vectors);
         final Dataset<Row> output = model.transform(vectors).drop(tmpFeatureColumn);
         vectors.unpersist();

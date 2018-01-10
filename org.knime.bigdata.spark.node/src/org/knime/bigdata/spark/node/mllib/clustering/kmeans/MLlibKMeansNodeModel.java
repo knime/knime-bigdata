@@ -43,6 +43,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -58,11 +59,16 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
      */
     public static final String MODEL_NAME = "KMeans";
 
+    /** default random seed for cluster initialization (use default ml based model seed) */
+    public static final long DEFAULT_SEED = "org.apache.spark.ml.param.shared.HasSeed".hashCode();
+
     private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
 
     private final SettingsModelIntegerBounded m_noOfCluster = createNoOfClusterModel();
 
     private final SettingsModelIntegerBounded m_noOfIteration = createNoOfIterationModel();
+
+    private final SettingsModelLong m_seed = createSeedModel();
 
     /** The unique Spark job id. */
     public static final String JOB_ID = MLlibKMeansNodeModel.class.getCanonicalName();
@@ -87,6 +93,10 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
      */
     static SettingsModelIntegerBounded createNoOfIterationModel() {
         return new SettingsModelIntegerBounded("noOfIteration", 30, 1, Integer.MAX_VALUE);
+    }
+
+    static SettingsModelLong createSeedModel() {
+        return new SettingsModelLong("seed", DEFAULT_SEED);
     }
 
     /**
@@ -143,7 +153,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         final String outputKey = SparkIDs.createSparkDataObjectID();
         final List<Integer> featureColumnIdxs = Arrays.asList(m_settings.getSettings(data).getFeatueColIdxs());
         final KMeansJobInput jobInput = new KMeansJobInput(inputKey, outputKey, outputSpec, featureColumnIdxs,
-            m_noOfCluster.getIntValue(), m_noOfIteration.getIntValue());
+            m_noOfCluster.getIntValue(), m_noOfIteration.getIntValue(), m_seed.getLongValue());
         return jobInput;
     }
 
@@ -155,6 +165,7 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         m_settings.saveSettingsTo(settings);
         m_noOfCluster.saveSettingsTo(settings);
         m_noOfIteration.saveSettingsTo(settings);
+        m_seed.saveSettingsTo(settings);
     }
 
     /**
@@ -165,6 +176,11 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         m_settings.validateSettings(settings);
         m_noOfCluster.validateSettings(settings);
         m_noOfIteration.validateSettings(settings);
+        try {
+            m_seed.validateSettings(settings);
+        } catch (InvalidSettingsException e) {
+            // optional setting
+        }
     }
 
     /**
@@ -175,5 +191,10 @@ public class MLlibKMeansNodeModel extends SparkNodeModel {
         m_settings.loadSettingsFrom(settings);
         m_noOfCluster.loadSettingsFrom(settings);
         m_noOfIteration.loadSettingsFrom(settings);
+        try {
+            m_seed.loadSettingsFrom(settings);
+        } catch (InvalidSettingsException e) {
+            // optional setting
+        }
     }
 }

@@ -51,6 +51,11 @@ public class KMeansJob implements SparkJob<KMeansJobInput, ModelJobOutput> {
 
     private final static Logger LOGGER = Logger.getLogger(KMeansJob.class.getName());
 
+    /** default number of parallel runs */
+    private static final int DEFAULT_RUNS = 1;
+
+    /** default initialization mode */
+    private static final String DEFAULT_MODE = KMeans.K_MEANS_PARALLEL();
 
     @Override
     public ModelJobOutput runJob(final SparkContext sparkContext, final KMeansJobInput input,
@@ -65,7 +70,8 @@ public class KMeansJob implements SparkJob<KMeansJobInput, ModelJobOutput> {
             RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRdd, input.getColumnIdxs());
         vectorRdd.cache();
         // Cluster the data into m_noOfCluster classes using KMeans
-        final KMeansModel model = KMeans.train(vectorRdd.rdd(), input.getNoOfClusters(), input.getNoOfIterations());
+        final KMeansModel model = KMeans.train(vectorRdd.rdd(), input.getNoOfClusters(),
+            input.getNoOfIterations(), DEFAULT_RUNS, DEFAULT_MODE, input.getSeed());
 
         final JavaRDD<Row> predictedData = ModelUtils.predict(vectorRdd, rowRdd, model);
         namedObjects.addJavaRdd(input.getNamedOutputObjects().get(0), predictedData);

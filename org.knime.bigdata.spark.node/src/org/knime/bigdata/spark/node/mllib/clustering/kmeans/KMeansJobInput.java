@@ -38,6 +38,8 @@ public class KMeansJobInput extends ColumnsJobInput {
 
     private final static String KEY_NO_CLUSTERS = "noOfClusters";
 
+    private final static String KEY_SEED = "seed";
+
     /**
      * Paramless constructor for automatic deserialization.
      */
@@ -53,10 +55,11 @@ public class KMeansJobInput extends ColumnsJobInput {
      * @param noOfIterations - maximal number of iterations
      * @param namedOutputObject - table identifier (classified output data)
      * @param outputSpec - output intermediate specification
+     * @param seed - random seed for cluster initialization
      */
     public KMeansJobInput(final String namedInputObject, final String namedOutputObject,
         final IntermediateSpec outputSpec, final List<Integer> featureColumnIdxs, final int noOfClusters,
-        final int noOfIterations) {
+        final int noOfIterations, final long seed) {
 
         super(namedInputObject, featureColumnIdxs);
         if (noOfClusters < 1) {
@@ -70,6 +73,7 @@ public class KMeansJobInput extends ColumnsJobInput {
         withSpec(namedOutputObject, outputSpec);
         set(KEY_NO_CLUSTERS, noOfClusters);
         set(KEY_NO_OF_ITERATIONS, noOfIterations);
+        set(KEY_SEED, seed);
     }
 
     /**
@@ -92,5 +96,10 @@ public class KMeansJobInput extends ColumnsJobInput {
      */
     public int getNoOfIterations() {
         return getInteger(KEY_NO_OF_ITERATIONS);
+    }
+
+    /** @return seed parameter */
+    public long getSeed() {
+        return getLong(KEY_SEED);
     }
 }
