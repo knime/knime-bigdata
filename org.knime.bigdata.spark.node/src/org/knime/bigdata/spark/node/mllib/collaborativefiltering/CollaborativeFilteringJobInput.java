@@ -115,16 +115,16 @@ public class CollaborativeFilteringJobInput extends JobInput {
 
     CollaborativeFilteringJobInput(final String tableName, final String predictions, final int userIdx,
         final int productIdx, final int ratingIdx, final double lambda, final double alpha, final int iterations,
-        final int rank, final boolean implicitPrefs, final int noOfBlocks) {
+        final int rank, final boolean implicitPrefs, final int noOfBlocks, final long randomSeed) {
         this(tableName, predictions, userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,
-            noOfBlocks, null, null, null, null);
+            noOfBlocks, null, null, null, randomSeed);
     }
 
     CollaborativeFilteringJobInput(final String aInputRDD, final String namedOutputObject, final int aUserIdx,
         final int aProductIdx, final int aRatingIdx, final Double aLambda, final Double aAlpha,
         final int aIterations, final Integer aRank, final boolean implicitPrefs, final Integer noOfBlocks,
         final Integer noOfUserBlocks, final Integer noOfProductBlocks, final Boolean isNonNegative,
-        final Long randomSeed) {
+        final long randomSeed) {
         addNamedInputObject(aInputRDD);
         if (namedOutputObject != null) {
             addNamedOutputObject(namedOutputObject);

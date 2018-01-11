@@ -45,6 +45,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -59,6 +60,9 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
     /**The unique model name.*/
     public static final String MODEL_NAME = "Matrix Factorization Model";
 
+    /** default random seed for cluster initialization (use default ml based model seed) */
+    public static final long DEFAULT_SEED = "org.apache.spark.ml.param.shared.HasSeed".hashCode();
+
     private final SettingsModelString m_userCol = createUserColModel();
     private final SettingsModelString m_productCol = createProductColModel();
     private final SettingsModelString m_ratingCol = createRatingColModel();
@@ -68,6 +72,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
     private final SettingsModelInteger m_iterations = createIterationsModel();
     private final SettingsModelInteger m_blocks = createNoOfBlocksModel();
     private final SettingsModelBoolean m_implicitPrefs = createImplicitPrefsModel();
+    private final SettingsModelLong m_seed = createSeedModel();
 
     /**The unique Spark job id.*/
     public static final String JOB_ID = "MLlibCollaborativeFilteringJob";
@@ -140,6 +145,11 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         return new SettingsModelBoolean("implicitPrefs", false);
     }
 
+    /** @return random seed model */
+    static SettingsModelLong createSeedModel() {
+        return new SettingsModelLong("seed", DEFAULT_SEED);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -183,14 +193,15 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final int iterations = m_iterations.getIntValue();
         final int rank = m_rank.getIntValue();
         final int noOfBlocks = m_blocks.getIntValue();
-        boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
+        final boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
+        final long seed = m_seed.getLongValue();
         //vMatrix is the prediction result
         final DataTableSpec vMatrixSpec = createResultTableSpec(tableSpec);
         final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec);
         exec.checkCanceled();
         final CollaborativeFilteringJobInput jobInput = new CollaborativeFilteringJobInput(data.getTableName(),
             vMatrixRDD.getID(), userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,
-            noOfBlocks);
+            noOfBlocks, seed);
         final CollaborativeFilteringJobOutput output = runFactory.createRun(jobInput).run(data.getContextID());
         final SparkModel sparkModel = new SparkModel(
             SparkContextManager.getOrCreateSparkContext(data.getContextID()).getSparkVersion(), MODEL_NAME,
@@ -253,6 +264,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_rank.saveSettingsTo(settings);
         m_blocks.saveSettingsTo(settings);
         m_implicitPrefs.saveSettingsTo(settings);
+        m_seed.saveSettingsTo(settings);
     }
 
     /**
@@ -269,6 +281,12 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_rank.validateSettings(settings);
         m_blocks.validateSettings(settings);
         m_implicitPrefs.validateSettings(settings);
+
+        try {
+            m_seed.validateSettings(settings);
+        } catch (InvalidSettingsException e) {
+            // option setting
+        }
     }
 
     /**
@@ -285,5 +303,11 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         m_rank.loadSettingsFrom(settings);
         m_blocks.loadSettingsFrom(settings);
         m_implicitPrefs.loadSettingsFrom(settings);
+
+        try {
+            m_seed.loadSettingsFrom(settings);
+        } catch (InvalidSettingsException e) {
+            // option setting
+        }
     }
 }

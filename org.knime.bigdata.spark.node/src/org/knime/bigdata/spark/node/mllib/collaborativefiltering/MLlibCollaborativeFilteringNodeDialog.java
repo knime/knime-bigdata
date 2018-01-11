@@ -20,9 +20,14 @@
  */
 package org.knime.bigdata.spark.node.mllib.collaborativefiltering;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
@@ -37,6 +42,8 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
+import org.knime.core.node.defaultnodesettings.SettingsModelLong;
 import org.knime.core.node.port.PortObjectSpec;
 
 /**
@@ -66,6 +73,10 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
     private final DialogComponentBoolean m_implicitPrefs =
             new DialogComponentBoolean(MLlibCollaborativeFilteringNodeModel.createImplicitPrefsModel(), "Implicit feedback");
 
+    private final DialogComponentNumberEdit m_seed =
+            new DialogComponentNumberEdit(MLlibCollaborativeFilteringNodeModel.createSeedModel(), "Initialization seed: ", 10);
+    private final static Random RND = new Random();
+    private final JButton m_nextSeedButton = new JButton("New");
 
     /**
      *
@@ -101,6 +112,22 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
         panel.add(m_blocks.getComponentPanel(), gbc);
         gbc.gridx++;
         panel.add(m_implicitPrefs.getComponentPanel(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        final JPanel seedPanel = new JPanel(new BorderLayout());
+        seedPanel.add(m_seed.getComponentPanel(), BorderLayout.WEST);
+        seedPanel.add(m_nextSeedButton, BorderLayout.EAST);
+        panel.add(seedPanel, gbc);
+        m_nextSeedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                // generate a integer here to avoid huge numbers in the dialog
+                ((SettingsModelLong) m_seed.getModel()).setLongValue(RND.nextInt());
+            }
+        });
+
         addTab("Settings", panel);
     }
 
@@ -118,6 +145,7 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
         m_rank.saveSettingsTo(settings);
         m_blocks.saveSettingsTo(settings);
         m_implicitPrefs.saveSettingsTo(settings);
+        m_seed.saveSettingsTo(settings);
     }
 
     /**
@@ -135,5 +163,6 @@ public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
         m_rank.loadSettingsFrom(settings, tableSpecs);
         m_blocks.loadSettingsFrom(settings, tableSpecs);
         m_implicitPrefs.loadSettingsFrom(settings, tableSpecs);
+        m_seed.loadSettingsFrom(settings, tableSpecs);
     }
 }

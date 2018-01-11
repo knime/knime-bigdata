@@ -35,6 +35,7 @@
 		<option name="Implicit feedback">
 		Select this option to use the ALS variant adapted for implicit feedback data otherwise the explicit feedback ALS 
 		variant is used.</option>
+		<option name="Initialization seed">Random seed to initialize the factors.</option>
 	</fullDescription>
 
 	<ports>
