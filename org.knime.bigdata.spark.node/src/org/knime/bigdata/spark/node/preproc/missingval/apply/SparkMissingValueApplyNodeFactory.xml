@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    type="Manipulator" icon="icon.png">
+
+    <name>Spark Missing Value (Apply)</name>
+
+    <shortDescription>
+        Applies missing value replacement that was created with the Spark Missing Value Handler node
+    </shortDescription>
+
+    <fullDescription>
+        <intro>
+            Reads missing value replacement settings from the PMML port and applies them to the data.
+            The node can handle the output of the KNIME Spark Missing Value node and foreign PMML of the following form:<br/>
+            <pre>
+	&lt;Apply function="if"&gt;
+	    &lt;Apply function="isMissing"&gt;
+	        &lt;FieldRef field="..."&gt;
+	    &lt;/Apply&lt;
+	    &lt;Constant dataType="..." value="..."&gt;
+	    &lt;FieldRef field="..."&gt;
+	&lt;/Apply&gt;
+            </pre>
+        </intro>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="PMML">Document describing the missing value replacement operations</inPort>
+        <inPort index="1" name="Spark Data">Spark data with missing values</inPort>
+        <outPort index="0" name="Spark Data">Spark data with replaced values</outPort>
+    </ports>
+</knimeNode>

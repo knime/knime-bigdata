@@ -12,8 +12,8 @@
 			<p>
 			<b>Notice: The matrix factorization model contains references to Spark DataFrame/RDDs and thus is not selfcontained. 
 			The referenced Spark DataFrame/RDDs will be deleted, like any other Spark DataFrame/RDD generated in KNIME, when the node is 
-			reseted or when the workflow is closed if the "Delete Spark DataFrame/RDDs on dispose" option is enabled for the 
-			current Spark Context.</b>
+			reset, or when the workflow is closed and the "Delete Spark DataFrame/RDDs on dispose" option is enabled for the 
+			current Spark context.</b>
 			</p>
 		</intro>
 

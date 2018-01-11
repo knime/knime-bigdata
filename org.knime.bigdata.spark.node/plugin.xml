@@ -214,11 +214,9 @@
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.MostFrequentMissingValueHandlerFactory">
      </SparkMissingValueHandler>
-     <!-- not PMML 4.2 conform:
      <SparkMissingValueHandler
-         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RemoveRowMissingSparkValueHandlerFactory">
+         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RemoveRowMissingValueHandlerFactory">
      </SparkMissingValueHandler>
-     -->
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RoundedMeanMissingValueHandlerFactory">
      </SparkMissingValueHandler>
