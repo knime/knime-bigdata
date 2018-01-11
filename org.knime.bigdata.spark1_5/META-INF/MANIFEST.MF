@@ -10,8 +10,8 @@ Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark1_5.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
  org.knime.base;bundle-version="[3.2.0,4.0.0)",
- org.knime.bigdata.spark.core;bundle-version="[2.2.0,2.3.0)",
- org.knime.bigdata.spark.node;bundle-version="[2.2.0,2.3.0)",
+ org.knime.bigdata.spark.core;bundle-version="[2.3.0,2.4.0)",
+ org.knime.bigdata.spark.node;bundle-version="[2.3.0,2.4.0)",
  org.apache.spark_2.10;bundle-version="[1.5.0,1.6.0)",
  org.apache.hadoop.client;bundle-version="[2.2.0,3.0.0)",
  org.knime.jsnippets;bundle-version="[3.3.0,4.0.0)",
