@@ -23,17 +23,15 @@ package org.knime.bigdata.spark2_2.jobs.preproc.rename;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.node.preproc.rename.RenameColumnJobInput;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
-import org.knime.bigdata.spark2_2.api.TypeConverters;
 
 /**
- * Renames columns via schema update.
+ * Renames columns if column name has changed.
  *
  * @author Sascha Wolke, KNIME.com
  */
@@ -45,12 +43,19 @@ public class RenameColumnJob implements SimpleSparkJob<RenameColumnJobInput> {
     public void runJob(final SparkContext sparkContext, final RenameColumnJobInput input, final NamedObjects namedObjects)
             throws KNIMESparkException, Exception {
 
-        final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final String namedInputObject = input.getFirstNamedInputObject();
         final String namedOutputObject = input.getFirstNamedOutputObject();
         final Dataset<Row> inputDataFrame = namedObjects.getDataFrame(namedInputObject);
-        final StructType outputSchema = TypeConverters.convertSpec(input.getSpec(namedOutputObject));
-        final Dataset<Row> outputDataFrame = sparkSession.createDataFrame(inputDataFrame.javaRDD(), outputSchema);
+        final String oldNames[] = inputDataFrame.schema().fieldNames();
+        final IntermediateField newFields[] = input.getSpec(namedOutputObject).getFields();
+        Dataset<Row> outputDataFrame = inputDataFrame;
+
+        for (int i = 0; i < newFields.length; i++) {
+            if (!oldNames[i].equals(newFields[i].getName())) {
+                outputDataFrame = inputDataFrame.withColumnRenamed(oldNames[i], newFields[i].getName());
+            }
+        }
+
         namedObjects.addDataFrame(namedOutputObject, outputDataFrame);
     }
 }

@@ -14,30 +14,24 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on Feb 13, 2015 by koetter
  */
 package org.knime.bigdata.spark2_1.jobs.preproc.sorter;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.MultiValueSortKey;
 import org.knime.bigdata.spark.node.preproc.sorter.SortJobInput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
 
 /**
- * sorts input data frame by given indices, in given order
+ * Sorts input data frame by given indices, in given order.
  *
- * @author Tobias Koetter, KNIME.com, dwk
+ * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
 public class SortJob implements SimpleSparkJob<SortJobInput> {
@@ -49,46 +43,29 @@ public class SortJob implements SimpleSparkJob<SortJobInput> {
         throws KNIMESparkException {
 
         LOGGER.info("Starting sort job...");
-        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
-        final Integer[] colIdxs = input.getFeatureColIdxs();
+        final Integer[] colIndex = input.getFeatureColIdxs();
+        final String[] colNames = inputDataset.columns();
         final Boolean[] sortOrders = input.isSortDirectionAscending();
         final Boolean missingToEnd = input.missingToEnd();
-        LOGGER.debug("Missing to end? " + missingToEnd);
-        final JavaRDD<Row> resRDD = execute(sparkContext.defaultMinPartitions(), inputDataset.javaRDD(), colIdxs, sortOrders, missingToEnd);
-        final Dataset<Row> resultDataset = spark.createDataFrame(resRDD, inputDataset.schema());
+        final Column[] sortColumns = new Column[colIndex.length];
+
+        for (int i = 0; i < colIndex.length; i++) {
+            final String name = colNames[colIndex[i]];
+            if (sortOrders[i] && missingToEnd) {
+                sortColumns[i] = inputDataset.col(name).asc_nulls_last();
+            } else if (sortOrders[i]) {
+                sortColumns[i] = inputDataset.col(name).asc();
+            } else if (missingToEnd) {
+                sortColumns[i] = inputDataset.col(name).desc_nulls_last();
+            } else {
+                sortColumns[i] = inputDataset.col(name).desc();
+            }
+        }
+
+        final Dataset<Row> resultDataset = inputDataset.sort(sortColumns);
         namedObjects.addDataFrame(input.getFirstNamedOutputObject(), resultDataset);
 
         LOGGER.info("Sort done");
-    }
-
-    static JavaRDD<Row> execute(final int numPartitions, final JavaRDD<Row> rowRDD, final Integer[] colIdxs,
-        final Boolean[] sortOrders, final Boolean missingToEnd) {
-        //special (and more efficient) handling of sorting by a single key:
-        if (colIdxs.length == 1) {
-            return rowRDD.sortBy(new Function<Row, Object>() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public Object call(final Row aRow) throws Exception {
-                    return aRow.get(colIdxs[0]);
-                }
-            }, sortOrders[0], numPartitions);
-        } else {
-            return rowRDD.sortBy(new Function<Row, MultiValueSortKey>() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public MultiValueSortKey call(final Row aRow) throws Exception {
-                    final Object[] values = new Object[colIdxs.length];
-                    final Boolean[] isAscending = new Boolean[sortOrders.length];
-                    for (int i=0; i<values.length; i++) {
-                        values[i] = aRow.get(colIdxs[i]);
-                        isAscending[i] = sortOrders[i];
-                    }
-                    return new MultiValueSortKey(values, isAscending, missingToEnd);
-                }
-            }, true, numPartitions);
-        }
     }
 }

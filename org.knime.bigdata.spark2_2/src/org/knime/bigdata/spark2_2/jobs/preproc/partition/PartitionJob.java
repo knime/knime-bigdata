@@ -41,7 +41,7 @@ import org.knime.bigdata.spark2_2.jobs.preproc.sampling.AbstractSamplingJob;
 import scala.Tuple2;
 
 /**
- * Split input RDD into two RDDs using sampling.
+ * Split input data frame into two data frames using sampling.
  *
  * @author Sascha Wolke, KNIME.com
  */
@@ -58,9 +58,7 @@ public class PartitionJob extends AbstractSamplingJob {
     protected SamplingJobOutput randomSampling(final SparkContext context, final SamplingJobInput input,
             final NamedObjects namedObjects) throws KNIMESparkException {
 
-        final SparkSession spark = SparkSession.builder().sparkContext(context).getOrCreate();
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
-        final JavaRDD<Row> inputRdd = inputDataset.javaRDD();
         double fraction = getFractionToSample(input, inputDataset);
 
         if (fraction >= 1.0) {
@@ -68,11 +66,9 @@ public class PartitionJob extends AbstractSamplingJob {
 
         } else {
             double weights[] = new double[] { fraction, 1 - fraction };
-            final JavaRDD<Row> resultRdd[] = inputRdd.randomSplit(weights, input.getSeed());
-            namedObjects.addDataFrame(input.getNamedOutputObjects().get(0),
-                spark.createDataFrame(resultRdd[0], inputDataset.schema()));
-            namedObjects.addDataFrame(input.getNamedOutputObjects().get(1),
-                spark.createDataFrame(resultRdd[1], inputDataset.schema()));
+            final Dataset<Row> result[] = inputDataset.randomSplit(weights, input.getSeed());
+            namedObjects.addDataFrame(input.getNamedOutputObjects().get(0), result[0]);
+            namedObjects.addDataFrame(input.getNamedOutputObjects().get(1), result[1]);
             return new SamplingJobOutput(false);
         }
     }

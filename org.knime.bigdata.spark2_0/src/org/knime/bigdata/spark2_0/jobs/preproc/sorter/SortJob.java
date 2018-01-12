@@ -35,7 +35,9 @@ import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
- * sorts input data frame by given indices, in given order
+ * Sorts input data frame by given indices, in given order.
+ *
+ * Note: DataFrame API of Spark 2.0 does not support <code>asc_nulls_last</code>, we have to use the old RDD based API.
  *
  * @author Tobias Koetter, KNIME.com, dwk
  */
