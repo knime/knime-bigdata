@@ -29,6 +29,8 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.node.SparkNodePlugin;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -89,7 +91,7 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation(s)
         // and in executeInternal()
         final DataTableSpec spec = (DataTableSpec)inSpecs[0];
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(getContextID(inSpecs), spec)};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(getContextID(inSpecs), createSparkDataTableSpec(spec))};
     }
 
 	private boolean isKNOSPMode() {
@@ -113,7 +115,26 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
 
         // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation and in configureInternal()
         return new PortObject[]{new SparkDataPortObject(new SparkDataTable(contextID,
-            streamableOp.getNamedOutputObjectId(), inputTable.getDataTableSpec()))};
+            streamableOp.getNamedOutputObjectId(), createSparkDataTableSpec(inputTable.getDataTableSpec())))};
+    }
+
+
+    /**
+     * Utility method to create the spec of the {@link SparkDataTable} which is passed to the next node. Currently, this
+     * method produces a spec that has identical column names and types to the given one, but it drops any additional
+     * table or column metadata (value domains, color handler, ...) because they don't make sense if you don't have the
+     * data locally.
+     *
+     * @param knimeTableSpec The spec of the {@link DataTable} that is uploaded to Spark.
+     * @return the spec of the {@link SparkDataTable}
+     */
+    public static DataTableSpec createSparkDataTableSpec(final DataTableSpec knimeTableSpec) {
+        final DataColumnSpec[] sparkDataColumns = new DataColumnSpec[knimeTableSpec.getNumColumns()];
+        for (int i = 0; i < sparkDataColumns.length; i++) {
+            final DataColumnSpec knimeColumnSpec = knimeTableSpec.getColumnSpec(i);
+            sparkDataColumns[i] = new DataColumnSpecCreator(knimeColumnSpec.getName(), knimeColumnSpec.getType()).createSpec();
+        }
+        return new DataTableSpec(sparkDataColumns);
     }
 
     /**

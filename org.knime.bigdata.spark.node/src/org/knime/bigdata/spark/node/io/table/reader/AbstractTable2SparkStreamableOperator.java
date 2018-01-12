@@ -76,7 +76,7 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
 
         // if you change this, you also need to change the behavior in Table2SparkNodeModel#configureInternal()
         // and Table2SparkNodeModel#executeInternal()
-        final DataTableSpec outputSpec = rowInput.getDataTableSpec();
+        final DataTableSpec outputSpec = Table2SparkNodeModel.createSparkDataTableSpec(rowInput.getDataTableSpec());
 
         final SparkDataPortObject outPortObject = new SparkDataPortObject(
             new SparkDataTable(contextPortObject.getContextID(), getNamedOutputObjectId(), outputSpec));
