@@ -52,7 +52,7 @@ public class RenameColumnJob implements SimpleSparkJob<RenameColumnJobInput> {
 
         for (int i = 0; i < newFields.length; i++) {
             if (!oldNames[i].equals(newFields[i].getName())) {
-                outputDataFrame = inputDataFrame.withColumnRenamed(oldNames[i], newFields[i].getName());
+                outputDataFrame = outputDataFrame.withColumnRenamed(oldNames[i], newFields[i].getName());
             }
         }
 
