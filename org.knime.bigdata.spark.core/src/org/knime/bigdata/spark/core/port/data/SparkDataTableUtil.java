@@ -24,9 +24,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
-import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobRunFactory;
@@ -156,9 +154,6 @@ public final class SparkDataTableUtil {
 
         final IntermediateSpec intermediateSpec = getIntermediateSpec(data);
         final FetchRowsJobInput input = FetchRowsJobInput.create(noOfRows, data.getID(), intermediateSpec);
-        if (SparkContextManager.getOrCreateSparkContext(data.getContextID()).getStatus() != SparkContextStatus.OPEN) {
-            throw new KNIMESparkException("Spark context does not exist (anymore). Please reset all preceding nodes and rexecute them.");
-        }
         final JobRunFactory<FetchRowsJobInput, FetchRowsJobOutput> execProvider =
             SparkContextUtil.getJobRunFactory(data.getContextID(), SparkContextConstants.FETCH_ROWS_JOB_ID);
         final FetchRowsJobOutput output = execProvider.createRun(input).run(data.getContextID(), exec);
