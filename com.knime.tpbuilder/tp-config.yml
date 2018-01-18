@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20171201
+version: knimebd-20180118
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -73,6 +73,7 @@ mavenBlacklist:
   - org\.slf4j:(?!slf4j-ext).*
   - com\.fasterxml\.jackson\.core:.*
   - com\.google\.guava:guava:.*
+  - com.jcraft:jsch:jar:.*
   - org\.apache\.httpcomponents:httpclient:jar:.*
   - org\.apache\.httpcomponents:httpcore:jar:.*
   - javax\.servlet:servlet-api:jar:.*
@@ -97,7 +98,7 @@ mavenBlacklist:
   - com\.google\.protobuf:protobuf-java:jar:.*
   - javax\.servlet\.jsp:jsp-api:jar:.*
   - org\.mortbay\.jetty:jetty-util:jar:.*
-  - org\.mortbay\.jetty:jetty:jar:.* 
+  - org\.mortbay\.jetty:jetty:jar:.*
   
   # javax.annotation packages from jsr305  are never required at runtime
   - com\.google\.code\.findbugs:jsr305:jar:.*
@@ -148,6 +149,9 @@ mavenBlacklist:
   # JDiff is a Javadoc doclet, which is in the "provided" dependency scope of hadoop-annotations
   # we don't need it at runtime
   - jdiff:jdiff:jar:.*
+  
+  # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
+  - io.airlift:slice:jar:.*
   
   
 # mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
@@ -248,6 +252,9 @@ requireBundleOverrides:
    
   - coordPattern: com\.google\.guava:guava:jar:.*
     replacement: com.google.guava;bundle-version=${knime_guava_version}
+    
+  - coordPattern: com.jcraft:jsch:jar:.*
+    replacement: com.jcraft.jsch;bundle-version="[0.1.53,1)"
   
   - coordPattern: org\.apache\.httpcomponents:httpclient:jar:.*
     replacement: org.apache.httpcomponents.httpclient;bundle-version=${knime_httpcomponents_httpclient_version}
@@ -324,6 +331,10 @@ requireBundleOverrides:
   - coordPattern: org\.mortbay\.jetty:jetty:jar:.*
     replacement: org.mortbay.jetty.server;bundle-version="[6.1,7)"
     
+  # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
+  - coordPattern: io.airlift:slice:jar:.*
+    replacement: io.airlift.slice;resolution:=optional
+        
   # Eclipse Orbit provides these
   - coordPattern: org\.antlr:antlr-runtime:jar:.*
     replacement: org.antlr.runtime;bundle-version="[4.5,5)"
@@ -448,6 +459,12 @@ mavenDependencyOverrides:
   # this makes sure we only get the newest one
   - coordPattern: commons-beanutils:commons-beanutils:jar:.*
     replacement: commons-beanutils:commons-beanutils:jar:1.8.0
+    
+  # this is in fact a shaded hadoop version, which is for some reason a dependency of aircompressor
+  # this redirects that dependency to the "true" hadoop
+  - coordPattern: com.facebook.presto.hadoop:hadoop-apache2:jar:.*
+    replacement: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
+
 
 # Prevents artifacts that only differ in their micro version from undergoing duplicate removal
 duplicateRemovalBlacklist:
@@ -1072,3 +1089,12 @@ artifactGroups:
       # avro support for spark-sql 2.2
       - id: com.databricks:spark-avro_2.11:4.0.0
         transitive: false
+        
+  # ##############################################################
+  # ORC columnar storage format
+  # ##############################################################
+  - name: ORC columnar storage
+    singleArtifacts:
+      - id: org.apache.orc:orc-core:1.4.1
+        transitiveSourceDepth: 1
+
