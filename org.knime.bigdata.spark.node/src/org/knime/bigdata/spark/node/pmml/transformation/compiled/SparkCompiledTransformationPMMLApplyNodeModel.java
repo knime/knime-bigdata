@@ -20,13 +20,17 @@
  */
 package org.knime.bigdata.spark.node.pmml.transformation.compiled;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkPMMLUtil;
 import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeModel;
+import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
@@ -57,11 +61,17 @@ public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSpark
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final CompiledModelPortObjectSpec pmmlSpec = (CompiledModelPortObjectSpec) inSpecs[0];
         final SparkDataPortObjectSpec sparkSpec = (SparkDataPortObjectSpec) inSpecs[1];
-        final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(sparkSpec.getTableSpec(), pmmlSpec);
+
+        final Collection<String> missingFieldNames  = new LinkedList<>();
+        SparkPMMLUtil.getColumnIndices(sparkSpec.getTableSpec(), pmmlSpec, missingFieldNames);
+        if (!missingFieldNames.isEmpty()) {
+            setWarningMessage("Missing input fields: " + missingFieldNames);
+        }
+
         final List<Integer> addCols = new LinkedList<>();
         final List<Integer> skipCols = new LinkedList<>();
-        final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(sparkSpec.getTableSpec(),
-            pmmlSpec, colIdxs, addCols, replace(), skipCols);
+        final DataTableSpec resultSpec = createTransformationResultSpec(sparkSpec.getTableSpec(),
+            null, pmmlSpec, addCols, skipCols);
         return new PortObjectSpec[]{
             new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec)};
     }
@@ -72,5 +82,42 @@ public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSpark
     @Override
     public CompiledModelPortObject getCompiledPMMLModel(final ExecutionMonitor exec, final PortObject[] inObjects) {
         return (CompiledModelPortObject)inObjects[0];
+    }
+
+    @Override
+    protected DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec, final PortObject pmmlPort,
+        final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols)
+        throws InvalidSettingsException {
+
+        final DataColumnSpec[] pmmlResultColSpecs = cms.getTransformationsResultColSpecs(inSpec);
+        final Set<String> pmmlInputColNames = cms.getInputIndices().keySet();
+        final List<DataColumnSpec> appendSpecs = new ArrayList<>(pmmlResultColSpecs.length);
+
+        // add only the specs to the result that have a matching input column
+        for (int i = 0; i < pmmlResultColSpecs.length; i++) {
+            if (hasInputColumn(inSpec, pmmlInputColNames, pmmlResultColSpecs[i].getName())) {
+                appendSpecs.add(pmmlResultColSpecs[i]);
+                addCols.add(i);
+            }
+        }
+
+        return new DataTableSpec(inSpec, new DataTableSpec(appendSpecs.toArray(new DataColumnSpec[0])));
+    }
+
+    /**
+     * Find PMML input column with longest matching result col name and return <code>true</code> if input spec contains
+     * this column.
+     */
+    private boolean hasInputColumn(final DataTableSpec inSpec, final Set<String> pmmlInputCols, final String resultColName) {
+        // find best matching PMML input column name
+        String inputCol = null;
+        for (String name : pmmlInputCols) {
+            if (resultColName.startsWith(name) && (inputCol == null || inputCol.length() < name.length())) {
+                inputCol = name;
+            }
+        }
+
+        // validate that input spec has detected column
+        return inputCol != null && inSpec.containsName(inputCol);
     }
 }

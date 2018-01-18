@@ -46,6 +46,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.pmml.PMMLPortObject;
 
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObject;
 import com.knime.pmml.compilation.java.compile.CompiledModelPortObjectSpec;
@@ -92,11 +93,10 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         if (!missingFieldNames.isEmpty()) {
             setWarningMessage("Missing input fields: " + missingFieldNames);
         }
-        //TODO: Implement replace function once we can better determine the columns to replace
         final List<Integer> addCols = new LinkedList<>();
         final List<Integer> skipCols = new LinkedList<>();
-        final DataTableSpec resultSpec = SparkPMMLUtil.createTransformationResultSpec(data.getTableSpec(), cms,
-            colIdxs, addCols, m_replace.getBooleanValue(), skipCols);
+        final DataTableSpec resultSpec =
+            createTransformationResultSpec(data.getTableSpec(), inObjects[0], cms, addCols, skipCols);
         final String aOutputTableName = SparkIDs.createSparkDataObjectID();
         final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
@@ -130,12 +130,30 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
             throws CanceledExecutionException, InvalidSettingsException, Exception;
 
     /**
+     * Create transformation result spec.
+     *
+     * @param inSpec input {@link DataTableSpec}
+     * @param pmmlPort input PMML port ({@link PMMLPortObject}, {@link CompiledModelPortObject} or null)
+     * @param cms the {@link CompiledModelPortObjectSpec}
+     * @param addCols list of PMML result column indices to add to the result (filled by this method)
+     * @param skipCols list of input column indices to skip (filled by this method)
+     * @return the result {@link DataTableSpec}
+     * @throws InvalidSettingsException
+     */
+    protected abstract DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec,
+        final PortObject pmmlPort, final CompiledModelPortObjectSpec cms, final List<Integer> addCols,
+        final List<Integer> skipCols) throws InvalidSettingsException;
+
+    /**
      * {@inheritDoc}
      */
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        //TODO: Implement replace option
-//        m_replace.loadSettingsFrom(settings);
+        try {
+            m_replace.loadSettingsFrom(settings);
+        } catch (InvalidSettingsException e) {
+            // optional setting, might be empty
+        }
     }
 
     /**
@@ -143,8 +161,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      */
     @Override
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        //TODO: Implement replace option
-//        m_replace.saveSettingsTo(settings);
+        m_replace.saveSettingsTo(settings);
     }
 
     /**
@@ -152,7 +169,6 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      */
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        //TODO: Implement replace option
-//        m_replace.validateSettings(settings);
+        // optional: m_replace
     }
 }

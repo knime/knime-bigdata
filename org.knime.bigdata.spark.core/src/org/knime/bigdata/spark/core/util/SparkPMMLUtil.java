@@ -20,18 +20,11 @@
  */
 package org.knime.bigdata.spark.core.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 
@@ -87,81 +80,6 @@ public final class SparkPMMLUtil {
             colIdxs[entry.getValue()] = Integer.valueOf(colIdx);
         }
         return colIdxs;
-    }
-
-    /**
-     * @param inSpec input {@link DataTableSpec}
-     * @param cms the {@link CompiledModelPortObjectSpec}
-     * @param colIdxs the indices of the columns in the input spec
-     * @param addCols
-     * @param replace <code>true</code> if the transformed columns should be replaced
-     * @param skipCols
-     * @return the result {@link DataTableSpec}
-     */
-    public static DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec,
-        final CompiledModelPortObjectSpec cms, final Integer[] colIdxs, final List<Integer> addCols,
-        final boolean replace, final List<Integer> skipCols) {
-        final DataColumnSpec[] pmmlResultColSpecs = cms.getTransformationsResultColSpecs(inSpec);
-        final Integer[] matchingColIdxs = findMatchingCols(inSpec, cms);
-        if (replace) {
-            final Set<Integer> skipColIdxs = new HashSet<>(Arrays.asList(matchingColIdxs));
-            List<DataColumnSpec> resultCols = new LinkedList<>();
-            for (int i = 0; i < inSpec.getNumColumns(); i++) {
-                final Integer colIdx = Integer.valueOf(i);
-                if (skipColIdxs.contains(colIdx)) {
-                    skipColIdxs.add(colIdx);
-                    continue;
-                }
-                resultCols.add(inSpec.getColumnSpec(i));
-            }
-            for (int i = 0, length = matchingColIdxs.length; i < length; i++) {
-                final int idx = matchingColIdxs[i];
-                if (idx >= 0) {
-                    //add only the specs to the result that have a matching input column
-                    final DataColumnSpec pmmlSpec = pmmlResultColSpecs[i];
-                    String pmmlName = pmmlSpec.getName();
-                    if (pmmlName.endsWith("*")) {
-                        DataColumnSpecCreator creator = new DataColumnSpecCreator(pmmlSpec);
-                        creator.setName(pmmlName.substring(0, pmmlName.length() - 1));
-                        resultCols.add(creator.createSpec());
-                    } else {
-                        resultCols.add(pmmlSpec);
-                    }
-                    addCols.add(Integer.valueOf(i));
-                }
-            }
-            return new DataTableSpec(resultCols.toArray(new DataColumnSpec[0]));
-        }
-        final List<DataColumnSpec> appendSpecs = new ArrayList<>(pmmlResultColSpecs.length);
-        for (int i = 0, length = matchingColIdxs.length; i < length; i++) {
-            final int idx = matchingColIdxs[i];
-            if (idx >= 0) {
-                //add only the specs to the result that have a matching input column
-                appendSpecs.add(pmmlResultColSpecs[i]);
-                addCols.add(Integer.valueOf(i));
-            }
-        }
-        return new DataTableSpec(inSpec, new DataTableSpec(appendSpecs.toArray(new DataColumnSpec[0])));
-    }
-
-    private static Integer[] findMatchingCols(final DataTableSpec inSpec, final CompiledModelPortObjectSpec cms) {
-        final DataColumnSpec[] pmmlResultColSpecs = cms.getTransformationsResultColSpecs(inSpec);
-        final Set<String> inputColNames = cms.getInputIndices().keySet();
-        final Integer[] idxs = new Integer[pmmlResultColSpecs.length];
-        Arrays.fill(idxs, Integer.valueOf(-1));
-        for (int pmmlIdx = 0; pmmlIdx < pmmlResultColSpecs.length; pmmlIdx++) {
-            final DataColumnSpec pmmlColSpec = pmmlResultColSpecs[pmmlIdx];
-            final String pmmlColName = pmmlColSpec.getName();
-            for (int specIdx = 0; specIdx < inSpec.getNumColumns(); specIdx++) {
-                final DataColumnSpec colSpec = inSpec.getColumnSpec(specIdx);
-                final String inputColName = colSpec.getName();
-                if (pmmlColName.startsWith(inputColName) && inputColNames.contains(inputColName)) {
-                    idxs[pmmlIdx] = Integer.valueOf(specIdx);
-                    break;
-                }
-            }
-        }
-        return idxs;
     }
 
     /**

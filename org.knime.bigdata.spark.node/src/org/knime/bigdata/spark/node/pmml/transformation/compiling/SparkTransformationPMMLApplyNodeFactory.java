@@ -21,6 +21,8 @@
 package org.knime.bigdata.spark.node.pmml.transformation.compiling;
 
 import org.knime.bigdata.spark.node.pmml.transformation.AbstractSparkTransformationPMMLApplyNodeFactory;
+import org.knime.bigdata.spark.node.pmml.transformation.SparkTransformationPMMLApplyNodeDialog;
+import org.knime.core.node.NodeDialogPane;
 
 /**
  *
@@ -35,5 +37,15 @@ extends AbstractSparkTransformationPMMLApplyNodeFactory<SparkTransformationPMMLA
     @Override
     public SparkTransformationPMMLApplyNodeModel createNodeModel() {
         return new SparkTransformationPMMLApplyNodeModel();
+    }
+
+    @Override
+    protected boolean hasDialog() {
+        return true;
+    }
+
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return new SparkTransformationPMMLApplyNodeDialog();
     }
 }
