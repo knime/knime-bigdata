@@ -1,0 +1,8 @@
+Now, configure KNIME Server Executor to load the JDBC drivers from these folders by adding the following lines to the KNIME Server `preferences.epf`:
+
+----
+/instance/org.knime.workbench.core/database_drivers=<FOLDERLIST>//<1>
+/instance/org.knime.workbench.core/database_timeout=86400//<2>
+----
+<1> Replace `<FOLDERLIST>` with a semicolon-separated list of the folders, in which the JAR files reside. Note that the file` format requires characters such as the colon (':') and the backslash ('\') to be escaped. For example `C:\Drivers\HiveJDBC41` needs to be written as `C\:\\Drivers\\HiveJDBC41`.
+<2> This increases the database connect and query timeout from its default 15s to 1 day, which prevents long-running queries from timing out.

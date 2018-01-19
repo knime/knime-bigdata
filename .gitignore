@@ -3,3 +3,4 @@
 */build/
 */knime.jar
 org.knime.*.bigdata.externals/.settings*
+documentation/secured_cluster_connection_guide_server/index.html

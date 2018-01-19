@@ -1,0 +1,85 @@
+== Setting up user impersonation
+
+As previously described, it is recommended that KNIME Server impersonates its users, towards Kerberos-secured cluster services.
+
+This section describes how to set up both ends of user impersonation.
+First, in <<server_impersonation_server>> we configure KNIME Server to request user impersonation from the relevant services.
+Second, in <<server_impersonation_hadoop>> and <<server_impersonation_impala>> we grant service-specific impersonation privileges to KNIME Server.
+
+[[server_impersonation_server]]
+=== Activating user impersonation on KNIME Server
+
+Without any further configuration, KNIME Server impersonates its users on the following connection types:
+
+- HDFS, webHDFS and httpFS
+- Hive and Impala, when using the *embedded* Hive/Impala JDBC driver).
+
+[NOTE]
+====
+Only if using a proprietary JDBC driver as described in <<server_jdbc>>, must user impersonation be activated. 
+====
+
+To activate user impersonation on KNIME Server for Hive and Impala using the *proprietary* JDBC driver, add the following lines to the KNIME Server `preferences.epf`:
+
+----
+/instance/org.knime.bigdata.commons/org.knime.bigdata.config.kerberos.jdbc.impersonation.flag=true
+/instance/org.knime.bigdata.commons/org.knime.bigdata.config.kerberos.jdbc.impersonation.param=DelegationUID\={1}
+----
+
+This will append the `DelegationUID` JDBC parameter to every JDBC connection made via the proprietary JDBC drivers.
+The placeholder `{1}` is automatically replaced by the login name of the KNIME Server user.
+
+
+
+[[server_impersonation_hadoop]]
+=== User impersonation on Apache Hadoop(TM) and Apache Hive(TM)
+
+Apache Hadoop(TM) and Apache Hive(TM) consult the `core-site.xml` file to determine whether KNIME Server is allowed to impersonate users.
+
+[NOTE]
+====
+Changing the `core-site.xml` file must  be done via Ambari (on HDP) or Cloudera Manager (on CDH). A restart of the affected Hadoop services is required.
+====
+
+Please add the following settings to the Hadoop `core-site.xml` on your cluster:
+
+----
+<property>
+    <name>hadoop.proxyuser.knimeserver.hosts</name>//<1>
+    <value>*</value>
+</property>
+<property>
+    <name>hadoop.proxyuser.knimeserver.groups</name>//<1>
+    <value>*</value>
+</property>
+----
+<1> If you have created a service principal for KNIME Server other than `knimeserver/<host>@<REALM>`, then adjust the property name accordingly.
+
+
+
+[[server_impersonation_impala]]
+=== User impersonation on Apache Impala(TM)
+
+Apache Impala(TM) requires a configuration setting to determine whether KNIME Server is allowed to impersonate users.
+
+[NOTE]
+====
+It is recommended to also https://www.cloudera.com/documentation/enterprise/5-13-x/topics/impala_authorization.html[enable Apache Sentry(TM) authorization in Apache Impala(TM)].
+Otherwise Impala continues to perform all read and write operations with the privileges of the `impala` user.
+====
+
+The required steps are similar to https://www.cloudera.com/documentation/enterprise/5-13-x/topics/impala_delegation.html[Configuring Impala Delegation for Hue]. 
+In Cloudera Manager, navigate to *Impala* > *Configuration* > *Impala Daemon Command Line Argument Advanced Configuration Snippet (Safety Valve)* and add the following line:
+
+----
+-authorized_proxy_user_config='hue=*;knimeserver=*'
+----
+
+Then click *Save* and restart all Impala daemons. Please note:
+
+- This will make `hue` and `knimeserver` the only services that can impersonate users in Impala. If other services should be allowed to do the same, they need to be included here as well.
+- If you have created a service principal for KNIME Server other than `knimeserver/<host>@<REALM>`, then adjust the above setting accordingly.
+
+
+
+// ==== User impersonation for Spark (Livy)

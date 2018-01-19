@@ -1,0 +1,41 @@
+== Advanced configuration
+
+This section offers supplementary material to address more advanced setups.
+
+[[server_advanced_krb5_conf]]
+=== Creating your own `krb5.conf`
+
+A minimal `krb5.conf` can look like this:
+
+----
+[libdefaults]
+default_realm = MYCOMPANY.COM//<1>
+
+[realms]
+MYCOMPANY.COM = {
+  kdc = kdc.mycompany.com//<2>
+}
+----
+<1> The name of your Kerberos realm.
+<2> The fully-qualified domain name or IP of the Kerberos KDC.
+
+Adjust these values as appropriate for your setup. Depending on your setup, more configuration settings may be necessary.
+The `krb5.conf` format is fully described as part of the https://web.mit.edu/kerberos/krb5-1.12/doc/admin/conf_files/krb5_conf.html[MIT Kerberos Documentation].
+
+
+[[server_advanced_krb5_conf_lookup]]
+=== Possible locations for `krb5.conf`
+
+Like any other Java program, KNIME Server Executor tries to read the `krb5.conf` file from a set of default locations. KNIME Executor tries the following locations in the given order:
+
+. First it checks whether the `java.security.krb5.conf` system property is set.
+If so, it will try to read the file from the location specified in this system property.
+The system property can be set as described in <<server_kerberos_auth_krb5>>.
+. Otherwise, it will try to read the `krb5.conf` from the the Java Runtime Environment of KNIME Server Executor:
+
+** ``<knime-executor-installation>/plugins/org.knime.binary.jre.<version>/jre/lib/security/krb5.conf``
+. If this fails too, it will try the following operating system dependent locations:
+** Windows: `C:\Windows\krb5.ini`
+** Linux: `/etc/krb5.conf`
+
+You can place `krb5.conf` in any of the above locations. It is however recommended to set the `java.security.krb5.conf` system property in `knime.ini`.

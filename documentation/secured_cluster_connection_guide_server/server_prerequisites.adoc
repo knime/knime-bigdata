@@ -1,0 +1,17 @@
+=== Prerequisites
+
+Setting up KNIME Server for Kerberos authentication and user impersonation has the following prerequisites.
+
+* For Kerberos:
+** An existing Kerberos KDC such as MIT Kerberos or Microsoft ActiveDirectory
+** A service principal for KNIME Server. The recommended format is `knimeserver/<host>@<REALM>`, where 
+*** `<host>` is the fully-qualified domain name of the machine where KNIME Server runs,
+*** `<REALM>` is the Kerberos realm.
+** A keytab file for the KNIME Server service principal.
+** A Kerberos client configuration file (`krb5.conf`). The recommended way to obtain this file, is to copy the `/etc/krb5.conf` from a node in the cluster. Alternatively, you can create the file yourself (see <<server_advanced_krb5_conf>>).
+* For the cluster:
+** A Kerberos-secured cluster.
+** An account with administrative privileges in the cluster management software, that can configure and restart cluster services. On Cloudera CDH this means a Cloudera Manager account, on Hortonworks HDP this means an Apache Ambari(TM) account.
+* For KNIME Server:
+** An existing KNIME Server installation.
+** An account with administrative privileges on the machine where KNIME Server is installed. This accounts needs to be able to edit the KNIME Server configuration files and restart KNIME Server.

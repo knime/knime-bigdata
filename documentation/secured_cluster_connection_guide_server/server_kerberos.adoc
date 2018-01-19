@@ -1,0 +1,29 @@
+[[server_kerberos_auth]]
+== Setting up Kerberos authentication
+
+This section describes how to set up KNIME Server to authenticate itself against Kerberos. 
+[[server_kerberos_auth_krb5]]
+=== Kerberos client configuration (krb5.conf)
+
+The KNIME Server Executor needs to read the `krb5.conf` file during Kerberos authentication. Please append the following line to the `knime.ini` file of the KNIME Server Executor:
+
+----
+-Djava.security.krb5.conf=<PATH>//<1>
+----
+<1> Replace `<PATH>` with the full path to your `krb5.conf` file, for example `C:\krb5.conf`. The file must be readable by the KNIME Server Executor process. It is recommended to store the file outside of the KNIME Server Executor installation folder, to avoid accidentally deleting it during upgrades.
+
+For reference, <<server_advanced_krb5_conf_lookup>> describes the process by which KNIME Server Executor locates the `krb5.conf` file.
+
+
+[[server_kerberos_auth_credentials]]
+=== Kerberos principal and keytab file
+
+KNIME Server Executor needs credentials during Kerberos authentiation. Please specify the service principial and the keytab file by adding the following lines to the KNIME Server `preferences.epf`:
+
+----
+/instance/org.knime.bigdata.commons/org.knime.bigdata.config.kerberos.user=<PRINCIPAL>//<1>
+/instance/org.knime.bigdata.commons/org.knime.bigdata.config.kerberos.keytab.file=<PATH>//<2>
+----
+<1> Replace `<PRINCIPAL>` with the service principal, for example `knimeserver/host.company.com@REALM`.
+<2> Replace `<PATH>` with the full path to the keytab file, for example `C:\knimeserver.keytab`. The file must be readable by the KNIME Server Executor process. It is recommended to store the keytab file outside of the KNIME Server Executor installation folder, to avoid accidentally deleting it during upgrades.
+

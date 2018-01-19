@@ -1,0 +1,45 @@
+== Setting up JDBC drivers
+
+[NOTE]
+====
+Each KNIME Server Executor is a headless instance of KNIME Analytics Platform.
+If the KNIME Big Data Connectors extension is installed, KNIME Server Executor includes a fully-functional embedded JDBC driver for Hive and Impala. If you choose to use this driver *(recommended)*, then no further setup is required and you can skip this section.
+
+The currently embedded JDBC driver is the open-source Apache Hive(TM) JDBC driver version `1.1.0-cdh5.13.0` (https://archive.cloudera.com/cdh5/cdh/5/hive-1.1.0-cdh5.13.0.releasenotes.html[Release Notes]). The driver has been verified to be compatible with:
+
+- HDP 2.2.4 and later
+- CDH 5.3 and later
+====
+
+The following subsections only apply if you choose to set up a proprietary JDBC driver for Hive/Impala.
+These drivers are vendor-specific.
+Please consult the subsection that applies to your Hadoop vendor:
+
+- <<server_jdbc_cloudera>>
+- <<server_jdbc_hortonworks>>
+
+[[server_jdbc_cloudera]]
+=== Setting up proprietary Cloudera JDBC drivers (Hive and Impala)
+
+. Download the newest JDBC drivers from the Cloudera website (login required):
+
+* http://www.cloudera.com/downloads/connectors/hive/jdbc.html[Hive JDBC Connector for Cloudera Enterprise]
+* http://www.cloudera.com/downloads/connectors/impala/jdbc.html[Impala JDBC Connector for Cloudera Enterprise]
+. Once downloaded, extract the contained `Cloudera_HiveJDBC41_<version>.zip` (`Cloudera_ImpalaJDBC41_<version>.zip`) file into an empty folder. Note that you need one folder for the Hive driver and another one for the Impala driver.
+. Verify that the resulting two folders contain JAR files. 
+. It is recommended to place the folders outside of the KNIME Server Executor installation folder, to avoid accidentally deleting them during upgrades.
+
+include::server_jdbc_prefs.adoc[]
+
+[[server_jdbc_hortonworks]]
+=== Setting up proprietary Hortonworks Hive JDBC drivers
+
+. Download the newest Hive JDBC driver from the https://hortonworks.com/downloads/[Hortonworks website].
+
+* Locate the *Hortonworks JDBC Driver for Apache Hive*.
+* Download the JDBC 4.1 driver.
+. Once downloaded, extract the ZIP file into an empty folder. 
+. Verify that the folder now contains JAR files. 
+. It is recommended to place the folder outside of the KNIME Server Executor installation folder, to avoid accidentally deleting them during upgrades.
+
+include::server_jdbc_prefs.adoc[]
