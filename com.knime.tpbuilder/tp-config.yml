@@ -73,7 +73,7 @@ mavenBlacklist:
   - org\.slf4j:(?!slf4j-ext).*
   - com\.fasterxml\.jackson\.core:.*
   - com\.google\.guava:guava:.*
-  - com.jcraft:jsch:jar:.*
+  - com\.jcraft:jsch:jar:.*
   - org\.apache\.httpcomponents:httpclient:jar:.*
   - org\.apache\.httpcomponents:httpcore:jar:.*
   - javax\.servlet:servlet-api:jar:.*
@@ -81,7 +81,7 @@ mavenBlacklist:
   - commons-httpclient:commons-httpclient:jar:.*
   - commons-logging:commons-logging:jar:.*
   - commons-lang:commons-lang:jar:.*
-  - org.apache.commons:commons-lang3:jar:.*
+  - org\.apache\.commons:commons-lang3:jar:.*
   - commons-codec:commons-codec:jar:.*
   - commons-collections:commons-collections:jar:.*
   - commons-io:commons-io:jar:.*
@@ -138,7 +138,7 @@ mavenBlacklist:
   # jaxb-impl is a dependency of pmml-model 1.1.x (required by Spark MLlib)
   # It is required for reading PMML documents, which Spark never does. If a proper pmml-model 1.1.x
   # is ever required, we should make a proper bundle for it
-  - com.sun.xml.bind:jaxb-impl:jar:.*
+  - com\.sun\.xml\.bind:jaxb-impl:jar:.*
   
   # these artifacts get pulled in because as transitive dependencies of hive-jdbc, however,
   # the hive-jdbc standalone jar does not include them, so I assume we don't actually
@@ -151,7 +151,7 @@ mavenBlacklist:
   - jdiff:jdiff:jar:.*
   
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
-  - io.airlift:slice:jar:.*
+  - io\.airlift:slice:jar:.*
   
   
 # mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
@@ -208,7 +208,7 @@ mavenDependencyBlacklist:
   
   # (see mavenBlacklist comments)
   - org\.glassfish\.jaxb:jaxb-runtime:jar:.*
-  - com.sun.xml.bind:jaxb-impl:jar:.*
+  - com\.sun\.xml\.bind:jaxb-impl:jar:.*
   
   # optional dependency of io.netty:netty-all:jar:4.0.23.Final that causes resolution failure
   - io\.netty:netty-transport-native-epoll:.*:4\.0\.23\.Final
@@ -253,7 +253,7 @@ requireBundleOverrides:
   - coordPattern: com\.google\.guava:guava:jar:.*
     replacement: com.google.guava;bundle-version=${knime_guava_version}
     
-  - coordPattern: com.jcraft:jsch:jar:.*
+  - coordPattern: com\.jcraft:jsch:jar:.*
     replacement: com.jcraft.jsch;bundle-version="[0.1.53,1)"
   
   - coordPattern: org\.apache\.httpcomponents:httpclient:jar:.*
@@ -283,10 +283,10 @@ requireBundleOverrides:
   - coordPattern: commons-lang:commons-lang:jar:.*
     replacement: org.apache.commons.lang;bundle-version="[2.6,3)"
 
-  - coordPattern: org.apache.commons:commons-lang3:jar:.*
+  - coordPattern: org\.apache\.commons:commons-lang3:jar:.*
     replacement: org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)"
     
-  - coordPattern: org.apache.commons:commons-compress:jar:.*
+  - coordPattern: org\.apache\.commons:commons-compress:jar:.*
     replacement: org.apache.commons.compress;bundle-version="[1.12,2)"
     
   - coordPattern: commons-codec:commons-codec:jar:.*
@@ -298,7 +298,7 @@ requireBundleOverrides:
   - coordPattern: commons-httpclient:commons-httpclient:jar:.*
     replacement: org.apache.commons.httpclient;bundle-version=${knime_commons_httpclient_version}
     
-  - coordPattern: org.apache.commons:commons-math3:jar:.*
+  - coordPattern: org\.apache\.commons:commons-math3:jar:.*
     replacement: org.apache.commons.math3;bundle-version="[3.1,4)"
     
   - coordPattern: commons-net:commons-net:jar:.*
@@ -332,7 +332,7 @@ requireBundleOverrides:
     replacement: org.mortbay.jetty.server;bundle-version="[6.1,7)"
     
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
-  - coordPattern: io.airlift:slice:jar:.*
+  - coordPattern: io\.airlift:slice:jar:.*
     replacement: io.airlift.slice;resolution:=optional
         
   # Eclipse Orbit provides these
@@ -462,7 +462,7 @@ mavenDependencyOverrides:
     
   # this is in fact a shaded hadoop version, which is for some reason a dependency of aircompressor
   # this redirects that dependency to the "true" hadoop
-  - coordPattern: com.facebook.presto.hadoop:hadoop-apache2:jar:.*
+  - coordPattern: com\.facebook\.presto\.hadoop:hadoop-apache2:jar:.*
     replacement: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
 
 
@@ -510,7 +510,7 @@ mergeOverrides:
     # Workaround for improperly prebundled curator articats, e.g. users of curator-framework's public API
     # need to be able to also see classes of curator-client, but curator-framework does not re-export
     # them.
-    - org.apache.curator:[^:]+:jar:.*
+    - org\.apache\.curator:[^:]+:jar:.*
 
 # specifies file excludes and BND instructions for *maven* coordinates 
 bundleInstructions:
