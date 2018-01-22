@@ -31,7 +31,8 @@ node {
 			repos: [
 				[name : 'knime-bigdata'],
 				[name : 'knime-config'],
-				[name : 'knime-jenkins']
+				[name : 'knime-jenkins'],
+				[name : 'knime-orc']
 			]
 		)
 	}
