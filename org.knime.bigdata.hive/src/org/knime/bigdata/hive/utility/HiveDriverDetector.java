@@ -69,6 +69,7 @@ public class HiveDriverDetector {
     }
 
     /**
+     * Converts the given driver name to an easily readable String including the version info
      *
      * @param driverName
      * @return a pretty driver name for display purposes

@@ -44,40 +44,33 @@ import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.workflow.CredentialsProvider;
 
-/**
- *
- * @author Tobias Koetter, KNIME.com
- */
-public final class HiveLoader {
+/** @author Tobias Koetter, KNIME.com */
+public class HiveLoader {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveLoader.class);
 
-    private static HiveLoader instance = new HiveLoader();
-
-    private HiveLoader() {
-    }
+    private boolean m_isImpala = false;
 
     /**
-     * Returns the only instance of this class.
-     * @return the only instance
-     */
-    public static HiveLoader getInstance() {
-        return instance;
-    }
-
-    /**
+     * Uploads the local file <code>dataFile</code> to a remote target defined in <code>settings
+     * </code>
+     *
      * @param dataFile the {@link File} to upload
      * @param connInfo the {@link ConnectionInformation}
      * @param connMonitor the {@link ConnectionMonitor}
      * @param exec the {@link ExecutionContext}
-     * @param settings the {@link HiveLoaderSettings}
+     * @param settings the {@link LoaderSettings}
      * @return the {@link RemoteFile}
      * @throws Exception if the file could not be uploaded to the remote file system
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public RemoteFile<? extends Connection> uploadFile(final File dataFile, final ConnectionInformation connInfo,
-        final ConnectionMonitor<? extends Connection> connMonitor, final ExecutionContext exec,
-        final HiveLoaderSettings settings) throws Exception {
+    public RemoteFile<? extends Connection> uploadFile(
+        final File dataFile,
+        final ConnectionInformation connInfo,
+        final ConnectionMonitor<? extends Connection> connMonitor,
+        final ExecutionContext exec,
+        final LoaderSettings settings)
+                throws Exception {
         LOGGER.debug("Uploading local file " + dataFile.getPath());
         exec.setMessage("Uploading import file to server");
         String targetFolder = settings.targetFolder();
@@ -86,14 +79,15 @@ public final class HiveLoader {
         }
         final URI folderUri = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(targetFolder));
         LOGGER.debug("Create remote folder with URI " + folderUri);
-        final RemoteFile remoteFolder = RemoteFileFactory.createRemoteFile(folderUri, connInfo, connMonitor);
+        final RemoteFile remoteFolder =
+                RemoteFileFactory.createRemoteFile(folderUri, connInfo, connMonitor);
         remoteFolder.mkDirs(true);
         LOGGER.debug("Remote folder created");
-        RemoteFile sourceFile = RemoteFileFactory.createRemoteFile(dataFile.toURI(), null, null);
+        final RemoteFile sourceFile = RemoteFileFactory.createRemoteFile(dataFile.toURI(), null, null);
 
-        URI targetUri = new URI(remoteFolder.getURI() + NodeUtils.encodePath(dataFile.getName()));
+        final URI targetUri = new URI(remoteFolder.getURI() + NodeUtils.encodePath(dataFile.getName()));
         LOGGER.debug("Create remote file with URI " + targetUri);
-        RemoteFile target = RemoteFileFactory.createRemoteFile(targetUri, connInfo, connMonitor);
+        final RemoteFile target = RemoteFileFactory.createRemoteFile(targetUri, connInfo, connMonitor);
         LOGGER.debug("Remote file created. Start writing file content...");
         target.write(sourceFile, exec);
         LOGGER.debug("File content sucessful written to remote file");
@@ -102,21 +96,30 @@ public final class HiveLoader {
     }
 
     /**
+     * Imports the data contained in the <code>remoteFile</code> into the table defined in <code>
+     *  settings </code>
+     *
      * @param remoteFile the {@link RemoteFile} that contains the Hive table data
      * @param columnNames column names
      * @param connSettings the {@link DatabaseConnectionSettings} to connect to Hive
      * @param exec {@link ExecutionContext}
-     * @param settings {@link HiveLoaderSettings}
+     * @param settings {@link LoaderSettings}
      * @param cp {@link CredentialsProvider}
      * @throws Exception if the table could not be created in Hive
      */
-    public void importData(final RemoteFile<? extends Connection> remoteFile, final List<String> columnNames,
-        final DatabaseConnectionSettings connSettings, final ExecutionContext exec,
-        final HiveLoaderSettings settings, final CredentialsProvider cp) throws Exception {
-        assert columnNames != null && !columnNames.isEmpty() : "No columns in input table";
+    public void importData(
+        final RemoteFile<? extends Connection> remoteFile,
+        final List<String> columnNames,
+        final DatabaseConnectionSettings connSettings,
+        final ExecutionContext exec,
+        final LoaderSettings settings,
+        final CredentialsProvider cp)
+                throws Exception {
+
+        assert (columnNames != null) && !columnNames.isEmpty() : "No columns in input table";
         final DatabaseUtility utility = connSettings.getUtility();
-        @SuppressWarnings("resource")
         final Connection conn = connSettings.createConnection(cp);
+
         // check if table already exists and whether we should drop it
         boolean tableAlreadyExists = false;
         final String tableName = settings.tableName();
@@ -124,9 +127,10 @@ public final class HiveLoader {
         LOGGER.debug("Column names: " + columnNames);
         final Collection<String> partitionColumns = settings.partitionColumns();
         LOGGER.debug("Partition columns: " + partitionColumns);
+
         synchronized (connSettings.syncConnection(conn)) {
             if (utility.tableExists(conn, tableName)) {
-                LOGGER.debug("Hive table " + tableName + " already exists");
+                LOGGER.debug("The table " + tableName + " already exists");
                 if (dropTableIfExists) {
                     try (Statement st = conn.createStatement()) {
                         LOGGER.debug("Dropping existing table '" + tableName + "'");
@@ -139,27 +143,24 @@ public final class HiveLoader {
                 }
             }
             exec.setMessage("Importing data");
-    //        List<String> normalColumns = new ArrayList<>(columnNames);
-    //        for (DataColumnSpec cs : tableSpec) {
-    //            normalColumns.add(cs.getName());
-    //        }
             LOGGER.debug("Importing data");
             final StatementManipulator manip = utility.getStatementManipulator();
             try (Statement st = conn.createStatement()) {
                 if (!partitionColumns.isEmpty()) {
-                    importPartitionedData(remoteFile, columnNames, manip, tableAlreadyExists, st, exec,
-                        settings);
+                    importPartitionedData(
+                        remoteFile, columnNames, manip, tableAlreadyExists, st, exec, settings);
                 } else {
                     if (!tableAlreadyExists) {
                         exec.setProgress(0, "Creating table");
-                        String createTableCmd = buildCreateTableCommand(tableName, columnNames,
-                            new ArrayList<String>(), manip, settings);
+                        final String createTableCmd =
+                                buildCreateTableCommand(
+                                    tableName, columnNames, new ArrayList<String>(), manip, settings);
                         LOGGER.debug("Executing '" + createTableCmd + "'");
                         st.execute(createTableCmd);
                         LOGGER.debug("Table sucessful created");
                     }
                     exec.setProgress(0.5, "Loading data into table");
-                    String buildTableCmd = buildLoadCommand(remoteFile, tableName);
+                    final String buildTableCmd = buildLoadCommand(remoteFile, tableName);
                     LOGGER.info("Executing '" + buildTableCmd + "'");
                     st.execute(buildTableCmd);
                     LOGGER.debug("Data loaded sucessfully");
@@ -169,48 +170,65 @@ public final class HiveLoader {
         exec.setProgress(1);
     }
 
-    private static void importPartitionedData(final RemoteFile<? extends Connection> remoteFile,
-        final List<String> columnNames, final StatementManipulator manip, final boolean tableAlreadyExists,
-        final Statement st, final ExecutionContext exec, final HiveLoaderSettings settings) throws Exception {
+    private void importPartitionedData(
+        final RemoteFile<? extends Connection> remoteFile,
+        final List<String> columnNames,
+        final StatementManipulator manip,
+        final boolean tableAlreadyExists,
+        final Statement st,
+        final ExecutionContext exec,
+        final LoaderSettings settings)
+                throws Exception {
         LOGGER.debug("Start load partitioned data...");
-        String tempTableName = settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
+        final String tempTableName =
+                settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
         LOGGER.debug("Creating temporary table " + tempTableName);
         // first create an unpartitioned table
         exec.setProgress(0, "Creating temporary table");
         String createTableCmd =
-            buildCreateTableCommand(tempTableName, columnNames, Collections.<String> emptyList(), manip, settings);
+                buildCreateTableCommand(
+                    tempTableName, columnNames, Collections.<String>emptyList(), manip, settings);
         LOGGER.debug("Executing '" + createTableCmd + "'");
         st.execute(createTableCmd);
         LOGGER.debug("Temporary table sucessful created");
         final List<String> normalColumns = new ArrayList<>(columnNames);
-        for (String partCol : settings.partitionColumns()) {
+        for (final String partCol : settings.partitionColumns()) {
             normalColumns.remove(partCol);
         }
         try {
             exec.setProgress(0.2, "Importing data from uploaded file");
-            String loadTableCmd = buildLoadCommand(remoteFile, tempTableName);
+            final String loadTableCmd = buildLoadCommand(remoteFile, tempTableName);
             LOGGER.debug("Executing '" + loadTableCmd + "'");
             st.execute(loadTableCmd);
 
             if (!tableAlreadyExists) {
                 // now create a partitioned table and copy data from
                 exec.setProgress(0.4, "Creating final table");
-                createTableCmd = buildCreateTableCommand(settings.tableName(), normalColumns,
-                        settings.partitionColumns(), manip, settings);
+                createTableCmd =
+                        buildCreateTableCommand(
+                            settings.tableName(), normalColumns, settings.partitionColumns(), manip, settings);
                 LOGGER.debug("Executing '" + createTableCmd + "'");
                 st.execute(createTableCmd);
             }
             LOGGER.debug("Copying data to partitioned table");
             exec.setProgress(0.6, "Copying data to partitioned table");
-            String setDynamicPartStmt = "SET hive.exec.dynamic.partition = true";
-            String nonStrictStmt = "SET hive.exec.dynamic.partition.mode = nonstrict";
-            LOGGER.debug("Executing '" + setDynamicPartStmt + "'");
-            st.execute(setDynamicPartStmt);
-            LOGGER.debug("Executing '" + nonStrictStmt + "'");
-            st.execute(nonStrictStmt);
-            String insertCmd =
-                buildInsertCommand(tempTableName, settings.tableName(), normalColumns,
-                    settings.partitionColumns(), manip);
+
+            if (!isImpala()) {
+                final String setDynamicPartStmt = "SET hive.exec.dynamic.partition=true";
+                final String nonStrictStmt = "SET hive.exec.dynamic.partition.mode=nonstrict";
+                LOGGER.debug("Executing '" + setDynamicPartStmt + "'");
+                st.execute(setDynamicPartStmt);
+                LOGGER.debug("Executing  " + nonStrictStmt + "'");
+                st.execute(nonStrictStmt);
+            }
+
+            final String insertCmd =
+                    buildInsertCommand(
+                        tempTableName,
+                        settings.tableName(),
+                        normalColumns,
+                        settings.partitionColumns(),
+                        manip);
             LOGGER.debug("Executing '" + insertCmd + "'");
             st.execute(insertCmd);
         } finally {
@@ -222,12 +240,16 @@ public final class HiveLoader {
         exec.setProgress(1);
     }
 
-    private static String buildCreateTableCommand(final String tableName, final Collection<String> columnNames,
-        final Collection<String> partitionColumns, final StatementManipulator manip, final HiveLoaderSettings settings) {
-        StringBuilder buf = new StringBuilder();
+    private static String buildCreateTableCommand(
+        final String tableName,
+        final Collection<String> columnNames,
+        final Collection<String> partitionColumns,
+        final StatementManipulator manip,
+        final LoaderSettings settings) {
+        final StringBuilder buf = new StringBuilder();
         buf.append("CREATE TABLE " + tableName + " (\n");
 
-        for (String col : columnNames) {
+        for (final String col : columnNames) {
             buf.append("   ");
             buf.append(manip.quoteIdentifier(col));
             buf.append(" ");
@@ -239,7 +261,7 @@ public final class HiveLoader {
 
         if (!partitionColumns.isEmpty()) {
             buf.append("PARTITIONED BY (");
-            for (String partCol : settings.partitionColumns()) {
+            for (final String partCol : settings.partitionColumns()) {
                 buf.append(manip.quoteIdentifier(partCol));
                 buf.append(" ");
                 buf.append(settings.typeMapping(partCol));
@@ -248,21 +270,23 @@ public final class HiveLoader {
             buf.deleteCharAt(buf.length() - 1);
             buf.append(")\n");
         }
-        buf.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '" + settings.valueDelimiter() + "' ESCAPED BY '\\\\'\n");
+        buf.append(
+            "ROW FORMAT DELIMITED FIELDS TERMINATED BY '"
+                    + settings.valueDelimiter()
+                    + "' ESCAPED BY '\\\\'\n");
         buf.append("STORED AS TEXTFILE");
         return buf.toString();
     }
 
-    private static String buildLoadCommand(final RemoteFile<? extends Connection> remoteFile, final String tableName)
-            throws Exception {
+    private static String buildLoadCommand(
+        final RemoteFile<? extends Connection> remoteFile, final String tableName) throws Exception {
         if (remoteFile instanceof CloudRemoteFile) {
             LOGGER.debug("Load data from cloud file system");
-            final CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>)remoteFile;
+            final CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>) remoteFile;
             final String clusterInputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
             // Hive handles load via move, use the full URI for cloud file systems e.g S3 and Azure BlobStore
             return "LOAD DATA INPATH '" + clusterInputPath + "' INTO TABLE " + tableName;
-        }
-        else if (HDFSRemoteFileHandler.isSupportedConnection(remoteFile.getConnectionInformation())) {
+        } else if (HDFSRemoteFileHandler.isSupportedConnection(remoteFile.getConnectionInformation())) {
             LOGGER.debug("Load data from hdfs");
             // Hive handles load via move, use Hive default FS URI and provide only input file path
             return "LOAD DATA INPATH '" + remoteFile.getFullName() + "' INTO TABLE " + tableName;
@@ -273,24 +297,27 @@ public final class HiveLoader {
         }
     }
 
-    private static String buildInsertCommand(final String sourceTableName, final String destTableName,
-        final Collection<String> normalColumns, final Collection<String> partitionColumns,
+    private static String buildInsertCommand(
+        final String sourceTableName,
+        final String destTableName,
+        final Collection<String> normalColumns,
+        final Collection<String> partitionColumns,
         final StatementManipulator manip) {
 
-        StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder();
         buf.append("INSERT INTO TABLE ").append(destTableName);
         buf.append(" PARTITION (");
-        for (String partCol : partitionColumns) {
+        for (final String partCol : partitionColumns) {
             buf.append(manip.quoteIdentifier(partCol)).append(",");
         }
         buf.deleteCharAt(buf.length() - 1);
         buf.append(")\n");
 
         buf.append("SELECT ");
-        for (String col : normalColumns) {
+        for (final String col : normalColumns) {
             buf.append(manip.quoteIdentifier(col)).append(",");
         }
-        for (String col : partitionColumns) {
+        for (final String col : partitionColumns) {
             buf.append(manip.quoteIdentifier(col)).append(",");
         }
         buf.deleteCharAt(buf.length() - 1);
@@ -299,4 +326,17 @@ public final class HiveLoader {
         return buf.toString();
     }
 
+
+    /**
+     * Returns boolean indicating whether the loader is used in an Impala context
+     * @return the isImpala
+     * */
+    public boolean isImpala() {
+        return m_isImpala;
+    }
+
+    /** Sets the Loader to ImpalalMode */
+    public void setImpala() {
+        m_isImpala = true;
+    }
 }

@@ -35,7 +35,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.base.node.io.database.DBSQLTypesPanel;
-import org.knime.bigdata.hive.utility.HiveLoaderSettings;
+import org.knime.bigdata.hive.utility.LoaderSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.IntValue;
 import org.knime.core.data.StringValue;
@@ -55,7 +55,7 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
 class HiveLoaderNodeDialog extends NodeDialogPane {
-    private final HiveLoaderSettings m_settings = new HiveLoaderSettings();
+    private final LoaderSettings m_settings = new LoaderSettings();
 
     private final DBSQLTypesPanel m_typeMappingPanel = new DBSQLTypesPanel();
 
@@ -75,7 +75,7 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
         JPanel p = new JPanel(new GridBagLayout());
         m_target =
             new RemoteFileChooserPanel(p, "", false, "targetHistory", RemoteFileChooser.SELECT_DIR,
-                createFlowVariableModel(HiveLoaderSettings.CFG_TARGET_FOLDER, FlowVariable.Type.STRING), null);
+                createFlowVariableModel(LoaderSettings.CFG_TARGET_FOLDER, FlowVariable.Type.STRING), null);
 
         GridBagConstraints c = new GridBagConstraints();
         NodeUtils.resetGBC(c);

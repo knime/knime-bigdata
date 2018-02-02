@@ -40,13 +40,13 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 /**
- * Settings for the Hive Loader node.
+ * Settings for the Hive/Impala Loader nodes.
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
-public class HiveLoaderSettings {
+public class LoaderSettings {
 
-    /** Target folder settings key */
+    /** Target folder settings key. */
     public static final String CFG_TARGET_FOLDER = "targetFolder";
 
     private String m_tableName;
@@ -80,7 +80,7 @@ public class HiveLoaderSettings {
     }
 
     /**
-     * Returns the target folder on the Hive server into which the data file is uploaded.
+     * Returns the target folder on the Hive/Impala server into which the data file is uploaded.
      *
      * @return a folder path
      */
@@ -89,7 +89,7 @@ public class HiveLoaderSettings {
     }
 
     /**
-     * Sets the target folder on the Hive server into which the data file is uploaded.
+     * Sets the target folder on the Hive/Impala server into which the data file is uploaded.
      *
      * @param folder a folder path
      */
@@ -268,6 +268,8 @@ public class HiveLoaderSettings {
     }
 
     /**
+     * Sets the delimiter that indicates the end of a column within a text file
+     *
      * @param valueDelimiter the delimiter that should be used to indicates the end of a column value in the text file
      */
     public void valueDelimiter(final String valueDelimiter) {
@@ -275,6 +277,8 @@ public class HiveLoaderSettings {
     }
 
     /**
+     * Returns the delimiter that indicates the end of a column in a text file
+     *
      * @return the delimiter that should be used to indicates the end of a column value in the text file
      */
     public String valueDelimiter() {

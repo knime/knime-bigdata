@@ -62,8 +62,8 @@ import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.node.util.exttool.ExtToolOutputNodeModel;
 import org.knime.bigdata.hive.utility.HiveLoader;
-import org.knime.bigdata.hive.utility.HiveLoaderSettings;
 import org.knime.bigdata.hive.utility.HiveUtility;
+import org.knime.bigdata.hive.utility.LoaderSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -159,8 +159,8 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
         ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
         try {
             dataFile = new File(sqlReader.getFileName());
-            final HiveLoaderSettings settings = createHiveLoaderSettings(sqlReader, targetFolder);
-            final HiveLoader hiveLoader = HiveLoader.getInstance();
+            final LoaderSettings settings = createHiveLoaderSettings(sqlReader, targetFolder);
+            final HiveLoader hiveLoader = new HiveLoader();
             remoteFile = hiveLoader.uploadFile(dataFile, connInfo, (ConnectionMonitor<? extends Connection>)connMonitor, exec, settings);
             final List<String> columnNames = sqlReader.getColumnNamesList();
             hiveLoader.importData(remoteFile, columnNames, connIn, exec, settings, cp);
@@ -191,8 +191,8 @@ class PythonScriptHiveNodeModel extends ExtToolOutputNodeModel {
         }
     }
 
-    private HiveLoaderSettings createHiveLoaderSettings(final SQLEditorObjectReader reader, final String targetFolder) {
-        HiveLoaderSettings settings = new HiveLoaderSettings();
+    private LoaderSettings createHiveLoaderSettings(final SQLEditorObjectReader reader, final String targetFolder) {
+        LoaderSettings settings = new LoaderSettings();
         settings.dropTableIfExists(reader.isDropTable());
         settings.partitionColumn(reader.getPartitionColumnNamesList());
         settings.tableName(reader.getTableName());
