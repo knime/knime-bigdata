@@ -33,7 +33,7 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.jobserver.JobserverJobInput;
 import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 import com.typesafe.config.ConfigRenderOptions;
@@ -70,7 +70,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
      * @param inputFilesOnServer
      */
     public StartJobRequest(final SparkContextID contextId,
-        final SparkContextConfig contextConfig,
+        final JobServerSparkContextConfig contextConfig,
         final String jobserverAppName,
         final boolean prependUserToContextName,
         final RestClient restClient,
@@ -93,7 +93,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
      * @param inputFilesOnServer
      */
     public StartJobRequest(final SparkContextID contextId,
-        final SparkContextConfig contextConfig,
+        final JobServerSparkContextConfig contextConfig,
         final String jobserverAppName,
         final boolean prependUserToContextName,
         final RestClient restClient,

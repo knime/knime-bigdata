@@ -68,7 +68,7 @@ import org.eclipse.ui.PlatformUI;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.NodeLogger;
 
@@ -370,7 +370,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     private void reconfigureDefaultSparkContext() {
         try {
-            SparkContextID newDefaultID = SparkContextID.fromContextConfig(new SparkContextConfig());
+            SparkContextID newDefaultID = SparkContextID.fromContextConfig(new JobServerSparkContextConfig());
             if (!SparkContextManager.getDefaultSparkContext().getID().equals(newDefaultID)) {
                 MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                     "Spark context changed",

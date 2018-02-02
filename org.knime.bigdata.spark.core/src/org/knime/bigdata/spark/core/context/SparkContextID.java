@@ -23,17 +23,18 @@ package org.knime.bigdata.spark.core.context;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
 
 /**
- * Uniquely identifies a {@link SparkContext} in the KNIME Extension for Apache Spark.
+ * Uniquely identifies a {@link SparkContext} in the KNIME Extension for Apache Spark. This class is a simple wrapper
+ * around a String ID that has the shape of a URL: scheme://host[:port][/path].
  *
  * @see SparkContext
  * @see SparkContextManager
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkContextID {
 
@@ -72,13 +73,15 @@ public class SparkContextID {
     public String toPrettyString() {
         if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
             return SparkContextManager.getDefaultSparkContext().getID().toPrettyString();
-        } else {
+        } else if (m_stringID.startsWith("jobserver://")) {
             URI uri = URI.create(m_stringID);
             StringBuilder b = new StringBuilder();
             b.append("Spark Jobserver Context ");
             b.append(String.format("(Host and Port: %s:%d, ", uri.getHost(), uri.getPort()));
             b.append(String.format("Context Name: %s)", uri.getPath().substring(1)));
             return b.toString();
+        } else {
+            return SparkContextProviderRegistry.getSparkContextProvider(getScheme()).toPrettyString(this);
         }
     }
 
@@ -88,10 +91,10 @@ public class SparkContextID {
     }
 
     /**
-     * @param config {@link SparkContextConfig} to read from
+     * @param config {@link JobServerSparkContextConfig} to read from
      * @return {@link SparkContextID}
      */
-    public static SparkContextID fromContextConfig(final SparkContextConfig config) {
+    public static SparkContextID fromContextConfig(final JobServerSparkContextConfig config) {
         return fromConnectionDetails(config.getJobServerUrl(), config.getContextName());
     }
 
@@ -123,5 +126,15 @@ public class SparkContextID {
      */
     public void saveToConfigWO(final ConfigWO configWO) {
         configWO.addString(CFG_CONTEXT_ID, m_stringID);
+    }
+
+    public String getScheme() {
+        try {
+            final URI url = new URI(m_stringID);
+            return url.getScheme();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URL: " + m_stringID);
+        }
+
     }
 }

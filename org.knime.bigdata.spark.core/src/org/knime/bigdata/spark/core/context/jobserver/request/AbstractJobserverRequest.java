@@ -33,7 +33,7 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -46,15 +46,15 @@ public abstract class AbstractJobserverRequest<T> {
 
     protected final RestClient m_client;
 
-    protected final SparkContextConfig m_config;
+    protected final JobServerSparkContextConfig m_config;
 
     protected final int m_maxAttempts;
 
-    public AbstractJobserverRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient) {
+    public AbstractJobserverRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient) {
         this(contextId, contextConfig, restClient, 1);
     }
 
-    public AbstractJobserverRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final int maxAttempts) {
+    public AbstractJobserverRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final int maxAttempts) {
         m_contextId = contextId;
         m_client = restClient;
         m_config = contextConfig;

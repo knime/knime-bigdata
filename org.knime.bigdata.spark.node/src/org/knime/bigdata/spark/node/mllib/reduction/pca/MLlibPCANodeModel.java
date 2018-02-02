@@ -27,7 +27,6 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
@@ -87,8 +86,8 @@ public class MLlibPCANodeModel extends SparkNodeModel {
     }
 
     /**
+     * @param noOfComponents
      * @param colPrefix
-     * @param context the {@link SparkContextConfig} to use
      * @param i the number of principal components
      * @return the {@link SparkDataPortObjectSpec}
      */

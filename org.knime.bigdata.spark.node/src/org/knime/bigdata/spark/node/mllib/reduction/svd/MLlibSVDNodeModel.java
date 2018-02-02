@@ -29,7 +29,6 @@ import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
@@ -138,9 +137,8 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
     }
 
     /**
-     * @param colPrefix
-     * @param context the {@link SparkContextConfig} to use
-     * @param i the number of principal components
+     * @param noOfCols The number of output columns/principal components.
+     * @param colPrefix The common prefix of all output columns/principal components.
      * @return the {@link SparkDataPortObjectSpec}
      */
     private static DataTableSpec createTableSpec(final int noOfCols, final String colPrefix) {

@@ -20,21 +20,62 @@
  */
 package org.knime.bigdata.spark.core.context;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.jar.JobJar;
+import org.knime.bigdata.spark.core.jar.SparkJarRegistry;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.JobRun;
+import org.knime.bigdata.spark.core.job.JobWithFilesRun;
+import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.NodeLogger;
 
 /**
- * Superclass for all Spark context implementations. Spark context here means a client-local
- * handle to talk to the (actual) remote Spark context inside the cluster.
+ * Superclass for all Spark context implementations. Spark context here means a client-local handle to talk to the
+ * (actual) remote Spark context inside the cluster.
  *
  * NOTE: Implementations must be thread-safe.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
+ * @param <T> The class from which to read configuration data.
  */
-public abstract class SparkContext implements JobController, NamedObjectsController {
+public abstract class SparkContext<T extends SparkContextConfig> implements JobController, NamedObjectsController {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkContext.class);
+
+    /**
+     * The ID of the Spark context. Never null, and never changes.
+     */
+    private final SparkContextID m_contextID;
+
+    /**
+     * The current status of the Spark context. Never null.
+     */
+    private SparkContextStatus m_status;
+
+    /**
+     * Holds a reference to the job jar. May be null when the context is {@link SparkContextStatus#NEW} or
+     * {@link SparkContextStatus#CONFIGURED}, otherwise it can be assumed to be set.
+     */
+    private JobJar m_jobJar;
+
+    /**
+     * The current configuration of the Spark context. May be null when the context is {@link SparkContextStatus#NEW},
+     * otherwise it can be assumed to be set.
+     */
+    private T m_config;
 
     /**
      * Possible context states.
@@ -54,9 +95,33 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     }
 
     /**
-     * @return the {@link SparkContextStatus}
+     * Creates a new Spark context.
+     *
+     * @param contextID The identfier for this context.
      */
-    public abstract SparkContextStatus getStatus();
+    public SparkContext(final SparkContextID contextID) {
+        m_contextID = contextID;
+        m_status = SparkContextStatus.NEW;
+    }
+
+    /**
+     * This method returns the current status of this client-local handle for a remote Spark context. This status may be
+     * completely out of sync with the actual status of the remote context. Note that due to concurrent access from
+     * multiple threads, the status may be different after invoking this method. In other words: It almost never makes
+     * sense to use this method.
+     *
+     * @return the current status of this context.
+     */
+    public final synchronized SparkContextStatus getStatus() {
+        return m_status;
+    }
+
+    /**
+     * @return the configuration of this Spark context
+     */
+    public final synchronized T getConfiguration() {
+        return m_config;
+    }
 
     /**
      * Ensures that the Spark context is open, creating a context if necessary and createRemoteContext is true.
@@ -66,10 +131,13 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * @return true when a new context was created, false, if a a context with the same name already existed in the
      *         cluster.
      *
-     * @throws KNIMESparkException Thrown if Spark context was non-existent and createRemoteContext=false, or if
-     *             something went wrong while creating a Spark context, or if context was not in state configured.
+     * @throws SparkContextNotFoundException if Spark context was non-existent and createRemoteContext=false.
+     * @throws KNIMESparkException if something went wrong while creating the Spark context, or if context was not in
+     *             state configured.
+     *
      */
-    public synchronized boolean ensureOpened(final boolean createRemoteContext) throws KNIMESparkException {
+    public final synchronized boolean ensureOpened(final boolean createRemoteContext)
+        throws SparkContextNotFoundException, KNIMESparkException {
         switch (getStatus()) {
             case NEW:
                 throw new KNIMESparkException("Spark context needs to be configured before opening.");
@@ -87,7 +155,7 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * @return true if a remote Spark context was actually destroyed, false if no remote Spark context existed.
      * @throws KNIMESparkException Thrown if anything went wrong while destroying an existing remote Spark context.
      */
-    public synchronized boolean ensureDestroyed() throws KNIMESparkException {
+    public final synchronized boolean ensureDestroyed() throws KNIMESparkException {
 
         boolean contextWasDestroyed = false;
 
@@ -98,12 +166,8 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
                     String.format("Cannot destroy unconfigured Spark context. This is a bug.", getStatus()));
             case CONFIGURED:
             case OPEN:
-                try {
-                    destroy();
-                    contextWasDestroyed= true;
-                } catch (SparkContextNotFoundException e) {
-                    // we can safely ignore this
-                }
+                destroy();
+                contextWasDestroyed = true;
                 break;
         }
 
@@ -137,7 +201,7 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * context remains {@link SparkContextStatus#OPEN}.</li>
      * </p>
      *
-     * @param config The new configuration to apply.
+     * @param newConfig The new configuration to apply.
      * @param overwriteExistingConfig Whether a pre-existing context configuration should be overwritten.
      * @param destroyIfNecessary Whether an existing remote context shall be destroyed (if necessary required to apply
      *            the new configuration).
@@ -145,21 +209,274 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      * @throws KNIMESparkException If something went wrong while destroying the context (only happens if
      *             destroyIfNecessary=true).
      */
-    public abstract boolean ensureConfigured(SparkContextConfig config, boolean overwriteExistingConfig,
-        boolean destroyIfNecessary) throws KNIMESparkException;
+    public final synchronized boolean ensureConfigured(final T newConfig,
+        final boolean overwriteExistingConfig, final boolean destroyIfNecessary) throws KNIMESparkException {
+
+        // we can never change the id of an existing context
+        if (!newConfig.getSparkContextID().equals(getID())) {
+            return false;
+        }
+
+        boolean toReturn = false;
+        boolean doApply = false;
+
+        switch (getStatus()) {
+            case NEW:
+                doApply = toReturn = true;
+                break;
+            case CONFIGURED:
+                doApply = toReturn = newConfig.equals(m_config) || overwriteExistingConfig;
+                break;
+            default: // OPEN
+                final boolean canReconfigureWithoutDestroy = canReconfigureWithoutDestroy(newConfig);
+
+                // make sure we only apply the config (and switch to CONFIGURED) if the new config is different from
+                // the existing one
+                doApply = !newConfig.equals(m_config) && overwriteExistingConfig
+                    && (canReconfigureWithoutDestroy || destroyIfNecessary);
+                toReturn = doApply || newConfig.equals(m_config);
+
+                if (doApply && !canReconfigureWithoutDestroy) {
+                    ensureDestroyed();
+                }
+                break;
+        }
+
+        if (doApply) {
+            m_config = newConfig;
+            m_jobJar = null;
+
+            final SparkContextStatus newStatus;
+            switch (getStatus()) {
+                case NEW:
+                    newStatus = SparkContextStatus.CONFIGURED;
+                    break;
+                default:
+                    newStatus = getStatus();
+                    break;
+            }
+            setStatus(newStatus);
+        }
+
+        return toReturn;
+    }
+
+    /**
+     * Compares the given configuration the current one and determines whether it can be applied without destroying the
+     * current remote Spark context.
+     *
+     * @param newConfig The new configuration to compare the current one against.
+     * @return true, if the new configuration can be applied without destroying the remote Spark context, false
+     *         otherwise.
+     */
+    protected boolean canReconfigureWithoutDestroy(final T newConfig) {
+        if (m_config == null) {
+            return true;
+        }
+        return m_config.getSparkVersion().equals(newConfig.getSparkVersion())
+            && (m_config.useCustomSparkSettings() == newConfig.useCustomSparkSettings())
+            && ((m_config.useCustomSparkSettings())
+                ? Objects.equals(m_config.getCustomSparkSettings(), newConfig.getCustomSparkSettings()) : true);
+    }
+
+    /**
+     * @return the {@link SparkContextID}
+     */
+    public final SparkContextID getID() {
+        return m_contextID;
+    }
+
+    /**
+     * Provides the job jar. This method can only be invoked on a context is {@link SparkContextStatus#CONFIGURED} or
+     * {@link SparkContextStatus#OPEN}.
+     *
+     * @return the job jar that contains the Spark job class for the configured Spark version.
+     *
+     * @throws KNIMESparkException if no Spark jobs were found for the configured Spark version.
+     */
+    protected final JobJar getJobJar() throws KNIMESparkException {
+        if (getStatus() == SparkContextStatus.NEW) {
+            throw new RuntimeException("Cannot get job jar for unconfigured Spark context. This is a bug.");
+        }
+
+        if (m_jobJar == null || !m_jobJar.getJarFile().exists()) {
+            m_jobJar = SparkJarRegistry.getJobJar(getConfiguration().getSparkVersion());
+        }
+
+        if (m_jobJar == null) {
+            throw new KNIMESparkException(String.format("No Spark jobs for Spark version %s found.",
+                getConfiguration().getSparkVersion().getLabel()));
+        }
+
+        return m_jobJar;
+    }
+
+    /**
+     * Updates the status to the given status. Subclasses are encouraged to override this method to update their state
+     * accordingly, but they must make sure to invoke the super method.
+     *
+     * @param newStatus the new status of the context
+     * @throws KNIMESparkException
+     */
+    protected void setStatus(final SparkContextStatus newStatus) throws KNIMESparkException {
+        if (newStatus != getStatus()) {
+            LOGGER.info(String.format("Spark context %s changed status from %s to %s", getID().toString(),
+                m_status.toString(), newStatus.toString()));
+            m_status = newStatus;
+        }
+    }
 
     /**
      * This method equivalent to invoking {@link #ensureConfigured(SparkContextConfig, boolean, boolean)} with the
      * boolean destroyIfNecessary=false.
      *
-     * @param config The new configuration to apply.
+     * @param newConfig The new configuration to apply.
      * @param overwriteExistingConfig Whether a pre-existing context config should be overwritten.
      * @return true the given config was successfully applied, false otherwise.
      */
-    public abstract boolean ensureConfigured(SparkContextConfig config, boolean overwriteExistingConfig);
+    public final synchronized boolean ensureConfigured(final T newConfig,
+        final boolean overwriteExistingConfig) {
+        try {
+            return ensureConfigured(newConfig, overwriteExistingConfig, false);
+        } catch (KNIMESparkException e) {
+            // should never happen because we are not actually destroying a pre-existing remote context
+            return false;
+        }
+    }
+
+    /**
+     * @return the Spark version supported by this context.
+     */
+    public final synchronized SparkVersion getSparkVersion() {
+        if (m_config == null) {
+            throw new RuntimeException(String.format(
+                "Trying to get Spark version of Spark context which is in status: %s. This is a bug.", getStatus()));
+        }
+        return m_config.getSparkVersion();
+    }
+
+    /**
+     * This method is invoked to while trying to run Spark jobs. Subclasses must provide an implementation of the the
+     * {@link JobController} interface. Implementations can assume that the context is {@link SparkContextStatus#OPEN}
+     * when this method is invoked.
+     *
+     * @return the {@link JobController} to use to run a Spark job.
+     */
+    protected abstract JobController getJobController();
+
+    /**
+     * This method is invoked when Spark nodes manage their named objects in Spark. Subclasses must provide an
+     * implementation of the the {@link NamedObjectsController} interface. Implementations can assume that the context
+     * is {@link SparkContextStatus#OPEN} when this method is invoked.
+     *
+     * @return the {@link NamedObjectsController} to use manage named objects.
+     */
+    protected abstract NamedObjectsController getNamedObjectsController();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> fileJob,
+        final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+
+        try {
+            final JobController jobController;
+            synchronized (this) {
+                ensureOpened(false);
+                jobController = getJobController();
+            }
+
+            return jobController.startJobAndWaitForResult(fileJob, exec);
+        } catch (SparkContextNotFoundException e) {
+            setStatus(SparkContextStatus.CONFIGURED);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final <O extends JobOutput> O startJobAndWaitForResult(final JobRun<?, O> job, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
+
+        try {
+            final JobController jobController;
+            synchronized (this) {
+                ensureOpened(false);
+                jobController = getJobController();
+            }
+
+            return jobController.startJobAndWaitForResult(job, exec);
+        } catch (SparkContextNotFoundException e) {
+            setStatus(SparkContextStatus.CONFIGURED);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void startJobAndWaitForResult(final SimpleJobRun<?> job, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
+        try {
+            final JobController jobController;
+            synchronized (this) {
+                ensureOpened(false);
+                jobController = getJobController();
+            }
+
+            jobController.startJobAndWaitForResult(job, exec);
+        } catch (SparkContextNotFoundException e) {
+            setStatus(SparkContextStatus.CONFIGURED);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Set<String> getNamedObjects() throws KNIMESparkException {
+        try {
+            final NamedObjectsController namedObjectsController;
+            synchronized (this) {
+                ensureOpened(false);
+                namedObjectsController = getNamedObjectsController();
+            }
+
+            return namedObjectsController.getNamedObjects();
+        } catch (SparkContextNotFoundException e) {
+            setStatus(SparkContextStatus.CONFIGURED);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void deleteNamedObjects(final Set<String> namedObjects) throws KNIMESparkException {
+        try {
+            final NamedObjectsController namedObjectsController;
+            synchronized (this) {
+                ensureOpened(false);
+                namedObjectsController = getNamedObjectsController();
+            }
+
+            namedObjectsController.deleteNamedObjects(namedObjects);
+        } catch (SparkContextNotFoundException e) {
+            setStatus(SparkContextStatus.CONFIGURED);
+            throw e;
+        }
+    }
 
     /**
      * Opens the Spark context, creating a a new remote context if necessary and createRemoteContext is true.
+     * Implementations can assume that the context is {@link SparkContextStatus#CONFIGURED} when this method is invoked
+     * and that the method is invoked in a thread-safe manner.
      *
      * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
      *            context leads to a {@link SparkContextNotFoundException}. Setting this parameter to false is useful in
@@ -172,10 +489,13 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
      *             in state configured.
      * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
-    protected abstract boolean open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException;
+    protected abstract boolean open(final boolean createRemoteContext)
+        throws KNIMESparkException, SparkContextNotFoundException;
 
     /**
-     * Destroys the Spark context within the cluster and frees up all resources.
+     * Destroys the Spark context within the cluster and frees up all resources. Implementations can assume that the
+     * context is {@link SparkContextStatus#CONFIGURED} or {@link SparkContextStatus#OPEN} when this method is invoked,
+     * and that the method is invoked in a thread-safe manner.
      *
      * @throws SparkContextNotFoundException Thrown if no remote Spark context actually existed.
      * @throws KNIMESparkException Thrown if anything else went wrong while destroying the remote Spark context.
@@ -183,23 +503,61 @@ public abstract class SparkContext implements JobController, NamedObjectsControl
     protected abstract void destroy() throws KNIMESparkException;
 
     /**
-     * @return the {@link SparkContextConfig}
-     */
-    public abstract SparkContextConfig getConfiguration();
-
-    /**
-     * @return the {@link SparkContextID}
-     */
-    public abstract SparkContextID getID();
-
-    /**
      * @return A HTML description of this context without HTML and BODY tags
      */
     public abstract String getHTMLDescription();
 
     /**
-     * @return the Spark version supported by this context.
+     * Replaces the given pattern with the given value inside the given buffer.
+     *
+     * @param buf The buffer inside which to do the replacement.
+     * @param pattern The pattern in the buffer to replace.
+     * @param value The value to replace with.
      */
-    public abstract SparkVersion getSparkVersion();
+    protected void replace(final StringBuilder buf, final String pattern, final String value) {
+        final String realPattern = String.format("${%s}", pattern);
+        int start = buf.indexOf(realPattern);
 
+        if (start == -1) {
+            throw new IllegalArgumentException(String.format("Pattern %s does not appear in template", realPattern));
+        }
+
+        buf.replace(start, start + realPattern.length(), value);
+    }
+
+    /**
+     * Using the given template file, this method replaces pattern strings in the template with actual replacement
+     * values. The patterns are the keys of the given map, whereas the replacement values are their respective map
+     * values.
+     *
+     * @param templateFileName The name of the template file, which will be resolved using
+     *            {@link Class#getResourceAsStream(String)}.
+     * @param replacements A map from patterns to replacment values.
+     * @return a description generated from the given template and pattern replacements.
+     */
+    protected String generateHTMLDescription(final String templateFileName, final Map<String, String> replacements) {
+        final String template;
+        try (InputStream r = getClass().getResourceAsStream(templateFileName)) {
+            final byte[] bytes = new byte[r.available()];
+            r.read(bytes);
+            template = new String(bytes, Charset.forName("UTF8"));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read context description template");
+        }
+
+        StringBuilder buf = new StringBuilder(template);
+        for (String pattern : replacements.keySet()) {
+            replace(buf, pattern, replacements.get(pattern));
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized String toString() {
+        return "SparkContext[" + m_contextID.toString() + "]";
+    }
 }

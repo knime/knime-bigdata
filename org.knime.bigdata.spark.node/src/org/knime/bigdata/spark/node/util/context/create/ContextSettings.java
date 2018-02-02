@@ -27,11 +27,13 @@
 package org.knime.bigdata.spark.node.util.context.create;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -103,7 +105,7 @@ public class ContextSettings {
             new SettingsModelBoolean("v1_6.overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
 
     private final SettingsModelString m_customSparkSettings =
-            new SettingsModelString("v1_6.customSparkSettings", KNIMEConfigContainer.getCustomSparkSettings());
+            new SettingsModelString("v1_6.customSparkSettings", KNIMEConfigContainer.getCustomSparkSettingsString());
 
     private final SettingsModelBoolean m_hideExistsWarning =
             new SettingsModelBoolean("v1_6.hideExistsWarning", false);
@@ -225,8 +227,12 @@ public class ContextSettings {
         return m_overrideSparkSettings.getBooleanValue();
     }
 
-    public String getCustomSparkSettings() {
+    public String getCustomSparkSettingsString() {
         return m_customSparkSettings.getStringValue();
+    }
+
+    public Map<String, String> getCustomSparkSettings() {
+        return SparkPreferenceValidator.parseSettingsString(getCustomSparkSettingsString());
     }
 
     public boolean hideExistsWarning() {
@@ -340,40 +346,34 @@ public class ContextSettings {
         }
     }
 
-    /** Validate current values of this setting. */
+    /**
+     * Validate current values of this setting.
+     *
+     * @throws InvalidSettingsException if validation failed.
+     */
     public void validateSettings() throws InvalidSettingsException {
-        String errors = null;
 
-        if (m_authentication.getAuthenticationType() == AuthenticationType.NONE) {
-            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
-                getReceiveTimeout(), getJobCheckFrequency(),
-                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
-                overrideSparkSettings(), getCustomSparkSettings());
+        final ArrayList<String> errors = new ArrayList<>();
 
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER) {
-            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
-                true, m_authentication.getUsername(), null,
-                getReceiveTimeout(), getJobCheckFrequency(),
-                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
-                overrideSparkSettings(), getCustomSparkSettings());
+        SparkPreferenceValidator.validateSparkContextName(getContextName(), errors);
+        SparkPreferenceValidator.validateJobServerUrl(getJobServerUrl(), errors);
+        SparkPreferenceValidator.validateReceiveTimeout(getReceiveTimeout(), errors);
+        SparkPreferenceValidator.validateCustomSparkSettings(overrideSparkSettings(), getCustomSparkSettingsString(), errors);
 
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.USER_PWD) {
-            errors = SparkPreferenceValidator.validate(getJobServerUrl(),
-                true, m_authentication.getUsername(), m_authentication.getPassword(),
-                getReceiveTimeout(), getJobCheckFrequency(),
-                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
-                overrideSparkSettings(), getCustomSparkSettings());
-
-        } else if (m_authentication.getAuthenticationType() == AuthenticationType.CREDENTIALS) {
-            SparkPreferenceValidator.validate(getJobServerUrl(),
-                m_authentication.getCredential(),
-                getReceiveTimeout(), getJobCheckFrequency(),
-                getSparkVersion().toString(), getContextName(), deleteObjectsOnDispose(),
-                overrideSparkSettings(), getCustomSparkSettings());
+        switch(m_authentication.getAuthenticationType()) {
+            case USER:
+            case USER_PWD:
+                SparkPreferenceValidator.validateUsernameAndPassword(m_authentication.getUsername(), m_authentication.getPassword(), errors);
+                break;
+            case CREDENTIALS:
+                SparkPreferenceValidator.validateCredential(m_authentication.getCredential(), errors);
+                break;
+            default:
+                break;
         }
 
-        if (errors != null && !errors.isEmpty()) {
-            throw new InvalidSettingsException(errors);
+        if (!errors.isEmpty()) {
+            throw new InvalidSettingsException(SparkPreferenceValidator.mergeErrors(errors));
         }
     }
 
@@ -469,25 +469,25 @@ public class ContextSettings {
     /**
      * @return the KNIMESparkContext object with the specified settings
      */
-    public SparkContextConfig createContextConfig(final CredentialsProvider cp) {
+    public JobServerSparkContextConfig createContextConfig(final CredentialsProvider cp) {
         AuthenticationType authType = m_authentication.getAuthenticationType();
 
         if (authType == AuthenticationType.NONE) {
-            return new SparkContextConfig(
+            return new JobServerSparkContextConfig(
                 getJobServerUrl(), false, null, null,
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER) {
-            return new SparkContextConfig(
+            return new JobServerSparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), "",
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
                 getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER_PWD) {
-            return new SparkContextConfig(
+            return new JobServerSparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), m_authentication.getPassword(),
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
@@ -496,7 +496,7 @@ public class ContextSettings {
         } else if (authType == AuthenticationType.CREDENTIALS) {
             ICredentials cred = cp.get(m_authentication.getCredential());
 
-            return new SparkContextConfig(
+            return new JobServerSparkContextConfig(
                 getJobServerUrl(), true, cred.getLogin(), cred.getPassword(),
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),

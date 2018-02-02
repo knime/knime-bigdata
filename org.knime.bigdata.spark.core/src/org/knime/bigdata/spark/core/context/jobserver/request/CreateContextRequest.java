@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.context.jobserver.request;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
@@ -31,7 +32,7 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -45,11 +46,12 @@ public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
     private final static NodeLogger LOGGER = NodeLogger.getLogger(CreateContextRequest.class);
 
     /**
+     * @param contextId The ID of the Spark context.
      * @param contextConfig
      * @param restClient // TODO Auto-generated method stub return null;
      *
      */
-    public CreateContextRequest(final SparkContextID contextId, final SparkContextConfig contextConfig,
+    public CreateContextRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig,
         final RestClient restClient) {
         super(contextId, contextConfig, restClient);
     }
@@ -93,14 +95,12 @@ public class CreateContextRequest extends AbstractJobserverRequest<Boolean> {
     }
 
     private String[] getCustomSettings() {
-        if (m_config.overrideSparkSettings() && m_config.getCustomSparkSettings() != null
-            && !m_config.getCustomSparkSettings().isEmpty()) {
+        if (m_config.useCustomSparkSettings() && !m_config.getCustomSparkSettings().isEmpty()) {
+
             ArrayList<String> elements = new ArrayList<String>();
-            for (String line : m_config.getCustomSparkSettings().split("\n")) {
-                line = line.trim();
-                for (String e : line.split(": *", 2)) {
-                    elements.add(e);
-                }
+            for (Entry<String, String> entry : m_config.getCustomSparkSettings().entrySet()) {
+                elements.add(entry.getKey());
+                elements.add(entry.getValue());
             }
 
             return elements.toArray(new String[]{});

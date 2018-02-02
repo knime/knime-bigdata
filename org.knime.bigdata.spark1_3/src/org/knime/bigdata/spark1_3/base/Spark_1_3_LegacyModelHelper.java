@@ -37,7 +37,7 @@ import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.knime.bigdata.spark.core.jobserver.CustomClassLoadingObjectInputStream;
+import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.model.LegacyModelHelper;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;

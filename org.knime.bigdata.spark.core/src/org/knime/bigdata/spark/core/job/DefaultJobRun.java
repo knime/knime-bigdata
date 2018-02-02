@@ -75,10 +75,11 @@ public class DefaultJobRun<I extends JobInput, O extends JobOutput> implements J
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public O run(final SparkContextID contextID) throws KNIMESparkException {
         try {
-            return SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this,
+            return (O) SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this,
                 new ExecutionMonitor());
         } catch (CanceledExecutionException e) {
             // cannot happen
@@ -86,6 +87,7 @@ public class DefaultJobRun<I extends JobInput, O extends JobOutput> implements J
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public O run(final SparkContextID contextID, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
@@ -93,7 +95,7 @@ public class DefaultJobRun<I extends JobInput, O extends JobOutput> implements J
         if (exec == null) {
             return run(contextID);
         } else {
-            return SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this, exec);
+            return (O) SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this, exec);
         }
     }
 

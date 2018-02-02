@@ -28,7 +28,7 @@ import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -46,7 +46,7 @@ public class GetJobStatusRequest extends AbstractJobserverRequest<JsonObject> {
      * @param restClient
      * @param jobID1
      */
-    public GetJobStatusRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final String jobID1) {
+    public GetJobStatusRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final String jobID1) {
         super(contextId, contextConfig, restClient, JobserverConstants.MAX_REQUEST_ATTEMTPS);
         this.jobID = jobID1;
     }

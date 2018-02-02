@@ -24,6 +24,7 @@ import java.util.HashMap;
 
 import org.knime.bigdata.spark.core.context.jobserver.JobserverSparkContext;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
@@ -32,11 +33,13 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
  */
 public class SparkContextManager {
 
+    @SuppressWarnings("rawtypes")
     private final static HashMap<SparkContextID, SparkContext> sparkContexts =
         new HashMap<>();
 
     private final static SparkContextID DEFAULT_SPARK_CONTEXT_ID = new SparkContextID("default://");
 
+    @SuppressWarnings("rawtypes")
     private static SparkContext defaultSparkContext;
 
     /**
@@ -51,7 +54,7 @@ public class SparkContextManager {
      * from the KNIME preferences page if it does not exists.
      * @see #getDefaultSparkContextID()
      */
-    public synchronized static SparkContext getDefaultSparkContext() {
+    public synchronized static SparkContext<?> getDefaultSparkContext() {
         ensureDefaultContext();
         return defaultSparkContext;
     }
@@ -62,8 +65,9 @@ public class SparkContextManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static void createAndConfigureDefaultSparkContext() {
-        SparkContextConfig defaultConfig = new SparkContextConfig();
+        JobServerSparkContextConfig defaultConfig = new JobServerSparkContextConfig();
         SparkContextID actualDefaultContextID =
             SparkContextID.fromConnectionDetails(defaultConfig.getJobServerUrl(), defaultConfig.getContextName());
         defaultSparkContext = new JobserverSparkContext(actualDefaultContextID);
@@ -76,11 +80,16 @@ public class SparkContextManager {
      * @param contextID the id of the context
      * @return an existing Spark context or creates a new one with the given id
      */
-    public synchronized static SparkContext getOrCreateSparkContext(final SparkContextID contextID) {
+    @SuppressWarnings("unchecked")
+    public synchronized static <T extends SparkContextConfig> SparkContext<T> getOrCreateSparkContext(final SparkContextID contextID) {
         ensureDefaultContext();
-        SparkContext toReturn = sparkContexts.get(contextID);
+        SparkContext<T> toReturn = sparkContexts.get(contextID);
         if (toReturn == null) {
-            toReturn = new JobserverSparkContext(contextID);
+            SparkContextProvider provider = SparkContextProviderRegistry.getSparkContextProvider(contextID.getScheme());
+            if (provider == null) {
+                throw new IllegalArgumentException("No Spark context provider found for the scheme " + contextID.getScheme());
+            }
+            toReturn = provider.createContext(contextID);
             sparkContexts.put(contextID, toReturn);
         }
 
@@ -108,7 +117,7 @@ public class SparkContextManager {
      * @throws KNIMESparkException
      */
     public static void destroyCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
+        final SparkContext<?> context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.destroy();
         }
@@ -125,7 +134,7 @@ public class SparkContextManager {
      * @throws KNIMESparkException
      */
     public static void ensureDestroyedCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        final SparkContext context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
+        final SparkContext<?> context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.ensureDestroyed();
         }
@@ -142,7 +151,7 @@ public class SparkContextManager {
     public synchronized static boolean reconfigureDefaultContext(final boolean destroyIfNecessary)
         throws KNIMESparkException {
 
-        final SparkContextConfig newDefaultConfig = new SparkContextConfig();
+        final JobServerSparkContextConfig newDefaultConfig = new JobServerSparkContextConfig();
         final SparkContextID newContextID =
             SparkContextID.fromConnectionDetails(newDefaultConfig.getJobServerUrl(), newDefaultConfig.getContextName());
 

@@ -80,7 +80,7 @@ public abstract class SparkContextPortObjectBase implements SparkContextProvider
             } else if (ze.getName().equals(KEY_CONTEXT_LEGACY)) {
                 // Load legacy workflow (KNIME Extension for Apache Spark <= v1.3)
                 final ModelContentRO model = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-                return SparkContextConfig.createSparkContextIDFromLegacyConfig(model);
+                return JobServerSparkContextConfig.createSparkContextIDFromLegacyConfig(model);
             } else {
                 throw new IOException(String.format("Key %s does not match expected zip entry name \"%s\" or \"%s\"", ze.getName(), KEY_CONTEXT_LEGACY, KEY_CONTEXT_ID));
             }

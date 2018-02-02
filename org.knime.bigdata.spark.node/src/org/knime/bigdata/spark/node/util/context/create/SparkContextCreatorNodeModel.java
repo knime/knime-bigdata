@@ -29,7 +29,7 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.core.node.CanceledExecutionException;
@@ -69,7 +69,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkContextID newContextID = m_settings.getSparkContextID();
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(newContextID);
-        final SparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
+        final JobServerSparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
 
         m_settings.validateSettings();
 
@@ -100,7 +100,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
         exec.setMessage("Configuring Spark context");
-        final SparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
+        final JobServerSparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
 
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
         if (!configApplied && !m_settings.hideExistsWarning()) {
@@ -145,7 +145,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
                 "Could not configure Spark context because credentials are not available. Please reset this node and reexecute.");
         }
 
-        final SparkContextConfig sparkContextConfig = m_settings.createContextConfig(getCredentialsProvider());
+        final JobServerSparkContextConfig sparkContextConfig = m_settings.createContextConfig(getCredentialsProvider());
         boolean configApplied = sparkContext.ensureConfigured(sparkContextConfig, true);
 
         if (!configApplied) {

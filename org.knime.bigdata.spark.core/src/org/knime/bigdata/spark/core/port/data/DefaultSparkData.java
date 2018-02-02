@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.data.util.NonClosableInputStream;
 import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
@@ -95,7 +95,7 @@ public class DefaultSparkData implements SparkData {
                 m_contextID = SparkContextID.fromConfigRO(sparkModel.getConfig(KEY_CONTEXT_ID));
             } else if (sparkModel.containsKey(KEY_CONTEXT_LEGACY)) {
                 // Load legacy workflow (KNIME Extension for Apache Spark <= v1.3)
-                m_contextID = SparkContextConfig.createSparkContextIDFromLegacyConfig(sparkModel.getConfig(KEY_CONTEXT_LEGACY));
+                m_contextID = JobServerSparkContextConfig.createSparkContextIDFromLegacyConfig(sparkModel.getConfig(KEY_CONTEXT_LEGACY));
             } else {
                 throw new IOException(String.format("Did not find one of the expected keys \"%s\" and \"%s\"", KEY_CONTEXT_LEGACY, KEY_CONTEXT_ID));
             }

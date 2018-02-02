@@ -82,10 +82,11 @@ public class DefaultJobWithFilesRun<I extends JobInput, O extends JobOutput> ext
         return m_inputFiles;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public O run(final SparkContextID contextID, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
-        return SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this, exec);
+        return (O) SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this, exec);
     }
 
     /**

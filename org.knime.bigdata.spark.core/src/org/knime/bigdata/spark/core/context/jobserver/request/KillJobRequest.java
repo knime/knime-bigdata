@@ -26,7 +26,7 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -43,7 +43,7 @@ public class KillJobRequest extends AbstractJobserverRequest<Void>{
      * @param contextConfig
      * @param restClient
      */
-    public KillJobRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final String jobID) {
+    public KillJobRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final String jobID) {
         super(contextId, contextConfig, restClient, JobserverConstants.MAX_REQUEST_ATTEMTPS);
         this.m_jobID = jobID;
     }

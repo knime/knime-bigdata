@@ -27,7 +27,7 @@ import org.knime.bigdata.spark.core.context.jobserver.JobserverConstants;
 import org.knime.bigdata.spark.core.context.jobserver.request.ParsedResponse.FailureReason;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -44,7 +44,7 @@ public class DeleteDataFileRequest extends AbstractJobserverRequest<Void> {
      * @param contextConfig
      * @param restClient
      */
-    public DeleteDataFileRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final String serverFilePath) {
+    public DeleteDataFileRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final String serverFilePath) {
         super(contextId, contextConfig, restClient);
         this.m_serverFilePath = serverFilePath;
     }

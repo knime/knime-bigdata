@@ -9,6 +9,7 @@
    <extension-point id="ModelHelperProvider" name="ModelHelperProvider" schema="schema/ModelHelperProvider.exsd"/>
    <extension-point id="IntermediateToSparkConverterProvider" name="IntermediateToSparkConverterProvider" schema="schema/IntermediateToSparkConverterProvider.exsd"/>
    <extension-point id="BundleGroupSparkJarProvider" name="BundleGroupSparkJarProvider" schema="schema/BundleGroupSparkJarProvider.exsd"/>
+   <extension-point id="SparkContextProvider" name="SparkContextProvider" schema="schema/SparkContextProvider.exsd"/>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer

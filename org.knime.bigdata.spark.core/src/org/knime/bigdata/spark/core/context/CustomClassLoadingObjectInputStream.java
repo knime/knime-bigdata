@@ -18,7 +18,7 @@
  * History
  *   Created on May 3, 2016 by bjoern
  */
-package org.knime.bigdata.spark.core.jobserver;
+package org.knime.bigdata.spark.core.context;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +28,10 @@ import java.io.ObjectStreamClass;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
+ * A subclass of {@link ObjectInputStream} which accepts a custom classloader. The custom classloader will be used to
+ * load the classes of deserialized objects.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
 public class CustomClassLoadingObjectInputStream extends ObjectInputStream {

@@ -31,7 +31,7 @@ import javax.ws.rs.core.Response;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -52,7 +52,7 @@ public class UploadFileRequest extends AbstractJobserverRequest<String> {
      * @param localFile
      * @param remotePath
      */
-    public UploadFileRequest(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final File localFile,
+    public UploadFileRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final File localFile,
         final String remotePath) {
         super(contextId, contextConfig, restClient);
 

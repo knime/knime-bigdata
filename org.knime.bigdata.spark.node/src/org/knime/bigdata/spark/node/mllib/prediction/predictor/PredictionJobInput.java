@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -126,7 +127,7 @@ public class PredictionJobInput extends JobInput {
      * @throws KNIMESparkException
      */
     public Serializable readModelFromTemporaryFile(final File inFile) throws KNIMESparkException {
-        try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inFile)))) {
+        try (ObjectInputStream in = new CustomClassLoadingObjectInputStream(new BufferedInputStream(new FileInputStream(inFile)), getClass().getClassLoader())) {
             Serializable model = (Serializable) in.readObject();
             in.close();
             return model;

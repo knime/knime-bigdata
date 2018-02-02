@@ -1,6 +1,7 @@
 package org.knime.bigdata.spark.core.preferences;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -99,17 +100,25 @@ public class KNIMEConfigContainer {
     }
 
     /**
-     * @return the custom Spark settings
+     * @return the default custom Spark settings as a map
      * @see #overrideSparkSettings()
      */
-    public static String getCustomSparkSettings() {
-        final String settings = PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS);
-        if (settings.matches("memory-per-node: 512m\\s+") && !overrideSparkSettings()) {
+    public static Map<String,String> getCustomSparkSettings() {
+        return SparkPreferenceValidator.parseSettingsString(getCustomSparkSettingsString());
+    }
+
+    /**
+     * @return the default custom Spark settings as a String
+     * @see #overrideSparkSettings()
+     */
+    public static String getCustomSparkSettingsString() {
+        String settingsString = PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS);
+        if (settingsString.matches("memory-per-node: 512m\\s+") && !overrideSparkSettings()) {
             //these are the old default settings from the application.conf file prior KNIME 3.4
             //so overwrite them with the new default settings
-            return "memory-per-node: 1G\nspark.executor.cores: 2\nspark.executor.instances: 3\n";
+            settingsString = "memory-per-node: 1G\nspark.executor.cores: 2\nspark.executor.instances: 3\n";
         }
-        return settings;
+        return settingsString;
     }
 
     /**

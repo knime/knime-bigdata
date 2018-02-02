@@ -30,7 +30,7 @@ import org.knime.bigdata.spark.core.context.jobserver.request.DeleteDataFileRequ
 import org.knime.bigdata.spark.core.context.jobserver.request.UploadFileRequest;
 import org.knime.bigdata.spark.core.context.jobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 
 /**
  * Simple utility that uploads some file to the jobserver and can clean up afterwards
@@ -45,7 +45,7 @@ class UploadUtil {
 
     private final SparkContextID m_contextId;
 
-    private final SparkContextConfig m_context;
+    private final JobServerSparkContextConfig m_context;
 
     private final RestClient m_restClient;
 
@@ -55,11 +55,11 @@ class UploadUtil {
 
     private final List<String> m_serverFileNames;
 
-    public UploadUtil(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final List<File> file) {
+    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final List<File> file) {
         this(contextId, contextConfig, restClient, file, false);
     }
 
-    public UploadUtil(final SparkContextID contextId, final SparkContextConfig contextConfig, final RestClient restClient, final List<File> file,
+    public UploadUtil(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final List<File> file,
         final boolean deleteRemoteFilesDuringCleanup) {
 
         m_contextId = contextId;

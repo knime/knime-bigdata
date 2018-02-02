@@ -9,7 +9,7 @@ import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.core.node.NodeLogger;
 
@@ -34,7 +34,7 @@ public class RestClient {
      * @throws KeyManagementException
      * @throws UnsupportedEncodingException
      */
-    public RestClient(final SparkContextConfig contextConfig)
+    public RestClient(final JobServerSparkContextConfig contextConfig)
         throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException {
         if (KNIMEConfigContainer.verboseLogging()) {
             LOGGER.debug("Create RestClient");

@@ -21,10 +21,9 @@
 package org.knime.bigdata.spark.core.port;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
- * All classes that use and store a {@link SparkContextConfig}.
+ * Interface for all classes that are linked to a certain Spark context via a {@link SparkContextID}.
  *
  * @author Tobias Koetter, KNIME.com
  */

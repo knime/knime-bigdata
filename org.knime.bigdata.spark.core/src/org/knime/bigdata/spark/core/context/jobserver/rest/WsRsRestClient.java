@@ -25,7 +25,7 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.transports.http.configuration.ProxyServerType;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.ThreadLocalHTTPAuthenticator;
 import org.osgi.framework.FrameworkUtil;
@@ -75,7 +75,7 @@ class WsRsRestClient implements IRestClient {
 
     private ProxyAuthorizationPolicy m_proxyAuthPolicy;
 
-    public WsRsRestClient(final SparkContextConfig contextConfig) throws KeyManagementException,
+    public WsRsRestClient(final JobServerSparkContextConfig contextConfig) throws KeyManagementException,
         NoSuchAlgorithmException, URISyntaxException, UnsupportedEncodingException, UnsupportedOperationException {
         // The JAX-RS interface is in a different plug-in than the CXF implementation. Therefore the interface classes
         // won't find the implementation via the default ContextFinder classloader. We set the current classes's
@@ -110,7 +110,7 @@ class WsRsRestClient implements IRestClient {
         configureProxyIfNecessary(contextConfig);
     }
 
-    private void configureProxyIfNecessary(final SparkContextConfig contextConfig) {
+    private void configureProxyIfNecessary(final JobServerSparkContextConfig contextConfig) {
 
         final URI jobserverURI = URI.create(contextConfig.getJobServerUrl());
 

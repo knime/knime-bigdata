@@ -27,7 +27,7 @@ import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
 import org.knime.bigdata.spark.core.jobserver.LogMessage;
 import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
@@ -57,7 +57,7 @@ class JobserverJobController implements JobController {
 
     private final SparkContextID m_contextId;
 
-    private final SparkContextConfig m_contextConfig;
+    private final JobServerSparkContextConfig m_contextConfig;
 
     private final RestClient m_restClient;
 
@@ -77,7 +77,7 @@ class JobserverJobController implements JobController {
      */
     private volatile boolean m_prependUserToContextName;
 
-    JobserverJobController(final SparkContextID contextId, final SparkContextConfig contextConfig, final String jobserverAppName,
+    JobserverJobController(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final String jobserverAppName,
         final RestClient restClient, final String jobserverJobClass) {
         m_contextId = contextId;
         m_contextConfig = contextConfig;

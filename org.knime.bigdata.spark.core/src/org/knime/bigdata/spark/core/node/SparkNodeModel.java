@@ -77,7 +77,7 @@ import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
-import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.port.data.SparkData;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
@@ -284,7 +284,7 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     /**
-     * @param context the {@link SparkContextConfig} the respective Spark data objects live in.
+     * @param context the ID of the Spark context that the data objects belong to
      * @param ids the Spark data object IDs to delete when the node is reset or disposed.
      * @since 2.2.0 (renamed from additionalRDDs2Delete)
      */
@@ -353,7 +353,7 @@ public abstract class SparkNodeModel extends NodeModel {
                     final ConfigRO contextConfig = sparkDataObjectsConfig.getConfig(CFG_CONTEXT_LEGACY + i);
                     final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
                     m_sparkDataObjects.put(
-                        SparkContextConfig
+                        JobServerSparkContextConfig
                             .createSparkContextIDFromLegacyConfig(contextConfig.getConfig(CFG_CONTEXT_LEGACY)),
                         new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
                 }

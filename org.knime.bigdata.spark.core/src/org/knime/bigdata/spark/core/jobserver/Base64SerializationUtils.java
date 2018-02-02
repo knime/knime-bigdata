@@ -33,6 +33,7 @@ import java.io.ObjectOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
