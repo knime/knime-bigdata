@@ -65,8 +65,9 @@ node {
 			'''
 
 			// Local Spark: Download jars from maven into the libs/ folder of the local Spark plugin
-			withMaven(maven: 'Maven 3.2') {
+			withMaven(maven: 'Maven 3.5') {
 				sh '''
+					rm -f "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/*.jar
 					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars
 					mvn clean package
 					popd
@@ -112,12 +113,5 @@ node {
 			)
 			throw ex
 		}
-	}
-
-	stage('Cleanup') {
-		// delete the jars fetched for local Spark
-		sh '''
-			rm -rf "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/*.jar
-		'''
 	}
 }
