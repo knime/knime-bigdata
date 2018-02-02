@@ -32,6 +32,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -97,7 +98,8 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         }
 
         if (!HDFSRemoteFileHandler.isSupportedConnection(connInfo)
-                && !(connInfo instanceof CloudConnectionInformation)) {
+                && !(connInfo instanceof CloudConnectionInformation)
+                && !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))) {
             throw new InvalidSettingsException("HDFS or cloud connection required");
         }
 

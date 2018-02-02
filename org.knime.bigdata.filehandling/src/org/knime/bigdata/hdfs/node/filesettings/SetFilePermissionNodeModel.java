@@ -28,6 +28,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.base.filehandling.remote.files.RemoteFileHandlerRegistry;
 import org.knime.bigdata.hdfs.filehandler.HDFSConnection;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
@@ -93,7 +94,8 @@ public class SetFilePermissionNodeModel extends NodeModel {
             throw new InvalidSettingsException("No connection information available");
         }
         if (!HDFSRemoteFileHandler.HDFS_PROTOCOL.getName().equals(connInfo.getProtocol())
-        		&& !HDFSRemoteFileHandler.WEBHDFS_PROTOCOL.getName().equals(connInfo.getProtocol())) {
+        		&& !HDFSRemoteFileHandler.WEBHDFS_PROTOCOL.getName().equals(connInfo.getProtocol())
+        		&& !(RemoteFileHandlerRegistry.getProtocol(connInfo.getProtocol()).getName().contains("hdfs"))) {
             throw new InvalidSettingsException("HDFS/webHDFS connection required");
         }
         final DataTableSpec tableSpec = (DataTableSpec) inSpecs[1];

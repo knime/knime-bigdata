@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<extension point="org.knime.bigdata.spark.core.SparkNodeFactoryProvider">
+  <SparkNodeFactoryProvider
+        ProviderClass="org.knime.bigdata.spark.local.SparkLocalNodeFactoryProvider">
+  </SparkNodeFactoryProvider>
+</extension>
+
+<extension point="org.knime.bigdata.spark.core.SparkContextProvider">
+  <SparkContextProvider
+        ProviderClass="org.knime.bigdata.spark.local.SparkLocalContextProvider">
+  </SparkContextProvider>
+</extension>
+<extension
+      point="org.knime.base.filehandling.RemoteFileHandler">
+   <RemoteFileHandler
+         RemoteFileHandler="org.knime.bigdata.spark.local.filehandler.HDFSLocalRemoteFileHandler">
+   </RemoteFileHandler>
+</extension>
+
+<extension point="org.knime.bigdata.spark.core.SparkJarProvider">
+	<SparkJarProvider ProviderClass="org.knime.bigdata.spark.local.SparkLocalJarProvider">
+	</SparkJarProvider>
+</extension>
+
+<extension point="org.knime.bigdata.spark.core.JobRunFactoryProvider">
+	<JobRunFactoryProvider
+		ProviderClass="org.knime.bigdata.spark.local.LocalSparkJobRunFactoryProvider">
+	</JobRunFactoryProvider>
+</extension>
+       <extension
+             point="org.eclipse.ui.actionSets">
+          <actionSet
+                id="org.knime.workbench.ui.localspark"
+                label="KNIME"
+                visible="true">
+             <action
+                   class="org.knime.bigdata.spark.local.ui.OpenLocalSparkLogfileAction"
+                   hoverIcon="icons/open_logfile.png"
+                   icon="icons/open_logfile.png"
+                   id="org.knime.workbench.ui.localspark.openLocalSparkLogfile"
+                   label="Open Local Spark log"
+                   menubarPath="view/localsparklog"
+                   tooltip="Opens local Spark log file in a text editor">
+             </action>
+          </actionSet>
+       </extension>
+
+</plugin>

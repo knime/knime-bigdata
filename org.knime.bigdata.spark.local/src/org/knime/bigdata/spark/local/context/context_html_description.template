@@ -1,0 +1,22 @@
+<strong>Local Spark Context</strong>
+<hr/>
+<strong>Spark version:</strong>&nbsp;&nbsp;<tt>${spark_version}</tt>
+<br/>
+<strong>Spark WebUI:</strong>&nbsp;&nbsp;${spark_webui_url}
+<br/>
+<strong>Hiveserver port:</strong>&nbsp;&nbsp;${hiveserver_port}
+<br/>
+<strong>Context settings</strong>
+<hr/>
+<strong>Context name:</strong>&nbsp;&nbsp;<tt>${context_name}</tt>
+<br/><strong>Delete DataFrames/RDDs on dispose:</strong>&nbsp;&nbsp;<tt>${delete_data_on_dispose}</tt>
+<br/>
+<strong>Override Spark settings:</strong>&nbsp;&nbsp;<tt>${override_settings}</tt>
+<br/>
+<strong>Custom Spark settings:</strong>
+<br/>
+<pre>
+${custom_settings}
+</pre>
+<strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
+<hr/>

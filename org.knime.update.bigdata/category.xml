@@ -5,6 +5,8 @@
 
    <feature id="org.knime.features.bigdata.spark" />
 
+   <feature id="org.knime.features.bigdata.spark.local" />
+
    <feature id="com.knime.features.licenses" />
 
    <feature id="com.knime.features.pmml.compilation.java.jario" />

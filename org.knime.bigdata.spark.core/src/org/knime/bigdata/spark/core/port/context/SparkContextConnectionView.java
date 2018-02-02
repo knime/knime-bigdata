@@ -27,7 +27,15 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
+import org.apache.log4j.Logger;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 
@@ -37,6 +45,8 @@ import org.knime.bigdata.spark.core.context.SparkContextManager;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkContextConnectionView extends JPanel {
+
+    private final static Logger LOG = Logger.getLogger(SparkContextConnectionView.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -54,6 +64,29 @@ public class SparkContextConnectionView extends JPanel {
         textArea.setEditable(false);
         textArea.setText(buf.toString());
         textArea.setCaretPosition(0);
+
+        textArea.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(final HyperlinkEvent event) {
+                if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    Display.getDefault().asyncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
+                            try {
+                                IWebBrowser browser = support.createBrowser(IWorkbenchBrowserSupport.AS_EDITOR,
+                                    "sparkWebUI", "Spark WebUI", null);
+                                browser.openURL(event.getURL());
+                            } catch (PartInitException e) {
+                                LOG.error("Failed to open browser", e);
+                            }
+
+                        }
+                    });
+                }
+            }
+        });
+
         final JScrollPane jsp = new JScrollPane(textArea);
         jsp.setPreferredSize(new Dimension(300, 300));
         final GridBagConstraints c = new GridBagConstraints();

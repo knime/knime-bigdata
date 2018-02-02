@@ -39,6 +39,8 @@ node {
 
 	stage('Maven-to-OSGi') {
 		try {
+			// in preparation for building org.knime.update.bigdata.externals, this converts
+			// performs the actual conversion from maven artifacts to OSGi bundles
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder
@@ -47,6 +49,7 @@ node {
 				'''
 			}
 
+			// build org.knime.update.bigdata.externals
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.externals-parent
@@ -55,10 +58,20 @@ node {
 				'''
 			}
 
+			// copy org.knime.update.bigdata.externals into a useful location for buckminster
 			sh '''
 				mv "$WORKSPACE"/git/knime-bigdata/org.knime.update.bigdata.externals/target/repository org.knime.update.bigdata.externals
 				rm -rf .metadata buckminster.*
 			'''
+
+			// Local Spark: Download jars from maven into the libs/ folder of the local Spark plugin
+			withMaven(maven: 'Maven 3.2') {
+				sh '''
+					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars
+					mvn clean package
+					popd
+				'''
+			}
 		} catch (ex) {
 			if (currentBuild.result == null) {
 				currentBuild.result = 'FAILED'
@@ -99,5 +112,12 @@ node {
 			)
 			throw ex
 		}
+	}
+
+	stage('Cleanup') {
+		// delete the jars fetched for local Spark
+		sh '''
+			rm -rf "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/*.jar
+		'''
 	}
 }
