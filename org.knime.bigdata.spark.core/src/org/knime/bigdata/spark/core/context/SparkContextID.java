@@ -73,13 +73,6 @@ public class SparkContextID {
     public String toPrettyString() {
         if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
             return SparkContextManager.getDefaultSparkContext().getID().toPrettyString();
-        } else if (m_stringID.startsWith("jobserver://")) {
-            URI uri = URI.create(m_stringID);
-            StringBuilder b = new StringBuilder();
-            b.append("Spark Jobserver Context ");
-            b.append(String.format("(Host and Port: %s:%d, ", uri.getHost(), uri.getPort()));
-            b.append(String.format("Context Name: %s)", uri.getPath().substring(1)));
-            return b.toString();
         } else {
             return SparkContextProviderRegistry.getSparkContextProvider(getScheme()).toPrettyString(this);
         }
