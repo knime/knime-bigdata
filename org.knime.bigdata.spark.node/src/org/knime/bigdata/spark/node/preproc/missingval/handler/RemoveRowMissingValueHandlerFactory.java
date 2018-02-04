@@ -17,6 +17,7 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval.handler;
 
+import org.knime.base.node.preproc.pmml.missingval.handlers.RemoveRowMissingCellHandlerFactory;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory;
 import org.knime.core.data.DataColumnSpec;
@@ -29,8 +30,8 @@ import org.knime.core.data.DataType;
  */
 public class RemoveRowMissingValueHandlerFactory extends SparkMissingValueHandlerFactory {
 
-    /** Id of this missing value handler factory. */
-    public final static String ID = "knime.RemoveRowMissingValueHandler";
+    /** We have to use the KNIME cell handler ID here to produce compatible PMML. */
+    public final static String ID = RemoveRowMissingCellHandlerFactory.ID;
 
     @Override
     public String getID() {
