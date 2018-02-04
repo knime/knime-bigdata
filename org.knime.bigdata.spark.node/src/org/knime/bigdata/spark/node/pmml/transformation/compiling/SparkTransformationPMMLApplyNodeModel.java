@@ -22,14 +22,15 @@ package org.knime.bigdata.spark.node.pmml.transformation.compiling;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.transform.SourceLocator;
 
-import org.apache.xmlbeans.XmlException;
+import org.apache.commons.lang3.StringUtils;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
-import org.dmg.pmml.PMMLDocument;
 import org.knime.base.pmml.translation.PMMLTranslator;
 import org.knime.base.pmml.translation.TerminatingMessageException;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -120,29 +121,42 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
          }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Only transformations with a valid input column are added to the result table. If the transformation does not
+     * contain a display name, the input column with longest matching name of the output column name will be used.
+     *
+     * <p>
+     * Note on filtering intermediate columns: It is not possible to decide if one of two derived fields, with the same
+     * input column, is an intermediate field or if it belongs to e.g. a binary category2number translation.
+     * </p>
+     */
     @Override
     protected DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec, final PortObject pmmlPort,
         final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols)
         throws InvalidSettingsException {
 
-        final PMMLDocument pmmlDoc = parsePMML(pmmlPort);
-        if (pmmlDoc.getPMML().getTransformationDictionary() == null
-                || pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList().size() == 0) {
+        final DerivedField derivedFields[] = ((PMMLPortObject) pmmlPort).getDerivedFields();
+        if (derivedFields.length == 0) {
             setWarningMessage("Empty PMML detected.");
             return inSpec;
         }
 
+        final List<String> warnings = new LinkedList<>();
+        final Set<String> pmmlModelInputColumns = cms.getInputIndices().keySet();
+        final int inputColIndices[] = findInputColumnIndices(inSpec, pmmlModelInputColumns, derivedFields, warnings);
+        final int inputColUsage[] = countUsage(inSpec.getNumColumns(), inputColIndices);
         final DataColumnSpec pmmlResultColSpecs[] = cms.getTransformationsResultColSpecs(inSpec);
-        final DerivedField newColumns[] = extractNewPMMLResultColumns(pmmlDoc);
         final List<DataColumnSpec> resultCols = new ArrayList<>(inSpec.getNumColumns());
         for (int i = 0; i < inSpec.getNumColumns(); i++) {
             resultCols.add(inSpec.getColumnSpec(i));
         }
 
-        // add new columns and drop input columns in replace mode
-        for (int i = 0; i < newColumns.length; i++) {
-            final DerivedField df = newColumns[i];
-            final int inputColIdx = inSpec.findColumnIndex(df.getDisplayName()); // this works only in KNIME
+        // add all new columns and drop the input columns in replace mode
+        for (int i = 0; i < derivedFields.length; i++) {
+            final DerivedField df = derivedFields[i];
+            final int inputColIdx = inputColIndices[i];
             final int pmmlResultColIdx = findColumnIndex(pmmlResultColSpecs, df.getName());
 
             if (inputColIdx >= 0 && pmmlResultColIdx >= 0) { // add only the specs to the result that have a matching input column
@@ -153,63 +167,29 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
                     final DataColumnSpec inputColumn = inSpec.getColumnSpec(inputColIdx);
                     resultCols.remove(inputColumn);
                     skipCols.add(inputColIdx);
-                    creator.setName(inputColumn.getName());
+
+                    if (inputColUsage[inputColIdx] == 1) {
+                        creator.setName(inputColumn.getName());
+                    } else {
+                        warnings.add("More than one transformation with input column " + inputColumn.getName()
+                            + " using oringal output name " + pmmlResultCol.getName() + " instead of renaming column.");
+                    }
                 }
 
                 resultCols.add(creator.createSpec());
                 addCols.add(pmmlResultColIdx);
+
+            } else {
+                warnings.add("Missing input or output column in model, ignoring transformation " + df.getName());
             }
+        }
+
+        if (warnings.size() > 0) {
+            final List<String> sub = warnings.subList(0, Math.min(10, warnings.size()));
+            setWarningMessage(StringUtils.join(sub, "\n"));
         }
 
         return new DataTableSpec(resultCols.toArray(new DataColumnSpec[0]));
-    }
-
-    /** Parses PMML from given port or throws {@link InvalidSettingsException} */
-    private PMMLDocument parsePMML(final PortObject pmmlPort) throws InvalidSettingsException {
-        if (pmmlPort != null && pmmlPort instanceof PMMLPortObject) {
-            try {
-                final PMMLPortObject pmmlIn = (PMMLPortObject) pmmlPort;
-                pmmlIn.validate();
-                return PMMLDocument.Factory.parse(pmmlIn.getPMMLValue().getDocument());
-            } catch (XmlException e) {
-                throw new InvalidSettingsException("Unable to parse PMML", e);
-            }
-        } else {
-            throw new InvalidSettingsException("Unable to read PMML from input port.");
-        }
-    }
-
-    /**
-     * Returns array of PMML generated output columns. In replace mode, only the last applied transformation per input
-     * column will be used and no intermediate columns are appended.
-     */
-    private DerivedField[] extractNewPMMLResultColumns(final PMMLDocument pmmlDoc) throws InvalidSettingsException {
-        final List<DerivedField> dfs = pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList();
-
-        if (replace()) {
-            // find the final transformation and ignore intermediate columns
-            final HashMap<String, DerivedField> columnReplacement = new HashMap<>();
-            for (DerivedField df : dfs) {
-                DerivedField other = columnReplacement.get(df.getDisplayName());
-                if (other == null) {
-                    columnReplacement.put(df.getDisplayName(), df);
-                } else if (other.getName().length() < df.getName().length() && df.getName().startsWith(other.getName())) {
-                    // other is an intermediate field
-                    columnReplacement.put(df.getDisplayName(), df);
-                } else if (other.getName().length() > df.getName().length() && other.getName().startsWith(df.getName())) {
-                    // df is an intermediate field
-                } else {
-                    throw new InvalidSettingsException("Found more than on transformation with same input column "
-                            + df.getDisplayName() + ", unable to replace columns.");
-                }
-            }
-
-            return columnReplacement.values().toArray(new DerivedField[0]);
-
-        } else {
-            // use all transformations
-            return dfs.toArray(new DerivedField[0]);
-        }
     }
 
     /** @return index of column with given name in given array or <code>-1</code> */
@@ -221,5 +201,62 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
         }
 
         return -1;
+    }
+
+    /**
+     * Find index of input column with matching display name or best matching name if display name is
+     * not present.
+     *
+     * @param inSpec input table spec containing input columns
+     * @param pmmlModelInputColumns input column names of compiled PMML model (data dictionary)
+     * @param derivedFields derived fields with name and optional display name
+     * @param warnings array with some user readable warning messages
+     * @return array with index of input column or -1 for each derived field
+     */
+    private int[] findInputColumnIndices(final DataTableSpec inSpec, final Set<String> pmmlModelInputColumns,
+        final DerivedField derivedFields[], final List<String> warnings) {
+
+        final int inputColumnIndices[] = new int[derivedFields.length];
+        for (int i = 0; i < derivedFields.length; i++) {
+            final DerivedField df = derivedFields[i];
+
+            // display name might only present in KNIME
+            if (df.getDisplayName() != null) {
+                inputColumnIndices[i] = inSpec.findColumnIndex(df.getDisplayName());
+
+            // use column with most matching name instead of display name
+            } else {
+                String outCol = df.getName();
+                String columnName = "";
+                inputColumnIndices[i] = -1;
+                for (int j = 0; j < inSpec.getNumColumns(); j++) {
+                    final String inCol = inSpec.getColumnSpec(j).getName();
+                    if (outCol.startsWith(inCol) && pmmlModelInputColumns.contains(inCol) && inCol.length() > columnName.length()) {
+                        columnName = inCol;
+                        inputColumnIndices[i] = j;
+                    }
+                }
+            }
+        }
+
+        return inputColumnIndices;
+    }
+
+    /**
+     * Count occurrences of input column indices in inputIndices array.
+     *
+     * @param inputColumns number of input columns
+     * @param inputIndices array containing input column indices
+     * @return array with usage count of each input column
+     */
+    private int[] countUsage(final int inputColumns, final int inputIndices[]) {
+        final int usage[] = new int[inputColumns];
+        Arrays.fill(usage, 0);
+        for (int i = 0; i < inputIndices.length; i++) {
+            if (inputIndices[i] >= 0) {
+                usage[inputIndices[i]]++;
+            }
+        }
+        return usage;
     }
 }
