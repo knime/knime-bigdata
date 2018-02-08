@@ -295,11 +295,17 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		} else if (!hiveOperationLogsDir.mkdir()) {
 			throw new IOException("Could not create directory for Hiveserver operations log at " + hiveOperationLogsDir.getAbsolutePath());
 		}
-
+		
+		final File hiveScratchDir = new File(m_sparkTmpDir, "hive_scratch");
+		if (hiveScratchDir.exists()) {
+			ensureWritableDirectory(hiveScratchDir, "Hive scratch");
+		}
+		
 		sparkConf.set("javax.jdo.option.ConnectionURL", m_derbyUrl + ";create=true");
-		sparkConf.set("spark.sql.warehouse.dir", warehouseDir.getAbsolutePath());
-		sparkConf.set("hive.server2.logging.operation.log.location", hiveOperationLogsDir.getAbsolutePath());
+		sparkConf.set("spark.sql.warehouse.dir", warehouseDir.getCanonicalPath());
+		sparkConf.set("hive.server2.logging.operation.log.location", hiveOperationLogsDir.getCanonicalPath());
 		sparkConf.set("spark.sql.catalogImplementation", "hive");
+		sparkConf.set("hive.exec.scratchdir", hiveScratchDir.getCanonicalPath());
 	}
 	
 	private void ensureWritableDirectory(final File maybeDir, final String errorMsgName) throws IOException {
