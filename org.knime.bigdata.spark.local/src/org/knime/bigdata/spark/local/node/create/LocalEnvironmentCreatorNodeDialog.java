@@ -142,15 +142,20 @@ class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements Change
             m_settings.getCustomSparkSettingsModel()
                 .setEnabled(m_settings.getUseCustomSparkSettingsModel().getBooleanValue());
         } else if (eventSource == m_settings.getSqlSupportModel() || eventSource == m_settings.getUseHiveDataFolderModel()) {
-        	final boolean hiveEnabled = SQLSupport.valueOf(m_settings.getSqlSupportModel().getStringValue()) != SQLSupport.SPARK_SQL_ONLY;
-        	m_settings.getUseHiveDataFolderModel().setEnabled(hiveEnabled);
-        	
-        	final boolean hiveDataFolderChooserEnabled = hiveEnabled && m_settings.useHiveDataFolder();
-        	m_settings.getHiveDataFolderModel().setEnabled(hiveDataFolderChooserEnabled);
-        	m_hiveFolderChooser.setEnabled(hiveDataFolderChooserEnabled);
+        	updateSQLSettingsEnabledness();
         }
     }
 
+	private void updateSQLSettingsEnabledness() {
+		final boolean hiveEnabled = SQLSupport
+				.valueOf(m_settings.getSqlSupportModel().getStringValue()) != SQLSupport.SPARK_SQL_ONLY;
+		m_settings.getUseHiveDataFolderModel().setEnabled(hiveEnabled);
+
+		final boolean hiveDataFolderChooserEnabled = hiveEnabled && m_settings.useHiveDataFolder();
+		m_settings.getHiveDataFolderModel().setEnabled(hiveDataFolderChooserEnabled);
+		m_hiveFolderChooser.setEnabled(hiveDataFolderChooserEnabled);
+	}
+    
     /**
      * {@inheritDoc}
      */
@@ -159,13 +164,6 @@ class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements Change
         m_settings.getHiveDataFolderModel().setStringValue(m_hiveFolderChooser.getSelectedFile());
         m_settings.validateDeeper();
         m_settings.saveSettingsTo(settings);
-    }
-
-
-    private void updateHiveSettingsEnabledness() {
-    	
-    	
-    	
     }
     
     /**
@@ -176,7 +174,7 @@ class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements Change
         try {
             m_settings.loadSettingsFrom(settings);
             m_hiveFolderChooser.setSelectedFile(m_settings.getHiveDataFolderModel().getStringValue());
-            updateHiveSettingsEnabledness();
+            updateSQLSettingsEnabledness();
             
         } catch (InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
