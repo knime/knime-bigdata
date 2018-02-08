@@ -23,12 +23,11 @@ package org.knime.bigdata.hdfs;
 import java.io.File;
 import java.net.URL;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -38,6 +37,10 @@ import org.osgi.framework.BundleContext;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class FileHandlingPlugin extends AbstractUIPlugin {
+    private static final String HADOOP_HOME_SYSPROPERTY = "hadoop.home.dir";
+
+    private static final NodeLogger LOG = NodeLogger.getLogger(FileHandlingPlugin.class);
+
     // The shared instance.
     private static FileHandlingPlugin plugin;
 
@@ -64,9 +67,15 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
 
-        // this quiets an error logged on Windows that winutils.exe cannot be found
-        // (see BD-552)
-        Logger.getLogger(org.apache.hadoop.util.Shell.class).setLevel(Level.FATAL);
+        final String hadoopHome = new File(m_pluginRootPath, "hadoop_home").getCanonicalPath();
+        if (System.getProperty(HADOOP_HOME_SYSPROPERTY) == null) {
+            LOG.info(String.format("Setting system property %s to %s (for Hadoop winutils).", HADOOP_HOME_SYSPROPERTY,
+                hadoopHome));
+            System.setProperty(HADOOP_HOME_SYSPROPERTY, hadoopHome);
+        } else {
+            LOG.warn(String.format("System property %s is already set to %s. Doing nothing (not overwriting).",
+                HADOOP_HOME_SYSPROPERTY, System.getProperty(HADOOP_HOME_SYSPROPERTY)));
+        }
     }
 
     /**
