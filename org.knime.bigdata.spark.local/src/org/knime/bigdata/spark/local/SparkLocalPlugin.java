@@ -67,8 +67,6 @@ public class SparkLocalPlugin extends AbstractUIPlugin {
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.spark"));
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.hadoop.hive.metastore"));
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.hive.service"));
-
-		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.Log4JLogger");
 	}
 
 	private void configureLoggerForLocalSparkLog(final Appender sparkLogAppender, final Logger logger) {
