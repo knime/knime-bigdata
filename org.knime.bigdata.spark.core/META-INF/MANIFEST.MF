@@ -7,7 +7,8 @@ Bundle-ClassPath: knime.jar,
  conf/
 Bundle-Activator: org.knime.bigdata.spark.core.SparkPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: org.knime.bigdata.spark.core.context,
+Export-Package: com.knime.bigdata.spark.core.port.data,
+ org.knime.bigdata.spark.core.context,
  org.knime.bigdata.spark.core.context.namedobjects,
  org.knime.bigdata.spark.core.exception,
  org.knime.bigdata.spark.core.jar,
@@ -24,6 +25,7 @@ Export-Package: org.knime.bigdata.spark.core.context,
  org.knime.bigdata.spark.core.port.model.interpreter,
  org.knime.bigdata.spark.core.preferences,
  org.knime.bigdata.spark.core.sql_function,
+ org.knime.bigdata.spark.core.types,
  org.knime.bigdata.spark.core.types.converter.knime,
  org.knime.bigdata.spark.core.types.converter.spark,
  org.knime.bigdata.spark.core.types.intermediate,

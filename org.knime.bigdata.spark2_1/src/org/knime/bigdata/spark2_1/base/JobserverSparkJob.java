@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -28,14 +26,16 @@ import spark.jobserver.api.DataFileCache;
 import spark.jobserver.api.JobEnvironment;
 
 /**
- * handles translation of Scala interface to Java, wraps generic config with JobConfig
+ * Job class binding to Spark Jobserver 0.7-release line. This class translates Jobserver's Scala job interface to Java.
  *
- * @author dwk
- * @author Bjoern Lohrmann, KNIME.com
- * @author Sascha Wolke, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH
+ * @author Nico Siebert, KNIME GmbH
  */
 @SparkClass
-public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
+public class JobserverSparkJob extends KNIMESparkJob {
+
+    private static final NamedObjects namedObjects = new NamedObjectsImpl();
 
     /** Empty deserialization constructor */
     public JobserverSparkJob() {
@@ -65,11 +65,11 @@ public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
             Logger.getRootLogger().addAppender(appender);
 
             if (sparkJob instanceof SparkJob) {
-                toReturn = JobserverJobOutput.success(((SparkJob) sparkJob).runJob(sparkContext, input, this));
+                toReturn = JobserverJobOutput.success(((SparkJob) sparkJob).runJob(sparkContext, input, namedObjects));
             } else if (sparkJob instanceof SparkJobWithFiles){
-                toReturn = JobserverJobOutput.success(((SparkJobWithFiles) sparkJob).runJob(sparkContext, input, inputFiles, this));
+                toReturn = JobserverJobOutput.success(((SparkJobWithFiles) sparkJob).runJob(sparkContext, input, inputFiles, namedObjects));
             } else {
-                ((SimpleSparkJob) sparkJob).runJob(sparkContext, input, this);
+                ((SimpleSparkJob) sparkJob).runJob(sparkContext, input, namedObjects);
                 toReturn = JobserverJobOutput.success();
             }
         } catch (KNIMESparkException e) {
@@ -125,7 +125,7 @@ public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
     private void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {
         // validate named output objects do not exist
         for (String namedOutputObject : input.getNamedOutputObjects()) {
-            if (validateNamedObject(namedOutputObject)) {
+            if (namedObjects.validateNamedObject(namedOutputObject)) {
                 throw new KNIMESparkException(
                     "Spark RDD/DataFrame to create already exists. Please reset all preceding nodes and reexecute.");
             }
@@ -134,16 +134,10 @@ public class JobserverSparkJob extends KNIMESparkJob implements NamedObjects {
 
     private void ensureNamedInputObjectsExist(final JobInput input) throws KNIMESparkException {
         for (String namedInputObject : input.getNamedInputObjects()) {
-            if (!validateNamedObject(namedInputObject)) {
+            if (!namedObjects.validateNamedObject(namedInputObject)) {
                 throw new KNIMESparkException(
                     "Missing input Spark RDD/DataFrame. Please reset all preceding nodes and reexecute.");
             }
         }
-    }
-
-    @Deprecated
-    @Override
-    public JavaRDD<Row> getJavaRdd(final String key) {
-        return getDataFrame(key).javaRDD();
     }
 }

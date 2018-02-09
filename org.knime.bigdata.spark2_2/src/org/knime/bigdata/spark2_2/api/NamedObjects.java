@@ -26,61 +26,85 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.storage.StorageLevel;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * @author Bjoern Lohrmann, KNIME.com
- * @author Sascha Wolke, KNIME.com
+ * Interface for storing and retrieving "named objects" in Spark. This interface is used by Spark jobs to retrieve and
+ * store data frames for example.
+ *
+ * @author Bjoern Lohrmann, KNIME GmbH
+ * @author Sascha Wolke, KNIME GmbH
+ * @author Nico Siebert, KNIME GmbH
  */
 @SparkClass
 public interface NamedObjects {
 
     /**
-     * Adds the given data frame (without forcing computation and storage level is {@link StorageLevel#NONE}).
+     * Adds a named object under a given key.
      *
-     * @param key
-     * @param dataset
+     * @param key The key under which to store the named object.
+     * @param obj the named object to add.
+     */
+    public <T> void add(final String key, T obj);
+
+    /**
+     * Get the named object by key.
+     *
+     * @param key The key under which the named object was previously stored.
+     * @return the named object.
+     */
+    public <T> T get(final String key);
+
+    /**
+     * Delete the named object by key.
+     *
+     * @param key The key under which the named object was previously stored.
+     * @return the named object that was deleted, or null, if none was deleted.
+     */
+    public <T> T delete(final String key);
+
+    /**
+     * Adds the given data frame to the named objects.
+     *
+     * @param key The key under which the named object was previously stored.
+     * @param dataset The data frame to add.
      */
     public void addDataFrame(final String key, final Dataset<Row> dataset);
 
     /**
      * Retrieves a previously stored data frame.
      *
-     * @param key the key under which the data frame was previously stored
-     * @return the data frame
+     * @param key The key under which the data frame was previously stored.
+     * @return the data frame.
      */
     public Dataset<Row> getDataFrame(final String key);
 
     /**
-     * Retrieves a previously stored RDD as {@link RDD}.
+     * Retrieves a previously stored data frame as an RDD.
      *
-     * @param key the key under which the RDD was previously stored
+     * @param key the key under which the RDD was previously stored.
      * @return the RDD as {@link RDD}.
      * @see #getDataFrame(String)
      */
-    @Deprecated
-    public  JavaRDD<Row> getJavaRdd(final String key);
-
+    public JavaRDD<Row> getJavaRdd(final String key);
 
     /**
-     * Checks whether an object is stored under the given key.
+     * Checks whether a named object is stored under the given key.
      *
-     * @param key
+     * @param key The key under which to look up the named object.
      * @return true if stored, false otherwise.
      */
     public boolean validateNamedObject(final String key);
 
-
     /**
-     * Deletes the given object from the map of named objects.
+     * Deletes the given named object from the map of named objects.
      *
-     * @param key
+     * @param key The key under which the named object was previously stored.
      */
     public void deleteNamedDataFrame(final String key);
 
     /**
-     * @return Returns the set of all named objects
+     * @return the keys of all currently stored named objects.
      */
     public Set<String> getNamedObjects();
 }

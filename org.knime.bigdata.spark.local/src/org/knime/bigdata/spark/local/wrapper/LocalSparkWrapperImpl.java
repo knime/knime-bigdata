@@ -45,7 +45,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	
 	private int m_hiveserverPort = -1;
 
-	private final Map<String, Dataset<Row>> m_namedObjects = new HashMap<>();
+	private final Map<String, Object> m_namedObjects = new HashMap<>();
 
 	private SparkSession m_sparkSession;
 	
@@ -135,17 +135,18 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Dataset<Row> getDataFrame(String key) {
 		synchronized (m_namedObjects) {
-			return m_namedObjects.get(key);
+			return (Dataset<Row>) m_namedObjects.get(key);
 		}
 	}
 
 	@Override
 	public JavaRDD<Row> getJavaRdd(String key) {
 		synchronized (m_namedObjects) {
-			return m_namedObjects.get(key).toJavaRDD();
+			return getDataFrame(key).toJavaRDD();
 		}
 	}
 
@@ -156,12 +157,13 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void deleteNamedDataFrame(String key) {
 		synchronized (m_namedObjects) {
-			Dataset<Row> frame = m_namedObjects.remove(key);
-			if (frame != null) {
-				frame.unpersist();
+			Object removed = m_namedObjects.remove(key);
+			if (removed != null) {
+				((Dataset<Row>) removed).unpersist();
 			}
 		}
 	}
@@ -377,5 +379,28 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	@Override
 	public int getHiveserverPort() {
 		return m_hiveserverPort;
+	}
+
+	@Override
+	public <T> void add(String key, T obj) {
+		synchronized (m_namedObjects) {
+			m_namedObjects.put(key, obj);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(String key) {
+		synchronized (m_namedObjects) {
+			return (T) m_namedObjects.get(key);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T delete(String key) {
+		synchronized (m_namedObjects) {
+			return (T) m_namedObjects.remove(key);
+		}
 	}
 }
