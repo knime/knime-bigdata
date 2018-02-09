@@ -23,6 +23,7 @@ package org.knime.bigdata.hive.utility;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,6 +152,7 @@ public class HiveLoader {
                         remoteFile, columnNames, manip, tableAlreadyExists, st, exec, settings);
                 } else {
                     if (!tableAlreadyExists) {
+                        //if table does not exists, we can use LOAD DATA
                         exec.setProgress(0, "Creating table");
                         final String createTableCmd =
                                 buildCreateTableCommand(
@@ -158,12 +160,33 @@ public class HiveLoader {
                         LOGGER.debug("Executing '" + createTableCmd + "'");
                         st.execute(createTableCmd);
                         LOGGER.debug("Table sucessful created");
+                        exec.setProgress(0.5, "Loading data into table");
+                        final String buildTableCmd = buildLoadCommand(remoteFile, tableName);
+                        LOGGER.info("Executing '" + buildTableCmd + "'");
+                        st.execute(buildTableCmd);
+                        LOGGER.debug("Data loaded sucessfully");
+                    } else{
+                        //Appending to an existing table using a temp table
+                        LOGGER.debug("Start loading data...");
+                        final String tempTableName = createTempTable(columnNames, manip, st, exec, settings);
+                        loadToTempTable(remoteFile, st, exec, tempTableName);
+                        try{
+                            LOGGER.debug("Copying data to existing table");
+                            exec.setProgress(0.6, "Copying data to existing table");
+                            final String insertCmd =
+                                    buildInsertCommand(
+                                        tempTableName,
+                                        settings.tableName(),
+                                        columnNames,
+                                        null,
+                                        manip);
+                            LOGGER.debug("Executing '" + insertCmd + "'");
+                            st.execute(insertCmd);
+                        } finally {
+                            deleteTempTable(st, exec, tempTableName);
+                        }
+                        exec.setProgress(1);
                     }
-                    exec.setProgress(0.5, "Loading data into table");
-                    final String buildTableCmd = buildLoadCommand(remoteFile, tableName);
-                    LOGGER.info("Executing '" + buildTableCmd + "'");
-                    st.execute(buildTableCmd);
-                    LOGGER.debug("Data loaded sucessfully");
                 }
             }
         }
@@ -180,31 +203,19 @@ public class HiveLoader {
         final LoaderSettings settings)
                 throws Exception {
         LOGGER.debug("Start load partitioned data...");
-        final String tempTableName =
-                settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
-        LOGGER.debug("Creating temporary table " + tempTableName);
-        // first create an unpartitioned table
-        exec.setProgress(0, "Creating temporary table");
-        String createTableCmd =
-                buildCreateTableCommand(
-                    tempTableName, columnNames, Collections.<String>emptyList(), manip, settings);
-        LOGGER.debug("Executing '" + createTableCmd + "'");
-        st.execute(createTableCmd);
-        LOGGER.debug("Temporary table sucessful created");
+
+        final String tempTableName = createTempTable(columnNames, manip, st, exec, settings);
         final List<String> normalColumns = new ArrayList<>(columnNames);
         for (final String partCol : settings.partitionColumns()) {
             normalColumns.remove(partCol);
         }
         try {
-            exec.setProgress(0.2, "Importing data from uploaded file");
-            final String loadTableCmd = buildLoadCommand(remoteFile, tempTableName);
-            LOGGER.debug("Executing '" + loadTableCmd + "'");
-            st.execute(loadTableCmd);
+            loadToTempTable(remoteFile, st, exec, tempTableName);
 
             if (!tableAlreadyExists) {
                 // now create a partitioned table and copy data from
                 exec.setProgress(0.4, "Creating final table");
-                createTableCmd =
+                String createTableCmd =
                         buildCreateTableCommand(
                             settings.tableName(), normalColumns, settings.partitionColumns(), manip, settings);
                 LOGGER.debug("Executing '" + createTableCmd + "'");
@@ -231,14 +242,56 @@ public class HiveLoader {
                         manip);
             LOGGER.debug("Executing '" + insertCmd + "'");
             st.execute(insertCmd);
+
         } finally {
-            exec.setProgress(0.9, "Deleting temporary table");
-            final String dropTable = "DROP TABLE " + tempTableName;
-            LOGGER.info("Executing '" + dropTable + "'");
-            st.execute(dropTable);
+            deleteTempTable(st, exec, tempTableName);
         }
         exec.setProgress(1);
     }
+
+
+    private String createTempTable(
+        final List<String> columnNames,
+        final StatementManipulator manip,
+        final Statement st,
+        final ExecutionContext exec,
+        final LoaderSettings settings)
+                throws SQLException {
+        final String tempTableName =
+                settings.tableName() + "_" + UUID.randomUUID().toString().replace('-', '_');
+        LOGGER.debug("Creating temporary table " + tempTableName);
+        // first create an unpartitioned table
+        exec.setProgress(0, "Creating temporary table");
+        String createTableCmd =
+                buildCreateTableCommand(
+                    tempTableName, columnNames, Collections.<String>emptyList(), manip, settings);
+        LOGGER.debug("Executing '" + createTableCmd + "'");
+        st.execute(createTableCmd);
+        LOGGER.debug("Temporary table sucessful created");
+        return tempTableName;
+    }
+
+    private void loadToTempTable(
+        final RemoteFile<? extends Connection> remoteFile,
+        final Statement st,
+        final ExecutionContext exec,
+        final String tempTableName)
+                throws Exception, SQLException {
+        exec.setProgress(0.2, "Importing data from uploaded file");
+        final String loadTableCmd = buildLoadCommand(remoteFile, tempTableName);
+        LOGGER.debug("Executing '" + loadTableCmd + "'");
+        st.execute(loadTableCmd);
+    }
+
+    private void deleteTempTable(
+        final Statement st, final ExecutionContext exec, final String tempTableName)
+                throws SQLException {
+        exec.setProgress(0.9, "Deleting temporary table");
+        final String dropTable = "DROP TABLE " + tempTableName;
+        LOGGER.info("Executing '" + dropTable + "'");
+        st.execute(dropTable);
+    }
+
 
     private static String buildCreateTableCommand(
         final String tableName,
@@ -306,19 +359,23 @@ public class HiveLoader {
 
         final StringBuilder buf = new StringBuilder();
         buf.append("INSERT INTO TABLE ").append(destTableName);
-        buf.append(" PARTITION (");
-        for (final String partCol : partitionColumns) {
-            buf.append(manip.quoteIdentifier(partCol)).append(",");
+        if(partitionColumns != null){
+            buf.append(" PARTITION (");
+            for (final String partCol : partitionColumns) {
+                buf.append(manip.quoteIdentifier(partCol)).append(",");
+            }
+            buf.deleteCharAt(buf.length() - 1);
+            buf.append(")");
         }
-        buf.deleteCharAt(buf.length() - 1);
-        buf.append(")\n");
-
+        buf.append("\n");
         buf.append("SELECT ");
         for (final String col : normalColumns) {
             buf.append(manip.quoteIdentifier(col)).append(",");
         }
-        for (final String col : partitionColumns) {
-            buf.append(manip.quoteIdentifier(col)).append(",");
+        if(partitionColumns != null){
+            for (final String col : partitionColumns) {
+                buf.append(manip.quoteIdentifier(col)).append(",");
+            }
         }
         buf.deleteCharAt(buf.length() - 1);
         buf.append("\nFROM ").append(sourceTableName);
