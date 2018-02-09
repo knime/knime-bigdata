@@ -188,8 +188,6 @@ public class SparkPreferenceValidator {
             }
 
             toReturn.put(key, value);
-
-            lineNumber++;
         }
 
         return toReturn;
