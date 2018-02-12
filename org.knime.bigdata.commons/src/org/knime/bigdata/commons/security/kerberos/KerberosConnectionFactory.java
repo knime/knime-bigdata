@@ -38,8 +38,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
 import org.knime.core.node.workflow.NodeContext;
-
-import com.knime.licenses.License;
+import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * {@link CachedConnectionFactory} implementation that supports Kerberos authentication.
@@ -81,7 +80,7 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             final UserGroupInformation ugi;
             final String jdbcImpersonationURL;
             if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter()
-                    && License.runningInServerContext()) {
+                    && KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
                 LOGGER.debug("Using JDBC impersonation parameter instead of proxy user on KNIME Server");
                 jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl);
                 ugi = UserGroupUtil.getKerberosTGTUser(conf);

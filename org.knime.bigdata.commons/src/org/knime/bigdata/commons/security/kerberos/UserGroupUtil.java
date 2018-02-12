@@ -27,8 +27,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.workflow.NodeContext;
-
-import com.knime.licenses.License;
+import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  *
@@ -109,7 +108,7 @@ public class UserGroupUtil {
         final UserGroupInformation kerberosTGTUser = getKerberosTGTUser(conf);
 
         final UserGroupInformation user;
-        if (License.runningInServerContext()) {
+        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
             //Always use the workflow user on the server in Kerberos mode because of security reasons!!!
             Optional<String> wfUser = NodeContext.getWorkflowUser();
             if (wfUser.isPresent() && !kerberosTGTUser.getUserName().equals(wfUser.get())

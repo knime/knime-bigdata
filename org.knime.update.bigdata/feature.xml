@@ -17,10 +17,6 @@
          version="0.0.0"/>
 
    <includes
-         id="com.knime.features.licenses"
-         version="0.0.0"/>
-
-   <includes
          id="com.knime.features.pmml.compilation.java.jario"
          version="0.0.0"/>
 
