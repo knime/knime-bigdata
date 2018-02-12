@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.transform.SourceLocator;
@@ -134,8 +135,8 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
      */
     @Override
     protected DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec, final PortObject pmmlPort,
-        final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols)
-        throws InvalidSettingsException {
+        final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols,
+        final Map<Integer, Integer> replaceCols) throws InvalidSettingsException {
 
         final DerivedField derivedFields[] = ((PMMLPortObject) pmmlPort).getDerivedFields();
         if (derivedFields.length == 0) {
@@ -161,23 +162,30 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
 
             if (inputColIdx >= 0 && pmmlResultColIdx >= 0) { // add only the specs to the result that have a matching input column
                 final DataColumnSpec pmmlResultCol = pmmlResultColSpecs[pmmlResultColIdx];
-                final DataColumnSpecCreator creator = new DataColumnSpecCreator(pmmlResultCol);
 
                 if (replace()) {
                     final DataColumnSpec inputColumn = inSpec.getColumnSpec(inputColIdx);
-                    resultCols.remove(inputColumn);
-                    skipCols.add(inputColIdx);
 
                     if (inputColUsage[inputColIdx] == 1) {
+                        int outputColIdx = resultCols.indexOf(inputColumn);
+                        final DataColumnSpecCreator creator = new DataColumnSpecCreator(pmmlResultCol);
                         creator.setName(inputColumn.getName());
+                        resultCols.set(outputColIdx, creator.createSpec());
+                        replaceCols.put(inputColIdx, pmmlResultColIdx);
+
                     } else {
                         warnings.add("More than one transformation with input column " + inputColumn.getName()
                             + " using oringal output name " + pmmlResultCol.getName() + " instead of renaming column.");
+                        resultCols.remove(inputColumn);
+                        skipCols.add(inputColIdx);
+                        resultCols.add(pmmlResultCol);
+                        addCols.add(pmmlResultColIdx);
                     }
-                }
 
-                resultCols.add(creator.createSpec());
-                addCols.add(pmmlResultColIdx);
+                } else {
+                    resultCols.add(pmmlResultCol);
+                    addCols.add(pmmlResultColIdx);
+                }
 
             } else {
                 warnings.add("Missing input or output column in model, ignoring transformation " + df.getName());

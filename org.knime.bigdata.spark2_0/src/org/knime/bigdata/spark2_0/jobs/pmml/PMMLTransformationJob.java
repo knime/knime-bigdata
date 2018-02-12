@@ -52,7 +52,8 @@ public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobIn
         final List<Integer> resultColIdxs2Add = input.getAdditionalColIdxs();
         final List<Integer> tmp = input.getSkippedColIdxs();
         final Set<Integer> inputColIdxs2Skip = new HashSet<>(tmp);
-        final Function<Row, Row> predict = new Function<Row, Row>() {
+        final Map<Integer, Integer> inputColIdx2Replace = input.getReplaceColIdxs();
+        return new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             //use transient since a Method can not be serialized
@@ -86,11 +87,13 @@ public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobIn
                 if (replace) {
                     rowBuilder = RowBuilder.emptyRow();
                     for (int i = 0; i < r.length(); i++) {
-                        if (inputColIdxs2Skip.contains(Integer.valueOf(i))) {
-                            //skip the input
-                            continue;
+                        if (inputColIdxs2Skip.contains(i)) {
+                            // skip the input column
+                        } else if (inputColIdx2Replace.containsKey(i)) {
+                            rowBuilder.add(result[inputColIdx2Replace.get(i)]);
+                        } else {
+                            rowBuilder.add(r.get(i));
                         }
-                        rowBuilder.add(r.get(i));
                     }
                 } else {
                     rowBuilder = RowBuilder.fromRow(r);
@@ -105,6 +108,5 @@ public class PMMLTransformationJob extends PMMLAssignJob<PMMLTransformationJobIn
                 return rowBuilder.build();
             }
         };
-        return predict;
     }
 }

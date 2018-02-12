@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.node.pmml.transformation;
 
 import java.util.List;
+import java.util.Map;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
@@ -36,6 +37,7 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
     private static final String REPLACE = "REPLACE";
     private static final String ADD_COLS = "additionalCols";
     private static final String SKIP_COLS = "skippedCols";
+    private static final String REPLACE_COLS = "replaceCols";
 
     /**
      * Paramless constructor for automatic deserialization.
@@ -51,15 +53,17 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
      * @param addCols
      * @param replace
      * @param skipCols
+     * @param replaceCols
      */
     public PMMLTransformationJobInput(final String inputNamedObject, final Integer[] colIdxs, final String mainClass,
             final String outputNamedObject, final IntermediateSpec outputSpec,
-            final List<Integer> addCols, final boolean replace, final List<Integer> skipCols) {
+            final List<Integer> addCols, final boolean replace, final List<Integer> skipCols, final Map<Integer, Integer> replaceCols) {
 
         super(inputNamedObject, colIdxs, mainClass, outputNamedObject, outputSpec);
         set(REPLACE, replace);
         set(ADD_COLS, addCols);
         set(SKIP_COLS, skipCols);
+        set(REPLACE_COLS, replaceCols);
     }
 
     /**
@@ -81,5 +85,12 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
      */
     public List<Integer> getSkippedColIdxs() {
         return get(SKIP_COLS);
+    }
+
+    /**
+     * @return map of input column indices (key) to replace with PMML result column indices (value)
+     */
+    public Map<Integer, Integer> getReplaceColIdxs() {
+        return get(REPLACE_COLS);
     }
 }

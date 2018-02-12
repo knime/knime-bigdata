@@ -22,8 +22,10 @@ package org.knime.bigdata.spark.node.pmml.transformation.compiled;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -70,8 +72,9 @@ public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSpark
 
         final List<Integer> addCols = new LinkedList<>();
         final List<Integer> skipCols = new LinkedList<>();
+        final Map<Integer, Integer> replaceCols = new HashMap<>();
         final DataTableSpec resultSpec = createTransformationResultSpec(sparkSpec.getTableSpec(),
-            null, pmmlSpec, addCols, skipCols);
+            null, pmmlSpec, addCols, skipCols, replaceCols);
         return new PortObjectSpec[]{
             new SparkDataPortObjectSpec(sparkSpec.getContextID(), resultSpec)};
     }
@@ -86,8 +89,8 @@ public class SparkCompiledTransformationPMMLApplyNodeModel extends AbstractSpark
 
     @Override
     protected DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec, final PortObject pmmlPort,
-        final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols)
-        throws InvalidSettingsException {
+        final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols,
+        final Map<Integer, Integer> replaceCols) throws InvalidSettingsException {
 
         final DataColumnSpec[] pmmlResultColSpecs = cms.getTransformationsResultColSpecs(inSpec);
         final Set<String> pmmlInputColNames = cms.getInputIndices().keySet();

@@ -23,8 +23,10 @@ package org.knime.bigdata.spark.node.pmml.transformation;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
@@ -95,14 +97,15 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         }
         final List<Integer> addCols = new LinkedList<>();
         final List<Integer> skipCols = new LinkedList<>();
+        final Map<Integer, Integer> replaceCols = new HashMap<>();
         final DataTableSpec resultSpec =
-            createTransformationResultSpec(data.getTableSpec(), inObjects[0], cms, addCols, skipCols);
+            createTransformationResultSpec(data.getTableSpec(), inObjects[0], cms, addCols, skipCols, replaceCols);
         final String aOutputTableName = SparkIDs.createSparkDataObjectID();
         final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
         final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), colIdxs,
-            pmml.getModelClassName(), aOutputTableName, outputSchema, addCols, m_replace.getBooleanValue(), skipCols);
+            pmml.getModelClassName(), aOutputTableName, outputSchema, addCols, m_replace.getBooleanValue(), skipCols, replaceCols);
         exec.setMessage("Execute Spark job");
         final JobWithFilesRunFactory<PMMLTransformationJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);
@@ -137,12 +140,13 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
      * @param cms the {@link CompiledModelPortObjectSpec}
      * @param addCols list of PMML result column indices to add to the result (filled by this method)
      * @param skipCols list of input column indices to skip (filled by this method)
+     * @param replaceCols map of input column indices (key) to replace with PMML result column indices (value)
      * @return the result {@link DataTableSpec}
      * @throws InvalidSettingsException
      */
     protected abstract DataTableSpec createTransformationResultSpec(final DataTableSpec inSpec,
         final PortObject pmmlPort, final CompiledModelPortObjectSpec cms, final List<Integer> addCols,
-        final List<Integer> skipCols) throws InvalidSettingsException;
+        final List<Integer> skipCols, final Map<Integer, Integer> replaceCols) throws InvalidSettingsException;
 
     /**
      * {@inheritDoc}
