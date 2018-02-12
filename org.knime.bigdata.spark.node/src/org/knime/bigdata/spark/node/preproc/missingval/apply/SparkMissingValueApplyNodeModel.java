@@ -44,6 +44,7 @@ import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingV
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
@@ -51,6 +52,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 import org.knime.core.node.port.pmml.preproc.DerivedFieldMapper;
+import org.w3c.dom.Document;
 
 /**
  * Missing values spark apply node model.
@@ -99,7 +101,12 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
             outputColSpec[i] = inputSpec.getColumnSpec(i);
         }
 
-        final PMMLDocument pmmlDoc = PMMLDocument.Factory.parse(pmmlIn.getPMMLValue().getDocument());
+        final PMMLDocument pmmlDoc;
+
+        try (AutocloseableSupplier<Document> supplier = pmmlIn.getPMMLValue().getDocumentSupplier()) {
+            pmmlDoc = PMMLDocument.Factory.parse(supplier.get());
+        }
+
         if (pmmlDoc.getPMML().getTransformationDictionary() == null
                 || pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList().isEmpty()) {
             setWarningMessage("No changes to the input data were made, because the provided PMML contains no transformations.");
