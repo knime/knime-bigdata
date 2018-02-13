@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.node.pmml.transformation.compiling;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,7 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
         final CompiledModelPortObjectSpec cms, final List<Integer> addCols, final List<Integer> skipCols,
         final Map<Integer, Integer> replaceCols) throws InvalidSettingsException {
 
-        final DerivedField derivedFields[] = ((PMMLPortObject) pmmlPort).getDerivedFields();
+        final DerivedField derivedFields[] = extractNewPMMLResultColumns(((PMMLPortObject) pmmlPort).getDerivedFields());
         if (derivedFields.length == 0) {
             setWarningMessage("Empty PMML detected.");
             return inSpec;
@@ -209,6 +210,69 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
         }
 
         return -1;
+    }
+
+    /**
+     * Returns array of PMML generated output columns.
+     *
+     * In replace mode: If field has a display name, only the last applied transformation per input column will be used
+     * and no intermediate columns are appended.
+     */
+    private DerivedField[] extractNewPMMLResultColumns(final DerivedField derivedFields[]) throws InvalidSettingsException {
+        if (replace()) {
+            final List<DerivedField> result = new ArrayList<>(derivedFields.length);
+
+            // source -> derived field map that contains last transformation in a chain and no intermediate fields
+            final HashMap<String, DerivedField> chainResultFields = new HashMap<>();
+
+            for (DerivedField df : derivedFields) {
+                if (supportsIntermediateReplace(df)) {
+                    addPMMLResultField(chainResultFields, df);
+                } else {
+                    result.add(df);
+                }
+            }
+
+            result.addAll(chainResultFields.values());
+
+            return result.toArray(new DerivedField[0]);
+
+        } else {
+            // use all transformations
+            return derivedFields;
+        }
+    }
+
+    /** @return <code>true</code> if display name equals source name with appended stars */
+    private boolean supportsIntermediateReplace(final DerivedField derivedField) {
+        final String destName = derivedField.getName();
+        final String sourceName = derivedField.getDisplayName();
+        return !StringUtils.isBlank(sourceName)
+                && destName.startsWith(sourceName)
+                && destName.substring(sourceName.length()).matches("\\*+");
+    }
+
+    /**
+     * Eliminate intermediate fields by adding a derived field to given map if map does not contain a field with the
+     * same display name or overwrite a field with same display name and shorter name.
+     *
+     * @param chainResultFields map with source column (display name) to derived field mapping
+     * @param df derived field with display name to add, that {@link #supportsIntermediateReplace(DerivedField)}
+     * @throws InvalidSettingsException if two columns with same input and output columns present
+     */
+    private void addPMMLResultField(final HashMap<String, DerivedField> chainResultFields, final DerivedField df) throws InvalidSettingsException {
+        DerivedField other = chainResultFields.get(df.getDisplayName());
+        if (other == null) {
+            chainResultFields.put(df.getDisplayName(), df);
+        } else if (other.getName().length() < df.getName().length()) {
+            // other is an intermediate field, replace it
+            chainResultFields.put(df.getDisplayName(), df);
+        } else if (other.getName().length() > df.getName().length()) {
+            // this is an intermediate field, keep other
+        } else {
+            throw new InvalidSettingsException("Found more than on transformation with same input column "
+                    + df.getDisplayName() + " and same output column " + df.getName() + ", unable to replace columns.");
+        }
     }
 
     /**
