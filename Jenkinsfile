@@ -32,7 +32,8 @@ node {
 				[name : 'knime-bigdata'],
 				[name : 'knime-config'],
 				[name : 'knime-jenkins'],
-				[name : 'knime-orc']
+				[name : 'knime-orc'],
+				[name : 'knime-sparkling-water']
 			]
 		)
 	}
