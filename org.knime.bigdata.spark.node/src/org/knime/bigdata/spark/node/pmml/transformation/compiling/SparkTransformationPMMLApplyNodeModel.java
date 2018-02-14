@@ -141,55 +141,65 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
 
         final DerivedField derivedFields[] = extractNewPMMLResultColumns(((PMMLPortObject) pmmlPort).getDerivedFields());
         if (derivedFields.length == 0) {
-            setWarningMessage("Empty PMML detected.");
+            setWarningMessage("PMML document contains no transformations. Doing nothing.");
             return inSpec;
         }
 
+        // outputs
         final List<String> warnings = new LinkedList<>();
-        final Set<String> pmmlModelInputColumns = cms.getInputIndices().keySet();
-        final int inputColIndices[] = findInputColumnIndices(inSpec, pmmlModelInputColumns, derivedFields, warnings);
-        final int inputColUsage[] = countUsage(inSpec.getNumColumns(), inputColIndices);
-        final DataColumnSpec pmmlResultColSpecs[] = cms.getTransformationsResultColSpecs(inSpec);
         final List<DataColumnSpec> resultCols = new ArrayList<>(inSpec.getNumColumns());
         for (int i = 0; i < inSpec.getNumColumns(); i++) {
             resultCols.add(inSpec.getColumnSpec(i));
         }
 
+
+        final int inputColIndicesOfDerivedField[] = findInputColumnIndicesOfDerivedFields(inSpec, cms, derivedFields);
+        final int inputColUsage[] = countUsage(inSpec.getNumColumns(), inputColIndicesOfDerivedField);
+        final DataColumnSpec pmmlResultColSpecs[] = cms.getTransformationsResultColSpecs(inSpec);
+
         // add all new columns and drop the input columns in replace mode
         for (int i = 0; i < derivedFields.length; i++) {
             final DerivedField df = derivedFields[i];
-            final int inputColIdx = inputColIndices[i];
+
+            final int inputColIdx = inputColIndicesOfDerivedField[i];
+            if (inputColIdx < 0) {
+                warnings.add(String.format("Missing input column%s, ignoring transformation %s",
+                    StringUtils.isBlank(df.getDisplayName())
+                        ? ""
+                        : " " + df.getDisplayName(),
+                    df.getName()));
+                continue;
+            }
+
+            // add only the specs to the result that have a matching input column
             final int pmmlResultColIdx = findColumnIndex(pmmlResultColSpecs, df.getName());
+            if (pmmlResultColIdx < 0) {
+                warnings.add(String.format("Missing column %s in PMML result spec. Ignoring transformation.",
+                    df.getName()));
+                continue;
+            }
 
-            if (inputColIdx >= 0 && pmmlResultColIdx >= 0) { // add only the specs to the result that have a matching input column
-                final DataColumnSpec pmmlResultCol = pmmlResultColSpecs[pmmlResultColIdx];
+            final DataColumnSpec pmmlResultCol = pmmlResultColSpecs[pmmlResultColIdx];
+            if (replace()) {
+                final DataColumnSpec inputColumn = inSpec.getColumnSpec(inputColIdx);
 
-                if (replace()) {
-                    final DataColumnSpec inputColumn = inSpec.getColumnSpec(inputColIdx);
-
-                    if (inputColUsage[inputColIdx] == 1) {
-                        int outputColIdx = resultCols.indexOf(inputColumn);
-                        final DataColumnSpecCreator creator = new DataColumnSpecCreator(pmmlResultCol);
-                        creator.setName(inputColumn.getName());
-                        resultCols.set(outputColIdx, creator.createSpec());
-                        replaceCols.put(inputColIdx, pmmlResultColIdx);
-
-                    } else {
-                        warnings.add("More than one transformation with input column " + inputColumn.getName()
-                            + " using oringal output name " + pmmlResultCol.getName() + " instead of renaming column.");
-                        resultCols.remove(inputColumn);
-                        skipCols.add(inputColIdx);
-                        resultCols.add(pmmlResultCol);
-                        addCols.add(pmmlResultColIdx);
-                    }
+                if (inputColUsage[inputColIdx] == 1) {
+                    int outputColIdx = resultCols.indexOf(inputColumn);
+                    final DataColumnSpecCreator creator = new DataColumnSpecCreator(pmmlResultCol);
+                    creator.setName(inputColumn.getName());
+                    resultCols.set(outputColIdx, creator.createSpec());
+                    replaceCols.put(inputColIdx, pmmlResultColIdx);
 
                 } else {
+                    resultCols.remove(inputColumn);
+                    skipCols.add(inputColIdx);
                     resultCols.add(pmmlResultCol);
                     addCols.add(pmmlResultColIdx);
                 }
 
             } else {
-                warnings.add("Missing input or output column in model, ignoring transformation " + df.getName());
+                resultCols.add(pmmlResultCol);
+                addCols.add(pmmlResultColIdx);
             }
         }
 
@@ -280,38 +290,41 @@ public class SparkTransformationPMMLApplyNodeModel extends AbstractSparkTransfor
      * not present.
      *
      * @param inSpec input table spec containing input columns
-     * @param pmmlModelInputColumns input column names of compiled PMML model (data dictionary)
+     * @param cms compiled PMML model (data dictionary)
      * @param derivedFields derived fields with name and optional display name
-     * @param warnings array with some user readable warning messages
      * @return array with index of input column or -1 for each derived field
      */
-    private int[] findInputColumnIndices(final DataTableSpec inSpec, final Set<String> pmmlModelInputColumns,
-        final DerivedField derivedFields[], final List<String> warnings) {
+    private int[] findInputColumnIndicesOfDerivedFields(final DataTableSpec inSpec, final CompiledModelPortObjectSpec cms,
+        final DerivedField derivedFields[]) {
 
-        final int inputColumnIndices[] = new int[derivedFields.length];
+        final Set<String> pmmlModelInputColumns = cms.getInputIndices().keySet();
+        final int inputColIndicesOfDerivedField[] = new int[derivedFields.length];
+
         for (int i = 0; i < derivedFields.length; i++) {
             final DerivedField df = derivedFields[i];
 
-            // display name might only present in KNIME
             if (df.getDisplayName() != null) {
-                inputColumnIndices[i] = inSpec.findColumnIndex(df.getDisplayName());
+                // most PMML transformations specify a "display name", which names the input column that
+                // is consumed by the transformation
+                inputColIndicesOfDerivedField[i] = inSpec.findColumnIndex(df.getDisplayName());
 
-            // use column with most matching name instead of display name
             } else {
-                String outCol = df.getName();
-                String columnName = "";
-                inputColumnIndices[i] = -1;
+                // some PMML transformations do not have a display name set (e.g. those produced by the "Category to Number" node
+                // use column with most matching name instead of display name
+                String derivedFielName = df.getName();
+                String inputColumnName = "";
+                inputColIndicesOfDerivedField[i] = -1;
                 for (int j = 0; j < inSpec.getNumColumns(); j++) {
                     final String inCol = inSpec.getColumnSpec(j).getName();
-                    if (outCol.startsWith(inCol) && pmmlModelInputColumns.contains(inCol) && inCol.length() > columnName.length()) {
-                        columnName = inCol;
-                        inputColumnIndices[i] = j;
+                    if (derivedFielName.startsWith(inCol) && pmmlModelInputColumns.contains(inCol) && inCol.length() > inputColumnName.length()) {
+                        inputColumnName = inCol;
+                        inputColIndicesOfDerivedField[i] = j;
                     }
                 }
             }
         }
 
-        return inputColumnIndices;
+        return inputColIndicesOfDerivedField;
     }
 
     /**
