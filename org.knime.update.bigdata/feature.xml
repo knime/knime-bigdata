@@ -33,7 +33,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.knime.features.sparklingwater"
+         id="org.knime.features.ext.h2o.sparklingwater"
          version="0.0.0"/>
 
 </feature>
