@@ -38,6 +38,7 @@ import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactory;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueSettings;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -74,17 +75,18 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
 
         final SparkDataPortObjectSpec sparkPortSpec = ((SparkDataPortObjectSpec)inSpecs[0]);
         final DataTableSpec inputSpec = sparkPortSpec.getTableSpec();
-        final DataTableSpec resultSpec = sparkPortSpec.getTableSpec();
-        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
+        m_settings.configure(inputSpec);
 
         final SparkVersion version = SparkContextUtil.getSparkVersion(sparkPortSpec.getContextID());
         if (SparkVersion.V_2_0.compareTo(version) > 0) {
             throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark 2.0.");
         }
 
-        m_settings.configure(inputSpec);
+        final DataTableSpec resultSpec = createOutputSpec(inputSpec);
+        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
 
-        return new PortObjectSpec[]{sparkPortSpec, pmmlSpecCreator.createSpec()};
+        return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkPortSpec.getContextID(), resultSpec),
+            pmmlSpecCreator.createSpec()};
     }
 
     @Override
@@ -93,29 +95,37 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         final SparkDataPortObject inputPort = (SparkDataPortObject)inData[0];
         final SparkContextID contextID = inputPort.getContextID();
         final DataTableSpec inputSpec = inputPort.getTableSpec();
-        final KNIMEToIntermediateConverter converters[] =
-            KNIMEToIntermediateConverterRegistry.getConverters(inputSpec);
+        final KNIMEToIntermediateConverter converters[] = new KNIMEToIntermediateConverter[inputSpec.getNumColumns()];
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
         final SparkMissingValueHandler mvHandler[] = new SparkMissingValueHandler[inputSpec.getNumColumns()];
         boolean validPMML = true;
 
+        final DataTableSpec outputSpec = createOutputSpec(inputSpec);
+
         // create job input
         for (int i = 0; i < inputSpec.getNumColumns(); i++) {
-            final DataColumnSpec colSpec = inputSpec.getColumnSpec(i);
-            final MVIndividualSettings colSetting = m_settings.getSettingsForColumn(colSpec);
-            final SparkMissingValueHandlerFactory factory = (SparkMissingValueHandlerFactory)colSetting.getFactory();
-            final SparkMissingValueHandler handler = factory.createHandler(colSpec);
-            handler.loadSettingsFrom(colSetting.getSettings());
-            jobInput.addColumnConfig(colSpec.getName(), handler.getJobInputColumnConfig(converters[i]));
+            final DataColumnSpec inputColSpec = inputSpec.getColumnSpec(i);
+            final DataColumnSpec outputColSpec = outputSpec.getColumnSpec(i);
+
+            final SparkMissingValueHandler handler = getSparkMissingValueHandler(inputColSpec);
+
+            converters[i] = KNIMEToIntermediateConverterRegistry.get(outputColSpec.getType());
+            final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converters[i]);
+
+            if (!inputColSpec.getType().equals(outputColSpec.getType())) {
+                SparkMissingValueJobInput.addCastConfig(colConfig, converters[i].getIntermediateDataType());
+            }
+
+            jobInput.addColumnConfig(inputColSpec.getName(), colConfig);
             mvHandler[i] = handler;
-            validPMML &= factory.producesPMML4_2();
+            validPMML &= handler.isPMML4_2Compatible();
         }
 
         if (!validPMML) {
             setWarningMessage(
-                "The current settings use missing value handling " + "methods that cannot be represented in PMML 4.2");
+                "The current settings use missing value handling methods that cannot be represented in PMML 4.2");
         }
 
         exec.setMessage("Running Spark job");
@@ -123,8 +133,9 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
             SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final SparkMissingValueJobOutput jobOutput = factory.createRun(jobInput).run(contextID, exec);
 
+
         final SparkDataPortObject sparkOutputPort =
-            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, inputSpec));
+            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, outputSpec));
 
         // convert fixed values (including aggregation results)
         final Map<String, Serializable> intermediateOutput = jobOutput.getValues();
@@ -137,10 +148,35 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         exec.setMessage("Generating PMML");
         PMMLMissingValueReplacementTranslator pmmlTranslator =
             new PMMLMissingValueReplacementTranslator(mvHandler, outputValues);
-        PMMLPortObject pmmlOutputPort = new PMMLPortObject(new PMMLPortObjectSpecCreator(inputSpec).createSpec());
+        PMMLPortObject pmmlOutputPort = new PMMLPortObject(new PMMLPortObjectSpecCreator(outputSpec).createSpec());
         pmmlOutputPort.addModelTranslater(pmmlTranslator);
 
         return new PortObject[]{sparkOutputPort, pmmlOutputPort};
+    }
+
+    private DataTableSpec createOutputSpec(final DataTableSpec inputSpec) throws InvalidSettingsException {
+        final DataColumnSpec outputColSpec[] = new DataColumnSpec[inputSpec.getNumColumns()];
+
+        for (int i = 0; i < inputSpec.getNumColumns(); i++) {
+            final DataColumnSpec colSpec = inputSpec.getColumnSpec(i);
+            final SparkMissingValueHandler handler = getSparkMissingValueHandler(colSpec);
+
+            DataColumnSpecCreator specCreator = new DataColumnSpecCreator(colSpec);
+            specCreator.setType(handler.getOutputDataType());
+            outputColSpec[i] = specCreator.createSpec();
+        }
+
+        return new DataTableSpec(outputColSpec);
+    }
+
+    private SparkMissingValueHandler getSparkMissingValueHandler(final DataColumnSpec inputColSpec)
+        throws InvalidSettingsException {
+
+        final MVIndividualSettings colSetting = m_settings.getSettingsForColumn(inputColSpec);
+        final SparkMissingValueHandlerFactory factory = (SparkMissingValueHandlerFactory)colSetting.getFactory();
+        final SparkMissingValueHandler handler = factory.createHandler(inputColSpec);
+        handler.loadSettingsFrom(colSetting.getSettings());
+        return handler;
     }
 
     @Override

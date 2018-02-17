@@ -26,28 +26,35 @@ import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandler;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.ReplaceOperation;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.DoubleCell;
 
 /**
- * Replace missing values with mean.
- * 
+ * Replace missing values with mean and change the output column type to double.
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class MeanMissingValueHandler extends SparkMissingValueHandler {
+public class DoubleMeanMissingValueHandler extends SparkMissingValueHandler {
 
     /**
      * @param col the column this handler is configured for
      */
-    public MeanMissingValueHandler(final DataColumnSpec col) {
+    public DoubleMeanMissingValueHandler(final DataColumnSpec col) {
         super(col);
     }
 
     @Override
     public DerivedField getPMMLDerivedField(final Object aggResult) {
-        return createValueReplacingDerivedField(getPMMLDataTypeForColumn(), aggResult.toString());
+        return createValueReplacingDerivedField(org.dmg.pmml.DATATYPE.DOUBLE, aggResult.toString());
     }
 
     @Override
     public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) {
         return SparkMissingValueJobInput.createConfig(ReplaceOperation.AVG);
+    }
+
+    @Override
+    public DataType getOutputDataType() {
+        return DataType.getType(DoubleCell.class);
     }
 }

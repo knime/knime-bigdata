@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Missing value job input, containing configurations by column name or data type.
@@ -35,6 +36,9 @@ public class SparkMissingValueJobInput extends JobInput {
 
     /** type of missing value replacement configuration key */
     public static final String KEY_OP_TYPE = "operationType";
+
+    /** output type key, if column should be casted */
+    public static final String KEY_OUTPUT_TYPE = "outputType";
 
     /** types of missing value replacement */
     public enum ReplaceOperation {
@@ -123,6 +127,18 @@ public class SparkMissingValueJobInput extends JobInput {
     public static Map<String, Serializable> createConfig(final ReplaceOperation operation) {
         final HashMap<String, Serializable> config = new HashMap<>();
         config.put(KEY_OP_TYPE, operation);
+        return config;
+    }
+
+    /**
+     * Add output type cast to given configuration.
+     *
+     * @param config column configuration
+     * @param outputType cast column to other data type before missing value apply
+     * @return fixed value configuration
+     */
+    public static Map<String, Serializable> addCastConfig(final Map<String, Serializable> config, final IntermediateDataType outputType) {
+        config.put(KEY_OUTPUT_TYPE, outputType);
         return config;
     }
 }

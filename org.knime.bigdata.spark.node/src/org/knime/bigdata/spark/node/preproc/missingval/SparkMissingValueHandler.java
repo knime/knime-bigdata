@@ -44,13 +44,26 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public abstract class SparkMissingValueHandler extends MissingCellHandler {
 
+    private final boolean m_isPMML4_2Compatible;
+
     /**
-     * Constructor for the missing value handler.
+     * Constructor for a PMML 4.2 compatible Spark missing value handler.
      *
      * @param col the column spec this handler is used for
      */
     public SparkMissingValueHandler(final DataColumnSpec col) {
+        this(col, true);
+    }
+
+    /**
+     * Constructor for the missing value handler.
+     *
+     * @param col the column spec this handler is used for.
+     * @param isPMML4_2Compatible whether the strategy implemented by this handler is PMML 4.2 compatible or not.
+     */
+    public SparkMissingValueHandler(final DataColumnSpec col, final boolean isPMML4_2Compatible) {
         super(col);
+        m_isPMML4_2Compatible = isPMML4_2Compatible;
     }
 
     /**
@@ -58,8 +71,9 @@ public abstract class SparkMissingValueHandler extends MissingCellHandler {
      *
      * @param converter The {@link KNIMEToIntermediateConverter} to use for this column.
      * @return the column configuration.
+     * @throws InvalidSettingsException if the job contains invalid configurations
      */
-    public abstract Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter);
+    public abstract Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) throws InvalidSettingsException;
 
     /**
      * Creates a derived field for the documentation of the operation in PMML.
@@ -82,6 +96,14 @@ public abstract class SparkMissingValueHandler extends MissingCellHandler {
 
         final SparkMissingValueHandlerFactoryManager manager = SparkMissingValueHandlerFactoryManager.getInstance();
         return (SparkMissingValueHandler)fromPMMLExtension(column, manager, ext);
+    }
+
+    /**
+     *
+     * @return whether the missing value handler is PMML 4.2 compatible.
+     */
+    public boolean isPMML4_2Compatible() {
+        return m_isPMML4_2Compatible;
     }
 
     @Override

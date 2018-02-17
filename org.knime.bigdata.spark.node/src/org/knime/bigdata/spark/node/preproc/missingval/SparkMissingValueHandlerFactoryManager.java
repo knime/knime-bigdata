@@ -17,8 +17,10 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval;
 
+import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactory;
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;
 import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
+import org.knime.bigdata.spark.node.preproc.missingval.handler.RoundedMeanMissingValueHandlerFactory;
 
 /**
  * Manager for missing spark value handler factories that are provided by extensions.
@@ -56,6 +58,20 @@ public class SparkMissingValueHandlerFactoryManager extends MissingCellHandlerFa
             instance = new SparkMissingValueHandlerFactoryManager(EXT_POINT_ID, EXT_POINT_ATTR_DF);
         }
         return instance;
+    }
+
+    /**
+     * {@inheritDoc} Supports backward compatibility by replacing MeanMissingValueHandlerFactory with
+     * {@link RoundedMeanMissingValueHandlerFactory}.
+     */
+    @Override
+    public MissingCellHandlerFactory getFactoryByID(final String id) {
+        // deprecated id (formerly mean, now rounded mean) which may still be
+        // used by old workflows (this was changed as part of BD-547).
+        if (id.equals(RoundedMeanMissingValueHandlerFactory.DEPRECATED_ID)) {
+            return super.getFactoryByID(RoundedMeanMissingValueHandlerFactory.ID);
+        }
+        return super.getFactoryByID(id);
     }
 
     @Override

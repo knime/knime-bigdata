@@ -29,7 +29,7 @@ import org.knime.core.data.DataColumnSpec;
 
 /**
  * Removes a row if it has a missing value in the column this handler is configured for.
- * 
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
 public class RemoveRowMissingValueHandler extends SparkMissingValueHandler {
@@ -38,7 +38,7 @@ public class RemoveRowMissingValueHandler extends SparkMissingValueHandler {
      * @param col the column this handler is configured for
      */
     public RemoveRowMissingValueHandler(final DataColumnSpec col) {
-        super(col);
+        super(col, false);
     }
 
     @Override

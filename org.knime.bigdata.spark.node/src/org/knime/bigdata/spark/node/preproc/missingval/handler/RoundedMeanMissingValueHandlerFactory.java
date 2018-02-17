@@ -35,6 +35,11 @@ public class RoundedMeanMissingValueHandlerFactory extends SparkMissingValueHand
     /** Id of this missing value handler factory. */
     public final static String ID = "knime.RoundedMeanMissingValueHandler";
 
+    /**
+     * Deprecated id which may still be used by old workflows (this was changed as part of BD-547).
+     */
+    public static final String DEPRECATED_ID = "knime.MeanMissingValueHandler";
+
     @Override
     public String getID() {
         return ID;

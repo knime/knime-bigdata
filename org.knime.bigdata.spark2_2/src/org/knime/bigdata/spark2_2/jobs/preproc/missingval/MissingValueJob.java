@@ -18,12 +18,14 @@
 package org.knime.bigdata.spark2_2.jobs.preproc.missingval;
 
 import static org.apache.spark.sql.functions.avg;
+import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.desc;
 import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.min;
 import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_FIXED_VALUE;
 import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OP_TYPE;
+import static org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.KEY_OUTPUT_TYPE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobInput.ReplaceOperation;
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueJobOutput;
@@ -80,6 +83,7 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
         final HashSet<String> medianApproxColumns = new HashSet<>();
         final HashSet<String> mostFreqColumns = new HashSet<>();
         final HashMap<String, Serializable> outputValues = new HashMap<>();
+        final HashMap<String, DataType> outputTypes = new HashMap<>(); // contains casts of columns
         Dataset<Row> outputDF = inputDF;
 
         LOGGER.info("Loading job input");
@@ -95,6 +99,8 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
                         break;
                     case AVG_ROUNDED:
                         rounded.add(field.name());
+                        aggregations.add(avg(field.name()).name(field.name()));
+                        break;
                     case AVG:
                         aggregations.add(avg(field.name()).name(field.name()));
                         break;
@@ -117,14 +123,28 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
                         dropRows.add(field.name());
                         break;
                 }
+
+                if (config.containsKey(KEY_OUTPUT_TYPE)) {
+                    outputTypes.put(field.name(),
+                        TypeConverters.getConverter((IntermediateDataType)config.get(KEY_OUTPUT_TYPE)).getSparkDataType());
+                }
             }
         }
 
-        if (!dropRows.isEmpty()) {
-            LOGGER.info("Dropping rows");
-            outputDF = outputDF.na().drop(dropRows.toArray(new String[0]));
+        // cast columns
+        if (!outputTypes.isEmpty()) {
+            final List<Column> columns = new ArrayList<>(schema.fieldNames().length);
+            for (String colName : schema.fieldNames()) {
+                if (outputTypes.containsKey(colName)) {
+                    columns.add(col(colName).cast(outputTypes.get(colName)));
+                } else {
+                    columns.add(col(colName));
+                }
+            }
+            outputDF = outputDF.select(columns.toArray(new Column[0]));
         }
 
+        // run standard aggregations
         if (!aggregations.isEmpty()) {
             LOGGER.info("Running aggregations");
             final Dataset<Row> result = outputDF
@@ -176,6 +196,14 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
             }
         }
 
+        // drop rows with missing values (this needs to be done last because it changes the results of
+        // aggregations).
+        if (!dropRows.isEmpty()) {
+            LOGGER.info("Dropping rows");
+            outputDF = outputDF.na().drop(dropRows.toArray(new String[0]));
+        }
+
+        // apply fixed values and aggregation results
         if (!fixedValues.isEmpty()) {
             LOGGER.info("Replacing missing values");
             outputDF = outputDF.na().fill(fixedValues);

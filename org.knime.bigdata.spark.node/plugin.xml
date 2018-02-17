@@ -173,6 +173,9 @@
    <extension
          point="org.knime.bigdata.spark.node.SparkMissingValueHandler">
      <SparkMissingValueHandler
+         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.DoubleMeanMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.FixedBooleanTrueMissingValueHandlerFactory">
      </SparkMissingValueHandler>
      <SparkMissingValueHandler
@@ -198,9 +201,6 @@
      </SparkMissingValueHandler>
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.MaxMissingValueHandlerFactory">
-     </SparkMissingValueHandler>
-     <SparkMissingValueHandler
-         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.MeanMissingValueHandlerFactory">
      </SparkMissingValueHandler>
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.MedianApproxMissingValueHandlerFactory">

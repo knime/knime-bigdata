@@ -17,8 +17,10 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval.apply;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dmg.pmml.DerivedFieldDocument.DerivedField;
@@ -40,6 +42,7 @@ import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValue
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeModel;
 import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -75,7 +78,7 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark 2.0.");
         }
 
-        return new PortObjectSpec[]{sparkPortSpec};
+        return new PortObjectSpec[]{null};
     }
 
     @Override
@@ -86,15 +89,14 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
         final SparkDataPortObject inputPort = (SparkDataPortObject)inData[1];
         final SparkContextID contextID = inputPort.getContextID();
         final DataTableSpec inputSpec = inputPort.getTableSpec();
-        final KNIMEToIntermediateConverter converters[] =
-            KNIMEToIntermediateConverterRegistry.getConverters(inputSpec);
+        final DataColumnSpec outputColSpec[] = new DataColumnSpec[inputSpec.getNumColumns()];
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
 
         final PMMLDocument pmmlDoc = PMMLDocument.Factory.parse(pmmlIn.getPMMLValue().getDocument());
         if (pmmlDoc.getPMML().getTransformationDictionary() == null
-                || pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList().size() == 0) {
+                || pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList().isEmpty()) {
             setWarningMessage("Empty PMML detected, returning input data frame as output data frame.");
             return new PortObject[]{ new SparkDataPortObject(inputPort.getData()) };
         }
@@ -107,10 +109,23 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
             final int colIndex = inputSpec.findColumnIndex(colName);
             final DataColumnSpec colSpec = inputSpec.getColumnSpec(colIndex);
             final SparkMissingValueHandler handler = createHandlerForColumn(colSpec, df);
-            jobInput.addColumnConfig(colSpec.getName(), handler.getJobInputColumnConfig(converters[colIndex]));
+            final KNIMEToIntermediateConverter converter =
+                    KNIMEToIntermediateConverterRegistry.get(handler.getOutputDataType());
+            final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converter);
+
+            if (colSpec.getType().equals(handler.getOutputDataType())) {
+                outputColSpec[colIndex] = colSpec;
+            } else {
+                SparkMissingValueJobInput.addCastConfig(colConfig, converter.getIntermediateDataType());
+                final DataColumnSpecCreator specCreator = new DataColumnSpecCreator(colSpec);
+                specCreator.setType(handler.getOutputDataType());
+                outputColSpec[colIndex] = specCreator.createSpec();
+            }
+
+            jobInput.addColumnConfig(colSpec.getName(), colConfig);
         }
 
-        if (m_warningMessage.size() > 0) {
+        if (!m_warningMessage.isEmpty()) {
             setWarningMessage(StringUtils.join(m_warningMessage, "\n"));
         }
 
@@ -119,8 +134,9 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
             .createRun(jobInput)
             .run(contextID, exec);
 
+        final DataTableSpec outputSpec = new DataTableSpec(outputColSpec);
         final SparkDataPortObject sparkOutputPort =
-            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, inputSpec));
+            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, outputSpec));
 
         return new PortObject[]{ sparkOutputPort };
     }

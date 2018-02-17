@@ -29,7 +29,6 @@ import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValue
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.MissingCell;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.BooleanCell.BooleanCellFactory;
 import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
@@ -80,7 +79,7 @@ public class PMMLApplyMissingValueHandler extends SparkMissingValueHandler {
     }
 
     @Override
-    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) {
+    public Map<String, Serializable> getJobInputColumnConfig(final KNIMEToIntermediateConverter converter) throws InvalidSettingsException {
         return SparkMissingValueJobInput.createFixedValueConfig(converter.convert(getKnimeDataCell()));
     }
 
@@ -89,11 +88,17 @@ public class PMMLApplyMissingValueHandler extends SparkMissingValueHandler {
         return m_derivedField;
     }
 
+    @Override
+    public DataType getOutputDataType() {
+        return m_dataType;
+    }
+
     /**
      * Maps the PMML value to a #{@link DataCell}.
      * @return a KNIME #{@link DataCell}.
+     * @throws InvalidSettingsException on format exceptions
      */
-    private DataCell getKnimeDataCell() {
+    private DataCell getKnimeDataCell() throws InvalidSettingsException {
         try {
             if (m_dataType.equals(BooleanCell.TYPE)) {
                 return BooleanCellFactory.create(m_value);
@@ -109,7 +114,8 @@ public class PMMLApplyMissingValueHandler extends SparkMissingValueHandler {
                 return LocalDateTimeCellFactory.create(m_value);
             }
         } catch (NumberFormatException e) {
-            return new MissingCell("Could not parse PMML value");
+            throw new InvalidSettingsException(
+                "Could not parse PMML value of column " + getColumnSpec().getName() + ": " + m_value);
         }
 
         return new StringCell(m_value);

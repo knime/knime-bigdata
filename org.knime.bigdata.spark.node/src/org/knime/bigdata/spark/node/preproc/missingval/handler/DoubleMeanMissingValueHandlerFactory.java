@@ -26,14 +26,14 @@ import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 
 /**
- * Creates a handler that removes rows with a missing values.
+ * Creates a handler that replace missing values with the mean and changes the column type double.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class MeanMissingValueHandlerFactory extends SparkMissingValueHandlerFactory {
+public class DoubleMeanMissingValueHandlerFactory extends SparkMissingValueHandlerFactory {
 
     /** Id of this missing value handler factory. */
-    public final static String ID = "knime.MeanMissingValueHandler";
+    public static final String ID = "knime.DoubleMeanMissingValueHandler";
 
     @Override
     public String getID() {
@@ -47,7 +47,7 @@ public class MeanMissingValueHandlerFactory extends SparkMissingValueHandlerFact
 
     @Override
     public SparkMissingValueHandler createHandler(final DataColumnSpec column) {
-        return new MeanMissingValueHandler(column);
+        return new DoubleMeanMissingValueHandler(column);
     }
 
     @Override
