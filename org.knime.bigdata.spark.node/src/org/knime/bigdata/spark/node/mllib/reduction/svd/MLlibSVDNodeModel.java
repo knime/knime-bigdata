@@ -52,6 +52,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.inactive.InactiveBranchPortObject;
+import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 
 /**
  *
@@ -111,7 +113,7 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
         final DataTableSpec vSpec = getVSpec(tableSpec);
         final DataTableSpec uSpec = getUSpec();
         return new PortObjectSpec[]{svSpec, new SparkDataPortObjectSpec(spec.getContextID(), vSpec),
-            uSpec == null ? null : new SparkDataPortObjectSpec(spec.getContextID(), uSpec)};
+            uSpec == null ?  InactiveBranchPortObjectSpec.INSTANCE : new SparkDataPortObjectSpec(spec.getContextID(), uSpec)};
     }
 
     /**
@@ -198,7 +200,7 @@ public class MLlibSVDNodeModel extends SparkNodeModel {
             uMatixRDD = new SparkDataTable(data.getContextID(), uMatrixName, uSpec);
         }
         return new PortObject[]{dc.getTable(), createSparkPortObject(data, vSpec, vMatrixName),
-            uMatixRDD == null ? null : new SparkDataPortObject(uMatixRDD)};
+            uMatixRDD == null ? InactiveBranchPortObject.INSTANCE : new SparkDataPortObject(uMatixRDD)};
     }
 
     /**
