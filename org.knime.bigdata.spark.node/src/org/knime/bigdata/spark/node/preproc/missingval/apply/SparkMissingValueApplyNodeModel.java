@@ -89,10 +89,15 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
         final SparkDataPortObject inputPort = (SparkDataPortObject)inData[1];
         final SparkContextID contextID = inputPort.getContextID();
         final DataTableSpec inputSpec = inputPort.getTableSpec();
-        final DataColumnSpec outputColSpec[] = new DataColumnSpec[inputSpec.getNumColumns()];
         final String namedInputObject = inputPort.getData().getID();
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkMissingValueJobInput jobInput = new SparkMissingValueJobInput(namedInputObject, namedOutputObject);
+
+        // prepare output spec by first copying over the whole input spec
+        final DataColumnSpec outputColSpec[] = new DataColumnSpec[inputSpec.getNumColumns()];
+        for (int i=0; i< outputColSpec.length; i++) {
+            outputColSpec[i] = inputSpec.getColumnSpec(i);
+        }
 
         final PMMLDocument pmmlDoc = PMMLDocument.Factory.parse(pmmlIn.getPMMLValue().getDocument());
         if (pmmlDoc.getPMML().getTransformationDictionary() == null
