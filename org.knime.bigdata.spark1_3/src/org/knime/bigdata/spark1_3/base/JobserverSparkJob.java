@@ -4,14 +4,13 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.jobserver.JobserverJobInput;
-import org.knime.bigdata.spark.core.jobserver.JobserverJobOutput;
-import org.knime.bigdata.spark.core.jobserver.TypesafeConfigSerializationUtils;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark1_3.api.NamedObjects;
 import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
 import org.knime.bigdata.spark1_3.api.SparkJob;
@@ -34,13 +33,15 @@ import spark.jobserver.SparkJobValidation;
 @SparkClass
 public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements NamedObjects {
 
+    /**
+     * Empty default constructor.
+     */
     public JobserverSparkJob() {
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Object runJob(final Object sparkContext, final Config config) {
-
-        InterceptingAppender appender = null;
 
         JobserverJobOutput toReturn;
 
@@ -56,11 +57,6 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
 
             Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
 
-            // FIXME this is quite probably broken when multiple jobs run at the same time. in
-            // this case we may get log messages from other jobs within the same context.
-            appender = new InterceptingAppender(jsInput.getLog4jLogLevel());
-            Logger.getRootLogger().addAppender(appender);
-
             if (sparkJob instanceof SparkJob) {
                 toReturn = JobserverJobOutput.success(((SparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this));
             } else if (sparkJob instanceof SparkJobWithFiles){
@@ -73,11 +69,6 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
             toReturn = JobserverJobOutput.failure(e);
         } catch (Throwable t) {
             toReturn = JobserverJobOutput.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
-        }
-
-        if (appender != null) {
-            Logger.getRootLogger().removeAppender(appender);
-            toReturn = toReturn.withLogMessages(appender.getLogMessages());
         }
 
         return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()

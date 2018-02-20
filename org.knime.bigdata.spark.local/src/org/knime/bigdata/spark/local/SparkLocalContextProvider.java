@@ -4,6 +4,7 @@
 package org.knime.bigdata.spark.local;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.Set;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
@@ -76,5 +77,14 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
 		}
 
 		return String.format(String.format("Local Spark Context (%s)", uri.getHost()));
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public Optional<SparkContext<LocalSparkContextConfig>> createDefaultSparkContextIfPossible() {
+		// currently, local Spark never provides the default Spark context.
+		return Optional.empty();
 	}
 }

@@ -68,7 +68,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final SparkContextID newContextID = m_settings.getSparkContextID();
-        final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(newContextID);
+        final SparkContext<JobServerSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(newContextID);
         final JobServerSparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
 
         m_settings.validateSettings();
@@ -97,7 +97,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
 
         final SparkContextID contextID = m_settings.getSparkContextID();
-        final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
+        final SparkContext<JobServerSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
         exec.setMessage("Configuring Spark context");
         final JobServerSparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
@@ -136,7 +136,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
             throws IOException, CanceledExecutionException {
 
         final SparkContextID contextID = m_settings.getSparkContextID();
-        final SparkContext sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
+        final SparkContext<JobServerSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
         // credentials are not available during loadInternals(), only during configure and execute
         // see AP-8636

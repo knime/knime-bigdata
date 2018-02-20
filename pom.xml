@@ -26,6 +26,7 @@
     <module>org.knime.bigdata.impala</module>
     <module>org.knime.bigdata.scripting</module>
     <module>org.knime.bigdata.spark.core</module>
+    <module>org.knime.bigdata.spark.core.sparkjobserver</module>
     <module>org.knime.bigdata.spark.local</module>
     <module>org.knime.bigdata.spark.node</module>
     <module>org.knime.bigdata.spark1_2</module>

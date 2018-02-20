@@ -738,6 +738,12 @@ propagated with or for interoperation with KNIME.
          version="0.0.0"/>
 
    <plugin
+         id="org.knime.bigdata.spark.core.sparkjobserver"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
          id="org.knime.bigdata.spark.node"
          download-size="0"
          install-size="0"
@@ -804,5 +810,6 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
 
 </feature>

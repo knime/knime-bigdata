@@ -23,7 +23,6 @@ package org.knime.bigdata.spark.core.context;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 import org.knime.core.node.config.ConfigWO;
@@ -81,14 +80,6 @@ public class SparkContextID {
     @Override
     public int hashCode() {
         return m_stringID.hashCode();
-    }
-
-    /**
-     * @param config {@link JobServerSparkContextConfig} to read from
-     * @return {@link SparkContextID}
-     */
-    public static SparkContextID fromContextConfig(final JobServerSparkContextConfig config) {
-        return fromConnectionDetails(config.getJobServerUrl(), config.getContextName());
     }
 
     /**

@@ -22,7 +22,9 @@ package org.knime.bigdata.spark.core.context;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProviderRegistry;
 
@@ -80,5 +82,24 @@ public class SparkContextProviderRegistry extends SparkProviderRegistry<SparkCon
                     provider.getClass().getName(), scheme));
         }
         m_providers.put(scheme, provider);
+    }
+
+    /**
+     * This method returns a new instance of the "default" Spark context. The default Spark context is a deprecated
+     * concept, which is only required to keep some deprecated Spark nodes functioning. The default Spark context is
+     * configured via the Spark preference page.
+     *
+     * @return the default Spark context, which is always in state {@link SparkContextStatus#CONFIGURED}.
+     */
+    public static SparkContext<?> createDefaultSparkContext() {
+        for (SparkContextProvider<?> provider : getInstance().m_providers.values()) {
+            final Optional<?> contextOptional = provider.createDefaultSparkContextIfPossible();
+            if (contextOptional.isPresent()) {
+                return (SparkContext<?>)contextOptional.get();
+            }
+        }
+
+        // should never happen
+        throw new IllegalStateException("Not default Spark context available. This is a bug.");
     }
 }

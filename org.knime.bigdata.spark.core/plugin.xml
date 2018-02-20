@@ -120,9 +120,4 @@
             ProviderClass="org.knime.bigdata.spark.core.SparkCoreJarProvider">
       </SparkJarProvider>
    </extension>
-	<extension point="org.knime.bigdata.spark.core.SparkContextProvider">
-	  <SparkContextProvider
-	        ProviderClass="org.knime.bigdata.spark.core.context.jobserver.JobserverSparkContextProvider">
-	  </SparkContextProvider>
-	</extension>
 </plugin>

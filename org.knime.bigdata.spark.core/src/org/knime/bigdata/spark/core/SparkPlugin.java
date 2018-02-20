@@ -25,10 +25,6 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
@@ -72,7 +68,6 @@ public class SparkPlugin extends AbstractUIPlugin {
         final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
-        initializeJaxRSRuntime();
         EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
     }
 
@@ -88,22 +83,6 @@ public class SparkPlugin extends AbstractUIPlugin {
         m_executor.shutdown();
         m_executor.awaitTermination(5, TimeUnit.SECONDS);
     }
-
-    private void initializeJaxRSRuntime() {
-        // The JAX-RS interface is in a different plug-in than the CXF implementation. Therefore the interface classes
-        // won't find the implementation via the default ContextFinder classloader. We set the current classes's
-        // classloader as context classloader and then it will find the service definition from this plug-in.
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            // silence the missing Aries Blueprint warnings
-            Logger.getLogger("org.apache.cxf.bus.blueprint.NamespaceHandlerRegisterer").setLevel(Level.SEVERE);
-            RuntimeDelegate.getInstance();
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
-    }
-
 
     /**
      * @param r {@link Runnable} to execute with the Spark thread pool

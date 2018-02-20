@@ -22,20 +22,19 @@ package org.knime.bigdata.spark.core.context;
 
 import java.util.HashMap;
 
-import org.knime.bigdata.spark.core.context.jobserver.JobserverSparkContext;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 
 /**
+ * Manager class to get and destroy Spark contexts. This class is to be used by nodes to obtain instances of a Spark
+ * context.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkContextManager {
 
     @SuppressWarnings("rawtypes")
-    private final static HashMap<SparkContextID, SparkContext> sparkContexts =
-        new HashMap<>();
+    private final static HashMap<SparkContextID, SparkContext> sparkContexts = new HashMap<>();
 
     private final static SparkContextID DEFAULT_SPARK_CONTEXT_ID = new SparkContextID("default://");
 
@@ -50,8 +49,8 @@ public class SparkContextManager {
     }
 
     /**
-     * @return the default Spark context. Creates a new Spark context with the default context id and the settings
-     * from the KNIME preferences page if it does not exists.
+     * @return the default Spark context. Creates a new Spark context with the default context id and the settings from
+     *         the KNIME preferences page if it does not exists.
      * @see #getDefaultSparkContextID()
      */
     public synchronized static SparkContext<?> getDefaultSparkContext() {
@@ -61,35 +60,36 @@ public class SparkContextManager {
 
     private static void ensureDefaultContext() {
         if (defaultSparkContext == null) {
-            createAndConfigureDefaultSparkContext();
+            createAndRegisterDefaultSparkContext();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static void createAndConfigureDefaultSparkContext() {
-        JobServerSparkContextConfig defaultConfig = new JobServerSparkContextConfig();
-        SparkContextID actualDefaultContextID =
-            SparkContextID.fromConnectionDetails(defaultConfig.getJobServerUrl(), defaultConfig.getContextName());
-        defaultSparkContext = new JobserverSparkContext(actualDefaultContextID);
-        defaultSparkContext.ensureConfigured(defaultConfig, true);
+    private static void createAndRegisterDefaultSparkContext() {
+        defaultSparkContext = SparkContextProviderRegistry.createDefaultSparkContext();
         sparkContexts.put(DEFAULT_SPARK_CONTEXT_ID, defaultSparkContext);
-        sparkContexts.put(actualDefaultContextID, defaultSparkContext);
+        sparkContexts.put(defaultSparkContext.getID(), defaultSparkContext);
     }
 
     /**
-     * @param contextID the id of the context
-     * @return an existing Spark context or creates a new one with the given id
+     * This method always returns a Spark context for the given ID. The context may be in any of the possible states,
+     * unless it has been configured or opened beforehand.
+     *
+     * @param contextID The {@link SparkContextID} of the context.
+     * @return a Spark context, never null.
      */
     @SuppressWarnings("unchecked")
-    public synchronized static <T extends SparkContextConfig> SparkContext<T> getOrCreateSparkContext(final SparkContextID contextID) {
+    public synchronized static <T extends SparkContextConfig> SparkContext<T>
+        getOrCreateSparkContext(final SparkContextID contextID) {
         ensureDefaultContext();
         SparkContext<T> toReturn = sparkContexts.get(contextID);
         if (toReturn == null) {
-            SparkContextProvider provider = SparkContextProviderRegistry.getSparkContextProvider(contextID.getScheme());
+            SparkContextProvider<?> provider =
+                SparkContextProviderRegistry.getSparkContextProvider(contextID.getScheme());
             if (provider == null) {
-                throw new IllegalArgumentException("No Spark context provider found for the scheme " + contextID.getScheme());
+                throw new IllegalArgumentException(
+                    "No Spark context provider found for the scheme " + contextID.getScheme());
             }
-            toReturn = provider.createContext(contextID);
+            toReturn = (SparkContext<T>)provider.createContext(contextID);
             sparkContexts.put(contextID, toReturn);
         }
 
@@ -97,43 +97,13 @@ public class SparkContextManager {
     }
 
     /**
-     * Use with care. This means nodes will not find a context with this ID anymore.
+     * Convenience method that ensures that the {@link SparkContext} with the given {@link SparkContextID} is destroyed,
+     * if the ID is known.
      *
-     * @param contextID
-     * @throws KNIMESparkException
+     * @param contextID The {@link SparkContextID} to destroy.
+     * @throws KNIMESparkException Thrown if anything went wrong while destroying an existing remote Spark context.
      */
-    public synchronized static void disposeCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        sparkContexts.remove(contextID);
-    }
-
-    /**
-     * Destroys the {@link SparkContext} with the given {@link SparkContextID}.
-     * If the context does not exists the method simply returns. The method does not remove the context and the
-     * context id from the list of available contexts but simply destroys the context which changes its state to
-     * configured. To also remove the id and the context from the list call
-     * {@link #disposeCustomContext(SparkContextID)}.
-     *
-     * @param contextID the {@link SparkContextID} to destroy
-     * @throws KNIMESparkException
-     */
-    public static void destroyCustomContext(final SparkContextID contextID) throws KNIMESparkException {
-        final SparkContext<?> context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
-        if (context != null) {
-            context.destroy();
-        }
-    }
-
-    /**
-     * Destroys the {@link SparkContext} with the given {@link SparkContextID} if the context is known and in open
-     * state. If the context does not exists or is in another state the method simply returns. The method does not
-     * remove the context and the context id from the list of available contexts but simply destroys the context which
-     * changes its state to configured. To also remove the id and the context from the list call
-     * {@link #disposeCustomContext(SparkContextID)}.
-     *
-     * @param contextID the {@link SparkContextID} to destroy
-     * @throws KNIMESparkException
-     */
-    public static void ensureDestroyedCustomContext(final SparkContextID contextID) throws KNIMESparkException {
+    public static void ensureSparkContextDestroyed(final SparkContextID contextID) throws KNIMESparkException {
         final SparkContext<?> context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
         if (context != null) {
             context.ensureDestroyed();
@@ -151,21 +121,19 @@ public class SparkContextManager {
     public synchronized static boolean reconfigureDefaultContext(final boolean destroyIfNecessary)
         throws KNIMESparkException {
 
-        final JobServerSparkContextConfig newDefaultConfig = new JobServerSparkContextConfig();
-        final SparkContextID newContextID =
-            SparkContextID.fromConnectionDetails(newDefaultConfig.getJobServerUrl(), newDefaultConfig.getContextName());
+        final SparkContext<?> maybeNewSparkContext = SparkContextProviderRegistry.createDefaultSparkContext();
 
         // create an entirely new context when the ID changes
-        if (defaultSparkContext != null && !newContextID.equals(defaultSparkContext.getID())) {
+        if (defaultSparkContext != null && !maybeNewSparkContext.getID().equals(defaultSparkContext.getID())) {
             sparkContexts.remove(defaultSparkContext.getID());
             sparkContexts.remove(DEFAULT_SPARK_CONTEXT_ID);
-
             defaultSparkContext = null;
-            createAndConfigureDefaultSparkContext();
+            createAndRegisterDefaultSparkContext();
             return true;
         } else {
             // otherwise try to reconfigure
-            return getOrCreateSparkContext(DEFAULT_SPARK_CONTEXT_ID).ensureConfigured(newDefaultConfig, true, destroyIfNecessary);
+            return getOrCreateSparkContext(DEFAULT_SPARK_CONTEXT_ID)
+                .ensureConfigured(maybeNewSparkContext.getConfiguration(), true, destroyIfNecessary);
         }
     }
 }

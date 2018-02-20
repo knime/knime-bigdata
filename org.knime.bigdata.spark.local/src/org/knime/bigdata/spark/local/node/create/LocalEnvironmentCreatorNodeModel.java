@@ -209,7 +209,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
             final SparkContextID id = m_settings.getSparkContextID();
 
             try {
-                SparkContextManager.ensureDestroyedCustomContext(id);
+                SparkContextManager.ensureSparkContextDestroyed(id);
             } catch (final KNIMESparkException e) {
                 LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
             }
