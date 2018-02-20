@@ -141,7 +141,25 @@ public class HiveUtility extends DatabaseUtility {
      */
     @Override
     public boolean tableExists(final Connection conn, final String tableName) throws SQLException {
-        try (ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null)) {
+        String schemaPattern = null;
+        String tableNamePattern = tableName;
+
+        if (tableName.contains(".")) {
+            String unquoteTableName = tableName.replaceAll("\"|\'", "");
+            String[] splits = unquoteTableName.split("\\.");
+
+            if (splits.length != 2) {
+                throw new SQLException(
+                    String.format("Invalid table name %s. Either table name or schema is missing.", tableName));
+            }
+
+            schemaPattern = splits[0];
+            tableNamePattern = splits[1];
+            LOGGER.debug(String.format("Found table name with schema. Using %s as schema and %s as table name.",
+                schemaPattern, tableNamePattern));
+        }
+
+        try (ResultSet rs = conn.getMetaData().getTables(null, schemaPattern, tableNamePattern, null)) {
             return rs.next();
         }
     }
