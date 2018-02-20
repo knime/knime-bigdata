@@ -35,7 +35,7 @@ public class HiveTableCreator extends DBTableCreatorIfNotExistsImpl {
      * @param tableName name of the table to create
      * @param isTempTable <code>true</code> if the table is a temporary table, otherwise <code>false</code>
      */
-    protected HiveTableCreator(final StatementManipulator sm, final String schema, final String tableName,
+    public HiveTableCreator(final StatementManipulator sm, final String schema, final String tableName,
         final boolean isTempTable) {
         super(sm, schema, tableName, isTempTable);
     }

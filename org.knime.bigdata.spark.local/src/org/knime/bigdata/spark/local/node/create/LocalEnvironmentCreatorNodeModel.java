@@ -28,7 +28,6 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.files.Protocol;
 import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
 import org.knime.bigdata.hive.utility.HiveDriverDetector;
-import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -39,6 +38,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
+import org.knime.bigdata.spark.local.database.LocalHiveUtility;
 import org.knime.bigdata.spark.local.filehandler.HDFSLocalConnectionInformation;
 import org.knime.bigdata.spark.local.filehandler.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.OnDisposeAction;
@@ -103,7 +103,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         }
 
         m_lastContextID = newContextID;
-        
+
         PortObjectSpec dbPortObjectObjectSpec = null;
         if (m_settings.getSQLSupport() != SQLSupport.HIVEQL_WITH_JDBC) {
         	dbPortObjectObjectSpec = InactiveBranchPortObjectSpec.INSTANCE;
@@ -139,7 +139,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         // try to open the context
         exec.setMessage("Opening local Spark context");
         sparkContext.ensureOpened(true);
-        
+
         final PortObject dbPortObject;
         if (m_settings.getSQLSupport() == SQLSupport.HIVEQL_WITH_JDBC) {
         	final int hiveserverPort = sparkContext.getHiveserverPort();
@@ -148,7 +148,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         	dbPortObject = InactiveBranchPortObject.INSTANCE;
         }
 
-        return new PortObject[]{dbPortObject, 
+        return new PortObject[]{dbPortObject,
         		new ConnectionInformationPortObject(createHDFSConnectionSpec()),
         		new SparkContextPortObject(contextID)};
     }
@@ -156,7 +156,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
     private  DatabaseConnectionPortObjectSpec getHiveSpec(final int hiveserverPort) {
     	final ParameterizedDatabaseConnectionSettings connSettings = new ParameterizedDatabaseConnectionSettings();
 
-    	connSettings.setDatabaseIdentifier(HiveUtility.DATABASE_IDENTIFIER);
+    	connSettings.setDatabaseIdentifier(LocalHiveUtility.DATABASE_IDENTIFIER);
     	connSettings.setDriver(HiveDriverDetector.getDriverName());
     	connSettings.setPort(hiveserverPort);
         connSettings.setRowIdsStartWithZero(true);

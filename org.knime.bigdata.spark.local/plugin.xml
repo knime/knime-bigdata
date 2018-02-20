@@ -46,5 +46,12 @@
              </action>
           </actionSet>
        </extension>
+       <extension
+             point="org.knime.core.DatabaseUtility">
+          <databaseUtility
+                class="org.knime.bigdata.spark.local.database.LocalHiveUtility"
+                database="localhive2">
+          </databaseUtility>
+       </extension>
 
 </plugin>

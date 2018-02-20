@@ -107,7 +107,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      * @throws InvalidSettingsException If the wrong database is connected
      */
     protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec) throws InvalidSettingsException {
-        if (!HiveUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
+        if (!spec.getDatabaseIdentifier().contains(HiveUtility.DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
     }

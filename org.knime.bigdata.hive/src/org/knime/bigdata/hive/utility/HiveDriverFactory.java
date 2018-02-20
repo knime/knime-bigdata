@@ -30,13 +30,13 @@ import org.osgi.framework.FrameworkUtil;
  *
  * @author Tobias Koetter, KNIME.com
  */
-class HiveDriverFactory extends DefaultDBDriverFactory {
+public class HiveDriverFactory extends DefaultDBDriverFactory {
     /**Hive driver class name.*/
-    static final String DRIVER = HiveDriver.class.getName();
+    public static final String DRIVER = HiveDriver.class.getName();
 
     /**Constructor.
      * @throws IOException */
-    HiveDriverFactory() throws IOException {
+    public HiveDriverFactory() throws IOException {
         super(DRIVER, FrameworkUtil.getBundle(HiveDriver.class));
     }
 }

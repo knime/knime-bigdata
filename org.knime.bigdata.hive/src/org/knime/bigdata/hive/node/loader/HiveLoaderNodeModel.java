@@ -49,7 +49,7 @@ class HiveLoaderNodeModel extends AbstractLoaderNodeModel {
         final DatabaseConnectionSettings connSettings =
                 ((DatabaseConnectionPortObjectSpec) inSpecs[2])
                 .getConnectionSettings(getCredentialsProvider());
-        if (!(connSettings.getUtility() instanceof HiveUtility)) {
+        if (!connSettings.getDatabaseIdentifier().contains(HiveUtility.DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Only Hive database connections are supported");
         }
         // We cannot provide a spec because it's not clear yet what the DB will return when the imported data
