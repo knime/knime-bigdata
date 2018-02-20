@@ -20,6 +20,7 @@ package org.knime.bigdata.spark.node.preproc.missingval.compute;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.knime.base.node.preproc.pmml.missingval.MVIndividualSettings;
 import org.knime.base.node.preproc.pmml.missingval.MVSettings;
@@ -128,21 +129,29 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
                 "The current settings use missing value handling methods that cannot be represented in PMML 4.2");
         }
 
-        exec.setMessage("Running Spark job");
-        final JobRunFactory<SparkMissingValueJobInput, SparkMissingValueJobOutput> factory =
-            SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
-        final SparkMissingValueJobOutput jobOutput = factory.createRun(jobInput).run(contextID, exec);
+        final SparkDataPortObject sparkOutputPort;
+        final Map<String, Object> outputValues = new HashMap<>();
 
+        if (jobInput.isEmtpy()) {
+            setWarningMessage("No changes to the input data were made, because the provided missing value replacements did not apply to any of the input columns.");
+            setAutomaticSparkDataHandling(false);
+            sparkOutputPort = new SparkDataPortObject(inputPort.getData());
 
-        final SparkDataPortObject sparkOutputPort =
-            new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, outputSpec));
+        } else {
+            exec.setMessage("Running Spark job");
+            final JobRunFactory<SparkMissingValueJobInput, SparkMissingValueJobOutput> factory =
+                SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
+            final SparkMissingValueJobOutput jobOutput = factory.createRun(jobInput).run(contextID, exec);
+            setAutomaticSparkDataHandling(true);
+            sparkOutputPort =
+                new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, outputSpec));
 
-        // convert fixed values (including aggregation results)
-        final Map<String, Serializable> intermediateOutput = jobOutput.getValues();
-        final Map<String, Object> outputValues = new HashMap<>(intermediateOutput.size());
-        for (String column : intermediateOutput.keySet()) {
-            KNIMEToIntermediateConverter converter = converters[inputSpec.findColumnIndex(column)];
-            outputValues.put(column, converter.convert(intermediateOutput.get(column)));
+            // convert fixed values (including aggregation results)
+            final Map<String, Serializable> intermediateOutput = jobOutput.getValues();
+            for (Entry<String, Serializable> e : intermediateOutput.entrySet()) {
+                KNIMEToIntermediateConverter converter = converters[inputSpec.findColumnIndex(e.getKey())];
+                outputValues.put(e.getKey(), converter.convert(e.getValue()));
+            }
         }
 
         exec.setMessage("Generating PMML");

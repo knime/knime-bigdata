@@ -102,7 +102,8 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
         final PMMLDocument pmmlDoc = PMMLDocument.Factory.parse(pmmlIn.getPMMLValue().getDocument());
         if (pmmlDoc.getPMML().getTransformationDictionary() == null
                 || pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList().isEmpty()) {
-            setWarningMessage("Empty PMML detected, returning input data frame as output data frame.");
+            setWarningMessage("No changes to the input data were made, because the provided PMML contains no transformations.");
+            setAutomaticSparkDataHandling(false);
             return new PortObject[]{ new SparkDataPortObject(inputPort.getData()) };
         }
 
@@ -112,22 +113,32 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
         for (DerivedField df : pmmlDoc.getPMML().getTransformationDictionary().getDerivedFieldList()) {
             final String colName = mapper.getColumnName(df.getName());
             final int colIndex = inputSpec.findColumnIndex(colName);
-            final DataColumnSpec colSpec = inputSpec.getColumnSpec(colIndex);
-            final SparkMissingValueHandler handler = createHandlerForColumn(colSpec, df);
-            final KNIMEToIntermediateConverter converter =
-                    KNIMEToIntermediateConverterRegistry.get(handler.getOutputDataType());
-            final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converter);
 
-            if (colSpec.getType().equals(handler.getOutputDataType())) {
-                outputColSpec[colIndex] = colSpec;
-            } else {
-                SparkMissingValueJobInput.addCastConfig(colConfig, converter.getIntermediateDataType());
-                final DataColumnSpecCreator specCreator = new DataColumnSpecCreator(colSpec);
-                specCreator.setType(handler.getOutputDataType());
-                outputColSpec[colIndex] = specCreator.createSpec();
-            }
+            if (colIndex >= 0) {
+                final DataColumnSpec colSpec = inputSpec.getColumnSpec(colIndex);
+                final SparkMissingValueHandler handler = createHandlerForColumn(colSpec, df);
+                final KNIMEToIntermediateConverter converter =
+                        KNIMEToIntermediateConverterRegistry.get(handler.getOutputDataType());
+                final Map<String, Serializable> colConfig = handler.getJobInputColumnConfig(converter);
 
-            jobInput.addColumnConfig(colSpec.getName(), colConfig);
+                if (colSpec.getType().equals(handler.getOutputDataType())) {
+                    outputColSpec[colIndex] = colSpec;
+                } else {
+                    SparkMissingValueJobInput.addCastConfig(colConfig, converter.getIntermediateDataType());
+                    final DataColumnSpecCreator specCreator = new DataColumnSpecCreator(colSpec);
+                    specCreator.setType(handler.getOutputDataType());
+                    outputColSpec[colIndex] = specCreator.createSpec();
+                }
+
+                jobInput.addColumnConfig(colSpec.getName(), colConfig);
+
+            } // else: unknown column, ignore transformation
+        }
+
+        if (jobInput.isEmtpy()) {
+            setWarningMessage("No changes to the input data were made, because the provided missing value replacements did not apply to any of the input columns.");
+            setAutomaticSparkDataHandling(false);
+            return new PortObject[]{ new SparkDataPortObject(inputPort.getData()) };
         }
 
         if (!m_warningMessage.isEmpty()) {
@@ -139,6 +150,7 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
             .createRun(jobInput)
             .run(contextID, exec);
 
+        setAutomaticSparkDataHandling(true);
         final DataTableSpec outputSpec = new DataTableSpec(outputColSpec);
         final SparkDataPortObject sparkOutputPort =
             new SparkDataPortObject(new SparkDataTable(contextID, namedOutputObject, outputSpec));

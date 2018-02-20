@@ -27,7 +27,7 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataType;
 
 /**
  * Missing value job input, containing configurations by column name or data type.
- * 
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
@@ -71,7 +71,7 @@ public class SparkMissingValueJobInput extends JobInput {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param namedInputObject id of input data frame
      * @param namedOutputObject id of output data frame
      */
@@ -83,7 +83,7 @@ public class SparkMissingValueJobInput extends JobInput {
 
     /**
      * Add configuration by column name.
-     * 
+     *
      * @param colName name of column
      * @param config configuration of column or null
      */
@@ -96,7 +96,7 @@ public class SparkMissingValueJobInput extends JobInput {
 
     /**
      * Get column configuration if present.
-     * 
+     *
      * @param colName name of column
      * @return column configuration or null
      */
@@ -105,9 +105,15 @@ public class SparkMissingValueJobInput extends JobInput {
         return columns.get(colName);
     }
 
+    /** @return <code>true</code> if column configuration is empty */
+    public boolean isEmtpy() {
+        final HashMap<String, Map<String, Serializable>> columns = get(KEY_COL_CONFIG);
+        return columns.isEmpty();
+    }
+
     /**
      * Create a new fixed value configuration.
-     * 
+     *
      * @param value missing value replacement
      * @return fixed value configuration
      */
@@ -120,7 +126,7 @@ public class SparkMissingValueJobInput extends JobInput {
 
     /**
      * Create replacement configuration.
-     * 
+     *
      * @param operation how to replace missing values
      * @return replacement configuration
      */
