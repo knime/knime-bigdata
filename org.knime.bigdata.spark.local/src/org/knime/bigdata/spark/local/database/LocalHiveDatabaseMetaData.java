@@ -462,22 +462,30 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
 			throws SQLException {
-	    final Statement statement = getConnection().createStatement();
-	    ResultSet result = null;
-	    if ((types != null && types[0].equals("TABLE") ) || (tableNamePattern != null && types == null)) {
-	    	final StringBuilder query = new StringBuilder();
-	    	query.append("SHOW TABLES");
-	    	if (!tableNamePattern.equals("%")) {
-	    		query.append(" like '" + tableNamePattern + "'");
-	    	}
-		    final HiveQueryResultSet result2 =
-		    		(HiveQueryResultSet) statement.executeQuery(query.toString());
+		
+		final Statement statement = getConnection().createStatement();
+		final ResultSet localHiveResult;
 
-		    result = new LocalHiveQueryResultSet(result2);
-	    } else {
-	    	result = m_hiveMetadata.getTables(catalog, schemaPattern, tableNamePattern, types);
-	    }
-	    return result;
+		if ((types != null && types[0].equals("TABLE")) || (tableNamePattern != null && types == null)) {
+			final StringBuilder query = new StringBuilder();
+			query.append("SHOW TABLES");
+
+			if (schemaPattern == null || schemaPattern.isEmpty()) {
+				schemaPattern = getConnection().getSchema();
+			}
+			query.append(" IN " + schemaPattern);
+
+			if (!tableNamePattern.equals("%")) {
+				query.append(String.format(" LIKE '%s'", tableNamePattern));
+			}
+
+			localHiveResult = new LocalHiveQueryResultSet(
+					(HiveQueryResultSet) statement.executeQuery(query.toString()));
+		} else {
+			localHiveResult = m_hiveMetadata.getTables(catalog, schemaPattern, tableNamePattern, types);
+		}
+
+		return localHiveResult;
 	}
 
 	@Override
