@@ -55,16 +55,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.knime.bigdata.spark.core.SparkPlugin;
 import org.knime.bigdata.spark.core.context.SparkContext;
-import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -78,12 +75,13 @@ import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
+import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.data.SparkData;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
-import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
+import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -137,9 +135,9 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private static final String CFG_DELETE_ON_RESET = "deleteRDDsOnReset";
 
-    private static final boolean DEFAULT_DELETE_ON_RESET = true;
-
     private final Map<SparkContextID, List<String>> m_sparkDataObjects = new LinkedHashMap<>();
+
+    private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
     private boolean m_deleteOnReset = DEFAULT_DELETE_ON_RESET;
 
@@ -538,66 +536,32 @@ public abstract class SparkNodeModel extends NodeModel {
         //override if you need to reset anything
     }
 
+
     private void deleteSparkDataObjects(final boolean onDispose) {
         if (m_deleteOnReset && m_sparkDataObjects != null && !m_sparkDataObjects.isEmpty()) {
-            LOGGER.debug("In reset of SparkNodeModel. Deleting Spark data objects. On dispose: " + onDispose);
-            if (KNIMEConfigContainer.verboseLogging()) {
-                LOGGER.debug("Spark data objects in delete queue: " + m_sparkDataObjects);
-            }
-
-            //make a copy of the spark data objects to delete for the deletion thread
-            final Map<SparkContextID, String[]> toDelete = new HashMap<>(m_sparkDataObjects.size());
-            for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
-                final SparkContextID contextID = e.getKey();
-                // mark for deletion if we are either resetting, or disposing and deleteObjectsOnDispose is on
-                SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
-
-                if (!onDispose
-                    || (context.getConfiguration() != null && context.getConfiguration().deleteObjectsOnDispose())) {
-                    toDelete.put(contextID, e.getValue().toArray(new String[0]));
-                }
-            }
+            final Map<SparkContextID, String[]> toDelete = collectNamedObjectsToDelete(onDispose);
 
             if (!toDelete.isEmpty()) {
-                if (KNIMEConfigContainer.verboseLogging()) {
-                    LOGGER.debug("Spark data objects to delete: " + toDelete);
-                }
-                SparkPlugin.getDefault().addJob(new Runnable() {
-                    @Override
-                    public void run() {
-                        final long startTime = System.currentTimeMillis();
-                        if (KNIMEConfigContainer.verboseLogging()) {
-                            LOGGER.debug("Deleting Spark data objects: " + toDelete);
-                        }
-                        for (final Entry<SparkContextID, String[]> e : toDelete.entrySet()) {
-                            final SparkContextID contextID = e.getKey();
-                            try {
-                                final SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
-                                if (KNIMEConfigContainer.verboseLogging()) {
-                                    LOGGER.debug("Deleting named Spark data objects for context: "
-                                            + contextID + " with status: " + context.getStatus());
-                                }
-                                if (SparkContextStatus.OPEN.equals(context.getStatus())) {
-                                    context.deleteNamedObjects(new HashSet<>(Arrays.asList(e.getValue())));
-                                }
-                            } catch (final Throwable ex) {
-                                // this does not log the full exception on purpose. In large workflows
-                                // where the deletion fails for some reason, logging the exception results
-                                // in a lot of not-so-useful logspam.
-                                LOGGER.debug("Exception while deleting named Spark data objects for context: "
-                                        + contextID + " Exception: " + ex.getMessage());
-                            }
-                        }
-                        if (KNIMEConfigContainer.verboseLogging()) {
-                            final long endTime = System.currentTimeMillis();
-                            final long durationTime = endTime - startTime;
-                            LOGGER.debug("Time deleting " + toDelete.size() + " Spark data object(s): "
-                                    + durationTime + " ms");
-                        }
-                    }
-                });
+                BackgroundTasks.run(new DeleteNamedObjectsTask(toDelete));
             }
         }
+    }
+
+    private Map<SparkContextID, String[]> collectNamedObjectsToDelete(final boolean onDispose) {
+        final Map<SparkContextID, String[]> toDelete = new HashMap<>(m_sparkDataObjects.size());
+
+        for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
+            final SparkContextID contextID = e.getKey();
+            // mark for deletion if we are either resetting, or disposing and deleteObjectsOnDispose is on
+            @SuppressWarnings("rawtypes")
+            final SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
+            final SparkContextConfig contextCfg = context.getConfiguration();
+
+            if (!onDispose || (contextCfg != null && contextCfg.deleteObjectsOnDispose())) {
+                toDelete.put(contextID, e.getValue().toArray(new String[0]));
+            }
+        }
+        return toDelete;
     }
 
     /**

@@ -27,11 +27,11 @@ import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
+import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -121,13 +121,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
     protected void onDisposeInternal() {
         if (m_settings.deleteContextOnDispose()) {
             final SparkContextID id = m_settings.getSparkContextID();
-
-            try {
-                LOGGER.debug("In onDispose() of SparkContextCreateNodeModel. Removing context: " + id);
-                SparkContextManager.ensureDestroyedCustomContext(id);
-            } catch (KNIMESparkException e) {
-                LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
-            }
+            BackgroundTasks.run(new DestroySparkContextTask(id));
         }
     }
 

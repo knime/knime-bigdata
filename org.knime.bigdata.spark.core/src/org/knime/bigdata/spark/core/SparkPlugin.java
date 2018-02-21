@@ -22,15 +22,13 @@ package org.knime.bigdata.spark.core;
 
 import java.io.File;
 import java.net.URL;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
+import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.osgi.framework.BundleContext;
 
 
@@ -46,8 +44,6 @@ public class SparkPlugin extends AbstractUIPlugin {
     private static SparkPlugin plugin;
 
     private String m_pluginRootPath;
-
-    private final ExecutorService m_executor = Executors.newSingleThreadExecutor();
 
     /**
      * The constructor.
@@ -80,15 +76,7 @@ public class SparkPlugin extends AbstractUIPlugin {
     public void stop(final BundleContext context) throws Exception {
         plugin = null;
         super.stop(context);
-        m_executor.shutdown();
-        m_executor.awaitTermination(5, TimeUnit.SECONDS);
-    }
-
-    /**
-     * @param r {@link Runnable} to execute with the Spark thread pool
-     */
-    public void addJob(final Runnable r) {
-        m_executor.submit(r);
+        BackgroundTasks.shutdown();
     }
 
     /**
