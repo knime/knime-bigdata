@@ -3,8 +3,12 @@
  */
 package org.knime.bigdata.spark.local.context;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.knime.bigdata.spark.core.context.JobController;
@@ -29,6 +33,12 @@ import org.knime.core.node.NodeLogger;
  * @author Oleg Yasnev, KNIME GmbH
  */
 public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
+
+	private static final String SPARK_EXECUTOR_EXTRA_CLASS_PATH = "spark.executor.extraClassPath";
+
+	private static final String SPARK_DRIVER_EXTRA_CLASS_PATH = "spark.driver.extraClassPath";
+
+	private static final String SPARK_JARS = "spark.jars";
 
 	private final static NodeLogger LOGGER = NodeLogger.getLogger(LocalSparkContext.class);
 
@@ -103,7 +113,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 				sparkConf.putAll(config.getCustomSparkSettings());
 			}
 			
-			m_wrapper = LocalSparkWrapperFactory.createWrapper(getJobJar().getJarFile());
+			final File[] extraJars = collectExtraJars(config.getCustomSparkSettings());
+			
+			m_wrapper = LocalSparkWrapperFactory.createWrapper(getJobJar().getJarFile(), extraJars);
 			m_wrapper.openSparkContext(config.getContextName(),
 					config.getNumberOfThreads(),
 					sparkConf,
@@ -133,6 +145,41 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 		return contextWasCreated;
 	}
+
+	private File[] collectExtraJars(final Map<String, String> customSparkSettings) {
+		final Set<String> extraJars = new HashSet<>();
+
+		if (customSparkSettings.containsKey(SPARK_JARS)) {
+			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_JARS).split(",")));
+		}
+		
+		if (customSparkSettings.containsKey(SPARK_DRIVER_EXTRA_CLASS_PATH)) {
+			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_DRIVER_EXTRA_CLASS_PATH).split(",")));
+		}
+		
+		if (customSparkSettings.containsKey(SPARK_EXECUTOR_EXTRA_CLASS_PATH)) {
+			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_EXECUTOR_EXTRA_CLASS_PATH).split(",")));
+		}
+
+		return extraJars.stream()
+				.map(File::new)
+				.filter((file) -> {
+					if (!file.exists()) {
+						LOGGER.warn(String.format("Extra jar %s does not exist. Ignoring it.", file.getPath()));
+					}
+					if (!file.isFile()) {
+						LOGGER.warn(String.format("Extra jar %s ist not a file. Ignoring it.", file.getPath()));
+					}
+					if (!file.canRead()) {
+						LOGGER.warn(String.format("Extra jar %s is not readable. Ignoring it.", file.getPath()));
+					}
+
+					return file.isFile() && file.canRead();
+				})
+				.collect(Collectors.toList())
+				.toArray(new File[extraJars.size()]);
+	}
+
 
 	private void validateAndPrepareContext() throws KNIMESparkException {
 		SparkVersion sparkVersion = getSparkVersion();

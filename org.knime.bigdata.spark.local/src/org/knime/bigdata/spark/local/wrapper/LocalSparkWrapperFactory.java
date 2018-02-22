@@ -19,10 +19,23 @@ public class LocalSparkWrapperFactory {
 
 	public static final String LOG4J_PACKAGE_NAME = "org.apache.log4j";
 
-	public static LocalSparkWrapper createWrapper(final File jobJar) {
+	/**
+	 * Creates a {@link LocalSparkWrapper} that lives in its own class loader
+	 * hierarchy. The returned object can be used to create/destroy a Spark
+	 * context in local mode and run jobs on it.
+	 * 
+	 * @param jobJar
+	 *            The KNIME job jar.
+	 * @param extraJars
+	 *            Additional jars that should be on the classpath of the custom
+	 *            class loader hierarchy.
+	 * @return a {@link LocalSparkWrapper}, which is ready to create a Spark
+	 *         context in local mode.
+	 */
+	public static LocalSparkWrapper createWrapper(final File jobJar, final File[] extraJars) {
 
 		try {
-			final ClassLoader sparkClassLoader = createSparkClassLoader(jobJar);
+			final ClassLoader sparkClassLoader = createSparkClassLoader(jobJar, extraJars);
 			return (LocalSparkWrapper) sparkClassLoader.loadClass(LocalSparkWrapperImpl.class.getName()).newInstance();
 
 		} catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -31,15 +44,16 @@ public class LocalSparkWrapperFactory {
 		return null;
 	}
 
-	private static ClassLoader createSparkClassLoader(final File jobJar) throws IOException {
+	private static ClassLoader createSparkClassLoader(final File jobJar, final File[] extraJars) throws IOException {
 		final Bundle hadoopBundle = FrameworkUtil.getBundle(Configuration.class);
 		final Bundle scalaLibraryBundle = FrameworkUtil.getBundle(scala.Boolean.class);
 		final Bundle scalaReflectBundle = FrameworkUtil.getBundle(scala.reflect.api.Annotations.class);
 		final Bundle scalaCompilerBundle = FrameworkUtil.getBundle(scala.tools.nsc.Main.class);
 		final Bundle scalaPBundle = FrameworkUtil.getBundle(scala.tools.scalap.Main.class);
-		final Bundle scalaXmlBundle =FrameworkUtil.getBundle(scala.xml.Document.class);
+		final Bundle scalaXmlBundle = FrameworkUtil.getBundle(scala.xml.Document.class);
 		
-		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(scalaLibraryBundle,
+		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(new String[] { "io.netty" },
+				scalaLibraryBundle,
 				scalaReflectBundle,
 				scalaCompilerBundle,
 				scalaPBundle,
@@ -48,7 +62,7 @@ public class LocalSparkWrapperFactory {
 		
 //		final Bundle thisBundle = FrameworkUtil.getBundle(Configuration.class);
 		
-		return new URLClassLoader(getJars(jobJar), bundleDelegatingLoader) {
+		return new URLClassLoader(getJars(jobJar, extraJars), bundleDelegatingLoader) {
 			public Class<?> loadClass(String name) throws ClassNotFoundException {
 				// we need to intercept loading of the LocalSparkWrapper class
 				// because
@@ -69,14 +83,21 @@ public class LocalSparkWrapperFactory {
 		};
 	}
 
-	private static URL[] getJars(final File jobJar) throws IOException {
-		final File jarDir = new File(FileLocator.getBundleFile(FrameworkUtil.getBundle(LocalSparkWrapperFactory.class)),
+	private static URL[] getJars(final File jobJar, final File[] extraJars) throws IOException {
+		final File sparkJarDir = new File(FileLocator.getBundleFile(FrameworkUtil.getBundle(LocalSparkWrapperFactory.class)),
 				"/libs");
 
 		final List<URL> jarUrls = new LinkedList<>();
+		// add job jar
 		jarUrls.add(jobJar.toURI().toURL());
+		
+		// add the extra jars
+		for(File extraJar : extraJars) {
+			jarUrls.add(extraJar.toURI().toURL());
+		}
 
-		for (File jarFile : jarDir.listFiles()) {
+		// add the Apache Spark jars
+		for (File jarFile : sparkJarDir.listFiles()) {
 			jarUrls.add(jarFile.toURI().toURL());
 		}
 		return jarUrls.toArray(new URL[jarUrls.size()]);

@@ -19,15 +19,22 @@ import org.osgi.framework.Bundle;
 public class MultiBundleDelegatingClassloader extends ClassLoader {
 
 	private final Bundle[] m_bundles;
+	
+	private final String[] m_pkgBlacklist;
 
 	/**
 	 * Creates a new instance.
 	 * 
+	 * @param pkgWhitelist
+	 *            A package whitelist that is consulted before classloading.
+	 *            This classloader only loads classes from those packages from
+	 *            the whitelist, which are on the whitelist.
 	 * @param bundles
 	 *            An array of bundles that classes are to be loaded from.
 	 */
-	public MultiBundleDelegatingClassloader(Bundle... bundles) {
+	public MultiBundleDelegatingClassloader(final String[] pkgWhitelist, Bundle... bundles) {
 		m_bundles = bundles;
+		m_pkgBlacklist = pkgWhitelist;
 	}
 
 	/**
@@ -37,6 +44,20 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	 */
 	protected Class<?> findClass(final String name) throws ClassNotFoundException {
 		Class<?> clazz = null;
+		
+		boolean onBlacklist = false;
+		
+		for(String blacklistedPkg : m_pkgBlacklist) {
+			if (name.startsWith(blacklistedPkg)) {
+				onBlacklist = true;
+				break;
+			}
+		}
+		
+		if (onBlacklist) {
+			throw new ClassNotFoundException("Package is on blacklist of MultiBundleDelegatingClassloader");
+		}
+		
 		for (int i = 0; i < m_bundles.length; i++) {
 			try {
 				clazz = m_bundles[i].loadClass(name);
