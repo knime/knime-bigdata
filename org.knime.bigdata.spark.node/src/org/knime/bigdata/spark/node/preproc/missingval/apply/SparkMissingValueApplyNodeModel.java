@@ -44,7 +44,7 @@ import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingV
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
@@ -103,7 +103,7 @@ public class SparkMissingValueApplyNodeModel extends SparkNodeModel {
 
         final PMMLDocument pmmlDoc;
 
-        try (AutocloseableSupplier<Document> supplier = pmmlIn.getPMMLValue().getDocumentSupplier()) {
+        try (LockedSupplier<Document> supplier = pmmlIn.getPMMLValue().getDocumentSupplier()) {
             pmmlDoc = PMMLDocument.Factory.parse(supplier.get());
         }
 
