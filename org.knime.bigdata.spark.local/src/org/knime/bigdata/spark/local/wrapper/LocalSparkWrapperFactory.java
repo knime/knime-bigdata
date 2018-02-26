@@ -52,6 +52,9 @@ public class LocalSparkWrapperFactory {
 		final Bundle scalaPBundle = FrameworkUtil.getBundle(scala.tools.scalap.Main.class);
 		final Bundle scalaXmlBundle = FrameworkUtil.getBundle(scala.xml.Document.class);
 		
+		// put io.nettyo on the package blacklist in the bundleDelegatingLoader,
+		// because the hadoop bundle has this package on its classpath but in a version
+		// that is older than the one in Spark. Otherwise we get NoSuchMethod exceptions.
 		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(new String[] { "io.netty" },
 				scalaLibraryBundle,
 				scalaReflectBundle,
@@ -60,7 +63,6 @@ public class LocalSparkWrapperFactory {
 				scalaXmlBundle,
 				hadoopBundle);
 		
-//		final Bundle thisBundle = FrameworkUtil.getBundle(Configuration.class);
 		
 		return new URLClassLoader(getJars(jobJar, extraJars), bundleDelegatingLoader) {
 			public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -72,7 +74,6 @@ public class LocalSparkWrapperFactory {
 				// will make Spark
 				// use KNIME's already configured log4j logging system
 				if (name.equals(LocalSparkWrapper.class.getName())) {
-//						|| name.startsWith(LOG4J_PACKAGE_NAME)) {
 					return LocalSparkWrapperFactory.class.getClassLoader().loadClass(name);
 				} else {
 					// this tries to load classes from the urls and its parent

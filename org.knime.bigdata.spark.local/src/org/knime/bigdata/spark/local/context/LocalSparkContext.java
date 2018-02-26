@@ -29,7 +29,7 @@ import org.knime.core.node.NodeLogger;
  * Implementation of {@link SparkContext} for local Spark. This class uses the
  * {@link LocalSparkWrapper} interface to actually create a local Spark context
  * and run jobs in it.
- * 
+ *
  * @author Oleg Yasnev, KNIME GmbH
  */
 public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
@@ -47,17 +47,17 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	private LocalSparkWrapper m_wrapper;
 
 	private LocalSparkJobController m_jobController;
-	
+
 	private LocalSparkNamedObjectsController m_namedObjectsController;
-	
+
 
 	/**
 	 * Creates a new local Spark context with the given ID.
-	 * 
+	 *
 	 * @param contextID
 	 *            The ID of the new local Spark context.
 	 */
-	public LocalSparkContext(SparkContextID contextID) {
+	public LocalSparkContext(final SparkContextID contextID) {
 		super(contextID);
 	}
 
@@ -82,7 +82,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
                 break;
         }
     }
-    
+
     private void ensureNamedObjectsController() {
         if (m_namedObjectsController == null) {
             m_namedObjectsController = new LocalSparkNamedObjectsController(m_wrapper);
@@ -99,7 +99,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
      * {@inheritDoc}
      */
 	@Override
-	protected boolean open(boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException {
+	protected boolean open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException {
 		if (m_wrapper == null && !createRemoteContext) {
 			throw new SparkContextNotFoundException(getID());
 		}
@@ -112,33 +112,33 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			if (config.useCustomSparkSettings()) {
 				sparkConf.putAll(config.getCustomSparkSettings());
 			}
-			
-			final File[] extraJars = collectExtraJars(config.getCustomSparkSettings());
-			
+
+			final File[] extraJars = collectExtraJars(config);
+
 			m_wrapper = LocalSparkWrapperFactory.createWrapper(getJobJar().getJarFile(), extraJars);
 			m_wrapper.openSparkContext(config.getContextName(),
 					config.getNumberOfThreads(),
 					sparkConf,
 					config.enableHiveSupport(),
 					config.startThriftserver(),
-					(config.useHiveDataFolder())
+					config.useHiveDataFolder()
 							? config.getHiveDataFolder()
 							: null);
-			
+
 			contextWasCreated = true;
 			setStatus(SparkContextStatus.OPEN);
-			
+
 			// run prepare context job to initialize type converters
 			validateAndPrepareContext();
-		} catch (KNIMESparkException e) {
+		} catch (final KNIMESparkException e) {
 			if (contextWasCreated) {
 				try {
 					destroy();
-				} catch (KNIMESparkException toIgnore) {
+				} catch (final KNIMESparkException toIgnore) {
 					// ignore
 				}
 			}
-			
+
 			setStatus(SparkContextStatus.CONFIGURED);
 			throw e;
 		}
@@ -146,17 +146,20 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 		return contextWasCreated;
 	}
 
-	private File[] collectExtraJars(final Map<String, String> customSparkSettings) {
+	private File[] collectExtraJars(final LocalSparkContextConfig config) {
+		if (!config.useCustomSparkSettings()) {
+			return new File[0];
+		}
 		final Set<String> extraJars = new HashSet<>();
-
+		final Map<String, String> customSparkSettings = config.getCustomSparkSettings();
 		if (customSparkSettings.containsKey(SPARK_JARS)) {
 			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_JARS).split(",")));
 		}
-		
+
 		if (customSparkSettings.containsKey(SPARK_DRIVER_EXTRA_CLASS_PATH)) {
 			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_DRIVER_EXTRA_CLASS_PATH).split(",")));
 		}
-		
+
 		if (customSparkSettings.containsKey(SPARK_EXECUTOR_EXTRA_CLASS_PATH)) {
 			extraJars.addAll(Arrays.asList(customSparkSettings.get(SPARK_EXECUTOR_EXTRA_CLASS_PATH).split(",")));
 		}
@@ -177,15 +180,15 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 					return file.isFile() && file.canRead();
 				})
 				.collect(Collectors.toList())
-				.toArray(new File[extraJars.size()]);
+				.toArray(new File[0]);
 	}
 
 
 	private void validateAndPrepareContext() throws KNIMESparkException {
-		SparkVersion sparkVersion = getSparkVersion();
+		final SparkVersion sparkVersion = getSparkVersion();
 
-		PrepareContextJobInput prepInput = PrepareContextJobInput.create(getJobJar().getDescriptor().getHash(),
-				sparkVersion.toString(), 
+		final PrepareContextJobInput prepInput = PrepareContextJobInput.create(getJobJar().getDescriptor().getHash(),
+				sparkVersion.toString(),
 				getJobJar().getDescriptor().getPluginVersion(),
 				IntermediateToSparkConverterRegistry.getConverters(sparkVersion));
 
@@ -204,7 +207,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 				m_wrapper.destroy();
 				m_wrapper = null;
 			}
-		} catch (KNIMESparkException e) {
+		} catch (final KNIMESparkException e) {
 			// do nothing, this is alright
 		} finally {
 			setStatus(SparkContextStatus.CONFIGURED);
@@ -224,10 +227,10 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
         final Map<String, String> reps = new HashMap<>();
 
         reps.put("spark_version", config.getSparkVersion().toString());
-        
+
         if (getStatus() == SparkContextStatus.OPEN) {
         	reps.put("spark_webui_url", String.format("<a href=\"%s\">Click here to open</a>", m_wrapper.getSparkWebUIUrl()));
-        	reps.put("hiveserver_port", (config.startThriftserver())
+        	reps.put("hiveserver_port", config.startThriftserver()
         			? Integer.toString(m_wrapper.getHiveserverPort())
         			: "unavailable");
         } else {
@@ -265,12 +268,12 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	protected NamedObjectsController getNamedObjectsController() {
 		return m_namedObjectsController;
 	}
-	
+
 	public synchronized int getHiveserverPort() {
 		if (getStatus() != SparkContextStatus.OPEN) {
 			throw new IllegalStateException("Local Spark context is not open.");
 		}
-		
+
 		return m_wrapper.getHiveserverPort();
 	}
 }

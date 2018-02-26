@@ -25,16 +25,16 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	/**
 	 * Creates a new instance.
 	 * 
-	 * @param pkgWhitelist
-	 *            A package whitelist that is consulted before classloading.
-	 *            This classloader only loads classes from those packages from
-	 *            the whitelist, which are on the whitelist.
+	 * @param pkgBlacklist
+	 *            A package blacklist that is consulted before classloading.
+	 *            This classloader only loads classes from those packages that
+	 *            are not on the blacklist.
 	 * @param bundles
 	 *            An array of bundles that classes are to be loaded from.
 	 */
-	public MultiBundleDelegatingClassloader(final String[] pkgWhitelist, Bundle... bundles) {
+	public MultiBundleDelegatingClassloader(final String[] pkgBlacklist, Bundle... bundles) {
 		m_bundles = bundles;
-		m_pkgBlacklist = pkgWhitelist;
+		m_pkgBlacklist = pkgBlacklist;
 	}
 
 	/**
