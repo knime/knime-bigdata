@@ -203,7 +203,7 @@ public abstract class AbstractSparkJavaSnippetBaseNodeModel extends SparkNodeMod
         final SparkContextID contextID = getContextID(inData);
 
         if (m_snippetType == SnippetType.SOURCE && m_isDeprecatedNode) {
-            SparkSourceNodeModel.ensureContextIsOpen(contextID);
+            SparkSourceNodeModel.ensureContextIsOpen(contextID, exec.createSubProgress(0.1));
         }
 
         final JavaSnippetJobOutput output =

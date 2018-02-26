@@ -342,7 +342,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     private void reconfigureDefaultSparkContext() {
         try {
-            final SparkContextID oldDefaultID = SparkContextManager.getDefaultSparkContextID();
+            final SparkContextID oldDefaultID = SparkContextManager.getDefaultSparkContext().getID();
             boolean reconfigWithoutDestroySuccess = SparkContextManager.reconfigureDefaultContext(false);
 
             if (reconfigWithoutDestroySuccess && !SparkContextManager.getDefaultSparkContext().getID().equals(oldDefaultID)) {
@@ -353,7 +353,7 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
                 boolean shouldDestroy =
                     MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                         "Spark context settings have changed",
-                        "New settings only become active after destroying the existing remote Spark context. "
+                        "New settings only become active after destroying the existing default Spark context. "
                             + "Should the existing context be destroyed?\n\n"
                             + "WARNING: This deletes all cached data such as RDDs in the context and you have to reset all executed Spark nodes.");
 

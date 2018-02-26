@@ -125,7 +125,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 		final LocalSparkContext sparkContext = (LocalSparkContext) SparkContextManager
 				.<LocalSparkContextConfig>getOrCreateSparkContext(contextID);
 
-        exec.setMessage("Configuring local Spark context");
+		exec.setProgress(0, "Configuring local Spark context");
         final LocalSparkContextConfig config = m_settings.createContextConfig();
 
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
@@ -137,8 +137,8 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         }
 
         // try to open the context
-        exec.setMessage("Opening local Spark context");
-        sparkContext.ensureOpened(true);
+        exec.setProgress(0.1, "Creating context");
+        sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
 
         final PortObject dbPortObject;
         if (m_settings.getSQLSupport() == SQLSupport.HIVEQL_WITH_JDBC) {

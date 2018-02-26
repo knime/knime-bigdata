@@ -153,7 +153,7 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
         if (isDeprecatedNode) {
             exec.setMessage("Creating a Spark context...");
-            ensureContextIsOpen(contextID);
+            ensureContextIsOpen(contextID, exec.createSubProgress(0.1));
         }
 
         final JobWithFilesRunFactory<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> runFactory = SparkContextUtil.getJobWithFilesRunFactory(contextID, JOB_ID);

@@ -89,11 +89,11 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
         throws KNIMESparkException, CanceledExecutionException {
 
         if (m_ensureSparkContext) {
-            exec.setMessage("Creating a Spark context...");
-            SparkSourceNodeModel.ensureContextIsOpen(m_contextID);
+            exec.setMessage("Creating Spark context");
+            SparkSourceNodeModel.ensureContextIsOpen(m_contextID, exec.createSubProgress(0.1));
         }
 
-        exec.setMessage("Importing data into Spark...");
+        exec.setMessage("Importing data");
 
         final Table2SparkJobInput input = Table2SparkJobInput.create(getNamedOutputObjectId(),
             SparkDataTableUtil.toIntermediateSpec(spec));

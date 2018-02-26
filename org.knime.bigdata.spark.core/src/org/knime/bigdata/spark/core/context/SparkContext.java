@@ -128,6 +128,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *
      * @param createRemoteContext If true, a non-existent Spark context will be created. Otherwise, a non-existent Spark
      *            context leads to a {@link KNIMESparkException}.
+     * @param exec an {@link ExecutionMonitor} to track the progress of opening the context.
      * @return true when a new context was created, false, if a a context with the same name already existed in the
      *         cluster.
      *
@@ -136,18 +137,19 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *             state configured.
      *
      */
-    public final synchronized boolean ensureOpened(final boolean createRemoteContext)
-        throws SparkContextNotFoundException, KNIMESparkException {
-        switch (getStatus()) {
-            case NEW:
-                throw new KNIMESparkException("Spark context needs to be configured before opening.");
-            case CONFIGURED:
-                return open(createRemoteContext);
-            default: // this is actually OPEN
-                // all is good, but we did not actually create a new context
-                return false;
+    public final synchronized boolean ensureOpened(final boolean createRemoteContext, final ExecutionMonitor exec)
+            throws SparkContextNotFoundException, KNIMESparkException {
+            switch (getStatus()) {
+                case NEW:
+                    throw new KNIMESparkException("Spark context needs to be configured before opening.");
+                case CONFIGURED:
+                    return open(createRemoteContext, exec);
+                default: // this is actually OPEN
+                    // all is good, but we did not actually create a new context
+                    exec.setProgress(1.0);
+                    return false;
+            }
         }
-    }
 
     /**
      * Ensures that no matching remote Spark context exists, destroying it if necessary.
@@ -383,7 +385,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
-                ensureOpened(false);
+                ensureOpened(false, new ExecutionMonitor());
                 jobController = getJobController();
             }
 
@@ -404,11 +406,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
-                ensureOpened(false);
+                ensureOpened(false, exec.createSubProgress(0.1));
                 jobController = getJobController();
             }
 
-            return jobController.startJobAndWaitForResult(job, exec);
+            return jobController.startJobAndWaitForResult(job, exec.createSubProgress(0.9));
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
@@ -424,11 +426,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
-                ensureOpened(false);
+                ensureOpened(false, exec.createSubProgress(0.1));
                 jobController = getJobController();
             }
 
-            jobController.startJobAndWaitForResult(job, exec);
+            jobController.startJobAndWaitForResult(job, exec.createSubProgress(0.9));
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
@@ -443,7 +445,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final NamedObjectsController namedObjectsController;
             synchronized (this) {
-                ensureOpened(false);
+                ensureOpened(false, new ExecutionMonitor());
                 namedObjectsController = getNamedObjectsController();
             }
 
@@ -462,7 +464,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final NamedObjectsController namedObjectsController;
             synchronized (this) {
-                ensureOpened(false);
+                ensureOpened(false, new ExecutionMonitor());
                 namedObjectsController = getNamedObjectsController();
             }
 
@@ -482,6 +484,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *            context leads to a {@link SparkContextNotFoundException}. Setting this parameter to false is useful in
      *            situations where you want to sync the status (see {@link #getStatus()}) to (re)attach to an existing
      *            remote Spark context, but not necessarily create a new one.
+     * @param exec an {@link ExecutionMonitor} to track the progress of opening the context.
      * @return true when a new context was created, false, if a a context with the same name already existed in the
      *         cluster.
      *
@@ -489,7 +492,7 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *             in state configured.
      * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
-    protected abstract boolean open(final boolean createRemoteContext)
+    protected abstract boolean open(final boolean createRemoteContext, final ExecutionMonitor exec)
         throws KNIMESparkException, SparkContextNotFoundException;
 
     /**

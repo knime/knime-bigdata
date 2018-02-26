@@ -50,6 +50,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
 
@@ -175,10 +176,12 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
      * {@inheritDoc}
      */
     @Override
-    protected boolean open(final boolean createRemoteContext) throws KNIMESparkException {
+    protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException {
         boolean contextWasCreated = false;
 
         try {
+        	exec.setProgress(0, "Opening remote context on Spark Jobserver");
+        	
             setStatus(SparkContextStatus.OPEN);
 
             if (!remoteSparkContextExists()) {
@@ -188,14 +191,17 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
                     throw new SparkContextNotFoundException(getID());
                 }
             }
-
+            
+            exec.setProgress(0.7, "Uploading Spark jobs");
             // regardless of contextWasCreated is true or not we can assume that the context exists now
             // (somebody else may have created it before us)
             if (!isJobJarUploaded()) {
                 uploadJobJar();
             }
-
+            
+            exec.setProgress(0.9, "Running job to prepare context");
             validateAndPrepareContext();
+            exec.setProgress(1);
         } catch (KNIMESparkException e) {
 
             // make sure we don't leave a broken context behind

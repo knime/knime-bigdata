@@ -117,7 +117,7 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
 
         if (m_isDeprecatedNode) {
             exec.setMessage("Creating a Spark context...");
-            ensureContextIsOpen(contextID);
+            ensureContextIsOpen(contextID, exec.createSubProgress(0.1));
         }
 
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();

@@ -99,7 +99,7 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         final SparkContextID contextID = m_settings.getSparkContextID();
         final SparkContext<JobServerSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
-        exec.setMessage("Configuring Spark context");
+        exec.setProgress(0, "Configuring Spark context");
         final JobServerSparkContextConfig config = m_settings.createContextConfig(getCredentialsProvider());
 
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
@@ -111,8 +111,8 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         }
 
         // try to open the context
-        exec.setMessage("Opening Spark context");
-        sparkContext.ensureOpened(true);
+        exec.setProgress(0.1, "Creating context");
+        sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
 
         return new PortObject[]{new SparkContextPortObject(contextID)};
     }

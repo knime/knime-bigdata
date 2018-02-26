@@ -23,6 +23,7 @@ import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapperFactory;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -99,13 +100,16 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
      * {@inheritDoc}
      */
 	@Override
-	protected boolean open(final boolean createRemoteContext) throws KNIMESparkException, SparkContextNotFoundException {
+	protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec)
+			throws KNIMESparkException, SparkContextNotFoundException {
+		
 		if (m_wrapper == null && !createRemoteContext) {
 			throw new SparkContextNotFoundException(getID());
 		}
 
 		boolean contextWasCreated = false;
 		try {
+			exec.setProgress(0, "Opening local Spark context");
 			final LocalSparkContextConfig config = getConfiguration();
 			final Map<String, String> sparkConf = new HashMap<>();
 
@@ -129,7 +133,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			setStatus(SparkContextStatus.OPEN);
 
 			// run prepare context job to initialize type converters
+			exec.setProgress(0.9, "Running job to prepare context");
 			validateAndPrepareContext();
+			exec.setProgress(1);
 		} catch (final KNIMESparkException e) {
 			if (contextWasCreated) {
 				try {
