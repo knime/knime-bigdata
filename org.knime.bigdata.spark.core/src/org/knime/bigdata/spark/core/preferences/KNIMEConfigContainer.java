@@ -85,13 +85,6 @@ public class KNIMEConfigContainer {
     }
 
     /**
-     * @return the logging level for Spark job log messages
-     */
-    public static String getSparkJobLogLevel() {
-        return PREFERENCE_STORE.getString(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL);
-    }
-
-    /**
      * @return <code>true</code> if the user has specified Spark settings
      * @see #getCustomSparkSettings()
      */

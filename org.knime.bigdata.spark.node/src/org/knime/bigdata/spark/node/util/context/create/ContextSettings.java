@@ -98,9 +98,6 @@ public class ContextSettings {
     private final SettingsModelBoolean m_deleteObjectsOnDispose =
             new SettingsModelBoolean("v1_6.deleteObjectsOnDispose", KNIMEConfigContainer.deleteSparkObjectsOnDispose());
 
-    private final SettingsModelString m_sparkJobLogLevel =
-            new SettingsModelString("v1_6.sparkJobLogLevel", KNIMEConfigContainer.getSparkJobLogLevel());
-
     private final SettingsModelBoolean m_overrideSparkSettings =
             new SettingsModelBoolean("v1_6.overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
 
@@ -172,10 +169,6 @@ public class ContextSettings {
         return m_deleteObjectsOnDispose;
     }
 
-    protected SettingsModelString getSparkJobLogLevelModel() {
-        return m_sparkJobLogLevel;
-    }
-
     protected SettingsModelBoolean getOverrideSparkSettingsModel() {
         return m_overrideSparkSettings;
     }
@@ -217,10 +210,6 @@ public class ContextSettings {
 
     public boolean deleteObjectsOnDispose() {
         return m_deleteObjectsOnDispose.getBooleanValue();
-    }
-
-    public String getSparkJobLogLevel() {
-        return m_sparkJobLogLevel.getStringValue();
     }
 
     public boolean overrideSparkSettings() {
@@ -287,7 +276,6 @@ public class ContextSettings {
         m_contextName.saveSettingsTo(settings);
         m_deleteContextOnDispose.saveSettingsTo(settings);
         m_deleteObjectsOnDispose.saveSettingsTo(settings);
-        m_sparkJobLogLevel.saveSettingsTo(settings);
         m_overrideSparkSettings.saveSettingsTo(settings);
         m_customSparkSettings.saveSettingsTo(settings);
 
@@ -339,7 +327,6 @@ public class ContextSettings {
         m_sparkVersion.validateSettings(settings);
         m_contextName.validateSettings(settings);
         m_deleteObjectsOnDispose.validateSettings(settings);
-        m_sparkJobLogLevel.validateSettings(settings);
         m_overrideSparkSettings.validateSettings(settings);
         if (m_overrideSparkSettings.getBooleanValue()) {
             m_customSparkSettings.validateSettings(settings);
@@ -477,21 +464,21 @@ public class ContextSettings {
                 getJobServerUrl(), false, null, null,
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
-                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+                overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER) {
             return new JobServerSparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), "",
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
-                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+                overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.USER_PWD) {
             return new JobServerSparkContextConfig(
                 getJobServerUrl(), true, m_authentication.getUsername(), m_authentication.getPassword(),
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
-                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+                overrideSparkSettings(), getCustomSparkSettings());
 
         } else if (authType == AuthenticationType.CREDENTIALS) {
             ICredentials cred = cp.get(m_authentication.getCredential());
@@ -500,7 +487,7 @@ public class ContextSettings {
                 getJobServerUrl(), true, cred.getLogin(), cred.getPassword(),
                 getReceiveTimeout(), getJobCheckFrequency(),
                 getSparkVersion(), getContextName(), deleteObjectsOnDispose(),
-                getSparkJobLogLevel(), overrideSparkSettings(), getCustomSparkSettings());
+                overrideSparkSettings(), getCustomSparkSettings());
 
         } else {
             throw new RuntimeException("Unsupported authentication method: " + authType);
@@ -541,8 +528,6 @@ public class ContextSettings {
         builder.append(deleteContextOnDispose());
         builder.append(", deleteObjectsOnDispose=");
         builder.append(deleteObjectsOnDispose());
-        builder.append(", sparkJobLogLevel=");
-        builder.append(getSparkJobLogLevel());
         builder.append(", overrideSparkSettings=");
         builder.append(overrideSparkSettings());
         builder.append(", customSparkSettings=");

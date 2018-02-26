@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.json.JsonObject;
 
-import org.apache.log4j.Priority;
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -19,6 +18,8 @@ import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.sparkjobserver.request.DeleteDataFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.GetJobStatusRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.JobAlreadyFinishedException;
@@ -195,7 +196,6 @@ class JobserverJobController implements JobController {
         String jobId = startJobAsynchronously(job, inputFilesOnServer);
 
         JobserverJobOutput jobserverOutput = waitForJob(job, jobId, exec);
-        logMessages(jobserverOutput.getLogMessages());
 
         if (jobserverOutput.isError()) {
             Throwable cause = jobserverOutput.getThrowable();
@@ -271,30 +271,6 @@ class JobserverJobController implements JobController {
         }
     }
 
-    private void logMessages(final List<LogMessage> logMessages) throws KNIMESparkException {
-        for (LogMessage logMessage : logMessages) {
-            switch (logMessage.getLog4jLogLevel()) {
-                case Priority.DEBUG_INT:
-                    LOGGER.debug(String.format("%s: %s", logMessage.getLoggerName(), logMessage.getMessage()));
-                    break;
-                case Priority.INFO_INT:
-                    LOGGER.info(String.format("%s: %s", logMessage.getLoggerName(), logMessage.getMessage()));
-                    break;
-                case Priority.WARN_INT:
-                    LOGGER.warn(String.format("%s: %s", logMessage.getLoggerName(), logMessage.getMessage()));
-                    break;
-                case Priority.ERROR_INT:
-                    LOGGER.error(String.format("%s: %s", logMessage.getLoggerName(), logMessage.getMessage()));
-                    break;
-                case Priority.FATAL_INT:
-                    LOGGER.fatal(String.format("%s: %s", logMessage.getLoggerName(), logMessage.getMessage()));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
     private JobserverJobOutput waitForJob(final JobRun<?, ?> jobRun, final String jobID,
         final ExecutionMonitor exec) throws CanceledExecutionException, KNIMESparkException {
 
@@ -363,15 +339,6 @@ class JobserverJobController implements JobController {
                 LOGGER.error(String.format("Failed to cancel job %s (Message: %s).", jobID, e.getMessage()));
                 throw c;
             }
-        }
-    }
-
-    private void killJobSafely(final String jobID) {
-        try {
-            LOGGER.warn("Cancelling job: " + jobID);
-            new KillJobRequest(m_contextId, m_contextConfig, m_restClient, jobID).send();
-        } catch (KNIMESparkException e) {
-            LOGGER.error("Failed to cancel job " + jobID + "\nMessage: " + e.getMessage());
         }
     }
 

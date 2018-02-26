@@ -28,7 +28,6 @@ import java.io.InputStreamReader;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Level;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
@@ -177,8 +176,4 @@ public abstract class AbstractJobserverRequest<T> {
     }
 
     protected abstract NodeLogger getLogger();
-
-    protected int getJobLog4jLevel() {
-        return Level.toLevel(m_config.getSparkJobLogLevel()).toInt();
-    }
 }

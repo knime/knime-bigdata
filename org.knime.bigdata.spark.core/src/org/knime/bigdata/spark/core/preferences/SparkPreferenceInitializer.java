@@ -62,9 +62,6 @@ import com.typesafe.config.ConfigFactory;
  */
 public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
-    /**All supported log levels.*/
-    public static final String ALL_LOG_LEVELS[] = new String[]{"DEBUG", "INFO", "WARN", "ERROR"};
-
     /** Preference key to determine whether Spark preferences have already been initialized */
     public static final String PREF_SPARK_PREFERENCES_INITIALIZED = "org.knime.bigdata.spark.v1_6.initialized";
 
@@ -103,15 +100,12 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
     /**Preference key to indicate that objects should be deleted on dispose.*/
     public static final String PREF_DELETE_OBJECTS_ON_DISPOSE = "org.knime.bigdata.spark.v1_6.deleteObjectsOnDispose";
 
-    /** Preference key for spark side log level (e.g. INFO, DEBUG...). */
-    public static final String PREF_JOB_LOG_LEVEL = "org.knime.bigdata.spark.v1_6.jobLogLevel";
-
     /** Preference key for verbose logging on KNIME/client side. */
     public static final String PREF_VERBOSE_LOGGING = "org.knime.bigdata.spark.v1_6.verboseLogging";
 
     /** All context specific settings requiring context reset on change. */
     public static final String[] PREF_ALL_CONTEXT_SETTINGS = new String[]{PREF_SPARK_VERSION, PREF_CONTEXT_NAME,
-        PREF_DELETE_OBJECTS_ON_DISPOSE, PREF_JOB_LOG_LEVEL, PREF_OVERRIDE_SPARK_SETTINGS, PREF_CUSTOM_SPARK_SETTINGS};
+        PREF_DELETE_OBJECTS_ON_DISPOSE, PREF_OVERRIDE_SPARK_SETTINGS, PREF_CUSTOM_SPARK_SETTINGS};
 
 
     private static final String LEGACY_SPARK_1_2_PLUGIN = "org.knime.bigdata.spark";
@@ -160,7 +154,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
     @Override
     public void initializeDefaultPreferences() {
-//        final IPreferenceStore store = SparkPlugin.getDefault().getPreferenceStore();
         final IPreferenceStore store = getPreferenceStore();
 
         loadDefaultValues(store);
@@ -281,7 +274,6 @@ public class SparkPreferenceInitializer extends AbstractPreferenceInitializer {
 
         // setup general KNIME Extension for Apache Spark settings
         store.setDefault(PREF_DELETE_OBJECTS_ON_DISPOSE, getPresetBoolean(config, "knime.deleteObjectsOnDispose"));
-        store.setDefault(PREF_JOB_LOG_LEVEL, getPresetString(config, "knime.jobLogLevel"));
         store.setDefault(PREF_VERBOSE_LOGGING, getPresetBoolean(config, "knime.verboseLogging"));
     }
 

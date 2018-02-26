@@ -68,7 +68,6 @@ import org.eclipse.ui.PlatformUI;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.NodeLogger;
 
@@ -99,8 +98,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
     private Text m_contextName;
 
     private Button m_deleteSparkObjectsOnDispose;
-
-    private Button m_sparkJobLevel[];
 
     private Button m_overrideSettings;
 
@@ -201,16 +198,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         m_deleteSparkObjectsOnDispose = new Button(contextSettings, SWT.CHECK);
         m_deleteSparkObjectsOnDispose.setText("Delete Spark DataFrames/RDDs on dispose");
 
-        Composite logLevelContainer =
-            createGridLayoutContainer(contextSettings, SparkPreferenceInitializer.ALL_LOG_LEVELS.length + 1);
-        new Label(logLevelContainer, SWT.NONE).setText("Spark job log level:");
-        m_sparkJobLevel = new Button[SparkPreferenceInitializer.ALL_LOG_LEVELS.length];
-        for (int i = 0; i < SparkPreferenceInitializer.ALL_LOG_LEVELS.length; i++) {
-            m_sparkJobLevel[i] = new Button(logLevelContainer, SWT.RADIO);
-            m_sparkJobLevel[i].setText(SparkPreferenceInitializer.ALL_LOG_LEVELS[i]);
-            m_sparkJobLevel[i].addListener(SWT.Selection, this);
-        }
-
         m_overrideSettings = new Button(contextSettings, SWT.CHECK);
         m_overrideSettings.setText("Override Spark settings:");
         m_overrideSettings.addListener(SWT.Selection, this);
@@ -284,7 +271,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
         setSparkVersionField(prefs.getString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
         m_contextName.setText(prefs.getString(SparkPreferenceInitializer.PREF_CONTEXT_NAME));
-        selectSparkJobLogLevelButton(prefs.getString(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL));
         m_deleteSparkObjectsOnDispose
             .setSelection(prefs.getBoolean(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE));
         m_overrideSettings.setSelection(prefs.getBoolean(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS));
@@ -309,7 +295,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
         setSparkVersionField(prefs.getDefaultString(SparkPreferenceInitializer.PREF_SPARK_VERSION));
         m_contextName.setText(prefs.getDefaultString(SparkPreferenceInitializer.PREF_CONTEXT_NAME));
-        selectSparkJobLogLevelButton(prefs.getDefaultString(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL));
         m_deleteSparkObjectsOnDispose
             .setSelection(prefs.getDefaultBoolean(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE));
         m_overrideSettings
@@ -346,19 +331,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         prefs.setValue(SparkPreferenceInitializer.PREF_DELETE_OBJECTS_ON_DISPOSE,
             m_deleteSparkObjectsOnDispose.getSelection());
 
-        String logLevel = null;
-        for (int i = 0; i < m_sparkJobLevel.length; i++) {
-            if (m_sparkJobLevel[i].getSelection()) {
-                logLevel = SparkPreferenceInitializer.ALL_LOG_LEVELS[i];
-                break;
-            }
-        }
-        if (logLevel != null) {
-            prefs.setValue(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL, logLevel);
-        } else {
-            prefs.setToDefault(SparkPreferenceInitializer.PREF_JOB_LOG_LEVEL);
-        }
-
         prefs.setValue(SparkPreferenceInitializer.PREF_OVERRIDE_SPARK_SETTINGS, m_overrideSettings.getSelection());
         prefs.setValue(SparkPreferenceInitializer.PREF_CUSTOM_SPARK_SETTINGS, m_customSettings.getText());
         prefs.setValue(SparkPreferenceInitializer.PREF_VERBOSE_LOGGING, m_verboseLogging.getSelection());
@@ -370,16 +342,14 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
 
     private void reconfigureDefaultSparkContext() {
         try {
-            SparkContextID newDefaultID = SparkContextID.fromContextConfig(new JobServerSparkContextConfig());
-            if (!SparkContextManager.getDefaultSparkContext().getID().equals(newDefaultID)) {
+            final SparkContextID oldDefaultID = SparkContextManager.getDefaultSparkContextID();
+            boolean reconfigWithoutDestroySuccess = SparkContextManager.reconfigureDefaultContext(false);
+
+            if (reconfigWithoutDestroySuccess && !SparkContextManager.getDefaultSparkContext().getID().equals(oldDefaultID)) {
                 MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                     "Spark context changed",
                     "You are connecting to a different Spark context than before. Please reset all executed Spark nodes.");
-            }
-
-            boolean reconfigWithoutDestroySuccess = SparkContextManager.reconfigureDefaultContext(false);
-
-            if (!reconfigWithoutDestroySuccess) {
+            } else if (!reconfigWithoutDestroySuccess) {
                 boolean shouldDestroy =
                     MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                         "Spark context settings have changed",
@@ -430,13 +400,6 @@ public class SparkPreferencePage extends PreferencePage implements IWorkbenchPre
         int index = m_sparkVersion.indexOf(SparkVersion.fromString(version).getLabel());
         if (index >= 0 && index < m_sparkVersion.getItemCount()) {
             m_sparkVersion.select(index);
-        }
-    }
-
-    /** Selects given spark job log level radio button. */
-    private void selectSparkJobLogLevelButton(final String level) {
-        for (int i = 0; i < SparkPreferenceInitializer.ALL_LOG_LEVELS.length; i++) {
-            m_sparkJobLevel[i].setSelection(SparkPreferenceInitializer.ALL_LOG_LEVELS[i].equals(level));
         }
     }
 

@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.bigdata.spark.core.preferences.SparkPreferenceInitializer;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -36,7 +35,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentAuthentication;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
@@ -116,10 +114,6 @@ class SparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeList
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getDeleteObjectsOnDisposeModel(),
                 "<html>Delete Spark DataFrames/RDDs on dispose</html>").getComponentPanel(), gbc);
-        gbc.gridx = 0;
-        gbc.gridy++;
-        panel.add(new DialogComponentButtonGroup(m_settings.getSparkJobLogLevelModel(), false,
-                "Spark job log level:", SparkPreferenceInitializer.ALL_LOG_LEVELS).getComponentPanel(), gbc);
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(new DialogComponentBoolean(m_settings.getOverrideSparkSettingsModel(),

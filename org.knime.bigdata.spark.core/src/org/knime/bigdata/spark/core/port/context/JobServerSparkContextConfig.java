@@ -32,10 +32,17 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.config.ConfigRO;
 
 /**
- * Class that holds all information about a SparkContext that is used in KNIME e.g. the id
- * of the context and the requested resources.
+ * Configuration class for a Spark context running on "Spark Jobserver". This class holds all required information to
+ * create and configure such a context.
  *
- * @author Tobias Koetter, KNIME.com
+ * <p>
+ * Note that this class is in the spark.core plugin for historical reasons, instead of spark.core.jobserver where it
+ * conceptually belongs. Before supporting arbitrary types of contexts, one could only use Spark Jobserver to run Spark
+ * jobs. To be able to load legacy KNIME workflows, this class needs to stay in the spark.core plugin.
+ * </p>
+ *
+ * @author Tobias Koetter, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class JobServerSparkContextConfig implements Serializable, SparkContextConfig {
 
@@ -51,7 +58,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
     private final SparkVersion m_sparkVersion;
     private final String m_contextName;
     private final boolean m_deleteObjectsOnDispose;
-    private final String m_sparkJobLogLevel;
     private final boolean m_overrideSparkSettings;
     private final Map<String, String> m_customSparkSettings;
 
@@ -64,7 +70,7 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
             KNIMEConfigContainer.useAuthentication(), KNIMEConfigContainer.getUserName(), KNIMEConfigContainer.getPassword(),
             KNIMEConfigContainer.getReceiveTimeout(), KNIMEConfigContainer.getJobCheckFrequency(),
             KNIMEConfigContainer.getSparkVersion(), KNIMEConfigContainer.getSparkContext(), KNIMEConfigContainer.deleteSparkObjectsOnDispose(),
-            KNIMEConfigContainer.getSparkJobLogLevel(), KNIMEConfigContainer.overrideSparkSettings(), KNIMEConfigContainer.getCustomSparkSettings());
+            KNIMEConfigContainer.overrideSparkSettings(), KNIMEConfigContainer.getCustomSparkSettings());
     }
 
 
@@ -78,7 +84,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
      * @param sparkVersion Spark version
      * @param contextName context name
      * @param deleteObjectsOnDispose <code>true</code> if objects should be deleted on dispose
-     * @param sparkJobLogLevel the log level for Spark jobs
      * @param overrideSparkSettings <code>true</code> for custom Spark settings
      * @param customSparkSettings custom Spark settings
      */
@@ -86,7 +91,7 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
         final boolean authentication, final String user, final String password,
         final Duration receiveTimeout, final int jobCheckFrequency,
         final SparkVersion sparkVersion, final String contextName, final boolean deleteObjectsOnDispose,
-        final String sparkJobLogLevel, final boolean overrideSparkSettings, final Map<String,String> customSparkSettings) {
+        final boolean overrideSparkSettings, final Map<String,String> customSparkSettings) {
 
         if (jobServerUrl == null || jobServerUrl.isEmpty()) {
             throw new IllegalArgumentException("url must not be empty");
@@ -112,10 +117,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
             throw new IllegalArgumentException("contextName must not be empty");
         }
 
-        if (sparkJobLogLevel == null || sparkJobLogLevel.isEmpty()) {
-            throw new IllegalArgumentException("No spark job log level provided");
-        }
-
         if (overrideSparkSettings && (customSparkSettings == null || customSparkSettings.isEmpty())) {
             throw new IllegalArgumentException("Can't override spark settings with empty settings");
         }
@@ -130,7 +131,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
         this.m_sparkVersion = sparkVersion;
         this.m_contextName = contextName;
         this.m_deleteObjectsOnDispose = deleteObjectsOnDispose;
-        this.m_sparkJobLogLevel = sparkJobLogLevel;
         this.m_overrideSparkSettings = overrideSparkSettings;
         this.m_customSparkSettings = customSparkSettings;
     }
@@ -176,9 +176,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
         if (m_deleteObjectsOnDispose != other.m_deleteObjectsOnDispose) {
             return false;
         }
-        if (!m_sparkJobLogLevel.equals(other.m_sparkJobLogLevel)) {
-            return false;
-        }
         if (m_overrideSparkSettings != other.m_overrideSparkSettings) {
             return false;
         }
@@ -205,7 +202,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
         result = prime * result + m_sparkVersion.hashCode();
         result = prime * result + m_contextName.hashCode();
         result = prime * result + (m_deleteObjectsOnDispose ? 1231 : 1237);
-        result = prime * result + m_sparkJobLogLevel.hashCode();
         result = prime * result + (m_overrideSparkSettings ? 1 : 0);
         result = prime * result + (m_overrideSparkSettings ? m_customSparkSettings.hashCode() : 0);
 
@@ -285,15 +281,6 @@ public class JobServerSparkContextConfig implements Serializable, SparkContextCo
     public boolean deleteObjectsOnDispose() {
         return m_deleteObjectsOnDispose;
     }
-
-
-    /**
-     * @return the Spark job log level
-     */
-    public String getSparkJobLogLevel() {
-        return m_sparkJobLogLevel;
-    }
-
 
     /**
      * {@inheritDoc}

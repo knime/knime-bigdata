@@ -31,8 +31,8 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverConstants;
-import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverJobInput;
-import org.knime.bigdata.spark.core.sparkjobserver.context.TypesafeConfigSerializationUtils;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.core.node.NodeLogger;
 
@@ -119,7 +119,6 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
 
         JobserverJobInput jsInput =
             JobserverJobInput.createFromSparkJobInput(m_jobInput, m_sparkJobClass);
-        jsInput = jsInput.withLog4jLogLevel(getJobLog4jLevel());
 
         if (m_inputFilesOnServer != null) {
             jsInput = jsInput.withFiles(m_inputFilesOnServer);
