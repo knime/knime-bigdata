@@ -385,6 +385,8 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
+                // this does not open a new context, it only checks that one exists and throws
+                // an exception otherwise
                 ensureOpened(false, new ExecutionMonitor());
                 jobController = getJobController();
             }
@@ -406,11 +408,13 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
-                ensureOpened(false, exec.createSubProgress(0.1));
+                // this does not open a new context, it only checks that one exists and throws
+                // an exception otherwise
+                ensureOpened(false, new ExecutionMonitor());
                 jobController = getJobController();
             }
 
-            return jobController.startJobAndWaitForResult(job, exec.createSubProgress(0.9));
+            return jobController.startJobAndWaitForResult(job, exec);
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
@@ -426,11 +430,13 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         try {
             final JobController jobController;
             synchronized (this) {
-                ensureOpened(false, exec.createSubProgress(0.1));
+                // this does not open a new context, it only checks that one exists and throws
+                // an exception otherwise
+                ensureOpened(false, new ExecutionMonitor());
                 jobController = getJobController();
             }
 
-            jobController.startJobAndWaitForResult(job, exec.createSubProgress(0.9));
+            jobController.startJobAndWaitForResult(job, exec);
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
