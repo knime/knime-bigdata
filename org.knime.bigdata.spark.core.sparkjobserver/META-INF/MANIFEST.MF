@@ -23,3 +23,4 @@ Require-Bundle: org.knime.bigdata.commons;bundle-version="3.6.0",
 Bundle-ClassPath: knime.jar
 Bundle-ActivationPolicy: lazy
 Export-Package: org.knime.bigdata.spark.core.sparkjobserver.jobapi
+Bundle-Activator: org.knime.bigdata.spark.core.sparkjobserver.JobserverPlugin
