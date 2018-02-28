@@ -103,9 +103,9 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         }
 
         m_lastContextID = newContextID;
-
+        
         PortObjectSpec dbPortObjectObjectSpec = null;
-        if (m_settings.getSQLSupport() != SQLSupport.HIVEQL_WITH_JDBC) {
+        if (!sparkContext.getConfiguration().startThriftserver()) {
         	dbPortObjectObjectSpec = InactiveBranchPortObjectSpec.INSTANCE;
         }
 
@@ -141,7 +141,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
         sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
 
         final PortObject dbPortObject;
-        if (m_settings.getSQLSupport() == SQLSupport.HIVEQL_WITH_JDBC) {
+        if (sparkContext.getConfiguration().startThriftserver()) {
         	final int hiveserverPort = sparkContext.getHiveserverPort();
         	dbPortObject = new DatabaseConnectionPortObject(getHiveSpec(hiveserverPort));
         } else {

@@ -329,7 +329,7 @@ public class LocalSparkContextSettings {
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
-        return new SparkContextID(SparkLocalContextProvider.LOCAL_SPARK_CONTEXT_ID_SCHEME + "://" + DEFAULT_CONTEXT_NAME);
+        return new SparkContextID(SparkLocalContextProvider.LOCAL_SPARK_CONTEXT_ID_SCHEME + "://" + getContextName());
     }
 
     /**

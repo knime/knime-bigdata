@@ -95,6 +95,22 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
             m_jobController = new LocalSparkJobController(m_wrapper);
         }
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean canReconfigureWithoutDestroy(final LocalSparkContextConfig newConfig) {
+    	final LocalSparkContextConfig config = getConfiguration();
+    	
+    	return super.canReconfigureWithoutDestroy(newConfig)
+    			&& config.getNumberOfThreads() == newConfig.getNumberOfThreads()
+    			&& config.enableHiveSupport() == newConfig.enableHiveSupport()
+    			&& config.startThriftserver() == newConfig.startThriftserver()
+    			&& ((config.enableHiveSupport() && config.useHiveDataFolder())
+    				? newConfig.useHiveDataFolder() && newConfig.getHiveDataFolder().equals(config.getHiveDataFolder())
+    				: true);
+    }
 
     /**
      * {@inheritDoc}
