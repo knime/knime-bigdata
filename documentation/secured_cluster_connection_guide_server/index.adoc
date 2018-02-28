@@ -13,9 +13,9 @@ include::server_prerequisites.adoc[]
 
 include::server_kerberos.adoc[]
 
-include::server_impersonation.adoc[]
-
 include::server_jdbc.adoc[]
+
+include::server_impersonation.adoc[]
 
 include::server_advanced.adoc[]
 

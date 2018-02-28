@@ -7,19 +7,18 @@ First, in <<server_impersonation_server>> we configure KNIME Server to request u
 Second, in <<server_impersonation_hadoop>> and <<server_impersonation_impala>> we grant service-specific impersonation privileges to KNIME Server.
 
 [[server_impersonation_server]]
-=== Activating user impersonation on KNIME Server
-
-Without any further configuration, KNIME Server impersonates its users on the following connection types:
-
-- HDFS, webHDFS and httpFS
-- Hive and Impala, when using the *embedded* Hive/Impala JDBC driver).
+=== User impersonation for proprietary JDBC drivers on KNIME Server
 
 [NOTE]
 ====
-Only if using a proprietary JDBC driver as described in <<server_jdbc>>, must user impersonation be activated. 
+Unless you have set up a roprietary JDBC driver as described in <<server_jdbc>>,  you can skip this subsection.
+Without any further configuration, KNIME Server impersonates its users on the following connection types:
+
+- HDFS, webHDFS and httpFS
+- Hive and Impala, when using the *embedded* Hive/Impala JDBC driver.
 ====
 
-To activate user impersonation on KNIME Server for Hive and Impala using the *proprietary* JDBC driver, add the following lines to the KNIME Server `preferences.epf`:
+The following only applies when using the *proprietary* JDBC driver to connect to Hive and Impala. To activate user impersonation on these connections, add the following lines to the KNIME Server `preferences.epf`:
 
 ----
 /instance/org.knime.bigdata.commons/org.knime.bigdata.config.kerberos.jdbc.impersonation.flag=true

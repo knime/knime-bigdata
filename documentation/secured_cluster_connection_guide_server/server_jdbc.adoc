@@ -1,9 +1,10 @@
-== Setting up JDBC drivers
+[[server_jdbc]]
+== Setting up proprietary JDBC drivers (optional)
 
 [NOTE]
 ====
 Each KNIME Server Executor is a headless instance of KNIME Analytics Platform.
-If the KNIME Big Data Connectors extension is installed, KNIME Server Executor includes a fully-functional embedded JDBC driver for Hive and Impala. If you choose to use this driver *(recommended)*, then no further setup is required and you can skip this section.
+If the _KNIME Big Data Connectors_ extension is installed, KNIME Server Executor includes a fully-functional embedded JDBC driver for Hive and Impala. If you choose to use this driver *(recommended)*, then you can skip this section.
 
 The currently embedded JDBC driver is the open-source Apache Hive(TM) JDBC driver version `1.1.0-cdh5.13.0` (https://archive.cloudera.com/cdh5/cdh/5/hive-1.1.0-cdh5.13.0.releasenotes.html[Release Notes]). The driver has been verified to be compatible with:
 
@@ -19,7 +20,7 @@ Please consult the subsection that applies to your Hadoop vendor:
 - <<server_jdbc_hortonworks>>
 
 [[server_jdbc_cloudera]]
-=== Setting up proprietary Cloudera JDBC drivers (Hive and Impala)
+=== Cloudera JDBC drivers (Hive and Impala)
 
 . Download the newest JDBC drivers from the Cloudera website (login required):
 
@@ -32,7 +33,7 @@ Please consult the subsection that applies to your Hadoop vendor:
 include::server_jdbc_prefs.adoc[]
 
 [[server_jdbc_hortonworks]]
-=== Setting up proprietary Hortonworks Hive JDBC drivers
+=== Hortonworks Hive JDBC drivers
 
 . Download the newest Hive JDBC driver from the https://hortonworks.com/downloads/[Hortonworks website].
 
