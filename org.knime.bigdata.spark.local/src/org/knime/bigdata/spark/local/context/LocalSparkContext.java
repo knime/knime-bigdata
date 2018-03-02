@@ -251,7 +251,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
         reps.put("spark_version", config.getSparkVersion().toString());
 
         if (getStatus() == SparkContextStatus.OPEN) {
-        	reps.put("spark_webui_url", String.format("<a href=\"%s\">Click here to open</a>", m_wrapper.getSparkWebUIUrl()));
+			reps.put("spark_webui_url",
+					String.format("<a href=\"%s\" style=\"text-decoration: underline;\">Click here to open</a>",
+							m_wrapper.getSparkWebUIUrl()));
         	reps.put("hiveserver_port", config.startThriftserver()
         			? Integer.toString(m_wrapper.getHiveserverPort())
         			: "unavailable");
