@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -49,7 +50,19 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	private SparkSession m_sparkSession;
 	
+	/**
+	 * Parent directory for temporary data.
+	 */
 	private File m_sparkTmpDir;
+	
+	/**
+	 * Subdirectory of {@link #m_sparkTmpDir} that is used to store copies of
+	 * the input files for {@link SparkJobWithFiles}. This is necessary because
+	 * these files are managed by KNIME nodes and may be deleted when a node is
+	 * reset. Since this can cause FileNotFoundExceptions in local Spark, we
+	 * ensure that Spark works on independent copies.
+	 */
+	private File m_jobInputFileCopyDir;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -68,7 +81,11 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			ensureNamedInputObjectsExist(jobInput);
 			ensureNamedOutputObjectsDoNotExist(jobInput);
 
-			List<File> inputFiles = validateInputFiles(localSparkInput);
+			// The input files are managed by KNIME nodes and may be deleted
+			// when a node is reset. Since this can cause FileNotFoundExceptions
+			// in local Spark, we ensure that Spark works on independent copies
+			// of the input files.
+			List<File> inputFileCopies = copyInputFiles(localSparkInput);
 
 			Object sparkJob = getClass().getClassLoader().loadClass(localSparkInput.getSparkJobClass()).newInstance();
 
@@ -77,7 +94,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 						.success(((SparkJob) sparkJob).runJob(m_sparkSession.sparkContext(), jobInput, this));
 			} else if (sparkJob instanceof SparkJobWithFiles) {
 				toReturn = LocalSparkJobOutput.success(((SparkJobWithFiles) sparkJob)
-						.runJob(m_sparkSession.sparkContext(), jobInput, inputFiles, this));
+						.runJob(m_sparkSession.sparkContext(), jobInput, inputFileCopies, this));
 			} else {
 				((SimpleSparkJob) sparkJob).runJob(m_sparkSession.sparkContext(), jobInput, this);
 				toReturn = LocalSparkJobOutput.success();
@@ -94,19 +111,26 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		return LocalSparkSerializationUtil.serializeToPlainJavaTypes(toReturn.getInternalMap());
 	}
 
-	private List<File> validateInputFiles(final LocalSparkJobInput jsInput) throws KNIMESparkException {
-		List<File> inputFiles = new LinkedList<>();
+	private List<File> copyInputFiles(final LocalSparkJobInput jsInput) throws KNIMESparkException, IOException {
+		List<File> inputFileCopies = new LinkedList<>();
 
 		for (String pathToFile : jsInput.getFiles()) {
-			File inputFile = new File(pathToFile);
+			final File inputFile = new File(pathToFile);
 			if (inputFile.canRead()) {
-				inputFiles.add(inputFile);
+				inputFileCopies.add(copyJobInputFile(inputFile));
 			} else {
-				throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
+				throw new KNIMESparkException("Cannot read job input file: " + pathToFile);
 			}
 		}
 
-		return inputFiles;
+		return inputFileCopies;
+	}
+
+	private File copyJobInputFile(File inputFile) throws IOException {
+		final File inputFileCopy = Files.createTempFile(m_jobInputFileCopyDir.toPath(), null, inputFile.getName()).toFile();
+		Files.copy(inputFile.toPath(), inputFileCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		
+		return inputFileCopy;
 	}
 
 	private void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {
@@ -191,6 +215,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			final Map<String, String> filteredUserSparkConf = filterUserSparkConfMap(userSparkConf);
 			
 			initSparkTmpDir();
+			initJobInputFileCopyDir();
 			
 			configureSparkLocalDir(filteredUserSparkConf, sparkConf);
 			
@@ -225,6 +250,13 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			throw new KNIMESparkException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
+		}
+	}
+
+	private void initJobInputFileCopyDir() throws IOException {
+		m_jobInputFileCopyDir = new File(m_sparkTmpDir, "spark_filecopy_dir");
+		if (!m_jobInputFileCopyDir.mkdir()) {
+			throw new IOException("Could not create temporary file copy directory for local Spark.");
 		}
 	}
 
