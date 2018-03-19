@@ -119,17 +119,15 @@ public class HiveLoader {
 
         assert (columnNames != null) && !columnNames.isEmpty() : "No columns in input table";
         final DatabaseUtility utility = connSettings.getUtility();
-        final Connection conn = connSettings.createConnection(cp);
+        connSettings.execute(cp, conn -> {
+            // check if table already exists and whether we should drop it
+            boolean tableAlreadyExists = false;
+            final String tableName = settings.tableName();
+            final boolean dropTableIfExists = settings.dropTableIfExists();
+            LOGGER.debug("Column names: " + columnNames);
+            final Collection<String> partitionColumns = settings.partitionColumns();
+            LOGGER.debug("Partition columns: " + partitionColumns);
 
-        // check if table already exists and whether we should drop it
-        boolean tableAlreadyExists = false;
-        final String tableName = settings.tableName();
-        final boolean dropTableIfExists = settings.dropTableIfExists();
-        LOGGER.debug("Column names: " + columnNames);
-        final Collection<String> partitionColumns = settings.partitionColumns();
-        LOGGER.debug("Partition columns: " + partitionColumns);
-
-        synchronized (connSettings.syncConnection(conn)) {
             if (utility.tableExists(conn, tableName)) {
                 LOGGER.debug("The table " + tableName + " already exists");
                 if (dropTableIfExists) {
@@ -189,7 +187,8 @@ public class HiveLoader {
                     }
                 }
             }
-        }
+            return null;
+        });
         exec.setProgress(1);
     }
 

@@ -172,21 +172,17 @@ public class HiveUtility extends DatabaseUtility {
      * @since 3.4
      */
     @Override
-    public synchronized boolean isValid(final Connection conn) {
-        //synchronize on the connection itself
-        //to ensure that we do not issue a query while using the connection somewhere else
-        synchronized (conn) {
-            //we can always use the select 1 statement since the open source driver throws an exception and the
-            //Simba driver seems to always return true even if the connection is invalid
-            try (Statement st = conn.createStatement()) {
-                try (ResultSet rs = st.executeQuery("SELECT 1")) {
-                    rs.next();
-                    return true;
-                }
-            } catch (SQLException e) {
-                LOGGER.debug("DB connection no longer valid. Exception: " + e.getMessage(), e);
-                return false;
+    public boolean isValid(final Connection conn) {
+        //we can always use the select 1 statement since the open source driver throws an exception and the
+        //Simba driver seems to always return true even if the connection is invalid
+        try (Statement st = conn.createStatement()) {
+            try (ResultSet rs = st.executeQuery("SELECT 1")) {
+                rs.next();
+                return true;
             }
+        } catch (SQLException e) {
+            LOGGER.debug("DB connection no longer valid. Exception: " + e.getMessage(), e);
+            return false;
         }
     }
 }

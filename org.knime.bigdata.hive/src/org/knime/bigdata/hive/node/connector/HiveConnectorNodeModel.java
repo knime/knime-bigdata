@@ -22,11 +22,7 @@ package org.knime.bigdata.hive.node.connector;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.sql.SQLException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.bigdata.hive.utility.HiveDriverDetector;
@@ -125,9 +121,9 @@ class HiveConnectorNodeModel extends NodeModel {
         }
 
         try {
-            spec.getConnectionSettings(getCredentialsProvider()).createConnection(getCredentialsProvider());
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidSettingsException
-                | SQLException | IOException ex) {
+            spec.getConnectionSettings(getCredentialsProvider()).execute(getCredentialsProvider(),
+                conn -> {return conn != null;});
+        } catch (SQLException ex) {
             Throwable cause = ExceptionUtils.getRootCause(ex);
             if (cause == null || cause.getMessage() == null) {
                 cause = ex;
