@@ -50,6 +50,7 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
+import org.knime.core.node.port.database.ExecuteStatement;
 import org.knime.core.node.port.database.StatementManipulator;
 import org.knime.core.node.port.database.aggregation.DBAggregationFunction;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
@@ -186,25 +187,27 @@ public class Database2SparkNodeModel extends SparkSourceNodeModel {
         DBAggregationFunction minFunction = utility.getAggregationFunction("MIN");
         DBAggregationFunction maxFunction = utility.getAggregationFunction("MAX");
         String table = "(" + settings.getQuery() + ") " + getTempTableName(settings.getJDBCUrl());
-        String newQuery = "SELECT "
+        final String newQuery = "SELECT "
                 + minFunction.getSQLFragment4SubQuery(statementManipulator, table, partCol)
                 + ", "
                 + maxFunction.getSQLFragment4SubQuery(statementManipulator, table, partCol)
                 + " FROM " + table;
-
-        try(final Connection connection = settings.createConnection(getCredentialsProvider())) {
-            synchronized (settings.syncConnection(connection)) {
+        try {
+            settings.execute(getCredentialsProvider(), new ExecuteStatement<String>() {
+                @Override
+                public String apply(final Connection connection) throws Exception {
                 try(final ResultSet result = connection.createStatement().executeQuery(newQuery)) {
                     result.next();
                     long min = result.getLong(1);
                     long max = result.getLong(2);
                     jobInput.setPartitioning(m_settings.getPartitionColumn(), min, max, m_settings.getNumPartitions());
                     LOGGER.info("Using " + min + " as lower and " + max + " as upper bound.");
+                    return null;
                 }
+            }});
+            } catch(Exception e) {
+                throw new InvalidSettingsException("Unable to fetch lower and upper partition bounds.", e);
             }
-        } catch(Exception e) {
-            throw new InvalidSettingsException("Unable to fetch lower and upper partition bounds.", e);
-        }
     }
 
     /**

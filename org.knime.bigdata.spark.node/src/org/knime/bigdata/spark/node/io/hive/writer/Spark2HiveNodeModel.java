@@ -49,6 +49,7 @@ import org.knime.core.node.port.database.DatabasePortObject;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
+import org.knime.core.node.port.database.ExecuteStatement;
 
 /**
  *
@@ -134,24 +135,34 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         final DatabaseConnectionSettings settings = con.getConnectionSettings(getCredentialsProvider());
         final DatabaseUtility utility = settings.getUtility();
         final String tableName = m_tableName.getStringValue();
-        try (final Connection connection = settings.createConnection(getCredentialsProvider());) {
-            if (utility.tableExists(connection, tableName)) {
-                if (m_dropExisting.getBooleanValue()) {
-                    final String dropTableStmt = utility.getStatementManipulator().dropTable(tableName, false);
-                    settings.execute(dropTableStmt, getCredentialsProvider());
-                } else {
-                    throw new InvalidSettingsException("Table " + tableName + " already exists");
+        settings.execute(getCredentialsProvider(), new ExecuteStatement<String>() {
+            @Override
+            public String apply(final Connection connection) throws Exception {
+                if (utility.tableExists(connection, tableName)) {
+                    if (m_dropExisting.getBooleanValue()) {
+                        final String dropTableStmt = utility.getStatementManipulator().dropTable(tableName, false);
+                        settings.execute(dropTableStmt, getCredentialsProvider());
+                    } else {
+                        throw new InvalidSettingsException("Table " + tableName + " already exists");
+                    }
                 }
+                return null;
             }
-        }
+        });
         final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
         final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema);
         runFactory.createRun(jobInput).run(rdd.getContextID());
-        try (final Connection connection = settings.createConnection(getCredentialsProvider());) {
-            postProcessing(connection, tableName, exec);
-        } catch (SQLException e) {
-            throw new InvalidSettingsException("During PostProcessing: " + e.getMessage());
-        }
+        settings.execute(getCredentialsProvider(), new ExecuteStatement<String>() {
+            @Override
+            public String apply(final Connection connection) throws Exception {
+            	try{
+            	    postProcessing(connection, tableName, exec);
+                } catch (SQLException e) {
+                    throw new InvalidSettingsException("During PostProcessing: " + e.getMessage());
+                }
+                return null;
+            }
+        });
         final DatabasePortObjectSpec resultSpec = createResultSpec(con.getSpec(), rdd.getTableSpec());
         return new PortObject[] {new DatabasePortObject(resultSpec)};
     }

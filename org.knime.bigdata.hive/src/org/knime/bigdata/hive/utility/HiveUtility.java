@@ -154,7 +154,7 @@ public class HiveUtility extends DatabaseUtility {
      * @since 3.4
      */
     @Override
-    public synchronized boolean isValid(final Connection conn) {
+    public boolean isValid(final Connection conn) {
         //synchronize on the connection itself to ensure that we do not issue a query while using the connection somewhere else
         synchronized (conn) {
             //we can always use the select 1 statement since the open source driver throws an exception and the

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -261,11 +260,10 @@ class ImpalaLoaderNodeModel extends NodeModel {
 
     private void importData(final HDFSRemoteFile remoteFile, final DataTableSpec tableSpec,
         final DatabaseConnectionSettings connSettings, final ExecutionContext exec) throws Exception {
-        final Connection conn = connSettings.createConnection(getCredentialsProvider());
 
-        // check if table already exists and whether we should drop it
-        boolean tableAlreadyExists = false;
-        synchronized (conn) {
+        connSettings.execute(getCredentialsProvider(), conn -> {
+            // check if table already exists and whether we should drop it
+            boolean tableAlreadyExists = false;
             try (ResultSet rs = conn.getMetaData().getTables(null, null, m_settings.tableName().toLowerCase(), null)) {
                 if (rs.next()) {
                     if (m_settings.dropTableIfExists()) {
@@ -279,15 +277,12 @@ class ImpalaLoaderNodeModel extends NodeModel {
                     }
                 }
             }
-        }
-
-        exec.setMessage("Importing data");
-        final List<String> normalColumns = new ArrayList<>();
-        for (final DataColumnSpec cs : tableSpec) {
-            normalColumns.add(cs.getName());
-        }
-        final StatementManipulator manip = connSettings.getUtility().getStatementManipulator();
-        synchronized (conn) {
+            exec.setMessage("Importing data");
+            final List<String> normalColumns = new ArrayList<>();
+            for (final DataColumnSpec cs : tableSpec) {
+                normalColumns.add(cs.getName());
+            }
+            final StatementManipulator manip = connSettings.getUtility().getStatementManipulator();
             try (Statement st = conn.createStatement()) {
                 if (!m_settings.partitionColumns().isEmpty()) {
                     importPartitionedData(remoteFile, tableSpec, normalColumns, manip, tableAlreadyExists, st, exec);
@@ -307,7 +302,8 @@ class ImpalaLoaderNodeModel extends NodeModel {
                     st.execute(buildTableCmd);
                 }
             }
-        }
+            return null;
+        });
         exec.setProgress(1);
     }
 

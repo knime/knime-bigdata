@@ -115,8 +115,7 @@ public final class HiveLoader {
         final HiveLoaderSettings settings, final CredentialsProvider cp) throws Exception {
         assert columnNames != null && !columnNames.isEmpty() : "No columns in input table";
         final DatabaseUtility utility = connSettings.getUtility();
-        @SuppressWarnings("resource")
-        final Connection conn = connSettings.createConnection(cp);
+        connSettings.execute(cp, conn -> {
         // check if table already exists and whether we should drop it
         boolean tableAlreadyExists = false;
         final String tableName = settings.tableName();
@@ -124,7 +123,6 @@ public final class HiveLoader {
         LOGGER.debug("Column names: " + columnNames);
         final Collection<String> partitionColumns = settings.partitionColumns();
         LOGGER.debug("Partition columns: " + partitionColumns);
-        synchronized (connSettings.syncConnection(conn)) {
             if (utility.tableExists(conn, tableName)) {
                 LOGGER.debug("Hive table " + tableName + " already exists");
                 if (dropTableIfExists) {
@@ -165,7 +163,8 @@ public final class HiveLoader {
                     LOGGER.debug("Data loaded sucessfully");
                 }
             }
-        }
+            return null;
+        });
         exec.setProgress(1);
     }
 

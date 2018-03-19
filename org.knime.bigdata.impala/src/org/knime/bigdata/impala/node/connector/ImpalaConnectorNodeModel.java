@@ -22,11 +22,7 @@ package org.knime.bigdata.impala.node.connector;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.sql.SQLException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.knime.bigdata.impala.utility.ImpalaDriverDetector;
@@ -131,9 +127,9 @@ class ImpalaConnectorNodeModel extends NodeModel {
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         DatabaseConnectionPortObjectSpec spec = createSpec();
         try {
-            spec.getConnectionSettings(getCredentialsProvider()).createConnection(getCredentialsProvider());
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidSettingsException
-                | SQLException | IOException ex) {
+            spec.getConnectionSettings(getCredentialsProvider()).execute(getCredentialsProvider(),
+                conn -> {return conn != null;});
+        } catch (SQLException ex) {
             Throwable cause = ExceptionUtils.getRootCause(ex);
             if (cause == null) {
                 cause = ex;
