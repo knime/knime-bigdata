@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180213
+version: knimebd-20180321
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -20,15 +20,16 @@ properties:
   spark2_2: 2.2.0
   knime_log4j_version: 1.2.15
   knime_slf4j_version: 1.7.2
-  knime_jackson_version: 2.7.1
+  knime_jackson_version: 2.8.9
   knime_guava_version: 19.0.0
   knime_commons_httpclient_version: 3.1.0
   knime_httpcomponents_httpclient_version: 4.5.3
-  knime_httpcomponents_httpcore_version: 4.4.6
+  knime_httpcomponents_httpcore_version: 4.4.8
+  knime_httpcomponents_httpmime_version: 4.5.3
   knime_servletapi_version: 3.1.0
   knime_xerces_version: 2.9.0
   
-  jackson_module_scala_version: 2.7.2
+  jackson_module_scala_version: 2.8.9
   
   # taken from spark's hadoop-2.7 profile (with update to curator, see
   # https://issues.apache.org/jira/browse/SPARK-13933)
@@ -76,6 +77,7 @@ mavenBlacklist:
   - com\.jcraft:jsch:jar:.*
   - org\.apache\.httpcomponents:httpclient:jar:.*
   - org\.apache\.httpcomponents:httpcore:jar:.*
+  - org\.apache\.httpcomponents:httpmime:jar:.*
   - javax\.servlet:servlet-api:jar:.*
   - javax\.servlet:javax\.servlet-api:jar:.*
   - commons-httpclient:commons-httpclient:jar:.*
@@ -152,6 +154,11 @@ mavenBlacklist:
   
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
   - io\.airlift:slice:jar:.*
+  
+  # datanucleus is an ORM required by the spark runtime and hive metastore.
+  # Since we are not using those code paths in spark/hive and datanucleus causes problems during resolving
+  # we don't package datancleus 
+  - org\.datanucleus:[^:]*:jar:.*
   
   
 # mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
@@ -261,6 +268,9 @@ requireBundleOverrides:
 
   - coordPattern: org\.apache\.httpcomponents:httpcore:jar:.*
     replacement: org.apache.httpcomponents.httpcore;bundle-version=${knime_httpcomponents_httpcore_version}
+    
+  - coordPattern: org\.apache\.httpcomponents:httpmime:jar:.*
+    replacement: org.apache.httpcomponents.httpmime;bundle-version=${knime_httpcomponents_httpmime_version}
 
   - coordPattern: com\.fasterxml\.jackson\.core:([^:]*):jar:.*
     replacement: com.fasterxml.jackson.core.${1};bundle-version="${knime_jackson_version}"
@@ -338,6 +348,17 @@ requireBundleOverrides:
   # Eclipse Orbit provides these
   - coordPattern: org\.antlr:antlr-runtime:jar:.*
     replacement: org.antlr.runtime;bundle-version="[4.5,5)"
+    
+    
+  # datanucleus is an ORM required by the spark runtime and hive metastore.
+  # Since we are not using those code paths in spark/hive AND datanucleus causes problems during resolving
+  # we don't package datanucleus and turn all dependencies into optional Require-Bundle clauses  
+  - coordPattern: org\.datanucleus:datanucleus-core:jar:3\..*
+    replacement: org.datanucleus;bundle-version="[3,4)";resolution:=optional
+  - coordPattern: org\.datanucleus:datanucleus-api-jdo:jar:3\..*
+    replacement: org.datanucleus.api.jdo;bundle-version="[3,4)";resolution:=optional
+  - coordPattern: org\.datanucleus:datanucleus-rdbms:jar:3\..*
+    replacement: org.datanucleus.store.rdbms;bundle-version="[3,4)";resolution:=optional
     
     
   # Rewrites spark-hive's dependency on hive-exec to a precise version of the (merged) org.spark-project.hive bundle
@@ -438,10 +459,6 @@ mavenDependencyOverrides:
   - coordPattern: org\.codehaus\.jackson:([^:]*):.*
     replacement: org.codehaus.jackson:${1}:jar:1.9.13
     
-  # accidentally pulled in by 
-  - coordPattern: org\.datanucleus:datanucleus-core:jar:5\..*
-    replacement: org.datanucleus:datanucleus-core:jar:3.2.10
-    
   # Both hadoop and hive-serde need com.sun.jersey. This makes sure we are only pulling jersey in
   # once.
   - coordPattern: com\.sun\.jersey:([^:]*):jar:.*
@@ -486,8 +503,13 @@ duplicateRemovalBlacklist:
 #
 mavenRepositories:
   # Cloudera repository is required for Spark 1.6 support CDH 5.9+ and for Hive 1.1 JDBC drivers
-  - id: Cloudera Maven Repo
-    url: https://repository.cloudera.com/artifactory/cloudera-repos/
+  - id: cloudera-releases
+    url: https://repository.cloudera.com/artifactory/cloudera-release-repo
+  
+  # for livy (name must be knime-mirror and match server definition in ~/.m2/settings.xml,
+  # otherwise authentication does not work)
+  - id: knime-mirror
+    url: https://nexus.knime.org/content/repositories/knime-externals-snapshots
 
 # The default merge behavior during the merge phase is that all maven artifacts that
 #   (1) are not prebundled
@@ -515,6 +537,9 @@ mergeOverrides:
     # need to be able to also see classes of curator-client, but curator-framework does not re-export
     # them.
     - org\.apache\.curator:[^:]+:jar:.*
+  blacklist:
+    # prevent livy-api from being merged with livy client artifacts because we need them separately
+    - org\.apache\.livy:livy-api:jar:.*
 
 # specifies file excludes and BND instructions for *maven* coordinates 
 bundleInstructions:
@@ -724,6 +749,21 @@ bundleInstructions:
   - coordPattern: org\.apache\.parquet:merged:jar:.*
     instructions:
       Bundle-SymbolicName: org.apache.parquet
+      
+      
+  # give the merged livy client artifacts a proper name
+  - coordPattern: org\.apache\.livy:merged:.*
+    instructions:
+      Bundle-SymbolicName: org.apache.livy.client
+
+  # livy-api has dependencies on Spark itself, which is problematic
+  # because we have to use it throughout our spark jobs plugins.
+  # here we remove those dependencies (which works because we only need
+  # the classes for compilation, not at runtime).  
+  - coordPattern: org\.apache\.livy:livy-api:.*
+    instructions:
+      Bundle-SymbolicName: org.apache.livy.api
+      Import-Package: ""
 
 
 
@@ -1115,3 +1155,12 @@ artifactGroups:
     singleArtifacts:
       - id: org.apache.parquet:parquet-hadoop:1.9.0
         transitiveSourceDepth: 1
+        
+  # ##############################################################
+  # Livy 0.4 Client
+  # ##############################################################
+  - name: Livy 0.4 Client
+    singleArtifacts:
+      - id: org.apache.livy:livy-client-http:0.4.1-incubating-SNAPSHOT
+        transitiveSourceDepth: 2
+
