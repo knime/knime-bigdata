@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark2_2.jobs.preproc.rename;
 
+import java.util.Arrays;
+
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -46,15 +48,13 @@ public class RenameColumnJob implements SimpleSparkJob<RenameColumnJobInput> {
         final String namedInputObject = input.getFirstNamedInputObject();
         final String namedOutputObject = input.getFirstNamedOutputObject();
         final Dataset<Row> inputDataFrame = namedObjects.getDataFrame(namedInputObject);
-        final String oldNames[] = inputDataFrame.schema().fieldNames();
         final IntermediateField newFields[] = input.getSpec(namedOutputObject).getFields();
-        Dataset<Row> outputDataFrame = inputDataFrame;
 
-        for (int i = 0; i < newFields.length; i++) {
-            if (!oldNames[i].equals(newFields[i].getName())) {
-                outputDataFrame = outputDataFrame.withColumnRenamed(oldNames[i], newFields[i].getName());
-            }
-        }
+        final String[] newNames = Arrays.stream(newFields)
+                .map( f -> f.getName())
+                .toArray(length -> new String[length]);
+
+        final Dataset<Row> outputDataFrame = inputDataFrame.toDF(newNames);
 
         namedObjects.addDataFrame(namedOutputObject, outputDataFrame);
     }
