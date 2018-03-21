@@ -21,10 +21,15 @@
 package org.knime.bigdata.impala.utility;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import org.knime.core.data.StringValue;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.DatabaseUtility;
 import org.knime.core.node.port.database.aggregation.function.AvgDistinctDBAggregationFunction;
 import org.knime.core.node.port.database.aggregation.function.CountDistinctDBAggregationFunction;
@@ -46,11 +51,22 @@ import org.knime.core.node.port.database.tablecreator.DBTableCreator;
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */
 public class ImpalaUtility extends DatabaseUtility {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(ImpalaUtility.class);
     /**The unique database identifier.*/
     public static final String DATABASE_IDENTIFIER = "impala";
 
     /** The driver's class name. */
     public static final String DRIVER = ImpalaDriverFactory.DRIVER;
+
+    private static final String VALIDATION_QUERY;
+
+    static {
+         VALIDATION_QUERY = System.getProperty("knime.bigdata.impala.validation.query");
+         if (VALIDATION_QUERY != null && !VALIDATION_QUERY.isEmpty()) {
+             LOGGER.info("Validate Impala connection using query: " + VALIDATION_QUERY);
+         }
+    }
 
     /**
      * Constructor.
@@ -104,6 +120,24 @@ public class ImpalaUtility extends DatabaseUtility {
     @Override
     public DBTableCreator getTableCreator(final String schema, final String tableName, final boolean isTempTable) {
         return new ImpalaTableCreator(getStatementManipulator(), schema, tableName, isTempTable);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isValid(final Connection conn) throws SQLException {
+        if (VALIDATION_QUERY != null && !VALIDATION_QUERY.isEmpty()) {
+            try (Statement st = conn.createStatement()) {
+                try (ResultSet rs = st.executeQuery(VALIDATION_QUERY)) {
+                    rs.next();
+                    return true;
+                }
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        return super.isValid(conn);
     }
 
 }
