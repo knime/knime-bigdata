@@ -73,7 +73,7 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
             throw new IllegalArgumentException("Unspported scheme: " + contextID.getScheme());
         }
 
-        URI uri = URI.create(contextID.toString());
+        final URI uri = contextID.asURI();
         return String.format("Spark Context %s on Spark Jobserver %s:%d", uri.getHost(), uri.getPort(), uri.getPath().substring(1));
     }
 

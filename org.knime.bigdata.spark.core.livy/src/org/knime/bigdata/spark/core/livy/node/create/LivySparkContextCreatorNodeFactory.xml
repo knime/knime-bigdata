@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+    <name>Create Spark Context (Livy)</name>
+    
+    <shortDescription>TEMPORARY NODE, NOT TO BE RELEASED. Creates a Spark context on Livy.</shortDescription>
+    
+    <fullDescription>
+        <intro>
+            Creates a Spark context on Livy
+        </intro>
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Spark Context">Spark context.</outPort>
+    </ports>    
+</knimeNode>

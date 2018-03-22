@@ -83,6 +83,13 @@ public class SparkContextID {
     }
 
     /**
+     * @return an URI representation of this context ID.
+     */
+    public URI asURI() {
+        return URI.create(m_stringID);
+    }
+
+    /**
      * @param jobServerUrl job server url
      * @param contextName context name
      * @return {@link SparkContextID}
@@ -112,10 +119,13 @@ public class SparkContextID {
         configWO.addString(CFG_CONTEXT_ID, m_stringID);
     }
 
+    /**
+     * @return the enum constant that matches the scheme in the URL that underlies this {@link SparkContextID}.
+     */
     public SparkContextIDScheme getScheme() {
         try {
             final URI url = new URI(m_stringID);
-            return SparkContextIDScheme.valueOf(url.getScheme());
+            return SparkContextIDScheme.fromString(url.getScheme());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URL: " + m_stringID);
         }

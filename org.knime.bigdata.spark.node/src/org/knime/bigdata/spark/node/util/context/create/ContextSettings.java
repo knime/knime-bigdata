@@ -343,7 +343,7 @@ public class ContextSettings {
         final ArrayList<String> errors = new ArrayList<>();
 
         SparkPreferenceValidator.validateSparkContextName(getContextName(), errors);
-        SparkPreferenceValidator.validateJobServerUrl(getJobServerUrl(), errors);
+        SparkPreferenceValidator.validateRESTEndpointURL(getJobServerUrl(), errors, "jobserver");
         SparkPreferenceValidator.validateReceiveTimeout(getReceiveTimeout(), errors);
         SparkPreferenceValidator.validateCustomSparkSettings(overrideSparkSettings(), getCustomSparkSettingsString(), errors);
 

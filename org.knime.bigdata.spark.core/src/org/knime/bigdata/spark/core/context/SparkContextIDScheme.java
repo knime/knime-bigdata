@@ -20,9 +20,13 @@
  */
 package org.knime.bigdata.spark.core.context;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Bjoern Lohrmann, KNIME GmbH
+ * @since 2.3.0
  */
 public enum SparkContextIDScheme {
 
@@ -41,6 +45,14 @@ public enum SparkContextIDScheme {
      */
     SPARK_LOCAL("sparkLocal");
 
+    private static final Map<String,SparkContextIDScheme> SCHEMES = new HashMap<>();
+    static {
+        for(SparkContextIDScheme scheme : values()) {
+            SCHEMES.put(scheme.toString(), scheme);
+        }
+    }
+
+
     private final String m_scheme;
 
     SparkContextIDScheme(final String scheme) {
@@ -50,5 +62,22 @@ public enum SparkContextIDScheme {
     @Override
     public String toString() {
         return m_scheme;
+    }
+
+    /**
+     * Returns the enum constant for a given scheme string.
+     *
+     * @param schemeString The scheme string, e.g. extracted from a URL.
+     * @return the respective enum constant.
+     * @throws IllegalArgumentException if there was no enum constant for the given scheme string.
+     */
+    public static SparkContextIDScheme fromString(final String schemeString) {
+        final  SparkContextIDScheme toReturn = SCHEMES.get(schemeString);
+
+        if (toReturn == null) {
+            throw new IllegalArgumentException("There is no Spark context ID scheme called " + schemeString);
+        }
+
+        return toReturn;
     }
 }

@@ -68,12 +68,11 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
      */
 	@Override
 	public String toPrettyString(SparkContextID contextID) {
-		URI uri = URI.create(contextID.toString());
-
 		if (contextID.getScheme() != SparkContextIDScheme.SPARK_LOCAL) {
 			throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme().toString());
 		}
 
+		final URI uri = contextID.asURI();
 		return String.format(String.format("Local Spark Context (%s)", uri.getHost()));
 	}
 

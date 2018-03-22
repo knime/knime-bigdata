@@ -20,8 +20,8 @@
  */
 package org.knime.bigdata.spark.core.preferences;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class SparkPreferenceValidator {
 
         List<String> errors = new ArrayList<>();
 
-        validateJobServerUrl(jobServerUrl, errors);
+        validateRESTEndpointURL(jobServerUrl, errors, "jobserver");
         validateSparkContextName(contextName, errors);
         validateReceiveTimeout(receiveTimeout, errors);
         validateCustomSparkSettings(overrideSettings, customSettings, errors);
@@ -79,25 +79,33 @@ public class SparkPreferenceValidator {
         }
     }
 
-    public static void validateJobServerUrl(final String jobServerUrl, final List<String> errors) {
-        if (jobServerUrl == null || jobServerUrl.isEmpty()) {
-            errors.add("Jobserver URL must not be empty.");
+    /**
+     * Validates the given URL for a REST endpoint (e.g. Spark Jobserver, Apache Livy, etc).
+     *
+     * @param endpointUrl The user-specified URL as a string.
+     * @param errors A list to add validation error messages to.
+     * @param displayName A display name for what endpoint URL is being validated (will become part of error messages),
+     *            e.g. "jobserver".
+     */
+    public static void validateRESTEndpointURL(final String endpointUrl, final List<String> errors, final String displayName) {
+        if (endpointUrl == null || endpointUrl.isEmpty()) {
+            errors.add(String.format("The %s URL must not be empty.", displayName));
         } else {
             try {
-                URI uri = new URI(jobServerUrl);
+                URL uri = new URL(endpointUrl);
 
-                if (uri.getScheme() == null || uri.getScheme().isEmpty()) {
-                    errors.add("Protocol in jobserver URL required (http or https)");
-                } else if (!(uri.getScheme().equalsIgnoreCase("http") || uri.getScheme().equalsIgnoreCase("https"))) {
-                    errors.add("Only http:// and https:// are supported in the Jobserver URL");
+                if (uri.getProtocol() == null || uri.getProtocol().isEmpty()) {
+                    errors.add(String.format("Protocol in %s URL required (http or https)", displayName));
+                } else if (!(uri.getProtocol().equalsIgnoreCase("http") || uri.getProtocol().equalsIgnoreCase("https"))) {
+                    errors.add(String.format("Only http:// and https:// are supported in the %s URL", displayName));
                 } else if (uri.getHost() == null || uri.getHost().isEmpty()) {
-                    errors.add("Hostname in Jobserver URL required.");
+                    errors.add(String.format("Hostname in %s URL required.", displayName));
                 } else if (uri.getPort() < 0) {
-                    errors.add("Port in Jobserver URL required.");
+                    errors.add(String.format("Port in %s URL required.", displayName));
                 }
 
-            } catch (URISyntaxException | IllegalArgumentException e) {
-                errors.add("Invalid Jobserver URL: " + e.getMessage());
+            } catch (MalformedURLException e) {
+                errors.add(String.format("Invalid %s URL: %s", displayName, e.getMessage()));
             }
         }
     }
