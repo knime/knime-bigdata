@@ -813,14 +813,14 @@ propagated with or for interoperation with KNIME.
          id="com.esotericsoftware.kryo"
          download-size="0"
          install-size="0"
-         version="2.22.0"
+         version="2.22.0.knimebd-20180321"
          unpack="false"/>
 
    <plugin
          id="com.esotericsoftware.kryo.source"
          download-size="0"
          install-size="0"
-         version="2.22.0"
+         version="2.22.0.knimebd-20180321"
          unpack="false"/>
 
    <plugin

@@ -764,6 +764,22 @@ bundleInstructions:
     instructions:
       Bundle-SymbolicName: org.apache.livy.api
       Import-Package: ""
+      
+  # fix some problems with the prebundled kryo library, e.g. it embeds jar files that contain
+  # classes which are already present/shaded in the library, it imports some sun.* packages
+  - coordPattern: com\.esotericsoftware\.kryo:kryo:jar:.*
+    fileExcludes:
+      - "*.jar"
+    instructions:
+      Bundle-SymbolicName: com.esotericsoftware.kryo
+      Export-Package: >-
+        com.esotericsoftware.kryo.*   ;version=${bundle.version},
+        !*
+      Import-Package: >-
+        javax.*,
+        !sun.*,
+        *                             ;resolution:=optional
+        
 
 
 
