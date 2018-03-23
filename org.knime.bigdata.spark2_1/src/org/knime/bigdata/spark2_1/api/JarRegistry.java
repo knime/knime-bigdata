@@ -18,7 +18,7 @@
  * History
  *   Created on Feb 5, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_1.jobs.scripting.java;
+package org.knime.bigdata.spark2_1.api;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

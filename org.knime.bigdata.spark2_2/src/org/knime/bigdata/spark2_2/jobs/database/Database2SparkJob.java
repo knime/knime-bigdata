@@ -33,10 +33,10 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkJobOutput;
+import org.knime.bigdata.spark2_2.api.JarRegistry;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
 import org.knime.bigdata.spark2_2.api.TypeConverters;
-import org.knime.bigdata.spark2_2.jobs.scripting.java.JarRegistry;
 
 /**
  * Executes given SQL statement and puts result into a (named) data frame.

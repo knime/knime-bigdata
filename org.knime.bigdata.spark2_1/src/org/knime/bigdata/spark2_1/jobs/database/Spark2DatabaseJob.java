@@ -32,9 +32,9 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
+import org.knime.bigdata.spark2_1.api.JarRegistry;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.SparkJobWithFiles;
-import org.knime.bigdata.spark2_1.jobs.scripting.java.JarRegistry;
 
 /**
  * Write given (named) data frame into a JDBC table.
