@@ -20,8 +20,8 @@
  */
 package org.knime.bigdata.spark.local.jobs.prepare;
 
+import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 
 /**

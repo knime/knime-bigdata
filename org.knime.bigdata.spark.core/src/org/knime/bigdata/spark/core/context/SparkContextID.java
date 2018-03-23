@@ -67,7 +67,7 @@ public class SparkContextID {
     }
 
     /**
-     * @return a nice String representation of the Spark cntext information
+     * @return a nice String representation of the Spark context information
      */
     public String toPrettyString() {
         if (this.equals(SparkContextManager.getDefaultSparkContextID())) {
@@ -112,13 +112,12 @@ public class SparkContextID {
         configWO.addString(CFG_CONTEXT_ID, m_stringID);
     }
 
-    public String getScheme() {
+    public SparkContextIDScheme getScheme() {
         try {
             final URI url = new URI(m_stringID);
-            return url.getScheme();
+            return SparkContextIDScheme.valueOf(url.getScheme());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URL: " + m_stringID);
         }
-
     }
 }

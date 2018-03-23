@@ -20,6 +20,10 @@
  */
 package org.knime.bigdata.spark2_2.base;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
 import org.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -31,10 +35,17 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  */
 public class Spark_2_2_JarProvider extends JobsPluginJarProvider {
 
+    private final static Map<SparkContextIDScheme, Class<?>> JOB_BINDING_CLASSES = new HashMap<>();
+
+    static {
+        JOB_BINDING_CLASSES.put(SparkContextIDScheme.SPARK_JOBSERVER, JobserverSparkJob.class);
+        JOB_BINDING_CLASSES.put(SparkContextIDScheme.SPARK_LIVY, LivySparkJob.class);
+    }
+
     /**
      * Default constructor.
      */
     public Spark_2_2_JarProvider() {
-        super(SparkVersion.V_2_2, JobserverSparkJob.class);
+        super(SparkVersion.V_2_2, JOB_BINDING_CLASSES);
     }
 }

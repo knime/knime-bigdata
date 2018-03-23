@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -21,9 +22,6 @@ import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
  * @author Oleg Yasnev, KNIME GmbH
  */
 public class SparkLocalContextProvider implements SparkContextProvider<LocalSparkContextConfig> {
-
-    public static final String LOCAL_SPARK_CONTEXT_ID_SCHEME = "localSpark";
-
 
     /**
      * {@inheritDoc}
@@ -61,8 +59,8 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
      * {@inheritDoc}
      */
     @Override
-    public String getSupportedScheme() {
-        return LOCAL_SPARK_CONTEXT_ID_SCHEME;
+    public SparkContextIDScheme getSupportedScheme() {
+        return SparkContextIDScheme.SPARK_LOCAL;
     }
 
     /**
@@ -72,8 +70,8 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
 	public String toPrettyString(SparkContextID contextID) {
 		URI uri = URI.create(contextID.toString());
 
-		if (!uri.getScheme().equals(LOCAL_SPARK_CONTEXT_ID_SCHEME)) {
-			throw new IllegalArgumentException("Unspported scheme: " + contextID.getScheme());
+		if (contextID.getScheme() != SparkContextIDScheme.SPARK_LOCAL) {
+			throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme().toString());
 		}
 
 		return String.format(String.format("Local Spark Context (%s)", uri.getHost()));

@@ -16,29 +16,39 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 04.03.2016 by koetter
+ *   Created on Mar 23, 2018 by bjoern
  */
-package org.knime.bigdata.spark2_0.base;
-
-import java.util.Collections;
-
-import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
-import org.knime.bigdata.spark.core.jar.DefaultSparkJarProvider;
-import org.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
-import org.knime.bigdata.spark.core.version.SparkVersion;
+package org.knime.bigdata.spark.core.context;
 
 /**
- * Implementation of the {@link DefaultSparkJarProvider} for Spark 2.0.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class Spark_2_0_JarProvider extends JobsPluginJarProvider {
+public enum SparkContextIDScheme {
 
     /**
-     * Default constructor.
+     * Scheme for Spark Jobserver-specific {@link SparkContextID}s.
      */
-    public Spark_2_0_JarProvider() {
-        super(SparkVersion.V_2_0, Collections.<SparkContextIDScheme, Class<?>>singletonMap(
-            SparkContextIDScheme.SPARK_JOBSERVER, JobserverSparkJob.class));
+    SPARK_JOBSERVER("jobserver"),
+
+    /**
+     * Scheme for Spark Jobserver-specific {@link SparkContextID}s.
+     */
+    SPARK_LIVY("sparkLivy"),
+
+    /**
+     * Scheme for local Spark-specific {@link SparkContextID}s.
+     */
+    SPARK_LOCAL("sparkLocal");
+
+    private final String m_scheme;
+
+    SparkContextIDScheme(final String scheme) {
+        m_scheme = scheme;
+    }
+
+    @Override
+    public String toString() {
+        return m_scheme;
     }
 }

@@ -10,6 +10,7 @@ import javax.json.JsonObject;
 
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.util.UploadFileCache;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.job.JobOutput;

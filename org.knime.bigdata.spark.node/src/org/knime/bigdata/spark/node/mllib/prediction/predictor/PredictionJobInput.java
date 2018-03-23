@@ -32,12 +32,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
  *

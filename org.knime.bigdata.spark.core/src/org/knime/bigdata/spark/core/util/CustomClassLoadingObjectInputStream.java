@@ -18,7 +18,7 @@
  * History
  *   Created on May 3, 2016 by bjoern
  */
-package org.knime.bigdata.spark.core.context;
+package org.knime.bigdata.spark.core.util;
 
 import java.io.IOException;
 import java.io.InputStream;

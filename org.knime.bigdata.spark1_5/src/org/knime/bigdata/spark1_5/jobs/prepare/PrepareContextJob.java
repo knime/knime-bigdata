@@ -24,10 +24,10 @@ import java.io.IOException;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.types.DataType;
+import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark1_5.api.NamedObjects;
 import org.knime.bigdata.spark1_5.api.SimpleSparkJob;
 import org.knime.bigdata.spark1_5.api.TypeConverters;

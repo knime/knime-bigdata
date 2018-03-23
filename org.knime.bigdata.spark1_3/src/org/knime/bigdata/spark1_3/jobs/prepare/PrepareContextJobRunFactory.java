@@ -21,8 +21,8 @@
 package org.knime.bigdata.spark1_3.jobs.prepare;
 
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
+import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
-import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 
 /**
  *

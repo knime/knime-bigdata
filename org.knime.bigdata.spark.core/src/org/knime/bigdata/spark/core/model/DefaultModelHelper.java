@@ -27,7 +27,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
+import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
  *

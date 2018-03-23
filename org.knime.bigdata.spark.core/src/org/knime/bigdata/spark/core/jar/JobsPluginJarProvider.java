@@ -21,7 +21,9 @@
 package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
+import java.util.Map;
 
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.FixedVersionCompatibilityChecker;
@@ -30,42 +32,47 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
 /**
  * Convenience class that generalizes the way {@link SparkClass}es are collected from KNIME's own Spark job plugins.
  *
+ * <p>
+ * There must only be one {@link JobsPluginJarProvider} registered per Spark version. If you are writing your own Spark
+ * jobs please subclass {@link DefaultSparkJarProvider}.
+ * </p>
+ *
  * @author Bjoern Lohrmann, KNIME.com
  */
 public class JobsPluginJarProvider extends DefaultSparkJarProvider {
 
-    private final String m_jobserverSparkJobClass;
+    private final Map<SparkContextIDScheme,Class<?>> m_jobBindingClasses;
 
     /**
      * Constructor to support a single Spark version.
      *
      * @param sparkVersion The supported Spark version.
-     * @param jobserverSparkJobClass The class the provides the binding between the Spark job API in KNIME and the
-     *            underlying jobserver job API.
+     * @param jobBindingClasses Sets the classes that bind the KNIME Spark job classes to the Job API of the underlying
+     *            jobserver.
      */
-    public JobsPluginJarProvider(final SparkVersion sparkVersion, final Class<?> jobserverSparkJobClass) {
-        this(new FixedVersionCompatibilityChecker(sparkVersion), jobserverSparkJobClass);
+    public JobsPluginJarProvider(final SparkVersion sparkVersion, final Map<SparkContextIDScheme,Class<?>> jobBindingClasses) {
+        this(new FixedVersionCompatibilityChecker(sparkVersion), jobBindingClasses);
     }
 
     /**
      * Constructor to support all Spark versions that the given checker supports.
      *
      * @param checker The Spark version compatibility checker.
-     * @param jobserverSparkJobClass The class the provides the binding between the Spark job API in KNIME and the
-     *            underlying jobserver job API.
+     * @param jobBindingClasses Sets the classes that bind the KNIME Spark job classes to the Job API of the underlying
+     *            jobserver.
      */
-    public JobsPluginJarProvider(final CompatibilityChecker checker, final Class<?> jobserverSparkJobClass) {
+    public JobsPluginJarProvider(final CompatibilityChecker checker, final Map<SparkContextIDScheme,Class<?>> jobBindingClasses) {
         super(checker, KNIMEPluginScanPredicates.KNIME_JOBS_PLUGIN_PREDICATE,
             KNIMEPluginScanPredicates.KNIME_JAR_PREDICATE,
             KNIMEPluginScanPredicates.KNIME_JOBSERVER_UTILS_JAR_PREDICATE);
 
-        m_jobserverSparkJobClass = jobserverSparkJobClass.getName();
+        m_jobBindingClasses = jobBindingClasses;
     }
 
     @Override
     public void collect(final JarCollector collector) {
         super.collect(collector);
-        collector.setJobserverJobClass(m_jobserverSparkJobClass);
+        collector.setJobBindingClasses(m_jobBindingClasses);
     }
 
     /**

@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
  * @author Bjoern Lohrmann, KNIME GmbH

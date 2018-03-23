@@ -18,7 +18,7 @@
  * History
  *   Created on Apr 6, 2016 by bjoern
  */
-package org.knime.bigdata.spark.core.sparkjobserver.jobapi;
+package org.knime.bigdata.spark.core.context.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,9 +33,9 @@ import java.io.ObjectOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.knime.bigdata.spark.core.context.CustomClassLoadingObjectInputStream;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
  * Utility class that (de)serializes objects from/to base64 encoded Strings.

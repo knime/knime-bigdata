@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
-import org.knime.bigdata.spark.local.SparkLocalContextProvider;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -329,7 +329,7 @@ public class LocalSparkContextSettings {
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
-        return new SparkContextID(SparkLocalContextProvider.LOCAL_SPARK_CONTEXT_ID_SCHEME + "://" + getContextName());
+        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL+ "://" + getContextName());
     }
 
     /**

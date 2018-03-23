@@ -41,7 +41,7 @@ public class SparkContextProviderRegistry extends SparkProviderRegistry<SparkCon
     private static SparkContextProviderRegistry instance;
 
     @SuppressWarnings("rawtypes")
-    private final Map<String, SparkContextProvider> m_providers = new LinkedHashMap<>();
+    private final Map<SparkContextIDScheme, SparkContextProvider> m_providers = new LinkedHashMap<>();
 
     private SparkContextProviderRegistry() {
     }
@@ -66,7 +66,7 @@ public class SparkContextProviderRegistry extends SparkProviderRegistry<SparkCon
      * @return A matching provider for the URL scheme, or null, if none was found.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends SparkContextConfig> SparkContextProvider<T> getSparkContextProvider(final String scheme) {
+    public static <T extends SparkContextConfig> SparkContextProvider<T> getSparkContextProvider(final SparkContextIDScheme scheme) {
         return getInstance().m_providers.get(scheme);
     }
 
@@ -75,7 +75,7 @@ public class SparkContextProviderRegistry extends SparkProviderRegistry<SparkCon
      */
     @Override
     protected void addProvider(final SparkContextProvider<?> provider) throws IllegalArgumentException {
-        String scheme = provider.getSupportedScheme();
+        final SparkContextIDScheme scheme = provider.getSupportedScheme();
         if (m_providers.containsKey(scheme)) {
             throw new IllegalArgumentException(
                 String.format("Could not register provider %s for the scheme %s ",

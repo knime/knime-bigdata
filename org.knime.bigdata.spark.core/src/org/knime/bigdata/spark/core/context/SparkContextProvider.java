@@ -47,7 +47,7 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      *
      * @return the scheme as a string (without ://).
      */
-    String getSupportedScheme();
+    SparkContextIDScheme getSupportedScheme();
 
     /**
      * Provides a prettier version of the context ID to be used for display purposes.

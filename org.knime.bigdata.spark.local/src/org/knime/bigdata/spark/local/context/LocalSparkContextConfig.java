@@ -6,10 +6,10 @@ package org.knime.bigdata.spark.local.context;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.LocalSparkVersion;
-import org.knime.bigdata.spark.local.SparkLocalContextProvider;
 
 /**
  * Implementation of {@link SparkContextConfig} interface for local Spark.
@@ -165,7 +165,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
      */
     @Override
     public SparkContextID getSparkContextID() {
-        return new SparkContextID(SparkLocalContextProvider.LOCAL_SPARK_CONTEXT_ID_SCHEME + "://" + m_contextName);
+        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL + "://" + m_contextName);
     }
     
 	@Override

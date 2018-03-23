@@ -24,10 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
@@ -56,7 +59,7 @@ public class JobJarDescriptor {
 
     private final String m_sparkVersion;
 
-    private final String m_jobserverJobClass;
+    final Map<SparkContextIDScheme, Class<?>> m_jobBindingClasses;
 
     /**
      * A set of provider IDs that have contributed
@@ -71,15 +74,15 @@ public class JobJarDescriptor {
      * @param pluginVersion
      * @param sparkVersion
      * @param hash
-     * @param jobserverJobClass
+     * @param jobBindingClasses
      * @param providerIDs
      */
     public JobJarDescriptor(final String pluginVersion, final String sparkVersion, final String hash,
-        final String jobserverJobClass, final Set<String> providerIDs) {
+        final Map<SparkContextIDScheme, Class<?>> jobBindingClasses, final Set<String> providerIDs) {
         m_pluginVersion = pluginVersion;
         m_sparkVersion = sparkVersion;
         m_hash = hash;
-        m_jobserverJobClass = jobserverJobClass;
+        m_jobBindingClasses = jobBindingClasses;
         m_providerIDs = providerIDs;
     }
 
@@ -114,10 +117,10 @@ public class JobJarDescriptor {
     }
 
     /**
-     * @return the Spark Jobserver job class, or null, if no class has been registered.
+     * @return a with the registered job binding class per Spark context ID scheme.
      */
-    public String getJobserverJobClass() {
-        return m_jobserverJobClass;
+    public Map<SparkContextIDScheme, Class<?>> getJobBindingClasses() {
+        return m_jobBindingClasses;
     }
 
     /**
@@ -129,8 +132,10 @@ public class JobJarDescriptor {
         Properties prop = new Properties();
         prop.load(is);
 
-        return new JobJarDescriptor(prop.getProperty(KEY_PLUGIN_VERSION), prop.getProperty(KEY_SPARK_VERSION),
-            prop.getProperty(KEY_JOB_JAR_HASH), prop.getProperty(KEY_JOBSERVER_JOB_CLASS),
+        return new JobJarDescriptor(prop.getProperty(KEY_PLUGIN_VERSION),
+            prop.getProperty(KEY_SPARK_VERSION),
+            prop.getProperty(KEY_JOB_JAR_HASH),
+            Collections.<SparkContextIDScheme,Class<?>>emptyMap(), // we don't save the job binding classes
             parseProviderIDs(prop.getProperty(KEY_PROVIDER_IDS)));
     }
 
@@ -168,10 +173,8 @@ public class JobJarDescriptor {
         prop.setProperty(KEY_PLUGIN_VERSION, getPluginVersion());
         prop.setProperty(KEY_SPARK_VERSION, getSparkVersion());
         prop.setProperty(KEY_JOB_JAR_HASH, getHash());
-        if (getJobserverJobClass() != null) {
-            prop.setProperty(KEY_JOBSERVER_JOB_CLASS, getJobserverJobClass());
-        }
         prop.setProperty(KEY_PROVIDER_IDS, serializeProviderIDs(getProviderIDs()));
+        // we don't save the job binding classes
         prop.store(os, "KNIME Job jar information");
     }
 }

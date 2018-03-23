@@ -22,9 +22,12 @@ package org.knime.bigdata.spark.core.jar;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
+
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 
 /**
  * Class that allows to assemble a jar file by adding Files and {@link JarEntry} to it.
@@ -82,11 +85,11 @@ public interface JarCollector {
     void addJarEntry(JarEntry je, InputStream is);
 
     /**
-     * Sets the class that is used on Spark jobserver to run Spark jobs.
+     * Sets the classes that bind the KNIME Spark job classes to the Job API of the underlying jobserver.
      *
-     * @param jobserverJobClass
+     * @param jobBindingClasses maps Spark context ID schemes to job binding classes.
      */
-    void setJobserverJobClass(String jobserverJobClass);
+    void setJobBindingClasses(final Map<SparkContextIDScheme,Class<?>> jobBindingClasses);
 
 
     /**

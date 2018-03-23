@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark1_2.base;
 
+import java.util.Collections;
+
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.jar.JobsPluginJarProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
@@ -34,6 +37,7 @@ public class Spark_1_2_JarProvider extends JobsPluginJarProvider {
      * Default constructor.
      */
     public Spark_1_2_JarProvider() {
-        super(SparkVersion.V_1_2, JobserverSparkJob.class);
+        super(SparkVersion.V_1_2, Collections.<SparkContextIDScheme, Class<?>>singletonMap(
+            SparkContextIDScheme.SPARK_JOBSERVER, JobserverSparkJob.class));
     }
 }

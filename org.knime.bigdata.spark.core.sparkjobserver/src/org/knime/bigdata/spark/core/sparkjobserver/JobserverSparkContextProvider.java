@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.sparkjobserver.context.JobserverSparkContext;
@@ -22,11 +23,6 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class JobserverSparkContextProvider implements SparkContextProvider<JobServerSparkContextConfig> {
-
-    /**
-     * Scheme for Spark Jobserver-specific {@link SparkContextID}s.
-     */
-    public static final String JOBSERVER_SPARK_CONTEXT_ID_SCHEME = "jobserver";
 
     /**
      * {@inheritDoc}
@@ -64,8 +60,8 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
      * {@inheritDoc}
      */
     @Override
-    public String getSupportedScheme() {
-        return JOBSERVER_SPARK_CONTEXT_ID_SCHEME;
+    public SparkContextIDScheme getSupportedScheme() {
+        return SparkContextIDScheme.SPARK_JOBSERVER;
     }
 
     /**
@@ -73,17 +69,12 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
      */
     @Override
     public String toPrettyString(final SparkContextID contextID) {
-        URI uri = URI.create(contextID.toString());
-
-        if (!uri.getScheme().equals(JOBSERVER_SPARK_CONTEXT_ID_SCHEME)) {
+        if (contextID.getScheme() != SparkContextIDScheme.SPARK_JOBSERVER) {
             throw new IllegalArgumentException("Unspported scheme: " + contextID.getScheme());
         }
 
-        StringBuilder b = new StringBuilder();
-        b.append("Spark Jobserver Context ");
-        b.append(String.format("(Host and Port: %s:%d, ", uri.getHost(), uri.getPort()));
-        b.append(String.format("Context Name: %s)", uri.getPath().substring(1)));
-        return b.toString();
+        URI uri = URI.create(contextID.toString());
+        return String.format("Spark Context %s on Spark Jobserver %s:%d", uri.getHost(), uri.getPort(), uri.getPath().substring(1));
     }
 
     /**

@@ -36,6 +36,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -43,6 +44,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 import org.apache.commons.codec.binary.Hex;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.FrameworkUtil;
@@ -71,7 +73,7 @@ public class FileBasedJarCollector implements JarCollector {
 
     private JobJar m_jobJar;
 
-    private String m_jobserverJobClass;
+    private Map<SparkContextIDScheme,Class<?>> m_jobBindingClasses;
 
     /**
      * @param sparkVersion the Spark version
@@ -139,7 +141,7 @@ public class FileBasedJarCollector implements JarCollector {
         final Version sparkCorePluginVersion = FrameworkUtil.getBundle(JarPacker.class).getVersion();
 
         final JobJarDescriptor jarInfo = new JobJarDescriptor(sparkCorePluginVersion.toString(),
-            m_sparkVersion.toString(), sha1Hex, m_jobserverJobClass, m_providerIDs);
+            m_sparkVersion.toString(), sha1Hex, m_jobBindingClasses, m_providerIDs);
 
         return jarInfo;
     }
@@ -264,8 +266,8 @@ public class FileBasedJarCollector implements JarCollector {
      * {@inheritDoc}
      */
     @Override
-    public void setJobserverJobClass(final String jobserverJobClass) {
-        m_jobserverJobClass = jobserverJobClass;
+    public void setJobBindingClasses(final Map<SparkContextIDScheme,Class<?>> jobBindingClasses) {
+        m_jobBindingClasses = jobBindingClasses;
     }
 
     /**

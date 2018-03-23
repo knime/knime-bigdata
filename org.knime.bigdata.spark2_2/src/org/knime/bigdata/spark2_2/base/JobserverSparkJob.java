@@ -12,7 +12,6 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
-import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
@@ -34,8 +33,6 @@ import spark.jobserver.api.JobEnvironment;
 @SparkClass
 public class JobserverSparkJob extends KNIMESparkJob {
 
-    private static final NamedObjects namedObjects = new NamedObjectsImpl();
-
     /** Empty deserialization constructor */
     public JobserverSparkJob() {
     }
@@ -51,18 +48,20 @@ public class JobserverSparkJob extends KNIMESparkJob {
 
             final JobInput input = jsInput.getSparkJobInput();
 
-            ensureNamedInputObjectsExist(input);
-            ensureNamedOutputObjectsDoNotExist(input);
+            NamedObjectsImpl.ensureNamedInputObjectsExist(input);
+            NamedObjectsImpl.ensureNamedOutputObjectsDoNotExist(input);
             List<File> inputFiles = validateInputFiles(runtime, jsInput);
 
             Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
 
             if (sparkJob instanceof SparkJob) {
-                toReturn = JobserverJobOutput.success(((SparkJob) sparkJob).runJob(sparkContext, input, namedObjects));
-            } else if (sparkJob instanceof SparkJobWithFiles){
-                toReturn = JobserverJobOutput.success(((SparkJobWithFiles) sparkJob).runJob(sparkContext, input, inputFiles, namedObjects));
+                toReturn = JobserverJobOutput
+                    .success(((SparkJob)sparkJob).runJob(sparkContext, input, NamedObjectsImpl.SINGLETON_INSTANCE));
+            } else if (sparkJob instanceof SparkJobWithFiles) {
+                toReturn = JobserverJobOutput.success(((SparkJobWithFiles)sparkJob).runJob(sparkContext, input,
+                    inputFiles, NamedObjectsImpl.SINGLETON_INSTANCE));
             } else {
-                ((SimpleSparkJob) sparkJob).runJob(sparkContext, input, namedObjects);
+                ((SimpleSparkJob)sparkJob).runJob(sparkContext, input, NamedObjectsImpl.SINGLETON_INSTANCE);
                 toReturn = JobserverJobOutput.success();
             }
         } catch (KNIMESparkException e) {
@@ -108,24 +107,5 @@ public class JobserverSparkJob extends KNIMESparkJob {
         }
 
         return inputFiles;
-    }
-
-    private void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {
-        // validate named output objects do not exist
-        for (String namedOutputObject : input.getNamedOutputObjects()) {
-            if (namedObjects.validateNamedObject(namedOutputObject)) {
-                throw new KNIMESparkException(
-                    "Spark RDD/DataFrame to create already exists. Please reset all preceding nodes and reexecute.");
-            }
-        }
-    }
-
-    private void ensureNamedInputObjectsExist(final JobInput input) throws KNIMESparkException {
-        for (String namedInputObject : input.getNamedInputObjects()) {
-            if (!namedObjects.validateNamedObject(namedInputObject)) {
-                throw new KNIMESparkException(
-                    "Missing input Spark RDD/DataFrame. Please reset all preceding nodes and reexecute.");
-            }
-        }
     }
 }

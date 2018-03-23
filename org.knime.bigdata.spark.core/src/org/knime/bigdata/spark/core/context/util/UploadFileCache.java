@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------
- * This source code, its documentation and all appendant files
+w * This source code, its documentation and all appendant files
  * are protected by copyright law. All rights reserved.
  *
  * Copyright by KNIME AG, Zurich, Switzerland
@@ -18,7 +18,7 @@
  * History
  *   Created on May 13, 2016 by bjoern
  */
-package org.knime.bigdata.spark.core.sparkjobserver.context;
+package org.knime.bigdata.spark.core.context.util;
 
 import java.io.File;
 import java.util.HashMap;

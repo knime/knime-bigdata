@@ -34,9 +34,11 @@ import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
+import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
@@ -48,7 +50,6 @@ import org.knime.bigdata.spark.core.sparkjobserver.request.GetJarsRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.UploadFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
-import org.knime.bigdata.spark.core.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.KNIMEConstants;
@@ -121,11 +122,16 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
 
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
+        	final Class<?> jobBindingClass = getJobJar().getDescriptor().getJobBindingClasses().get(SparkContextIDScheme.SPARK_JOBSERVER);
+        	if (jobBindingClass == null) {
+        		throw new KNIMESparkException("Missing Spark job binding class for Spark Jobserver.");
+        	}
+        	
             m_jobController = new JobserverJobController(getID(),
                 getConfiguration(),
                 m_jobserverAppName,
                 m_restClient,
-                getJobJar().getDescriptor().getJobserverJobClass());
+                jobBindingClass.getName());
         }
     }
 
