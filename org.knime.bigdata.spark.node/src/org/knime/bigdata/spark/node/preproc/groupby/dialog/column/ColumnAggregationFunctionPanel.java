@@ -65,6 +65,8 @@ import org.knime.base.data.aggregation.dialogutil.AbstractAggregationPanel;
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionAndRowTableCellRenderer;
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRowTableCellRenderer;
 import org.knime.base.data.aggregation.dialogutil.AggregationFunctionRowTableCellRenderer.ValueRenderer;
+import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeModel;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
 import org.knime.core.data.DataColumnSpec;
@@ -385,6 +387,26 @@ ColumnAggregationFunctionRow, DataColumnSpec> {
             }
         }
 
+    }
+
+    /**
+     * Validates that output column names are unique.
+     * @param namePolicy
+     * @throws InvalidSettingsException if two or more aggregations share the same output column name
+     */
+    public void ensureUniqueOutputColumns(final ColumnNamePolicy namePolicy) throws InvalidSettingsException {
+        final HashSet<String> columns = new HashSet<>();
+        for (ColumnAggregationFunctionRow row : getManualColumnAggregationFunctions()) {
+            final String name = SparkGroupByNodeModel.generateColumnName(namePolicy, getInputTableSpec(), row);
+            if (columns.contains(name)) {
+                throw new InvalidSettingsException(String.format(
+                    "Unsupported duplicate output columns detected.\n"
+                    + "Change column naming policy or remove duplicate aggregation on column '%s'.",
+                    row.getColumnSpec().getName()));
+            } else {
+                columns.add(name);
+            }
+        }
     }
 
     /**

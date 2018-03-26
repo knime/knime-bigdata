@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -67,7 +66,7 @@ import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.bigdata.spark.node.preproc.groupby.dialog.WindowFunctionSettings;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.type.DataTypeAggregationFunctionPanel;
@@ -94,7 +93,7 @@ import org.knime.core.node.util.ColumnFilterPanel;
  *
  * @author Tobias Koetter, University of Konstanz
  */
-final class SparkGroupByNodeDialog extends NodeDialogPane {
+public final class SparkGroupByNodeDialog extends NodeDialogPane {
 
     private static final int DEFAULT_WIDTH = 680;
 
@@ -104,7 +103,7 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
     private final SettingsModelFilterString m_groupByCols = new SettingsModelFilterString(
         SparkGroupByNodeModel.CFG_GROUP_BY_COLUMNS);
 
-    private final WindowFunctionSettings m_windowSettings = new WindowFunctionSettings();
+//    private final WindowFunctionSettings m_windowSettings = new WindowFunctionSettings();
 
     private final SettingsModelString m_columnNamePolicy = new SettingsModelString(
         SparkGroupByNodeModel.CFG_COLUMN_NAME_POLICY, ColumnNamePolicy.getDefault().getLabel());
@@ -117,6 +116,10 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
     private final DialogComponentColumnFilter m_groupCol;
 
     private final JTabbedPane m_tabs;
+
+    private final boolean m_pivotNodeDialog;
+
+    private final PivotPanel m_pivotPanel = new PivotPanel();
 
     // TODO: private final WindowFunctionPanel m_windowPanel = new WindowFunctionPanel(m_windowSettings);
 
@@ -136,9 +139,12 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
 
     /**
      * Constructor for class GroupByNodeDialog.
+     * @param pivotNodeDialog show pivot tab and settings
      */
     @SuppressWarnings("unchecked")
-    SparkGroupByNodeDialog() {
+    public SparkGroupByNodeDialog(final boolean pivotNodeDialog) {
+        m_pivotNodeDialog = pivotNodeDialog;
+
         m_addCountStar.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(final ChangeEvent e) {
@@ -170,14 +176,16 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
         groupColPanel
             .setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), " Group settings "));
         m_tabs.addTab("Groups", groupColPanel);
-        //The last tab: aggregations and advance settings
-        final JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        //The aggregation column box
+
+        if (m_pivotNodeDialog) {
+            m_tabs.addTab(PivotPanel.DEFAULT_TITLE, m_pivotPanel.getComponentPanel());
+        }
+
         // TODO: m_tabs.addTab(WindowFunctionPanel.DEFAULT_TITLE, m_windowPanel.getComponentPanel());
         m_tabs.addTab(AggregationColumnPanel.DEFAULT_TITLE, m_manualAggPanel.getComponentPanel());
         m_tabs.addTab(PatternAggregationPanel.DEFAULT_TITLE, m_patternAggPanel.getComponentPanel());
         m_tabs.addTab(DataTypeAggregationPanel.DEFAULT_TITLE, m_typeAggPanel.getComponentPanel());
+
         //calculate the component size
         int width =
             (int)Math.max(m_groupCol.getComponentPanel().getMinimumSize().getWidth(),
@@ -271,6 +279,10 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
             m_countStarColName.loadSettingsFrom(settings);
             m_descriptionTab.removeAll();
 
+            if (m_pivotNodeDialog) {
+                m_pivotPanel.loadSettingsFrom(settings, spec);
+            }
+
             m_aggregationSettings.loadSettingsFrom(settings);
 
             // initialize the three panels
@@ -306,6 +318,10 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
         m_countStarColName.saveSettingsTo(settings);
         m_columnNamePolicy.saveSettingsTo(settings);
 
+        if (m_pivotNodeDialog) {
+            m_pivotPanel.saveSettingsTo(settings);
+        }
+
         m_aggregationSettings.setManualColumnAggregationFunctionRows(m_manualAggPanel.getManualColumnAggregationFunctions());
         m_aggregationSettings.setPatternAggregationFunctionRows(m_patternAggPanel.getPatternAggregationFunctionRows());
         m_aggregationSettings.setDataTypeColumnAggregationFunctionRows(m_typeAggPanel.getDataTypeAggregationFunctionRows());
@@ -324,8 +340,12 @@ final class SparkGroupByNodeDialog extends NodeDialogPane {
         if (columnNamePolicy == null) {
             throw new InvalidSettingsException("Invalid column name policy");
         }
+        if (m_pivotNodeDialog) {
+            m_pivotPanel.validate();
+        }
         // TODO: m_windowPanel.validate();
         m_manualAggPanel.validate();
+        m_manualAggPanel.ensureUniqueOutputColumns(columnNamePolicy);
         m_patternAggPanel.validate();
         m_typeAggPanel.validate();
     }

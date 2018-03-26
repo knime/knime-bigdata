@@ -31,14 +31,27 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
  */
 @SparkClass
 public class SparkGroupByJobOutput extends JobOutput {
+    private static final String PIVOT_VALUES_DROPPED = "pivotValuesCount";
+
     /** Deserialization constructor */
     public SparkGroupByJobOutput() {}
 
     /**
      * @param outputObject id of output object
      * @param outputSpec spec of output
+     * @param pivotValuesWereDropped count of values used in pivoting or -1
      */
-    public SparkGroupByJobOutput(final String outputObject, final IntermediateSpec outputSpec) {
+    public SparkGroupByJobOutput(final String outputObject, final IntermediateSpec outputSpec, final boolean pivotValuesWereDropped) {
         withSpec(outputObject, outputSpec);
+        set(PIVOT_VALUES_DROPPED, pivotValuesWereDropped);
+    }
+
+    /** @return count of values used for pivoting or -1 */
+    public boolean getPivotValuesDropped() {
+        if (has(PIVOT_VALUES_DROPPED)) {
+            return get(PIVOT_VALUES_DROPPED);
+        } else {
+            return false;
+        }
     }
 }

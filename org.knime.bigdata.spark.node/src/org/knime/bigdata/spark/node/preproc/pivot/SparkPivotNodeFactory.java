@@ -41,26 +41,29 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * -------------------------------------------------------------------
- *
  */
-package org.knime.bigdata.spark.node.preproc.groupby;
+package org.knime.bigdata.spark.node.preproc.pivot;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeDialog;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeModel;
 import org.knime.core.node.NodeDialogPane;
 
 /**
+ * Spark pivoting node, that use the group by node model and has a pivoting tab in addition.
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
-public final class SparkGroupByNodeFactory extends DefaultSparkNodeFactory<SparkGroupByNodeModel> {
+public final class SparkPivotNodeFactory extends DefaultSparkNodeFactory<SparkGroupByNodeModel> {
 
     /** Default constructor */
-    public SparkGroupByNodeFactory() {
+    public SparkPivotNodeFactory() {
         super("row");
     }
 
     @Override
     public SparkGroupByNodeModel createNodeModel() {
-        return new SparkGroupByNodeModel(false);
+        return new SparkGroupByNodeModel(true);
     }
 
     @Override
@@ -70,6 +73,6 @@ public final class SparkGroupByNodeFactory extends DefaultSparkNodeFactory<Spark
 
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new SparkGroupByNodeDialog(false);
+        return new SparkGroupByNodeDialog(true);
     }
 }

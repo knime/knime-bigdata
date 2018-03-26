@@ -47,8 +47,11 @@ package org.knime.bigdata.spark.node.preproc.groupby;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -65,6 +68,7 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotSettings;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionRow;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionCombinationProvider;
@@ -82,9 +86,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 /**
- * Node model of the Spark GroupBy node.
+ * Node model of the Spark GroupBy and Spark Pivot nodes.
  *
- * @author Tobias Koetter, KNIME.com, Zurich, Switzerland
+ * @author Tobias Koetter, KNIME GmbH
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkGroupByNodeModel extends SparkNodeModel {
@@ -121,11 +125,19 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
 
     private List<ColumnAggregationFunctionRow> m_aggregationFunction2Use = null;
 
+    /** Indicates that this node is the pivot node */
+    private final boolean m_pivotNodeMode;
+
+    private final PivotSettings m_pivotSettings = new PivotSettings();
+
     /**
      * Creates a new database group by.
+     *
+     * @param pivotNodeMode Whether to do pivoting or just grouping.
      */
-    SparkGroupByNodeModel() {
+    public SparkGroupByNodeModel(final boolean pivotNodeMode) {
         super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
+        m_pivotNodeMode = pivotNodeMode;
     }
 
     /**
@@ -148,7 +160,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         final SparkVersion sparkVersion = SparkContextUtil.getSparkVersion(sparkSpec.getContextID());
 
         if (SparkVersion.V_2_0.compareTo(sparkVersion) > 0) {
-            throw new InvalidSettingsException("Unsupported Spark Version! This node requires at least Spark 2.0.");
+            throw new InvalidSettingsException("Unsupported Spark version. This node requires at least Spark 2.0.");
         }
 
         final SparkSQLFunctionCombinationProvider functionProvider = new SparkSQLFunctionCombinationProvider(sparkVersion);
@@ -166,6 +178,14 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
 //            setWarningMessage("No Spark window function provider exists.");
 //        }
 
+        if (m_pivotNodeMode && StringUtils.isBlank(m_pivotSettings.getColumn())) {
+            throw new InvalidSettingsException("No pivot column selected.");
+        }
+
+        if (m_pivotNodeMode && tableSpec.findColumnIndex(m_pivotSettings.getColumn()) == -1) {
+            throw new InvalidSettingsException("Can't find pivot column '" + m_pivotSettings.getColumn() + "' in input table.");
+        }
+
         if (!invalidColAggrs.isEmpty()) {
             setWarningMessage(invalidColAggrs.size() + " aggregation functions ignored due to incompatible columns.");
         }
@@ -175,10 +195,20 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         if (aggFunctions == null || aggFunctions.isEmpty()) {
             throw new InvalidSettingsException("No aggregation function defined");
         }
-        final DataTableSpec outputSpec = createOutputSpec(sparkVersion, inputSpec,
-            createGroupByJobInput(tableSpec, functionProvider), aggFunctions, functionProvider);
 
-        return new PortObjectSpec[] { new SparkDataPortObjectSpec(sparkSpec.getContextID(), outputSpec) };
+        if (m_pivotNodeMode && m_pivotSettings.isAutoValuesMode()) {
+            return new PortObjectSpec[] { null }; // wait for result spec from spark
+
+        } else if (m_pivotNodeMode && m_pivotSettings.isManualValuesMode()) {
+            final DataTableSpec outputSpec = createPivotOutputSpec(sparkVersion, inputSpec,
+                createGroupByJobInput(tableSpec, functionProvider), aggFunctions, functionProvider);
+            return new PortObjectSpec[] { new SparkDataPortObjectSpec(sparkSpec.getContextID(), outputSpec) };
+
+        } else {
+            final DataTableSpec outputSpec = createGroupByOutputSpec(sparkVersion, inputSpec,
+                createGroupByJobInput(tableSpec, functionProvider), aggFunctions, functionProvider);
+            return new PortObjectSpec[] { new SparkDataPortObjectSpec(sparkSpec.getContextID(), outputSpec) };
+        }
     }
 
     @Override
@@ -193,18 +223,38 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         final String outputObject = SparkIDs.createSparkDataObjectID();
         final List<SparkSQLFunctionJobInput> groupByFunctions = createGroupByJobInput(tableSpec, functionProvider);
         final List<SparkSQLFunctionJobInput> aggFunctions = createAggJobInput(tableSpec, functionProvider);
-        final DataTableSpec outputSpec = createOutputSpec(sparkVersion, inputSpec,
-            groupByFunctions, aggFunctions, functionProvider);
         final SparkGroupByJobInput jobInput = new SparkGroupByJobInput(inputObject, outputObject,
             groupByFunctions.toArray(new SparkSQLFunctionJobInput[0]),
             aggFunctions.toArray(new SparkSQLFunctionJobInput[0]));
+        if (m_pivotNodeMode) {
+            m_pivotSettings.addJobConfig(jobInput, aggFunctions.size());
+        }
 
         exec.setMessage("Executing spark job...");
-        SparkContextUtil.getJobRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
-        final SparkDataTable resultTable = new SparkDataTable(contextID, outputObject, outputSpec);
-        final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
+        final SparkGroupByJobOutput jobOutput = SparkContextUtil
+                .<SparkGroupByJobInput, SparkGroupByJobOutput>getJobRunFactory(contextID, JOB_ID)
+                .createRun(jobInput).run(contextID, exec);
+        final DataTableSpec outputSpec;
 
-        return new PortObject[] { sparkObject };
+        if (m_pivotNodeMode && m_pivotSettings.isAutoValuesMode()) {
+            if (jobOutput.getPivotValuesDropped()) {
+                setWarningMessage(
+                    "One or more values in the pivot column were ignored, because the configured limit was reached.\n"
+                    + "Increase the limit in the node configuration if required.");
+            }
+            outputSpec = KNIMEToIntermediateConverterRegistry.convertSpec(jobOutput.getSpec(outputObject));
+
+        } else if (m_pivotNodeMode && m_pivotSettings.isManualValuesMode()) {
+            outputSpec =
+                createPivotOutputSpec(sparkVersion, inputSpec, groupByFunctions, aggFunctions, functionProvider);
+
+        } else {
+            outputSpec =
+                createGroupByOutputSpec(sparkVersion, inputSpec, groupByFunctions, aggFunctions, functionProvider);
+        }
+
+        final SparkDataTable resultTable = new SparkDataTable(contextID, outputObject, outputSpec);
+        return new PortObject[] { new SparkDataPortObject(resultTable) };
     }
 
     @Override
@@ -216,19 +266,24 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
 //        m_windowSettings.saveSettingsTo(settings);
         m_columnNamePolicy.saveSettingsTo(settings);
         m_aggregationFunctionSettings.saveSettingsTo(settings);
+
+        if (m_pivotNodeMode) {
+            m_pivotSettings.saveSettingsTo(settings);
+        }
     }
 
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_groupByCols.loadSettingsFrom(settings);
 //        m_windowSettings.loadSettingsFrom(settings);
-
         m_addCountStar.loadSettingsFrom(settings);
         m_countStarColName.loadSettingsFrom(settings);
-
         m_columnNamePolicy.loadSettingsFrom(settings);
-
         m_aggregationFunctionSettings.loadSettingsFrom(settings);
+
+        if (m_pivotNodeMode) {
+            m_pivotSettings.loadSettingsFrom(settings);
+        }
     }
 
     @Override
@@ -251,12 +306,14 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         }
 
         m_aggregationFunctionSettings.validateSettings(settings);
+
+        if (m_pivotNodeMode) {
+            m_pivotSettings.validateSettings(settings);
+        }
     }
 
-    /**
-     * @return output spec of the Spark GroupBy job
-     */
-    private DataTableSpec createOutputSpec(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+    /** @return output spec of the Spark GroupBy job */
+    private DataTableSpec createGroupByOutputSpec(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
         final List<SparkSQLFunctionJobInput> groupByFunctions, final List<SparkSQLFunctionJobInput> aggFunctions,
         final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
 
@@ -264,14 +321,65 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         allFunctions.addAll(groupByFunctions);
         allFunctions.addAll(aggFunctions);
         final SparkSQLFunctionJobInput functionInput[] = allFunctions.toArray(new SparkSQLFunctionJobInput[0]);
-        final IntermediateField outputFields[] = new IntermediateField[functionInput.length];
+        final ArrayList<IntermediateField> outputFields = new ArrayList<>(functionInput.length);
         for (int i = 0; i < functionInput.length; i++) {
             final SparkSQLFunctionJobInput funcInput = functionInput[i];
-            outputFields[i] = functionProvider
-                    .getFunctionResultField(sparkVersion, inputSpec, funcInput);
+            outputFields.add(functionProvider
+                    .getFunctionResultField(sparkVersion, inputSpec, funcInput));
         }
 
-        return KNIMEToIntermediateConverterRegistry.convertSpec(new IntermediateSpec(outputFields));
+        // check uniqueness of output column names
+        final HashMap<String, Integer> outputColumns = new HashMap<>();
+        for (int i = 0; i < outputFields.size(); i++) {
+            final String colName = outputFields.get(i).getName();
+
+            if (outputColumns.containsKey(colName)) {
+                throw new InvalidSettingsException(
+                    String.format("Doublicate output column '%s' at %d and %d detected, rename input column or remove manual aggregations.",
+                        colName, outputColumns.get(colName), i));
+            } else {
+                outputColumns.put(colName, i);
+            }
+        }
+
+        return KNIMEToIntermediateConverterRegistry.convertSpec(new IntermediateSpec(outputFields.toArray(new IntermediateField[0])));
+    }
+
+    /** @return output spec of the Spark Pivot job with manual defined values */
+    private DataTableSpec createPivotOutputSpec(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
+        final List<SparkSQLFunctionJobInput> groupByFunctions, final List<SparkSQLFunctionJobInput> aggFunctions,
+        final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
+
+        final ArrayList<IntermediateField> outputFields = new ArrayList<>();
+        for (SparkSQLFunctionJobInput config : groupByFunctions) {
+            outputFields.add(functionProvider.getFunctionResultField(sparkVersion, inputSpec, config));
+        }
+
+        // use the value as output column name
+        final IntermediateDataType aggResult[] = new IntermediateDataType[aggFunctions.size()];
+        final String aggName[] = new String[aggFunctions.size()];
+        for (int i = 0; i < aggFunctions.size(); i++) {
+            final SparkSQLFunctionJobInput aggIn = aggFunctions.get(i);
+            aggResult[i] = functionProvider.getFunctionResultField(sparkVersion, inputSpec, aggIn).getType();
+            aggName[i] = aggIn.getOutputName();
+        }
+
+        for (String value : m_pivotSettings.getValues()) {
+            for (int i = 0; i < aggResult.length; i++) {
+                outputFields.add(new IntermediateField(String.format("%s+%s", value, aggName[i]), aggResult[i], true));
+            }
+        }
+
+        // validate that all output columns are unique
+        final HashSet<String> outputColNames = new HashSet<>(outputFields.size());
+        for (IntermediateField field : outputFields) {
+            if (!outputColNames.add(field.getName())) {
+                throw new InvalidSettingsException(String.format("Duplicate column '%s' in resulting table. Please adjust the column naming strategy,\n"
+                    +  "or rename the grouping column before pivoting, or remove value from pivot manual values list.", field.getName()));
+            }
+        }
+
+        return KNIMEToIntermediateConverterRegistry.convertSpec(new IntermediateSpec(outputFields.toArray(new IntermediateField[0])));
     }
 
     /** @return group by column function input */

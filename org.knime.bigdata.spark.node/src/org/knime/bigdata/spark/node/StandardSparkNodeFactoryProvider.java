@@ -70,6 +70,7 @@ import org.knime.bigdata.spark.node.preproc.missingval.apply.SparkMissingValueAp
 import org.knime.bigdata.spark.node.preproc.missingval.compute.SparkMissingValueNodeFactory;
 import org.knime.bigdata.spark.node.preproc.normalize.SparkNormalizerPMMLNodeFactory;
 import org.knime.bigdata.spark.node.preproc.partition.SparkPartitionNodeFactory;
+import org.knime.bigdata.spark.node.preproc.pivot.SparkPivotNodeFactory;
 import org.knime.bigdata.spark.node.preproc.rename.SparkRenameColumnNodeFactory;
 import org.knime.bigdata.spark.node.preproc.renameregex.SparkColumnRenameRegexNodeFactory;
 import org.knime.bigdata.spark.node.preproc.sampling.SparkSamplingNodeFactory;
@@ -153,6 +154,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkNumber2CategoryNodeFactory(),
             new SparkColumnFilterNodeFactory(),
             new SparkGroupByNodeFactory(),
+            new SparkPivotNodeFactory(),
             new SparkJoinerNodeFactory(),
             new SparkNormalizerPMMLNodeFactory(),
             new SparkPartitionNodeFactory(),
