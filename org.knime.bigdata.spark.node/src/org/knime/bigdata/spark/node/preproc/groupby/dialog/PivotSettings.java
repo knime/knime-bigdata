@@ -51,8 +51,8 @@ public class PivotSettings {
     private static final String CFG_VALUES = "pivot.values";
     private final SettingsModelStringArray m_values = new SettingsModelStringArray(CFG_VALUES, new String[0]);
 
-    private static final String CFG_USE_PIVOT_AS_COL_NAME = "pivot.usePivotAsColName";
-    private final SettingsModelBoolean m_ignoreMissingValues = new SettingsModelBoolean(CFG_USE_PIVOT_AS_COL_NAME, true);
+    private static final String CFG_IGNORE_MISSING_VALUES = "pivot.ignoreMissingValues";
+    private final SettingsModelBoolean m_ignoreMissingValues = new SettingsModelBoolean(CFG_IGNORE_MISSING_VALUES, true);
 
     /** @return column name model */
     public SettingsModelString getColumnModel() { return m_column; }
