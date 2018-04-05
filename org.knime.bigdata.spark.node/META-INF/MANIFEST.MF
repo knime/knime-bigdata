@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark Nodes
 Bundle-SymbolicName: org.knime.bigdata.spark.node;singleton:=true
-Bundle-Version: 2.2.1.qualifier
+Bundle-Version: 2.2.2.qualifier
 Bundle-ClassPath: knime.jar
 Bundle-Activator: org.knime.bigdata.spark.node.SparkNodePlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
@@ -64,13 +64,13 @@ Export-Package: org.knime.bigdata.spark.node.io.database.reader,
  org.knime.bigdata.spark.node.statistics.correlation.matrix,
  org.knime.bigdata.spark.node.util.rdd.persist,
  org.knime.bigdata.spark.node.util.rdd.unpersist
-Require-Bundle: org.knime.base;bundle-version="[3.5.0,4.0.0)",
+Require-Bundle: org.knime.base;bundle-version="[3.5.3,4.0.0)",
  org.knime.bigdata.spark.core;bundle-version="[2.2.0,2.3.0)",
  org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
- org.knime.bigdata.filehandling;bundle-version="3.5.0",
- org.knime.bigdata.hive;bundle-version="3.5.0",
- org.knime.bigdata.impala;bundle-version="3.5.0",
+ org.knime.bigdata.filehandling;bundle-version="[3.5.0,4.0.0)",
+ org.knime.bigdata.hive;bundle-version="[3.5.3,4.0.0)",
+ org.knime.bigdata.impala;bundle-version="[3.5.3,4.0.0)",
  org.knime.cloud.core;bundle-version="[3.4.0,4.0.0)",
  org.knime.ext.sun;bundle-version="[3.0.0,4.0.0)",
  org.knime.jsnippets;bundle-version="[3.3.0,4.0.0)",
