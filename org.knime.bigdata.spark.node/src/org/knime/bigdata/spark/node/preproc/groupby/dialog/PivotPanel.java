@@ -17,17 +17,18 @@
  */
 package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 
-import static org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotSettings.MODE_AUTO_VALUES;
+import static org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotSettings.MODE_ALL_VALUES;
+import static org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotSettings.MODE_INPUT_TABLE;
 import static org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotSettings.MODE_MANUAL_VALUES;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -59,13 +60,22 @@ public class PivotPanel implements ChangeListener {
 
     private final JPanel m_panel;
 
-    private final JLabel m_columnLabel;
     private final DialogComponentColumnNameSelection m_column;
-    private final JLabel m_modeLabel;
     private final DialogComponentButtonGroup m_mode;
-    private final DialogComponentNumber m_limit;
-    private final PivotValuesPanel m_valuesPanel;
-    private final DialogComponentBoolean m_ignoreMissingValues;
+    private final JPanel m_valuesPanel;
+
+    private final JPanel m_valuesAutoPanel;
+    private final DialogComponentNumber m_limitAutoValues;
+    private final DialogComponentBoolean m_ignoreMVAutoValues;
+
+    private final JPanel m_valuesInputPanel;
+    private final DialogComponentColumnNameSelection m_inputValuesColumn;
+    private final DialogComponentNumber m_limitInputValues;
+    private final DialogComponentBoolean m_ignoreMVInputValues;
+
+    private final PivotValuesPanel m_valuesManualPanel;
+
+    private boolean m_hasValuesInputTable = false;
 
     /**
      * Panel representing pivoting settings.
@@ -75,74 +85,89 @@ public class PivotPanel implements ChangeListener {
         GridBagConstraints gbc = new GridBagConstraints();
         NodeUtils.resetGBC(gbc);
         gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.insets = new Insets(0, 0, 0, 0); // the dialog components already have some space around
+        gbc.insets = new Insets(0, 0, 0, 0);
 
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        gbc.gridwidth = 2;
-        m_columnLabel = new JLabel("Column:");
-        panel.add(m_columnLabel, gbc);
+        // pivot column
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(new JLabel("Pivot Column:"), gbc);
         gbc.gridx++;
+        gbc.anchor = GridBagConstraints.WEST;
         m_column = new DialogComponentColumnNameSelection(m_settings.getColumnModel(), "", 0, true, DataValue.class);
         panel.add(m_column.getComponentPanel(), gbc);
         gbc.gridy++;
 
-        gbc.gridwidth = 1;
+        // values mode
         gbc.gridx = 0;
-        m_modeLabel = new JLabel("Values:");
-        final Box labelBox = Box.createVerticalBox();
-        labelBox.add(m_modeLabel);
-        labelBox.add(Box.createVerticalGlue());
-        panel.add(labelBox, gbc);
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(new JLabel("Pivot Values:"), gbc);
         gbc.gridx++;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 5, 0, 0); // column panel (above) has an empty label in front
+        m_mode = new DialogComponentButtonGroup(m_settings.getModeModel(), null, false,
+            new String[] { "Use all values", "Use values from data table", "Manually specify values" },
+            new String[] { MODE_ALL_VALUES, MODE_INPUT_TABLE, MODE_MANUAL_VALUES });
+        m_mode.getButton(MODE_ALL_VALUES).setToolTipText("Pivot values will be determined based on the values in the chosen pivot column.");
+        m_mode.getButton(MODE_INPUT_TABLE).setToolTipText("Pivot values are taken from a column in the connected data table.");
+        m_mode.getButton(MODE_MANUAL_VALUES).setToolTipText("Pivot values are taken from a manually specified list.");
+        panel.add(m_mode.getComponentPanel(), gbc);
+        gbc.gridy++;
+
+        // value options area
+        m_valuesPanel = new JPanel();
+        m_valuesPanel.setLayout(new CardLayout());
+        panel.add(m_valuesPanel, gbc);
 
         // automatic values
-        final JPanel autoPanel = new JPanel();
-        autoPanel.setLayout(new BoxLayout(autoPanel, BoxLayout.Y_AXIS));
-        m_mode = new DialogComponentButtonGroup(m_settings.getModeModel(), null, true,
-            new String[] { "Automatic", "Manual" },
-            new String[] { MODE_AUTO_VALUES, MODE_MANUAL_VALUES });
-        autoPanel.add(leftAlign(m_mode.getButton(MODE_AUTO_VALUES)));
+        m_limitAutoValues = createLimitValuesComponent();
+        m_ignoreMVAutoValues = createIgnoreMissingValuePanel();
+        m_valuesAutoPanel =
+            createValueOptionsPanel(m_limitAutoValues.getComponentPanel(), m_ignoreMVAutoValues.getComponentPanel());
+        m_valuesPanel.add(m_valuesAutoPanel, MODE_ALL_VALUES);
 
-        final Box autoOptions = Box.createHorizontalBox();
-        autoOptions.add(Box.createHorizontalStrut(10));
-        m_limit = new DialogComponentNumber(m_settings.getComputeValuesLimitModel(), "Limit", 10);
-        autoOptions.add(m_limit.getComponentPanel());
-        m_ignoreMissingValues = new DialogComponentBoolean(m_settings.getIgnoreMissingValuesModel(),
-                "Ignore missing values");
-        autoOptions.add(m_ignoreMissingValues.getComponentPanel());
-        autoPanel.add(autoOptions);
-        panel.add(autoPanel, gbc);
-        gbc.gridy++;
+        // values from input table
+        m_inputValuesColumn = new DialogComponentColumnNameSelection(m_settings.getInputValuesColumnModel(), "Column with pivot values:", 1, false, DataValue.class);
+        m_limitInputValues = createLimitValuesComponent();
+        m_ignoreMVInputValues = createIgnoreMissingValuePanel();
+        m_valuesInputPanel = createValueOptionsPanel(m_inputValuesColumn.getComponentPanel(),
+            m_limitInputValues.getComponentPanel(), m_ignoreMVInputValues.getComponentPanel());
+        m_valuesPanel.add(m_valuesInputPanel, MODE_INPUT_TABLE);
 
         // manual values
-        final JPanel manualPanel = new JPanel();
-        manualPanel.setLayout(new BoxLayout(manualPanel, BoxLayout.Y_AXIS));
-        manualPanel.add(leftAlign(m_mode.getButton(MODE_MANUAL_VALUES)));
-        m_valuesPanel = new PivotValuesPanel(m_settings.getValuesModel());
-        manualPanel.add(leftAlign(m_valuesPanel.getComponentPanel(), 10));
-        panel.add(manualPanel, gbc);
-        gbc.gridy++;
+        m_valuesManualPanel = new PivotValuesPanel(m_settings.getValuesModel());
+        m_valuesPanel.add(createValueOptionsPanel(m_valuesManualPanel.getComponentPanel()), MODE_MANUAL_VALUES);
 
         m_panel = new JPanel(new BorderLayout());
         m_panel.add(panel, BorderLayout.PAGE_START);
     }
 
-    private JComponent leftAlign(final JComponent component) {
-        final Box box = Box.createHorizontalBox();
-        box.add(component);
-        box.add(Box.createHorizontalGlue());
-        return box;
+    private DialogComponentNumber createLimitValuesComponent() {
+        return new DialogComponentNumber(m_settings.getValuesLimitModel(), "Limit number of values:", 10);
     }
 
-    private JComponent leftAlign(final JComponent component, final int leftInset) {
-        final Box box = Box.createHorizontalBox();
-        box.add(Box.createHorizontalStrut(leftInset));
-        box.add(component);
-        box.add(Box.createHorizontalGlue());
-        return box;
+    private DialogComponentBoolean createIgnoreMissingValuePanel() {
+        return new DialogComponentBoolean(m_settings.getIgnoreMissingValuesModel(), "Ignore missing values");
     }
 
+    private JPanel createValueOptionsPanel(final Component ...components) {
+        final JPanel container = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        for(Component comp : components) {
+            panel.add(comp, gbc);
+            gbc.gridy++;
+        }
+
+        container.add(panel);
+        return container;
+    }
 
     /**
      * @return the panel in which all sub-components of this component are
@@ -154,21 +179,59 @@ public class PivotPanel implements ChangeListener {
 
     /**
      * @param settings {@link NodeSettingsRO}
-     * @param spec the input {@link DataTableSpec}
+     * @param specs the input {@link DataTableSpec}
      * @throws NotConfigurableException if the settings are invalid
      */
-    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec spec)
+    public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
         throws NotConfigurableException {
 
-        m_column.loadSettingsFrom(settings, new DataTableSpec[] { spec });
-        m_mode.loadSettingsFrom(settings, new DataTableSpec[] { spec });
-        m_limit.loadSettingsFrom(settings, new DataTableSpec[] { spec });
-        m_valuesPanel.loadSettingsFrom(settings);
-        m_ignoreMissingValues.loadSettingsFrom(settings, new DataTableSpec[] { spec });
+        m_column.loadSettingsFrom(settings, specs);
+        m_mode.loadSettingsFrom(settings, specs);
 
-        updateInputEnabledState();
+        m_limitAutoValues.loadSettingsFrom(settings, specs);
+        m_ignoreMVAutoValues.loadSettingsFrom(settings, specs);
+        m_valuesManualPanel.loadSettingsFrom(settings);
+
+        m_hasValuesInputTable = specs.length == 2 && specs[1] != null;
+        if (m_hasValuesInputTable) {
+            boolean containsInValColConf = m_settings.containsInputValuesColumnConfig(settings);
+            m_inputValuesColumn.loadSettingsFrom(settings, specs);
+            if (!containsInValColConf) {
+                m_settings.guessInputValuesColumn(specs);
+            }
+        }
+        updateAvailableModes();
 
         m_settings.getModeModel().addChangeListener(this);
+    }
+
+    /**
+     * Enable/disable non available values mode and select an available mode.
+     */
+    private void updateAvailableModes() {
+        final String valuesMode = m_settings.getModeModel().getStringValue();
+
+        if (m_hasValuesInputTable) {
+            if (!valuesMode.equals(MODE_INPUT_TABLE)) {
+                m_settings.getModeModel().setStringValue(MODE_INPUT_TABLE); // do this before set enable!
+            }
+
+            m_mode.getButton(MODE_ALL_VALUES).setEnabled(false);
+            m_mode.getButton(MODE_INPUT_TABLE).setEnabled(true);
+            m_mode.getButton(MODE_MANUAL_VALUES).setEnabled(false);
+
+        } else {
+            if (valuesMode.equals(MODE_INPUT_TABLE)) {
+                m_settings.getModeModel().setStringValue(MODE_ALL_VALUES); // do this before set enable!
+            }
+
+            m_mode.getButton(MODE_ALL_VALUES).setEnabled(true);
+            m_mode.getButton(MODE_INPUT_TABLE).setEnabled(false);
+            m_mode.getButton(MODE_MANUAL_VALUES).setEnabled(true);
+        }
+
+        final CardLayout cl = (CardLayout)m_valuesPanel.getLayout();
+        cl.show(m_valuesPanel, m_settings.getModeModel().getStringValue());
     }
 
     /**
@@ -180,9 +243,12 @@ public class PivotPanel implements ChangeListener {
 
         m_column.saveSettingsTo(settings);
         m_mode.saveSettingsTo(settings);
-        m_limit.saveSettingsTo(settings);
-        m_valuesPanel.saveSettingsTo(settings);
-        m_ignoreMissingValues.saveSettingsTo(settings);
+        m_limitAutoValues.saveSettingsTo(settings);
+        m_ignoreMVAutoValues.saveSettingsTo(settings);
+        m_inputValuesColumn.saveSettingsTo(settings);
+        m_valuesManualPanel.saveSettingsTo(settings);
+
+        m_settings.getModeModel().removeChangeListener(this);
     }
 
     /**
@@ -193,16 +259,10 @@ public class PivotPanel implements ChangeListener {
         m_valuesPanel.validate();
     }
 
-    /** Enable or disable fields on changes */
-    private void updateInputEnabledState() {
-        m_limit.getModel().setEnabled(m_settings.isAutoValuesMode());
-        m_ignoreMissingValues.getModel().setEnabled(m_settings.isAutoValuesMode());
-        m_settings.getValuesModel().setEnabled(m_settings.isManualValuesMode());
-    }
+
 
     @Override
     public void stateChanged(final ChangeEvent e) {
-        // handle mode changes
-        updateInputEnabledState();
+        updateAvailableModes();
     }
 }

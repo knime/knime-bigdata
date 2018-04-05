@@ -279,8 +279,10 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
             m_countStarColName.loadSettingsFrom(settings);
             m_descriptionTab.removeAll();
 
-            if (m_pivotNodeDialog) {
-                m_pivotPanel.loadSettingsFrom(settings, spec);
+            if (m_pivotNodeDialog && specs.length == 2 && specs[1] != null) {
+                m_pivotPanel.loadSettingsFrom(settings, new DataTableSpec[] { spec, ((DataTableSpec) specs[1]) });
+            } else if (m_pivotNodeDialog) {
+                m_pivotPanel.loadSettingsFrom(settings, new DataTableSpec[] { spec });
             }
 
             m_aggregationSettings.loadSettingsFrom(settings);

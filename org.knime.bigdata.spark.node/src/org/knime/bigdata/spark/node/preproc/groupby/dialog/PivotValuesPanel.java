@@ -21,22 +21,27 @@
 package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.base.filehandling.NodeUtils;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -51,11 +56,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 public class PivotValuesPanel implements ActionListener, ChangeListener {
 
     private final SettingsModelStringArray m_settingsModel;
-    private final Box m_panel;
+    private final JPanel m_panel;
     private final DefaultTableModel m_tableModel;
     private final JTable m_table;
 
+    private final JTextField m_newValueField;
     private final JButton m_buttonAdd;
+
     private final JButton m_buttonRemove;
     private final JButton m_buttonRemoveAll;
     private final JButton m_buttonUp;
@@ -64,43 +71,52 @@ public class PivotValuesPanel implements ActionListener, ChangeListener {
 
     PivotValuesPanel(final SettingsModelStringArray settingsModel) {
         m_settingsModel = settingsModel;
-        m_panel = Box.createHorizontalBox();
+        m_panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        NodeUtils.resetGBC(gbc);
+        gbc.insets = new Insets(0, 5, 5, 5);
 
-        m_tableModel = new DefaultTableModel(new String[]{"Values"}, 0);
+        m_buttonAdd = new JButton("Add");
+        m_buttonAdd.addActionListener(this);
+        m_buttonUp = new JButton("Up");
+        m_buttonUp.addActionListener(this);
+        m_buttonDown = new JButton("Down");
+        m_buttonDown.addActionListener(this);
+        m_buttonRemove = new JButton("Remove");
+        m_buttonRemove.addActionListener(this);
+        m_buttonRemoveAll = new JButton("Remove All");
+        m_buttonRemoveAll.addActionListener(this);
 
+        m_newValueField = new JTextField();
+        m_newValueField.addActionListener(this);
+        m_panel.add(m_newValueField, gbc);
+        gbc.gridx++;
+        m_panel.add(m_buttonAdd, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+
+        m_tableModel = new DefaultTableModel(0, 1);
         m_table = new JTable(m_tableModel);
         m_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         m_table.setCellSelectionEnabled(true);
         m_table.setColumnSelectionAllowed(false);
+        m_table.setTableHeader(null); // disable header
 
         final JScrollPane scrollPane = new JScrollPane(m_table);
         scrollPane.setPreferredSize(new Dimension(400, 240));
-        m_panel.add(scrollPane);
+        gbc.insets = new Insets(0, 5, 0, 5);
+        gbc.gridheight = 6;
+        m_panel.add(scrollPane, gbc);
+        gbc.gridx++;
 
-        m_buttonAdd = new JButton("Add");
-        m_buttonUp = new JButton("Up");
-        m_buttonDown = new JButton("Down");
-        m_buttonRemove = new JButton("Remove");
-        m_buttonRemoveAll = new JButton("Remove All");
-
-        Box buttonBox = Box.createVerticalBox();
-        Dimension buttonSize = m_buttonRemoveAll.getPreferredSize();
-        addButton(m_buttonAdd, buttonBox, buttonSize);
-        addButton(m_buttonUp, buttonBox, buttonSize);
-        addButton(m_buttonDown, buttonBox, buttonSize);
-        addButton(m_buttonRemove, buttonBox, buttonSize);
-        addButton(m_buttonRemoveAll, buttonBox, buttonSize);
-
-        m_panel.add(Box.createHorizontalStrut(10));
-        m_panel.add(buttonBox);
-    }
-
-    /** Add button to box, set min/max size and register action listener */
-    private void addButton(final JButton button, final Box box, final Dimension size) {
-        button.setMinimumSize(size);
-        button.setMaximumSize(size);
-        button.addActionListener(this);
-        box.add(button);
+        gbc.gridheight = 1;
+        m_panel.add(m_buttonUp, gbc);
+        gbc.gridy++;
+        m_panel.add(m_buttonDown, gbc);
+        gbc.gridy++;
+        m_panel.add(m_buttonRemove, gbc);
+        gbc.gridy++;
+        m_panel.add(m_buttonRemoveAll, gbc);
     }
 
     @Override
@@ -114,9 +130,12 @@ public class PivotValuesPanel implements ActionListener, ChangeListener {
             m_table.getCellEditor().stopCellEditing();
         }
 
-        if (event.getSource().equals(m_buttonAdd)) {
-            m_tableModel.setRowCount(m_tableModel.getRowCount() + 1);
+        if ((event.getSource().equals(m_buttonAdd) || event.getSource().equals(m_newValueField))
+                && !StringUtils.isEmpty(m_newValueField.getText())) {
+            m_tableModel.addRow(new Object[] { m_newValueField.getText() });
+            m_newValueField.setText("");
             focusRow(m_tableModel.getRowCount() - 1);
+            m_newValueField.requestFocus();
 
         } else if (event.getSource().equals(m_buttonUp) && row > 0) {
             m_tableModel.moveRow(row, row, row - 1);

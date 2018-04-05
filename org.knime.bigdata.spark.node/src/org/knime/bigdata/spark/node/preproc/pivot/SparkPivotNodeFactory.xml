@@ -72,35 +72,43 @@
         </tab>
         <tab name="Pivot">
             <description>
-				The "Pivot" tab allows to transpose values of <i>one</i> input column into	individual output columns.
-				The values can be computed by Spark, or manually specified in the dialog.
+				The "Pivot" tab allows to transpose the values of <i>one</i> input column into	individual output columns.
 				To pivot over <i>multiple</i> columns, you can use the <i>Spark SQL</i> with the <i>concat()</i>
 				function before pivoting.
 			</description>
 
-			<option name="Column">
+			<option name="Pivot column">
 				The column containing the values to transpose.
 			</option>
 
-			<option name="Values">
+			<option name="Pivot values">
 				<ul>
                 <li>
-	                <i>Automatic:</i> If set, Spark will automatically compute and sort the pivot values. To avoid the excessive
-	                creation of new columns, a <i>limit</i> can be set to only take the top-k pivot values.
-	                Selecting this option implies that Spark Pivot materializes the ingoing Spark DataFrame/RDD,
-	                which may take some time.
+	                <i>Use all values:</i> If set, Spark will automatically determine all distinct values in the chosen pivot column and sort them.
+	                Selecting this option implies that the ingoing Spark DataFrame/RDD will be materialized, which may take some time.
                 </li>
                 <li>
-                	<i>Manual:</i> If set, it allows the manual definition of the pivot values. This is useful if (a) you
+                	<i>Use values from data table:</i> This option is set, if a data table is connected to the node's optional input port.
+                	In this case, the pivot values are taken from a column in the data table. This is useful if (a) the pivot values of interest
+                	need to be dynamically specified, or (c) you want to avoid materialization of the ingoing DataFrame/RDD to speed up pivoting performance.
+                </li>
+                <li>
+                	<i>Manually specify values:</i> If set, pivot values can be manually specified. This is useful if (a) you
                 	are only interested in a small subset of the pivot values, or (b) the resulting columns should be ordered in a specific way,
                 	or (c) you want to avoid materialization of the ingoing DataFrame/RDD to speed up pivoting performance.
                 </li>
                 </ul>
 			</option>
 			
+			<option name ="Limit number of values">
+                	This option can be set to to only take the top-k pivot values. This is useful to to avoid excessive
+	                amounts of columns in the resulting data. This options is available when <i>Use all values</i> or 
+	                <i>Use values from data table</i> is selected.
+			</option>
+			
 			<option name="Ignore missing values">
-				Ignore rows containing missing values in pivot column. This options is only available when
-				<i>Automatic</i> is selected above.
+				Ignore rows containing missing values in pivot column. This option is available when
+				<i>Use all values</i> or <i>Use values from data table</i> is selected.
 			</option>
         </tab>
         <!--// TODO:
@@ -211,6 +219,9 @@
 	<ports>
 		<inPort index="0" name="Spark DataFrame/RDD">
 			Spark DataFrame/RDD to apply pivoting on.
+		</inPort>
+		<inPort index="1" name="KNIME table">
+			KNIME table with pivot values (optional).
 		</inPort>
 		<outPort index="0" name="Spark DataFrame/RDD">
 			DataFrame/RDD with pivoted data.
