@@ -71,6 +71,9 @@ public class PivotSettings {
     private static final String CFG_INPUT_VALUES_COLUMN = "pivot.inputValuesTableColumn";
     private final SettingsModelString m_inputValuesColumn = new SettingsModelString(CFG_INPUT_VALUES_COLUMN, "");
 
+    private static final String CFG_VALIDATE_MANUAL_VALUES = "pivot.validateManualValues";
+    private final SettingsModelBoolean m_validateManualValues = new SettingsModelBoolean(CFG_VALIDATE_MANUAL_VALUES, false);
+
     /** @return column name model */
     public SettingsModelString getColumnModel() { return m_column; }
 
@@ -110,6 +113,12 @@ public class PivotSettings {
     /** @return column name of pivot values input table to use */
     public String getInputValuesColumn() { return m_inputValuesColumn.getStringValue(); }
 
+    /** @return validate manual values model */
+    public SettingsModelBoolean getValidateManualValuesModel() { return m_validateManualValues; }
+
+    /** @return <code>true</code> if manual defined values list should be verified against pivot values in spark data frame */
+    public boolean validateManualValues() { return m_validateManualValues.getBooleanValue(); }
+
     /**
      * Validates if given settings contains a non empty input values column configuration.
      * @param settings The {@link org.knime.core.node.NodeSettings} to read from.
@@ -131,6 +140,7 @@ public class PivotSettings {
         m_ignoreMissingValues.saveSettingsTo(settings);
         m_inputValuesColumn.saveSettingsTo(settings);
         m_values.saveSettingsTo(settings);
+        m_validateManualValues.saveSettingsTo(settings);
     }
 
     /**
@@ -146,6 +156,7 @@ public class PivotSettings {
         m_ignoreMissingValues.loadSettingsFrom(settings);
         m_inputValuesColumn.loadSettingsFrom(settings);
         m_values.loadSettingsFrom(settings);
+        m_validateManualValues.loadSettingsFrom(settings);
     }
 
     /**
@@ -161,6 +172,7 @@ public class PivotSettings {
         m_ignoreMissingValues.validateSettings(settings);
         m_inputValuesColumn.validateSettings(settings);
         m_values.validateSettings(settings);
+        m_validateManualValues.validateSettings(settings);
     }
 
     /**
@@ -175,7 +187,7 @@ public class PivotSettings {
             jobInput.setIgnoreMissingValuesInPivotColumn(ignoreMissingValues());
         } else {
             jobInput.setComputePivotValues(false);
-            jobInput.setPivotValues(getValues());
+            jobInput.setPivotValues(getValues(), validateManualValues());
         }
     }
 
@@ -195,10 +207,10 @@ public class PivotSettings {
         jobInput.setComputePivotValues(false);
 
         if (values.length >= limit) {
-            jobInput.setPivotValues(Arrays.copyOf(values, limit));
+            jobInput.setPivotValues(Arrays.copyOf(values, limit), validateManualValues());
             return false;
         } else {
-            jobInput.setPivotValues(values);
+            jobInput.setPivotValues(values, validateManualValues());
             return true;
         }
     }

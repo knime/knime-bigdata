@@ -40,6 +40,7 @@ public class SparkGroupByJobInput extends JobInput {
     private static final String PIVOT_VALUES = "pivotValues";
     private static final String PIVOT_IGNORE_MISSING_VALUES = "pivotIgnoreMissingValues";
     private static final String AGG_FUNCTIONS = "aggregateFunctions";
+    private static final String PIVOT_VALIDATE_VALUES = "pivotValidateValues";
 
     /** Deserialization constructor */
     public SparkGroupByJobInput() {}
@@ -121,14 +122,23 @@ public class SparkGroupByJobInput extends JobInput {
         return getInteger(PIVOT_COMPUTE_VALUES_LIMIT);
     }
 
-    /** @param values pivot values */
-    public void setPivotValues(final Serializable values[]) {
+    /**
+     * @param values pivot values
+     * @param validateValues <code>true</code> if values should be validated against pivot values from data frame
+     */
+    public void setPivotValues(final Serializable values[], final boolean validateValues) {
         set(PIVOT_VALUES, values);
+        set(PIVOT_VALIDATE_VALUES, validateValues);
     }
 
     /** @return pivot values */
     public Object[] getPivotValues() {
         return get(PIVOT_VALUES);
+    }
+
+    /** @return <code>true</code> if values should be validated against pivot values from data frame */
+    public boolean validateValues() {
+        return get(PIVOT_VALIDATE_VALUES);
     }
 
     /** @return aggregate functions */

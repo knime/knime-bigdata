@@ -72,8 +72,10 @@ public class PivotPanel implements ChangeListener {
     private final DialogComponentColumnNameSelection m_inputValuesColumn;
     private final DialogComponentNumber m_limitInputValues;
     private final DialogComponentBoolean m_ignoreMVInputValues;
+    private final DialogComponentBoolean m_validateInputValues;
 
     private final PivotValuesPanel m_valuesManualPanel;
+    private final DialogComponentBoolean m_validateManualValues;
 
     private boolean m_hasValuesInputTable = false;
 
@@ -130,13 +132,17 @@ public class PivotPanel implements ChangeListener {
         m_inputValuesColumn = new DialogComponentColumnNameSelection(m_settings.getInputValuesColumnModel(), "Column with pivot values:", 1, false, DataValue.class);
         m_limitInputValues = createLimitValuesComponent();
         m_ignoreMVInputValues = createIgnoreMissingValuePanel();
+        m_validateInputValues = createValidateValuesPanel();
         m_valuesInputPanel = createValueOptionsPanel(m_inputValuesColumn.getComponentPanel(),
-            m_limitInputValues.getComponentPanel(), m_ignoreMVInputValues.getComponentPanel());
+            m_limitInputValues.getComponentPanel(), m_ignoreMVInputValues.getComponentPanel(), m_validateInputValues.getComponentPanel());
+
         m_valuesPanel.add(m_valuesInputPanel, MODE_INPUT_TABLE);
 
         // manual values
         m_valuesManualPanel = new PivotValuesPanel(m_settings.getValuesModel());
-        m_valuesPanel.add(createValueOptionsPanel(m_valuesManualPanel.getComponentPanel()), MODE_MANUAL_VALUES);
+        m_validateManualValues = createValidateValuesPanel();
+        m_valuesPanel.add(createValueOptionsPanel(m_valuesManualPanel.getComponentPanel(), m_validateManualValues.getComponentPanel()),
+            MODE_MANUAL_VALUES);
 
         m_panel = new JPanel(new BorderLayout());
         m_panel.add(panel, BorderLayout.PAGE_START);
@@ -148,6 +154,10 @@ public class PivotPanel implements ChangeListener {
 
     private DialogComponentBoolean createIgnoreMissingValuePanel() {
         return new DialogComponentBoolean(m_settings.getIgnoreMissingValuesModel(), "Ignore missing values");
+    }
+
+    private DialogComponentBoolean createValidateValuesPanel() {
+        return new DialogComponentBoolean(m_settings.getValidateManualValuesModel(), "Fail, if pivot column in DataFrame/RDD contains other values");
     }
 
     private JPanel createValueOptionsPanel(final Component ...components) {
@@ -190,7 +200,13 @@ public class PivotPanel implements ChangeListener {
 
         m_limitAutoValues.loadSettingsFrom(settings, specs);
         m_ignoreMVAutoValues.loadSettingsFrom(settings, specs);
+
+        m_limitInputValues.loadSettingsFrom(settings, specs);
+        m_ignoreMVInputValues.loadSettingsFrom(settings, specs);
+        m_validateInputValues.loadSettingsFrom(settings, specs);
+
         m_valuesManualPanel.loadSettingsFrom(settings);
+        m_validateManualValues.loadSettingsFrom(settings, specs);
 
         m_hasValuesInputTable = specs.length == 2 && specs[1] != null;
         if (m_hasValuesInputTable) {
@@ -243,10 +259,17 @@ public class PivotPanel implements ChangeListener {
 
         m_column.saveSettingsTo(settings);
         m_mode.saveSettingsTo(settings);
+
         m_limitAutoValues.saveSettingsTo(settings);
         m_ignoreMVAutoValues.saveSettingsTo(settings);
+
         m_inputValuesColumn.saveSettingsTo(settings);
+        m_ignoreMVInputValues.saveSettingsTo(settings);
+        m_limitInputValues.saveSettingsTo(settings);
+        m_validateInputValues.saveSettingsTo(settings);
+
         m_valuesManualPanel.saveSettingsTo(settings);
+        m_validateManualValues.saveSettingsTo(settings);
 
         m_settings.getModeModel().removeChangeListener(this);
     }

@@ -33,6 +33,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -93,6 +94,16 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
     private Dataset<Row> doPivoting(final Dataset<Row> inputFrame, final SparkGroupByJobInput input,
         final List<Column> aggCols, final List<Object> pivotValues) throws Exception {
 
+        // validate that pivot list contains all values
+        final Dataset<Row> validatedFrame;
+        if (input.validateValues()) {
+            final int colIdx = inputFrame.schema().fieldIndex(input.getPivotColumn());
+            validatedFrame =
+                inputFrame.map(new ValidateValuesMapper(colIdx, pivotValues), RowEncoder.apply(inputFrame.schema()));
+        } else {
+            validatedFrame = inputFrame;
+        }
+
         // final column names, in the order as they are produced by Spark
         final List<String> outputColumns = computeOutputColumns(input, pivotValues);
 
@@ -109,7 +120,7 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
             groupByAliased.add(col(tmpAlias));
         }
 
-        return inputFrame
+        return validatedFrame
                 .toDF(colsWithGroupByAliases)
                 .groupBy(asScalaBuffer(groupByAliased))
                 .pivot(input.getPivotColumn(), pivotValues)

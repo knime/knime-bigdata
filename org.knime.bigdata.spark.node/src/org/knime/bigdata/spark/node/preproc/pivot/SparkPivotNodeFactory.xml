@@ -110,6 +110,11 @@
 				Ignore rows containing missing values in pivot column. This option is available when
 				<i>Use all values</i> or <i>Use values from data table</i> is selected.
 			</option>
+
+			<option name="Fail, if pivot column in DataFrame/RDD contains other values">
+				Fail execution, if the specified pivot values do not contain <i>all</i> values present the Spark DataFrame/RDD.
+				This option is available when <i>Use values from data table</i> or <i>Manually specify values</i> is selected.
+			</option>
         </tab>
         <!--// TODO:
         <tab name="Time Based Window">
