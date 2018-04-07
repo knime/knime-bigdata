@@ -68,7 +68,7 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         } catch (KNIMESparkException e) {
             toReturn = JobserverJobOutput.failure(e);
         } catch (Throwable t) {
-            toReturn = JobserverJobOutput.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
+            toReturn = JobserverJobOutput.failure(new KNIMESparkException(t));
         }
 
         return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()

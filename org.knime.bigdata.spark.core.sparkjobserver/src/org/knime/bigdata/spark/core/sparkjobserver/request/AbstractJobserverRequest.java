@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
@@ -72,11 +73,17 @@ public abstract class AbstractJobserverRequest<T> {
             } catch (ProcessingException e) {
                 // Thrown by Java REST API when something went wrong while sending the request
                 // e.g. connection refused
-                if (e.getCause() != null) {
-                    throw new KNIMESparkException(e.getCause().getMessage(), e);
-                } else {
-                    throw new KNIMESparkException("Request to Spark Jobserver failed " + KNIMESparkException.SEE_LOG_SNIPPET, e);
-                }
+				if (e.getCause() != null && e.getCause() instanceof ConnectException) {
+					final String deepestMsg = KNIMESparkException.getDeepestErrorMessage(e.getCause(), false);
+					if (deepestMsg != null) {
+						throw new KNIMESparkException("Could not connect to Spark Jobserver: " + deepestMsg, e);
+					} else {
+						throw new KNIMESparkException(
+								"Could not connect to Spark Jobserver. " + KNIMESparkException.SEE_LOG_SNIPPET, e);
+					}
+				} else {
+					throw new KNIMESparkException(e);
+				}
             } catch (RetryableKNIMESparkException e) {
                 // Thrown by the request class to indicate that an error has been returned by the Jobserver
                 // but that it might make sense to repeat the request (up to maxAttempts times).
@@ -115,7 +122,7 @@ public abstract class AbstractJobserverRequest<T> {
             }
             return responseStrBuilder.toString();
         } catch (IOException e) {
-            throw new KNIMESparkException("I/O error while reading Spark Jobserver response. Possible reason: Network problems " + KNIMESparkException.SEE_LOG_SNIPPET, e);
+            throw new KNIMESparkException("I/O error while reading Spark Jobserver response. Possible reason: Network problems. " + KNIMESparkException.SEE_LOG_SNIPPET, e);
         }
     }
 

@@ -23,7 +23,7 @@ public class KNIMESparkException extends Exception {
     private static final long serialVersionUID = 1L;
 
     /**Standard see log message shown in exceptions.*/
-    public static final String SEE_LOG_SNIPPET = "(for details see View > Open KNIME log)";
+    public static final String SEE_LOG_SNIPPET = "For details see View > Open KNIME log.";
 
     /** Optional stack trace of original exception. */
     private final String m_stackTrace;
@@ -52,15 +52,24 @@ public class KNIMESparkException extends Exception {
 
     /**
      * Constructor for cases where /NO/ instructive error message exists, because it is an internal error and/or a bug.
-     * In this case the constructed {@link KNIMESparkException} will have a generic message that points the user to the
-     * log file.
+     * In this case the resulting {@link KNIMESparkException} will recurse through the given cause-hierarchy, trying to
+     * extract the deepest non-blank error message. If there is no such thing, a generic message will be set.
      *
      * @param cause The original exception that caused the error. You can assume that this exception will be logged
      *            automatically and will show up in the KNIME log.
      */
     public KNIMESparkException(final Throwable cause) {
-        this(String.format("%s %s",
-            (cause.getMessage() == null) ? "An error occured" : "An error occured: " + cause.getMessage(), SEE_LOG_SNIPPET), cause);
+        this(buildMessage(cause), cause);
+    }
+
+    private static String buildMessage(final Throwable cause) {
+        final String deepestErrorMsg = getDeepestErrorMessage(cause, true);
+
+        if (deepestErrorMsg != null) {
+            return deepestErrorMsg;
+        } else {
+            return "An error occured. " + SEE_LOG_SNIPPET;
+        }
     }
 
     /** @return Stack trace of given cause as string. */
@@ -68,15 +77,40 @@ public class KNIMESparkException extends Exception {
         if (cause == null) {
             return null;
         } else {
-            try(final StringWriter sw = new StringWriter();
-                    final PrintWriter pw = new PrintWriter(sw);) {
-            cause.printStackTrace(pw);
-            pw.close();
-            return sw.toString();
+            try(final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw);) {
+                cause.printStackTrace(pw);
+                return sw.toString();
             } catch (IOException e) {
                 return "Unable to print stack trace for Throwable: " + cause.getClass().getName()
                         + ". Exception: " + e.getMessage();
             }
+        }
+    }
+
+    /**
+     * Returns deepest non empty error message from the given exception and its cause stack.
+     *
+     * @param t A throwable, possibly with cause chain.
+     * @param appendType Whether to append the type of the deepest exception with non-empty error message to the
+     *            returned string.
+     * @return deepest non empty error message or null.
+     */
+    public static String getDeepestErrorMessage(final Throwable t, final boolean appendType) {
+        String deeperMsg = null;
+        if (t.getCause() != null) {
+            deeperMsg = getDeepestErrorMessage(t.getCause(), appendType);
+        }
+
+        if (deeperMsg != null && deeperMsg.length() > 0) {
+            return deeperMsg;
+        } else if (t.getMessage() != null && t.getMessage().length() > 0) {
+            if (appendType) {
+                return String.format("%s (%s)", t.getMessage(), t.getClass().getSimpleName());
+            } else {
+                return t.getMessage();
+            }
+        } else {
+            return null;
         }
     }
 

@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.sparkjobserver.jobapi;
 
 import java.util.Map;
 
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobData;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -63,7 +64,7 @@ public class JobserverJobOutput extends JobData {
     }
 
     /**
-     * @return whether job execution failed or not. If this method returns true, then {@link #getThrowable()} returns
+     * @return whether job execution failed or not. If this method returns true, then {@link #getException()} returns
      *         the Throwable that caused the failure.
      */
     public boolean isError() {
@@ -72,9 +73,9 @@ public class JobserverJobOutput extends JobData {
 
     /**
      *
-     * @return a {@link #getThrowable()} that caused the job to fail
+     * @return a {@link KNIMESparkException} that caused the job to fail
      */
-    public Throwable getThrowable() {
+    public KNIMESparkException getException() {
         return get(KEY_ERROR_THROWABLE);
     }
 
@@ -126,10 +127,10 @@ public class JobserverJobOutput extends JobData {
      * @return a {@link JobserverJobOutput} indicating a failed job execution and which contains the given
      *         {@link Throwable}.
      */
-    public static JobserverJobOutput failure(final Throwable throwable) {
+    public static JobserverJobOutput failure(final KNIMESparkException exception) {
         JobserverJobOutput toReturn = new JobserverJobOutput();
         toReturn.set(KEY_ERROR_FLAG, true);
-        toReturn.set(KEY_ERROR_THROWABLE, throwable);
+        toReturn.set(KEY_ERROR_THROWABLE, exception);
         return toReturn;
     }
 

@@ -61,12 +61,7 @@ public class LocalSparkJobController implements JobController {
 		}
 
 		if (out.isError()) {
-			Throwable cause = out.getThrowable();
-			if (cause instanceof KNIMESparkException) {
-				throw (KNIMESparkException) cause;
-			} else {
-				throw new KNIMESparkException("Job execution failed " + KNIMESparkException.SEE_LOG_SNIPPET, cause);
-			}
+			throw out.getException();
 		} else if (job instanceof SimpleJobRun) {
 			return null;
 		} else {

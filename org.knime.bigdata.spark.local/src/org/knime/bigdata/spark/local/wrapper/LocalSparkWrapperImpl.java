@@ -102,8 +102,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		} catch (KNIMESparkException e) {
 			toReturn = LocalSparkJobOutput.failure(e);
 		} catch (Throwable t) {
-			toReturn = LocalSparkJobOutput
-					.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
+			toReturn = LocalSparkJobOutput.failure(new KNIMESparkException(t));
 		} finally {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
 		}

@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.local.wrapper;
 
 import java.util.Map;
 
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobData;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -66,9 +67,9 @@ public class LocalSparkJobOutput extends JobData {
 
     /**
      *
-     * @return a {@link #getThrowable()} that caused the job to fail
+     * @return the {@link KNIMESparkException} that caused the job to fail
      */
-    public Throwable getThrowable() {
+    public KNIMESparkException getException() {
         return get(KEY_ERROR_THROWABLE);
     }
 
@@ -116,14 +117,14 @@ public class LocalSparkJobOutput extends JobData {
      * Creates a {@link LocalSparkJobOutput} indicating a failed job execution and which contains the given
      * {@link Throwable}.
      *
-     * @param throwable The exeption to report back to the client
+     * @param exception The exception to report back to the client
      * @return a {@link LocalSparkJobOutput} indicating a failed job execution and which contains the given
      *         {@link Throwable}.
      */
-    public static LocalSparkJobOutput failure(final Throwable throwable) {
+    public static LocalSparkJobOutput failure(final KNIMESparkException exception) {
         LocalSparkJobOutput toReturn = new LocalSparkJobOutput();
         toReturn.set(KEY_ERROR_FLAG, true);
-        toReturn.set(KEY_ERROR_THROWABLE, throwable);
+        toReturn.set(KEY_ERROR_THROWABLE, exception);
         return toReturn;
     }
 

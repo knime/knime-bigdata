@@ -197,16 +197,11 @@ class JobserverJobController implements JobController {
 
         JobserverJobOutput jobserverOutput = waitForJob(job, jobId, exec);
 
-        if (jobserverOutput.isError()) {
-            Throwable cause = jobserverOutput.getThrowable();
-            if (cause instanceof KNIMESparkException) {
-                throw (KNIMESparkException)cause;
-            } else {
-                throw new KNIMESparkException("Job execution failed " + KNIMESparkException.SEE_LOG_SNIPPET, cause);
-            }
-        } else if (job instanceof SimpleJobRun) {
-            return null;
-        } else {
+		if (jobserverOutput.isError()) {
+			throw jobserverOutput.getException();
+		} else if (job instanceof SimpleJobRun) {
+			return null;
+		} else {
             try {
                 return jobserverOutput.<O> getSparkJobOutput(job.getJobOutputClass());
             } catch (InstantiationException | IllegalAccessException e) {
