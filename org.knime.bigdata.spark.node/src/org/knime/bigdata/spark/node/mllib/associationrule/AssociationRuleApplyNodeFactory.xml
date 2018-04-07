@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
+	type="Predictor" icon="icon.png">
+	<name>Spark Association Rule (Apply)</name>
+	<shortDescription>Apply association rules in Apache Spark.</shortDescription>
+	<fullDescription>
+        <intro>
+        	<p>
+        		This node applies the <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html#association-rules">association rules</a> to a given column with collections of items (transactions).
+        		A rule matches if the input transaction contains all antecedent items of the rule.
+        		The consequent items of the matching rules are then added to the output set of predicted items
+        		if they are not already included in the input items collection (the output set contains only <i>new</i> items).
+        	</p>
+        	
+        	<p>
+        		To avoid memory and computations explosions, the number of used association rules can be limited.
+        		A warning will be added to the node if the limit is reached and only the first <i>n</i> rules are used (this means randomly chosen on a unsorted set of rules).
+        	</p>
+
+            <p>
+                The <i>Spark Association Rule Learner</i> Node can be used to generate the association rules.
+                The <i>Spark GroupBy</i> or <i>Spark SQL</i> Node can be used to generate a collection of items as input.
+            </p>
+
+            <p><i>This node requires at least Apache Spark 2.0.</i></p>
+        </intro>
+
+        <option name="Rule limit">
+            Maximal number of rules to use.
+        </option>
+        <option name="Item Column">
+            Input column to apply rules, containing collections of items.
+        </option>
+        <option name="Output Column">
+            Name of the output column, containing the set of consequent items of the matching rules.
+        </option>
+    </fullDescription>
+
+	<ports>
+		<inPort index="0" name="Association rules model">Association rules model</inPort>
+		<inPort index="1" name="Spark data">Spark data with item collection column</inPort>
+		<outPort index="0" name="Spark data">Spark data with prediction column</outPort>
+	</ports>
+</knimeNode>

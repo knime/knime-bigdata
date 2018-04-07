@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
+	type="Learner" icon="icon.png">
+	<name>Spark Association Rule Learner</name>
+	<shortDescription>Association rule learner using frequent item sets in Spark.</shortDescription>
+	<fullDescription>
+		<intro>
+            This extracts <a href="http://en.wikipedia.org/wiki/Association_rule_learning">association rules</a> from a collection of frequent items.
+            <p>
+				This node extracts <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html#association-rules">association rules</a> with a single item
+				as the consequent from a given column containing frequent item sets.
+            </p>
+            
+            <p>
+            	Association rules describes relations between items in a given set of transactions.
+            	For example, if a customer bought <i>onions, potatos, meat</i> in a transaction,
+            	this implies that a new customer who buys <i>onions</i> and <i>potatos</i> together is likely to also by hamburger <i>meat</i>.
+            	This can be written as a association rule with <i>onions</i> and <i>potatos</i> as antecedent and the <i>meat</i> as consequents.
+           	</p>
+           	
+           	<p>
+           		The association rules can be filtered by a required confidence.
+	           	Confidence is an indication of how often an association rule has been found to be true.
+	           	For example, if in the transactions item set X appears 4 times, X and Y co-occur only 2 times,
+	           	the confidence for the rule X => Y is then 2/4 = 0.5.
+           	</p>
+           	
+           	<p>
+            	See <a href="http://en.wikipedia.org/wiki/Association_rule_learning">Association rule learning (Wikipedia)</a> for general informations.
+            </p>
+            
+            <p>
+                The <i>Spark Frequent Item Sets</i> Node can be used to generate a collection of frequent items as input.
+                The <i>Spark Association Rule Apply</i> Node can be used to apply the rules produced by this node.
+            </p>
+
+            <p><i>This node requires at least Apache Spark 2.0.</i></p>
+		</intro>
+		
+		<option name="Minimum Confidence">
+			Sets the minimum confidence for association rules (default: 0.8).
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Frequent item sets model">Frequent item sets model</inPort>
+		<outPort index="0" name="Association rules">Spark data with association rules</outPort>
+		<outPort index="1" name="Association rules model (remote model)">Association rules model. 
+        <b>The model is not self-contained and thus cannot be saved with the workflow.</b></outPort>
+	</ports>
+</knimeNode>

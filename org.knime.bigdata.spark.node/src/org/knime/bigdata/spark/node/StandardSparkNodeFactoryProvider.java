@@ -42,9 +42,12 @@ import org.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
+import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleApplyNodeFactory;
+import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeFactory;
 import org.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeFactory;
+import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeFactory;
@@ -139,6 +142,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibClusterAssignerNodeFactory(),
             new MLlibKMeansNodeFactory(),
             new MLlibCollaborativeFilteringNodeFactory(),
+            new FrequentItemSetNodeFactory(),
             new MLlibNaiveBayesNodeFactory(),
             new MLlibDecisionTreeNodeFactory(),
             new MLlibGradientBoostedTreeNodeFactory(),
@@ -146,6 +150,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibLogisticRegressionNodeFactory(),
             new MLlibLinearRegressionNodeFactory(),
             new MLlibSVMNodeFactory(),
+            new AssociationRuleApplyNodeFactory(),
+            new AssociationRuleLearnerNodeFactory(),
             new MLlibPredictorNodeFactory(),
             new MLlibPCANodeFactory(),
             new MLlibSVDNodeFactory(),

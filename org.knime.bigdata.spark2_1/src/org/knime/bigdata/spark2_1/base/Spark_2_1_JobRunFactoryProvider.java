@@ -29,8 +29,11 @@ import org.knime.bigdata.spark2_1.jobs.genericdatasource.GenericDataSource2Spark
 import org.knime.bigdata.spark2_1.jobs.genericdatasource.Spark2GenericDataSourceJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.hive.Hive2SparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.hive.Spark2HiveJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.mllib.freqitemset.FrequentItemSetJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.prediction.bayes.naive.NaiveBayesJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree.DecisionTreeJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesJobRunFactory;
@@ -91,6 +94,9 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new Spark2HiveJobRunFactory(),
             new KMeansJobRunFactory(),
             new CollaborativeFilteringJobRunFactory(),
+            new FrequentItemSetJobRunFactory(),
+            new AssociationRuleApplyJobRunFactory(),
+            new AssociationRuleLearnerJobRunFactory(),
             new NaiveBayesJobRunFactory(),
             new DecisionTreeJobRunFactory(),
             new GradientBoostedTreesJobRunFactory(),

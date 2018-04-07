@@ -124,6 +124,13 @@
       </category>
       <category
             icon="icons/missing.gif"
+            level-id="freq-item-sets-association-rules"
+            locked="true"
+            name="Item Sets / Association Rules"
+            path="/toolintegration/spark/mining">
+      </category>
+      <category
+            icon="icons/missing.gif"
             level-id="clustering"
             locked="true"
             name="Clustering"
