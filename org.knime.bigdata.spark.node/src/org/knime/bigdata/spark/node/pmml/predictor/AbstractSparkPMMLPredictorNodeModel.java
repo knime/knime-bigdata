@@ -126,6 +126,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final CompiledModelPortObject pmml = getCompiledModel(inObjects[0]);
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
+        final IntermediateSpec inputSchema = SparkDataTableUtil.toIntermediateSpec(data.getTableSpec());
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         final String predColName = m_changePredColName.getBooleanValue() ? m_predColName.getStringValue() : null;
         final DataTableSpec resultSpec = SparkPMMLUtil.createPredictionResultSpec(data.getTableSpec(), cms,
@@ -135,7 +136,7 @@ public abstract class AbstractSparkPMMLPredictorNodeModel extends SparkNodeModel
         final Integer[] colIdxs = SparkPMMLUtil.getColumnIndices(data.getTableSpec(), cms);
         final File jobFile = createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
-        final PMMLPredictionJobInput input = new PMMLPredictionJobInput(data.getTableName(), colIdxs,
+        final PMMLPredictionJobInput input = new PMMLPredictionJobInput(data.getTableName(), inputSchema, colIdxs,
             pmml.getModelClassName(), aOutputTableName, outputSchema, m_outputProbabilities.getBooleanValue());
         final JobWithFilesRunFactory<PMMLPredictionJobInput, EmptyJobOutput> execProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), JOB_ID);

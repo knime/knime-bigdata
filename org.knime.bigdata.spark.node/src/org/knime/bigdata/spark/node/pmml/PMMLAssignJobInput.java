@@ -20,8 +20,12 @@
  */
 package org.knime.bigdata.spark.node.pmml;
 
+import java.util.Arrays;
+
 import org.knime.bigdata.spark.core.job.ColumnsJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateDataTypes;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateField;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
@@ -32,6 +36,7 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 public abstract class PMMLAssignJobInput extends ColumnsJobInput {
 
     private static final String CLASS = "mainClass";
+    private static final String LONG_FIELDS = "longFields";
 
     /**
      * Paramless constuctor for automatic deserialization.
@@ -40,17 +45,19 @@ public abstract class PMMLAssignJobInput extends ColumnsJobInput {
 
     /**
      * @param inputID
+     * @param inputSpec
      * @param colIdxs
      * @param mainClass
      * @param outputID
      * @param outputSpec
      */
-    public PMMLAssignJobInput(final String inputID, final Integer[] colIdxs, final String mainClass,
-            final String outputID, final IntermediateSpec outputSpec) {
+    public PMMLAssignJobInput(final String inputID, final IntermediateSpec inputSpec, final Integer[] colIdxs,
+            final String mainClass, final String outputID, final IntermediateSpec outputSpec) {
 
         super(inputID, outputID, colIdxs);
         withSpec(outputID, outputSpec);
         set(CLASS, mainClass);
+        set(LONG_FIELDS, getLongColumns(colIdxs, inputSpec));
     }
 
     /**
@@ -60,4 +67,24 @@ public abstract class PMMLAssignJobInput extends ColumnsJobInput {
         return get(CLASS);
     }
 
+    /** @return array with <code>true</code> if PMML input field is a long */
+    public boolean[] getInputLongFields() {
+        return get(LONG_FIELDS);
+    }
+
+    /**
+     * Returns an array with <code>true</code> if input field if PMML method is a <code>long</code>.
+     * @param inputColIdxs array with input indices used by PMML
+     * @param inputSpec input spec
+     * @return array with boolean flag (for each PMML input field) indicating if columns contains longs
+     */
+    private boolean[] getLongColumns(final Integer inputColIdxs[], final IntermediateSpec inputSpec) {
+        final IntermediateField fields[] = inputSpec.getFields();
+        final boolean longColumns[] = new boolean[inputColIdxs.length];
+        Arrays.fill(longColumns, false);
+        for (int i = 0; i < inputColIdxs.length; i++) {
+            longColumns[i] = fields[inputColIdxs[i]].getType() == IntermediateDataTypes.LONG;
+        }
+        return longColumns;
+    }
 }

@@ -40,16 +40,17 @@ public class PMMLPredictionJobInput extends PMMLAssignJobInput {
     /**
      * Constructor.
      * @param inputID
+     * @param inputSpec
      * @param colIdxs
      * @param mainClass
      * @param outputID
      * @param outputSpec
      * @param appendProbabilities <code>true</code> if probability columns should be added
      */
-    public PMMLPredictionJobInput(final String inputID, final Integer[] colIdxs, final String mainClass,
-            final String outputID, final IntermediateSpec outputSpec, final boolean appendProbabilities) {
+    public PMMLPredictionJobInput(final String inputID, final IntermediateSpec inputSpec, final Integer[] colIdxs,
+            final String mainClass, final String outputID, final IntermediateSpec outputSpec, final boolean appendProbabilities) {
 
-        super(inputID, colIdxs, mainClass, outputID, outputSpec);
+        super(inputID, inputSpec, colIdxs, mainClass, outputID, outputSpec);
         set(PROBABILITIES, appendProbabilities);
     }
 

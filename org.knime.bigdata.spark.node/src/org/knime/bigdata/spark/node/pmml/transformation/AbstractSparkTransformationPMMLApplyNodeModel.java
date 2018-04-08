@@ -87,6 +87,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final CompiledModelPortObject pmml = getCompiledPMMLModel(exec, inObjects);
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
+        final IntermediateSpec inputSpec = SparkDataTableUtil.toIntermediateSpec(data.getTableSpec());
         final CompiledModelPortObjectSpec cms = (CompiledModelPortObjectSpec)pmml.getSpec();
         exec.setMessage("Create table specification");
         final Collection<String> missingFieldNames  = new LinkedList<>();
@@ -104,7 +105,7 @@ public abstract class AbstractSparkTransformationPMMLApplyNodeModel extends Spar
         final IntermediateSpec outputSchema = SparkDataTableUtil.toIntermediateSpec(resultSpec);
         final File jobFile = AbstractSparkPMMLPredictorNodeModel.createJobFile(pmml);
         addFileToDeleteAfterExecute(jobFile);
-        final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), colIdxs,
+        final PMMLTransformationJobInput input = new PMMLTransformationJobInput(data.getTableName(), inputSpec, colIdxs,
             pmml.getModelClassName(), aOutputTableName, outputSchema, addCols, m_replace.getBooleanValue(), skipCols, replaceCols);
         exec.setMessage("Execute Spark job");
         final JobWithFilesRunFactory<PMMLTransformationJobInput, EmptyJobOutput> execProvider =

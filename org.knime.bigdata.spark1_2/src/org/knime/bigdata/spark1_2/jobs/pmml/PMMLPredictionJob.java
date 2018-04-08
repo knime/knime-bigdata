@@ -21,8 +21,8 @@
 package org.knime.bigdata.spark1_2.jobs.pmml;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -33,62 +33,53 @@ import org.knime.bigdata.spark.node.pmml.predictor.PMMLPredictionJobInput;
 import org.knime.bigdata.spark1_2.api.RowBuilder;
 
 /**
- * applies a compiled pmml model to the input data
+ * Job that applies a compiled PMML prediction model to the input data.
  *
  * @author Tobias Koetter, KNIME.com
  */
 @SparkClass
 public class PMMLPredictionJob extends PMMLAssignJob<PMMLPredictionJobInput> {
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(PMMLPredictionJob.class.getName());
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected Function<Row, Row> createFunction(final Map<String, byte[]> bytecode, final String mainClass,
-        final List<Integer> inputColIdxs, final PMMLPredictionJobInput input) {
-        LOGGER.debug("Create pmml prediction function");
-        final Function<Row, Row> predict = new Function<Row, Row>() {
+    protected Function<Row, Row> createMapFunction(final Map<String, byte[]> bytecode, final PMMLPredictionJobInput input) {
+
+        final String mainClass = input.getMainClass();
+        final ArrayList<Integer> inputColIdxs = new ArrayList<>(input.getColumnIdxs());
+        final boolean[] longColumns = input.getInputLongFields();
+
+        LOGGER.debug("Creating PMML prediction function");
+
+        return new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
             final boolean addProbabilites = input.appendProbabilities();
-            //use transient since a Method can not be serialized
+
+            // use transient since a Method can not be serialized
             private transient Method m_evalMethod;
-            /** {@inheritDoc} */
+
+            // use transient because we have to initialize this array per task anyway
+            private transient Object[] m_evalMethodInput;
+
             @Override
             public Row call(final Row r) throws Exception {
                 if (m_evalMethod == null) {
-                    final ClassLoader cl = new ClassLoader(Thread.currentThread().getContextClassLoader()) {
-                        /** {@inheritDoc} */
-                        @Override
-                        protected Class<?> findClass(final String name) throws ClassNotFoundException {
-                            byte[] bc = bytecode.get(name);
-                            return defineClass(name, bc, 0, bc.length);
-                        }
-                    };
-                    final Class<?> modelClass = cl.loadClass(mainClass);
-                    m_evalMethod = modelClass.getMethod("evaluate", Object[].class);
+                    m_evalMethod = loadCompiledPMMLEvalMethod(bytecode, mainClass);
+                    m_evalMethodInput = new Object[inputColIdxs.size()];
                 }
-                final Object[] in = new Object[inputColIdxs.size()];
-                for (int i = 0; i < inputColIdxs.size(); i++) {
-                    final Integer colIdx = inputColIdxs.get(i);
-                    if (colIdx == null || colIdx < 0) {
-                        in[i] = null;
-                    } else {
-                        in[i] = r.get(colIdx);
-                    }
-                }
-                final Object[] result = (Object[])m_evalMethod.invoke(null, (Object)in);
+
+                fillEvalMethodInputFromRow(inputColIdxs, r, m_evalMethodInput, longColumns);
+                final Object[] result = (Object[])m_evalMethod.invoke(null, (Object)m_evalMethodInput);
 
                 final RowBuilder rowBuilder = RowBuilder.fromRow(r);
-                //this is a PMML prediction task
+
+                // this is a PMML prediction task
                 if (addProbabilites) {
                     return rowBuilder.addAll(Arrays.asList(result)).build();
+                } else {
+                    return rowBuilder.add(result[0]).build();
                 }
-                return rowBuilder.add(result[0]).build();
             }
         };
-        return predict;
     }
 }

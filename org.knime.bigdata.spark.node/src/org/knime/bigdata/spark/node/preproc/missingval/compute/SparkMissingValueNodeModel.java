@@ -84,7 +84,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         }
 
         final DataTableSpec resultSpec = createOutputSpec(inputSpec);
-        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(resultSpec);
+        final PMMLPortObjectSpecCreator pmmlSpecCreator = new PMMLPortObjectSpecCreator(inputSpec);
 
         return new PortObjectSpec[]{new SparkDataPortObjectSpec(sparkPortSpec.getContextID(), resultSpec),
             pmmlSpecCreator.createSpec()};
@@ -157,7 +157,7 @@ public class SparkMissingValueNodeModel extends SparkNodeModel {
         exec.setMessage("Generating PMML");
         PMMLMissingValueReplacementTranslator pmmlTranslator =
             new PMMLMissingValueReplacementTranslator(mvHandler, outputValues);
-        PMMLPortObject pmmlOutputPort = new PMMLPortObject(new PMMLPortObjectSpecCreator(outputSpec).createSpec());
+        PMMLPortObject pmmlOutputPort = new PMMLPortObject(new PMMLPortObjectSpecCreator(inputSpec).createSpec());
         pmmlOutputPort.addModelTranslater(pmmlTranslator);
 
         return new PortObject[]{sparkOutputPort, pmmlOutputPort};

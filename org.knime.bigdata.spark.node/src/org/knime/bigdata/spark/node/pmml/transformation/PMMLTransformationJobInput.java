@@ -46,6 +46,7 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
 
     /**
      * @param inputNamedObject
+     * @param inputSpec
      * @param colIdxs
      * @param mainClass
      * @param outputNamedObject
@@ -55,11 +56,12 @@ public class PMMLTransformationJobInput extends PMMLAssignJobInput {
      * @param skipCols
      * @param replaceCols
      */
-    public PMMLTransformationJobInput(final String inputNamedObject, final Integer[] colIdxs, final String mainClass,
+    public PMMLTransformationJobInput(final String inputNamedObject, final IntermediateSpec inputSpec,
+            final Integer[] colIdxs, final String mainClass,
             final String outputNamedObject, final IntermediateSpec outputSpec,
             final List<Integer> addCols, final boolean replace, final List<Integer> skipCols, final Map<Integer, Integer> replaceCols) {
 
-        super(inputNamedObject, colIdxs, mainClass, outputNamedObject, outputSpec);
+        super(inputNamedObject, inputSpec, colIdxs, mainClass, outputNamedObject, outputSpec);
         set(REPLACE, replace);
         set(ADD_COLS, addCols);
         set(SKIP_COLS, skipCols);
