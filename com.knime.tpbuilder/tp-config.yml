@@ -773,7 +773,8 @@ bundleInstructions:
     instructions:
       Bundle-SymbolicName: com.esotericsoftware.kryo
       Export-Package: >-
-        com.esotericsoftware.kryo.*   ;version=${bundle.version},
+        com.esotericsoftware.kryo.*                   ;version=${bundle.version},
+        com.esotericsoftware.shaded.org.objenesis.*   ;version=${bundle.version},
         !*
       Import-Package: >-
         javax.*,

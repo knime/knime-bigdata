@@ -113,7 +113,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 				final Properties livyClientConf = new Properties();
 				livyClientConf.load(getClass().getResource("/livy-client.conf").openStream());
 				// this is temporary until we fix how SPNEGO/Kerberos is configured for the Livy client API
-				livyClientConf.setProperty("livy.client.http.auth.login.config", getClass().getResource("spnegoLogin.conf").getFile());
+				livyClientConf.setProperty("livy.client.http.auth.login.config", getClass().getResource("/spnegoLogin.conf").getFile());
 
 				final LivySparkContextConfig config = getConfiguration();
 
