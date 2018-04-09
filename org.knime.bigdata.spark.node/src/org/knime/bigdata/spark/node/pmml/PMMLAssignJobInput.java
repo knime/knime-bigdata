@@ -73,7 +73,7 @@ public abstract class PMMLAssignJobInput extends ColumnsJobInput {
     }
 
     /**
-     * Returns an array with <code>true</code> if input field if PMML method is a <code>long</code>.
+     * Returns an array with <code>true</code> if input field of PMML method is a <code>long</code>.
      * @param inputColIdxs array with input indices used by PMML
      * @param inputSpec input spec
      * @return array with boolean flag (for each PMML input field) indicating if columns contains longs
@@ -83,7 +83,8 @@ public abstract class PMMLAssignJobInput extends ColumnsJobInput {
         final boolean longColumns[] = new boolean[inputColIdxs.length];
         Arrays.fill(longColumns, false);
         for (int i = 0; i < inputColIdxs.length; i++) {
-            longColumns[i] = fields[inputColIdxs[i]].getType() == IntermediateDataTypes.LONG;
+            longColumns[i] =
+                inputColIdxs[i] >= 0 && fields[inputColIdxs[i]].getType() == IntermediateDataTypes.LONG;
         }
         return longColumns;
     }
