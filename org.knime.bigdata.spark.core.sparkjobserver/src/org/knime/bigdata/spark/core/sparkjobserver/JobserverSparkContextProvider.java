@@ -74,7 +74,7 @@ public class JobserverSparkContextProvider implements SparkContextProvider<JobSe
         }
 
         final URI uri = contextID.asURI();
-        return String.format("Spark Context %s on Spark Jobserver %s:%d", uri.getHost(), uri.getPort(), uri.getPath().substring(1));
+        return String.format("Spark Context %s on Spark Jobserver %s:%d", uri.getPath().substring(1), uri.getHost(), uri.getPort());
     }
 
     /**
