@@ -1174,6 +1174,6 @@ artifactGroups:
   # ##############################################################
   - name: Livy 0.4 Client
     singleArtifacts:
-      - id: org.apache.livy:livy-client-http:0.4.1-incubating-SNAPSHOT
+      - id: org.apache.livy:livy-client-http:0.4.1.knime1
         transitiveSourceDepth: 2
 
