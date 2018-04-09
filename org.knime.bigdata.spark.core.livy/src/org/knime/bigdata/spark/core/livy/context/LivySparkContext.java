@@ -41,6 +41,7 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.livy.LivyPlugin;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.core.node.CanceledExecutionException;
@@ -112,8 +113,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 			try {
 				final Properties livyClientConf = new Properties();
 				livyClientConf.load(getClass().getResource("/livy-client.conf").openStream());
+
 				// this is temporary until we fix how SPNEGO/Kerberos is configured for the Livy client API
-				livyClientConf.setProperty("livy.client.http.auth.login.config", getClass().getResource("/spnegoLogin.conf").getFile());
+				final String loginConf = String.join(File.separator, LivyPlugin.getDefault().getPluginRootPath(), "conf", "spnegoLogin.conf");
+				livyClientConf.setProperty("livy.client.http.auth.login.config", loginConf);
 
 				final LivySparkContextConfig config = getConfiguration();
 
