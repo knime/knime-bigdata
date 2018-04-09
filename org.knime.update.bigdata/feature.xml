@@ -28,12 +28,12 @@
          id="org.knime.features.orc"
          version="0.0.0"/>
 
-<!--   <includes
+   <includes
          id="org.knime.features.ext.h2o.sparklingwater"
          version="0.0.0"/>
 
    <includes
          id="org.knime.features.ext.h2o.mojo.spark"
-         version="0.0.0"/>  -->
+         version="0.0.0"/>
 
 </feature>
