@@ -97,7 +97,6 @@ mavenBlacklist:
   - org\.apache\.derby:derby:jar:.*
   - javax\.transaction:jta:jar:.*
   - com\.google\.code\.gson:gson:jar:.*
-  - com\.google\.protobuf:protobuf-java:jar:.*
   - javax\.servlet\.jsp:jsp-api:jar:.*
   - org\.mortbay\.jetty:jetty-util:jar:.*
   - org\.mortbay\.jetty:jetty:jar:.*
@@ -328,9 +327,6 @@ requireBundleOverrides:
     
   - coordPattern: com\.google\.code\.gson:gson:jar:.*
     replacement: com.google.gson;bundle-version="[2.8,3)"
-    
-  - coordPattern: com\.google\.protobuf:protobuf-java:jar:.*
-    replacement: com.google.protobuf;bundle-version="[2.5,3)"
     
   - coordPattern: javax\.servlet\.jsp:jsp-api:jar:.*
     replacement: javax.servlet.jsp;bundle-version="[2.2,3)"

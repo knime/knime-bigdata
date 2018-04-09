@@ -838,6 +838,20 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="com.google.protobuf"
+         download-size="0"
+         install-size="0"
+         version="2.5.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.protobuf.source"
+         download-size="0"
+         install-size="0"
+         version="2.5.0"
+         unpack="false"/>
+
+   <plugin
          id="com.jolbox.bonecp"
          download-size="0"
          install-size="0"
