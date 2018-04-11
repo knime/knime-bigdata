@@ -22,10 +22,9 @@ package org.knime.bigdata.spark2_2.jobs.mllib.reduction.pca;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -46,30 +45,32 @@ public class PCAJob implements SimpleSparkJob<PCAJobInput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(PCAJob.class.getName());
 
+    private static final String PROJ_COL_PREFIX = "DIM_";
+    private static final String COMP_COL_PREFIX = "Component_";
+
     @Override
     public void runJob(final SparkContext sparkContext, final PCAJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
 
         LOGGER.info("Starting PCA job...");
 
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+        final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
 
         // Create a RowMatrix from JavaRDD<Row>.
-        final RowMatrix mat = RDDUtilsInJava.toRowMatrix(rowRDD, input.getColumnIdxs());
+        final RowMatrix mat = RDDUtilsInJava.toRowMatrix(inputDataset, input.getColumnIdxs());
         // Compute the top k singular values and corresponding singular vectors.
         final Tuple2<RowMatrix, Matrix> pcaRes = new Tuple2<>(mat, mat.computePrincipalComponents(input.getK()));
 
         final String matrixName = input.getMatrixName();
         if (matrixName != null) {
-            final JavaSparkContext js = JavaSparkContext.fromSparkContext(sparkContext);
-            namedObjects.addDataFrame(matrixName, RDDUtilsInJava.fromMatrix(js, pcaRes._2));
+            namedObjects.addDataFrame(matrixName, RDDUtilsInJava.fromMatrix(sparkContext, pcaRes._2, COMP_COL_PREFIX));
         }
 
         final String projectionMatrix = input.getProjectionMatrix();
         if (projectionMatrix != null) {
             // Project the rows to the linear space spanned by the top N principal components.
             final RowMatrix projected = pcaRes._1.multiply(pcaRes._2);
-            namedObjects.addDataFrame(projectionMatrix,  RDDUtilsInJava.fromRowMatrix(sparkContext, projected));
+            namedObjects.addDataFrame(projectionMatrix,  RDDUtilsInJava.fromRowMatrix(sparkContext, projected, PROJ_COL_PREFIX));
         }
 
         return;

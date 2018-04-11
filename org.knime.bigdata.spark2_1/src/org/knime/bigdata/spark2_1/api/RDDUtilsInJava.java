@@ -22,7 +22,6 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -333,24 +332,32 @@ public class RDDUtilsInJava {
         });
     }
 
-    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length());
+    /**
+     * Convert given data set into an RDD of vectors containing values of given column indices.
+     *
+     * @param dataset input data set
+     * @param columnIndices indices of columns to use
+     * @return RDD with vectors
+     */
+    public static JavaRDD<Vector> toVectorRdd(final Dataset<Row> dataset, final List<Integer> columnIndices) {
+        return toVectorRdd(dataset.javaRDD(), columnIndices);
+    }
 
+    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> columnIndices) {
+        return toVectorRdd(inputRdd, columnIndices.toArray(new Integer[0]));
+    }
+
+    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final Integer columnIndices[]) {
         return inputRdd.map(new Function<Row, Vector>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Vector call(final Row row) {
-                int insertionIndex = 0;
-                final double[] convertedValues = new double[numFeatures];
-                for (int idx : aColumnIndices) {
-                    if (idx < row.length()) {
-                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
-                        insertionIndex += 1;
-                    }
+                final double[] values = new double[columnIndices.length];
+                for (int i = 0; i < columnIndices.length; i++) {
+                    values[i] = row.getDouble(columnIndices[i]);
                 }
-
-                return Vectors.dense(convertedValues);
+                return Vectors.dense(values);
             }
         });
     }
@@ -504,60 +511,62 @@ public class RDDUtilsInJava {
     }
 
     /**
-     * convert the given JavaRDD of Row to a RowMatrix
+     * Convert the given data frame of rows to a {@link RowMatrix}.
      *
-     * @param aRowRDD
-     * @param aColumnIds - indices of columns to select
+     * @param dataset input data frame
+     * @param columnIndices indices of columns to use
      * @return converted RowMatrix
      */
-    public static RowMatrix toRowMatrix(final JavaRDD<Row> aRowRDD, final List<Integer> aColumnIds) {
-        final JavaRDD<Vector> vectorRDD = toVectorRdd(aRowRDD, aColumnIds);
-        return new RowMatrix(vectorRDD.rdd());
+    public static RowMatrix toRowMatrix(final Dataset<Row> dataset, final List<Integer> columnIndices) {
+        return new RowMatrix(toVectorRdd(dataset, columnIndices).rdd());
     }
 
     /**
-     * convert the given RowMatrix to a JavaRDD of Row
+     * Convert the given {@link RowMatrix} to a data frame of rows.
      *
-     * @param sparkContext
-     * @param aRowMatrix
-     * @return converted JavaRDD
+     * @param context spark context to use to create data frames
+     * @param rowMatrix matrix to convert
+     * @param columnPrefix prefix of output column names
+     * @return data set of rows
      */
-    public static Dataset<Row> fromRowMatrix(final SparkContext sparkContext, final RowMatrix aRowMatrix) {
-        final RDD<Vector> rows = aRowMatrix.rows();
-        final JavaRDD<Row> vectorRows = fromVectorRdd(new JavaRDD<>(rows, rows.elementClassTag()));
-        return createDoubleDataFrame(sparkContext, vectorRows, (int) aRowMatrix.numCols());
+    public static Dataset<Row> fromRowMatrix(final SparkContext context, final RowMatrix rowMatrix, final String columnPrefix) {
+        final JavaRDD<Row> vectorRows = fromVectorRdd(rowMatrix.rows().toJavaRDD());
+        return createDoubleDataFrame(context, vectorRows, (int) rowMatrix.numCols(), columnPrefix);
     }
 
     /**
-     * convert the given Matrix to a data frame
+     * Convert the given Matrix to a data frame.
      *
-     * @param aContext java context, required for RDD construction
-     *
-     * @param aMatrix
-     * @return converted data frame
+     * @param context spark context to use for data frame construction
+     * @param matrix matrix to convert
+     * @param columnPrefix prefix of output column names
+     * @return converted matrix as data frame
      */
-    public static Dataset<Row> fromMatrix(final JavaSparkContext aContext, final Matrix aMatrix) {
-        final int nRows = aMatrix.numRows();
-        final int nCols = aMatrix.numCols();
+    public static Dataset<Row> fromMatrix(final SparkContext context, final Matrix matrix, final String columnPrefix) {
+        final int nRows = matrix.numRows();
+        final int nCols = matrix.numCols();
         final List<Row> rows = new ArrayList<>(nRows);
         for (int i = 0; i < nRows; i++) {
             RowBuilder builder = RowBuilder.emptyRow();
             for (int j = 0; j < nCols; j++) {
-                builder.add(aMatrix.apply(i, j));
+                builder.add(matrix.apply(i, j));
             }
             rows.add(builder.build());
         }
-        final JavaRDD<Row> resultRdd = aContext.parallelize(rows);
-        return createDoubleDataFrame(aContext.sc(), resultRdd, nCols);
+        final JavaSparkContext javaContext = JavaSparkContext.fromSparkContext(context);
+        final JavaRDD<Row> resultRdd = javaContext.parallelize(rows);
+        return createDoubleDataFrame(context, resultRdd, nCols, columnPrefix);
     }
 
-    /** Create a data frame containing double columns named by index. */
-    private static Dataset<Row> createDoubleDataFrame(final SparkContext sparkContext, final JavaRDD<Row> rdd, final int numColumns) {
+    /**
+     * Create a data frame containing double columns named by index and given column prefix.
+     */
+    private static Dataset<Row> createDoubleDataFrame(final SparkContext sparkContext, final JavaRDD<Row> rdd, final int numColumns, final String columnPrefix) {
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
 
         final List<StructField> fields = new ArrayList<>(numColumns);
         for (int i = 0; i < numColumns; i++) {
-            fields.add(DataTypes.createStructField(Integer.toString(i), DataTypes.DoubleType, false));
+            fields.add(DataTypes.createStructField(String.format("%s%d", columnPrefix, i), DataTypes.DoubleType, false));
         }
         final StructType schema = DataTypes.createStructType(fields);
 

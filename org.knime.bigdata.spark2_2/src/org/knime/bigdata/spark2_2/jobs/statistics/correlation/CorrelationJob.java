@@ -20,12 +20,9 @@
  */
 package org.knime.bigdata.spark2_2.jobs.statistics.correlation;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.Statistics;
@@ -38,8 +35,6 @@ import org.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_2.api.SparkJob;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * Computes correlation
@@ -57,14 +52,15 @@ public abstract class CorrelationJob<O extends JobOutput> implements SparkJob<Co
         throws KNIMESparkException, Exception {
 
         LOGGER.info("starting Correlation Computation job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
-        final List<Integer> colIdxs = input.getColumnIdxs();
-        final JavaRDD<Vector> data = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<Vector> data = RDDUtilsInJava.toVectorRdd(dataset, input.getColumnIdxs());
         final Matrix mat = Statistics.corr(data.rdd(), input.getMethod().toString().toLowerCase());
         final O output = createJobOutput(mat);
         if (input.hasFirstNamedOutputObject()) {
-            final Dataset<Row> outputRdd = RDDUtilsInJava.fromMatrix(JavaSparkContext.fromSparkContext(sparkContext), mat);
-            namedObjects.addDataFrame(input.getFirstNamedOutputObject(), outputRdd);
+            final Dataset<Row> outputDataset =
+                    RDDUtilsInJava.fromMatrix(sparkContext, mat, "dummy")
+                    .toDF(input.getColumnNames(dataset.schema().fieldNames()));
+            namedObjects.addDataFrame(input.getFirstNamedOutputObject(), outputDataset);
         }
 
         LOGGER.info("Correlation Computation done");
