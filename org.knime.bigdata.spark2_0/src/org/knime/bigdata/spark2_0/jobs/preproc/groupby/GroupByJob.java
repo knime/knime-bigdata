@@ -33,6 +33,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sql_function.SparkSQLFunctionFactory;
@@ -96,13 +97,20 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
         final List<String> outputColumns = computeOutputColumns(input, pivotValues);
 
         // uniquify groupBy columns to avoid collisions with new pivot columns
+        // special case spark 2.0:
+        // aliasing on group by columns are not supported, we have to rename group by columns before group by happens
+        final StructType inputSchema = inputFrame.schema();
+        final String colsWithGroupByAliases[] = inputSchema.fieldNames();
         final ArrayList<Column> groupByAliased = new ArrayList<>();
         for (SparkSQLFunctionJobInput groupByCol : input.getGroupByFunctions()) {
-            final String tmpAlias = groupByCol.getOutputName() + UUID.randomUUID().toString();
-            groupByAliased.add(col(groupByCol.getOutputName()).as(tmpAlias));
+            final String originalName = groupByCol.getOutputName();
+            final String tmpAlias = originalName + UUID.randomUUID().toString();
+            colsWithGroupByAliases[inputSchema.fieldIndex(originalName)] = tmpAlias;
+            groupByAliased.add(col(tmpAlias));
         }
 
         return inputFrame
+                .toDF(colsWithGroupByAliases)
                 .groupBy(asScalaBuffer(groupByAliased))
                 .pivot(input.getPivotColumn(), pivotValues)
                 .agg(aggCols.get(0), aggCols.subList(1, aggCols.size()).toArray(new Column[0]))
@@ -133,11 +141,11 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
                     String msg = String.format("Duplicate column '%s' in resulting table.\n", outputPivotColumnName);
                     if (pivotValue == null || pivotString.equals("?")) {
                         msg +=
-                            "Please adjust the column naming scheme and/or 'Ignore missing values' to prevent this.";
+                            " Please adjust the column naming scheme and/or 'Ignore missing values' to prevent this.";
                     } else {
                         // conflict is unrelated to missing values -> conflict is between a group column and pivot value -> solvable via column naming scheme.
                         msg +=
-                            "Please adjust the column naming strategy, or rename the grouping column before pivoting.";
+                            " Please adjust the column naming strategy, or rename the grouping column before pivoting.";
                     }
 
                     throw new KNIMESparkException(msg);
