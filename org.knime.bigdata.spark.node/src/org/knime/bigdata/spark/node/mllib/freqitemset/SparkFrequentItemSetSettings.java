@@ -34,7 +34,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SuppressWarnings("javadoc")
-public class FrequentItemSetSettings {
+public class SparkFrequentItemSetSettings {
 
     /** Input column name containing a collection of items/transactions. */
     private static final String CFG_ITEM_COLUMN = "itemColumn";
@@ -65,7 +65,7 @@ public class FrequentItemSetSettings {
     public SettingsModelInteger getNumPartitionsModel() { return m_numPartitionsModel; }
 
     /** Default constructor. */
-    public FrequentItemSetSettings() {
+    public SparkFrequentItemSetSettings() {
         m_numPartitionsModel.setEnabled(false); // disabled by default
     }
 

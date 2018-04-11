@@ -31,7 +31,7 @@ import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObject;
 import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetModelMetaData;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetNodeModel;
+import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -50,18 +50,18 @@ import org.knime.core.node.port.PortType;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class AssociationRuleLearnerNodeModel extends SparkNodeModel {
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(AssociationRuleLearnerNodeModel.class);
+public class SparkAssociationRuleLearnerNodeModel extends SparkNodeModel {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkAssociationRuleLearnerNodeModel.class);
 
     /** The unique Spark job id. */
-    public static final String JOB_ID = AssociationRuleLearnerNodeModel.class.getCanonicalName();
+    public static final String JOB_ID = SparkAssociationRuleLearnerNodeModel.class.getCanonicalName();
 
     /** The unique model name. */
     public static final String MODEL_NAME = "Association Rules";
 
-    private final AssociationRuleLearnerSettings m_settings = new AssociationRuleLearnerSettings();
+    private final SparkAssociationRuleLearnerSettings m_settings = new SparkAssociationRuleLearnerSettings();
 
-    AssociationRuleLearnerNodeModel() {
+    SparkAssociationRuleLearnerNodeModel() {
         super(new PortType[]{RemoteSparkModelPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, RemoteSparkModelPortObject.TYPE});
     }
@@ -74,7 +74,7 @@ public class AssociationRuleLearnerNodeModel extends SparkNodeModel {
 
         final RemoteSparkModelPortObjectSpec spec = (RemoteSparkModelPortObjectSpec)inSpecs[0];
 
-        if (!spec.getModelName().equals(FrequentItemSetNodeModel.MODEL_NAME)) {
+        if (!spec.getModelName().equals(SparkFrequentItemSetNodeModel.MODEL_NAME)) {
             throw new InvalidSettingsException("Invalid input model, frequent item model requiered.");
         }
 

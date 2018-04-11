@@ -23,7 +23,7 @@ package org.knime.bigdata.spark2_2.jobs.mllib.freqitemset;
 import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobInput;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobOutput;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetNodeModel;
+import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
 
 /**
  * Job run factory of frequent item sets job.
@@ -34,6 +34,6 @@ public class FrequentItemSetJobRunFactory extends DefaultJobRunFactory<FrequentI
 
     /** Default constructor. */
     public FrequentItemSetJobRunFactory() {
-        super(FrequentItemSetNodeModel.JOB_ID, FrequentItemSetJob.class, FrequentItemSetJobOutput.class);
+        super(SparkFrequentItemSetNodeModel.JOB_ID, FrequentItemSetJob.class, FrequentItemSetJobOutput.class);
     }
 }

@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerNodeModel;
+import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleLearnerNodeModel;
 import org.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
 
 /**
@@ -38,7 +38,7 @@ public class AssociationRuleModelHelper extends Spark_2_0_ModelHelper {
 
     /** Default constructor. */
     public AssociationRuleModelHelper() {
-        super(AssociationRuleLearnerNodeModel.MODEL_NAME);
+        super(SparkAssociationRuleLearnerNodeModel.MODEL_NAME);
     }
 
     @Override

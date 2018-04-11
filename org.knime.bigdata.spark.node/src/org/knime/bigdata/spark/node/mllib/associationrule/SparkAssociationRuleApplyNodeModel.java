@@ -46,15 +46,15 @@ import org.knime.core.node.port.PortType;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class AssociationRuleApplyNodeModel extends SparkNodeModel {
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(AssociationRuleApplyNodeModel.class);
+public class SparkAssociationRuleApplyNodeModel extends SparkNodeModel {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkAssociationRuleApplyNodeModel.class);
 
     /** The unique Spark job id. */
-    public static final String JOB_ID = AssociationRuleApplyNodeModel.class.getCanonicalName();
+    public static final String JOB_ID = SparkAssociationRuleApplyNodeModel.class.getCanonicalName();
 
-    private final AssociationRuleApplySettings m_settings = new AssociationRuleApplySettings();
+    private final SparkAssociationRuleApplySettings m_settings = new SparkAssociationRuleApplySettings();
 
-    AssociationRuleApplyNodeModel() {
+    SparkAssociationRuleApplyNodeModel() {
         super(new PortType[]{RemoteSparkModelPortObject.TYPE, SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE});
     }
@@ -72,8 +72,8 @@ public class AssociationRuleApplyNodeModel extends SparkNodeModel {
 
         m_settings.loadDefaults(itemsTableSpec);
 
-        if (!rulesPortSpec.getModelName().equals(AssociationRuleLearnerNodeModel.MODEL_NAME)) {
-            throw new InvalidSettingsException("Invalid input model, conect a " + AssociationRuleLearnerNodeModel.MODEL_NAME + " instead.");
+        if (!rulesPortSpec.getModelName().equals(SparkAssociationRuleLearnerNodeModel.MODEL_NAME)) {
+            throw new InvalidSettingsException("Invalid input model, conect a " + SparkAssociationRuleLearnerNodeModel.MODEL_NAME + " instead.");
         }
 
         if (m_settings.getItemColumn() == null) {

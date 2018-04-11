@@ -23,7 +23,7 @@ package org.knime.bigdata.spark2_0.jobs.mllib.associationrule;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
-import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerNodeModel;
+import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleLearnerNodeModel;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleModelMetaData;
 
 /**
@@ -48,7 +48,7 @@ public class AssociationRuleModelInterpreter extends HTMLModelInterpreter {
 
     @Override
     public String getModelName() {
-        return AssociationRuleLearnerNodeModel.MODEL_NAME;
+        return SparkAssociationRuleLearnerNodeModel.MODEL_NAME;
     }
 
     @Override

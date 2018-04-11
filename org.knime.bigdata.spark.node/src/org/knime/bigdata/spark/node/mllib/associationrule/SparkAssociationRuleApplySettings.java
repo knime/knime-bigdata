@@ -33,7 +33,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SuppressWarnings("javadoc")
-public class AssociationRuleApplySettings {
+public class SparkAssociationRuleApplySettings {
 
     /** Optional: limit the number of rules to use to avoid performance issues. */
     private static final String CFG_RULE_LIMIT = "ruleLimit";

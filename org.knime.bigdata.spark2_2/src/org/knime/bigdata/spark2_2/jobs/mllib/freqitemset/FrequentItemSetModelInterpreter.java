@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetModelMetaData;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetNodeModel;
+import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
 
 /**
  * Frequent item sets model interpreter.
@@ -48,7 +48,7 @@ public class FrequentItemSetModelInterpreter extends HTMLModelInterpreter {
 
     @Override
     public String getModelName() {
-        return FrequentItemSetNodeModel.MODEL_NAME;
+        return SparkFrequentItemSetNodeModel.MODEL_NAME;
     }
 
     @Override

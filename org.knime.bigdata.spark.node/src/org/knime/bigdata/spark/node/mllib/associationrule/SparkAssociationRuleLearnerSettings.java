@@ -31,7 +31,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SuppressWarnings("javadoc")
-public class AssociationRuleLearnerSettings {
+public class SparkAssociationRuleLearnerSettings {
 
     /**
      * Minimal confidence for generating Association Rule. minConfidence will not affect the mining
@@ -45,7 +45,7 @@ public class AssociationRuleLearnerSettings {
 
 
     /** Default constructor. */
-    public AssociationRuleLearnerSettings() {
+    public SparkAssociationRuleLearnerSettings() {
     }
 
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {

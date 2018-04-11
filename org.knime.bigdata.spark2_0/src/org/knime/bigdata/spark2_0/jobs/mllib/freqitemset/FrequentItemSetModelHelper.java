@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetNodeModel;
+import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
 import org.knime.bigdata.spark2_0.api.Spark_2_0_ModelHelper;
 
 /**
@@ -38,7 +38,7 @@ public class FrequentItemSetModelHelper extends Spark_2_0_ModelHelper {
 
     /** Default constructor. */
     public FrequentItemSetModelHelper() {
-        super(FrequentItemSetNodeModel.MODEL_NAME);
+        super(SparkFrequentItemSetNodeModel.MODEL_NAME);
     }
 
     @Override

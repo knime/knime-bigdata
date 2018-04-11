@@ -45,8 +45,8 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FrequentItemSetNodeDialog extends NodeDialogPane implements ActionListener {
-    private final FrequentItemSetSettings m_settings = new FrequentItemSetSettings();
+public class SparkFrequentItemSetNodeDialog extends NodeDialogPane implements ActionListener {
+    private final SparkFrequentItemSetSettings m_settings = new SparkFrequentItemSetSettings();
 
     @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_itemColumn =
@@ -62,7 +62,7 @@ public class FrequentItemSetNodeDialog extends NodeDialogPane implements ActionL
             new DialogComponentNumber(m_settings.getNumPartitionsModel(), "Number of partitions:", 10);
 
     /** Default constructor. */
-    public FrequentItemSetNodeDialog() {
+    public SparkFrequentItemSetNodeDialog() {
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 

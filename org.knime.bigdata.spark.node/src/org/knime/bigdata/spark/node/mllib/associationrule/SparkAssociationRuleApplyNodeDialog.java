@@ -46,8 +46,8 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class AssociationRuleApplyNodeDialog extends NodeDialogPane implements ActionListener {
-    private final AssociationRuleApplySettings m_settings = new AssociationRuleApplySettings();
+public class SparkAssociationRuleApplyNodeDialog extends NodeDialogPane implements ActionListener {
+    private final SparkAssociationRuleApplySettings m_settings = new SparkAssociationRuleApplySettings();
 
     @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_itemColumn =
@@ -62,7 +62,7 @@ public class AssociationRuleApplyNodeDialog extends NodeDialogPane implements Ac
             new DialogComponentString(m_settings.getOutputColumnModel(), "Output column:");
 
     /** Default constructor. */
-    public AssociationRuleApplyNodeDialog() {
+    public SparkAssociationRuleApplyNodeDialog() {
         final JPanel tab = new JPanel();
         tab.setLayout(new BoxLayout(tab, BoxLayout.PAGE_AXIS));
 

@@ -48,18 +48,18 @@ import org.knime.core.node.port.PortType;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FrequentItemSetNodeModel extends SparkNodeModel {
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrequentItemSetNodeModel.class);
+public class SparkFrequentItemSetNodeModel extends SparkNodeModel {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(SparkFrequentItemSetNodeModel.class);
 
     /** The unique Spark job id. */
-    public static final String JOB_ID = FrequentItemSetNodeModel.class.getCanonicalName();
+    public static final String JOB_ID = SparkFrequentItemSetNodeModel.class.getCanonicalName();
 
     /** The unique model name. */
     public static final String MODEL_NAME = "Frequent Items";
 
-    private final FrequentItemSetSettings m_settings = new FrequentItemSetSettings();
+    private final SparkFrequentItemSetSettings m_settings = new SparkFrequentItemSetSettings();
 
-    FrequentItemSetNodeModel() {
+    SparkFrequentItemSetNodeModel() {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, RemoteSparkModelPortObject.TYPE});
     }

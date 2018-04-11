@@ -18,26 +18,26 @@
  * History
  *   Created on Jan 30, 2018 by Sascha Wolke, KNIME GmbH
  */
-package org.knime.bigdata.spark.node.mllib.freqitemset;
+package org.knime.bigdata.spark.node.mllib.associationrule;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.core.node.NodeDialogPane;
 
 /**
- * Frequent item sets node factory.
+ * Association rules learner node factory.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FrequentItemSetNodeFactory extends DefaultSparkNodeFactory<FrequentItemSetNodeModel> {
+public class SparkAssociationRuleLearnerNodeFactory extends DefaultSparkNodeFactory<SparkAssociationRuleLearnerNodeModel> {
 
     /** Default constructor. */
-    public FrequentItemSetNodeFactory() {
+    public SparkAssociationRuleLearnerNodeFactory() {
         super("mining/freq-item-sets-association-rules");
     }
 
     @Override
-    public FrequentItemSetNodeModel createNodeModel() {
-        return new FrequentItemSetNodeModel();
+    public SparkAssociationRuleLearnerNodeModel createNodeModel() {
+        return new SparkAssociationRuleLearnerNodeModel();
     }
 
     @Override
@@ -47,6 +47,6 @@ public class FrequentItemSetNodeFactory extends DefaultSparkNodeFactory<Frequent
 
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new FrequentItemSetNodeDialog();
+        return new SparkAssociationRuleLearnerNodeDialog();
     }
 }

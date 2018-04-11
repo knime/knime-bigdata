@@ -36,14 +36,14 @@ import org.knime.core.node.port.PortObjectSpec;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class AssociationRuleLearnerNodeDialog extends NodeDialogPane {
-    private final AssociationRuleLearnerSettings m_settings = new AssociationRuleLearnerSettings();
+public class SparkAssociationRuleLearnerNodeDialog extends NodeDialogPane {
+    private final SparkAssociationRuleLearnerSettings m_settings = new SparkAssociationRuleLearnerSettings();
 
     private final DialogComponentNumber m_minConfidence =
             new DialogComponentNumber(m_settings.getMinConfidenceModel(), "Minimum confidence:", 0.1);
 
     /** Default constructor. */
-    public AssociationRuleLearnerNodeDialog() {
+    public SparkAssociationRuleLearnerNodeDialog() {
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
         panel.add(m_minConfidence.getComponentPanel());

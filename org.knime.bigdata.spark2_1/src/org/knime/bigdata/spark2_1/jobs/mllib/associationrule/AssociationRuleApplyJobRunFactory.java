@@ -23,7 +23,7 @@ package org.knime.bigdata.spark2_1.jobs.mllib.associationrule;
 import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleApplyJobInput;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleApplyJobOutput;
-import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleApplyNodeModel;
+import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleApplyNodeModel;
 
 /**
  * Job run factory of association rules apply job.
@@ -34,6 +34,6 @@ public class AssociationRuleApplyJobRunFactory extends DefaultJobRunFactory<Asso
 
     /** Default constructor. */
     public AssociationRuleApplyJobRunFactory() {
-        super(AssociationRuleApplyNodeModel.JOB_ID, AssociationRuleApplyJob.class, AssociationRuleApplyJobOutput.class);
+        super(SparkAssociationRuleApplyNodeModel.JOB_ID, AssociationRuleApplyJob.class, AssociationRuleApplyJobOutput.class);
     }
 }

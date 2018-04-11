@@ -24,20 +24,20 @@ import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.core.node.NodeDialogPane;
 
 /**
- * Association rules learner node factory.
+ * Association rules apply node factory.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class AssociationRuleLearnerNodeFactory extends DefaultSparkNodeFactory<AssociationRuleLearnerNodeModel> {
+public class SparkAssociationRuleApplyNodeFactory extends DefaultSparkNodeFactory<SparkAssociationRuleApplyNodeModel> {
 
     /** Default constructor. */
-    public AssociationRuleLearnerNodeFactory() {
+    public SparkAssociationRuleApplyNodeFactory() {
         super("mining/freq-item-sets-association-rules");
     }
 
     @Override
-    public AssociationRuleLearnerNodeModel createNodeModel() {
-        return new AssociationRuleLearnerNodeModel();
+    public SparkAssociationRuleApplyNodeModel createNodeModel() {
+        return new SparkAssociationRuleApplyNodeModel();
     }
 
     @Override
@@ -47,6 +47,6 @@ public class AssociationRuleLearnerNodeFactory extends DefaultSparkNodeFactory<A
 
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new AssociationRuleLearnerNodeDialog();
+        return new SparkAssociationRuleApplyNodeDialog();
     }
 }
