@@ -282,10 +282,13 @@ public class PivotPanel implements ChangeListener {
         m_valuesPanel.validate();
     }
 
-
-
     @Override
     public void stateChanged(final ChangeEvent e) {
         updateAvailableModes();
+    }
+
+    /** @return name of selected pivot column or <code>null</code> */
+    public String getPivotColumn() {
+        return m_column.getSelected();
     }
 }

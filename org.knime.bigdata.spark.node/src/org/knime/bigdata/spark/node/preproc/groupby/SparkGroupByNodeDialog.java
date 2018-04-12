@@ -344,11 +344,17 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
         }
         if (m_pivotNodeDialog) {
             m_pivotPanel.validate();
+            if (m_groupByCols.getIncludeList().contains(m_pivotPanel.getPivotColumn())) {
+                throw new InvalidSettingsException("Cannot group and pivot on the same column."
+                    + " Please remove pivot column from grouping columns, or choose another pivot column.");
+            }
         }
         // TODO: m_windowPanel.validate();
         m_manualAggPanel.validate();
         m_manualAggPanel.ensureUniqueOutputColumns(columnNamePolicy);
         m_patternAggPanel.validate();
         m_typeAggPanel.validate();
+
+ 
     }
 }

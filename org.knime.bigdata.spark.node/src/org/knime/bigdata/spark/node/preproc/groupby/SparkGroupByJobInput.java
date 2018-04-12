@@ -138,7 +138,7 @@ public class SparkGroupByJobInput extends JobInput {
 
     /** @return <code>true</code> if values should be validated against pivot values from data frame */
     public boolean validateValues() {
-        return get(PIVOT_VALIDATE_VALUES);
+        return has(PIVOT_VALIDATE_VALUES) && (boolean) get(PIVOT_VALIDATE_VALUES);
     }
 
     /** @return aggregate functions */
