@@ -140,15 +140,17 @@ class JobserverJobController implements JobController {
      */
     private List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job) throws KNIMESparkException {
 
-        final List<String> serverFilenamesToReturn = new LinkedList<>();
+        final Map<String, String> serverFilenamesToReturn = new LinkedHashMap<>();
 
         // first we determine the files we have to upload
         final List<File> filesToUpload = new LinkedList<>();
         for (File inputFile : job.getInputFiles()) {
             String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
             if (cachedServerFile != null) {
-                serverFilenamesToReturn.add(cachedServerFile);
+                serverFilenamesToReturn.put(inputFile.getPath(), cachedServerFile);
             } else {
+                // add null as dummy value to ensure the order of the files stay the same
+                serverFilenamesToReturn.put(inputFile.getPath(), null);
                 filesToUpload.add(inputFile);
             }
         }
@@ -166,16 +168,17 @@ class JobserverJobController implements JobController {
             final String serverFile = serverFilesIter.next();
 
             if (m_uploadFileCache.addFilesToCache(localFile, serverFile)) {
-                serverFilenamesToReturn.add(serverFile);
+                serverFilenamesToReturn.put(localFile.getPath(), serverFile);
             } else {
                 // in the meantime someone else has uploaded the same file or a newer version of it
                 // this means we can discard our file
-                serverFilenamesToReturn.add(m_uploadFileCache.tryToGetServerFileFromCache(localFile));
+                serverFilenamesToReturn.put(localFile.getPath(),
+                    m_uploadFileCache.tryToGetServerFileFromCache(localFile));
                 new DeleteDataFileRequest(m_contextId, m_contextConfig, m_restClient, serverFile).send();
             }
         }
 
-        return serverFilenamesToReturn;
+        return new LinkedList<String>(serverFilenamesToReturn.values());
     }
 
     /**
