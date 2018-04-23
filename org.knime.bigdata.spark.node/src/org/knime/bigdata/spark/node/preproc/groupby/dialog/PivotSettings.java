@@ -20,14 +20,15 @@ package org.knime.bigdata.spark.node.preproc.groupby.dialog;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByJobInput;
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -222,13 +223,13 @@ public class PivotSettings {
      */
     public String[] getValues(final BufferedDataTable valuesTable) {
         final int columnIdx = valuesTable.getDataTableSpec().findColumnIndex(getInputValuesColumn());
-        final CloseableRowIterator it = valuesTable.iterator();
-        final HashSet<Serializable> values = new HashSet<>();
-        while (it.hasNext()) {
-            final DataRow row = it.next();
+        final HashSet<Serializable> values = new LinkedHashSet<>();
+
+        for (DataRow row : valuesTable) {
             if (row.getNumCells() >= columnIdx) {
-                if (!row.getCell(columnIdx).isMissing()) {
-                    values.add(row.getCell(columnIdx).toString());
+                final DataCell cell = row.getCell(columnIdx);
+                if (!cell.isMissing()) {
+                    values.add(cell.toString());
                 } else if (!ignoreMissingValues()) {
                     values.add(null);
                 }
