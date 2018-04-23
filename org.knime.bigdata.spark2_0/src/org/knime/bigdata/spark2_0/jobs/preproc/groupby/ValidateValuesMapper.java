@@ -55,7 +55,7 @@ public class ValidateValuesMapper implements MapFunction<Row, Row> {
     public Row call(final Row row) throws Exception {
         if (!m_values.contains(row.get(m_columnIndex))) {
             throw new KNIMESparkException(
-                String.format("Manual defined pivot values list does not contain value '%s'.", row.get(m_columnIndex)));
+                String.format("Provided pivot values do not contain value '%s'.", row.get(m_columnIndex)));
         }
 
         return row;

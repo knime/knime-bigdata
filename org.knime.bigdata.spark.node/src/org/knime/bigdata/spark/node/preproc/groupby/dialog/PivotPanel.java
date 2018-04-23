@@ -157,7 +157,7 @@ public class PivotPanel implements ChangeListener {
     }
 
     private DialogComponentBoolean createValidateValuesPanel() {
-        return new DialogComponentBoolean(m_settings.getValidateManualValuesModel(), "Fail, if pivot column in DataFrame/RDD contains other values");
+        return new DialogComponentBoolean(m_settings.getValidateManualValuesModel(), "Fail, if pivot column in DataFrame/RDD contains different values");
     }
 
     private JPanel createValueOptionsPanel(final Component ...components) {
