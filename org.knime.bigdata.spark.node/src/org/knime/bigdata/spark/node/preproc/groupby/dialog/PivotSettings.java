@@ -210,7 +210,8 @@ public class PivotSettings {
         jobInput.setPivotColumn(getColumn());
         jobInput.setComputePivotValues(false);
 
-        if (values.length >= limit) {
+        final int limit = getValuesLimit();
+        if (values.length > limit) {
             jobInput.setPivotValues(Arrays.copyOf(values, limit), validateManualValues());
             return false;
         } else {
