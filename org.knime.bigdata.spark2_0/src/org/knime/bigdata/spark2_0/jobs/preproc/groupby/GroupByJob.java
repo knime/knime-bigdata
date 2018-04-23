@@ -23,7 +23,7 @@ import static scala.collection.JavaConversions.asScalaBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -130,25 +130,22 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
 
     private List<String> computeOutputColumns(final SparkGroupByJobInput input, final List<Object> pivotValues)
         throws KNIMESparkException {
-        final List<String> outputColumns = new LinkedList<>();
 
-        final Set<String> alreadyUsed = new HashSet<>();
+        final Set<String> outputColumns = new LinkedHashSet<>();
 
         // grouping columns come first
         for (SparkSQLFunctionJobInput groupByCol : input.getGroupByFunctions()) {
             final String groupColumnName = groupByCol.getOutputName();
             outputColumns.add(groupColumnName);
-            alreadyUsed.add(groupColumnName);
         }
 
         for (Object pivotValue : pivotValues) {
             final String pivotString = (pivotValue != null) ? pivotValue.toString() : "?";
+
             for (SparkSQLFunctionJobInput aggFunc : input.getAggregateFunctions()) {
                 final String outputPivotColumnName = String.format("%s+%s", pivotString, aggFunc.getOutputName());
 
-                if (alreadyUsed.add(outputPivotColumnName)) {
-                    outputColumns.add(outputPivotColumnName);
-                } else {
+                if (!outputColumns.add(outputPivotColumnName)) {
                     String msg = String.format("Duplicate column '%s' in resulting table.\n", outputPivotColumnName);
                     if (pivotValue == null || pivotString.equals("?")) {
                         msg +=
@@ -164,7 +161,7 @@ public class GroupByJob implements SparkJob<SparkGroupByJobInput, SparkGroupByJo
             }
         }
 
-        return outputColumns;
+        return new LinkedList<String>(outputColumns);
     }
 
     /** Load required {@link SparkSQLFunctionFactory}s */

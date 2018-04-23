@@ -381,15 +381,23 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         return KNIMEToIntermediateConverterRegistry.convertSpec(new IntermediateSpec(outputFields.toArray(new IntermediateField[0])));
     }
 
-    /** @return output spec of the Spark Pivot job with manual defined values */
+    /**
+     * @return output spec of the Spark Pivot job with manually defined values
+     * @throws InvalidSettingsException
+     */
     private DataTableSpec createPivotOutputSpec(final SparkVersion sparkVersion, final IntermediateSpec inputSpec,
         final BufferedDataTable valuesTable,
         final List<SparkSQLFunctionJobInput> groupByFunctions, final List<SparkSQLFunctionJobInput> aggFunctions,
         final SparkSQLFunctionCombinationProvider functionProvider) throws InvalidSettingsException {
 
+
         final ArrayList<IntermediateField> outputFields = new ArrayList<>();
+        final HashSet<String> outputColNames = new HashSet<>(outputFields.size());
+
+        // first add the columns we group over
         for (SparkSQLFunctionJobInput config : groupByFunctions) {
             outputFields.add(functionProvider.getFunctionResultField(sparkVersion, inputSpec, config));
+            outputColNames.add(config.getOutputName());
         }
 
         // collect aggregation names
@@ -402,31 +410,39 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
         }
 
         // collect pivot values
-        final String values[];
+        final String[] pivotValues;
         if (valuesTable != null) {
-            final String valuesFromTable[] = m_pivotSettings.getValues(valuesTable);
+            final String[] valuesFromTable = m_pivotSettings.getValues(valuesTable);
             if (valuesFromTable.length > m_pivotSettings.getValuesLimit()) {
-                values = Arrays.copyOf(valuesFromTable, m_pivotSettings.getValuesLimit());
+                pivotValues = Arrays.copyOf(valuesFromTable, m_pivotSettings.getValuesLimit());
             } else {
-                values = valuesFromTable;
+                pivotValues = valuesFromTable;
             }
         } else {
-            values = m_pivotSettings.getValues();
+            pivotValues = m_pivotSettings.getValues();
         }
 
         // combine pivot values with aggregation names
-        for (String value : values) {
-            for (int i = 0; i < aggResult.length; i++) {
-                outputFields.add(new IntermediateField(String.format("%s+%s", value, aggName[i]), aggResult[i], true));
-            }
-        }
+        for (String pivotValue : pivotValues) {
+            final String pivotString = (pivotValue != null) ? pivotValue : "?";
 
-        // validate that all output columns are unique
-        final HashSet<String> outputColNames = new HashSet<>(outputFields.size());
-        for (IntermediateField field : outputFields) {
-            if (!outputColNames.add(field.getName())) {
-                throw new InvalidSettingsException(String.format("Duplicate column '%s' in resulting table. Please adjust the column naming strategy,\n"
-                    +  "or rename the grouping column before pivoting, or remove value from pivot manual values list.", field.getName()));
+            for (int i = 0; i < aggResult.length; i++) {
+                final String pivotColumnName = String.format("%s+%s", pivotString, aggName[i]);
+
+                if (outputColNames.add(pivotColumnName)) {
+                    outputFields.add(new IntermediateField(pivotColumnName, aggResult[i], true));
+                } else {
+                    String msg = String.format("Duplicate column '%s' in resulting table.\n", pivotColumnName);
+                    if (pivotValue == null || pivotString.equals("?")) {
+                        msg +=
+                            " Please adjust the column naming scheme and/or 'Ignore missing values' to prevent this.";
+                    } else {
+                        // conflict is unrelated to missing values -> conflict is between a group column and pivot value -> solvable via column naming scheme.
+                        msg +=
+                            " Please adjust the column naming strategy, or rename the grouping column before pivoting.";
+                    }
+                    throw new InvalidSettingsException(msg);
+                }
             }
         }
 
