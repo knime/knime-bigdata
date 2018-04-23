@@ -371,7 +371,7 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
 
             if (outputColumns.containsKey(colName)) {
                 throw new InvalidSettingsException(
-                    String.format("Doublicate output column '%s' at %d and %d detected, rename input column or remove manual aggregations.",
+                    String.format("Duplicate output column '%s' at %d and %d detected. Rename input column or remove manual aggregations.",
                         colName, outputColumns.get(colName), i));
             } else {
                 outputColumns.put(colName, i);
