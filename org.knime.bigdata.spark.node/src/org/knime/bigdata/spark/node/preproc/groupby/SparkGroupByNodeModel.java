@@ -193,6 +193,10 @@ public class SparkGroupByNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException("Can't find pivot column '" + m_pivotSettings.getColumn() + "' in input table.");
         }
 
+        if (m_pivotNodeMode && m_pivotSettings.isManualValuesMode() && m_pivotSettings.getValues().length == 0) {
+            throw new InvalidSettingsException("No pivot values were specified.");
+        }
+
         if (!invalidColAggrs.isEmpty()) {
             setWarningMessage(invalidColAggrs.size() + " aggregation functions ignored due to incompatible columns.");
         }

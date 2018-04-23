@@ -199,10 +199,13 @@ public class PivotSettings {
      * @param valuesTable table with pivot values column
      * @return <code>true</code> if all values from input tables are used, <code>false</code> if limit has been reached
      *         and additional values are ignored
+     * @throws InvalidSettingsException when no pivot values were provided.
      */
-    public boolean addJobConfig(final SparkGroupByJobInput jobInput, final BufferedDataTable valuesTable) {
+    public boolean addJobConfig(final SparkGroupByJobInput jobInput, final BufferedDataTable valuesTable) throws InvalidSettingsException {
         final String[] values = getValues(valuesTable);
-        final int limit = getValuesLimit();
+        if (values.length == 0) {
+            throw new InvalidSettingsException("The provided table with pivot values is empty.");
+        }
 
         jobInput.setPivotColumn(getColumn());
         jobInput.setComputePivotValues(false);
