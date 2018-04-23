@@ -132,13 +132,6 @@ class SparkContextCreatorNodeModel extends SparkNodeModel {
         final SparkContextID contextID = m_settings.getSparkContextID();
         final SparkContext<JobServerSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
-        // credentials are not available during loadInternals(), only during configure and execute
-        // see AP-8636
-        if (m_settings.getAuthenticateModel().useCredential()) {
-            throw new RuntimeException(
-                "Could not configure Spark context because credentials are not available. Please reset this node and reexecute.");
-        }
-
         final JobServerSparkContextConfig sparkContextConfig = m_settings.createContextConfig(getCredentialsProvider());
         boolean configApplied = sparkContext.ensureConfigured(sparkContextConfig, true);
 
