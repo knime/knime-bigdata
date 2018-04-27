@@ -132,12 +132,16 @@ public class NormalizedDataFrameContainer implements Serializable{
             }
         });
 
-        final StructField fields[] = input.schema().fields();
-        for (int index : columnIndices) {
-            fields[index] = DataTypes.createStructField(fields[index].name(), DataTypes.DoubleType, true);
+        final StructField inputFields[] = input.schema().fields();
+        final StructField outputFields[] = new StructField[inputFields.length];
+        for (int i = 0; i < inputFields.length; i++) {
+            if (columnIndices.contains(i)) {
+                outputFields[i] = DataTypes.createStructField(inputFields[i].name(), DataTypes.DoubleType, true);
+            } else {
+                outputFields[i] = inputFields[i];
+            }
         }
-
-        return spark.createDataFrame(normalizedRdd, DataTypes.createStructType(fields));
+        return spark.createDataFrame(normalizedRdd, DataTypes.createStructType(outputFields));
     }
 
     /**
