@@ -947,6 +947,12 @@ artifactGroups:
       - id: org.json4s:json4s-jackson_2.10:3.2.10
         source: false
         
+      # This is only here because we need the sources to shut up buckminster.
+      # This artifact is being pulled in transitively anyway via json4s, but WITHOUT sources,
+      # which causes buckminster to fail, because we also have paranamer 2.3.0
+      # WITH sources. 
+      - id: com.thoughtworks.paranamer:paranamer:jar:2.6
+        
   
   # ##############################################################
   # Spark 1.3

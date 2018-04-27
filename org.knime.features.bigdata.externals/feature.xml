@@ -915,6 +915,13 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="com.thoughtworks.paranamer.source"
+         download-size="0"
+         install-size="0"
+         version="2.3.0.knimebd-20180426"
+         unpack="false"/>
+
+   <plugin
          id="com.thoughtworks.paranamer"
          download-size="0"
          install-size="0"
@@ -925,7 +932,7 @@ propagated with or for interoperation with KNIME.
          id="com.thoughtworks.paranamer.source"
          download-size="0"
          install-size="0"
-         version="2.3.0.knimebd-20180426"
+         version="2.6.0.knimebd-20180426"
          unpack="false"/>
 
    <plugin
