@@ -21,7 +21,10 @@
 package org.knime.bigdata.hdfs;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
@@ -67,6 +70,29 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
         final File tmpFile = new File(pluginURL.getPath());
         m_pluginRootPath = tmpFile.getAbsolutePath();
 
+        try {
+            // This method initializes the JAX-RS 1.x RuntimeDelegate, which is provided by com.sun.jersey.core.
+            // Due to the way the RuntimeDelegates is used deep down in some libraries, we may not get a good error message
+            // if this doesn't work for some reason (which sometimes happens on broken installations). This code here
+            // at least fails with a usable error message.
+            if (RuntimeDelegate.getInstance() == null) {
+                throw new RuntimeException("No implementation found");
+            }
+        } catch (Throwable t) {
+            LOG.error("Failed to initialize the JAX-RS 1.x RuntimeDelegate. Provided error message: " + t.getMessage(),
+                t);
+        }
+
+        initHadoopHome();
+    }
+
+    /**
+     * Initializes the hadoop home system property so that the hadoop library can find winutils.exe, which is
+     * required for local file system access via the HDFS API on Windows.
+     *
+     * @throws IOException
+     */
+    private void initHadoopHome() throws IOException {
         final String hadoopHome = new File(m_pluginRootPath, "hadoop_home").getCanonicalPath();
         if (System.getProperty(HADOOP_HOME_SYSPROPERTY) == null) {
             LOG.info(String.format("Setting system property %s to %s (for Hadoop winutils).", HADOOP_HOME_SYSPROPERTY,

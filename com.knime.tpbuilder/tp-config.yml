@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180321
+version: knimebd-20180426
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -158,7 +158,10 @@ mavenBlacklist:
   # Since we are not using those code paths in spark/hive and datanucleus causes problems during resolving
   # we don't package datancleus 
   - org\.datanucleus:[^:]*:jar:.*
-  
+
+  # This is the JAX-RS 1.x API, which is already (and must be) included in com.sun.jersey:jersey-core:1.x
+  # (which provides an implementation for the API).
+  - javax\.ws\.rs:jsr311-api:jar:.*
   
 # mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
 # collection. If there is a maven dependency A -> B, and B is on this blacklist, this has the following effect:
@@ -344,6 +347,11 @@ requireBundleOverrides:
   # Eclipse Orbit provides these
   - coordPattern: org\.antlr:antlr-runtime:jar:.*
     replacement: org.antlr.runtime;bundle-version="[4.5,5)"
+    
+  # This is the JAX-RS 1.x API, which is already (and must be) included in bundle com.sun.jersey.core
+  # (a hadoop client dependency).
+  - coordPattern: javax\.ws\.rs:jsr311-api:jar:.*
+    replacement: com.sun.jersey.core;bundle-version="[1,2)"
     
     
   # datanucleus is an ORM required by the spark runtime and hive metastore.
@@ -542,40 +550,26 @@ bundleInstructions:
   
   # hadoop-client: rename the merged hadoop bundle to hadoop-client
   - coordPattern: org\.apache\.hadoop:merged:jar:.*
-    requireBundleInjections:
-      # hadoop-hdfs uses the JAX-RS v1.1 API, however there is no corresponding maven dependency
-      # because in the plain-java world, the JAX-RS classes come included with jersey-core
-      # (however, we remove them from jersey-core because they cause other trouble there)
-      - javax.ws.rs-api;bundle-version="[1.0,2)"
     instructions:
       Bundle-SymbolicName: org.apache.hadoop.client
       
-  # Packages for JAX-RS v1.1 API. We also have JAX-RS 2.x in the (non-bigdata) KNIME TP with the same
-  # bundle name. 
-  - coordPattern: javax.ws.rs:jsr311-api:jar:.*
-    instructions:
-      Bundle-SymbolicName: javax.ws.rs-api
-      DynamicImport-Package: "*"
-
-  # jersey-core and jersey-client are hadoop-client and hive-serde dependencies. Unfortunately jersey-core contains and exports the
-  # JAX-RS 1.x API packages (javax.ws.rs.*) without proper version. This here deletes the JAX-RS API packages from jersey-core,
-  # defines a properly versioned dependency on the JAX-RS 1.x API packages,
-  # and otherwise reconstructs the pre-existing bundling of jersey-core and jersey-client.
+  # jersey-core and jersey-client are hadoop-client and hive-serde dependencies. jersey-core contains and exports the
+  # JAX-RS 1.x API packages (javax.ws.rs.*) without proper version. This here fixes that and otherwise reconstructs
+  # the pre-existing bundling of jersey-core and jersey-client.
   - coordPattern: com\.sun\.jersey:jersey-core:jar:.*
-    fileExcludes:
-      - javax/*
     instructions:
-      Bundle-SymbolicName: com.sun.jersey.jersey-core
       Bundle-Activator: com.sun.jersey.core.osgi.Activator
-      DynamicImport-Package: "*"
       Import-Package: >-
-        javax.ws.rs.*                         ;version="[1,2)",
         javax.mail.*                          ;resolution:=optional,
+        com.sun.ws.rs.ext                     ;version="[1.14,2)",
+        !javax.ws.rs.*,
         *
+      Export-Package: >-
+        javax.ws.rs.*                         ;version="1.1.1",
+        !com.sun.jersey.core.osgi,
+        *                                     ;version="${bundle.version}"
   - coordPattern: com\.sun\.jersey:jersey-client:jar:.*
     instructions:
-      Bundle-SymbolicName: com.sun.jersey.jersey-client
-      Private-Package: com.sun.jersey.client.osgi
       Import-Package: >-
         com.sun.jersey.*                      ;version="[1.14,2)",
         javax.ws.rs.*                         ;version="[1.0,2)",
@@ -909,28 +903,13 @@ artifactGroups:
   - name: Hadoop client
     singleArtifacts:
       - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
-        transitiveSourceDepth: 1
+        transitiveSourceDepth: 3
         
       # a transitive but excluded dependency of hadoop-client. Unfortunately
       # the prebundled org.apache.directory.api.util does not resolve without it.
       - id: org.apache.directory.api:api-i18n:1.0.0-M20
         source: false
-     
-      # JAX-RS 1.1 is required by com.sun.jersey.jersey-core (a dep of Hadoop client)
-      # While the maven artifact for jersey-core CONTAINS the JAX-RS packages, we
-      # remove them during bundling (see bundle instructions).
-      # jsr311-api properly bundles the JAX-RS 1.1 classes (also see bundle instructions) 
-      - id: javax.ws.rs:jsr311-api:jar:1.1.1
-        source: false
-      
-      # avro >1.7.4 needs sun.misc package. This bundle
-      # is a fragment that makes org.eclipse.osgi export the sun.misc package
-      # NOTE: 2017-05-24: There is something funny about this bundle. Eclipse
-      # fails to verify the signature (which is created by Buckminster) for
-      # unknown reasons.
-#      - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
-#        source: false
-
+           
   # ##############################################################
   # Hive JDBC
   # ##############################################################
