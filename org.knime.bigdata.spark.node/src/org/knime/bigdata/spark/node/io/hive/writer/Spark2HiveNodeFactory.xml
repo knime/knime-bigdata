@@ -10,6 +10,8 @@
 		</intro>
 		<option name="Table name">The name of the table to create</option>
 		<option name="Drop existing table">Select this option to drop an existing table</option>
+		<option name="File Format">Choose the file format in which to store the table. Default is ORC.</option>
+		<option name="Compression">Choose the compression codec for the file format.</option>
 	</fullDescription>
 
 	<ports>

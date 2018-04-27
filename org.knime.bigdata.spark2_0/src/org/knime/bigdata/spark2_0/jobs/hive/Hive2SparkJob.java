@@ -44,7 +44,7 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
 
     @Override
     public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
-        final NamedObjects namedObjects) throws KNIMESparkException, Exception {
+        final NamedObjects namedObjects) throws KNIMESparkException{
 
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         ensureHiveSupport(spark);

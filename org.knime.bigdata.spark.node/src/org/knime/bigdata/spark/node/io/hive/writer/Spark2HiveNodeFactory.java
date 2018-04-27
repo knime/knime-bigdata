@@ -30,8 +30,10 @@ import org.knime.core.node.NodeView;
  */
 public class Spark2HiveNodeFactory extends DefaultSparkNodeFactory<Spark2HiveNodeModel> {
 
+    private static final FileFormat[] m_fileFormats = FileFormat.getHiveFormats();
+
     /**
-     *
+     * Creates a Spark2Hive node factory
      */
     public Spark2HiveNodeFactory() {
         super("io/db");
@@ -74,7 +76,7 @@ public class Spark2HiveNodeFactory extends DefaultSparkNodeFactory<Spark2HiveNod
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new Spark2HiveNodeDialog();
+        return new Spark2HiveNodeDialog(m_fileFormats);
     }
 
 }

@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.knime.bigdata.impala.utility.ImpalaUtility;
+import org.knime.bigdata.spark.node.io.hive.writer.FileFormat;
 import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -39,19 +40,30 @@ public class Spark2ImpalaNodeModel extends Spark2HiveNodeModel {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(Spark2ImpalaNodeModel.class);
 
     @Override
-    protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec) throws InvalidSettingsException {
+    protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec)
+        throws InvalidSettingsException {
         if (!ImpalaUtility.DATABASE_IDENTIFIER.equals(spec.getDatabaseIdentifier())) {
             throw new InvalidSettingsException("Input must be a Impala connection");
         }
     }
 
     /**
-     * Metadata is held in memory, thus after creation of the impala table an "INVALIDATE METADATA table_name" statement has to
-     * to be issued to make the table visible in Impala.
+    *
+    */
+    @Override
+    protected FileFormat getDefaultFormat() {
+        return FileFormat.PARQUET;
+    }
+
+    /**
+     * Metadata is held in memory, thus after creation of the Impala table an "INVALIDATE METADATA table_name" statement
+     * has to to be issued to make the table visible in Impala.
+     *
      * @throws SQLException
      */
     @Override
-    protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec) throws SQLException {
+    protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec)
+        throws SQLException {
 
         exec.setMessage("Invalidating impala metadata");
         final String invalidateStatement = "INVALIDATE METADATA " + tableName;

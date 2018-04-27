@@ -48,11 +48,11 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
     @Override
     public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
-        final NamedObjects namedObjects) throws KNIMESparkException, Exception {
+        final NamedObjects namedObjects) throws KNIMESparkException {
 
         LOGGER.log(Level.INFO, "reading hive table...");
 
@@ -73,7 +73,7 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
         final JavaRDD<Row> javaRDD = new JavaRDD<>(rdd, rdd.elementClassTag());
 
         final String key = input.getFirstNamedOutputObject();
-        LOGGER.log(Level.INFO, "Storing Hive query result under key: " + key);
+        LOGGER.log(Level.INFO, "Storing Hive query result under key: {0}" , key);
         namedObjects.addJavaRdd(key, javaRDD);
         LOGGER.log(Level.INFO, "done");
     }

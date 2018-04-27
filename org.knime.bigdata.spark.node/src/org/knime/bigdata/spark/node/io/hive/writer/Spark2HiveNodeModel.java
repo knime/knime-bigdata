@@ -25,6 +25,7 @@ import java.sql.SQLException;
 
 import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -37,8 +38,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -57,33 +56,27 @@ import org.knime.core.node.port.database.ExecuteStatement;
  */
 public class Spark2HiveNodeModel extends SparkNodeModel {
 
-    /**The unique Spark job id.*/
+    /** The unique Spark job id. */
     public static final String JOB_ID = Spark2HiveNodeModel.class.getCanonicalName();
 
-    private final SettingsModelString m_tableName = createTableNameModel();
+    private Spark2HiveSettings m_settings = new Spark2HiveSettings(getDefaultFormat());
 
-    private final SettingsModelBoolean m_dropExisting = createDropExistingModel();
 
     /**
      * Constructor.
      */
     public Spark2HiveNodeModel() {
-        super(new PortType[] {DatabaseConnectionPortObject.TYPE, SparkDataPortObject.TYPE},
-            new PortType[] {DatabasePortObject.TYPE});
+        super(new PortType[]{DatabaseConnectionPortObject.TYPE, SparkDataPortObject.TYPE},
+            new PortType[]{DatabasePortObject.TYPE});
+
     }
 
     /**
-     * @return the drop existing table model
+     * @return the default file format for the Hive table creation
+     *
      */
-    static SettingsModelBoolean createDropExistingModel() {
-        return new SettingsModelBoolean("dropExistingTable", false);
-    }
-
-    /**
-     * @return the table name model
-     */
-    static SettingsModelString createTableNameModel() {
-        return new SettingsModelString("tableName", "sparkTable");
+    protected FileFormat getDefaultFormat() {
+        return FileFormat.ORC;
     }
 
     /**
@@ -99,27 +92,28 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         checkDatabaseIdentifier(spec);
         final DataTableSpec tableSpec = ((SparkDataPortObjectSpec)inSpecs[1]).getTableSpec();
         final DatabasePortObjectSpec resultSpec = createResultSpec(spec, tableSpec);
-        return new PortObjectSpec[] {resultSpec};
+        return new PortObjectSpec[]{resultSpec};
     }
 
     /**
      * Checks whether the input Database is compatible.
+     *
      * @param spec the {@link DatabaseConnectionPortObjectSpec} from the input port
      * @throws InvalidSettingsException If the wrong database is connected
      */
-    protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec) throws InvalidSettingsException {
+    protected void checkDatabaseIdentifier(final DatabaseConnectionPortObjectSpec spec)
+        throws InvalidSettingsException {
         if (!spec.getDatabaseIdentifier().contains(HiveUtility.DATABASE_IDENTIFIER)) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
     }
 
-    private DatabasePortObjectSpec createResultSpec(final DatabaseConnectionPortObjectSpec spec, final DataTableSpec tableSpec)
-        throws InvalidSettingsException {
+    private DatabasePortObjectSpec createResultSpec(final DatabaseConnectionPortObjectSpec spec,
+        final DataTableSpec tableSpec) throws InvalidSettingsException {
         //TK_TODO: take into account that hive does not support upper case columns
-        final String query = "SELECT * FROM " + m_tableName.getStringValue();
-        DatabasePortObjectSpec resultSpec = new DatabasePortObjectSpec(tableSpec,
+        final String query = "SELECT * FROM " + m_settings.getTableName();
+        return new DatabasePortObjectSpec(tableSpec,
             new DatabaseQueryConnectionSettings(spec.getConnectionSettings(getCredentialsProvider()), query));
-        return resultSpec;
     }
 
     /**
@@ -130,33 +124,37 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         exec.setMessage("Starting spark job");
         final SparkDataPortObject rdd = (SparkDataPortObject)inData[1];
         final SimpleJobRunFactory<JobInput> runFactory =
-                SparkContextUtil.getSimpleRunFactory(rdd.getContextID(), JOB_ID);
+            SparkContextUtil.getSimpleRunFactory(rdd.getContextID(), JOB_ID);
         final DatabaseConnectionPortObject con = (DatabaseConnectionPortObject)inData[0];
         final DatabaseConnectionSettings settings = con.getConnectionSettings(getCredentialsProvider());
         final DatabaseUtility utility = settings.getUtility();
-        final String tableName = m_tableName.getStringValue();
+        final String tableName = m_settings.getTableName();
         settings.execute(getCredentialsProvider(), new ExecuteStatement<String>() {
             @Override
             public String apply(final Connection connection) throws Exception {
                 if (utility.tableExists(connection, tableName)) {
-                    if (m_dropExisting.getBooleanValue()) {
+                    if (m_settings.getDropExisting()) {
                         final String dropTableStmt = utility.getStatementManipulator().dropTable(tableName, false);
                         settings.execute(dropTableStmt, getCredentialsProvider());
                     } else {
-                        throw new InvalidSettingsException("Table " + tableName + " already exists");
+                        throw new KNIMESparkException("Table " + tableName + " already exists");
                     }
                 }
                 return null;
             }
         });
         final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
-        final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema);
+        FileFormat fileFormat = FileFormat.fromDialogString(m_settings.getFileFormat());
+
+        final Spark2HiveJobInput jobInput = new Spark2HiveJobInput(rdd.getData().getID(), tableName, schema,
+            fileFormat.name(), m_settings.getCompression());
+
         runFactory.createRun(jobInput).run(rdd.getContextID());
         settings.execute(getCredentialsProvider(), new ExecuteStatement<String>() {
             @Override
             public String apply(final Connection connection) throws Exception {
-            	try{
-            	    postProcessing(connection, tableName, exec);
+                try {
+                    postProcessing(connection, tableName, exec);
                 } catch (SQLException e) {
                     throw new InvalidSettingsException("During PostProcessing: " + e.getMessage());
                 }
@@ -164,17 +162,19 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
             }
         });
         final DatabasePortObjectSpec resultSpec = createResultSpec(con.getSpec(), rdd.getTableSpec());
-        return new PortObject[] {new DatabasePortObject(resultSpec)};
+        return new PortObject[]{new DatabasePortObject(resultSpec)};
     }
 
     /**
-     *  Do whatever post processing is necessary.
+     * Do whatever post processing is necessary.
+     *
      * @param connection the database connection settings
      * @param tableName the created table's name
      * @param exec the execution environment
      * @throws SQLException
      */
-    protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec) throws SQLException {
+    protected void postProcessing(final Connection connection, final String tableName, final ExecutionContext exec)
+        throws SQLException {
         // do nothing
     }
 
@@ -183,8 +183,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      */
     @Override
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_tableName.saveSettingsTo(settings);
-        m_dropExisting.saveSettingsTo(settings);
+        m_settings.saveAdditionalSettingsTo(settings);
     }
 
     /**
@@ -192,11 +191,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      */
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        final String name = ((SettingsModelString)m_tableName.createCloneWithValidatedValue(settings)).getStringValue();
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Table name must not be empty");
-        }
-        m_dropExisting.validateSettings(settings);
+        m_settings.validateAdditionalSettings(settings);
     }
 
     /**
@@ -204,7 +199,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_tableName.loadSettingsFrom(settings);
-        m_dropExisting.loadSettingsFrom(settings);
+       m_settings.loadAdditionalValidatedSettingsFrom(settings);
     }
+
 }

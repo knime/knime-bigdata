@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.node.io.impala.writer;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.io.hive.writer.FileFormat;
 import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeDialog;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeView;
@@ -31,8 +32,10 @@ import org.knime.core.node.NodeView;
  */
 public class Spark2ImpalaNodeFactory extends DefaultSparkNodeFactory<Spark2ImpalaNodeModel> {
 
+    private static final FileFormat[] m_fileFormats = FileFormat.getImpalaFormats();
+
     /**
-     *
+     * Creates a Spark2Impala NodeFactory
      */
     public Spark2ImpalaNodeFactory() {
         super("io/db");
@@ -75,7 +78,7 @@ public class Spark2ImpalaNodeFactory extends DefaultSparkNodeFactory<Spark2Impal
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new Spark2HiveNodeDialog();
+        return new Spark2HiveNodeDialog(m_fileFormats);
     }
 
 }
