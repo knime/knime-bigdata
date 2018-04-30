@@ -11,7 +11,7 @@ FEATURE_XML_HEADER='<?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.bigdata.externals"
       label="Feature with all external plugins for KNIME Big Data Extensions."
-      version="2.2.0.qualifier"
+      version="2.2.2.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
       <copyright>

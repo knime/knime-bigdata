@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20171201
+version: knimebd-20170430
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -829,7 +829,7 @@ artifactGroups:
   - name: Hadoop client
     singleArtifacts:
       - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
-        transitiveSourceDepth: 1
+        transitiveSourceDepth: 3
         
       # a transitive but excluded dependency of hadoop-client. Unfortunately
       # the prebundled org.apache.directory.api.util does not resolve without it.
@@ -841,16 +841,7 @@ artifactGroups:
       # remove them during bundling (see bundle instructions).
       # jsr311-api properly bundles the JAX-RS 1.1 classes (also see bundle instructions) 
       - id: javax.ws.rs:jsr311-api:jar:1.1.1
-        source: false
       
-      # avro >1.7.4 needs sun.misc package. This bundle
-      # is a fragment that makes org.eclipse.osgi export the sun.misc package
-      # NOTE: 2017-05-24: There is something funny about this bundle. Eclipse
-      # fails to verify the signature (which is created by Buckminster) for
-      # unknown reasons.
-#      - id: com.diffplug.osgi:com.diffplug.osgi.extension.sun.misc:0.0.0
-#        source: false
-
   # ##############################################################
   # Hive JDBC
   # ##############################################################
@@ -887,6 +878,12 @@ artifactGroups:
       # spark-core dep 
       - id: org.json4s:json4s-jackson_2.10:3.2.10
         source: false
+        
+      # This is only here because we need the sources to shut up buckminster.
+      # This artifact is being pulled in transitively anyway via json4s, but WITHOUT sources,
+      # which causes buckminster to fail, because we also have paranamer 2.3.0
+      # WITH sources being pulled in by hadoop-client.
+      - id: com.thoughtworks.paranamer:paranamer:jar:2.6
         
   
   # ##############################################################
