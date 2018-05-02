@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20170430
+version: knimebd-20180430
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -504,7 +504,7 @@ bundleInstructions:
       # hadoop-hdfs uses the JAX-RS v1.1 API, however there is no corresponding maven dependency
       # because in the plain-java world, the JAX-RS classes come included with jersey-core
       # (however, we remove them from jersey-core because they cause other trouble there)
-      - javax.ws.rs-api;bundle-version="[1.0,2)"
+      - javax.ws.rs-api;bundle-version="[1.1.1.${tp.version},2)"
     instructions:
       Bundle-SymbolicName: org.apache.hadoop.client
       
@@ -513,7 +513,7 @@ bundleInstructions:
   - coordPattern: javax.ws.rs:jsr311-api:jar:.*
     instructions:
       Bundle-SymbolicName: javax.ws.rs-api
-      DynamicImport-Package: "*"
+      Eclipse-BuddyPolicy: registered
 
   # jersey-core and jersey-client are hadoop-client and hive-serde dependencies. Unfortunately jersey-core contains and exports the
   # JAX-RS 1.x API packages (javax.ws.rs.*) without proper version. This here deletes the JAX-RS API packages from jersey-core,
@@ -525,18 +525,19 @@ bundleInstructions:
     instructions:
       Bundle-SymbolicName: com.sun.jersey.jersey-core
       Bundle-Activator: com.sun.jersey.core.osgi.Activator
-      DynamicImport-Package: "*"
+      Eclipse-RegisterBuddy: javax.ws.rs-api
       Import-Package: >-
-        javax.ws.rs.*                         ;version="[1,2)",
+        javax.ws.rs.*                         ;version="[1.1.1.${tp.version},2)",
         javax.mail.*                          ;resolution:=optional,
         *
   - coordPattern: com\.sun\.jersey:jersey-client:jar:.*
     instructions:
       Bundle-SymbolicName: com.sun.jersey.jersey-client
+      Eclipse-RegisterBuddy: javax.ws.rs-api
       Private-Package: com.sun.jersey.client.osgi
       Import-Package: >-
         com.sun.jersey.*                      ;version="[1.14,2)",
-        javax.ws.rs.*                         ;version="[1.0,2)",
+        javax.ws.rs.*                         ;version="[1.1.1.${tp.version},2)",
         javax.mail.*                          ;resolution:=optional,
         *
 
@@ -549,7 +550,7 @@ bundleInstructions:
       Bundle-SymbolicName: jackson-jaxrs
       DynamicImport-Package: org.codehaus.jackson.xc
       Import-Package: >-
-        javax.ws.rs.*                         ;version="[1.0,2)",
+        javax.ws.rs.*                         ;version="[1.1.1.${tp.version},2)",
         org.codehaus.jackson.*                ;version="1.9.13",
         *
       Export-Package: >-
