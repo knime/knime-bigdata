@@ -91,9 +91,6 @@ object Bundler {
     val mergedArts = art.mergedArtifacts.get
     val bundler = new AquteBundler(false)
     
-    if (bundleInfo.bundleSymbolicName == "org.apache.hadoop.client") {
-      println("here")
-    }
     val filesToCleanUp = Buffer[File]()
 
     try {

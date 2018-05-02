@@ -173,7 +173,7 @@ object TPConfigReader {
 
       for (instruction <- config.bundleInstructions) {
         if (Pattern.compile(instruction.coordPattern).matcher(mvnCoord).matches())
-          return instruction.requireBundleInjections
+          return instruction.requireBundleInjections.map(TPConfig.evalVars(art, config))
       }
       Seq()
     }
