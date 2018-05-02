@@ -90,6 +90,7 @@ object Bundler {
     val bundleInfo = art.bundle.get
     val mergedArts = art.mergedArtifacts.get
     val bundler = new AquteBundler(false)
+    
     val filesToCleanUp = Buffer[File]()
 
     try {
