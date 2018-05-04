@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.bigdata.hive.aggregation.CollectSetDBAggregationFunction;
 import org.knime.bigdata.hive.aggregation.percentile.PercentileApproxDBAggregationFunction;
 import org.knime.bigdata.hive.aggregation.percentile.PercentileDBAggregationFunction;

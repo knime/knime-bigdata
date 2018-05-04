@@ -20,7 +20,6 @@
  */
 package org.knime.bigdata.phoenix.utility;
 
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
 import org.knime.core.node.port.database.DatabaseConnectionSettings;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.DatabaseUtility;
@@ -54,7 +53,7 @@ import org.knime.core.node.port.database.writer.DBWriter;
 
 
 /**
- * Database utility for Impala.
+ * Database utility for Phoenix.
  *
  * @author Tobias Koetter, KNIME AG, Zurich, Switzerland
  */

@@ -18,7 +18,7 @@
  * History
  *   Created on 23.06.2016 by koetter
  */
-package org.knime.bigdata.commons.security.kerberos;
+package org.knime.bigdata.hive.utility;
 
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
@@ -29,11 +29,10 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
-import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
+import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
@@ -41,8 +40,10 @@ import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.util.KNIMERuntimeContext;
 
 /**
- * {@link CachedConnectionFactory} implementation that supports Kerberos authentication.
+ * {@link CachedConnectionFactory} implementation for Hive and Impala that supports Kerberos authentication.
+ *
  * @author Tobias Koetter, KNIME.com
+ * @since 3.6
  */
 public class KerberosConnectionFactory extends CachedConnectionFactory {
 
@@ -66,17 +67,8 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             return super.createConnection(jdbcUrl, user, pass, useKerberos, d);
         }
         try {
-            final Configuration conf = new Configuration();
-            conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
-            final CommonConfigContainer configContainer = CommonConfigContainer.getInstance();
-            if (configContainer.hasCoreSiteConfig()) {
-                LOGGER.debug("Adding core site from config");
-                conf.addResource(configContainer.getCoreSiteConfig());
-            }
-            if (configContainer.hasHdfsSiteConfig()) {
-                LOGGER.debug("Adding hdfs site from config");
-                conf.addResource(configContainer.getHdfsSiteConfig());
-            }
+            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+
             final UserGroupInformation ugi;
             final String jdbcImpersonationURL;
             if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter()
@@ -108,18 +100,18 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
         }
     }
 
-    private String appendImpersonationParameter(final String jdbcUrl) {
+    private static String appendImpersonationParameter(final String jdbcUrl) {
         final String param = CommonConfigContainer.getInstance().getJDBCImpersonationParameter();
         LOGGER.debug("JDBC impersonation parameter: " + param);
         LOGGER.debug("Original JDBC URL: " + jdbcUrl);
-        final String searchString = param.replace(CommonPreferenceInitializer.JDBC_IMPERSONATION_PLACEHOLDER, "");
+        final String searchString = param.replace(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER, "");
         if (jdbcUrl.contains(searchString)) {
             throw new IllegalArgumentException("JDBC URL must not contain Kerberos impersonation parameter");
         }
         final Optional<String> wfUser = NodeContext.getWorkflowUser();
         if (wfUser.isPresent()) {
             final String replacedParam = param.replaceAll(
-                Pattern.quote(CommonPreferenceInitializer.JDBC_IMPERSONATION_PLACEHOLDER), wfUser.get());
+                Pattern.quote(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER), wfUser.get());
             final StringBuilder buf = new StringBuilder(jdbcUrl);
             if (!jdbcUrl.endsWith(";")) {
                 buf.append(";");

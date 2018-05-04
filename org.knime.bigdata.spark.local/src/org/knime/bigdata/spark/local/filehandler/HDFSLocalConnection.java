@@ -38,7 +38,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
-import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.core.node.NodeLogger;
 
 /**
@@ -57,20 +56,11 @@ public class HDFSLocalConnection extends Connection {
      */
     public HDFSLocalConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
+
         m_conf = new Configuration();
         final String defaultName = createDefaultName(connectionInformation);
         LOGGER.debug("Adding " + CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY + " to config: " + defaultName);
         m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, defaultName);
-        m_conf.setBoolean(CommonConfigurationKeysPublic.FS_AUTOMATIC_CLOSE_KEY, true);
-
-
-        final CommonConfigContainer configContainer = CommonConfigContainer.getInstance();
-        if (configContainer.hasCoreSiteConfig()) {
-            m_conf.addResource(configContainer.getCoreSiteConfig());
-        }
-        if (configContainer.hasHdfsSiteConfig()) {
-            m_conf.addResource(configContainer.getHdfsSiteConfig());
-        }
     }
 
     private static String createDefaultName(final ConnectionInformation conInfo) {

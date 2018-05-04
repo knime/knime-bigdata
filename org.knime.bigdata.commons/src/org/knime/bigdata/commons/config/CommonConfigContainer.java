@@ -49,6 +49,9 @@ public class CommonConfigContainer {
 
     private boolean m_sparkSupported = false;
 
+    /**The placeholder for the workflow user in the JDBC impersonation parameter.*/
+    public static final String JDBC_IMPERSONATION_PLACEHOLDER = "{1}";
+
     private CommonConfigContainer() {
         //avoid object creation
     }

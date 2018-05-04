@@ -18,7 +18,7 @@
  * History
  *   Created on 24.06.2016 by koetter
  */
-package org.knime.bigdata.commons.security.kerberos;
+package org.knime.bigdata.commons.hadoop;
 
 import java.util.Optional;
 
@@ -30,8 +30,11 @@ import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.util.KNIMERuntimeContext;
 
 /**
+ * Utility class to obtain Hadoop {@link UserGroupInformation} objects, through which we perform Kerberos logins, Hadoop
+ * identities and Hadoop impersonation (proxy-user).
  *
  * @author Tobias Koetter, KNIME.com
+ * @since 3.6
  */
 public class UserGroupUtil {
 
@@ -132,14 +135,22 @@ public class UserGroupUtil {
     }
 
     /**
-     * This method returns the Kerberos user which can be used directly or used for proxy user creation.
-     * If the user has specified a keytab file in the KNIME preferences the method returns the Kerberos user from
-     * the keytab file otherwise it looks in the ticket cache for a user.
-     * @param conf {@link Configuration} to use
-     * @return the Kerberos user
-     * @throws Exception if no Kerberos user could be obtained
+     * This method always returns a {@link UserGroupInformation} with the principal and credentials of a Kerberos TGT.
+     * If the KNIME preferences are configured with a keytab file, a keytab login will be performed to obtain the TGT.
+     * Otherwise it will try to obtain the TGT from a ticket cache.
+     *
+     * <p>
+     * This method is only useful in rare cases, because it does NOT return a a proxy user UGI. Hence, on KNIME Server
+     * this method will NOT impersonate the workflow user. On KNIME Server it returns the UGI with the TGT of the KNIME
+     * Server principal. To seamlessly impersonate users on KNIME Server, Use {@link #getKerberosUser(Configuration)}.
+     * </p>
+     *
+     * @param conf Hadoop {@link Configuration} to use. It must be set to the KERBEROS authentication method.
+     * @return a UGI with the principal and credentials of a Kerberos TGT.
+     * @throws Exception If Kerberos authentication was not enabled in the given configuration, or if the keytab login
+     *             failed, or if no TGT could be obtained from a ticket cache.
      */
-    static synchronized UserGroupInformation getKerberosTGTUser(final Configuration conf) throws Exception {
+    public static synchronized UserGroupInformation getKerberosTGTUser(final Configuration conf) throws Exception {
         UserGroupInformation.setConfiguration(conf);
         if (!UserGroupInformation.isSecurityEnabled()) {
             throw new Exception("Kerberos authentication not enabled in configuration.");

@@ -26,7 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.knime.bigdata.commons.security.kerberos.KerberosConnectionFactory;
+import org.knime.bigdata.hive.utility.KerberosConnectionFactory;
 import org.knime.bigdata.impala.aggregation.NDVDBAggregationFunction;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.NodeLogger;

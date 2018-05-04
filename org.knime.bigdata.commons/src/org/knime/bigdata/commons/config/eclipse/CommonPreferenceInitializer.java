@@ -48,6 +48,7 @@ import org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.bigdata.commons.CommonsPlugin;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.core.node.NodeLogger.LEVEL;
 
 /**
@@ -99,9 +100,6 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for JDBC impersonation parameter. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM =
             "org.knime.bigdata.config.kerberos.jdbc.impersonation.param";
-    /**The place holder for the workflow user in the JDBC impersonation parameter.*/
-    public static final String JDBC_IMPERSONATION_PLACEHOLDER = "{1}";
-
     @Override
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = CommonsPlugin.getDefault().getPreferenceStore();
@@ -131,6 +129,6 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KERBEROS_USER, "");
         store.setDefault(PREF_KERBEROS_KEYTAB_FILE, "");
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG, false);
-        store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + JDBC_IMPERSONATION_PLACEHOLDER);
+        store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER);
     }
 }

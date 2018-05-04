@@ -38,13 +38,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.ssl.SSLFactory;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.security.kerberos.UserGroupUtil;
+import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
@@ -68,36 +68,28 @@ public class HDFSConnection extends Connection {
      */
     public HDFSConnection(final ConnectionInformation connectionInformation) {
         m_connectionInformation = connectionInformation;
-        m_conf = new Configuration();
+
+        if (m_connectionInformation.useKerberos()) {
+            LOGGER.debug("Adding Kerberos settings to configuration");
+            m_conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+        } else {
+            // or simple which is the default
+            m_conf = ConfigurationFactory.createBaseConfigurationWithSimpleAuth();
+        }
+
+        // set default
         final String defaultName = createDefaultName(connectionInformation);
         LOGGER.debug("Adding " + CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY + " to config: " + defaultName);
         m_conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, defaultName);
-        m_conf.setBoolean(CommonConfigurationKeysPublic.FS_AUTOMATIC_CLOSE_KEY, true);
-        if (m_connectionInformation.useKerberos()) {
-            LOGGER.debug("Adding Kerberos settings to configuration");
-            //use Kerberos based authentication
-            m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.KERBEROS.name());
-        } else {
-            //or simple which is the default
-            m_conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, AuthMethod.SIMPLE.name());
-        }
-
-        CommonConfigContainer configContainer = CommonConfigContainer.getInstance();
-        if (configContainer.hasCoreSiteConfig()) {
-            m_conf.addResource(configContainer.getCoreSiteConfig());
-        }
-        if (configContainer.hasHdfsSiteConfig()) {
-            m_conf.addResource(configContainer.getHdfsSiteConfig());
-        }
 
         // Add SSL configuration, wrapper and current class loader
         if (HDFSRemoteFileHandler.isEncryptedConnection(connectionInformation)) {
-            if (configContainer.hasSSLConfig()) {
-                configContainer.addSSLConfig(m_conf);
+            if (CommonConfigContainer.getInstance().hasSSLConfig()) {
+                CommonConfigContainer.getInstance().addSSLConfig(m_conf);
                 m_conf.set(SSLFactory.KEYSTORES_FACTORY_CLASS_KEY, KeyStoreFactoryWrapper.class.getCanonicalName());
                 m_conf.setClassLoader(getClass().getClassLoader());
             } else {
-                final String msg = "HDFS SSL settings required by connection settings, but not set in preferences (See KNIME > Big Data Extension > Hadoop)!";
+                final String msg = "HDFS SSL settings required by connection settings, but not set in preferences (See KNIME > Big Data > Hadoop)!";
                 LOGGER.warn(msg);
                 throw new RuntimeException(msg);
             }
