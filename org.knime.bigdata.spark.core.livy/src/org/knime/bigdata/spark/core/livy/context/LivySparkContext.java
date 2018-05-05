@@ -20,6 +20,8 @@ package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
 import java.net.URI;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +32,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
+import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextConstants;
@@ -41,7 +45,6 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import org.knime.bigdata.spark.core.livy.LivyPlugin;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.core.node.CanceledExecutionException;
@@ -111,27 +114,41 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 	private void ensureLivyClient() throws KNIMESparkException {
 		if (m_livyClient == null) {
 			try {
-				final Properties livyClientConf = new Properties();
-				livyClientConf.load(getClass().getResource("/livy-client.conf").openStream());
-
-				// this is temporary until we fix how SPNEGO/Kerberos is configured for the Livy client API
-				final String loginConf = String.join(File.separator, LivyPlugin.getDefault().getPluginRootPath(), "conf", "spnegoLogin.conf");
-				livyClientConf.setProperty("livy.client.http.auth.login.config", loginConf);
-
-				final LivySparkContextConfig config = getConfiguration();
+			    final LivySparkContextConfig config = getConfiguration();
+			    
+				final Properties livyHttpConf = new Properties();
+				livyHttpConf.setProperty("livy.client.http.connection.timeout", "10s");
+				livyHttpConf.setProperty("livy.client.http.connection.socket.timeout", "5m");
+				livyHttpConf.setProperty("livy.client.http.content.compress.enable", "true");
+				livyHttpConf.setProperty("livy.client.http.connection.idle.timeout", "15s");
+				livyHttpConf.setProperty("livy.client.http.job.initial-poll-interval", "10ms");
+				livyHttpConf.setProperty("livy.client.http.job.max-poll-interval", "1s");
+				livyHttpConf.setProperty("livy.client.http.spnego.enable", "true");
+				livyHttpConf.setProperty("livy.client.http.spnego.useSubjectCredentials", "true");
+				livyHttpConf.setProperty("spark.master", "yarn");
+				livyHttpConf.setProperty("spark.submit.deployMode", "cluster");
 
 				LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
 
-				final LivyClientBuilder builder = new LivyClientBuilder(false).setAll(livyClientConf).setURI(new URI(config.getLivyUrl()));
-				
-				final ClassLoader origCtxClassLoader = Thread.currentThread().getContextClassLoader();
-				try {
-					Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-					m_livyClient = builder.build();
-				} finally {
-					Thread.currentThread().setContextClassLoader(origCtxClassLoader);
-				}
+				final LivyClientBuilder builder = new LivyClientBuilder(false).setAll(livyHttpConf).setURI(new URI(config.getLivyUrl()));
 
+                m_livyClient =
+                    UserGroupUtil.getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth())
+                        .doAs(new PrivilegedExceptionAction<LivyClient>() {
+                            @Override
+                            public LivyClient run() throws Exception {
+                                final ClassLoader origCtxClassLoader = Thread.currentThread().getContextClassLoader();
+                                try {
+                                    Thread.currentThread().setContextClassLoader(LivySparkContext.class.getClassLoader());
+                                    return builder.build();
+                                } finally {
+                                    Thread.currentThread().setContextClassLoader(origCtxClassLoader);
+                                }
+                            }
+                        });
+			} catch (PrivilegedActionException e) {
+		         // just rethrow the original exception thrown in the run() method
+	            throw new KNIMESparkException(e.getException());
 			} catch (Exception e) {
 				throw new KNIMESparkException(e);
 			}
