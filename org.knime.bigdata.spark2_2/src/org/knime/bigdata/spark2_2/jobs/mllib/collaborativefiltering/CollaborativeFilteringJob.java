@@ -58,7 +58,8 @@ public class CollaborativeFilteringJob implements SparkJob<CollaborativeFilterin
         final String userColumn = inputDataset.columns()[input.getUserIdx()];
         final String productColumn = inputDataset.columns()[input.getProductIdx()];
         final String ratingColumn = inputDataset.columns()[input.getRatingIdx()];
-        final ALSModel model = execute(input, inputDataset, userColumn, productColumn, ratingColumn);
+        final String predictColumn = input.getPredictColumnName();
+        final ALSModel model = execute(input, inputDataset, userColumn, productColumn, ratingColumn, predictColumn);
         LOGGER.info("Collaborative Filtering done");
 
         if (!input.getNamedOutputObjects().isEmpty()) {
@@ -187,12 +188,13 @@ public class CollaborativeFilteringJob implements SparkJob<CollaborativeFilterin
      * @return model trained model
      */
     private ALSModel execute(final CollaborativeFilteringJobInput input, final Dataset<Row> dataset,
-            final String userColumn, final String itemColumn, final String ratingColumn) {
+            final String userColumn, final String itemColumn, final String ratingColumn, final String predicColumn) {
 
         ALS solver = new ALS()
             .setUserCol(userColumn)
             .setItemCol(itemColumn)
-            .setRatingCol(ratingColumn);
+            .setRatingCol(ratingColumn)
+            .setPredictionCol(predicColumn);
         solver = setAlpha(solver, input);
         solver = setImplicitPrefs(solver, input);
         solver = setIsNonnegative(solver, input);

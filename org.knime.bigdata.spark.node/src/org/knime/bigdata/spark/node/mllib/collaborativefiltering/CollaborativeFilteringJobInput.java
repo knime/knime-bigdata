@@ -46,6 +46,11 @@ public class CollaborativeFilteringJobInput extends JobInput {
     private static final String PARAM_RATING_INDEX = "RatingIx";
 
     /**
+     * output prediction column name
+     */
+    private static final String PARAM_PREDICT_COL_NAME = "predictionColumnName";
+
+    /**
      * lambda parameter
      */
     private static final String PARAM_LAMBDA = "Lambda";
@@ -114,17 +119,18 @@ public class CollaborativeFilteringJobInput extends JobInput {
 
 
     CollaborativeFilteringJobInput(final String tableName, final String predictions, final int userIdx,
-        final int productIdx, final int ratingIdx, final double lambda, final double alpha, final int iterations,
-        final int rank, final boolean implicitPrefs, final int noOfBlocks) {
-        this(tableName, predictions, userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,
+        final int productIdx, final int ratingIdx, final String predictColName, final double lambda, final double alpha,
+        final int iterations, final int rank, final boolean implicitPrefs, final int noOfBlocks) {
+        this(tableName, predictions, userIdx, productIdx, ratingIdx, predictColName, lambda, alpha, iterations, rank, implicitPrefs,
             noOfBlocks, null, null, null, null);
     }
 
     CollaborativeFilteringJobInput(final String aInputRDD, final String namedOutputObject, final int aUserIdx,
-        final int aProductIdx, final int aRatingIdx, final Double aLambda, final Double aAlpha,
+        final int aProductIdx, final int aRatingIdx, final String predictColName, final Double aLambda, final Double aAlpha,
         final int aIterations, final Integer aRank, final boolean implicitPrefs, final Integer noOfBlocks,
         final Integer noOfUserBlocks, final Integer noOfProductBlocks, final Boolean isNonNegative,
         final Long randomSeed) {
+
         addNamedInputObject(aInputRDD);
         if (namedOutputObject != null) {
             addNamedOutputObject(namedOutputObject);
@@ -135,6 +141,7 @@ public class CollaborativeFilteringJobInput extends JobInput {
         set(PARAM_PRODUCT_INDEX, aProductIdx);
         //rating column should be double valued
         set(PARAM_RATING_INDEX, aRatingIdx);
+        set(PARAM_PREDICT_COL_NAME, predictColName);
 
         set(PARAM_LAMBDA, aLambda);
         set(PARAM_ALPHA, aAlpha);
@@ -167,6 +174,13 @@ public class CollaborativeFilteringJobInput extends JobInput {
      */
     public int getRatingIdx() {
         return getInteger(PARAM_RATING_INDEX);
+    }
+
+    /**
+     * @return output prediction column name
+     */
+    public String getPredictColumnName() {
+        return get(PARAM_PREDICT_COL_NAME);
     }
 
     /**

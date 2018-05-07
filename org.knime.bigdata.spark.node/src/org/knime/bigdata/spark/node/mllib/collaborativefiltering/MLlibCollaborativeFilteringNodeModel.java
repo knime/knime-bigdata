@@ -36,7 +36,9 @@ import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 import org.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -58,6 +60,8 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
 
     /**The unique model name.*/
     public static final String MODEL_NAME = "Matrix Factorization Model";
+
+    private static final String OUTPUT_COL_NAME = "Rating";
 
     private final SettingsModelString m_userCol = createUserColModel();
     private final SettingsModelString m_productCol = createProductColModel();
@@ -149,17 +153,22 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = spec.getTableSpec();
         //check that all columns are present in the input data
         createMLlibSettings(tableSpec);
-        final DataTableSpec resultSpec = createResultTableSpec(tableSpec);
+        final String resultCol = DataTableSpec.getUniqueColumnName(tableSpec, OUTPUT_COL_NAME);
+        final DataTableSpec resultSpec = MLlibPredictorNodeModel.createSpec(tableSpec, resultCol);
         return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), resultSpec),
             new SparkModelPortObjectSpec(getSparkVersion(spec), MODEL_NAME)};
     }
 
     /**
-     * @param tableSpec
-     * @return
+     * Creates output spec with appended double column with given (unique) name.
+     *
+     * @param inputSpec the input data spec
+     * @param resultColName the name of the result column (has to be unique)
+     * @return the result spec with appended double column
      */
-    private DataTableSpec createResultTableSpec(final DataTableSpec tableSpec) {
-        return MLlibPredictorNodeModel.createSpec(tableSpec, "Rating");
+    public static DataTableSpec createSpec(final DataTableSpec inputSpec, final String resultColName) {
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator(resultColName, DoubleCell.TYPE);
+        return new DataTableSpec(inputSpec, new DataTableSpec(creator.createSpec()));
     }
 
     /**
@@ -170,7 +179,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
         final JobRunFactory<CollaborativeFilteringJobInput, CollaborativeFilteringJobOutput> runFactory =
                 SparkContextUtil.getJobRunFactory(data.getContextID(), JOB_ID);
-        exec.setMessage("Collaborative filtering (SPARK)");
+        exec.setMessage("Preparing Collaborative filtering job");
         exec.checkCanceled();
         final DataTableSpec tableSpec = data.getTableSpec();
         final MLlibSettings settings = createMLlibSettings(tableSpec);
@@ -185,12 +194,14 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         final int noOfBlocks = m_blocks.getIntValue();
         boolean implicitPrefs = m_implicitPrefs.getBooleanValue();
         //vMatrix is the prediction result
-        final DataTableSpec vMatrixSpec = createResultTableSpec(tableSpec);
+        final String resultCol = DataTableSpec.getUniqueColumnName(tableSpec, OUTPUT_COL_NAME);
+        final DataTableSpec vMatrixSpec = createSpec(tableSpec, resultCol);
         final SparkDataTable vMatrixRDD = new SparkDataTable(data.getContextID(), vMatrixSpec);
         exec.checkCanceled();
         final CollaborativeFilteringJobInput jobInput = new CollaborativeFilteringJobInput(data.getTableName(),
-            vMatrixRDD.getID(), userIdx, productIdx, ratingIdx, lambda, alpha, iterations, rank, implicitPrefs,
+            vMatrixRDD.getID(), userIdx, productIdx, ratingIdx, resultCol, lambda, alpha, iterations, rank, implicitPrefs,
             noOfBlocks);
+        exec.setMessage("Running Collaborative filtering job");
         final CollaborativeFilteringJobOutput output = runFactory.createRun(jobInput).run(data.getContextID());
         final SparkModel sparkModel = new SparkModel(
             SparkContextManager.getOrCreateSparkContext(data.getContextID()).getSparkVersion(), MODEL_NAME,
@@ -198,7 +209,6 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         //add the model RDDs to the list of RDDs to delete on reset
         addAdditionalSparkDataObjectsToDelete(data.getContextID(), output.getUserFeaturesObjectName(),
             output.getProductFeaturesObjectName());
-        exec.setMessage("Collaborative filtering (SPARK) done.");
         return new PortObject[]{new SparkDataPortObject(vMatrixRDD), new SparkModelPortObject(sparkModel)};
     }
 

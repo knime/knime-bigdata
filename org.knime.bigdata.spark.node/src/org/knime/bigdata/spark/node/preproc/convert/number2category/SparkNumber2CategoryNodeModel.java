@@ -142,9 +142,9 @@ public class SparkNumber2CategoryNodeModel extends SparkNodeModel {
             final String outputTableName = SparkIDs.createSparkDataObjectID();
           //TODO_TK
             final boolean keepOriginalColumns = m_keepOriginalCols.getBooleanValue();
-
+            final String suffix = keepOriginalColumns ? m_colSuffix.getStringValue() : "";
             final Number2CategoryJobInput jobInput = new Number2CategoryJobInput(rdd.getTableName(),
-                    map, keepOriginalColumns, m_colSuffix.getStringValue(), outputTableName);
+                    map, keepOriginalColumns, suffix, outputTableName);
             final SimpleJobRunFactory<Number2CategoryJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(rdd.getContextID(), JOB_ID);
             runFactory.createRun(jobInput).run(rdd.getContextID(), exec);
 
