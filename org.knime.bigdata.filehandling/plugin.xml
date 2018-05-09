@@ -38,4 +38,10 @@
             factory-class="org.knime.bigdata.hdfs.node.connector.SWebHDFSConnectionInformationNodeFactory">
       </node>
    </extension>
+   <extension
+         point="org.knime.base.filehandling.RemoteFileHandler">
+      <RemoteFileHandler
+            RemoteFileHandler="org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler">
+      </RemoteFileHandler>
+   </extension>
 </plugin>

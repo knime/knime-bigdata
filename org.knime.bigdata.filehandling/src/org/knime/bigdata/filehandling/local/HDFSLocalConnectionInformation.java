@@ -18,7 +18,7 @@
  * History
 + *   Created on Jan 22, 2018 by oole
  */
-package org.knime.bigdata.spark.local.filehandler;
+package org.knime.bigdata.filehandling.local;
 
 import java.net.URI;
 

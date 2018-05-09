@@ -1,4 +1,4 @@
-package org.knime.bigdata.spark.local.filehandler;
+package org.knime.bigdata.filehandling.local;
 
 /* ------------------------------------------------------------------
  * This source code, its documentation and all appendant files

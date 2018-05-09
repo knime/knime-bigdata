@@ -27,6 +27,8 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.Protocol;
 import org.knime.base.node.io.database.connection.util.ParameterizedDatabaseConnectionSettings;
+import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hive.utility.HiveDriverDetector;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
@@ -39,10 +41,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.bigdata.spark.local.database.LocalHiveUtility;
-import org.knime.bigdata.spark.local.filehandler.HDFSLocalConnectionInformation;
-import org.knime.bigdata.spark.local.filehandler.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.OnDisposeAction;
-import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -64,196 +63,196 @@ import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
  */
 class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalEnvironmentCreatorNodeModel.class);
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalEnvironmentCreatorNodeModel.class);
 
-    private final LocalSparkContextSettings m_settings = new LocalSparkContextSettings();
+	private final LocalSparkContextSettings m_settings = new LocalSparkContextSettings();
 
-    private SparkContextID m_lastContextID;
+	private SparkContextID m_lastContextID;
 
-    /**
-     * Constructor.
-     */
-    LocalEnvironmentCreatorNodeModel() {
-        super(new PortType[]{}, new PortType[]{DatabaseConnectionPortObject.TYPE,
-        	ConnectionInformationPortObject.TYPE, SparkContextPortObject.TYPE});
-    }
+	/**
+	 * Constructor.
+	 */
+	LocalEnvironmentCreatorNodeModel() {
+		super(new PortType[]{}, new PortType[]{DatabaseConnectionPortObject.TYPE,
+				ConnectionInformationPortObject.TYPE, SparkContextPortObject.TYPE});
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final SparkContextID newContextID = m_settings.getSparkContextID();
-        final SparkContext<LocalSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(newContextID);
-        final LocalSparkContextConfig config = m_settings.createContextConfig();
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+		final SparkContextID newContextID = m_settings.getSparkContextID();
+		final SparkContext<LocalSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(newContextID);
+		final LocalSparkContextConfig config = m_settings.createContextConfig();
 
-        m_settings.validateDeeper();
+		m_settings.validateDeeper();
 
-        if (m_lastContextID != null && !m_lastContextID.equals(newContextID)
-            && SparkContextManager.getOrCreateSparkContext(m_lastContextID).getStatus() == SparkContextStatus.OPEN) {
-            LOGGER.warn("Context ID has changed. Keeping old local Spark context alive and configuring new one!");
-        }
+		if (m_lastContextID != null && !m_lastContextID.equals(newContextID)
+				&& SparkContextManager.getOrCreateSparkContext(m_lastContextID).getStatus() == SparkContextStatus.OPEN) {
+			LOGGER.warn("Context ID has changed. Keeping old local Spark context alive and configuring new one!");
+		}
 
-        final boolean configApplied = sparkContext.ensureConfigured(config, true);
-        if (!configApplied && !m_settings.hideExistsWarning()) {
-            // this means context was OPEN and we are changing settings that cannot become active without
-            // destroying and recreating the remote context. Furthermore the node settings say that
-            // there should be a warning about this situation
-            setWarningMessage("Local Spark context exists already. Settings were not applied.");
-        }
+		final boolean configApplied = sparkContext.ensureConfigured(config, true);
+		if (!configApplied && !m_settings.hideExistsWarning()) {
+			// this means context was OPEN and we are changing settings that cannot become active without
+			// destroying and recreating the remote context. Furthermore the node settings say that
+			// there should be a warning about this situation
+			setWarningMessage("Local Spark context exists already. Settings were not applied.");
+		}
 
-        m_lastContextID = newContextID;
-        
-        PortObjectSpec dbPortObjectObjectSpec = null;
-        if (!sparkContext.getConfiguration().startThriftserver()) {
-        	dbPortObjectObjectSpec = InactiveBranchPortObjectSpec.INSTANCE;
-        }
+		m_lastContextID = newContextID;
 
-        return new PortObjectSpec[]{dbPortObjectObjectSpec,
-        		createHDFSConnectionSpec(), new SparkContextPortObjectSpec(m_settings.getSparkContextID())};
-    }
+		PortObjectSpec dbPortObjectObjectSpec = null;
+		if (!sparkContext.getConfiguration().startThriftserver()) {
+			dbPortObjectObjectSpec = InactiveBranchPortObjectSpec.INSTANCE;
+		}
+
+		return new PortObjectSpec[]{dbPortObjectObjectSpec,
+				createHDFSConnectionSpec(), new SparkContextPortObjectSpec(m_settings.getSparkContextID())};
+	}
 
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
 
-        final SparkContextID contextID = m_settings.getSparkContextID();
+		final SparkContextID contextID = m_settings.getSparkContextID();
 		final LocalSparkContext sparkContext = (LocalSparkContext) SparkContextManager
 				.<LocalSparkContextConfig>getOrCreateSparkContext(contextID);
 
 		exec.setProgress(0, "Configuring local Spark context");
-        final LocalSparkContextConfig config = m_settings.createContextConfig();
+		final LocalSparkContextConfig config = m_settings.createContextConfig();
 
-        final boolean configApplied = sparkContext.ensureConfigured(config, true);
-        if (!configApplied && !m_settings.hideExistsWarning()) {
-            // this means context was OPEN and we are changing settings that cannot become active without
-            // destroying and recreating the remote context. Furthermore the node settings say that
-            // there should be a warning about this situation
-            setWarningMessage("Local Spark context exists already. Settings were not applied.");
-        }
+		final boolean configApplied = sparkContext.ensureConfigured(config, true);
+		if (!configApplied && !m_settings.hideExistsWarning()) {
+			// this means context was OPEN and we are changing settings that cannot become active without
+			// destroying and recreating the remote context. Furthermore the node settings say that
+			// there should be a warning about this situation
+			setWarningMessage("Local Spark context exists already. Settings were not applied.");
+		}
 
-        // try to open the context
-        exec.setProgress(0.1, "Creating context");
-        sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
+		// try to open the context
+		exec.setProgress(0.1, "Creating context");
+		sparkContext.ensureOpened(true, exec.createSubProgress(0.9));
 
-        final PortObject dbPortObject;
-        if (sparkContext.getConfiguration().startThriftserver()) {
-        	final int hiveserverPort = sparkContext.getHiveserverPort();
-        	dbPortObject = new DatabaseConnectionPortObject(getHiveSpec(hiveserverPort));
-        } else {
-        	dbPortObject = InactiveBranchPortObject.INSTANCE;
-        }
+		final PortObject dbPortObject;
+		if (sparkContext.getConfiguration().startThriftserver()) {
+			final int hiveserverPort = sparkContext.getHiveserverPort();
+			dbPortObject = new DatabaseConnectionPortObject(getHiveSpec(hiveserverPort));
+		} else {
+			dbPortObject = InactiveBranchPortObject.INSTANCE;
+		}
 
-        return new PortObject[]{dbPortObject,
-        		new ConnectionInformationPortObject(createHDFSConnectionSpec()),
-        		new SparkContextPortObject(contextID)};
-    }
+		return new PortObject[]{dbPortObject,
+				new ConnectionInformationPortObject(createHDFSConnectionSpec()),
+				new SparkContextPortObject(contextID)};
+	}
 
-    private  DatabaseConnectionPortObjectSpec getHiveSpec(final int hiveserverPort) {
-    	final ParameterizedDatabaseConnectionSettings connSettings = new ParameterizedDatabaseConnectionSettings();
+	private  DatabaseConnectionPortObjectSpec getHiveSpec(final int hiveserverPort) {
+		final ParameterizedDatabaseConnectionSettings connSettings = new ParameterizedDatabaseConnectionSettings();
 
-    	connSettings.setDatabaseIdentifier(LocalHiveUtility.DATABASE_IDENTIFIER);
-    	connSettings.setDriver(HiveDriverDetector.getDriverName());
-    	connSettings.setPort(hiveserverPort);
-        connSettings.setRowIdsStartWithZero(true);
-        connSettings.setRetrieveMetadataInConfigure(false);
-        connSettings.setHost("localhost");
-        connSettings.setParameter("");
-        connSettings.setDatabaseName("");
-        connSettings.setJDBCUrl(getJDBCURL(connSettings.getHost(),
-        		connSettings.getPort(), connSettings.getDatabaseName(), connSettings.getParameter()));
-        final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(connSettings);
+		connSettings.setDatabaseIdentifier(LocalHiveUtility.DATABASE_IDENTIFIER);
+		connSettings.setDriver(HiveDriverDetector.getDriverName());
+		connSettings.setPort(hiveserverPort);
+		connSettings.setRowIdsStartWithZero(true);
+		connSettings.setRetrieveMetadataInConfigure(false);
+		connSettings.setHost("localhost");
+		connSettings.setParameter("");
+		connSettings.setDatabaseName("");
+		connSettings.setJDBCUrl(getJDBCURL(connSettings.getHost(),
+				connSettings.getPort(), connSettings.getDatabaseName(), connSettings.getParameter()));
+		final DatabaseConnectionPortObjectSpec spec = new DatabaseConnectionPortObjectSpec(connSettings);
 
-    	return spec;
-    }
+		return spec;
+	}
 
-    private String getJDBCURL(final String host, final int port, final String databaseName, final String parameter) {
-        final StringBuilder buf = new StringBuilder("jdbc:hive2://" + host + ":" + port);
-        //append database
-        buf.append("/" + databaseName);
-        if (parameter != null && !parameter.trim().isEmpty()) {
-            if (!parameter.startsWith(";")) {
-                buf.append(";");
-            }
-            buf.append(parameter);
-        }
-        final String jdbcUrl = buf.toString();
-        LOGGER.debug("Using jdbc url: " + jdbcUrl);
-        return jdbcUrl;
-    }
+	private String getJDBCURL(final String host, final int port, final String databaseName, final String parameter) {
+		final StringBuilder buf = new StringBuilder("jdbc:hive2://" + host + ":" + port);
+		//append database
+		buf.append("/" + databaseName);
+		if (parameter != null && !parameter.trim().isEmpty()) {
+			if (!parameter.startsWith(";")) {
+				buf.append(";");
+			}
+			buf.append(parameter);
+		}
+		final String jdbcUrl = buf.toString();
+		LOGGER.debug("Using jdbc url: " + jdbcUrl);
+		return jdbcUrl;
+	}
 
-    /**
-     * Create the spec for the local hdfs.
-     *
-     * @return ...
-     * @throws InvalidSettingsException ...
-     */
-    private ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
-        final HDFSLocalConnectionInformation connectionInformation = new HDFSLocalConnectionInformation();
-        final Protocol protocol = HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL;
-        connectionInformation.setProtocol(protocol.getName());
-        connectionInformation.setHost("localhost");
-        connectionInformation.setPort(protocol.getPort());
-        connectionInformation.setUser(null);
-        connectionInformation.setPassword(null);
-        return new ConnectionInformationPortObjectSpec(connectionInformation);
-    }
+	/**
+	 * Create the spec for the local hdfs.
+	 *
+	 * @return ...
+	 * @throws InvalidSettingsException ...
+	 */
+	private ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
+		final HDFSLocalConnectionInformation connectionInformation = new HDFSLocalConnectionInformation();
+		final Protocol protocol = HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL;
+		connectionInformation.setProtocol(protocol.getName());
+		connectionInformation.setHost("localhost");
+		connectionInformation.setPort(protocol.getPort());
+		connectionInformation.setUser(null);
+		connectionInformation.setPassword(null);
+		return new ConnectionInformationPortObjectSpec(connectionInformation);
+	}
 
-    @Override
-    protected void onDisposeInternal() {
-        if (m_settings.getOnDisposeAction() == OnDisposeAction.DESTROY_CTX) {
-            final SparkContextID id = m_settings.getSparkContextID();
+	@Override
+	protected void onDisposeInternal() {
+		if (m_settings.getOnDisposeAction() == OnDisposeAction.DESTROY_CTX) {
+			final SparkContextID id = m_settings.getSparkContextID();
 
-            try {
-                SparkContextManager.ensureSparkContextDestroyed(id);
-            } catch (final KNIMESparkException e) {
-                LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
-            }
-        }
-    }
+			try {
+				SparkContextManager.ensureSparkContextDestroyed(id);
+			} catch (final KNIMESparkException e) {
+				LOGGER.debug("Failed to destroy context " + id + " on dispose.", e);
+			}
+		}
+	}
 
-    @Override
-    protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
+	@Override
+	protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
+			throws IOException, CanceledExecutionException {
 
-        final SparkContextID contextID = m_settings.getSparkContextID();
-        final SparkContext<LocalSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
+		final SparkContextID contextID = m_settings.getSparkContextID();
+		final SparkContext<LocalSparkContextConfig> sparkContext = SparkContextManager.getOrCreateSparkContext(contextID);
 
-        final LocalSparkContextConfig sparkContextConfig = m_settings.createContextConfig();
+		final LocalSparkContextConfig sparkContextConfig = m_settings.createContextConfig();
 
-        final boolean configApplied = sparkContext.ensureConfigured(sparkContextConfig, true);
-        if (!configApplied && !m_settings.hideExistsWarning()) {
-            setWarningMessage("Local Spark context exists already. Settings were not applied.");
-        }
-    }
+		final boolean configApplied = sparkContext.ensureConfigured(sparkContextConfig, true);
+		if (!configApplied && !m_settings.hideExistsWarning()) {
+			setWarningMessage("Local Spark context exists already. Settings were not applied.");
+		}
+	}
 
 
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
+		m_settings.saveSettingsTo(settings);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+		m_settings.validateSettings(settings);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+		m_settings.loadSettingsFrom(settings);
+	}
 }

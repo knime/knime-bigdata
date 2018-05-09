@@ -14,9 +14,6 @@
 </extension>
 <extension
       point="org.knime.base.filehandling.RemoteFileHandler">
-   <RemoteFileHandler
-         RemoteFileHandler="org.knime.bigdata.spark.local.filehandler.HDFSLocalRemoteFileHandler">
-   </RemoteFileHandler>
 </extension>
 
 <extension point="org.knime.bigdata.spark.core.SparkJarProvider">
