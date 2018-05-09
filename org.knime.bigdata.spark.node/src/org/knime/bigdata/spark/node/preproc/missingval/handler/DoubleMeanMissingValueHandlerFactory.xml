@@ -3,5 +3,6 @@
             Calculates the mean value of all non-missing cells in a column,
             replaces the missing values with this mean and changes the
             column type to double.
+            See also <i>Rounded Mean</i> and <i>Truncated Mean</i>.
             This missing value handler produces valid PMML 4.2.
 </missingcellhandler>

@@ -78,6 +78,7 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
         final HashSet<String> dropRows = new HashSet<>();
         final HashMap<String, Object> fixedValues = new HashMap<>();
         final HashSet<String> rounded = new HashSet<>();
+        final HashSet<String> truncated = new HashSet<>();
         final ArrayList<Column> aggregations = new ArrayList<>();
         final HashSet<String> medianExactColumns = new HashSet<>();
         final HashSet<String> medianApproxColumns = new HashSet<>();
@@ -99,6 +100,10 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
                         break;
                     case AVG_ROUNDED:
                         rounded.add(field.name());
+                        aggregations.add(avg(field.name()).name(field.name()));
+                        break;
+                    case AVG_TRUNCATED:
+                        truncated.add(field.name());
                         aggregations.add(avg(field.name()).name(field.name()));
                         break;
                     case AVG:
@@ -158,6 +163,10 @@ public class MissingValueJob implements SparkJob<SparkMissingValueJobInput, Spar
                     throw new KNIMESparkException("Unable to compute " + agg + " for column " + column + ", possibly because there were no values in the column.");
                 } else if (rounded.contains(column)) {
                     double value = Math.round(row.getDouble(i));
+                    fixedValues.put(column, fixedSparkValue(schema, column, value));
+                    outputValues.put(column, intermediateValue(schema, column, value));
+                } else if (truncated.contains(column)) {
+                    long value = (long) row.getDouble(i);
                     fixedValues.put(column, fixedSparkValue(schema, column, value));
                     outputValues.put(column, intermediateValue(schema, column, value));
                 } else {

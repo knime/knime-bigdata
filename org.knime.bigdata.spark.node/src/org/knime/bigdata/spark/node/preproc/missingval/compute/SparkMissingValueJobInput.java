@@ -46,6 +46,8 @@ public class SparkMissingValueJobInput extends JobInput {
             AVG,
             /** Rounded AVG */
             AVG_ROUNDED,
+            /** Truncated AVG */
+            AVG_TRUNCATED,
             /** Drop row */
             DROP,
             /** Replace with a fixed value */

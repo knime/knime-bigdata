@@ -222,10 +222,16 @@
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.MostFrequentMissingValueHandlerFactory">
      </SparkMissingValueHandler>
      <SparkMissingValueHandler
+         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.OldMeanMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RemoveRowMissingValueHandlerFactory">
      </SparkMissingValueHandler>
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RoundedMeanMissingValueHandlerFactory">
+     </SparkMissingValueHandler>
+     <SparkMissingValueHandler
+         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.TruncatedMeanMissingValueHandlerFactory">
      </SparkMissingValueHandler>
    </extension>
    <extension

@@ -26,14 +26,17 @@ import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 
 /**
- * Creates a handler that removes rows with a missing values.
+ * Old mean missing values handler factory (introduced in BD-224), that truncates the mean on integer and long columns
+ * (output data types are not changed).
  *
  * @author Sascha Wolke, KNIME GmbH
+ * @deprecated use {@link DoubleMeanMissingValueHandlerFactory} or {@link RoundedMeanMissingValueHandlerFactory} instead
  */
-public class RoundedMeanMissingValueHandlerFactory extends SparkMissingValueHandlerFactory {
+@Deprecated
+public class OldMeanMissingValueHandlerFactory extends SparkMissingValueHandlerFactory {
 
     /** Id of this missing value handler factory. */
-    public final static String ID = "knime.RoundedMeanMissingValueHandler";
+    public static final String ID = "knime.MeanMissingValueHandler";
 
     @Override
     public String getID() {
@@ -41,13 +44,18 @@ public class RoundedMeanMissingValueHandlerFactory extends SparkMissingValueHand
     }
 
     @Override
+    public boolean isDeprecated() {
+        return true;
+    }
+
+    @Override
     public String getDisplayName() {
-        return "Rounded Mean";
+        return "Mean (deprecated)";
     }
 
     @Override
     public SparkMissingValueHandler createHandler(final DataColumnSpec column) {
-        return new RoundedMeanMissingValueHandler(column);
+        return new OldMeanMissingValueHandler(column);
     }
 
     @Override
