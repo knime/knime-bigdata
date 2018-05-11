@@ -194,14 +194,17 @@ public class BigDataExtensionJanitor extends TestrunJanitor {
 
         m_flowVariables.add(new FlowVariable("spark.version", "2.2"));
         m_flowVariables.add(new FlowVariable("spark.context", DEFAULT_VALUE));
-        m_flowVariables.add(new FlowVariable("spark.jobserver.url", "http://execute-testflow-conf-node:123/"));
-        m_flowVariables.add(new FlowVariable("spark.jobserver.receiveTimeout", 120));
         m_flowVariables.add(new FlowVariable("spark.settings.override", "false"));
         m_flowVariables.add(new FlowVariable("spark.settings.custom", ""));
         m_flowVariables.add(new FlowVariable("spark.authMethod", "NONE"));
 		m_flowVariables.add(new FlowVariable("spark.credentialsName", "spark.credentials"));
         m_flowVariables.add(new FlowVariable("spark.username", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("spark.password", DEFAULT_VALUE));
+
+        m_flowVariables.add(new FlowVariable("spark.jobserver.url", "http://execute-testflow-conf-node:123/"));
+        m_flowVariables.add(new FlowVariable("spark.jobserver.receiveTimeout", 120));
+
+        m_flowVariables.add(new FlowVariable("spark.livy.url", "http://execute-testflow-conf-node:123/"));
 
         m_flowVariables.add(new FlowVariable("ssh.username", DEFAULT_VALUE));
         m_flowVariables.add(new FlowVariable("ssh.password", DEFAULT_VALUE));

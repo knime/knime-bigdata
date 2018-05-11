@@ -125,8 +125,6 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 				livyHttpConf.setProperty("livy.client.http.job.max-poll-interval", "1s");
 				livyHttpConf.setProperty("livy.client.http.spnego.enable", "true");
 				livyHttpConf.setProperty("livy.client.http.spnego.useSubjectCredentials", "true");
-				livyHttpConf.setProperty("spark.master", "yarn");
-				livyHttpConf.setProperty("spark.submit.deployMode", "cluster");
 
 				LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
 
