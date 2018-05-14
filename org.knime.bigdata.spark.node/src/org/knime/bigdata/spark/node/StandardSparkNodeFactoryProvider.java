@@ -57,6 +57,7 @@ import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLine
 import org.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeFactory;
 import org.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory;
+import org.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeFactory2;
 import org.knime.bigdata.spark.node.mllib.reduction.svd.MLlibSVDNodeFactory;
 import org.knime.bigdata.spark.node.pmml.converter.MLlib2PMMLNodeFactory;
 import org.knime.bigdata.spark.node.pmml.predictor.compiled.SparkPMMLPredictorNodeFactory;
@@ -153,7 +154,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkAssociationRuleApplyNodeFactory(),
             new SparkAssociationRuleLearnerNodeFactory(),
             new MLlibPredictorNodeFactory(),
-            new MLlibPCANodeFactory(),
+            new MLlibPCANodeFactory2(),
             new MLlibSVDNodeFactory(),
             new SparkConcatenateNodeFactory(),
             new SparkCategory2NumberNodeFactory(),
@@ -208,7 +209,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Orc2SparkNodeFactory(),
             new Parquet2SparkNodeFactory(),
             new Impala2SparkNodeFactory(),
-            new SparkJavaSnippetSourceNodeFactory()
+            new SparkJavaSnippetSourceNodeFactory(),
+            new MLlibPCANodeFactory()
             );
     }
 

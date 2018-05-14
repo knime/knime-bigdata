@@ -1,6 +1,7 @@
 package org.knime.bigdata.spark1_5.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Row;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
 import org.knime.bigdata.spark.core.job.util.MyJoinKey;
@@ -505,6 +507,81 @@ public class RDDUtilsInJava {
     }
 
     /**
+     * Merges a pair of rows into a new row.
+     *
+     * @param pairs pair of rows
+     * @return rows with all columns from both input rows
+     */
+    public static JavaRDD<Row> mergeRows(final JavaPairRDD<Row, Row> pairs) {
+        return pairs.map(new Function<Tuple2<Row, Row>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Tuple2<Row, Row> pair) throws Exception {
+                RowBuilder builder = RowBuilder.fromRow(pair._1);
+                for (int i = 0; i < pair._2.size(); i++) {
+                    builder.add(pair._2.get(i));
+                }
+                return builder.build();
+            }
+
+        });
+    }
+
+    /**
+     * Merges a pair of rows, with columns from left row (except given column indices) and all from right row.
+     *
+     * @param pairs pair of rows
+     * @param exceptColIdxLeft - indices of left columns to skip
+     * @return corresponding rows from left (except given indices) and all right columns
+     */
+    public static JavaRDD<Row> mergeRows(final JavaPairRDD<Row, Row> pairs, final List<Integer> exceptColIdxLeft) {
+        final boolean[] skipColumns = skipColumnsIndices(exceptColIdxLeft);
+
+        return pairs.map(new Function<Tuple2<Row, Row>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Tuple2<Row, Row> pair) throws Exception {
+                final RowBuilder builder = RowBuilder.emptyRow();
+                for (int i = 0; i < pair._1.size(); i++) {
+                    if (skipColumns.length <= i || !skipColumns[i]) {
+                        builder.add(pair._1.get(i));
+                    }
+                }
+                for (int i = 0; i < pair._2.size(); i++) {
+                    builder.add(pair._2.get(i));
+                }
+                return builder.build();
+            }
+
+        });
+    }
+
+    /**
+     * Creates an array of booleans with size = max(indices) and true at given column indices.
+     *
+     * @param exceptColIdxLeft column indices to skip
+     * @return array of booleans
+     */
+    private static boolean[] skipColumnsIndices(final List<Integer> exceptColIdxLeft) {
+        if (exceptColIdxLeft.isEmpty()) {
+            return new boolean[0];
+        } else {
+            int max = -1;
+            for (int index : exceptColIdxLeft) {
+                max = index > max ? index : max;
+            }
+            final boolean skipCol[] = new boolean[max];
+            Arrays.fill(skipCol, false);
+            for (int index : exceptColIdxLeft) {
+                skipCol[index] = true;
+            }
+            return skipCol;
+        }
+    }
+
+    /**
      * @param aColIdxLeft
      * @param aTuple
      * @param builder
@@ -568,6 +645,57 @@ public class RDDUtilsInJava {
         return aContext.parallelize(rows);
     }
 
+    /**
+     * Drops all rows with <code>null</code> or <code>NaN</code> values at given number columns.
+     *
+     * @param input data set to validate
+     * @param columnIndices columns to check
+     * @return input data set
+     */
+    public static JavaRDD<Row> dropMissingValues(final JavaRDD<Row> input, final List<Integer> columnIndices) {
+        return input.filter(new Function<Row, Boolean>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Boolean call(final Row row) throws Exception {
+                for (int index : columnIndices) {
+                    final Object o = row.get(index);
+                    if (o == null || (o instanceof Number && Double.isNaN(((Number)o).doubleValue()))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Validates that given data set has non <code>null</code> or <code>NaN</code> values at given number columns or
+     * fails with given error message.
+     *
+     * @param input input RDD to validate
+     * @param columnIndices number columns to check
+     * @param errorMessageFormat error message to throw on <code>null</code> or <code>NaN</code> values. The message
+     *            will be formated with the column name as first argument
+     * @return mapped input RDD
+     */
+    public static JavaRDD<Row> failOnMissingValues(final JavaRDD<Row> input, final List<Integer> columnIndices, final String errorMessageFormat) {
+        return input.map(new Function<Row, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Row row) throws Exception {
+                for (int index : columnIndices) {
+                    final Object o = row.get(index);
+                    if (o == null || (o instanceof Number && Double.isNaN(((Number)o).doubleValue()))) {
+                        throw new KNIMESparkException(String.format(errorMessageFormat, index));
+                    }
+                }
+                return row;
+            }
+        });
+    }
 
     /**
      *

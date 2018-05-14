@@ -14,27 +14,36 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on 29.04.2016 by koetter
  */
-package org.knime.bigdata.spark1_3.jobs.mllib.reduction.pca;
+package org.knime.bigdata.spark.node.mllib.reduction.pca;
 
-import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import org.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCANodeModel;
-import org.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput;
-import org.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobOutput;
+import org.knime.bigdata.spark.core.job.JobOutput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
+ * Spark PCA job output.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class PCAJobRunFactory extends DefaultJobRunFactory<PCAJobInput, PCAJobOutput> {
+@SparkClass
+public class PCAJobOutput extends JobOutput {
+
+    private static final String KEY_NUMBER_OF_COMPONENTS = "numberOfComponents";
+
+    /** Paramless constructor for automatic deserialization. */
+    public PCAJobOutput(){}
 
     /**
-     * Constructor.
+     * Default constructor.
+     *
+     * @param numberOfComponents number of principal components
      */
-    public PCAJobRunFactory() {
-        super(MLlibPCANodeModel.JOB_ID, PCAJob.class, PCAJobOutput.class);
+    public PCAJobOutput(final int numberOfComponents) {
+        set(KEY_NUMBER_OF_COMPONENTS, numberOfComponents);
+    }
+
+    /** @return number of principal components */
+    public int getNumberOfComponents() {
+        return getInteger(KEY_NUMBER_OF_COMPONENTS);
     }
 }

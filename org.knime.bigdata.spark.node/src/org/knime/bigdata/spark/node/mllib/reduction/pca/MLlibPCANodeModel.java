@@ -20,16 +20,20 @@
  */
 package org.knime.bigdata.spark.node.mllib.reduction.pca;
 
+import static org.knime.bigdata.spark.node.mllib.reduction.pca.MLlibPCASettings.TARGET_DIM_MODE_FIXED;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.util.MLlibSettings;
-import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.mllib.reduction.pca.PCAJobInput.Mode;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -38,116 +42,169 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 /**
+ * Spark PCA node model.
  *
- * @author knime
+ * @author Sascha Wolke, KNIME GmbH
  */
 public class MLlibPCANodeModel extends SparkNodeModel {
 
-    private final SettingsModelIntegerBounded m_noOfComponents = createNoComponentsModel();
-
-    private final MLlibNodeSettings m_settings = new MLlibNodeSettings(false);
-
-    /**The unique job id.*/
+    /** The unique job id. */
     public static final String JOB_ID = MLlibPCANodeModel.class.getCanonicalName();
 
+    private static final String PROJ_COL_PREFIX = "PCA dimension ";
+    private static final String COMP_COL_PREFIX = "Component ";
+
+    private static final String LEGACY_PROJ_COL_PREFIX = "DIM_";
+    private static final String LEGACY_COMP_COL_PREFIX = "Component_";
+
+    private final MLlibPCASettings m_settings;
+
+    private final boolean m_legacyMode;
+
     /**
+     * Default constructor.
      *
+     * @param legacyMode <code>false</code> if we run MLlibSVDNodeFactory2
      */
-    public MLlibPCANodeModel() {
+    public MLlibPCANodeModel(final boolean legacyMode) {
         super(new PortType[]{SparkDataPortObject.TYPE},
             new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
+        m_legacyMode = legacyMode;
+        m_settings = new MLlibPCASettings(legacyMode);
     }
 
-    /**
-     * @return
-     */
-    static SettingsModelIntegerBounded createNoComponentsModel() {
-        return new SettingsModelIntegerBounded("noOfPrincipalComponents", 10, 1, Integer.MAX_VALUE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
+            throw new InvalidSettingsException("Spark input data required.");
+        }
+
         final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
         final DataTableSpec tableSpec = spec.getTableSpec();
-        m_settings.check(tableSpec);
-        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "PCA dimension ");
-        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component ");
-        return new PortObjectSpec[]{new SparkDataPortObjectSpec(spec.getContextID(), projectedSpec),
-            new SparkDataPortObjectSpec(spec.getContextID(), matrixSpec)};
+        final SparkVersion sparkVersion = SparkContextUtil.getSparkVersion(spec.getContextID());
+        m_settings.validateSettings(tableSpec);
+
+        if (m_legacyMode || m_settings.getTargetDimMode().equals(TARGET_DIM_MODE_FIXED)) {
+            final int noOfComponents = m_settings.getNoOfComponents();
+            return new PortObjectSpec[]{
+                new SparkDataPortObjectSpec(spec.getContextID(), createProjectionResultSpec(tableSpec, noOfComponents)),
+                new SparkDataPortObjectSpec(spec.getContextID(), createPCMatrixResultSpec(noOfComponents))};
+
+        } else if (SparkVersion.V_2_0.compareTo(sparkVersion) > 0) {
+            throw new InvalidSettingsException(
+                "Minimum information fraction to preserve requires at least Spark 2.0."
+                + " Set a fixed number of dimensions instead.");
+
+        } else {
+            return new PortObjectSpec[]{null, null};
+        }
     }
 
-    /**
-     * @param noOfComponents
-     * @param colPrefix
-     * @param i the number of principal components
-     * @return the {@link SparkDataPortObjectSpec}
-     */
-    private static DataTableSpec createResultSpec(final int noOfComponents, final String colPrefix) {
+    @Override
+    protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+        final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
+
+        exec.setMessage("Starting Spark PCA job");
+        exec.checkCanceled();
+
+        final DataTableSpec inSpec = data.getTableSpec();
+        final PCAJobInput jobInput = createJobInput(data);
+        final PCAJobOutput jobOutput = SparkContextUtil.<PCAJobInput, PCAJobOutput>getJobRunFactory(data.getContextID(), JOB_ID)
+                .createRun(jobInput).run(data.getContextID());
+        final int noOfComponents = jobOutput.getNumberOfComponents();
+
+        exec.setMessage("park job done.");
+        return new PortObject[]{
+            createSparkPortObject(data, createProjectionResultSpec(inSpec, noOfComponents), jobInput.getProjectionOutputName()),
+            createSparkPortObject(data, createPCMatrixResultSpec(noOfComponents), jobInput.getPCMatrixOutputName())};
+    }
+
+    private PCAJobInput createJobInput(final SparkDataPortObject dataPort) throws InvalidSettingsException {
+        final String inputName = dataPort.getData().getID();
+        final String pcMatrixName = SparkIDs.createSparkDataObjectID();
+        final String projectionName = SparkIDs.createSparkDataObjectID();
+
+        final boolean failOnMissingValues = m_settings.failOnMissingValues();
+        final Integer featureColIdxs[] = m_settings.getFeatureColumnIdices(dataPort.getTableSpec());
+
+        final PCAJobInput jobInput = new PCAJobInput(inputName, pcMatrixName, projectionName, featureColIdxs,
+            failOnMissingValues, getOutColMode(), getProjColPrefix(), getCompColPrefix());
+
+        if (m_legacyMode || m_settings.getTargetDimMode().equals(TARGET_DIM_MODE_FIXED)) {
+            jobInput.setTargetDimensions(m_settings.getNoOfComponents());
+        } else {
+            jobInput.setMinQuality(m_settings.getMinQuality());
+        }
+
+        return jobInput;
+    }
+
+    private PCAJobInput.Mode getOutColMode() {
+        if (m_legacyMode) {
+            return Mode.LEGACY;
+        } else if (m_settings.replaceInputColumns()) {
+            return Mode.REPLACE_COLUMNS;
+        } else {
+            return Mode.APPEND_COLUMNS;
+        }
+    }
+
+    private String getProjColPrefix() {
+        return m_legacyMode ? LEGACY_PROJ_COL_PREFIX : PROJ_COL_PREFIX;
+    }
+
+    private String getCompColPrefix() {
+        return m_legacyMode ? LEGACY_COMP_COL_PREFIX : COMP_COL_PREFIX;
+    }
+
+    /** @return projection port output spec */
+    private DataTableSpec createProjectionResultSpec(final DataTableSpec inputSpec, final int noOfComponents) {
+        final String prefix = getProjColPrefix();
         final List<DataColumnSpec> specs = new LinkedList<>();
-        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("Test", DoubleCell.TYPE);
+
+        if (!m_legacyMode) {
+            final HashSet<String> featureColumns = new HashSet<>(Arrays.asList(m_settings.getFeatureColumns(inputSpec)));
+            for (int i = 0; i < inputSpec.getNumColumns(); i++) {
+                final DataColumnSpec col = inputSpec.getColumnSpec(i);
+                if (!m_settings.replaceInputColumns() || !featureColumns.contains(col.getName())) {
+                    specs.add(col);
+                }
+            }
+        }
+
+        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("output", DoubleCell.TYPE);
         for (int i = 0; i < noOfComponents; i++) {
-            specCreator.setName(colPrefix + i);
+            specCreator.setName(String.format("%s%d", prefix, i));
+            specs.add(specCreator.createSpec());
+        }
+
+        return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
+    }
+
+    /** @return principal components output port spec */
+    private DataTableSpec createPCMatrixResultSpec(final int noOfComponents) {
+        final String prefix = getCompColPrefix();
+        final List<DataColumnSpec> specs = new LinkedList<>();
+        final DataColumnSpecCreator specCreator = new DataColumnSpecCreator("output", DoubleCell.TYPE);
+        for (int i = 0; i < noOfComponents; i++) {
+            specCreator.setName(String.format("%s%d", prefix, i));
             specs.add(specCreator.createSpec());
         }
         return new DataTableSpec(specs.toArray(new DataColumnSpec[0]));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final SparkDataPortObject data = (SparkDataPortObject)inObjects[0];
-        exec.setMessage("Starting PCA (SPARK)");
-        exec.checkCanceled();
-        final DataTableSpec tableSpec = data.getTableSpec();
-        final MLlibSettings settings = m_settings.getSettings(tableSpec);
-        int noOfComponents = m_noOfComponents.getIntValue();
-        final DataTableSpec projectedSpec = createResultSpec(m_noOfComponents.getIntValue(), "DIM_");
-        final DataTableSpec matrixSpec = createResultSpec(m_noOfComponents.getIntValue(), "Component_");
-        final String matrixName = SparkIDs.createSparkDataObjectID();
-        final String projectionMatrixName = SparkIDs.createSparkDataObjectID();
-        final PCAJobInput jobInput = new PCAJobInput(data.getTableName(), settings.getFeatueColIdxs(), noOfComponents,
-            matrixName, projectionMatrixName);
-        SparkContextUtil.getSimpleRunFactory(data.getContextID(), JOB_ID).createRun(jobInput).run(data.getContextID());
-        exec.setMessage("PCA (SPARK) done.");
-        return new PortObject[]{createSparkPortObject(data, projectedSpec, projectionMatrixName),
-            createSparkPortObject(data, matrixSpec, matrixName)};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_noOfComponents.saveSettingsTo(settings);
         m_settings.saveSettingsTo(settings);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noOfComponents.validateSettings(settings);
-        m_settings.validateSettings(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_noOfComponents.loadSettingsFrom(settings);
         m_settings.loadSettingsFrom(settings);
     }
 }

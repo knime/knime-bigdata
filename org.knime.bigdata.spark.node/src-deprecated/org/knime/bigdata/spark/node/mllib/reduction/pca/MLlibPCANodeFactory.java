@@ -41,7 +41,7 @@ public class MLlibPCANodeFactory extends DefaultSparkNodeFactory<MLlibPCANodeMod
      */
     @Override
     public MLlibPCANodeModel createNodeModel() {
-        return new MLlibPCANodeModel();
+        return new MLlibPCANodeModel(true);
     }
 
     /**
@@ -57,7 +57,7 @@ public class MLlibPCANodeFactory extends DefaultSparkNodeFactory<MLlibPCANodeMod
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new MLlibPCANodeDialog();
+        return new MLlibPCANodeDialog(true);
     }
 
 }

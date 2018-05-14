@@ -15,7 +15,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.ml.linalg.DenseMatrix;
+import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.mllib.linalg.Matrix;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
@@ -25,9 +28,13 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.types.BooleanType;
 import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.NumericType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
@@ -535,7 +542,31 @@ public class RDDUtilsInJava {
     }
 
     /**
-     * Convert the given Matrix to a data frame.
+     * Convert the given Matrix to a data frame (ML version).
+     *
+     * @param context spark context to use for data frame construction
+     * @param matrix matrix to convert
+     * @param columnPrefix prefix of output column names
+     * @return converted matrix as data frame
+     */
+    public static Dataset<Row> fromMatrix(final SparkContext context, final DenseMatrix matrix, final String columnPrefix) {
+        final int nRows = matrix.numRows();
+        final int nCols = matrix.numCols();
+        final List<Row> rows = new ArrayList<>(nRows);
+        for (int i = 0; i < nRows; i++) {
+            RowBuilder builder = RowBuilder.emptyRow();
+            for (int j = 0; j < nCols; j++) {
+                builder.add(matrix.apply(i, j));
+            }
+            rows.add(builder.build());
+        }
+        final JavaSparkContext javaContext = JavaSparkContext.fromSparkContext(context);
+        final JavaRDD<Row> resultRdd = javaContext.parallelize(rows);
+        return createDoubleDataFrame(context, resultRdd, nCols, columnPrefix);
+    }
+
+    /**
+     * Convert the given Matrix to a data frame (MLlib version).
      *
      * @param context spark context to use for data frame construction
      * @param matrix matrix to convert
@@ -571,6 +602,91 @@ public class RDDUtilsInJava {
         final StructType schema = DataTypes.createStructType(fields);
 
         return spark.createDataFrame(rdd, schema);
+    }
+
+    /**
+     * Explode a {@link org.apache.spark.ml.linalg.Vector} column into n double columns (ML vector version).
+     *
+     * @param input rows with double vectors
+     * @param vectorColumn name of column with vectors
+     * @param n dimensions of vector
+     * @param columnPrefix output column prefix
+     * @return rows with extracted double columns and removed vector column
+     */
+    public static Dataset<Row> explodeVector(final Dataset<Row> input, final String vectorColumn, final int n, final String columnPrefix) {
+        final ArrayList<StructField> outputFields = new ArrayList<>();
+        for (StructField field : input.schema().fields()) {
+            if (!field.name().equals(vectorColumn)) {
+                outputFields.add(field);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            outputFields.add(DataTypes.createStructField(String.format("%s%d", columnPrefix, i), DataTypes.DoubleType, false));
+        }
+        final StructType outputSchema = DataTypes.createStructType(outputFields);
+        final int vectorColIdx = input.schema().fieldIndex(vectorColumn);
+
+        return input.map((MapFunction<Row, Row>) row -> {
+            final RowBuilder rb = RowBuilder.emptyRow();
+            for (int i = 0; i < row.length(); i++) {
+                if (i != vectorColIdx) {
+                    rb.add(row.get(i));
+                }
+            }
+            for (double value : ((org.apache.spark.ml.linalg.Vector)row.get(vectorColIdx)).toArray()) {
+                rb.add(value);
+            }
+            return rb.build();
+        }, RowEncoder.apply(outputSchema));
+    }
+
+    /**
+     * Validates that given data set has values on given columns or fails with given error message.
+     *
+     * @param input data set to validate
+     * @param columnIndices columns to check
+     * @param errorMessageFormat error message to throw on <code>null</code> or <code>NaN</code> values. The message
+     *            will be formated with the column name as first argument
+     * @return input data set
+     */
+    public static Dataset<Row> failOnMissingValues(final Dataset<Row> input, final List<Integer> columnIndices, final String errorMessageFormat) {
+        final String[] columns = input.columns();
+        final boolean[] numericValue = new boolean[columns.length];
+
+        for (int index : columnIndices) {
+            numericValue[index] = input.schema().apply(index).dataType() instanceof NumericType;
+        }
+
+        return input.map((MapFunction<Row, Row>) row -> {
+            for (int index : columnIndices) {
+                if (row.isNullAt(index) || (numericValue[index] && Double.isNaN(((Number)row.get(index)).doubleValue()))) {
+                    throw new KNIMESparkException(String.format(errorMessageFormat, columns[index]));
+                }
+            }
+            return row;
+        }, RowEncoder.apply(input.schema()));
+    }
+
+    /**
+     * Validates that schema of given data set has numeric, boolean or vector types at given columns indices or fails
+     * with given error message.
+     *
+     * @param input data set to validate
+     * @param columnIndices columns to check
+     * @param errorMessage error message to throw on non numeric columns
+     * @throws KNIMESparkException on numeric columns
+     */
+    public static void failOnNonNumericColumn(final Dataset<Row> input, final List<Integer> columnIndices,
+        final String errorMessage) throws KNIMESparkException {
+
+        final StructField fields[] = input.schema().fields();
+        for (int index : columnIndices) {
+            if (!(fields[index].dataType() instanceof NumericType)
+                    && !(fields[index].dataType() instanceof BooleanType)
+                    && !(fields[index].dataType() instanceof VectorUDT)) {
+                throw new KNIMESparkException(String.format(errorMessage, fields[index].name()));
+            }
+        }
     }
 
     /**

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+    type="Manipulator" icon="icon.png">
+
+	<name>Spark PCA</name>
+	<shortDescription>Principal component analysis (PCA) in Spark.</shortDescription>
+  <fullDescription>
+    <intro>
+      This node performs a <a href="http://en.wikipedia.org/wiki/Principal_component_analysis">
+      principal component analysis (PCA)</a> on the given data using the Apache Spark
+      <a href="http://spark.apache.org/docs/latest/ml-features.html#pca">implementation</a>.
+      The input data is projected from its original feature space into a space of (possibly) lower
+      dimension with a minimum of information loss.
+    </intro>
+    <option name="Fail if missing values are encountered">
+      If checked, execution fails, when the selected columns contain missing values.
+      By default, rows containing missing values are ignored and not considered in the computation of the principal components.
+    </option>
+	<option name="Target dimensions">
+		Select the number of dimensions the input data is projected to. You
+		can select either one of:
+		<ul>
+			<li>
+				<i>Dimensions to reduce to:</i>
+				Directly specify the number of target dimensions. The specified
+				number must be lower or equal than the number of input columns.
+			</li>
+			<li>
+				<i>Minimum information fraction to preserve (%):</i>
+				Specify the fraction in percentage of information to preserve from
+				the input columns. This option requires Apache Spark 2.0 or
+				higher.
+			</li>
+		</ul>
+	</option>
+	<option name="Replace original data columns">
+		If checked, the projected DataFrame/RDD will not contain columns that
+		were included in the principal component analysis. Only the projected
+		columns and the input columns that were <i>not</i> included in the
+		principal component analysis remain.
+	</option>
+    <option name="Columns">
+      Select columns that are included in the analysis of principal components, i.e the original features.
+    </option>
+  </fullDescription>
+
+  <ports>
+    <inPort index="0" name="Spark DataFrame/RDD">Input Spark DataFrame/RDD</inPort>
+    <outPort index="0" name="Projected Input DataFrame/RDD">
+    	The input DataFrame/RDD projected onto the principal components. Input
+    	columns that were <i>not</i> included in the principal component
+    	analysis are retained.</outPort>
+    <outPort index="1" name="Principal Component Matrix">A DataFrame/RDD with the principal components matrix.</outPort>
+  </ports>
+</knimeNode>
