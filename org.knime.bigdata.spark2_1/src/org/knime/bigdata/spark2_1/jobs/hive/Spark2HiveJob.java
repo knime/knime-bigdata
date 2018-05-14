@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark2_1.jobs.hive;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -93,8 +94,13 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         String previousCompression = "";
         try {
             // Remember previous compression setting
-            previousCompression = spark.conf().get(SPARK_SQL_PARQUET_COMPRESSION_CODEC, null);
-
+            try {
+                previousCompression = spark.conf().get(SPARK_SQL_PARQUET_COMPRESSION_CODEC);
+                LOGGER.debug(String.format("Found PARQUET compression %s.", previousCompression));
+            } catch (NoSuchElementException e) {
+                LOGGER.debug("No previous PARQUET compression found.");
+                //Nothing to do
+            }
             // Set compression
             ParquetCompression parquetCompression = ParquetCompression.valueOf(compression);
             String codecString = parquetCompression.getParquetCompressionCodec();
@@ -113,11 +119,12 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
 
     private void resetParquetCompression(final SparkSession spark, final String previousCompression) {
         try {
-            if (previousCompression == null) {
+            if (previousCompression.isEmpty()) {
+                LOGGER.info("Unsetting PARQUET compression");
                 spark.conf().unset(SPARK_SQL_PARQUET_COMPRESSION_CODEC);
-            } else if (!previousCompression.isEmpty()) {
+            } else {
                 spark.conf().set(SPARK_SQL_PARQUET_COMPRESSION_CODEC, previousCompression);
-                LOGGER.info("Setting PARQUET compression back to " + previousCompression);
+                LOGGER.info(String.format("Setting PARQUET compression back to %s.", previousCompression));
             }
         } catch (Exception e) {
             // Do nothing.

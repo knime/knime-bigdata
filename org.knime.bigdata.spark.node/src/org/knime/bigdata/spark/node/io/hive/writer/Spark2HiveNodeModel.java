@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.io.hive.writer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
 
 import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -34,6 +35,8 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.time.localtime.LocalTimeValue;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -60,7 +63,6 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
     public static final String JOB_ID = Spark2HiveNodeModel.class.getCanonicalName();
 
     private Spark2HiveSettings m_settings = new Spark2HiveSettings(getDefaultFormat());
-
 
     /**
      * Constructor.
@@ -92,7 +94,33 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
         checkDatabaseIdentifier(spec);
         final DataTableSpec tableSpec = ((SparkDataPortObjectSpec)inSpecs[1]).getTableSpec();
         final DatabasePortObjectSpec resultSpec = createResultSpec(spec, tableSpec);
+        FileFormat fileFormat = FileFormat.fromDialogString(m_settings.getFileFormat());
+        // Check for limitations in column names.
+        checkColumnNames(tableSpec, fileFormat);
+        if (fileFormat == FileFormat.AVRO) {
+            for (int i = 0; i < tableSpec.getNumColumns(); i++) {
+                DataType c = tableSpec.getColumnSpec(i).getType();
+                if (c.isCompatible(LocalTimeValue.class)) {
+                    throw new InvalidSettingsException("Avro does not support timestamp.");
+                }
+            }
+        }
         return new PortObjectSpec[]{resultSpec};
+    }
+
+    private static void checkColumnNames(final DataTableSpec tableSpec, final FileFormat fileFormat)
+        throws InvalidSettingsException {
+        String[] columnNames = tableSpec.getColumnNames();
+        for (String name : columnNames) {
+            if (name.contains(",")) {
+                throw new InvalidSettingsException(String.format("No comma allowed in column name: %s.", name));
+            }
+            if (fileFormat == FileFormat.AVRO && !Pattern.matches("[A-Za-z_][A-Za-z0-9_]*", name)) {
+                throw new InvalidSettingsException(String.format(
+                    "Invalid column name %s. Column names in Avro must match the regular expression [A-Za-z_][A-Za-z0-9_]*.",
+                    name));
+            }
+        }
     }
 
     /**
@@ -199,7 +227,7 @@ public class Spark2HiveNodeModel extends SparkNodeModel {
      */
     @Override
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-       m_settings.loadAdditionalValidatedSettingsFrom(settings);
+        m_settings.loadAdditionalValidatedSettingsFrom(settings);
     }
 
 }
