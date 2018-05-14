@@ -43,6 +43,7 @@ public class OldMeanMissingValueHandlerFactory extends SparkMissingValueHandlerF
         return ID;
     }
 
+    @Override
     public boolean isDeprecated() {
         return true;
     }
