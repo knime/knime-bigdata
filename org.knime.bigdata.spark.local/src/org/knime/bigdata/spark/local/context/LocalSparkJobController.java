@@ -18,11 +18,21 @@ import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
-public class LocalSparkJobController implements JobController {
+/**
+ * {@link JobController} implementation for local Spark.
+ * 
+ * @author Bjoern Lohrmann, KNIME GmbH
+ */
+class LocalSparkJobController implements JobController {
 
 	private LocalSparkWrapper m_wrapper;
 
-	public LocalSparkJobController(LocalSparkWrapper wrapper) {
+    /**
+     * Constructor.
+     * 
+     * @param wrapper The wrapper for the Spark instance to run jobs on.
+     */
+	LocalSparkJobController(LocalSparkWrapper wrapper) {
 		m_wrapper = wrapper;
 	}
 

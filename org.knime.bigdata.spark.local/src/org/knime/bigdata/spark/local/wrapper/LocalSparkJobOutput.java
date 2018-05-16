@@ -58,7 +58,7 @@ public class LocalSparkJobOutput extends JobData {
     }
 
     /**
-     * @return whether job execution failed or not. If this method returns true, then {@link #getThrowable()} returns
+     * @return whether job execution failed or not. If this method returns true, then {@link #getException()} returns
      *         the Throwable that caused the failure.
      */
     public boolean isError() {

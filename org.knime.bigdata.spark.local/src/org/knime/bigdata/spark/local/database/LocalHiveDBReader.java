@@ -1,13 +1,7 @@
 package org.knime.bigdata.spark.local.database;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
@@ -15,7 +9,6 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.database.DatabaseQueryConnectionSettings;
 import org.knime.core.node.port.database.reader.DBReader;
 import org.knime.core.node.port.database.reader.DBReaderImpl;
@@ -23,6 +16,11 @@ import org.knime.core.node.streamable.BufferedDataTableRowOutput;
 import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.workflow.CredentialsProvider;
 
+/**
+ * {@link DBReader} implementation for local Hive.
+ * 
+ * @author Ole Ostergaard, KNIME AG, Konstanz, Germany
+ */
 public class LocalHiveDBReader implements DBReader {
 
 	private final DBReaderImpl m_dbreader;
@@ -31,28 +29,22 @@ public class LocalHiveDBReader implements DBReader {
 		m_dbreader = new DBReaderImpl(conn);
 	}
 
-	/**
+    /**
      * Returns the database meta data on the connection.
+     * 
      * @param cp CredentialsProvider to receive user/password from
      * @return DatabaseMetaData on this connection
-     * @throws SQLException if the connection to the database or the statement
-     *         could not be created
+     * @throws SQLException if the connection to the database or the statement could not be created
      */
     @Override
     public final DatabaseMetaData getDatabaseMetaData(
             final CredentialsProvider cp) throws SQLException {
         try {
             final DatabaseQueryConnectionSettings dbConn = getQueryConnection();
-
-            final Connection conn = dbConn.createConnection(cp);
-            synchronized (dbConn.syncConnection(conn)) {
-            	final DatabaseMetaData metaData = conn.getMetaData();
-                return metaData;
-            }
-        } catch (final SQLException sql) {
+            return dbConn.execute(cp, (conn) -> conn.getMetaData());
+        } catch (SQLException sql) {
             throw sql;
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidSettingsException
-                | IOException ex) {
+        } catch (Exception ex) {
             throw new SQLException(ex);
         }
     }

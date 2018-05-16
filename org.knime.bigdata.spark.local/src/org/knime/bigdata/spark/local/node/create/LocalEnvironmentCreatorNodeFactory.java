@@ -24,8 +24,9 @@ import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.core.node.NodeDialogPane;
 
 /**
+ * Node factory for the "Create Local Big Data Environment" node.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LocalEnvironmentCreatorNodeFactory extends DefaultSparkNodeFactory<LocalEnvironmentCreatorNodeModel> {
 

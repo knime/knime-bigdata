@@ -50,10 +50,11 @@ import org.knime.core.node.util.FilesHistoryPanel.LocationValidation;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**
- *
+ * Node dialog for the "Create Local Big Data Environment" node.
+ * 
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
+public class LocalEnvironmentCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
 
     private LocalSparkContextSettings m_settings = new LocalSparkContextSettings();
 

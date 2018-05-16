@@ -61,8 +61,18 @@ public class LocalSparkContextSettings {
 	 */
     public enum OnDisposeAction implements ButtonGroupEnumInterface {
 		
+		/**
+		 * Destroy context on dispose.
+		 */
 		DESTROY_CTX,
+		/**
+		 * Delete named objects on dispose.
+		 */
 		DELETE_DATA,
+		
+		/**
+		 * Do nothing on dispose.
+		 */
 		DO_NOTHING;
 	
 		@Override
@@ -94,8 +104,19 @@ public class LocalSparkContextSettings {
 	 */
 	public enum SQLSupport implements ButtonGroupEnumInterface {
 		
+	    /**
+	     * Only provide the basic SparkSQL dialect.  
+	     */
 		SPARK_SQL_ONLY,
+
+		/**
+         * Provide full HiveQL dialect, but do not start Spark Thriftserver (for JDBC).   
+         */
 		HIVEQL_ONLY,
+		
+		/**
+         * Provide full HiveQL dialect and start Spark Thriftserver to allow JDBC connections to be made.    
+         */
 		HIVEQL_WITH_JDBC;
 	
 		@Override

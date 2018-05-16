@@ -35,6 +35,8 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
+ * Utility class to handle serialization of job inputs and outputs in local Spark.
+ * 
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
@@ -42,6 +44,12 @@ public class LocalSparkSerializationUtil {
 
     private static final String KEY_SERIALIZED_FIELDS = "serializedFields";
 
+    /**
+     * Serializes all values of the given map into byte arrays, which are not null, boolean, a number or a String.
+     * 
+     * @param mapToSerialize The map whose values are checked and potentially serialized.
+     * @return a new map that contains serialized values in place of the original ones.
+     */
     public static Map<String, Object> serializeToPlainJavaTypes(final Map<String, Object> mapToSerialize) {
         final List<String> serializedFields = new LinkedList<>();
 
@@ -81,6 +89,16 @@ public class LocalSparkSerializationUtil {
         }
     }
 
+    /**
+     * Reverses the effects of the {@link #serializeToPlainJavaTypes(Map)} method.
+     * 
+     * @param toDeserialize Map with values to deserialize.
+     * @param classLoader A classload with which to load the deserialized objects.
+     * @return a new map with deserialized objects.
+     * @throws ClassNotFoundException f the serialized data contained objects that the given classloader could not
+     *             load.
+     * @throws IOException if something went wrong during derserialization.
+     */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> deserializeFromPlainJavaTypes(Map<String, Object>  toDeserialize, 
     		final ClassLoader classLoader) throws ClassNotFoundException, IOException {

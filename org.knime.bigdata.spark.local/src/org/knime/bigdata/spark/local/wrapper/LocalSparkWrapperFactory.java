@@ -13,11 +13,16 @@ import org.knime.core.node.NodeLogger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+/**
+ * Factory class to create instances of {@link LocalSparkWrapper}. This class implements the necessary
+ * involves a classloading barriers between OSGI classloading and Spark's classloading.
+ * 
+ * @author Bjoern Lohrmann, KNIME GmbH
+ */
 public class LocalSparkWrapperFactory {
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalSparkWrapperFactory.class);
 
-	public static final String LOG4J_PACKAGE_NAME = "org.apache.log4j";
 
 	/**
 	 * Creates a {@link LocalSparkWrapper} that lives in its own class loader
@@ -65,7 +70,8 @@ public class LocalSparkWrapperFactory {
 		
 		
 		return new URLClassLoader(getJars(jobJar, extraJars), bundleDelegatingLoader) {
-			public Class<?> loadClass(String name) throws ClassNotFoundException {
+			@Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
 				// we need to intercept loading of the LocalSparkWrapper class
 				// because
 				// otherwise we cannot assign the LocalSparkWrapperImpl instance

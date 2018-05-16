@@ -44,6 +44,9 @@ public class SparkLocalPlugin extends AbstractUIPlugin {
 	 */
 	private static SparkLocalPlugin plugin;
 
+	/**
+	 * Log file for local Spark instances.
+	 */
 	public static final File SPARK_LOG_FILE = new File(KNIMEConstants.getKNIMEHomeDir(), "local_spark.log");
 
 	/**
@@ -69,7 +72,7 @@ public class SparkLocalPlugin extends AbstractUIPlugin {
 		configureLoggerForLocalSparkLog(sparkLogAppender, Logger.getLogger("org.apache.hive.service"));
 	}
 
-	private void configureLoggerForLocalSparkLog(final Appender sparkLogAppender, final Logger logger) {
+	private static void configureLoggerForLocalSparkLog(final Appender sparkLogAppender, final Logger logger) {
 		logger.setLevel(Level.INFO);
 		logger.setAdditivity(false);
 		logger.removeAllAppenders();

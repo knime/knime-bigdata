@@ -25,7 +25,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 import org.apache.hive.jdbc.HiveQueryResultSet;
@@ -456,36 +455,30 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 	}
 
 	/**
-	 * This overwrite fixes the problems when querying the local thrift server, which is created when using the
+	 * This override fixes the problems when querying the local thrift server, which is created when using the
 	 * {@link LocalEnvironmentCreatorNodeFactory}.
 	 */
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
 			throws SQLException {
-		
-		final Statement statement = getConnection().createStatement();
-		final ResultSet localHiveResult;
+	    
+        if ((types != null && types[0].equals("TABLE")) || (tableNamePattern != null && types == null)) {
+            final StringBuilder query = new StringBuilder();
+            query.append("SHOW TABLES");
 
-		if ((types != null && types[0].equals("TABLE")) || (tableNamePattern != null && types == null)) {
-			final StringBuilder query = new StringBuilder();
-			query.append("SHOW TABLES");
+            if (schemaPattern == null || schemaPattern.isEmpty()) {
+                schemaPattern = getConnection().getSchema();
+            }
+            query.append(" IN " + schemaPattern);
 
-			if (schemaPattern == null || schemaPattern.isEmpty()) {
-				schemaPattern = getConnection().getSchema();
-			}
-			query.append(" IN " + schemaPattern);
+            if (tableNamePattern != null && !tableNamePattern.equals("%")) {
+                query.append(String.format(" LIKE '%s'", tableNamePattern));
+            }
 
-			if (!tableNamePattern.equals("%")) {
-				query.append(String.format(" LIKE '%s'", tableNamePattern));
-			}
-
-			localHiveResult = new LocalHiveQueryResultSet(
-					(HiveQueryResultSet) statement.executeQuery(query.toString()));
-		} else {
-			localHiveResult = m_hiveMetadata.getTables(catalog, schemaPattern, tableNamePattern, types);
-		}
-
-		return localHiveResult;
+            return new LocalHiveQueryResultSet((HiveQueryResultSet) getConnection().createStatement().executeQuery(query.toString()));
+        } else {
+            return m_hiveMetadata.getTables(catalog, schemaPattern, tableNamePattern, types);
+        }
 	}
 
 	@Override

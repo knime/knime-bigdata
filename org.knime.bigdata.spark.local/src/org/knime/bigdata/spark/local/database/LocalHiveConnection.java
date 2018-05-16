@@ -28,7 +28,7 @@ import org.apache.hive.jdbc.HiveConnection;
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 
 /**
- * This class extends the {@link HiveConnection}. It override
+ * This class extends the {@link HiveConnection}. It overrides
  * {@link HiveConnection#getMetaData()} to pass our wrapped
  * {@link HiveDatabaseMetaData} object. Which fixes the metadata fetching
  * problems for the local thrift server.
@@ -37,6 +37,13 @@ import org.apache.hive.jdbc.HiveDatabaseMetaData;
  */
 public class LocalHiveConnection extends HiveConnection {
 
+    /**
+     * Constructor.
+     * 
+     * @param uri The JDBC URL.
+     * @param info Additional properties to pass to the {@link HiveConnection}.
+     * @throws SQLException If something went wroing creating the underlying Hive connection.
+     */
 	public LocalHiveConnection(String uri, Properties info) throws SQLException {
 		super(uri, info);
 	}

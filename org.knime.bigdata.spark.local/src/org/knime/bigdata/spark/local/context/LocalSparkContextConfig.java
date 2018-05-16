@@ -38,6 +38,19 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 
     private final String m_hiveDataFolder;
 
+    /**
+     * Constructor.
+     * 
+     * @param contextName Name of the local Spark context.
+     * @param numberOfThreads Number of worker threads in Spark.
+     * @param deleteObjectsOnDispose Whether to delete named objects on dispose.
+     * @param useCustomSparkSettings Whether to inject the given custom Spark settings into SparkConf.
+     * @param customSparkSettings Key-value pairs of custom settings to inject into SparkConf.
+     * @param enableHiveSupport Whether to provide HiveQL (or just SparkSQL).
+     * @param startThriftserver Whether to start Spark Thriftserver or not.
+     * @param useHiveDataFolder Whether to store Hive's Metastore and warehouse in the given Hive data folder.
+     * @param hiveDataFolder A folder where to store Hive's Metastore and warehouse.
+     */
     public LocalSparkContextConfig(
         final String contextName, 
         final int numberOfThreads,

@@ -34,8 +34,11 @@ import org.knime.bigdata.spark.core.jar.KNIMEPluginScanPredicates;
  */
 public class SparkLocalJarProvider extends DefaultSparkJarProvider implements BaseSparkJarProvider {
 
-	public static final Predicate<String> KNIME_LOCAL_PLUGIN_PREDICATE = Pattern
-			.compile("org\\.knime\\.bigdata\\.spark\\.local").asPredicate();
+    /**
+     * Jar collection scan predicate to enable jar collection when KNIME is started from a development workspace.
+     */
+    public static final Predicate<String> KNIME_LOCAL_PLUGIN_PREDICATE =
+        Pattern.compile("org\\.knime\\.bigdata\\.spark\\.local").asPredicate();
 
 	/**
 	 * Constructor.

@@ -31,6 +31,12 @@ import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
 
+/**
+ * Implementation of {@link LocalSparkWrapper} and {@link NamedObjects}. Objects of this class hold and manage an actual
+ * SparkContext and run jobs on it.
+ * 
+ * @author Bjoern Lohrmann, KNIME GmbH
+ */
 @SparkClass
 public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
@@ -219,7 +225,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			configureSparkLocalDir(filteredUserSparkConf, sparkConf);
 			
 			if (enableHiveSupport) {
-				configureHiveSupport(filteredUserSparkConf, sparkConf, hiveDataFolder);
+				configureHiveSupport(sparkConf, hiveDataFolder);
 
 				if (startThriftserver) {
 					configureThriftserver(sparkConf);
@@ -266,7 +272,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set("hive.server2.thrift.bind.host", "localhost");
 	}
 
-	private int findRandomFreePort() throws IOException {
+	private static int findRandomFreePort() throws IOException {
 		int freePort;
 		try (ServerSocket s = new ServerSocket(0)) {
 			freePort = s.getLocalPort();
@@ -290,8 +296,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set(SPARK_LOCAL_DIR, sparkLocalDir.getAbsolutePath());
 	}
 	
-	private void configureHiveSupport(Map<String, String> filteredUserSparkConf, SparkConf sparkConf,
-			String hiveDataFolder) throws IOException {
+	private void configureHiveSupport(SparkConf sparkConf, String hiveDataFolder) throws IOException {
 
 		final File hiveParentDir;
 		if (hiveDataFolder != null) {
@@ -341,7 +346,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set("hive.exec.scratchdir", hiveScratchDir.getCanonicalPath());
 	}
 	
-	private void ensureWritableDirectory(final File maybeDir, final String errorMsgName) throws IOException {
+	private static void ensureWritableDirectory(final File maybeDir, final String errorMsgName) throws IOException {
 		if (!maybeDir.isDirectory()) {
 			throw new IOException(
 					String.format("%s at %s exists but is not a directory.", errorMsgName, maybeDir.getAbsolutePath()));
@@ -359,7 +364,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		deleteRecursivelyOnExit(m_sparkTmpDir);
 	}
 
-	private Map<String, String> filterUserSparkConfMap(Map<String, String> sparkConfMap) {
+	private static Map<String, String> filterUserSparkConfMap(Map<String, String> sparkConfMap) {
 		final Map<String, String> filteredMap = new HashMap<>(sparkConfMap);
 		filteredMap.remove(SPARK_APP_NAME);
 		filteredMap.remove(SPARK_MASTER);
@@ -369,12 +374,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		return filteredMap;
 	}
 
-	private void deleteRecursivelyOnExit(final File tmpData) {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				FileUtils.deleteQuietly(tmpData);
-			}
-		});
+	private static void deleteRecursivelyOnExit(final File tmpData) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(tmpData)));
 	}
 
 	private ClassLoader swapContextClassLoader() {
@@ -396,7 +397,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-	public void deleteNamedObjects(Set<String> namedObjects) throws KNIMESparkException {
+	public void deleteNamedObjects(Set<String> namedObjects) {
 		for (String namedObjectId : namedObjects) {
 			deleteNamedDataFrame(namedObjectId);
 		}

@@ -43,6 +43,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 	private final static NodeLogger LOGGER = NodeLogger.getLogger(LocalSparkContext.class);
 
+	/**
+	 * Job ID for the Spark context preparation job (Spark 2.2)
+	 */
 	public final static String PREPARE_LOCAL_SPARK_CONTEXT_JOB = "prepareLocalSpark22Context";
 
 	private LocalSparkWrapper m_wrapper;
@@ -168,7 +171,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 		return contextWasCreated;
 	}
 
-	private File[] collectExtraJars(final LocalSparkContextConfig config) {
+	private static File[] collectExtraJars(final LocalSparkContextConfig config) {
 		if (!config.useCustomSparkSettings()) {
 			return new File[0];
 		}
@@ -293,6 +296,11 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 		return m_namedObjectsController;
 	}
 
+    /**
+     * 
+     * @return the TCP port that Hiveserver2 (Spark Thriftserver actually) is listening on, or -1 if Hiveserver2 has not
+     *         been started.
+     */
 	public synchronized int getHiveserverPort() {
 		if (getStatus() != SparkContextStatus.OPEN) {
 			throw new IllegalStateException("Local Spark context is not open.");

@@ -58,10 +58,11 @@ import org.knime.core.node.port.inactive.InactiveBranchPortObject;
 import org.knime.core.node.port.inactive.InactiveBranchPortObjectSpec;
 
 /**
+ * Node model for the "Create Local Big Data Environment" node.
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
+public class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalEnvironmentCreatorNodeModel.class);
 
@@ -152,7 +153,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 				new SparkContextPortObject(contextID)};
 	}
 
-	private  DatabaseConnectionPortObjectSpec getHiveSpec(final int hiveserverPort) {
+	private static DatabaseConnectionPortObjectSpec getHiveSpec(final int hiveserverPort) {
 		final ParameterizedDatabaseConnectionSettings connSettings = new ParameterizedDatabaseConnectionSettings();
 
 		connSettings.setDatabaseIdentifier(LocalHiveUtility.DATABASE_IDENTIFIER);
@@ -170,7 +171,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 		return spec;
 	}
 
-	private String getJDBCURL(final String host, final int port, final String databaseName, final String parameter) {
+	private static String getJDBCURL(final String host, final int port, final String databaseName, final String parameter) {
 		final StringBuilder buf = new StringBuilder("jdbc:hive2://" + host + ":" + port);
 		//append database
 		buf.append("/" + databaseName);
@@ -191,7 +192,7 @@ class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 	 * @return ...
 	 * @throws InvalidSettingsException ...
 	 */
-	private ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
+	private static ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
 		final HDFSLocalConnectionInformation connectionInformation = new HDFSLocalConnectionInformation();
 		final Protocol protocol = HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL;
 		connectionInformation.setProtocol(protocol.getName());

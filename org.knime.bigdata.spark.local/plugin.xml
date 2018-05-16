@@ -12,9 +12,6 @@
         ProviderClass="org.knime.bigdata.spark.local.SparkLocalContextProvider">
   </SparkContextProvider>
 </extension>
-<extension
-      point="org.knime.base.filehandling.RemoteFileHandler">
-</extension>
 
 <extension point="org.knime.bigdata.spark.core.SparkJarProvider">
 	<SparkJarProvider ProviderClass="org.knime.bigdata.spark.local.SparkLocalJarProvider">

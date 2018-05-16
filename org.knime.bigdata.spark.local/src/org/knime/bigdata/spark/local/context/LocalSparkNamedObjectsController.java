@@ -6,12 +6,21 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 
-public class LocalSparkNamedObjectsController implements NamedObjectsController {
+/**
+ * {@link NamedObjectsController} implementation for local Spark.
+ * 
+ * @author Bjoern Lohrmann, KNIME GmbH
+ */
+class LocalSparkNamedObjectsController implements NamedObjectsController {
 
 	private final LocalSparkWrapper m_wrapper;
 	
-	
-    public LocalSparkNamedObjectsController(LocalSparkWrapper wrapper) {
+    /**
+     * Constructor.
+     * 
+     * @param wrapper The wrapper for the Spark instance to manage.
+     */
+    LocalSparkNamedObjectsController(LocalSparkWrapper wrapper) {
     	m_wrapper = wrapper;
 	}
 

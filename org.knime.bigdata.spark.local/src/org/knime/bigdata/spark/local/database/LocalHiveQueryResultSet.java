@@ -47,9 +47,8 @@ import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFact
 
 
 /**
- * This class wraps the {@link HiveQueryResultSet}.
- * It overrides the  {@link HiveQueryResultSet#getString(String)}
- * to enable metadata collection from the local thrift server instance set up by {@link LocalEnvironmentCreatorNodeFactory}
+ * This class wraps the {@link HiveQueryResultSet}. It overrides the {@link HiveQueryResultSet#getString(String)} to
+ * enable metadata collection from the local thrift server instance set up by {@link LocalEnvironmentCreatorNodeFactory}
  *
  * @author Ole Ostergaard, KNIME AG, Konstanz, Germany
  */
@@ -57,6 +56,11 @@ public class LocalHiveQueryResultSet implements ResultSet {
 
 	HiveQueryResultSet m_resultset;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param resultSet The underlying hive result set.
+	 */
 	public LocalHiveQueryResultSet(HiveQueryResultSet resultSet) {
 		m_resultset = resultSet;
 	}
@@ -131,12 +135,14 @@ public class LocalHiveQueryResultSet implements ResultSet {
 		return m_resultset.getBigDecimal(columnName);
 	}
 
-	@Override
+	@Deprecated
+    @Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
 		return m_resultset.getBigDecimal(columnIndex, scale);
 	}
 
-	@Override
+	@Deprecated
+    @Override
 	public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
 		return m_resultset.getBigDecimal(columnName, scale);
 	}
@@ -509,12 +515,14 @@ public class LocalHiveQueryResultSet implements ResultSet {
 		return m_resultset.getURL(columnName);
 	}
 
-	@Override
+	@Deprecated
+    @Override
 	public InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		return m_resultset.getUnicodeStream(columnIndex);
 	}
 
-	@Override
+	@Deprecated
+    @Override
 	public InputStream getUnicodeStream(String columnName) throws SQLException {
 		return m_resultset.getUnicodeStream(columnName);
 	}

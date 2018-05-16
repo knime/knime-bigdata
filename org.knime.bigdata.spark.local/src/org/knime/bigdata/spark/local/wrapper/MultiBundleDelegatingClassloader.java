@@ -42,7 +42,8 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	 * they appear in the underlying bundle array. The first bundle that
 	 * successfully loads the class wins.
 	 */
-	protected Class<?> findClass(final String name) throws ClassNotFoundException {
+	@Override
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
 		Class<?> clazz = null;
 		
 		boolean onBlacklist = false;
@@ -79,7 +80,8 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	 * they appear in the underlying bundle array. The first bundle that
 	 * successfully finds the resource wins.
 	 */
-	protected URL findResource(final String name) {
+	@Override
+    protected URL findResource(final String name) {
 		for (int i = 0; i < m_bundles.length; i++) {
 			URL resource = m_bundles[i].getResource(name);
 			if (resource != null) {
@@ -94,7 +96,8 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	 * order they appear in the underlying bundle array. The first bundle that
 	 * successfully finds the resources wins.
 	 */
-	protected Enumeration<URL> findResources(final String name) throws IOException {
+	@Override
+    protected Enumeration<URL> findResources(final String name) throws IOException {
 		for (int i = 0; i < m_bundles.length; i++) {
 			Enumeration<URL> urls = m_bundles[i].getResources(name);
 			if (urls != null) {
@@ -111,7 +114,8 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	 * parameter was true, the class will be resolved with
 	 * {@link #resolveClass(Class)}.
 	 */
-	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+	@Override
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Class<?> clazz = findClass(name);
 
 		if (resolve) {
