@@ -21,10 +21,19 @@
 package org.knime.bigdata.spark.node.scripting.java.util;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
+import javax.tools.JavaFileObject.Kind;
+
+import org.eclipse.jdt.internal.compiler.tool.EclipseFileObject;
+import org.knime.core.util.FileUtil;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
-import org.knime.ext.sun.nodes.script.compile.InMemorySourceJavaFileObject;
 import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
 
 /**
@@ -32,6 +41,7 @@ import org.knime.ext.sun.nodes.script.compile.JavaCodeCompiler;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
+@SuppressWarnings("restriction")
 public class SourceCompiler {
 
     private final String m_className;
@@ -54,13 +64,10 @@ public class SourceCompiler {
     public SourceCompiler(final String aClassName, final String javaCode, final File[] classpath)
         throws CompilationFailedException, ClassNotFoundException {
 
-        this.m_className = aClassName;
-        this.m_javaCode = javaCode;
-        this.m_classpath = classpath;
-
-        JavaCodeCompiler compiler = initCompiler();
-
-        this.m_bytecode = compiler.getClassByteCode();
+        m_className = aClassName;
+        m_javaCode = javaCode;
+        m_classpath = classpath;
+        m_bytecode = compile();
     }
 
     /**
@@ -70,15 +77,58 @@ public class SourceCompiler {
         return m_bytecode;
     }
 
-    private JavaCodeCompiler initCompiler() throws CompilationFailedException {
-        final JavaCodeCompiler compiler = new JavaCodeCompiler(JavaCodeCompiler.JavaVersion.JAVA_7);
-        final InMemorySourceJavaFileObject sourceContainer = new InMemorySourceJavaFileObject(m_className, m_javaCode);
+    private Map<String, byte[]> compile() throws CompilationFailedException {
 
-        compiler.setClasspaths(m_classpath);
-        compiler.setSources(sourceContainer);
-        compiler.compile();
+        File tmpCompilationDirectory = null;
+        try {
+            tmpCompilationDirectory = FileUtil.createTempDir("SparkJavaSnippet");
+            final File classDirectory = new File(tmpCompilationDirectory, "classes");
+            if (!classDirectory.mkdir()) {
+                throw new IOException("Failed to create temp directory for compiled classes: " + classDirectory.getAbsolutePath());
+            }
 
-        return compiler;
+            File codeFile = new File(tmpCompilationDirectory, m_className.concat(".java"));
+            Files.write(codeFile.toPath(), Collections.singleton(m_javaCode));
+
+            final EclipseFileObject snippetFile = new EclipseFileObject(m_className,
+                codeFile.toURI(),
+                Kind.SOURCE,
+                StandardCharsets.UTF_8);
+
+            final JavaCodeCompiler compiler = new JavaCodeCompiler(JavaCodeCompiler.JavaVersion.JAVA_7, classDirectory);
+            compiler.setSources(snippetFile);
+            compiler.setClasspaths(m_classpath);
+            compiler.compile();
+
+            final File[] classes = classDirectory.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(final File pathname) {
+                    return pathname.isFile() && pathname.canRead() && pathname.getName().endsWith(".class");
+                }
+            });
+
+            final Map<String, byte[]> bytecode = new HashMap<>();
+            for (File clazz : classes) {
+                final String classname = clazz.getAbsolutePath()
+                        .substring(classDirectory.getAbsolutePath().length())
+                        .replace(File.separator, ".")
+                        .replaceFirst("\\.class$", "")
+                        .replaceFirst("^\\.", "");
+
+                bytecode.put(classname, Files.readAllBytes(clazz.toPath()));
+            }
+            return bytecode;
+
+        } catch (IOException e) {
+            throw new CompilationFailedException(
+                "Failed to compile Java snippet", e);
+        } finally {
+            if (tmpCompilationDirectory != null) {
+                if (tmpCompilationDirectory.exists()) {
+                    FileUtil.deleteRecursively(tmpCompilationDirectory);
+                }
+            }
+        }
     }
 
     /**
