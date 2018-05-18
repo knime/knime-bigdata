@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180426
+version: knimebd-20180518
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -33,7 +33,7 @@ properties:
   
   # taken from spark's hadoop-2.7 profile (with update to curator, see
   # https://issues.apache.org/jira/browse/SPARK-13933)
-  hadoop_version: 2.7.4
+  hadoop_version: 2.7.6
   jets3t_version: 0.9.3
   zookeeper_version: 3.4.6
   curator_version: 2.7.1
@@ -100,6 +100,9 @@ mavenBlacklist:
   - javax\.servlet\.jsp:jsp-api:jar:.*
   - org\.mortbay\.jetty:jetty-util:jar:.*
   - org\.mortbay\.jetty:jetty:jar:.*
+  - com\.amazonaws:.*
+  - javax\.mail:mail:.*
+  - org\.bouncycastle:bcprov-jdk15on:.*
   
   # javax.annotation packages from jsr305  are never required at runtime
   - com\.google\.code\.findbugs:jsr305:jar:.*
@@ -162,6 +165,9 @@ mavenBlacklist:
   # This is the JAX-RS 1.x API, which is already (and must be) included in com.sun.jersey:jersey-core:1.x
   # (which provides an implementation for the API).
   - javax\.ws\.rs:jsr311-api:jar:.*
+  
+  # mx4j is an optional dependency of jets3t (a hadoop-common dependency used for S3 access)
+  - mx4j:mx4j:.*
   
 # mavenDependencyBlacklist specifies maven artifacts that will be filtered out during transitive dependency.
 # collection. If there is a maven dependency A -> B, and B is on this blacklist, this has the following effect:
@@ -340,6 +346,12 @@ requireBundleOverrides:
   - coordPattern: org\.mortbay\.jetty:jetty:jar:.*
     replacement: org.mortbay.jetty.server;bundle-version="[6.1,7)"
     
+  - coordPattern: javax\.mail:mail:.*
+    replacement: javax.mail.glassfish;bundle-version="[1,2)"
+    
+  - coordPattern: org\.bouncycastle:bcprov-jdk15on:.*
+    replacement: bcprov;bundle-version="[1,2)"
+    
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
   - coordPattern: io\.airlift:slice:jar:.*
     replacement: io.airlift.slice;resolution:=optional
@@ -363,6 +375,10 @@ requireBundleOverrides:
     replacement: org.datanucleus.api.jdo;bundle-version="[3,4)";resolution:=optional
   - coordPattern: org\.datanucleus:datanucleus-rdbms:jar:3\..*
     replacement: org.datanucleus.store.rdbms;bundle-version="[3,4)";resolution:=optional
+    
+  # mx4j is an optional dependency of jets3t (a hadoop-common dependency used for S3 access)
+  - coordPattern: mx4j:mx4j:.*
+    replacement: mx4j;bundle-version="[3,4)";resolution:=optional
     
     
   # Rewrites spark-hive's dependency on hive-exec to a precise version of the (merged) org.spark-project.hive bundle
@@ -403,6 +419,13 @@ importPackageOverrides:
   # KNIME TP provides these as fragments, so we cannot use Require-Bundle
   - coordPattern: javax\.transaction:.*
     replacement: javax.transaction.*;version="[1,2)"
+
+  # KNIME TP provides several artifacts from the AWS Java SDK.
+  # Hadoop's AWS integration declares an improperly broad dependency on the whole SDK instead of just the core and s3
+  # This situation is best solved by using import-package instructions, so we can let BND figure which packages are actually
+  # required. 
+  - coordPattern: com.amazonaws:.*
+    replacement: com.amazonaws.*;version="[1,2)"
     
 
 # mavenDependencyOverrides 
@@ -490,7 +513,7 @@ mavenDependencyOverrides:
   # This updates all snappy 1.1 dependencies to 1.1.7, which improves performance
   - coordPattern: org\.xerial\.snappy:snappy-java:jar:1\.1\..*
     replacement: org.xerial.snappy:snappy-java:jar:1.1.7
-
+    
 # Prevents artifacts that only differ in their micro version from undergoing duplicate removal
 duplicateRemovalBlacklist:
   # (only required for full spark):
@@ -572,7 +595,7 @@ bundleInstructions:
     instructions:
       Import-Package: >-
         com.sun.jersey.*                      ;version="[1.14,2)",
-        javax.ws.rs.*                         ;version="[1.0,2)",
+        javax.ws.rs.*                         ;version="[1,2)",
         javax.mail.*                          ;resolution:=optional,
         *
 
@@ -801,6 +824,10 @@ licenses:
   - licenseName: 3-Clause BSD License
     licenseUrl: https://raw.githubusercontent.com/paul-hammant/paranamer/4b7e215b9d1117fd4c5c1290aadcbd2e3ec76d20/LICENSE.txt
     id: [ 'com.thoughtworks.paranamer:paranamer:jar:2.6' ]
+    
+  - licenseName: Apache License, Version 2.0
+    licenseUrl: https://github.com/codehaus/jettison/blob/jettison-1.1/src/main/resources/META-INF/LICENSE
+    id: [ 'org.codehaus.jettison:jettison:jar:1.1' ]
 
   - licenseName: Apache License, Version 2.0
     licenseUrl: http://www.apache.org/licenses/LICENSE-2.0
@@ -816,6 +843,7 @@ licenses:
       - com.sun.jersey:jersey-servlet:jar:1.14
       - com.sun.jersey:jersey-core:jar:1.14
       - com.sun.jersey:jersey-client:jar:1.14
+      - com.sun.jersey:jersey-json:jar:1.14
       
   - licenseName: GNU Lesser General Public License, Version 2.1
     licenseUrl: http://www.gnu.org/licenses/lgpl-2.1.txt
@@ -901,10 +929,15 @@ artifactGroups:
   # Hadoop client
   # ##############################################################
   - name: Hadoop client
-    singleArtifacts:
-      - id: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
+    multiArtifacts:
+      - group: org.apache.hadoop
+        version: ${hadoop_version}
         transitiveSourceDepth: 3
-        
+        artifacts:
+          - hadoop-client
+          - hadoop-aws
+
+    singleArtifacts:
       # a transitive but excluded dependency of hadoop-client. Unfortunately
       # the prebundled org.apache.directory.api.util does not resolve without it.
       - id: org.apache.directory.api:api-i18n:1.0.0-M20
@@ -1161,4 +1194,3 @@ artifactGroups:
     singleArtifacts:
       - id: org.apache.livy:livy-client-http:0.4.1.knime3
         transitiveSourceDepth: 2
-
