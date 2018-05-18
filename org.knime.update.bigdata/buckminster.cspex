@@ -13,6 +13,10 @@
     <dependency name="org.mortbay.jetty.server" componentType="osgi.bundle"/>
     <dependency name="com.fasterxml.jackson.module.jackson-module-jaxb-annotations" versionDesignator="2.7.0" componentType="osgi.bundle"/>
     <dependency name="stax2-api" versionDesignator="3.1.0" componentType="osgi.bundle"/>
+    <dependency name="com.amazonaws.aws-java-sdk-core" componentType="osgi.bundle"/>
+    <dependency name="com.amazonaws.aws-java-sdk-kms" componentType="osgi.bundle"/>
+    <dependency name="com.amazonaws.aws-java-sdk-s3" componentType="osgi.bundle"/>
+    <dependency name="com.amazonaws.jmespath-java" componentType="osgi.bundle"/>
   </dependencies>
 
   <actions>
