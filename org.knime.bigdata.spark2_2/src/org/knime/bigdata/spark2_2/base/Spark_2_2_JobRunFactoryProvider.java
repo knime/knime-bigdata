@@ -71,8 +71,10 @@ import org.knime.bigdata.spark2_2.jobs.statistics.compute.StatisticsJobRunFactor
 import org.knime.bigdata.spark2_2.jobs.statistics.correlation.CorrelationColumnJobRunFactory;
 import org.knime.bigdata.spark2_2.jobs.statistics.correlation.CorrelationMatrixJobRunFactory;
 import org.knime.bigdata.spark2_2.jobs.table2spark.Table2SparkJobRunFactory;
+import org.knime.bigdata.spark2_2.jobs.util.CheckJarPresenceJobRunFactory;
 import org.knime.bigdata.spark2_2.jobs.util.PersistJobRunFactory;
 import org.knime.bigdata.spark2_2.jobs.util.UnpersistJobRunFactory;
+import org.knime.bigdata.spark2_2.jobs.util.UploadJarJobRunFactory;
 
 /**
  *
@@ -136,6 +138,8 @@ public class Spark_2_2_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new PersistJobRunFactory(),
             new UnpersistJobRunFactory(),
             new SparkSQLJobRunFactory(),
-            new SparkSQLFunctionsJobRunFactory());
+            new SparkSQLFunctionsJobRunFactory(),
+            new CheckJarPresenceJobRunFactory(),
+            new UploadJarJobRunFactory());
     }
 }
