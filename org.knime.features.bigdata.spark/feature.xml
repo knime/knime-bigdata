@@ -731,6 +731,10 @@ propagated with or for interoperation with KNIME.
          id="org.knime.features.bigdata.connectors"
          version="0.0.0"/>
 
+   <includes
+         id="com.knime.features.pmml.compilation.java.jario"
+         version="0.0.0"/>
+
    <plugin
          id="org.knime.bigdata.spark.core"
          download-size="0"

@@ -24,6 +24,7 @@
     <module>org.knime.bigdata.filehandling</module>
     <module>org.knime.bigdata.hive</module>
     <module>org.knime.bigdata.impala</module>
+    <module>org.knime.bigdata.parquet</module>
     <module>org.knime.bigdata.scripting</module>
     <module>org.knime.bigdata.spark.core</module>
     <module>org.knime.bigdata.spark.core.sparkjobserver</module>
