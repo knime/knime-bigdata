@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OrcWriter-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.knime.bigdata.orc; singleton:=true
+Bundle-Version: 1.0.0
+Bundle-ClassPath: orcwriter.jar
+Bundle-Vendor: 
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core,
+ org.knime.workbench.repository,
+ org.knime.base,
+ org.knime.base.filehandling,
+ org.knime.cloud.core,
+ org.knime.orc,
+ org.apache.orc.core,
+ org.knime.bigdata.filehandling
+Bundle-ActivationPolicy: lazy
+Export-Package: org.knime.bigdata.orc.node.reader
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+
