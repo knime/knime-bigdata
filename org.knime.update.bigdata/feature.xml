@@ -32,4 +32,8 @@
          id="org.knime.features.ext.h2o.mojo.spark"
          version="0.0.0"/>
 
+   <includes
+         id="org.knime.features.parquet"
+         version="0.0.0"/>
+
 </feature>
