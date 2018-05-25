@@ -31,6 +31,7 @@ node {
 			repos: [
 				[name : 'knime-bigdata'],
 				[name : 'knime-config'],
+				[name : 'knime-filehandling'],
 				[name : 'knime-jenkins'],
 				[name : 'knime-h2o'],
 				[name : 'knime-orc'],
