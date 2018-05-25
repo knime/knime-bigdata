@@ -30,6 +30,7 @@ node {
 			credentialsId: 'bitbucket-jenkins',
 			repos: [
 				[name : 'knime-bigdata'],
+				[name : 'knime-cloud'],
 				[name : 'knime-config'],
 				[name : 'knime-filehandling'],
 				[name : 'knime-jenkins'],
