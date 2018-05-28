@@ -60,7 +60,7 @@ public class LocalSparkWrapperFactory {
 		// put io.nettyo on the package blacklist in the bundleDelegatingLoader,
 		// because the hadoop bundle has this package on its classpath but in a version
 		// that is older than the one in Spark. Otherwise we get NoSuchMethod exceptions.
-		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(new String[] { "io.netty" },
+		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(new String[] { "io.netty", "com.fasterxml.jackson" },
 				scalaLibraryBundle,
 				scalaReflectBundle,
 				scalaCompilerBundle,
