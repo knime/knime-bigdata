@@ -38,8 +38,6 @@ import org.knime.bigdata.spark1_2.api.NamedObjects;
 import org.knime.bigdata.spark1_2.api.RDDUtilsInJava;
 import org.knime.bigdata.spark1_2.api.SparkJob;
 
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-
 /**
  * Computes correlation
  *
@@ -62,7 +60,7 @@ public abstract class CorrelationJob<O extends JobOutput> implements SparkJob<Co
         LOGGER.info("starting Correlation Computation job...");
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
         final List<Integer> colIdxs = input.getColumnIdxs();
-        final JavaRDD<Vector> data = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
+        final JavaRDD<Vector> data = RDDUtilsInJava.toVectorRdd(rowRDD, colIdxs);
         final Matrix mat = Statistics.corr(data.rdd(), input.getMethod().toString().toLowerCase());
         final O output = createJobOutput(mat);
         if (input.hasFirstNamedOutputObject()) {

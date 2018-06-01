@@ -23,7 +23,6 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.util.MyJoinKey;
 
 import com.google.common.base.Optional;
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 import scala.Tuple2;
 
@@ -46,8 +45,7 @@ public class ModelUtils {
     public static <T> JavaRDD<Row> predict(final List<Integer> includeColumnIndices, final JavaRDD<Row> rowRdd,
         final T model) throws Exception {
       //use only the column indices when converting to vector
-        final JavaRDD<Vector> vectorRdd =
-            RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRdd, includeColumnIndices);
+        final JavaRDD<Vector> vectorRdd = RDDUtilsInJava.toVectorRdd(rowRdd, includeColumnIndices);
         return predict(vectorRdd, rowRdd, model);
     }
 
@@ -94,7 +92,24 @@ public class ModelUtils {
             throw new Exception("Unknown model type: " + aModel.getClass());
         }
 
-        return RDDUtils.addColumn(rowRDD.zip(predictions));
+        return addColumn(rowRDD.zip(predictions));
+    }
+
+    /**
+     * Appends a value as new column to a row.
+     *
+     * @param pairs pair of row and a value
+     * @return row with appended value
+     */
+    public static <T> JavaRDD<Row> addColumn(final JavaPairRDD<Row, T> pairs) {
+        return pairs.map(new Function<Tuple2<Row, T>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Tuple2<Row, T> pair) throws Exception {
+                return RowBuilder.fromRow(pair._1).add(pair._2).build();
+            }
+        });
     }
 
     /**

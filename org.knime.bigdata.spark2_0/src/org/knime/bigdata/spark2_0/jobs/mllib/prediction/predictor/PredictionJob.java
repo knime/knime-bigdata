@@ -81,7 +81,7 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
 
         } else {
             final StructType predictSchema = TypeConverters.convertSpec(input.getSpec(outputKey));
-            final JavaRDD<Row> predictedData = ModelUtils.predict(input.getIncludeColumnIndices(), inputDataset.javaRDD(), model);
+            final JavaRDD<Row> predictedData = ModelUtils.predict(input.getIncludeColumnIndices(), inputDataset, model);
             outputDataset = spark.createDataFrame(predictedData, predictSchema);
         }
 

@@ -20,14 +20,20 @@
  */
 package org.knime.bigdata.spark2_2.jobs.preproc.convert.number2category;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -66,9 +72,8 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
      */
     private static Dataset<Row> execute(final Dataset<Row> input, final ColumnBasedValueMapping map,
             final boolean keepOriginalColumns, final String colSuffix) {
-        final SparkSession spark = SparkSession.builder().getOrCreate();
-        final List<Integer> idxs = map.getColumnIndices();
-        final Function<Row, Row> function = new Function<Row, Row>(){
+        final Set<Integer> idxs = new HashSet<>(map.getColumnIndices());
+        final MapFunction<Row, Row> function = new MapFunction<Row, Row>(){
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -90,8 +95,39 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
                 return rowBuilder.build();
             }
         };
-        final StructType schema = RDDUtilsInJava.createSchema(input, map, keepOriginalColumns, colSuffix);
+        final StructType schema = createSchema(input, map, keepOriginalColumns, colSuffix);
+        return input.map(function, RowEncoder.apply(schema));
+    }
 
-        return spark.createDataFrame(input.javaRDD().map(function), schema);
+    /**
+     * Create a number to category schema.
+     *
+     * @param dataset
+     * @param map
+     * @param keepOriginalColumns
+     * @param colSuffix column suffix to append
+     * @return Number to category schema
+     */
+    public static StructType createSchema(final Dataset<Row> dataset, final ColumnBasedValueMapping map,
+            final boolean keepOriginalColumns, final String colSuffix) {
+
+        StructType schema = dataset.schema();
+        List<Integer> columnIdsList = map.getColumnIndices();
+        Collections.sort(columnIdsList);
+        List<StructField> fields = new ArrayList<>();
+        StructField oldFields[] = schema.fields();
+
+        for (int i = 0; i < oldFields.length; i++) {
+            if (keepOriginalColumns || !columnIdsList.contains(i)) {
+                fields.add(oldFields[i]);
+            }
+        }
+
+        for (int idx : columnIdsList) {
+            String name = oldFields[idx].name() + colSuffix;
+            fields.add(DataTypes.createStructField(name, DataTypes.StringType, false));
+        }
+
+        return DataTypes.createStructType(fields);
     }
 }

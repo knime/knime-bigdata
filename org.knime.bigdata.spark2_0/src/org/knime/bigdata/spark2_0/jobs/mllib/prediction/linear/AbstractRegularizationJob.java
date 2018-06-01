@@ -15,6 +15,7 @@ import org.apache.spark.mllib.optimization.SimpleUpdater;
 import org.apache.spark.mllib.optimization.SquaredL2Updater;
 import org.apache.spark.mllib.optimization.Updater;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -46,8 +47,8 @@ implements SparkJob<I, ModelJobOutput> {
         getLogger().info("starting " + getAlgName() + " job...");
 
         //note that the column in the input RDD should be normalized into 0-1 ranges
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, dataset);
 
         inputRdd.cache();
         final Serializable model = execute(sparkContext, input, inputRdd);

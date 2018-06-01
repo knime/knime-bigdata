@@ -1,30 +1,24 @@
 package org.knime.bigdata.spark2_1.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.classification.LogisticRegressionModel;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.classification.SVMModel;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
-import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.mllib.regression.LinearRegressionModel;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.MyJoinKey;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 import scala.Tuple2;
 
@@ -40,18 +34,17 @@ public class ModelUtils {
 
     /**
      * @param includeColumnIndices indices of columns to be used for prediction
-     * @param rowRdd original data
+     * @param dataset original data
      * @param model model to be applied
      * @return original data with appended column containing predictions
      * @throws Exception thrown when model type cannot be handled
      */
     @Deprecated
-    public static <T> JavaRDD<Row> predict(final List<Integer> includeColumnIndices, final JavaRDD<Row> rowRdd,
+    public static <T> JavaRDD<Row> predict(final List<Integer> includeColumnIndices, final Dataset<Row> dataset,
         final T model) throws Exception {
       //use only the column indices when converting to vector
-        final JavaRDD<Vector> vectorRdd =
-            RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRdd, includeColumnIndices);
-        return predict(vectorRdd, rowRdd, model);
+        final JavaRDD<Vector> vectorRdd = RDDUtilsInJava.toVectorRdd(dataset, includeColumnIndices);
+        return predict(vectorRdd, dataset.javaRDD(), model);
     }
 
     /**
@@ -98,48 +91,24 @@ public class ModelUtils {
             throw new Exception("Unknown model type: " + aModel.getClass());
         }
 
-        return RDDUtils.addColumn(rowRDD.zip(predictions));
+        return addColumn(rowRDD.zip(predictions));
     }
 
     /**
+     * Appends a value as new column to a row.
      *
-     * @param aRowRdd
-     * @param aUserProductInfo
-     * @param aProductIdx
-     * @param aUserIdx
-     * @param aModel
-     * @return original data plus one new column with predicted ratings
+     * @param pairs pair of row and a value
+     * @return row with appended value
      */
-    @Deprecated
-    public static JavaRDD<Row> predict(final JavaRDD<Row> aRowRdd, final JavaRDD<Rating> aUserProductInfo,
-        final int aUserIdx, final int aProductIdx, final MatrixFactorizationModel aModel) {
-        // apply the model to user/product data
-        final JavaPairRDD<Integer, Integer> userProducts =
-            JavaPairRDD.fromJavaRDD(aUserProductInfo.map(new Function<Rating, Tuple2<Integer, Integer>>() {
-                private static final long serialVersionUID = 1L;
-                @Override
-                public Tuple2<Integer, Integer> call(final Rating r) {
-                    return new Tuple2<>(r.user(), r.product());
-                }
-            }));
-        final JavaRDD<Rating> userProductsAndPredictions = aModel.predict(userProducts);
+    private static <T> JavaRDD<Row> addColumn(final JavaPairRDD<Row, T> pairs) {
+        return pairs.map(new Function<Tuple2<Row, T>, Row>() {
+            private static final long serialVersionUID = 1L;
 
-        final JavaRDD<Row> predictions = RDDUtilsInJava.convertRatings2RowRDDRdd(userProductsAndPredictions);
-        // join again with original data, use left outer join since predict does not necessarily return a prediction for each
-        // record
-        final JavaPairRDD<MyJoinKey, Row> leftRdd =
-            RDDUtilsInJava.extractKeys(aRowRdd, new Integer[]{aUserIdx, aProductIdx});
-
-        final JavaPairRDD<MyJoinKey, Row> rightRdd = RDDUtilsInJava.extractKeys(predictions, new Integer[]{0, 1});
-        final JavaRDD<Tuple2<Row, Optional<Row>>> joinedRdd = leftRdd.leftOuterJoin(rightRdd).values();
-        final List<Integer> predictedRatingIdx = new ArrayList<>();
-        predictedRatingIdx.add(2);
-        final int nFeatures = aRowRdd.take(1).get(0).length();
-        final List<Integer> origIdx = new ArrayList<>();
-        for (int i = 0; i < nFeatures; i++) {
-            origIdx.add(i);
-        }
-        return RDDUtilsInJava.mergeRows(joinedRdd, origIdx, predictedRatingIdx);
+            @Override
+            public Row call(final Tuple2<Row, T> pair) throws Exception {
+                return RowBuilder.fromRow(pair._1).add(pair._2).build();
+            }
+        });
     }
 
     /**

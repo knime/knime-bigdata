@@ -29,15 +29,15 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.stat.MultivariateStatisticalSummary;
 import org.apache.spark.mllib.stat.Statistics;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ColumnsJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.statistics.compute.StatisticsJobOutput;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
+import org.knime.bigdata.spark2_2.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_2.api.SparkJob;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * computes multivariate statistics from input data frame and given indices
@@ -54,9 +54,9 @@ public class StatisticsJob implements SparkJob<ColumnsJobInput, StatisticsJobOut
         throws KNIMESparkException, Exception {
 
         LOGGER.info("Starting Multivariate Statistics job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final List<Integer> colIdxs = input.getColumnIdxs();
-        final JavaRDD<Vector> data = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRDD, colIdxs);
+        final JavaRDD<Vector> data = RDDUtilsInJava.toVectorRdd(dataset, colIdxs);
         MultivariateStatisticalSummary stats = Statistics.colStats(data.rdd());
         LOGGER.log(Level.INFO, "Multivariate Statistics done");
         return new StatisticsJobOutput(stats.count(), stats.min().toArray(), stats.max().toArray(),

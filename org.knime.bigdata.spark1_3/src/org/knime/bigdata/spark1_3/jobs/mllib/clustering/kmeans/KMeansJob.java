@@ -35,9 +35,8 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.KMeansJobInput;
 import org.knime.bigdata.spark1_3.api.ModelUtils;
 import org.knime.bigdata.spark1_3.api.NamedObjects;
+import org.knime.bigdata.spark1_3.api.RDDUtilsInJava;
 import org.knime.bigdata.spark1_3.api.SparkJob;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * runs MLlib KMeans on a given RDD, model is returned as result
@@ -66,8 +65,7 @@ public class KMeansJob implements SparkJob<KMeansJobInput, ModelJobOutput> {
         final JavaRDD<Row> rowRdd = namedObjects.getJavaRdd(input.getNamedInputObjects().get(0));
 
         //use only the column indices when converting to vector
-        final JavaRDD<Vector> vectorRdd =
-            RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(rowRdd, input.getColumnIdxs());
+        final JavaRDD<Vector> vectorRdd = RDDUtilsInJava.toVectorRdd(rowRdd, input.getColumnIdxs());
         vectorRdd.cache();
         // Cluster the data into m_noOfCluster classes using KMeans
         final KMeansModel model = KMeans.train(vectorRdd.rdd(), input.getNoOfClusters(),

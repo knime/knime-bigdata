@@ -47,8 +47,6 @@ import scala.Tuple2;
 @SparkClass
 public class RDDUtilsInJava {
 
-    //TODO: Improve missing value handling in scala     RDDUtils line 157 in getDouble() method
-
     /**
      * (Java friendly version) convert nominal values in columns for given column indices to integers and append columns
      * with mapped values
@@ -76,16 +74,21 @@ public class RDDUtilsInJava {
      * apply the given mapping to the given input RDD
      *
      * @param aInputRdd
-     * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
+     * @param columnIndices indices of columns to be mapped, columns that have no mapping are ignored
      * @param aMappings
      * @param aKeepOriginalColumns - keep original columns as well or not
      * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
      * @return JavaRDD<Row> with converted data (columns are appended)
      */
-    public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aColumnIds,
+    public static JavaRDD<Row> applyLabelMapping(final JavaRDD<Row> aInputRdd, final int[] columnIndices,
         final NominalValueMapping aMappings, final boolean aKeepOriginalColumns) {
 
-        JavaRDD<Row> rddWithConvertedValues = aInputRdd.map(new Function<Row, Row>() {
+        final Set<Integer> inputColIndices = new HashSet<Integer>(columnIndices.length);
+        for (int colIdx : columnIndices) {
+            inputColIndices.add(colIdx);
+        }
+
+        return aInputRdd.map(new Function<Row, Row>() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -94,9 +97,9 @@ public class RDDUtilsInJava {
                 if (aKeepOriginalColumns) {
                     builder = RowBuilder.fromRow(row);
                 } else {
-                    builder = dropColumnsFromRow(aColumnIds, row);
+                    builder = dropColumnsFromRow(inputColIndices, row);
                 }
-                for (int ix : aColumnIds) {
+                for (int ix : columnIndices) {
                     //ignore columns that have no mapping
                     if (aMappings.hasMappingForColumn(ix)) {
                         Object val = row.get(ix);
@@ -122,7 +125,6 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-        return rddWithConvertedValues;
     }
 
     /**
@@ -130,7 +132,7 @@ public class RDDUtilsInJava {
      * @param aRow
      * @return rowBuilder with subset of columns already added
      */
-    public static RowBuilder dropColumnsFromRow(final List<Integer> aColumnIdsToDrop, final Row aRow) {
+    public static RowBuilder dropColumnsFromRow(final Set<Integer> aColumnIdsToDrop, final Row aRow) {
         final RowBuilder builder;
         builder = RowBuilder.emptyRow();
         for (int ix = 0; ix < aRow.length(); ix++) {
@@ -139,14 +141,6 @@ public class RDDUtilsInJava {
             }
         }
         return builder;
-    }
-
-    private static RowBuilder dropColumnsFromRow(final int[] aColumnIdsToDrop, final Row aRow) {
-        List<Integer> cols = new ArrayList<>();
-        for (int ix : aColumnIdsToDrop) {
-            cols.add(ix);
-        }
-        return dropColumnsFromRow(cols, aRow);
     }
 
     /**
@@ -282,7 +276,7 @@ public class RDDUtilsInJava {
         columnIndices.addAll(aColumnIndices);
         Collections.sort(columnIndices);
 
-        JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
+        JavaRDD<Vector> mat = toVectorRdd(aInputRdd, columnIndices);
 
         // Compute column summary statistics.
         MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());
@@ -329,78 +323,88 @@ public class RDDUtilsInJava {
     }
 
     /**
-     * Note that now only the class label is converted (no matter whether it is already numeric or not)
+     * Convert a RDD of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric
      *
-     * convert a RDD of Rows to JavaRDD of LabeledPoint, the string label column is converted to integer values, all
-     * other indices must be numeric
-     *
-     * @param aInputRdd Row RDD to be converted
-     * @param aColumnIndices column selector (and, possibly, re-ordering)
-     * @param aLabelColumnIndex index of label column (can be numeric or string)
+     * @param inputRdd Row RDD to be converted
+     * @param columnIndicesList column selector (and, possibly, re-ordering)
+     * @param labelColumnIndex index of label column (must be numeric)
      * @return container with mapped data and mapping
-     * @throws IllegalArgumentException if values are encountered that are neither numeric nor string
+     * @throws IllegalArgumentException if values are encountered that are not numeric, <code>null</code> or <code>NaN</code>
      */
-    public static LabeledDataInfo toJavaLabeledPointRDDConvertNominalValues(final JavaRDD<Row> aInputRdd,
-        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
-        final NominalValueMapping labelMapping =
-            toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
-        final JavaRDD<LabeledPoint> labeledRdd =
-            toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, labelMapping);
-
-        return new LabeledDataInfo(labeledRdd, labelMapping);
-    }
-
-    private static JavaRDD<LabeledPoint>
-        toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex, final NominalValueMapping labelMapping) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length() - 1);
+    public static JavaRDD<LabeledPoint> toLabeledPointRDD(final JavaRDD<Row> inputRdd,
+        final List<Integer> columnIndicesList, final int labelColumnIndex) {
+        final Integer[] columnIndices = columnIndicesList.toArray(new Integer[0]);
 
         return inputRdd.map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public LabeledPoint call(final Row row) {
-                int insertionIndex = 0;
-                final double[] convertedValues = new double[numFeatures];
-                for (int idx : aColumnIndices) {
-                    if (idx != labelColumnIndex && idx < row.length()) {
-                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
-                        insertionIndex += 1;
-                    }
-                }
-                final double label;
-                if (labelMapping != null) {
-                    label =
-                        labelMapping.getNumberForValue(labelColumnIndex, row.get(labelColumnIndex).toString())
-                            .doubleValue();
-                } else {
-                    //no mapping given - label must already be numeric
-                    label = RDDUtils.getDouble(row, labelColumnIndex);
-                }
-                return new LabeledPoint(label, Vectors.dense(convertedValues));
+                return new LabeledPoint(getDouble(row, labelColumnIndex), toVector(row, columnIndices));
             }
         });
     }
 
-    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length());
+    /**
+     * Extract values from given column indices into a vector.
+     *
+     * @param inputRdd input RDD with numeric or boolean values
+     * @param columnIndicesList indices of columns to use
+     * @return RDD with vectors
+     */
+    public static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> columnIndicesList) {
+        final Integer[] columnIndices = columnIndicesList.toArray(new Integer[0]);
 
         return inputRdd.map(new Function<Row, Vector>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Vector call(final Row row) {
-                int insertionIndex = 0;
-                final double[] convertedValues = new double[numFeatures];
-                for (int idx : aColumnIndices) {
-                    if (idx < row.length()) {
-                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
-                        insertionIndex += 1;
-                    }
-                }
-
-                return Vectors.dense(convertedValues);
+                return toVector(row, columnIndices);
             }
         });
+    }
+
+    private static Vector toVector(final Row row, final Integer columnIndices[]) {
+        final double[] values = new double[columnIndices.length];
+        for (int i = 0; i < columnIndices.length; i++) {
+            values[i] = getDouble(row, columnIndices[i]);
+        }
+        return Vectors.dense(values);
+    }
+
+    /**
+     * Returns a numeric or boolean value as double and fails on other types, <code>null</code> or <code>NaN</code>
+     * values. This is the same behavior like the VectorAssembler in Spark has, therefore use this method only to create
+     * vectors where VectorAssembler is not an option (RDD/Spark 1.x).
+     *
+     * @param row with numeric or boolean values
+     * @param index column index to extract
+     * @return value as double
+     * @throws IllegalArgumentException on <code>null</code> or <code>NaN</code> values
+     * @throws IllegalArgumentException if value is not a numeric or boolean value
+     */
+    public static double getDouble(final Row row, final int index) {
+        final Object o = row.get(index);
+
+        if (o == null) {
+            throw new IllegalArgumentException(
+                String.format("Unsupported missing value at column index %d detected.", index));
+        } else if (o instanceof Number) {
+            final double d = ((Number)o).doubleValue();
+            if (Double.isNaN(d)) {
+                throw new IllegalArgumentException(
+                    String.format("Unsupported NaN value at column index %d detected.", index));
+            } else {
+                return d;
+            }
+        } else if (o instanceof Boolean) {
+            return ((boolean)o) ? 1d : 0d;
+        } else {
+            throw new IllegalArgumentException(
+                String.format("Unsupported non-numeric value type '%s' at column index %d detected.",
+                    o.getClass(), index));
+        }
     }
 
     private static JavaRDD<Row> fromVectorRdd(final JavaRDD<Vector> aInputRdd) {
@@ -417,21 +421,6 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-    }
-
-    /**
-     *
-     * convert a RDD of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric
-     *
-     * @param aInputRdd Row RDD to be converted
-     * @param aColumnIndices column selector (and, possibly, re-ordering)
-     * @param aLabelColumnIndex index of label column (must be numeric)
-     * @return container with mapped data and mapping
-     * @throws IllegalArgumentException if values are encountered that are not numeric
-     */
-    public static JavaRDD<LabeledPoint> toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd,
-        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
-        return toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, null);
     }
 
     /**

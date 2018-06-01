@@ -30,6 +30,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.RandomForest;
 import org.apache.spark.mllib.tree.model.RandomForestModel;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -58,8 +59,8 @@ public class RandomForestJob implements SparkJob<RandomForestJobInput, ModelJobO
     public ModelJobOutput runJob(final SparkContext sparkContext, final RandomForestJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
         LOGGER.log(Level.INFO, "starting Random Forest learner job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, dataset);
         final boolean isClassification = input.isClassification();
         //cache the input object to speed up computation
         inputRdd.cache();
@@ -84,7 +85,7 @@ public class RandomForestJob implements SparkJob<RandomForestJobInput, ModelJobO
             model = RandomForest.trainRegressor(inputRdd, nominalFeatureInfo, numTrees, featureSubSetStrategy, impurity,
                 maxDepth, maxBins, seed);
         }
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model);
+        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, dataset.javaRDD(), inputRdd, model);
         LOGGER.log(Level.INFO, "Random Forest Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);

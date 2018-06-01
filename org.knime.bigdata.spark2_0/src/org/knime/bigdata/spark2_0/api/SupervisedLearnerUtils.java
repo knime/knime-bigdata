@@ -38,8 +38,6 @@ import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobI
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-
 /**
  *
  * @author dwk
@@ -56,14 +54,14 @@ public class SupervisedLearnerUtils {
 
     /**
      * @param input
-     * @param aRowRDD
+     * @param dataset
      * @return LabeledPoint RDD with training data
      */
-    public static JavaRDD<LabeledPoint> getTrainingData(final ClassificationJobInput input, final JavaRDD<Row> aRowRDD) {
+    public static JavaRDD<LabeledPoint> getTrainingData(final ClassificationJobInput input, final Dataset<Row> dataset) {
         final List<Integer> colIdxs = input.getColumnIdxs();
         //note: requires that all features (including the label) are numeric !!!
         final Integer labelIndex = input.getClassColIdx();
-        final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toJavaLabeledPointRDD(aRowRDD, colIdxs, labelIndex);
+        final JavaRDD<LabeledPoint> inputRdd = RDDUtilsInJava.toLabeledPointRDD(dataset, colIdxs, labelIndex);
         return inputRdd;
     }
 
@@ -79,7 +77,24 @@ public class SupervisedLearnerUtils {
     public static void storePredictions(final SparkContext sparkContext, final NamedObjects namedObjects,
         final JobInput input, final JavaRDD<Row> rowRDD, final JavaRDD<LabeledPoint> inputRdd,
         final Serializable model) throws Exception {
-        storePredictions(sparkContext, input, namedObjects, rowRDD, RDDUtils.toVectorRDDFromLabeledPointRDD(inputRdd), model);
+        storePredictions(sparkContext, input, namedObjects, rowRDD, toVectorRDDFromLabeledPointRDD(inputRdd), model);
+    }
+
+    /**
+     * Extracts features from {@link LabeledPoint}s.
+     *
+     * @param inputRdd RDD of labeled points
+     * @return features of labeled points
+     */
+    private static JavaRDD<Vector> toVectorRDDFromLabeledPointRDD(final JavaRDD<LabeledPoint> inputRdd) {
+        return inputRdd.map(new Function<LabeledPoint, Vector>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Vector call(final LabeledPoint point) {
+                return point.features();
+            }
+        });
     }
 
     /**

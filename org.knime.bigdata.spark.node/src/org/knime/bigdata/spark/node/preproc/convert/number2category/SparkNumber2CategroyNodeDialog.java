@@ -38,6 +38,7 @@ public class SparkNumber2CategroyNodeDialog extends DefaultNodeSettingsPane {
     SparkNumber2CategroyNodeDialog() {
         final SettingsModelBoolean keepModel = SparkNumber2CategoryNodeModel.createKeepOriginalColsModel();
         final SettingsModelString suffixModel = SparkNumber2CategoryNodeModel.createColSuffixModel();
+        suffixModel.setEnabled(keepModel.getBooleanValue());
         keepModel.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(final ChangeEvent e) {

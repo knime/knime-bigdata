@@ -211,6 +211,10 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
             tableSpec.findColumnIndex(m_secondCompareColumn));
         final ScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
+        if (jobOutput.getRowCount() == 0) {
+            throw new IllegalArgumentException("Empty input Spark DataFrame/RDD.");
+        }
+
         m_viewData = createViewData(jobOutput, tableSpec);
 
         pushFlowVars(false);
@@ -285,9 +289,19 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
         return new Comparator<Object>() {
             @Override
             public int compare(final Object o1, final Object o2) {
-                return sign * Double.compare(((Number)o1).doubleValue(), ((Number)o2).doubleValue());
+                return sign * Double.compare(getDouble(o1), getDouble(o2));
             }
         };
+    }
+
+    private double getDouble(final Object o) {
+        if (o instanceof Number) {
+            return ((Number)o).doubleValue();
+        } else if (o instanceof Boolean) {
+            return ((boolean)o) ? 1d : 0d;
+        } else {
+            throw new IllegalArgumentException("Unsopported data type for numerical sorting: " + o.getClass());
+        }
     }
 
     @SuppressWarnings("unchecked")

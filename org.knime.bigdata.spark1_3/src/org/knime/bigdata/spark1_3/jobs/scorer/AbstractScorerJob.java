@@ -79,6 +79,6 @@ public abstract class AbstractScorerJob implements SparkJob<ScorerJobInput, JobO
      * @param rowRDD
      * @return
      */
-    protected abstract JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD);
+    protected abstract JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) throws KNIMESparkException;
 
 }

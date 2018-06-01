@@ -20,8 +20,8 @@ xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
 	The computed values can be inspected in the node's view and/or further
 	processed using the output table.
 		</intro>
-		<option name="Reference column">Column with the correct, observed, training data values.</option>
-		<option name="Predicted column">Column with the modeled, predicted data values.</option>
+		<option name="Reference column">Column with the correct, observed, training data values. Rows with missing values in selected column will be ignored.</option>
+		<option name="Predicted column">Column with the modeled, predicted data values. Computation will fail if selected column contains missing values.</option>
 		<option name="Change column name">Change the default output column name.</option>
 		<option name="Output column name">The name of the column in the output.</option>
 		<option name="Output scores as flow variables">

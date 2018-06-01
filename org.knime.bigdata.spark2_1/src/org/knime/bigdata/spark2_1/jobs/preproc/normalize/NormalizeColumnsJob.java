@@ -22,9 +22,8 @@ import org.knime.bigdata.spark.node.preproc.normalize.NormalizeJobOutput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.NormalizedDataFrameContainer;
 import org.knime.bigdata.spark2_1.api.NormalizedDataFrameContainerFactory;
+import org.knime.bigdata.spark2_1.api.RDDUtilsInJava;
 import org.knime.bigdata.spark2_1.api.SparkJob;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
 /**
  * @author dwk
@@ -43,7 +42,7 @@ public class NormalizeColumnsJob implements SparkJob<NormalizeJobInput, Normaliz
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final Integer[] cols = input.getIncludeColIdxs();
-        final MultivariateStatisticalSummary stats = findColumnStats(inputDataset.javaRDD(), Arrays.asList(cols));
+        final MultivariateStatisticalSummary stats = findColumnStats(inputDataset, Arrays.asList(cols));
         final NormalizedDataFrameContainer normalizeContainer =
               NormalizedDataFrameContainerFactory.getNormalizedRDDContainer(stats, input.getNormalizationSettings());
 
@@ -56,20 +55,20 @@ public class NormalizeColumnsJob implements SparkJob<NormalizeJobInput, Normaliz
 
 
     /**
-     * Convert given RDD to an RDD<Vector> with selected columns and compute statistics for these columns
+     * Convert given dataset to an RDD<Vector> with selected columns and compute statistics for these columns
      *
-     * @param aInputRdd
+     * @param inputDataset
      * @param aColumnIndices
      * @return MultivariateStatisticalSummary
      */
-    private MultivariateStatisticalSummary findColumnStats(final JavaRDD<Row> aInputRdd,
+    private MultivariateStatisticalSummary findColumnStats(final Dataset<Row> inputDataset,
         final Collection<Integer> aColumnIndices) {
 
         List<Integer> columnIndices = new ArrayList<>();
         columnIndices.addAll(aColumnIndices);
         Collections.sort(columnIndices);
 
-        JavaRDD<Vector> mat = RDDUtils.toJavaRDDOfVectorsOfSelectedIndices(aInputRdd, columnIndices);
+        JavaRDD<Vector> mat = RDDUtilsInJava.toVectorRdd(inputDataset, columnIndices);
 
         // Compute column summary statistics.
         MultivariateStatisticalSummary summary = Statistics.colStats(mat.rdd());

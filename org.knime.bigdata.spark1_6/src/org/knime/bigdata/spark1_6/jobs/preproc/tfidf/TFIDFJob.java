@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.feature.HashingTF;
@@ -35,9 +36,10 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.preproc.tfidf.TFIDFJobInput;
 import org.knime.bigdata.spark1_6.api.NamedObjects;
+import org.knime.bigdata.spark1_6.api.RowBuilder;
 import org.knime.bigdata.spark1_6.api.SimpleSparkJob;
 
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import scala.Tuple2;
 
 /**
  * splits a given string column into a word vector and adds the vector to an RDD
@@ -117,6 +119,22 @@ public class TFIDFJob implements SimpleSparkJob<TFIDFJobInput> {
         final IDFModel idf = new IDF(minFrequency).fit(tf);
         JavaRDD<Vector> tfidf =  idf.transform(tf);
 
-        return RDDUtils.addColumn(aRowRDD.zip(tfidf));
+        return addColumn(aRowRDD.zip(tfidf));
+    }
+    /**
+     * Appends a value as new column to a row.
+     *
+     * @param pairs pair of row and a value
+     * @return row with appended value
+     */
+    private static <T> JavaRDD<Row> addColumn(final JavaPairRDD<Row, T> pairs) {
+        return pairs.map(new Function<Tuple2<Row, T>, Row>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Row call(final Tuple2<Row, T> pair) throws Exception {
+                return RowBuilder.fromRow(pair._1).add(pair._2).build();
+            }
+        });
     }
 }

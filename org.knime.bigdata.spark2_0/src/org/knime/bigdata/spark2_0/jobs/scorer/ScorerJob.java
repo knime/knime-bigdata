@@ -20,102 +20,68 @@
  */
 package org.knime.bigdata.spark2_0.jobs.scorer;
 
+import static org.apache.spark.sql.functions.abs;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.mean;
+import static org.apache.spark.sql.functions.not;
+import static org.apache.spark.sql.functions.pow;
+import static org.apache.spark.sql.functions.sum;
+
 import org.apache.log4j.Logger;
-import org.apache.spark.api.java.JavaDoubleRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataTypes;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
 
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
-
 /**
- * computes classification / regression scores
+ * Computes classification / regression scores
  *
- * @author dwk
+ * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
 public class ScorerJob extends AbstractScorerJob {
-
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(ScorerJob.class.getName());
 
-    private final static int REFERENCE_IX = 0;
-    private final static int ABBS_ERROR_IX = 1;
-    private final static int SQUARED_ERROR_IX =2 ;
-    private final static int SIGNED_DIFF_IX = 3;
-
-    //  - Numeric Scorer liefert R^2, mean absolute error, mean absolute error,
-    //    root mean square error und mean signed difference. In KNIME ist das die
-    //    Klasse org.knime.base.node.mine.scorer.numeric.NumericScorerNodeModel
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
-        final Integer classCol = input.getActualColIdx();
-        final Integer predictionCol = input.getPredictionColIdx();
+    protected JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) throws KNIMESparkException {
 
-        final JavaRDD<Row> filtered = rowRDD.filter(new Function<Row, Boolean>() {
-            private static final long serialVersionUID = 1L;
+        final String refCol = dataset.columns()[input.getActualColIdx()]; // ignore rows with missing values
+        final String predictionCol = dataset.columns()[input.getPredictionColIdx()]; // fail on missing values
 
-            @Override
-            public Boolean call(final Row aRow) throws Exception {
-                return !aRow.isNullAt(classCol);
-            }
-        });
-        final JavaRDD<Double[]> stats = filtered.map(new Function<Row, Double[]>() {
-            private static final long serialVersionUID = 1L;
+        final Dataset<Row> filtered = dataset
+                .select(col(refCol).cast(DataTypes.DoubleType), col(predictionCol).cast(DataTypes.DoubleType))
+                .where(col(refCol).isNotNull().and(not(col(refCol).isNaN()))).toDF(); // drop rows with missing reference column
 
-            @Override
-            public Double[] call(final Row aRow) {
+        final long count = filtered.count();
+        if (count == 0) {
+            throw new KNIMESparkException("Unsupported empty input dataset detected.");
+        }
 
-                final double ref = RDDUtils.getDouble(aRow, classCol);
-                final double pred = RDDUtils.getDouble(aRow, predictionCol);
-                //observed, abs err, squared error, signed diff
-                return new Double[]{ref, Math.abs(ref - pred), Math.pow(ref - pred, 2.0), pred - ref};
-            }
-        });
+        if (filtered.where(col(predictionCol).isNull().or(col(predictionCol).isNaN())).count() > 0) {
+            throw new KNIMESparkException(
+                String.format("Unsupported missing values in prediction column '%s' detected.", predictionCol));
+        }
 
-        Double[] means = stats.reduce(new Function2<Double[], Double[], Double[]>() {
-            private static final long serialVersionUID = 1L;
+        final Row stats = filtered.select(
+                col(refCol).as("ref"),
+                abs(col(refCol).minus(col(predictionCol))).as("absError"),
+                pow(col(refCol).minus(col(predictionCol)), 2.0).as("sqErr"),
+                col(predictionCol).minus(col(refCol)).as("sigDiff")
+            ).agg(sum("ref"), sum("absError"), sum("sqErr"), sum("sigDiff")).first();
 
-            @Override
-            public Double[] call(final Double[] arg0, final Double[] arg1) throws Exception {
-                return new Double[]{arg0[REFERENCE_IX] + arg1[REFERENCE_IX], arg0[ABBS_ERROR_IX] + arg1[ABBS_ERROR_IX],
-                    arg0[SQUARED_ERROR_IX] + arg1[SQUARED_ERROR_IX], arg0[SIGNED_DIFF_IX] + arg1[SIGNED_DIFF_IX]};
-            }
-        });
-        final long nRows = rowRDD.count();
-        final double meanObserved = means[REFERENCE_IX] / nRows;
+        final double meanObserved = stats.getDouble(0) / count;
+        final double absError = stats.getDouble(1) / count;
+        final double squaredError = stats.getDouble(2) / count;
+        final double signedDiff = stats.getDouble(3) / count;
+        final double ssErrorNullModel = filtered.select(pow(col(refCol).minus(meanObserved), 2.0).as("ssErr")).agg(mean("ssErr")).first().getDouble(0);
 
-        final double absError = means[ABBS_ERROR_IX] / nRows;
-        final double squaredError = means[SQUARED_ERROR_IX] / nRows;
-        final double signedDiff = means[SIGNED_DIFF_IX] / nRows;
-
-        final Double ssErrorNullModel = JavaDoubleRDD.fromRDD(filtered.map(new Function<Row, Object>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Double call(final Row aRow) {
-                double ref = RDDUtils.getDouble(aRow, classCol);
-                return Math.pow(ref - meanObserved, 2.0);
-            }
-        }).rdd()).mean();
-
-        LOGGER.info("R^2: "+ (1 - squaredError / ssErrorNullModel));
-        LOGGER.info("mean absolute error: "+ absError);
-        LOGGER.info("mean squared error: "+ squaredError);
-        LOGGER.info("root mean squared deviation: "+ Math.sqrt(squaredError));
-        LOGGER.info("mean signed difference: "+ signedDiff);
-
-        return new NumericScorerJobOutput(rowRDD.count(), (1 - squaredError / ssErrorNullModel),
-            absError, squaredError, Math.sqrt(squaredError), signedDiff, classCol, predictionCol);
+        return new NumericScorerJobOutput(count, (1 - squaredError / ssErrorNullModel),
+            absError, squaredError, Math.sqrt(squaredError), signedDiff, input.getActualColIdx(), input.getPredictionColIdx());
     }
 
     @Override

@@ -22,7 +22,7 @@ package org.knime.bigdata.spark2_1.jobs.scorer;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
@@ -52,8 +52,8 @@ public abstract class AbstractScorerJob implements SparkJob<ScorerJobInput, JobO
     public JobOutput runJob(final SparkContext sparkContext, final ScorerJobInput input, final NamedObjects namedObjects) throws KNIMESparkException {
         getLogger().info("Starting " + getScorerName() + " scorer job...");
 
-        final JavaRDD<Row> rowRDD = namedObjects.getDataFrame(input.getFirstNamedInputObject()).javaRDD();
-        JobOutput res = doScoring(input,rowRDD);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        JobOutput res = doScoring(input, dataset);
 
         getLogger().info(getScorerName() + " scorer job done.");
         return res;
@@ -61,8 +61,8 @@ public abstract class AbstractScorerJob implements SparkJob<ScorerJobInput, JobO
 
     /**
      * @param input
-     * @param rowRDD
+     * @param dataset
      * @return Scorer result
      */
-    protected abstract JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD);
+    protected abstract JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) throws KNIMESparkException;
 }

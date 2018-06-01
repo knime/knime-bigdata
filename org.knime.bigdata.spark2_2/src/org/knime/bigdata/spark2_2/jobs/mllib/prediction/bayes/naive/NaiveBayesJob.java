@@ -28,6 +28,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.classification.NaiveBayes;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -57,7 +58,7 @@ public class NaiveBayesJob implements SparkJob<NaiveBayesJobInput, ModelJobOutpu
     public ModelJobOutput runJob(final SparkContext sparkContext, final NaiveBayesJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException, Exception {
         LOGGER.log(Level.INFO, "starting Naive Bayes learner job...");
-        final JavaRDD<Row> inputData = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
+        final Dataset<Row> inputData = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final JavaRDD<LabeledPoint> trainingsData = SupervisedLearnerUtils.getTrainingData(input, inputData);
 
         trainingsData.cache();

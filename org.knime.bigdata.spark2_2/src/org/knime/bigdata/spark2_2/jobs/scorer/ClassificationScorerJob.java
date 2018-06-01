@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -47,9 +48,10 @@ public class ClassificationScorerJob extends AbstractScorerJob {
     private static final Logger LOGGER = Logger.getLogger(ClassificationScorerJob.class.getName());
 
     @Override
-    protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
+    protected JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) {
         final Integer classCol = input.getActualColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
+        final JavaRDD<Row> rowRDD = dataset.javaRDD();
 
         Map<Tuple2<Object, Object>, Integer> counts = RDDUtilsInJava.aggregatePairs(rowRDD, classCol, predictionCol);
 
@@ -79,6 +81,7 @@ public class ClassificationScorerJob extends AbstractScorerJob {
             }
             i++;
         }
+
         return new ScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
             labels);
     }

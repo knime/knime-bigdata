@@ -37,6 +37,7 @@ import org.apache.spark.mllib.tree.loss.LogLoss$;
 import org.apache.spark.mllib.tree.loss.Loss;
 import org.apache.spark.mllib.tree.loss.SquaredError$;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -70,11 +71,11 @@ public class GradientBoostedTreesJob implements SparkJob<GradientBoostedTreesJob
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
         LOGGER.log(Level.INFO, "starting 'Gradient Boosted Trees' learner job...");
 
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, dataset);
 
         final GradientBoostedTreesModel model = execute(input, inputRdd);
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD,
+        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, dataset.javaRDD(),
                 inputRdd, model);
         LOGGER.log(Level.INFO, "'Gradient Boosted Trees' done");
         // note that with Spark 1.4 we can use PMML instead

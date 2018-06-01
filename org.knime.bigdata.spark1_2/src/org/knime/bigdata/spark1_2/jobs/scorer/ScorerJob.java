@@ -27,12 +27,12 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.sql.api.java.Row;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.numeric.NumericScorerJobOutput;
-
-import com.knime.bigdata.spark.jobserver.server.RDDUtils;
+import org.knime.bigdata.spark1_2.api.RDDUtilsInJava;
 
 /**
  * computes classification / regression scores
@@ -56,9 +56,10 @@ public class ScorerJob extends AbstractScorerJob {
 
     /**
      * {@inheritDoc}
+     * @throws KNIMESparkException
      */
     @Override
-    protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
+    protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) throws KNIMESparkException {
         final Integer classCol = input.getActualColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
 
@@ -70,14 +71,20 @@ public class ScorerJob extends AbstractScorerJob {
                 return !aRow.isNullAt(classCol);
             }
         });
+
+        final long nRows = filtered.count();
+        if (nRows == 0) {
+            throw new KNIMESparkException("Unsupported empty input dataset detected.");
+        }
+
         final JavaRDD<Double[]> stats = filtered.map(new Function<Row, Double[]>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public Double[] call(final Row aRow) {
 
-                final double ref = RDDUtils.getDouble(aRow, classCol);
-                final double pred = RDDUtils.getDouble(aRow, predictionCol);
+                final double ref = RDDUtilsInJava.getDouble(aRow, classCol);
+                final double pred = RDDUtilsInJava.getDouble(aRow, predictionCol);
                 //observed, abs err, squared error, signed diff
                 return new Double[]{ref, Math.abs(ref - pred), Math.pow(ref - pred, 2.0), pred - ref};
             }
@@ -92,7 +99,6 @@ public class ScorerJob extends AbstractScorerJob {
                     arg0[SQUARED_ERROR_IX] + arg1[SQUARED_ERROR_IX], arg0[SIGNED_DIFF_IX] + arg1[SIGNED_DIFF_IX]};
             }
         });
-        final long nRows = rowRDD.count();
         final double meanObserved = means[REFERENCE_IX] / nRows;
 
         final double absError = means[ABBS_ERROR_IX] / nRows;
@@ -104,7 +110,7 @@ public class ScorerJob extends AbstractScorerJob {
 
             @Override
             public Double call(final Row aRow) {
-                double ref = RDDUtils.getDouble(aRow, classCol);
+                double ref = RDDUtilsInJava.getDouble(aRow, classCol);
                 return Math.pow(ref - meanObserved, 2.0);
             }
         }).rdd()).mean();
@@ -115,7 +121,7 @@ public class ScorerJob extends AbstractScorerJob {
         LOGGER.info("root mean squared deviation: "+ Math.sqrt(squaredError));
         LOGGER.info("mean signed difference: "+ signedDiff);
 
-        return new NumericScorerJobOutput(rowRDD.count(), (1 - squaredError / ssErrorNullModel),
+        return new NumericScorerJobOutput(nRows, (1 - squaredError / ssErrorNullModel),
             absError, squaredError, Math.sqrt(squaredError), signedDiff, classCol, predictionCol);
     }
 }

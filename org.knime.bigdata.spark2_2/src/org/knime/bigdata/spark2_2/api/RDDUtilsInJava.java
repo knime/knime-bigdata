@@ -1,22 +1,17 @@
 package org.knime.bigdata.spark2_2.api;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.Optional;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.MapFunction;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.ml.linalg.DenseMatrix;
 import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.mllib.linalg.Matrix;
@@ -36,11 +31,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.MappingType;
-import org.knime.bigdata.spark.core.job.util.MyJoinKey;
-import org.knime.bigdata.spark.node.preproc.convert.NominalValueMapping;
-import org.knime.bigdata.spark.node.preproc.convert.category2number.NominalValueMappingFactory;
 
 import com.knime.bigdata.spark.jobserver.server.RDDUtils;
 
@@ -54,101 +44,14 @@ import scala.Tuple2;
 @SparkClass
 public class RDDUtilsInJava {
 
-    //TODO: Improve missing value handling in scala     RDDUtils line 157 in getDouble() method
-
     /**
-     * (Java friendly version) convert nominal values in columns for given column indices to integers and append columns
-     * with mapped values
+     * Drops the given columns from the given row.
      *
-     * @param inputDataset dataset to be processed
-     * @param aColumnIds indices of columns to be mapped, columns that have no mapping are ignored
-     * @param aMappingType indicates how values are to be mapped
-     * @param aKeepOriginalColumns - keep original columns as well or not
-     * @note throws SparkException thrown if no mapping is known for some value, but only when row is actually read!
-     * @return dataset container with converted data (columns are appended)
-     */
-    public static MappedDatasetContainer convertNominalValuesForSelectedIndices(final Dataset<Row> inputDataset,
-            final int[] aColumnIds, final MappingType aMappingType, final boolean aKeepOriginalColumns) {
-
-        final NominalValueMapping mappings = toLabelMapping(inputDataset.javaRDD(), aColumnIds, aMappingType);
-        JavaRDD<Row> mappedRdd = inputDataset.javaRDD().map(new Function<Row, Row>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Row call(final Row row) {
-                final RowBuilder builder;
-                if (aKeepOriginalColumns) {
-                    builder = RowBuilder.fromRow(row);
-                } else {
-                    builder = dropColumnsFromRow(aColumnIds, row);
-                }
-                for (int ix : aColumnIds) {
-                    //ignore columns that have no mapping
-                    if (mappings.hasMappingForColumn(ix)) {
-                        Object val = row.get(ix);
-                        if (val == null) {
-                            builder.add(null);
-                        } else {
-                            Integer labelOrIndex = mappings.getNumberForValue(ix, val.toString());
-                            if (mappings.getType() == MappingType.BINARY) {
-                                int numValues = mappings.getNumberOfValues(ix);
-                                for (int i = 0; i < numValues; i++) {
-                                    if (labelOrIndex == i) {
-                                        builder.add(1.0d);
-                                    } else {
-                                        builder.add(0.0d);
-                                    }
-                                }
-                            } else {
-                                builder.add(labelOrIndex.doubleValue());
-                            }
-                        }
-                    }
-                }
-                return builder.build();
-            }
-        });
-
-        return MappedDatasetContainer.createContainer(inputDataset, mappedRdd, aColumnIds, mappings, aKeepOriginalColumns);
-    }
-
-    /**
-     * Create a number to category schema.
-     * @param dataset
-     * @param map
-     * @param keepOriginalColumns
-     * @param colSuffix - column suffix to append
-     * @return Number to category schema
-     */
-    public static StructType createSchema(final Dataset<Row> dataset, final ColumnBasedValueMapping map,
-            final boolean keepOriginalColumns, final String colSuffix) {
-
-        StructType schema = dataset.schema();
-        List<Integer> columnIdsList = map.getColumnIndices();
-        Collections.sort(columnIdsList);
-        List<StructField> fields = new ArrayList<>();
-        StructField oldFields[] = schema.fields();
-
-        for (int i = 0; i < oldFields.length; i++) {
-            if (keepOriginalColumns || !columnIdsList.contains(i)) {
-                fields.add(oldFields[i]);
-            }
-        }
-
-        for (int idx : columnIdsList) {
-            String name = oldFields[idx].name() + colSuffix;
-            fields.add(DataTypes.createStructField(name, DataTypes.StringType, false));
-        }
-
-        return DataTypes.createStructType(fields);
-    }
-
-    /**
      * @param aColumnIdsToDrop
      * @param aRow
      * @return rowBuilder with subset of columns already added
      */
-    public static RowBuilder dropColumnsFromRow(final List<Integer> aColumnIdsToDrop, final Row aRow) {
+    public static RowBuilder dropColumnsFromRow(final Set<Integer> aColumnIdsToDrop, final Row aRow) {
         final RowBuilder builder;
         builder = RowBuilder.emptyRow();
         for (int ix = 0; ix < aRow.length(); ix++) {
@@ -159,214 +62,118 @@ public class RDDUtilsInJava {
         return builder;
     }
 
-    private static RowBuilder dropColumnsFromRow(final int[] aColumnIdsToDrop, final Row aRow) {
-        List<Integer> cols = new ArrayList<>();
-        for (int ix : aColumnIdsToDrop) {
-            cols.add(ix);
-        }
-        return dropColumnsFromRow(cols, aRow);
-    }
 
     /**
-     * extract all distinct values from the given input RDD and the given indices and create a mapping from value to int
+     * Convert a dataset of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric or booleans.
      *
-     * @param aInputRdd
-     * @param aNominalColumnIndices
-     * @param aMappingType
-     * @return mapping from distinct value to unique integer value
-     */
-    public static NominalValueMapping toLabelMapping(final JavaRDD<Row> aInputRdd, final int[] aNominalColumnIndices,
-        final MappingType aMappingType) {
-
-        switch (aMappingType) {
-            case GLOBAL: {
-                return toLabelMappingGlobalMapping(aInputRdd, aNominalColumnIndices, aMappingType);
-            }
-            case COLUMN: {
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
-            }
-            case BINARY: {
-                return toLabelMappingColumnMapping(aInputRdd, aNominalColumnIndices, aMappingType);
-            }
-            default: {
-                throw new UnsupportedOperationException("ERROR: unknown mapping type !");
-            }
-        }
-    }
-
-    private static NominalValueMapping toLabelMappingGlobalMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices, final MappingType aMappingType) {
-
-        Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
-
-        Map<String, Integer> mappings = new HashMap<>();
-        {
-            Set<String> allValues = new HashSet<>();
-            for (Set<String> labs : labels.values()) {
-                allValues.addAll(labs);
-            }
-
-            int idx = 0;
-            for (String label : allValues) {
-                mappings.put(label, idx++);
-            }
-        }
-
-        Map<Integer, Map<String, Integer>> labelMapping = new HashMap<>(labels.size());
-        for (Map.Entry<Integer, Set<String>> entry : labels.entrySet()) {
-            Set<String> values = entry.getValue();
-            Map<String, Integer> mapping = new HashMap<>(values.size());
-            for (String val : values) {
-                mapping.put(val, mappings.get(val));
-            }
-            labelMapping.put(entry.getKey(), mapping);
-        }
-        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
-    }
-
-    private static NominalValueMapping toLabelMappingColumnMapping(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices, final MappingType aMappingType) {
-
-        Map<Integer, Set<String>> labels = aggregateValues(aInputRdd, aNominalColumnIndices);
-
-        Map<Integer, Map<String, Integer>> labelMapping = new HashMap<>(labels.size());
-        for (Map.Entry<Integer, Set<String>> entry : labels.entrySet()) {
-            int idx = 0;
-            Set<String> values = entry.getValue();
-            Map<String, Integer> mapping = new HashMap<>(values.size());
-            for (String val : values) {
-                mapping.put(val, idx++);
-            }
-            labelMapping.put(entry.getKey(), mapping);
-        }
-
-        return NominalValueMappingFactory.createColumnMapping(labelMapping, aMappingType);
-    }
-
-    /**
-     * @param aInputRdd
-     * @param aNominalColumnIndices
-     * @return
-     */
-    private static Map<Integer, Set<String>> aggregateValues(final JavaRDD<Row> aInputRdd,
-        final int[] aNominalColumnIndices) {
-        Map<Integer, Set<String>> emptyMap = new HashMap<>();
-        for (int ix : aNominalColumnIndices) {
-            emptyMap.put(ix, new HashSet<String>());
-        }
-
-        Map<Integer, Set<String>> labels =
-            aInputRdd.aggregate(emptyMap, new Function2<Map<Integer, Set<String>>, Row, Map<Integer, Set<String>>>() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues, final Row row)
-                    throws Exception {
-                    for (int ix : aNominalColumnIndices) {
-                        Object val = row.get(ix);
-                        if (val != null) {
-                            //no need to add modified set as the modification is done implicitly
-                            aAggregatedValues.get(ix).add(val.toString());
-                        }
-                    }
-                    return aAggregatedValues;
-                }
-            }, new Function2<Map<Integer, Set<String>>, Map<Integer, Set<String>>, Map<Integer, Set<String>>>() {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public Map<Integer, Set<String>> call(final Map<Integer, Set<String>> aAggregatedValues0,
-                    final Map<Integer, Set<String>> aAggregatedValues1) throws Exception {
-                    for (Map.Entry<Integer, Set<String>> entry : aAggregatedValues0.entrySet()) {
-                        entry.getValue().addAll(aAggregatedValues1.get(entry.getKey()));
-                    }
-                    return aAggregatedValues0;
-                }
-            });
-        return labels;
-    }
-
-    /**
-     * Note that now only the class label is converted (no matter whether it is already numeric or not)
-     *
-     * convert a RDD of Rows to JavaRDD of LabeledPoint, the string label column is converted to integer values, all
-     * other indices must be numeric
-     *
-     * @param aInputRdd Row RDD to be converted
-     * @param aColumnIndices column selector (and, possibly, re-ordering)
-     * @param aLabelColumnIndex index of label column (can be numeric or string)
+     * @param dataset set of rows to be converted
+     * @param columnIndicesList column selector (and, possibly, re-ordering)
+     * @param labelColumnIndex index of label column (must be numeric)
      * @return container with mapped data and mapping
-     * @throws IllegalArgumentException if values are encountered that are neither numeric nor string
+     * @throws IllegalArgumentException if values are encountered that are not numeric, <code>null</code> or <code>NaN</code>
      */
-    public static LabeledDataInfo toJavaLabeledPointRDDConvertNominalValues(final JavaRDD<Row> aInputRdd,
-        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
-        final NominalValueMapping labelMapping =
-            toLabelMapping(aInputRdd, new int[]{aLabelColumnIndex}, MappingType.COLUMN);
-        final JavaRDD<LabeledPoint> labeledRdd =
-            toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, labelMapping);
+    public static JavaRDD<LabeledPoint> toLabeledPointRDD(final Dataset<Row> dataset,
+        final List<Integer> columnIndicesList, final int labelColumnIndex) {
 
-        return new LabeledDataInfo(labeledRdd, labelMapping);
-    }
+        final StructField[] fields = dataset.schema().fields();
+        final String[] columnNames = dataset.columns();
+        final Integer[] columnIndices = columnIndicesList.toArray(new Integer[0]);
+        final boolean[] isNumericCol = isNumericCol(fields);
+        final boolean[] isBoolCol = isBoolCol(fields);
 
-    private static JavaRDD<LabeledPoint>
-        toLabeledVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> aColumnIndices, final int labelColumnIndex, final NominalValueMapping labelMapping) {
-        final int numFeatures = Math.min(aColumnIndices.size(), inputRdd.take(1).get(0).length() - 1);
-
-        return inputRdd.map(new Function<Row, LabeledPoint>() {
+        return dataset.javaRDD().map(new Function<Row, LabeledPoint>() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public LabeledPoint call(final Row row) {
-                int insertionIndex = 0;
-                final double[] convertedValues = new double[numFeatures];
-                for (int idx : aColumnIndices) {
-                    if (idx != labelColumnIndex && idx < row.length()) {
-                        convertedValues[insertionIndex] = RDDUtils.getDouble(row, idx);
-                        insertionIndex += 1;
-                    }
-                }
-                final double label;
-                if (labelMapping != null) {
-                    label =
-                        labelMapping.getNumberForValue(labelColumnIndex, row.get(labelColumnIndex).toString())
-                            .doubleValue();
-                } else {
-                    //no mapping given - label must already be numeric
-                    label = RDDUtils.getDouble(row, labelColumnIndex);
-                }
-                return new LabeledPoint(label, Vectors.dense(convertedValues));
+                return new LabeledPoint(
+                    getDouble(row, labelColumnIndex, columnNames[labelColumnIndex], isNumericCol[labelColumnIndex], isBoolCol[labelColumnIndex]),
+                    toVector(row, columnIndices, columnNames, isNumericCol, isBoolCol));
             }
         });
     }
 
     /**
-     * Convert given data set into an RDD of vectors containing values of given column indices.
+     * Convert given dataset of rows into an RDD of vectors containing values of given column indices.
      *
-     * @param dataset input data set
-     * @param columnIndices indices of columns to use
+     * @param dataset input data of rows
+     * @param columnIndicesList indices of columns to use
      * @return RDD with vectors
      */
-    public static JavaRDD<Vector> toVectorRdd(final Dataset<Row> dataset, final List<Integer> columnIndices) {
-        return toVectorRdd(dataset.javaRDD(), columnIndices);
+    public static JavaRDD<Vector> toVectorRdd(final Dataset<Row> dataset, final List<Integer> columnIndicesList) {
+        final StructField[] fields = dataset.schema().fields();
+        final String[] columnNames = dataset.columns();
+        final Integer[] columnIndices = columnIndicesList.toArray(new Integer[0]);
+        final boolean[] isNumericCol = isNumericCol(fields);
+        final boolean[] isBoolCol = isBoolCol(fields);
+
+        return dataset.javaRDD().map((row) -> toVector(row, columnIndices, columnNames, isNumericCol, isBoolCol));
     }
 
-    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final List<Integer> columnIndices) {
-        return toVectorRdd(inputRdd, columnIndices.toArray(new Integer[0]));
+    private static Vector toVector(final Row row, final Integer[] columnIndices, final String[] columnNames,
+        final boolean[] numericCols, final boolean[] boolCols) {
+
+        final double[] values = new double[columnIndices.length];
+        for (int i = 0; i < columnIndices.length; i++) {
+            final int colIndex = columnIndices[i];
+            values[i] = getDouble(row, colIndex, columnNames[colIndex], numericCols[colIndex], boolCols[colIndex]);
+        }
+        return Vectors.dense(values);
     }
 
-    private static JavaRDD<Vector> toVectorRdd(final JavaRDD<Row> inputRdd, final Integer columnIndices[]) {
-        return inputRdd.map(new Function<Row, Vector>() {
-            private static final long serialVersionUID = 1L;
+    /**
+     * Returns a numeric or boolean value as double and fails on other types, <code>null</code> or <code>NaN</code>
+     * values. This is the same behavior like the VectorAssembler in Spark has, therefore use this method only to create
+     * vectors where VectorAssembler is not an option (RDD/Spark 1.x).
+     *
+     * @param row with numeric or boolean values
+     * @param index column index to extract
+     * @param name column name (for error messages)
+     * @param isNumeric <code>true</code> if value at index is numeric
+     * @param isBool <code>true</code> if value at index is a boolean
+     * @return value as double
+     * @throws IllegalArgumentException on <code>null</code> or <code>NaN</code> values
+     * @throws IllegalArgumentException if value is not a numeric or boolean value
+     */
+    public static double getDouble(final Row row, final int index, final String name, final boolean isNumeric, final boolean isBool) {
+        final Object o = row.get(index);
 
-            @Override
-            public Vector call(final Row row) {
-                final double[] values = new double[columnIndices.length];
-                for (int i = 0; i < columnIndices.length; i++) {
-                    values[i] = row.getDouble(columnIndices[i]);
-                }
-                return Vectors.dense(values);
+        if (o == null) {
+            throw new IllegalArgumentException(
+                String.format("Unsupported missing value at column '%s' detected.", name));
+        } else if (isNumeric) {
+            final double d = ((Number)o).doubleValue();
+            if (Double.isNaN(d)) {
+                throw new IllegalArgumentException(
+                    String.format("Unsupported NaN value at column '%s' detected.", name));
+            } else {
+                return d;
             }
-        });
+        } else if (isBool) {
+            return ((boolean)o) ? 1d : 0d;
+        } else {
+            throw new IllegalArgumentException(
+                String.format("Unsupported non-numeric value type '%s' at column '%s' detected.",
+                    o.getClass(), name));
+        }
+    }
+
+    /** validates if given column indices are of given type */
+    private static boolean[] isNumericCol(final StructField[] fields) {
+        final boolean[] isOfType = new boolean[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            isOfType[i] = fields[i].dataType() instanceof NumericType;
+        }
+        return isOfType;
+    }
+
+    /** validates if given column indices are of given type */
+    private static boolean[] isBoolCol(final StructField[] fields) {
+        final boolean[] isOfType = new boolean[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            isOfType[i] = fields[i].dataType().equals(DataTypes.BooleanType);
+        }
+        return isOfType;
     }
 
     private static JavaRDD<Row> fromVectorRdd(final JavaRDD<Vector> aInputRdd) {
@@ -383,138 +190,6 @@ public class RDDUtilsInJava {
                 return builder.build();
             }
         });
-    }
-
-    /**
-     *
-     * convert a RDD of Rows to JavaRDD of LabeledPoint, all selected row values must be numeric
-     *
-     * @param aInputRdd Row RDD to be converted
-     * @param aColumnIndices column selector (and, possibly, re-ordering)
-     * @param aLabelColumnIndex index of label column (must be numeric)
-     * @return container with mapped data and mapping
-     * @throws IllegalArgumentException if values are encountered that are not numeric
-     */
-    public static JavaRDD<LabeledPoint> toJavaLabeledPointRDD(final JavaRDD<Row> aInputRdd,
-        final List<Integer> aColumnIndices, final int aLabelColumnIndex) {
-        return toLabeledVectorRdd(aInputRdd, aColumnIndices, aLabelColumnIndex, null);
-    }
-
-    /**
-    *
-    * sub-select given columns by index from the given RDD and put result into new RDD
-    *
-    * @param aInputRdd Row RDD to be converted
-    * @param aColumnIndices column selector (and, possibly, re-ordering)
-    * @return RDD with selected columns and same number of rows as original
-    * @throws IllegalArgumentException if values are encountered that are not numeric
-    */
-    public static JavaRDD<Row> selectColumnsFromRDD(final JavaRDD<Row> aInputRdd, final List<Integer> aColumnIndices) {
-       return aInputRdd.map(new Function<Row, Row>() {
-           private static final long serialVersionUID = 1L;
-
-           @Override
-           public Row call(final Row row) {
-               RowBuilder rb = RowBuilder.emptyRow();
-               for (int idx : aColumnIndices) {
-                   rb.add(row.get(idx));
-               }
-               return rb.build();
-           }
-       });
-   }
-
-    /**
-     * extracts the given keys from the given rdd and constructs a pair rdd from it
-     *
-     * @param aRdd Row JavaRDD to be converted
-     * @param aKeys keys to be extracted
-     * @return pair rdd with keys and original rows as values (no columns are filtered out)
-     */
-    public static JavaPairRDD<MyJoinKey, Row> extractKeys(final JavaRDD<Row> aRdd, final Integer[] aKeys) {
-        return aRdd.mapToPair(new PairFunction<Row, MyJoinKey, Row>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Tuple2<MyJoinKey, Row> call(final Row aRow) throws Exception {
-                final Object[] keyValues = new Object[aKeys.length];
-                int ix = 0;
-                for (int keyIx : aKeys) {
-                    keyValues[ix++] = aRow.get(keyIx);
-                }
-                return new Tuple2<>(new MyJoinKey(keyValues), aRow);
-            }
-        });
-    }
-
-    /**
-     * <L> and <R> must be either of class Row or of class Optional<Row>
-     *
-     * @param aTuples
-     * @param aColIdxLeft - indices of <L> to be kept
-     * @param aColIdxRight - indices of <R> to be kept
-     * @return corresponding rows from left and right merged into instances of Row (one for each original pair),
-     *         possibly with null values for outer joins
-     */
-    public static <L, R> JavaRDD<Row> mergeRows(final JavaRDD<Tuple2<L, R>> aTuples, final List<Integer> aColIdxLeft,
-        final List<Integer> aColIdxRight) {
-        return aTuples.map(new Function<Tuple2<L, R>, Row>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Row call(final Tuple2<L, R> aTuple) throws Exception {
-                RowBuilder builder = RowBuilder.emptyRow();
-                extractColumns(aColIdxLeft, aTuple._1, builder);
-                extractColumns(aColIdxRight, aTuple._2, builder);
-                return builder.build();
-            }
-
-        });
-    }
-
-    /**
-     * @param aColIdxLeft
-     * @param aTuple
-     * @param builder
-     */
-    @SuppressWarnings("unchecked")
-    private static <J> void extractColumns(final List<Integer> aColIdx, final J aRow, final RowBuilder builder) {
-        for (int ix : aColIdx) {
-            if (aRow instanceof Row) {
-                builder.add(((Row)aRow).get(ix));
-            } else if ((aRow instanceof Optional<?>) && ((Optional<Row>)aRow).isPresent()) {
-                builder.add(((Optional<Row>)aRow).get().get(ix));
-            } else {
-                builder.add(null);
-            }
-        }
-    }
-
-    /**
-     * Creates a list of fields matching schema of rows produced by {@link #mergeRows(JavaRDD, List, List)}.
-     *
-     * @param left - left data frame
-     * @param aColIdxLeft - indices of <L> to be kept
-     * @param right - right data frame
-     * @param aColIdxRight - indices of <R> to be kept
-     * @return list of fields
-     */
-    public static List<StructField> getFields(final Dataset<Row> left, final List<Integer> aColIdxLeft,
-            final Dataset<Row> right, final List<Integer> aColIdxRight) {
-
-        final List<StructField> fields = new ArrayList<>(aColIdxLeft.size() + aColIdxRight.size());
-        final StructField leftFields[] = left.schema().fields();
-        final StructField rightFields[] = right.schema().fields();
-
-        for (int index : aColIdxLeft) {
-            fields.add(leftFields[index]);
-        }
-
-        for (int index : aColIdxRight) {
-            fields.add(rightFields[index]);
-        }
-
-        return fields;
     }
 
     /**
@@ -549,6 +224,7 @@ public class RDDUtilsInJava {
      * @param columnPrefix prefix of output column names
      * @return converted matrix as data frame
      */
+    @SuppressWarnings("resource")
     public static Dataset<Row> fromMatrix(final SparkContext context, final DenseMatrix matrix, final String columnPrefix) {
         final int nRows = matrix.numRows();
         final int nCols = matrix.numCols();
@@ -573,6 +249,7 @@ public class RDDUtilsInJava {
      * @param columnPrefix prefix of output column names
      * @return converted matrix as data frame
      */
+    @SuppressWarnings("resource")
     public static Dataset<Row> fromMatrix(final SparkContext context, final Matrix matrix, final String columnPrefix) {
         final int nRows = matrix.numRows();
         final int nCols = matrix.numCols();
@@ -592,6 +269,7 @@ public class RDDUtilsInJava {
     /**
      * Create a data frame containing double columns named by index and given column prefix.
      */
+    @SuppressWarnings("resource")
     private static Dataset<Row> createDoubleDataFrame(final SparkContext sparkContext, final JavaRDD<Row> rdd, final int numColumns, final String columnPrefix) {
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
 

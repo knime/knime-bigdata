@@ -20,7 +20,8 @@
  */
 package org.knime.bigdata.spark1_6.jobs.preproc.convert.number2category;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -70,7 +71,7 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
      * @return
      */
     private static JavaRDD<Row> execute(final JavaRDD<Row> inputRDD, final ColumnBasedValueMapping map, final boolean keepOriginalColumns) {
-        final List<Integer> idxs = map.getColumnIndices();
+       final Set<Integer> idxs = new HashSet<>(map.getColumnIndices());
         final Function<Row, Row> function = new Function<Row, Row>(){
             private static final long serialVersionUID = 1L;
             @Override

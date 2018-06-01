@@ -29,6 +29,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.tree.DecisionTree;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -57,12 +58,13 @@ public class DecisionTreeJob implements SparkJob<DecisionTreeJobInput, ModelJobO
     public ModelJobOutput runJob(final SparkContext sparkContext, final DecisionTreeJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
         LOGGER.log(Level.INFO, "starting Decision Tree learner job...");
-        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
-        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, rowRDD);
+        final Dataset<Row> dataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
+        final JavaRDD<LabeledPoint> inputRdd = SupervisedLearnerUtils.getTrainingData(input, dataset);
 
         final DecisionTreeModel model = execute(sparkContext, input, inputRdd);
 
-        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, rowRDD, inputRdd, model);
+        SupervisedLearnerUtils.storePredictions(sparkContext, namedObjects, input, dataset.javaRDD(),
+            inputRdd, model);
         LOGGER.log(Level.INFO, "Decision Tree Learner done");
         // note that with Spark 1.4 we can use PMML instead
         return new ModelJobOutput(model);
