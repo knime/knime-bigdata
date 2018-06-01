@@ -9,7 +9,7 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
  org.apache.parquet;bundle-version="1.9.0",
  org.apache.parquet.format;bundle-version="2.3.1",
- org.apache.hadoop.client;bundle-version="[2.7.4,3.0.0)",
+ org.apache.hadoop.client;bundle-version="[2.7.6,3.0.0)",
  org.knime.bigdata.commons;bundle-version="3.2.0",
  org.knime.bigdata.filehandling;bundle-version="3.5.0",
  org.knime.cloud.core
