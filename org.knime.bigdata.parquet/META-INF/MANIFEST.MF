@@ -14,6 +14,7 @@ Require-Bundle: org.knime.base;bundle-version="[3.0.0,4.0.0)",
  org.knime.bigdata.filehandling;bundle-version="3.5.0",
  org.knime.cloud.core
 Bundle-ActivationPolicy: lazy
-Export-Package: org.knime.bigdata.parquet.node.writer
+Export-Package: org.knime.bigdata.parquet.node.writer,
+ org.knime.bigdata.parquet.utility
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 

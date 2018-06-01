@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./orcwriter-icon.png" type="Sink" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>ORC Writer</name>
+    
+      <shortDescription>
+        Writes KNIME Table into a ORC File
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node writes the KNIME data table into an ORC File. The ORC file can be written locally or on a remote file system.
+        It convert int, double, boolean, timestamp, long in the corresponding ORC primitives, and can handle lists of those types.
+        For remote connections, the writer stores chunks locally and uploads them in parallel. 
+        The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" tab.
+   
+        </intro>
+        
+  
+        <tab name="Options">
+       	 <option name="Output location">A path on the local machine or remote server where the file is written.</option>
+       	 <option name="Write Row Key">If this option is selected the Writer will write the RowIDs in the file</option>
+       	 <option name="Overwrite">If this option is selected the file will be overwritten if it exists</option>
+       	 <option name="File Compression">The compression codec used to write the ORC file. One of NONE, ZLIB, SNAPPY, LZO or LZ4</option>
+        </tab>
+        <tab name="Chunk Upload">
+      	  <option name="Chunk size in MB">The maximum size for an individual chunk.</option>
+      	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
+    	</tab>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Remote connection">An optional connection to the remote file system </inPort>   
+        <inPort index="1" name="Data">The data table that should be written</inPort>        
+    </ports> 
+</knimeNode>

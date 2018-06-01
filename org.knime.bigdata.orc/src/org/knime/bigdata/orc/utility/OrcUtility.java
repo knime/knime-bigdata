@@ -45,9 +45,10 @@
 package org.knime.bigdata.orc.utility;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.UUID;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
@@ -80,7 +81,6 @@ public class OrcUtility {
         if (connInfo == null) {
             remoteFile = createLocalFile(fileName);
         } else {
-
             remoteFile = RemoteFileFactory.createRemoteFile(new URI(connInfo.toURI().toString() + fileName), connInfo,
                     connectionMonitor);
         }
@@ -106,10 +106,70 @@ public class OrcUtility {
             // Use File protocol as default
             final File file = new File(fileName);
             fileuri = file.toURI();
+
         }
 
         remoteFile = RemoteFileFactory.createRemoteFile(fileuri, null, null);
         LOGGER.debug(String.format("Creating local File %s.", remoteFile.getFullName()));
         return remoteFile;
     }
+
+
+    /**
+     * Creates a remote directory with the given Name.
+     *
+     * @param connInfo the connection information
+     * @param fileName the name
+     * @param overwrite whether the file should be overwritten
+     * @return a remote file, representing the directory
+     * @throws Exception If file can not be created.
+     */
+    @SuppressWarnings("unchecked")
+    public RemoteFile<Connection> createRemoteDir(final ConnectionInformation connInfo, String fileName,
+            boolean overwrite) throws Exception {
+
+        final ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
+        final URI targetURI = new URI(connInfo.toURI().toString() + fileName + "/");
+        LOGGER.info("Creating remote File " + targetURI + " from name " + fileName);
+        return (RemoteFile<Connection>) RemoteFileFactory.createRemoteFile(targetURI, connInfo, connMonitor);
+    }
+
+    /**
+     * Checks if file exists. If the file exists and it should be overwritten
+     * tries to remove it.
+     *
+     * @param remoteFile the remote file to check.
+     * @param overwrite whether the file should be overwritten
+     * @throws Exception if the file exists, and should not be overwritten. Or
+     *         if the file can not be deleted.
+     */
+    public void checkOverwrite(RemoteFile<Connection> remoteFile, boolean overwrite) throws Exception {
+        if (remoteFile.exists()) {
+            if (overwrite) {
+                LOGGER.debug(String.format("File %s already exists. Deleting it.", remoteFile.getFullName()));
+                if (!remoteFile.delete()) {
+                    throw new IOException(
+                            String.format("File %s already exists and could not be deleted.", remoteFile.getPath()));
+                }
+            } else {
+                throw new IOException(String.format("File %s already exists.", remoteFile.getPath()));
+            }
+        }
+    }
+
+    /**
+     * Creates a temporary file with a counter suffix in the directory given in
+     * path.
+     *
+     * @param path file that represents the target directory
+     * @param filecount the counter for the suffix
+     * @return a {@link FileRemoteFile} for the temporary file
+     * @throws Exception if file creation fails
+     */
+    public RemoteFile<Connection> createTempFile(File path, int filecount) throws Exception {
+        final String filepath = "file://" + path + "/" + UUID.randomUUID().toString().replace('-', '_');
+        final URI tempfileuri = new URI(String.format("%s_%05d", filepath, filecount));
+        return RemoteFileFactory.createRemoteFile(tempfileuri, null, null);
+    }
+
 }
