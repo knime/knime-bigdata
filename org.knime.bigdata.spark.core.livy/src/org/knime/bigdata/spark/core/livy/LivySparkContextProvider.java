@@ -22,13 +22,36 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LivySparkContextProvider implements SparkContextProvider<LivySparkContextConfig> {
-
+    
+    /**
+     * The highest Spark version currently supported by the Apache Livy integration.
+     */
+    public final static SparkVersion HIGHEST_SUPPORTED_SPARK_VERSION;
+    
+    static {
+        SparkVersion currHighest = LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions().iterator().next();
+        for (SparkVersion curr : LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions()) {
+            if (currHighest.compareTo(curr) < 0) {
+                currHighest = curr;
+            }
+        }
+        HIGHEST_SUPPORTED_SPARK_VERSION = currHighest;
+    }
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public CompatibilityChecker getChecker() {
         return LivyPlugin.LIVY_SPARK_VERSION_CHECKER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparkVersion getHighestSupportedSparkVersion() {
+        return HIGHEST_SUPPORTED_SPARK_VERSION;
     }
 
     /**

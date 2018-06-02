@@ -136,4 +136,24 @@ public class SparkContextManager {
                 .ensureConfigured(maybeNewSparkContext.getConfiguration(), true, destroyIfNecessary);
         }
     }
+
+    /**
+     * Ensures that the {@link SparkContext} with the given {@link SparkContextID} is destroyed and deletes any
+     * references to it. Use this with caution, because {@link #getOrCreateSparkContext(SparkContextID)} will from then
+     * on return a new (unconfigured) Spark context which cannot be used by normal Spark nodes anymore. Use this only if
+     * the given Spark context ID is guaranteed to never be used again.
+     *
+     * @param sparkContextId Identifies the Spark context to destroy and dispose.
+     * @throws KNIMESparkException Thrown if anything went wrong while destroying an existing remote Spark context.
+     */
+    public synchronized static void disposeSparkContext(final SparkContextID sparkContextId) throws KNIMESparkException {
+        if (sparkContextId.equals(DEFAULT_SPARK_CONTEXT_ID) || defaultSparkContext.getID().equals(sparkContextId)) {
+            throw new RuntimeException("Cannot dispose default Spark context.");
+        }
+        try {
+            ensureSparkContextDestroyed(sparkContextId);
+        } finally {
+            sparkContexts.remove(sparkContextId);
+        }
+    }
 }

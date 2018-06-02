@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.context;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
@@ -50,6 +52,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.request.GetJarsRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.UploadFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
+import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.KNIMEConstants;
@@ -358,11 +361,15 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
             ? renderCustomSparkSettings(config.getCustomSparkSettings())
             : "(not applicable)");
         reps.put("context_state", getStatus().toString());
-
-        return generateHTMLDescription("context_html_description.template", reps);
+        
+        try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
+            return TextTemplateUtil.fillOutTemplate(r, reps);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read context description template");
+        }
     }
 
-    private String renderCustomSparkSettings(final Map<String, String> customSparkSettings) {
+    private static String renderCustomSparkSettings(final Map<String, String> customSparkSettings) {
         final StringBuffer buf= new StringBuffer();
 
         for (String key : customSparkSettings.keySet()) {

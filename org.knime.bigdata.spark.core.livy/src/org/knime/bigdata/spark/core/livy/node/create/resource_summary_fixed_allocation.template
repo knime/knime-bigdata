@@ -1,0 +1,17 @@
+<html>
+<body style='width: 350px'>
+<p>
+<strong>Estimated total cluster resources:</strong><br> ${total.memory} ${memory.unit.total} of memory and ${total.cores} cores.
+</p>
+<p></p>
+<strong>Estimated per-container resources:</strong>
+<ul style='margin-left: 20px;'>
+<li>
+ one Spark driver with ${driver.memory} ${memory.unit.containers} of memory and ${driver.cores} core(s)
+</li>
+<li>
+ ${executors.fixed} Spark executor(s), each with ${executor.memory} ${memory.unit.containers} of memory and ${executor.cores} core(s)
+ </li>
+</ul>
+</body>
+</html>

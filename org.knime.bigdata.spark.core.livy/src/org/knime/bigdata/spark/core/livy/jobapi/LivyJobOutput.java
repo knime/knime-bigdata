@@ -28,19 +28,14 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *
- * FIXME write correct javadoc
+ * A class that wraps the actual job output or exception of Spark jobs on Livy. 
  *
- * immutable container for job results
- *
- * a job result may contain a message, any number of table keys and corresponding schemas and at most one mllib model or
- * some other result object (some object in fact)
- *
- * @author Bjoern Lohrmann (KNIME.COM)
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
 public class LivyJobOutput extends JobData {
 
-    private static final String JOBSERVER_PREFIX = "js";
+    private static final String LIVY_PREFIX = "ly";
 
     private static final String KEY_ERROR_THROWABLE = "throwable";
 
@@ -51,7 +46,7 @@ public class LivyJobOutput extends JobData {
      *
      */
     LivyJobOutput() {
-        super(JOBSERVER_PREFIX);
+        super(LIVY_PREFIX);
     }
 
     /**
@@ -59,7 +54,7 @@ public class LivyJobOutput extends JobData {
      * by the given internal map.
      */
     LivyJobOutput(final Map<String, Object> internalMap) {
-        super(JOBSERVER_PREFIX, internalMap);
+        super(LIVY_PREFIX, internalMap);
     }
 
     /**

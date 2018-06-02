@@ -29,8 +29,9 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
+ * A class that wraps that wraps the actual job input for Spark jobs on Livy.  
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
 public class LivyJobInput extends JobData {
@@ -41,8 +42,6 @@ public class LivyJobInput extends JobData {
 
     private static final String KEY_JOB_CLASS = "jobClass";
 
-    private static final String KEY_LOG4JLOG_LEVEL = "loglevel";
-
     private static final String KEY_FILES = "inputFiles";
 
     LivyJobInput() {
@@ -51,13 +50,6 @@ public class LivyJobInput extends JobData {
 
     LivyJobInput(final Map<String,Object> internalMap) {
         super(LIVY_PREFIX, internalMap);
-    }
-
-    /**
-     * @return the log level to use in Spark for the job
-     */
-    public int getLog4jLogLevel() {
-        return getInteger(KEY_LOG4JLOG_LEVEL);
     }
 
     /**
@@ -105,7 +97,7 @@ public class LivyJobInput extends JobData {
     /**
      * @param jobInput the {@link JobInput}
      * @param sparkJobClass the Spark job class to use
-     * @return the {@link JobserverJobInput}
+     * @return the {@link LivyJobInput}
      */
     public static LivyJobInput createFromSparkJobInput(final JobInput jobInput,
         final String sparkJobClass) {
@@ -117,7 +109,7 @@ public class LivyJobInput extends JobData {
 
     /**
      * @param internalMap of parameters
-     * @return the {@link JobserverJobInput}
+     * @return the {@link LivyJobInput}
      */
     public static LivyJobInput createFromMap(final Map<String, Object> internalMap) {
     	LivyJobInput jsInput = new LivyJobInput(internalMap);
@@ -125,17 +117,8 @@ public class LivyJobInput extends JobData {
     }
 
     /**
-     * @param log4jLogLevel the log level to use
-     * @return the {@link JobserverJobInput} itself
-     */
-    public LivyJobInput withLog4jLogLevel(final int log4jLogLevel) {
-        set(KEY_LOG4JLOG_LEVEL, log4jLogLevel);
-        return this;
-    }
-
-    /**
      * @param serverFilenames the path to the files
-     * @return the {@link JobserverJobInput} itself
+     * @return the {@link LivyJobInput} itself
      */
     public LivyJobInput withFiles(final List<String> serverFilenames) {
         set(KEY_FILES, serverFilenames);

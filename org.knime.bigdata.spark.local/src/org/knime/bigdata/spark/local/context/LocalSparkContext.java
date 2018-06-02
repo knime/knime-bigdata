@@ -4,6 +4,8 @@
 package org.knime.bigdata.spark.local.context;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
+import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapperFactory;
@@ -276,8 +279,12 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
             		.collect(Collectors.joining("\n"))
             : "(not applicable)");
         reps.put("context_state", getStatus().toString());
-
-        return generateHTMLDescription("context_html_description.template", reps);
+        
+        try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
+            return TextTemplateUtil.fillOutTemplate(r, reps);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read context description template");
+        }
     }
 
     /**

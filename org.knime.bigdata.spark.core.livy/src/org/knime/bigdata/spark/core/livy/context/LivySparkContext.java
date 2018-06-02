@@ -19,11 +19,15 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -45,11 +49,12 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
+import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 
 /**
  * Spark context implementation for Apache Livy.
@@ -107,51 +112,84 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 			final Class<?> jobBindingClass = getJobJar().getDescriptor().getJobBindingClasses()
 					.get(SparkContextIDScheme.SPARK_LIVY);
 
-			m_jobController = new LivyJobController(getConfiguration(), m_livyClient, jobBindingClass.getName());
+			m_jobController = new LivyJobController(m_livyClient, jobBindingClass.getName());
 		}
 	}
 
 	private void ensureLivyClient() throws KNIMESparkException {
-		if (m_livyClient == null) {
-			try {
-			    final LivySparkContextConfig config = getConfiguration();
-			    
-				final Properties livyHttpConf = new Properties();
-				livyHttpConf.setProperty("livy.client.http.connection.timeout", "10s");
-				livyHttpConf.setProperty("livy.client.http.connection.socket.timeout", "5m");
-				livyHttpConf.setProperty("livy.client.http.content.compress.enable", "true");
-				livyHttpConf.setProperty("livy.client.http.connection.idle.timeout", "15s");
-				livyHttpConf.setProperty("livy.client.http.job.initial-poll-interval", "10ms");
-				livyHttpConf.setProperty("livy.client.http.job.max-poll-interval", "1s");
-				livyHttpConf.setProperty("livy.client.http.spnego.enable", "true");
-				livyHttpConf.setProperty("livy.client.http.spnego.useSubjectCredentials", "true");
+        if (m_livyClient == null) {
+            final LivySparkContextConfig config = getConfiguration();
+            final Properties livyHttpConf = createLivyHttpConf(config);
 
-				LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
-
-				final LivyClientBuilder builder = new LivyClientBuilder(false).setAll(livyHttpConf).setURI(new URI(config.getLivyUrl()));
-
-                m_livyClient =
-                    UserGroupUtil.getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth())
+            LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
+            try {
+                if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
+                    m_livyClient = UserGroupUtil.getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth())
                         .doAs(new PrivilegedExceptionAction<LivyClient>() {
                             @Override
                             public LivyClient run() throws Exception {
-                                final ClassLoader origCtxClassLoader = Thread.currentThread().getContextClassLoader();
-                                try {
-                                    Thread.currentThread().setContextClassLoader(LivySparkContext.class.getClassLoader());
-                                    return builder.build();
-                                } finally {
-                                    Thread.currentThread().setContextClassLoader(origCtxClassLoader);
-                                }
+                                return buildLivyClient(livyHttpConf, config.getLivyUrl());
                             }
                         });
-			} catch (PrivilegedActionException e) {
-		         // just rethrow the original exception thrown in the run() method
-	            throw new KNIMESparkException(e.getException());
-			} catch (Exception e) {
-				throw new KNIMESparkException(e);
-			}
-		}
+                } else {
+                    m_livyClient = buildLivyClient(livyHttpConf, config.getLivyUrl());
+                }
+            } catch (PrivilegedActionException e) {
+                // just rethrow the original exception thrown in the run() method
+                throw new KNIMESparkException(e.getException());
+            } catch (Exception e) {
+                throw new KNIMESparkException(e);
+            }
+        }
 	}
+
+    private static Properties createLivyHttpConf(final LivySparkContextConfig config) {
+        final Properties livyHttpConf = new Properties();
+        
+        // timeout until a connection is established. zero means infinite timeout. 
+        livyHttpConf.setProperty("livy.client.http.connection.timeout", String.format("%ds", config.getConnectTimeoutSeconds()));
+        
+        // socket timeout (SO_TIMEOUT), which is the maximum period of inactivity between two consecutive data packets). zero means infinite timeout.
+        // we use this to implement the response timeout
+        livyHttpConf.setProperty("livy.client.http.connection.socket.timeout", String.format("%ds", config.getResponseTimeoutSeconds()));
+
+        // idle HTTP connections will be closed after this timeout
+        livyHttpConf.setProperty("livy.client.http.connection.idle.timeout", "15s");
+        
+        // whether the target server is requested to compress content. 
+        livyHttpConf.setProperty("livy.client.http.content.compress.enable", "true");
+        
+        // job status polling interval
+        livyHttpConf.setProperty("livy.client.http.job.initial-poll-interval", "10ms");
+        livyHttpConf.setProperty("livy.client.http.job.max-poll-interval", String.format("%ds", config.getJobCheckFrequencySeconds()));
+        
+        if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
+        	livyHttpConf.setProperty("livy.client.http.spnego.enable", "true");
+        	livyHttpConf.setProperty("livy.client.http.spnego.useSubjectCredentials", "true");
+        } else {
+            livyHttpConf.setProperty("livy.client.http.spnego.enable", "false");
+        }
+        
+        // transfer all custom Spark settings
+        for (Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
+            livyHttpConf.setProperty(customSparkSetting.getKey(), customSparkSetting.getValue());
+        }
+        
+        return livyHttpConf;
+    }
+	
+	private static LivyClient buildLivyClient(final Properties livyHttpConf, final String livyUrl) throws IOException, URISyntaxException {
+	    final LivyClientBuilder builder = new LivyClientBuilder(false).setAll(livyHttpConf).setURI(new URI(livyUrl));
+	    
+        final ClassLoader origCtxClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(LivySparkContext.class.getClassLoader());
+            return builder.build();
+        } finally {
+            Thread.currentThread().setContextClassLoader(origCtxClassLoader);
+        }
+    }
+
 
 	/**
 	 * {@inheritDoc}
@@ -181,21 +219,14 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 			ensureLivyClient();
 			setStatus(SparkContextStatus.OPEN);
 
-			if (!remoteSparkContextExists()) {
-				if (createRemoteContext) {
-					contextWasCreated = createRemoteSparkContext();
-				} else {
-					throw new SparkContextNotFoundException(getID());
-				}
+			if (createRemoteContext) {
+				contextWasCreated = createRemoteSparkContext();
+			} else {
+				throw new SparkContextNotFoundException(getID());
 			}
 
 			exec.setProgress(0.7, "Uploading Spark jobs");
-			// regardless of contextWasCreated is true or not we can assume that
-			// the context exists now
-			// (somebody else may have created it before us)
-			if (!isJobJarUploaded()) {
-				uploadJobJar();
-			}
+			uploadJobJar();
 
 			exec.setProgress(0.9, "Running job to prepare context");
 			validateAndPrepareContext();
@@ -240,28 +271,6 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             m_livyClient = null;
             setStatus(SparkContextStatus.CONFIGURED);
         }
-	}
-
-	/**
-	 * @return <code>true</code> if the context exists
-	 * @throws KNIMESparkException
-	 */
-	private boolean remoteSparkContextExists() throws KNIMESparkException {
-		// FIXME right new we don't have a way to determine whether a remote
-		// context with the name already exists
-		return false;
-	}
-
-	/**
-	 * @param context
-	 *            the {@link JobServerSparkContextConfig} to use for checking
-	 *            job jar existence
-	 * @return <code>true</code> if the jar is uploaded, false otherwise
-	 * @throws KNIMESparkException
-	 */
-	private boolean isJobJarUploaded() throws KNIMESparkException {
-		// FIXME this is currently not possible with the Livy REST API
-		return false;
 	}
 
 	private void uploadJobJar() throws KNIMESparkException {
@@ -355,31 +364,33 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 		final LivySparkContextConfig config = getConfiguration();
 		final Map<String, String> reps = new HashMap<>();
 
-		 reps.put("url", config.getLivyUrl());
-//		 reps.put("use_authentication", config.useAuthentication()
-//		 ? String.format("true (user: %s)", config.getUser())
-//		 : "false");
-//		 reps.put("receive_timeout", (config.getReceiveTimeout().getSeconds()
-//		 == 0)
-//		 ? "infinite"
-//		 : Long.toString(config.getReceiveTimeout().getSeconds()));
-//		 reps.put("job_check_frequency",
-//		 Integer.toString(config.getJobCheckFrequency()));
-		 reps.put("spark_version", config.getSparkVersion().toString());
-		 reps.put("context_name", config.getContextName());
-		 reps.put("delete_data_on_dispose",
-		 Boolean.toString(config.deleteObjectsOnDispose()));
-		 reps.put("override_settings",
-		 Boolean.toString(config.useCustomSparkSettings()));
-		 reps.put("custom_settings", config.useCustomSparkSettings()
-		 ? renderCustomSparkSettings(config.getCustomSparkSettings())
-		 : "(not applicable)");
-		 reps.put("context_state", getStatus().toString());
+         reps.put("spark_version", config.getSparkVersion().toString());
+         reps.put("url", config.getLivyUrl());
+         reps.put("authentication", createAuthenticationInfoString());
+         reps.put("context_state", getStatus().toString());
 
-		return generateHTMLDescription("context_html_description.template", reps);
+        try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
+            return TextTemplateUtil.fillOutTemplate(r, reps);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read context description template");
+        }
 	}
 
-	private String renderCustomSparkSettings(final Map<String, String> customSparkSettings) {
+	private String createAuthenticationInfoString() {
+	    final LivySparkContextConfig config = getConfiguration();
+        if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
+            try {
+                return String.format("Kerberos (authenticated as: %s)", UserGroupUtil
+                    .getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth()).getUserName());
+            } catch (Exception e) {
+                return "Kerberos";
+            }
+        } else {
+            return "None";
+        }
+    }
+
+    private static String renderCustomSparkSettings(final Map<String, String> customSparkSettings) {
 		final StringBuffer buf = new StringBuffer();
 
 		for (String key : customSparkSettings.keySet()) {

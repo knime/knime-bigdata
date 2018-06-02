@@ -3,12 +3,58 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
     <name>Create Spark Context (Livy)</name>
     
-    <shortDescription>TEMPORARY NODE, NOT TO BE RELEASED. Creates a Spark context on Livy.</shortDescription>
+    <shortDescription>Creates a new Spark context.</shortDescription>
     
     <fullDescription>
         <intro>
-            Creates a Spark context on Livy
+            Creates a new Spark context via <a href="Apache Livy">Apache Livy</a>.
         </intro>
+        <tab name="General">
+            <option name="Spark version">
+                The version of the Spark context.
+            </option>
+            <option name="Livy URL">
+                The URL of Livy including protocol and port e.g. http://localhost:8998.
+            </option>
+            <option name="Auhtentication">
+                Select
+                <ul>
+		            <li><i>None</i>, if Livy does not require any credentials.</li>
+		            <li><i>Kerberos</i>, if Livy uses Kerberos based authentication.</li>
+		        </ul>
+            </option>
+            <option name="Spark executor resources">
+                Select the <i>"Override default Spark executor resources"</i> option to manually set the resources
+                for the Spark executors. If enabled you can specify the amount of memory and the number of cores
+                for each executor.
+                <br/> 
+                In addition you can specify the Spark executor allocation strategy:
+                <ul>
+                    <li><i>Default allocation</i> uses the cluster default allocation strategy.</li>
+                    <li><i>Fixed allocation</i> allows you to specify a fixed number of Spark executors.</li>
+                    <li><i>Dynamic allocation</i> allows you to specify the minimum and maximum number of executors
+                    that Spark can use. Executors are allocated up to the maximum number and destroyed if no longer 
+                    needed until the minimum number of executors is reached.</li>
+                </ul>
+            </option>
+            <option name="Estimated resources">
+                An estimation of the resources that are allocated in your cluster by the Spark context. 
+                The calculation uses default settings for memory overheads etc. and is thus only an estimate. 
+                The exact resources might be different depending on your specific cluster settings.
+            </option>
+        </tab>
+        <tab name="Advanced">
+            <option name="Override default Spark driver resources">
+                If enabled you can specify the amount of memory and number of cores the Spark driver process will 
+                allocate.
+            </option>
+            <option name="Set custom Spark settings">
+                If enabled you can specify additional Spark setting. 
+                A tooltip is provided for the keys if available. For further information about the Spark settings
+                refer to the <a href="https://spark.apache.org/docs/latest/configuration.html#available-properties">
+                Spark documentation</a>.  
+            </option>
+        </tab>
     </fullDescription>
     
     <ports>

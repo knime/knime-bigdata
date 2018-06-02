@@ -32,7 +32,7 @@ import org.knime.bigdata.spark.core.jar.KNIMEPluginScanPredicates;
  */
 public class LivyJarProvider extends DefaultSparkJarProvider implements BaseSparkJarProvider {
 
-	public static final Predicate<String> LIVY_PLUGIN_PREDICATE = Pattern
+	private static final Predicate<String> LIVY_PLUGIN_PREDICATE = Pattern
 			.compile("org\\.knime\\.bigdata\\.spark\\.core\\.livy").asPredicate();
 	
 	/**

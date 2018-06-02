@@ -1,21 +1,10 @@
-<strong>Connection settings</strong>
-<hr/>
-<strong>URL:</strong>&nbsp;&nbsp;<tt>${url}</tt>
-<br/>
-<br/>
-<strong>Context settings</strong>
+<strong>Livy Spark Context settings</strong>
 <hr/>
 <strong>Spark version:</strong>&nbsp;&nbsp;<tt>${spark_version}</tt>
 <br/>
-<strong>Context name:</strong>&nbsp;&nbsp;<tt>${context_name}</tt>
-<br/><strong>Delete DataFrames/RDDs on dispose:</strong>&nbsp;&nbsp;<tt>${delete_data_on_dispose}</tt>
+<strong>Livy URL:</strong>&nbsp;&nbsp;<tt>${url}</tt>
 <br/>
-<strong>Override Spark settings:</strong>&nbsp;&nbsp;<tt>${override_settings}</tt>
+<strong>Authentication:</strong>&nbsp;&nbsp;<tt>${authentication}</tt>
 <br/>
-<strong>Custom Spark settings:</strong>
-<br/>
-<pre>
-${custom_settings}
-</pre>
 <strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
-<hr/>
+<br/>

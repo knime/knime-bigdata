@@ -71,13 +71,13 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
 
             if (!sparkContext.version().startsWith(input.getSparkVersion())) {
                 throw new KNIMESparkException(String.format(
-                    "Spark version mismatch: KNIME Extension for Apache Spark is set to %s, but the cluster runs %s. Please correct the setting under Preferences > KNIME > Spark. Then destroy and reopen the Spark context.",
+                    "Spark version mismatch: Version %s was expected, but the cluster runs %s.",
                     input.getSparkVersion(), sparkContext.version()));
             }
 
             if (!input.getKNIMEPluginVersion().equals(jobJarInfo.getPluginVersion())) {
                 throw new KNIMESparkException(String.format(
-                    "Spark context was created by version %s of the KNIME Extension for Apache Spark, but you are running %s. Please destroy and reopen this Spark context or use a different one.",
+                    "Spark context was created with version %s of the KNIME Extension for Apache Spark, but you are running %s. Please create a new Spark context.",
                     jobJarInfo.getPluginVersion(), input.getKNIMEPluginVersion()));
             }
 
@@ -87,7 +87,7 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
             //                    "Spark context was created by a KNIME Extension for Apache Spark that has incompatible community extensions. Please destroy and reopen this Spark context or use a different one.");
             //            }
         } catch (IOException e) {
-            throw new KNIMESparkException("Spark context was probably not created with KNIME Extension for Apache Spark (or an old version of it).  Please destroy and reopen this Spark context or use a different one.",
+            throw new KNIMESparkException("Spark context was probably not created with KNIME Extension for Apache Spark (or an old version of it). Please destroy and reopen this Spark context or use a different one.",
                 e);
         }
 

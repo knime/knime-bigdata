@@ -45,7 +45,7 @@ class LivyJobController implements JobController {
 
 	private final String m_livyJobClass;
 
-	LivyJobController(final LivySparkContextConfig contextConfig, final LivyClient livyClient,
+	LivyJobController(final LivyClient livyClient,
 			final String livyJobClass) {
 		
 		m_livyClient = livyClient;

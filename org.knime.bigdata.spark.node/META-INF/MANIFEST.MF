@@ -64,6 +64,7 @@ Export-Package: org.knime.bigdata.spark.node.io.database.reader,
  org.knime.bigdata.spark.node.statistics.correlation,
  org.knime.bigdata.spark.node.statistics.correlation.column,
  org.knime.bigdata.spark.node.statistics.correlation.matrix,
+ org.knime.bigdata.spark.node.util.context.create,
  org.knime.bigdata.spark.node.util.rdd.persist,
  org.knime.bigdata.spark.node.util.rdd.unpersist
 Require-Bundle: org.knime.base;bundle-version="[3.6.0,4.0.0)",

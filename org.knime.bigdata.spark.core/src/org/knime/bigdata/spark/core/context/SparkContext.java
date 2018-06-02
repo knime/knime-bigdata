@@ -20,10 +20,6 @@
  */
 package org.knime.bigdata.spark.core.context;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -515,52 +511,6 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      * @return A HTML description of this context without HTML and BODY tags
      */
     public abstract String getHTMLDescription();
-
-    /**
-     * Replaces the given pattern with the given value inside the given buffer.
-     *
-     * @param buf The buffer inside which to do the replacement.
-     * @param pattern The pattern in the buffer to replace.
-     * @param value The value to replace with.
-     */
-    protected void replace(final StringBuilder buf, final String pattern, final String value) {
-        final String realPattern = String.format("${%s}", pattern);
-        int start = buf.indexOf(realPattern);
-
-        if (start == -1) {
-            throw new IllegalArgumentException(String.format("Pattern %s does not appear in template", realPattern));
-        }
-
-        buf.replace(start, start + realPattern.length(), value);
-    }
-
-    /**
-     * Using the given template file, this method replaces pattern strings in the template with actual replacement
-     * values. The patterns are the keys of the given map, whereas the replacement values are their respective map
-     * values.
-     *
-     * @param templateFileName The name of the template file, which will be resolved using
-     *            {@link Class#getResourceAsStream(String)}.
-     * @param replacements A map from patterns to replacment values.
-     * @return a description generated from the given template and pattern replacements.
-     */
-    protected String generateHTMLDescription(final String templateFileName, final Map<String, String> replacements) {
-        final String template;
-        try (InputStream r = getClass().getResourceAsStream(templateFileName)) {
-            final byte[] bytes = new byte[r.available()];
-            r.read(bytes);
-            template = new String(bytes, Charset.forName("UTF8"));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read context description template");
-        }
-
-        StringBuilder buf = new StringBuilder(template);
-        for (String pattern : replacements.keySet()) {
-            replace(buf, pattern, replacements.get(pattern));
-        }
-
-        return buf.toString();
-    }
 
     /**
      * {@inheritDoc}

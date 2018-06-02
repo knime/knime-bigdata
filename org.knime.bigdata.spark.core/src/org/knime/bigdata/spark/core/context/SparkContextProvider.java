@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
  * Interface for different providers of Spark contexts. Providers can be registered via the respective extension point.
@@ -57,6 +58,11 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      */
     String toPrettyString(SparkContextID contextID);
 
+
+    /**
+     * @return the highest Spark version supported by this Spark context provider.
+     */
+    SparkVersion getHighestSupportedSparkVersion();
 
     /**
      * This method creates a new instance of the "default" Spark context. The default Spark context is a deprecated

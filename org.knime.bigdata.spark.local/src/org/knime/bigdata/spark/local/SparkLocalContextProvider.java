@@ -30,6 +30,14 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
     public CompatibilityChecker getChecker() {
         return LocalSparkVersion.VERSION_CHECKER;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparkVersion getHighestSupportedSparkVersion() {
+        return LocalSparkVersion.VERSION_CHECKER.getSupportedSparkVersions().iterator().next();
+    }
 
     /**
      * {@inheritDoc}
