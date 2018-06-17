@@ -25,7 +25,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.knime.features.ext.h2o.sparklingwater"
+         id="org.knime.features.ext.h2o.spark"
          version="0.0.0"/>
 
    <includes
