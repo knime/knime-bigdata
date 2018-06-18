@@ -20,8 +20,6 @@
  */
 package org.knime.bigdata.spark.node.mllib.associationrule;
 
-import java.io.Serializable;
-
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
@@ -31,30 +29,31 @@ import org.knime.bigdata.spark.core.job.SparkClass;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-@SuppressWarnings("javadoc")
 public class AssociationRuleLearnerJobInput extends JobInput {
-    private static final String FREQ_ITEMS_MODEL = "freqItemsModel";
     private static final String MIN_CONFIDENCE = "minConfidence";
 
     /** Deserialization constructor */
     public AssociationRuleLearnerJobInput() {}
 
-    AssociationRuleLearnerJobInput(final Serializable freqItemsModel, final String associationRulesOutputObject,
+    AssociationRuleLearnerJobInput(final String freqItemsInputObject, final String associationRulesOutputObject,
         final double minConfidence) {
 
-        set(FREQ_ITEMS_MODEL, freqItemsModel);
+        addNamedInputObject(freqItemsInputObject);
         addNamedOutputObject(associationRulesOutputObject);
         set(MIN_CONFIDENCE, minConfidence);
     }
 
-    public Serializable getFreqItemsModel() {
-        return get(FREQ_ITEMS_MODEL);
-    }
-
+    /** @return minimum confidence */
     public double getMinConfidence() {
         return getDouble(MIN_CONFIDENCE);
     }
 
+    /** @return input frequent item sets object id */
+    public String getFreqItemSetsInputObject() {
+        return getFirstNamedInputObject();
+    }
+
+    /** @return output association rules object id */
     public String getAssociationRulesOutputObject() {
         return getFirstNamedOutputObject();
     }

@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark2_2.jobs.mllib.freqitemset;
 
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.size;
+
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.fpm.FPGrowth;
@@ -29,9 +32,9 @@ import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobInput;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobOutput;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
-import org.knime.bigdata.spark2_2.api.SparkJob;
+import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
+
 
 /**
  * Find frequent item sets using FP-Growth in Spark.
@@ -39,30 +42,30 @@ import org.knime.bigdata.spark2_2.api.SparkJob;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-public class FrequentItemSetJob implements SparkJob<FrequentItemSetJobInput, FrequentItemSetJobOutput> {
+public class FrequentItemSetJob implements SimpleSparkJob<FrequentItemSetJobInput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(FrequentItemSetJob.class.getName());
 
     @Override
-    public FrequentItemSetJobOutput runJob(final SparkContext sparkContext, final FrequentItemSetJobInput input, final NamedObjects namedObjects)
+    public void runJob(final SparkContext sparkContext, final FrequentItemSetJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
 
         LOGGER.info("Running frequent items job...");
 
-        final Dataset<Row> inputRows = namedObjects.getDataFrame(input.getItemsInputObject());
-        final FPGrowth fpg = new FPGrowth()
-                .setItemsCol(input.getItemColumn())
-                .setMinSupport(input.getMinSupport());
+        final Dataset<Row> inputRows = namedObjects.getDataFrame(input.getItemsInputObject())
+                .na().drop(new String[] { input.getItemColumn() });
+        final FPGrowth fpg = new FPGrowth().setItemsCol(input.getItemColumn()).setMinSupport(input.getMinSupport());
+
         if (input.hasNumPartitions()) {
             LOGGER.warn("Using custom number of partitions: " + input.getNumPartitions());
             fpg.setNumPartitions(input.getNumPartitions());
         }
 
         final FPGrowthModel model = fpg.fit(inputRows);
-        namedObjects.addDataFrame(input.getFreqItemsOutputObject(), model.freqItemsets());
+        final Dataset<Row> result = model.freqItemsets()
+            .select(col("items").as("ItemSet"), size(col("items")).as("ItemSetSize"), col("freq").as("ItemSetSupport"));
+        namedObjects.addDataFrame(input.getFreqItemsOutputObject(), result);
 
         LOGGER.info("Frequent items job done.");
-
-        return new FrequentItemSetJobOutput(FrequentItemSetModel.fromJobInput(model.uid(), input));
     }
 }

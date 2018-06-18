@@ -1,52 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
-	type="Learner" icon="icon.png">
-	<name>Spark Association Rule Learner</name>
-	<shortDescription>Association rule learner using frequent item sets in Spark.</shortDescription>
-	<fullDescription>
-		<intro>
-            This extracts <a href="http://en.wikipedia.org/wiki/Association_rule_learning">association rules</a> from a collection of frequent items.
-            <p>
-				This node extracts <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html#association-rules">association rules</a> with a single item
-				as the consequent from a given column containing frequent item sets.
-            </p>
-            
-            <p>
-            	Association rules describes relations between items in a given set of transactions.
-            	For example, if a customer bought <i>onions, potatos, meat</i> in a transaction,
-            	this implies that a new customer who buys <i>onions</i> and <i>potatos</i> together is likely to also by hamburger <i>meat</i>.
-            	This can be written as a association rule with <i>onions</i> and <i>potatos</i> as antecedent and the <i>meat</i> as consequents.
-           	</p>
-           	
-           	<p>
-           		The association rules can be filtered by a required confidence.
-	           	Confidence is an indication of how often an association rule has been found to be true.
-	           	For example, if in the transactions item set X appears 4 times, X and Y co-occur only 2 times,
-	           	the confidence for the rule X => Y is then 2/4 = 0.5.
-           	</p>
-           	
-           	<p>
-            	See <a href="http://en.wikipedia.org/wiki/Association_rule_learning">Association rule learning (Wikipedia)</a> for general informations.
-            </p>
-            
-            <p>
-                The <i>Spark Frequent Item Sets</i> Node can be used to generate a collection of frequent items as input.
-                The <i>Spark Association Rule Apply</i> Node can be used to apply the rules produced by this node.
-            </p>
+    type="Learner" icon="icon.png">
+  <name>Spark Association Rule Learner</name>
+  <shortDescription>Find frequent item sets and learn association rules in Spark.</shortDescription>
+  <fullDescription>
+    <intro>
+      <p>
+        This node uses Spark MLlib to compute frequent item sets and then extract association rules from the given input data. 
+        Association rules describe relations between items in a set of transactions. For example, if a customer bought <i>onions,
+        potatos</i> and <i>meat</i> in a transaction, this implies that a new customer who buys <i>onions</i> and <i>potatos</i> is likely
+        to also buy <i>meat</i>. This can be written as an association rule with <i>onions</i> and <i>potatos</i> as antecedents and
+        <i>meat</i> as consequent.
+      </p>
 
-            <p><i>This node requires at least Apache Spark 2.0.</i></p>
-		</intro>
-		
-		<option name="Minimum Confidence">
-			Sets the minimum confidence for association rules (default: 0.8).
-		</option>
-	</fullDescription>
+      <p>
+        Transactions/item sets are represented as collection columns. The <i>Spark GroupBy</i> or <i>Spark SQL</i> nodes are
+        recommended to create collection columns in Spark.
+      </p>
 
-	<ports>
-		<inPort index="0" name="Frequent item sets model">Frequent item sets model</inPort>
-		<outPort index="0" name="Association rules">Spark data with association rules</outPort>
-		<outPort index="1" name="Association rules model (remote model)">Association rules model. 
-        <b>The model is not self-contained and thus cannot be saved with the workflow.</b></outPort>
-	</ports>
+      <p>
+        Frequent item sets are computed using the <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html">FP-growth</a>
+        implementation provided by Spark MLlib, using input data with a collection column, where each cell holds the items of a transaction.
+        Rows with <i>missing values</i> in the selected item column are <i>ignored</i>. 
+        FP-growth uses a suffix tree (FP-tree) structure to encode transactions without generating candidate sets explicitly and then extracts
+        the frequent item sets from this FP-tree. This approach avoids the usually expensive generation of explicit candidates sets used in
+        Apriori-like algorithms designed for the same purpose. More information about the FP-Growth algorithm can be found in
+        <a href="http://dx.doi.org/10.1145/335191.335372">Han et al., Mining frequent patterns without candidate generation</a>.
+        Spark implements <i>Parallel FP-growth (PFP)</i> described in <a href="http://dx.doi.org/10.1145/1454008.1454027">Li
+        et al., PFP: Parallel FP-Growth for Query Recommendation</a>.
+      </p>
+
+      <p>
+        <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html#association-rules">Association rules</a> are computed using Spark MLlib,
+        using the previously computed frequent item sets. Each association rule maps an item set (<i>antecedent</i>) to a single item (<i>consequent</i>).
+        The <i>Spark Association Rule Apply</i> node can be used to apply the rules produced by this node.
+      </p>
+
+      <p>
+        See <a href="http://en.wikipedia.org/wiki/Association_rule_learning">Association rule learning (Wikipedia)</a> for general information.
+      </p>
+
+      <p><i>This node requires at least Apache Spark 2.0.</i></p>
+    </intro>
+
+    <option name="Item Column">
+      Collection column, where each cell holds the items of a transaction.
+    </option>
+    <option name="Minimum Support">
+      The minimum support for an item set to be identified as frequent. For example, if an item set appears in 3 out of 5 transactions, it has a support of 3/5=0.6 (default: 0.3).
+    </option>
+    <option name="Number of partitions">
+      Optional: Number of partitions used by the Parallel FP-growth algorithm to distribute the work (default: same as input data).
+    </option>
+    <option name="Minimum Confidence">
+      Sets the minimum confidence for association rules (default: 0.8). Association rules are filtered based on <i>confidence</i>. 
+      Confidence is an indication of how often an association rule has been found to be true.
+      For example, if the item set A appears in 10 transactions, and item sets A and B co-occur one time, then the confidence for the rule A => B is 1/10 = 0.1.
+    </option>
+  </fullDescription>
+
+  <ports>
+    <inPort index="0" name="Spark data">Spark DataFrame  with a collection column, where each cell holds the items of a transaction</inPort>
+    <outPort index="0" name="Association rules">Spark DataFrame with association rules</outPort>
+    <outPort index="1" name="Frequent item sets">Spark DataFrame with frequent item sets</outPort>
+  </ports>
 </knimeNode>

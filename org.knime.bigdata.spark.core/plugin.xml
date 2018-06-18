@@ -53,16 +53,6 @@
             specClass="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
             specSerializer="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
       </portType>
-      <!-- TODO: change color? -->
-      <portType
-            color="#7DBDFF"
-            hidden="false"
-            name="Remote Spark Model"
-            objectClass="org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObject"
-            objectSerializer="org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObject$Serializer"
-            specClass="org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObjectSpec"
-            specSerializer="org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObjectSpec$Serializer">
-      </portType>
       <portType
             hidden="false"
             name="Spark Context (legacy com)"

@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.collection.CollectionDataValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -50,13 +51,21 @@ public class SparkAssociationRuleApplyNodeDialog extends NodeDialogPane implemen
     private final SparkAssociationRuleApplySettings m_settings = new SparkAssociationRuleApplySettings();
 
     @SuppressWarnings("unchecked")
-    private final DialogComponentColumnNameSelection m_itemColumn =
-            new DialogComponentColumnNameSelection(m_settings.getItemColumnModel(), "Item column:", 1, CollectionDataValue.class);
+    private final DialogComponentColumnNameSelection m_antColumn =
+            new DialogComponentColumnNameSelection(m_settings.getAntecedentColumnModel(), "Antecedent column:", 0, CollectionDataValue.class);
+
+    @SuppressWarnings("unchecked")
+    private final DialogComponentColumnNameSelection m_consColumn =
+            new DialogComponentColumnNameSelection(m_settings.getConsequentColumnModel(), "Consequent column:", 0, DataValue.class);
 
     private final JCheckBox m_useRuleLimit =
             new JCheckBox("Limit number of used rules");
     private final DialogComponentNumber m_ruleLimit =
             new DialogComponentNumber(m_settings.getRuleLimitModel(), "Rule limit:", 1000);
+
+    @SuppressWarnings("unchecked")
+    private final DialogComponentColumnNameSelection m_itemColumn =
+            new DialogComponentColumnNameSelection(m_settings.getItemColumnModel(), "Item column:", 1, CollectionDataValue.class);
 
     private final DialogComponentString m_outputColumn =
             new DialogComponentString(m_settings.getOutputColumnModel(), "Output column:");
@@ -69,6 +78,8 @@ public class SparkAssociationRuleApplyNodeDialog extends NodeDialogPane implemen
         JPanel rulesPanel = new JPanel();
         rulesPanel.setLayout(new BoxLayout(rulesPanel, BoxLayout.Y_AXIS));
         rulesPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Association Rules input"));
+        rulesPanel.add(m_antColumn.getComponentPanel());
+        rulesPanel.add(m_consColumn.getComponentPanel());
         JPanel useRulesPanel = new JPanel();
         useRulesPanel.add(m_useRuleLimit);
         m_useRuleLimit.addActionListener(this);
@@ -93,6 +104,8 @@ public class SparkAssociationRuleApplyNodeDialog extends NodeDialogPane implemen
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_antColumn.saveSettingsTo(settings);
+        m_consColumn.saveSettingsTo(settings);
         m_ruleLimit.saveSettingsTo(settings);
         m_itemColumn.saveSettingsTo(settings);
         m_outputColumn.saveSettingsTo(settings);
@@ -104,16 +117,19 @@ public class SparkAssociationRuleApplyNodeDialog extends NodeDialogPane implemen
             throw new NotConfigurableException("Spark input data required.");
         }
 
+        final DataTableSpec rulesTableSpec = ((SparkDataPortObjectSpec) specs[0]).getTableSpec();
         final DataTableSpec itemsTableSpec = ((SparkDataPortObjectSpec) specs[1]).getTableSpec();
-        final DataTableSpec tablesSpecs[] = new DataTableSpec[] { null, itemsTableSpec };
+        final DataTableSpec tablesSpecs[] = new DataTableSpec[] { rulesTableSpec, itemsTableSpec };
 
+        m_antColumn.loadSettingsFrom(settings, tablesSpecs);
+        m_consColumn.loadSettingsFrom(settings, tablesSpecs);
         m_ruleLimit.loadSettingsFrom(settings, tablesSpecs);
         m_itemColumn.loadSettingsFrom(settings, tablesSpecs);
         m_outputColumn.loadSettingsFrom(settings, tablesSpecs);
 
         m_useRuleLimit.setSelected(m_settings.getRuleLimitModel().isEnabled());
 
-        m_settings.loadDefaults(itemsTableSpec);
+        m_settings.loadDefaults(rulesTableSpec, itemsTableSpec);
     }
 
     @Override

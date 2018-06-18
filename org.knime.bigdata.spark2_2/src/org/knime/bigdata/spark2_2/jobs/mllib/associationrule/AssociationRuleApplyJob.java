@@ -20,7 +20,8 @@
  */
 package org.knime.bigdata.spark2_2.jobs.mllib.associationrule;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -28,11 +29,13 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.MapPartitionsFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleApplyJobInput;
@@ -54,46 +57,44 @@ public class AssociationRuleApplyJob implements SparkJob<AssociationRuleApplyJob
     private static final Logger LOGGER = Logger.getLogger(AssociationRuleApplyJob.class.getName());
 
     @Override
-    public AssociationRuleApplyJobOutput runJob(final SparkContext sparkContext, final AssociationRuleApplyJobInput input, final NamedObjects namedObjects)
-        throws KNIMESparkException {
+    public AssociationRuleApplyJobOutput runJob(final SparkContext sparkContext,
+        final AssociationRuleApplyJobInput input, final NamedObjects namedObjects) throws KNIMESparkException {
 
-        LOGGER.info("Generating association rules...");
+        LOGGER.info("Predicting items using association rules...");
 
-        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
-        @SuppressWarnings("resource") // don't close JavaSparkContext
-        final JavaSparkContext javaSparkContex = new JavaSparkContext(sparkContext);
-        final AssociationRuleModel ruleModel = (AssociationRuleModel) input.getRuleModel();
-        final Dataset<Row> rulesDataset = namedObjects.getDataFrame(ruleModel.getAssociationRulesObjectName());
-        final Dataset<Row> itemsDataset = namedObjects.getDataFrame(input.getItemsInputObject());
+        @SuppressWarnings("resource") // we don't close the context here
+        final JavaSparkContext javaSparkContext = new JavaSparkContext(sparkContext);
+        final Dataset<Row> itemsDataset = namedObjects.getDataFrame(input.getItemsInputObject())
+            .na().drop(new String[] { input.getItemColumn() });
 
         // load and broadcast rules
-        final JavaRDD<Tuple2<List<Object>, List<Object>>> rulesRdd = rulesDataset
-                .select(ruleModel.getAntecedentColumn(), ruleModel.getConsequentColumn())
-                .javaRDD().map(new Function<Row, Tuple2<List<Object>, List<Object>>>() {
-                    private static final long serialVersionUID = 1L;
+        final JavaRDD<Tuple2<List<Object>, Object>> rulesDataset = namedObjects.getDataFrame(input.getRulesInputObject())
+            .select(input.getAntecedentColumn(), input.getConsequentColumn())
+            .na().drop("any").javaRDD().map(new Function<Row, Tuple2<List<Object>, Object>>() {
+                private static final long serialVersionUID = 1L;
 
-                    @Override
-                    public Tuple2<List<Object>, List<Object>> call(final Row row) throws Exception {
-                        return new Tuple2<>(row.getList(0), row.getList(1));
-                    }
-                });
-        final List<Tuple2<List<Object>, List<Object>>> rules;
+                @Override
+                public Tuple2<List<Object>, Object> call(final Row row) throws Exception {
+                    return Tuple2.apply(row.getList(0), row.get(1));
+                }
+            });
+        final List<Tuple2<List<Object>, Object>> rules;
         if (input.hasRuleLimit()) {
-            rules = rulesRdd.take(input.getRuleLimit());
+            rules = rulesDataset.take(input.getRuleLimit());
         } else {
-            rules = rulesRdd.collect();
+            rules = rulesDataset.collect();
         }
-        final Broadcast<List<Tuple2<List<Object>, List<Object>>>> brRules = javaSparkContex.broadcast(rules);
+        final Broadcast<List<Tuple2<List<Object>, Object>>> brRules = javaSparkContext.broadcast(rules);
 
         // apply rules
         final StructField itemsField = itemsDataset.schema().apply(input.getItemColumn());
         final int itemsFieldIdx = itemsDataset.schema().fieldIndex(input.getItemColumn());
-        final Dataset<Row> result = spark.createDataFrame(
-            itemsDataset.toJavaRDD().map(new RulesApplyFunction(itemsFieldIdx, brRules)),
-            itemsDataset.schema().add(input.getOutputColumn(), itemsField.dataType(), false));
+        final StructType outputSchema = itemsDataset.schema().add(input.getOutputColumn(), itemsField.dataType(), false);
+        final Dataset<Row> result = itemsDataset
+            .mapPartitions(new RulesApplyFunction(itemsFieldIdx, brRules), RowEncoder.apply(outputSchema));
         namedObjects.addDataFrame(input.getFirstNamedOutputObject(), result);
 
-        LOGGER.info("Association rules learner done.");
+        LOGGER.info("Association rules apply job done.");
 
         return new AssociationRuleApplyJobOutput(rules.size());
     }
@@ -106,41 +107,53 @@ public class AssociationRuleApplyJob implements SparkJob<AssociationRuleApplyJob
      *
      * Implementation was extracted from ml-FPGrowth transform implementation in Spark 2.2.
      *
-     * @author Sascha Wolke, KNIME GmbH
+     * @author Bjoern Lohrmann, KNIME GmbH
      */
-    public class RulesApplyFunction implements Function<Row, Row> {
+    public class RulesApplyFunction implements MapPartitionsFunction<Row, Row> {
         private static final long serialVersionUID = 1L;
         private final int m_inputColIndex;
-        private final Broadcast<List<Tuple2<List<Object>, List<Object>>>> m_brRules;
+        private final Broadcast<List<Tuple2<List<Object>, Object>>> m_brRules;
 
         /**
          * Default constructor.
          *
          * @param inputColIndex collection column index in input dataset
-         * @param brRules rule tuples of antecedent and consequent item lists
+         * @param brRules tuple with antecedent items list and a consequent item
          */
-        public RulesApplyFunction(final int inputColIndex, final Broadcast<List<Tuple2<List<Object>, List<Object>>>> brRules) {
+        public RulesApplyFunction(final int inputColIndex, final Broadcast<List<Tuple2<List<Object>, Object>>> brRules) {
             m_inputColIndex = inputColIndex;
             m_brRules = brRules;
         }
 
         @Override
-        public Row call(final Row inputRow) throws Exception {
-            final RowBuilder rb = RowBuilder.fromRow(inputRow);
-            final List<Object> items = inputRow.getList(m_inputColIndex);
+        public Iterator<Row> call(final Iterator<Row> inputRows) throws Exception {
+            final HashSet<Object> result = new HashSet<>();
+            final List<Tuple2<List<Object>, Object>> rules = m_brRules.getValue();
 
-            if (items != null) {
-                final List<Object> result = new ArrayList<>();
-                for (Tuple2<List<Object>, List<Object>> rule : m_brRules.getValue()) {
-                    applyRule(items, rule, result);
+            return new Iterator<Row>() {
+                @Override
+                public boolean hasNext() {
+                    return inputRows.hasNext();
                 }
-                rb.add(result.toArray());
 
-            } else {
-                rb.add(new Object[0]);
-            }
+                @Override
+                public Row next() {
+                    final Row inputRow = inputRows.next();
+                    final RowBuilder rb = RowBuilder.fromRow(inputRow);
+                    final List<Object> items = inputRow.getList(m_inputColIndex);
 
-            return rb.build();
+                    if (items != null) {
+                        for (Tuple2<List<Object>, Object> rule : rules) {
+                            applyRule(items, rule, result);
+                        }
+                        rb.add(result.toArray());
+                        result.clear();
+                    } else {
+                        rb.add(new Object[0]);
+                    }
+                    return rb.build();
+                }
+            };
         }
 
         /**
@@ -150,14 +163,14 @@ public class AssociationRuleApplyJob implements SparkJob<AssociationRuleApplyJob
          * @param rule tuple with antecedent and consequent item lists
          * @param result predicted items set
          */
-        private void applyRule(final List<Object> items, final Tuple2<List<Object>, List<Object>> rule,
-            final List<Object> result) {
+        private void applyRule(final List<Object> items, final Tuple2<List<Object>, Object> rule,
+            final HashSet<Object> result) {
 
-            if (items.containsAll(rule._1())) {
-                for (Object o : rule._2()) {
-                    if (!items.contains(o) && !result.contains(o)) { // add new items
-                        result.add(o);
-                    }
+            final Object o = rule._2();
+
+            if (!result.contains(o) && items.containsAll(rule._1())) {
+                if (!items.contains(o)) { // add only new items to prediction
+                    result.add(o);
                 }
             }
         }

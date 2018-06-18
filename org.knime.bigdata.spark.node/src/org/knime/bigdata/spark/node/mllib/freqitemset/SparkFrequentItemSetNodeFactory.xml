@@ -1,54 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
-	type="Learner" icon="icon.png">
-	<name>Spark Frequent Item Sets</name>
-	<shortDescription>Find frequent item sets using FP-Growth in Spark.</shortDescription>
-	<fullDescription>
-		<intro>
-			<p>
-				This node finds frequent item sets using the 
-	            <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html">FP-growth implementation</a>
-	            in Apache Spark.
-            </p>
-            
-            <p>
-	            The FP-growth (frequent pattern) algorithm calculates item frequencies and identifies frequent items in a given column, containing collections of items (transactions).
-	            It use a suffix tree (FP-tree) structure to encode transactions without generating candidate sets explicitly and then extracts the frequent item sets from this FP-tree.
-	            This approach avoids the usually expensive generation of explicit candidates sets used in Apriori-like algorithms designed for the same purpose.
-	            The implementation uses a parallel Version (PFP) to distribute the work in such a way that each machine executes an independent group of mining tasks based on the suffixes of transactions,
-	            and hence is more scalable.
-            </p>
-            
-            <p>
-	            See <a href="http://en.wikipedia.org/wiki/Association_rule_learning">Association rule learning (Wikipedia)</a> for general informations.
-	            More informations about the FP-Growth algorithm can be found in <a href="http://dx.doi.org/10.1145/335191.335372">Han et al., Mining frequent patterns without candidate generation</a>.
-	            Apache Spark uses the parallel FP-Growth (PFP) implementation described in <a href="http://dx.doi.org/10.1145/1454008.1454027">Li et al., PFP: Parallel FP-Growth for Query Recommendation</a>.
-            </p>
+  xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd"
+  type="Learner" icon="icon.png">
+  <name>Spark Frequent Item Sets</name>
+  <shortDescription>Find frequent item sets using FP-Growth in Spark.</shortDescription>
+  <fullDescription>
+    <intro>
+      <p>
+        This node uses Spark MLlib to compute frequent item sets. See the <i>Spark Association Rule Learner</i> node
+        to generate frequent item sets and association rules in one step.
+      </p>
 
-            <p>
-                The <i>Spark GroupBy</i> or <i>Spark SQL</i> Node can be used to generate a collection of items as input.
-                The <i>Spark Association Rule Learner</i> Node can be used to generate rules based on the identified frequent item sets by this node.
-            </p>
+      <p>
+        Frequent item sets are computed using the <a href="https://spark.apache.org/docs/2.2.0/mllib-frequent-pattern-mining.html">FP-growth</a>
+        implementation provided by Spark MLlib, using input data with a collection column, where each cell holds the items of a transaction.
+        Rows with <i>missing values</i> in the selected item column are <i>ignored</i>. 
+        FP-growth uses a suffix tree (FP-tree) structure to encode transactions without generating candidate sets explicitly and then extracts
+        the frequent item sets from this FP-tree. This approach avoids the usually expensive generation of explicit candidates sets used in
+        Apriori-like algorithms designed for the same purpose. More information about the FP-Growth algorithm can be found in
+        <a href="http://dx.doi.org/10.1145/335191.335372">Han et al., Mining frequent patterns without candidate generation</a>.
+        Spark implements <i>Parallel FP-growth (PFP)</i> described in <a href="http://dx.doi.org/10.1145/1454008.1454027">Li
+        et al., PFP: Parallel FP-Growth for Query Recommendation</a>.
+      </p>
 
-            <p><i>This node requires at least Apache Spark 2.0.</i></p>
-		</intro>
+      <p>
+        Transactions/item sets are represented as collection columns. The <i>Spark GroupBy</i> or <i>Spark SQL</i> nodes are
+        recommended to create collection columns in Spark.
+      </p>
 
-		<option name="Item Column">
-			Input column to learn on, containing collections of items.
-		</option>
-		<option name="Minimum Support">
-			Sets the minimum support for an itemset to be identified as frequent. For example, if an item appears in 3 out of 5 transactions, it has a support of 3/5=0.6 (default: 0.3).
-		</option>
-		<option name="Number of partitions">
-			Number of partitions used by the parallel FP-growth algorithm to distribute the work (default: same as input data).
-		</option>
-	</fullDescription>
+      <p>
+        See <a href="http://en.wikipedia.org/wiki/Association_rule_learning">Association rule learning (Wikipedia)</a> for general information.
+      </p>
 
-	<ports>
-		<inPort index="0" name="Spark data">Spark data with item collection column</inPort>
-		<outPort index="0" name="Frequent item sets">Spark data with frequent item sets</outPort>
-		<outPort index="1" name="Frequent item sets model (remote model)">Frequent item sets model. 
-        <b>The model is not self-contained and thus cannot be saved with the workflow.</b></outPort>
-	</ports>
+      <p><i>This node requires at least Apache Spark 2.0.</i></p>
+    </intro>
+
+    <option name="Item Column">
+      Collection column, where each cell holds the items of a transaction.
+    </option>
+    <option name="Minimum Support">
+      The minimum support for an item set to be identified as frequent. For example, if an item set appears in 3 out of 5 transactions, it has a support of 3/5=0.6 (default: 0.3).
+    </option>
+    <option name="Number of partitions">
+      Optional: Number of partitions used by the Parallel FP-growth algorithm to distribute the work (default: same as input data).
+    </option>
+  </fullDescription>
+
+  <ports>
+    <inPort index="0" name="Spark data">Spark DataFrame  with a collection column, where each cell holds the items of a transaction</inPort>
+    <outPort index="0" name="Frequent item sets">Spark DataFrame with frequent item sets</outPort>
+  </ports>
 </knimeNode>

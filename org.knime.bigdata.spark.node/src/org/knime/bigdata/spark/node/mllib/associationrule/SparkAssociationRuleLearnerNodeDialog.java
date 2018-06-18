@@ -20,9 +20,11 @@
  */
 package org.knime.bigdata.spark.node.mllib.associationrule;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrquentItemSetNodeDialogPanel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -37,26 +39,42 @@ import org.knime.core.node.port.PortObjectSpec;
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkAssociationRuleLearnerNodeDialog extends NodeDialogPane {
-    private final SparkAssociationRuleLearnerSettings m_settings = new SparkAssociationRuleLearnerSettings();
-
-    private final DialogComponentNumber m_minConfidence =
-            new DialogComponentNumber(m_settings.getMinConfidenceModel(), "Minimum confidence:", 0.1);
+    private final SparkAssociationRuleLearnerSettings m_settings;
+    private final SparkFrquentItemSetNodeDialogPanel m_freqItems;
+    private final DialogComponentNumber m_minConfidence;
 
     /** Default constructor. */
     public SparkAssociationRuleLearnerNodeDialog() {
+        m_settings = new SparkAssociationRuleLearnerSettings();
+        m_freqItems = new SparkFrquentItemSetNodeDialogPanel(m_settings);
+        m_minConfidence =
+            new DialogComponentNumber(m_settings.getMinConfidenceModel(), "Minimum confidence:", 0.1, 8);
+
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-        panel.add(m_minConfidence.getComponentPanel());
+
+        JPanel itemsPanel = m_freqItems.getComponentPanel();
+        itemsPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Frequent Item Sets"));
+        panel.add(itemsPanel);
+
+        JPanel rulesPanel = new JPanel();
+        rulesPanel.setLayout(new BoxLayout(rulesPanel, BoxLayout.Y_AXIS));
+        rulesPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Association Rules"));
+        rulesPanel.add(m_minConfidence.getComponentPanel());
+        panel.add(rulesPanel);
+
         addTab("Settings", panel);
     }
 
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_freqItems.saveSettingsTo(settings);
         m_minConfidence.saveSettingsTo(settings);
     }
 
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+        m_freqItems.loadSettingsFrom(settings, specs);
         m_minConfidence.loadSettingsFrom(settings, specs);
     }
 }

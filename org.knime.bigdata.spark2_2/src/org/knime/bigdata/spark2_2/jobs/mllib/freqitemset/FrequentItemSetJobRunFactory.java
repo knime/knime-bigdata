@@ -20,9 +20,8 @@
  */
 package org.knime.bigdata.spark2_2.jobs.mllib.freqitemset;
 
-import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobInput;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobOutput;
 import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
 
 /**
@@ -30,10 +29,10 @@ import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeMo
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class FrequentItemSetJobRunFactory extends DefaultJobRunFactory<FrequentItemSetJobInput, FrequentItemSetJobOutput> {
+public class FrequentItemSetJobRunFactory extends DefaultSimpleJobRunFactory<FrequentItemSetJobInput> {
 
     /** Default constructor. */
     public FrequentItemSetJobRunFactory() {
-        super(SparkFrequentItemSetNodeModel.JOB_ID, FrequentItemSetJob.class, FrequentItemSetJobOutput.class);
+        super(SparkFrequentItemSetNodeModel.JOB_ID, FrequentItemSetJob.class);
     }
 }

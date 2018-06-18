@@ -20,19 +20,18 @@
  */
 package org.knime.bigdata.spark.node.mllib.freqitemset;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObject;
-import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -54,14 +53,10 @@ public class SparkFrequentItemSetNodeModel extends SparkNodeModel {
     /** The unique Spark job id. */
     public static final String JOB_ID = SparkFrequentItemSetNodeModel.class.getCanonicalName();
 
-    /** The unique model name. */
-    public static final String MODEL_NAME = "Frequent Items";
-
     private final SparkFrequentItemSetSettings m_settings = new SparkFrequentItemSetSettings();
 
     SparkFrequentItemSetNodeModel() {
-        super(new PortType[]{SparkDataPortObject.TYPE},
-            new PortType[]{SparkDataPortObject.TYPE, RemoteSparkModelPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkDataPortObject.TYPE});
     }
 
     @Override
@@ -69,71 +64,91 @@ public class SparkFrequentItemSetNodeModel extends SparkNodeModel {
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("Spark input data required.");
         }
-        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
-        final SparkContextID contextId = spec.getContextID();
-        m_settings.loadDefaults(new DataTableSpec[] { spec.getTableSpec() });
-        final DataType itemsetType = getItemsetType(spec.getTableSpec());
-        final FrequentItemSetModelMetaData modelMeta = new FrequentItemSetModelMetaData(itemsetType);
+
+        final SparkDataPortObjectSpec itemsPortSpec = (SparkDataPortObjectSpec)inSpecs[0];
+        final DataTableSpec itemsSpec = itemsPortSpec.getTableSpec();
+        final SparkContextID contextId = itemsPortSpec.getContextID();
+        m_settings.loadDefaults(itemsSpec);
+        final DataType itemsetType = getColumnSpec(itemsSpec, "item sets", true, m_settings.getItemsColumn()).getType();
         return new PortObjectSpec[]{
-            new SparkDataPortObjectSpec(contextId, createFreqItemsTableSpec(itemsetType)),
-            new RemoteSparkModelPortObjectSpec(contextId, getSparkVersion(spec), MODEL_NAME, modelMeta)
+            new SparkDataPortObjectSpec(contextId, createFreqItemsTableSpec(itemsetType))
         };
     }
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        final SparkDataPortObject sparkPort = (SparkDataPortObject) inData[0];
-        final SparkContextID contextID = sparkPort.getContextID();
-        final String inputObject = sparkPort.getData().getID();
-        final DataTableSpec inputSpec = sparkPort.getTableSpec();
-        final DataType itemsetType = getItemsetType(inputSpec);
-        final FrequentItemSetModelMetaData modelMeta = new FrequentItemSetModelMetaData(itemsetType);
-        final String freqItemsOutputObject = SparkIDs.createSparkDataObjectID();
-        final FrequentItemSetJobInput jobInput = new FrequentItemSetJobInput(
-            inputObject, freqItemsOutputObject,
-            m_settings.getItemsColumn(), m_settings.getMinSupport());
-        if (m_settings.overwriteNumPartitions()) {
-            jobInput.setNumPartitions(m_settings.getNumPartitions());
-        }
-
-        LOGGER.info("Running frequent items Spark job...");
-        final FrequentItemSetJobOutput jobOutput =
-            SparkContextUtil.<FrequentItemSetJobInput, FrequentItemSetJobOutput>getJobRunFactory(contextID, JOB_ID)
-                .createRun(jobInput)
-                .run(contextID, exec);
-        LOGGER.info("Frequent items Spark job done.");
-
-        final SparkModel sparkModel = new SparkModel(
-            getSparkVersion(sparkPort), MODEL_NAME, jobOutput.getModel(), inputSpec, null, modelMeta);
-
-        return new PortObject[]{
-            createSparkPortObject(sparkPort, createFreqItemsTableSpec(itemsetType), freqItemsOutputObject),
-            new RemoteSparkModelPortObject(contextID, sparkModel)
-        };
+        final SparkDataPortObject inputPort = (SparkDataPortObject) inData[0];
+        final String outputObject = SparkIDs.createSparkDataObjectID();
+        return new PortObject[]{runFreqItemsJob(exec, inputPort, outputObject, m_settings)};
     }
 
     /**
-     * Return data type of items column or throw exception if column is missing.
+     * Run the frequent item sets spark job.
+     *
+     * @param exec context
+     * @param inputPort input port with item sets
+     * @param outputObject ID of output object
+     * @param settings settings to use
+     * @return output port with frequent item sets
+     * @throws Exception on any failures
+     */
+    public static PortObject runFreqItemsJob(final ExecutionContext exec, final SparkDataPortObject inputPort,
+        final String outputObject, final SparkFrequentItemSetSettings settings) throws Exception {
+
+        final SparkContextID contextID = inputPort.getContextID();
+        final String inputObject = inputPort.getData().getID();
+        final DataTableSpec inputSpec = inputPort.getTableSpec();
+        final DataType itemsetType = getColumnSpec(inputSpec, "item sets", true, settings.getItemsColumn()).getType();
+        final FrequentItemSetJobInput jobInput = new FrequentItemSetJobInput(
+            inputObject, outputObject, settings.getItemsColumn(), settings.getMinSupport());
+
+        if (settings.overwriteNumPartitions()) {
+            jobInput.setNumPartitions(settings.getNumPartitions());
+        }
+
+        LOGGER.info("Running frequent item sets Spark job");
+        SparkContextUtil.getSimpleRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
+        LOGGER.info("Frequent item sets Spark job done.");
+
+        return createSparkPortObject(inputPort, createFreqItemsTableSpec(itemsetType), outputObject);
+    }
+
+    /**
+     * Returns spec of a column or throw exception if column is missing.
      *
      * @param spec input data table spec
-     * @return data type of items column, defined in settings
-     * @throws InvalidSettingsException if input column is missing or not a collection
+     * @param colDesc description of column e.g. item sets, antecedent...
+     * @param collection <code>true</code> if column should be a collection
+     * @param colName name of column
+     * @return spec of column
+     * @throws InvalidSettingsException if column is missing or (not) contains collections
      */
-    private DataType getItemsetType(final DataTableSpec spec) throws InvalidSettingsException {
-        DataColumnSpec col = spec.getColumnSpec(m_settings.getItemsColumn());
+    public static DataColumnSpec getColumnSpec(final DataTableSpec spec, final String colDesc, final boolean collection, final String colName) throws InvalidSettingsException {
+        if (StringUtils.isBlank(colName)) {
+            throw new InvalidSettingsException("No " + colDesc + " column selected.");
+        }
+
+        DataColumnSpec col = spec.getColumnSpec(colName);
         if (col == null) {
-            throw new InvalidSettingsException("Input column " + m_settings.getItemsColumn() + " not found.");
-        } else if (!col.getType().isCollectionType()) {
-            throw new InvalidSettingsException("Input column " + m_settings.getItemsColumn() + " is not a collection.");
+            throw new InvalidSettingsException("Input " + colDesc + " column '" + colName + "' not found.");
+        } else if (collection && !col.getType().isCollectionType()) {
+            throw new InvalidSettingsException("Input " + colDesc + " column '" + colName + "' is not a collection column.");
+        } else if (!collection && col.getType().isCollectionType()) {
+            throw new InvalidSettingsException("Selected " + colDesc + " column ''" + colName + "' contains a collection instead of single values.");
         } else {
-            return col.getType();
+            return col;
         }
     }
 
-    private DataTableSpec createFreqItemsTableSpec(final DataType itemsetType) {
-        DataColumnSpecCreator items = new DataColumnSpecCreator("items", itemsetType);
-        DataColumnSpecCreator freq = new DataColumnSpecCreator("freq", LongCell.TYPE);
-        return new DataTableSpec(items.createSpec(), freq.createSpec());
+    /**
+     * @param itemsetType data type of items
+     * @return a frequent item sets data table spec
+     */
+    public static DataTableSpec createFreqItemsTableSpec(final DataType itemsetType) {
+        DataColumnSpecCreator itemSet = new DataColumnSpecCreator("ItemSet", itemsetType);
+        DataColumnSpecCreator itemSetSize = new DataColumnSpecCreator("ItemSetSize", IntCell.TYPE);
+        DataColumnSpecCreator freq = new DataColumnSpecCreator("ItemSetSupport", LongCell.TYPE);
+        return new DataTableSpec(itemSet.createSpec(), itemSetSize.createSpec(), freq.createSpec());
     }
 
     @Override

@@ -39,10 +39,9 @@ import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobInput;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetJobOutput;
 import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.RowBuilder;
-import org.knime.bigdata.spark2_0.api.SparkJob;
+import org.knime.bigdata.spark2_0.api.SimpleSparkJob;
 
 /**
  * Find frequent item sets using FP-Growth in Spark.
@@ -50,30 +49,23 @@ import org.knime.bigdata.spark2_0.api.SparkJob;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-public class FrequentItemSetJob implements SparkJob<FrequentItemSetJobInput, FrequentItemSetJobOutput> {
+public class FrequentItemSetJob implements SimpleSparkJob<FrequentItemSetJobInput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(FrequentItemSetJob.class.getName());
 
     @Override
-    public FrequentItemSetJobOutput runJob(final SparkContext sparkContext, final FrequentItemSetJobInput input, final NamedObjects namedObjects)
+    public void runJob(final SparkContext sparkContext, final FrequentItemSetJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
 
         LOGGER.info("Running frequent items job...");
 
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
-        final Dataset<Row> inputRows = namedObjects.getDataFrame(input.getItemsInputObject());
-        final FPGrowth fpg = new FPGrowth()
-                .setMinSupport(input.getMinSupport());
-        if (input.hasNumPartitions()) {
-            LOGGER.warn("Using custom number of partitions: " + input.getNumPartitions());
-            fpg.setNumPartitions(input.getNumPartitions());
-        }
 
         // extract items field into RDD
+        final Dataset<Row> inputRows = namedObjects.getDataFrame(input.getItemsInputObject());
         final StructField itemsField = inputRows.schema().apply(input.getItemColumn());
         final JavaRDD<List<Object>> items = inputRows
-            .select(col(input.getItemColumn()))
-            .where(col(input.getItemColumn()).isNotNull())
+            .select(col(input.getItemColumn())).na().drop("any")
             .javaRDD().map(new Function<Row, List<Object>>() {
                 private static final long serialVersionUID = 1L;
 
@@ -84,6 +76,11 @@ public class FrequentItemSetJob implements SparkJob<FrequentItemSetJobInput, Fre
             });
 
         // do it
+        final FPGrowth fpg = new FPGrowth().setMinSupport(input.getMinSupport());
+        if (input.hasNumPartitions()) {
+            LOGGER.warn("Using custom number of partitions: " + input.getNumPartitions());
+            fpg.setNumPartitions(input.getNumPartitions());
+        }
         final FPGrowthModel<Object> model = fpg.run(items);
 
         // convert frequent items
@@ -96,6 +93,7 @@ public class FrequentItemSetJob implements SparkJob<FrequentItemSetJobInput, Fre
                 public Row call(final FPGrowth.FreqItemset<Object> itemset){
                     RowBuilder rb = RowBuilder.emptyRow();
                     rb.add(itemset.javaItems().toArray());
+                    rb.add(itemset.javaItems().size());
                     rb.add(itemset.freq());
                     return rb.build();
                 }});
@@ -103,13 +101,12 @@ public class FrequentItemSetJob implements SparkJob<FrequentItemSetJobInput, Fre
             spark.createDataFrame(freqItems, freqItemsSchema(itemsField)));
 
         LOGGER.info("Frequent items job done.");
-
-        return new FrequentItemSetJobOutput(FrequentItemSetModel.fromJobInput(input));
     }
 
-    private StructType freqItemsSchema(final StructField itemsField) {
+    private static StructType freqItemsSchema(final StructField itemsField) {
         return new StructType(new StructField[]{
-            DataTypes.createStructField("items", itemsField.dataType(), false),
-            DataTypes.createStructField("freq", DataTypes.LongType, false) });
+            DataTypes.createStructField("ItemSet", itemsField.dataType(), false),
+            DataTypes.createStructField("ItemSetSize", DataTypes.IntegerType, false),
+            DataTypes.createStructField("ItemSetSupport", DataTypes.LongType, false) });
     }
 }

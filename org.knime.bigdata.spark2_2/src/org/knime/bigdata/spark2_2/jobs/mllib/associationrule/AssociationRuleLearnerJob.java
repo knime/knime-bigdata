@@ -20,6 +20,11 @@
  */
 package org.knime.bigdata.spark2_2.jobs.mllib.associationrule;
 
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.explode;
+
+import java.util.UUID;
+
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.fpm.FPGrowthModel;
@@ -28,37 +33,37 @@ import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerJobInput;
-import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerJobOutput;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
-import org.knime.bigdata.spark2_2.api.SparkJob;
-import org.knime.bigdata.spark2_2.jobs.mllib.freqitemset.FrequentItemSetModel;
-
+import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
 /**
  * Implements a association rules learner using frequent pattern mining in spark.
+ *
+ * The input frequent item sets data frame must have a ItemSet and a ItemSetSupport column.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-public class AssociationRuleLearnerJob implements SparkJob<AssociationRuleLearnerJobInput, AssociationRuleLearnerJobOutput> {
+public class AssociationRuleLearnerJob implements SimpleSparkJob<AssociationRuleLearnerJobInput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(AssociationRuleLearnerJob.class.getName());
 
     @Override
-    public AssociationRuleLearnerJobOutput runJob(final SparkContext sparkContext, final AssociationRuleLearnerJobInput input, final NamedObjects namedObjects)
+    public void runJob(final SparkContext sparkContext, final AssociationRuleLearnerJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
 
         LOGGER.info("Generating association rules...");
 
-        final FrequentItemSetModel freqItemsModel = (FrequentItemSetModel)input.getFreqItemsModel();
-        final Dataset<Row> freqItemsets = namedObjects.getDataFrame(freqItemsModel.getFrequentItemsObjectName());
-        final String modelUid = freqItemsModel.getModelUid();
+        final Dataset<Row> freqItemsets = namedObjects.getDataFrame(input.getFreqItemSetsInputObject())
+                .select(col("ItemSet").as("items"), col("ItemSetSupport").as("freq"))
+                .na().drop("any");
+        final String modelUid = "fpgrowth_" + UUID.randomUUID();
         final FPGrowthModel model = new FPGrowthModel(modelUid, freqItemsets);
         model.setMinConfidence(input.getMinConfidence());
-        namedObjects.addDataFrame(input.getAssociationRulesOutputObject(), model.associationRules());
+        final Dataset<Row> result = model.associationRules().select(
+            explode(col("consequent")).as("Consequent"), col("antecedent").as("Antecedent"),
+            col("confidence").as("RuleConfidence"), col("confidence").multiply(100).as("RuleConfidence%"));
+        namedObjects.addDataFrame(input.getAssociationRulesOutputObject(), result);
 
         LOGGER.info("Association rules learner done.");
-
-        return new AssociationRuleLearnerJobOutput(
-            new AssociationRuleModel(modelUid, input.getAssociationRulesOutputObject(), input.getMinConfidence(), "antecedent", "consequent"));
     }
 }

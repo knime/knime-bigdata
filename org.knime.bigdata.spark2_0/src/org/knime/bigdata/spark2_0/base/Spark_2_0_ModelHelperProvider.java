@@ -22,10 +22,8 @@ package org.knime.bigdata.spark2_0.base;
 
 import org.knime.bigdata.spark.core.model.DefaultModelHelperProvider;
 import org.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
-import org.knime.bigdata.spark2_0.jobs.mllib.associationrule.AssociationRuleModelHelper;
 import org.knime.bigdata.spark2_0.jobs.mllib.clustering.kmeans.KMeansModelHelper;
 import org.knime.bigdata.spark2_0.jobs.mllib.collaborativefiltering.CollaborativeFilteringModelHelper;
-import org.knime.bigdata.spark2_0.jobs.mllib.freqitemset.FrequentItemSetModelHelper;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.bayes.naive.NaiveBayesModelHelper;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.DecisionTreeModelHelper;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesModelHelper;
@@ -45,10 +43,8 @@ public class Spark_2_0_ModelHelperProvider extends DefaultModelHelperProvider {
      */
     public Spark_2_0_ModelHelperProvider() {
         super(Spark_2_0_CompatibilityChecker.INSTANCE,
-            new AssociationRuleModelHelper(),
             new KMeansModelHelper(),
             new CollaborativeFilteringModelHelper(),
-            new FrequentItemSetModelHelper(),
             new LinearRegressionModelHelper(),
             new LogisticRegressionModelHelper(),
             new SVMModelHelper(),

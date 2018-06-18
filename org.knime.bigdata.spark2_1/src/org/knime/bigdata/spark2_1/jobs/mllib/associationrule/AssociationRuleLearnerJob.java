@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark2_1.jobs.mllib.associationrule;
 
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.explode;
+
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -30,17 +33,16 @@ import org.apache.spark.mllib.fpm.FPGrowth;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerJobInput;
-import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerJobOutput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.RowBuilder;
-import org.knime.bigdata.spark2_1.api.SparkJob;
-import org.knime.bigdata.spark2_1.jobs.mllib.freqitemset.FrequentItemSetModel;
+import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
 
 /**
  * Implements a association rules learner using frequent pattern mining in spark.
@@ -48,20 +50,21 @@ import org.knime.bigdata.spark2_1.jobs.mllib.freqitemset.FrequentItemSetModel;
  * @author Sascha Wolke, KNIME GmbH
  */
 @SparkClass
-public class AssociationRuleLearnerJob implements SparkJob<AssociationRuleLearnerJobInput, AssociationRuleLearnerJobOutput> {
+public class AssociationRuleLearnerJob implements SimpleSparkJob<AssociationRuleLearnerJobInput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(AssociationRuleLearnerJob.class.getName());
 
     @Override
-    public AssociationRuleLearnerJobOutput runJob(final SparkContext sparkContext, final AssociationRuleLearnerJobInput input, final NamedObjects namedObjects)
+    public void runJob(final SparkContext sparkContext, final AssociationRuleLearnerJobInput input, final NamedObjects namedObjects)
         throws KNIMESparkException {
 
         LOGGER.info("Generating association rules...");
 
+        @SuppressWarnings("resource")
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
-        final FrequentItemSetModel freqItemsModel = (FrequentItemSetModel)input.getFreqItemsModel();
-        final Dataset<Row> freqItemsDataset = namedObjects.getDataFrame(freqItemsModel.getFrequentItemsObjectName());
-        final StructField itemsField = freqItemsDataset.schema().apply("items");
+        final Dataset<Row> freqItemsDataset = namedObjects.getDataFrame(input.getFreqItemSetsInputObject())
+                .select(col("ItemSet"), col("ItemSetSupport")).na().drop("any");
+        final DataType itemsFieldDataType = freqItemsDataset.schema().apply("ItemSet").dataType();
 
         // convert frequent items to rdd
         final JavaRDD<FPGrowth.FreqItemset<Object>> freqItemsets = freqItemsDataset
@@ -78,31 +81,33 @@ public class AssociationRuleLearnerJob implements SparkJob<AssociationRuleLearne
         final JavaRDD<Rule<Object>> assRulesRdd = ruleModel.run(freqItemsets);
 
         // convert association rules to dataset
-        final JavaRDD<Row> associationRules = assRulesRdd
+        final JavaRDD<Row> associationRulesRDD = assRulesRdd
             .map(new Function<AssociationRules.Rule<Object>, Row>() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public Row call(final AssociationRules.Rule<Object> rule){
                     RowBuilder rb = RowBuilder.emptyRow();
-                    rb.add(rule.javaAntecedent().toArray());
                     rb.add(rule.javaConsequent().toArray());
+                    rb.add(rule.javaAntecedent().toArray());
                     rb.add(rule.confidence());
+                    rb.add(rule.confidence() * 100);
                     return rb.build();
                 }});
-        namedObjects.addDataFrame(input.getAssociationRulesOutputObject(),
-            spark.createDataFrame(associationRules, associationRulesSchema(itemsField)));
+        // explode consequent
+        final Dataset<Row> associationRules = spark
+            .createDataFrame(associationRulesRDD, associationRulesSchema(itemsFieldDataType))
+            .select(explode(col("Consequent")).as("Consequent"), col("Antecedent"), col("RuleConfidence"), col("RuleConfidence%"));
+        namedObjects.addDataFrame(input.getAssociationRulesOutputObject(), associationRules);
 
         LOGGER.info("Association rules learner done.");
-
-        return new AssociationRuleLearnerJobOutput(
-            new AssociationRuleModel(input.getAssociationRulesOutputObject(), input.getMinConfidence(), "antecedent", "consequent"));
     }
 
-    private StructType associationRulesSchema(final StructField itemsField) {
+    private static StructType associationRulesSchema(final DataType itemsFieldDataType) {
         return new StructType(new StructField[]{
-            DataTypes.createStructField("antecedent", itemsField.dataType(), false),
-            DataTypes.createStructField("consequent", itemsField.dataType(), false),
-            DataTypes.createStructField("confidence", DataTypes.DoubleType, false) });
+            DataTypes.createStructField("Consequent", itemsFieldDataType, false),
+            DataTypes.createStructField("Antecedent", itemsFieldDataType, false),
+            DataTypes.createStructField("RuleConfidence", DataTypes.DoubleType, false),
+            DataTypes.createStructField("RuleConfidence%", DataTypes.DoubleType, false) });
     }
 }

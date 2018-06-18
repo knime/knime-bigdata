@@ -20,18 +20,17 @@
  */
 package org.knime.bigdata.spark.node.mllib.associationrule;
 
+import static org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel.createFreqItemsTableSpec;
+import static org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel.getColumnSpec;
+import static org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel.runFreqItemsJob;
+
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObject;
-import org.knime.bigdata.spark.core.port.remotemodel.RemoteSparkModelPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
-import org.knime.bigdata.spark.node.mllib.freqitemset.FrequentItemSetModelMetaData;
-import org.knime.bigdata.spark.node.mllib.freqitemset.SparkFrequentItemSetNodeModel;
+import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -46,7 +45,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 
 /**
- * Associations rules learning using frequent pattern mining.
+ * Frequent item sets and associations rules learning node model.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
@@ -56,70 +55,62 @@ public class SparkAssociationRuleLearnerNodeModel extends SparkNodeModel {
     /** The unique Spark job id. */
     public static final String JOB_ID = SparkAssociationRuleLearnerNodeModel.class.getCanonicalName();
 
-    /** The unique model name. */
-    public static final String MODEL_NAME = "Association Rules";
-
     private final SparkAssociationRuleLearnerSettings m_settings = new SparkAssociationRuleLearnerSettings();
 
     SparkAssociationRuleLearnerNodeModel() {
-        super(new PortType[]{RemoteSparkModelPortObject.TYPE},
-            new PortType[]{SparkDataPortObject.TYPE, RemoteSparkModelPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE},
+            new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE});
     }
 
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
-            throw new InvalidSettingsException("Remtoe spark input model required.");
+            throw new InvalidSettingsException("Spark input data required.");
         }
 
-        final RemoteSparkModelPortObjectSpec spec = (RemoteSparkModelPortObjectSpec)inSpecs[0];
+        final SparkDataPortObjectSpec itemsPortSpec = (SparkDataPortObjectSpec)inSpecs[0];
+        final DataTableSpec itemsSpec = itemsPortSpec.getTableSpec();
+        final SparkContextID contextId = itemsPortSpec.getContextID();
+        m_settings.loadDefaults(itemsSpec);
+        final DataColumnSpec itemsColumn = getColumnSpec(itemsSpec, "item sets", true, m_settings.getItemsColumn());
 
-        if (!spec.getModelName().equals(SparkFrequentItemSetNodeModel.MODEL_NAME)) {
-            throw new InvalidSettingsException("Invalid input model, frequent item model requiered.");
-        }
-
-        final SparkContextID contextId = spec.getContextID();
-        final DataType itemsetType = ((FrequentItemSetModelMetaData) spec.getModelMetaData()).getItemsetType();
-        final AssociationRuleModelMetaData modelMeta = new AssociationRuleModelMetaData(itemsetType);
         return new PortObjectSpec[]{
-            new SparkDataPortObjectSpec(contextId, createAssociationRulesSpec(itemsetType)),
-            new RemoteSparkModelPortObjectSpec(contextId, getSparkVersion(spec), MODEL_NAME, modelMeta)
+            new SparkDataPortObjectSpec(contextId, createAssociationRulesSpec(itemsColumn.getType())),
+            new SparkDataPortObjectSpec(contextId, createFreqItemsTableSpec(itemsColumn.getType()))
         };
     }
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        final RemoteSparkModelPortObject modelPort = (RemoteSparkModelPortObject) inData[0];
-        final SparkContextID contextID = modelPort.getContextID();
-        final SparkModel freqItemsModel = modelPort.getModel();
-        final DataType itemsetType = ((FrequentItemSetModelMetaData) freqItemsModel.getMetaData()).getItemsetType();
-        final AssociationRuleModelMetaData modelMetaData = new AssociationRuleModelMetaData(itemsetType);
+        final SparkDataPortObject itemsPort = (SparkDataPortObject) inData[0];
+        final DataTableSpec itemsSpec = itemsPort.getTableSpec();
+        final SparkContextID contextID = itemsPort.getContextID();
 
-        final String associationRulesOutputObject = SparkIDs.createSparkDataObjectID();
+        final String freqItemSetsOutputObject = SparkIDs.createSparkDataObjectID();
+        final DataColumnSpec itemsColumn = getColumnSpec(itemsSpec, "item sets", true, m_settings.getItemsColumn());
+        final PortObject freqItemSetsPort = runFreqItemsJob(exec, itemsPort, freqItemSetsOutputObject, m_settings);
+
+        final String rulesOutputObject = SparkIDs.createSparkDataObjectID();
+        final DataTableSpec rulesOutputSpec = createAssociationRulesSpec(itemsColumn.getType());
         final AssociationRuleLearnerJobInput jobInput = new AssociationRuleLearnerJobInput(
-            freqItemsModel.getModel(), associationRulesOutputObject, m_settings.getMinConfidence());
+            freqItemSetsOutputObject, rulesOutputObject, m_settings.getMinConfidence());
 
-        LOGGER.info("Running association rules learner Spark job...");
-        final AssociationRuleLearnerJobOutput jobOutput =
-            SparkContextUtil.<AssociationRuleLearnerJobInput, AssociationRuleLearnerJobOutput>getJobRunFactory(contextID, JOB_ID)
-                .createRun(jobInput)
-                .run(contextID, exec);
+        LOGGER.info("Running association rules learner Spark job");
+        SparkContextUtil.getSimpleRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
         LOGGER.info("Association rules learner Spark job done.");
 
-        final SparkModel ruleModel = new SparkModel(
-            getSparkVersion(modelPort), MODEL_NAME, jobOutput.getModel(), freqItemsModel.getTableSpec(), null, modelMetaData);
-
         return new PortObject[]{
-            new SparkDataPortObject(new SparkDataTable(contextID, associationRulesOutputObject, createAssociationRulesSpec(itemsetType))),
-            new RemoteSparkModelPortObject(contextID, ruleModel)
+            createSparkPortObject(itemsPort, rulesOutputSpec, rulesOutputObject),
+            freqItemSetsPort
         };
     }
 
-    private DataTableSpec createAssociationRulesSpec(final DataType itemsCollectionType) {
-        DataColumnSpecCreator antecedent = new DataColumnSpecCreator("antecedent", itemsCollectionType);
-        DataColumnSpecCreator consequent = new DataColumnSpecCreator("consequent", itemsCollectionType);
-        DataColumnSpecCreator confidence = new DataColumnSpecCreator("confidence", DoubleCell.TYPE);
-        return new DataTableSpec(antecedent.createSpec(), consequent.createSpec(), confidence.createSpec());
+    private static DataTableSpec createAssociationRulesSpec(final DataType itemsCollectionType) {
+        DataColumnSpecCreator consequent = new DataColumnSpecCreator("Consequent", itemsCollectionType.getCollectionElementType());
+        DataColumnSpecCreator antecedent = new DataColumnSpecCreator("Antecedent", itemsCollectionType);
+        DataColumnSpecCreator confidence = new DataColumnSpecCreator("RuleConfidence", DoubleCell.TYPE);
+        DataColumnSpecCreator confidencePerc = new DataColumnSpecCreator("RuleConfidence%", DoubleCell.TYPE);
+        return new DataTableSpec(consequent.createSpec(), antecedent.createSpec(), confidence.createSpec(), confidencePerc.createSpec());
     }
 
     @Override
