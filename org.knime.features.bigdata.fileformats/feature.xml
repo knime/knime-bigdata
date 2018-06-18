@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.knime.features.bigdata.connectors"
-      label="KNIME Big Data Connectors"
-      version="3.6.0.qualifier"
+      id="org.knime.features.bigdata.fileformats"
+       label="KNIME Extension for BigData file formats"
+      version="1.0.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for accessing Big Data infrastructure such as Apache Hive, Apache Impala, or HDFS.
+      KNIME nodes for reading and writing BigData file formats
    </description>
 
-   <copyright>
+     <copyright>
       Copyright by KNIME AG, Zurich, Switzerland
    </copyright>
 
@@ -727,34 +727,9 @@ license terms applicable to such Node, including when such Node is
 propagated with or for interoperation with KNIME.
    </license>
 
-   <plugin
-         id="org.knime.bigdata.commons"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
-         id="org.knime.bigdata.filehandling"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.knime.bigdata.hive"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.knime.bigdata.impala"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.knime.bigdata.scripting"
+         id="org.knime.bigdata.fileformats"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

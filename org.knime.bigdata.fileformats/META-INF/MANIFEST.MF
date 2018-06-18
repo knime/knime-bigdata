@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME BigData File Format Extension
+Bundle-SymbolicName: org.knime.bigdata.fileformats;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-ClassPath: fileformat.jar
+Require-Bundle: org.knime.workbench.core;bundle-version="[3.0.0,4.0.0)",
+ org.knime.base;bundle-version="[3.0.0,4.0.0)",
+ org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
+ org.apache.orc.core;bundle-version="[1.4.1,2.0.0)",
+ org.knime.bigdata.filehandling;bundle-version="3.5.0",
+ org.apache.parquet;bundle-version="1.9.0",
+ org.apache.hadoop.client;bundle-version="[2.7.4,3.0.0)",
+ org.apache.hive.storage-api;bundle-version="[2.2.1,3.0.0)",
+ org.knime.cloud.core;bundle-version="[3.6.0,4.0.0)",
+ org.knime.time;bundle-version="[3.6.0,4.0.0)",
+ org.knime.bigdata.commons;bundle-version="[3.6.0,4.0.0)",
+ org.knime.cloud.aws;bundle-version="[3.6.0,4.0.0)",
+ com.amazonaws.aws-java-sdk-core;bundle-version="[1.11.133,2.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./parquetreader-icon.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>Parquet Reader</name>
+    
+    <shortDescription>
+        Reader for Parquet files.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Reader for Parquet files. It reads either single files or all files in a given directory. Does support INT, LONG, DOUBLE and String.</intro>
+         <tab name="Options">
+     	   <option name="Input">The file or directory to read.</option>
+      	  <option name="Read Row Key">Whether to read the row key from the file.</option>
+        </tab>
+        <tab name="Advanced">
+	        <option name="Number of rows per batch">The number of rows in each read batch.</option>
+        </tab>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Remote connection port">Optional port for a remote connection.</inPort>
+        <outPort index="0" name="Data table">Data table containing the data of the Parquet file.</outPort>
+    </ports>    
+</knimeNode>
