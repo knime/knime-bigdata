@@ -36,4 +36,8 @@
          id="org.knime.features.parquet"
          version="0.0.0"/>
 
+   <includes
+         id="org.knime.features.bigdata.fileformats"
+         version="0.0.0"/>
+
 </feature>

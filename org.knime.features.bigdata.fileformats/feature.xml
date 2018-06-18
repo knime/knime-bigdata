@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.bigdata.fileformats"
-       label="KNIME Extension for BigData file formats"
+      label="KNIME Extension for Big Data file formats"
       version="1.0.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for reading and writing BigData file formats
+      KNIME nodes for reading and writing Big Data file formats
    </description>
 
-     <copyright>
+   <copyright>
       Copyright by KNIME AG, Zurich, Switzerland
    </copyright>
 
@@ -726,7 +726,6 @@ interoperation with KNIME.  The owner of a Node may freely choose the
 license terms applicable to such Node, including when such Node is
 propagated with or for interoperation with KNIME.
    </license>
-
 
    <plugin
          id="org.knime.bigdata.fileformats"
