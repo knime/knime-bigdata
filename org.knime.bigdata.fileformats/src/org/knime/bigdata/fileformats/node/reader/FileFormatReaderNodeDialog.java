@@ -65,8 +65,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 
@@ -85,7 +83,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
     /**
      * New pane for configuring the OrcWriter node.
      */
-    protected FileFormatReaderNodeDialog(FileFormatReaderNodeSettings settings) {
+    protected FileFormatReaderNodeDialog(final FileFormatReaderNodeSettings settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
                 RemoteFileChooser.SELECT_FILE_OR_DIR,
@@ -107,18 +105,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
 
         panel.add(filePanel, gbc);
 
-        ++gbc.gridy;
-        gbc.fill = GridBagConstraints.NONE;
-        panel.add(new DialogComponentBoolean(m_settings.getRowKeyModel(), "Read Row Key").getComponentPanel(), gbc);
-
-        ++gbc.gridy;
-
         addTab("Options", panel);
-        final JPanel advancedPanel = new JPanel(new GridBagLayout());
-        final DialogComponentNumberEdit chunkSize = new DialogComponentNumberEdit(m_settings.getBatchSizeModel(),
-                "Number of rows per batch: ");
-        advancedPanel.add(chunkSize.getComponentPanel(), gbc);
-        addTab("Advanced", advancedPanel);
     }
 
     /**

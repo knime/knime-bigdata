@@ -76,8 +76,7 @@ public class OrcFormatFactory implements FileFormatFactory {
     private static final String NAME = "ORC";
 
     @Override
-    public AbstractFileFormatReader getReader(RemoteFile<Connection> file, boolean isReadRowKey, int batchSize,
-            ExecutionContext exec) {
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
         try {
             AbstractFileFormatReader reader;
             if (file.getConnectionInformation() != null && file.getConnectionInformation().useKerberos()) {
@@ -86,11 +85,11 @@ public class OrcFormatFactory implements FileFormatFactory {
                 reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
                     @Override
                     public AbstractFileFormatReader run() throws Exception {
-                        return new OrcKNIMEReader(file, isReadRowKey, batchSize, exec);
+                        return new OrcKNIMEReader(file, exec);
                     }
                 });
             } else {
-                reader = new OrcKNIMEReader(file, isReadRowKey, batchSize, exec);
+                reader = new OrcKNIMEReader(file, exec);
             }
             return reader;
         } catch (final Exception e) {
@@ -99,9 +98,9 @@ public class OrcFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public AbstractFileFormatWriter getWriter(RemoteFile<Connection> file, DataTableSpec spec, boolean isWriteRowKey,
-            int chunkSize, String compression) throws IOException {
-        return new OrcKNIMEWriter(file, spec, isWriteRowKey, chunkSize, compression);
+    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+    		final int chunkSize, final String compression) throws IOException {
+        return new OrcKNIMEWriter(file, spec, chunkSize, compression);
     }
 
     @Override
@@ -110,7 +109,7 @@ public class OrcFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public String[] getUnsupportedTypes(DataTableSpec spec) {
+    public String[] getUnsupportedTypes(final DataTableSpec spec) {
         return OrcTableStoreFormat.getUnsupportedTypes(spec);
     }
 
@@ -122,6 +121,14 @@ public class OrcFormatFactory implements FileFormatFactory {
     @Override
     public String getFilenameSuffix() {
         return SUFFIX;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getChunkSizeUnit() {
+        return "rows";
     }
 
 }

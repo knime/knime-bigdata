@@ -7,13 +7,10 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Reader for ORC files. It reads either single files or all files in a given directory. Does support all ORC types except MAP, STRUCT and UNION.</intro>
+        <intro>Reader for ORC files. It reads either single files or all files in a given directory. 
+        Does support all ORC types except map, struct and union.</intro>
          <tab name="Options">
      	   <option name="Input">The file or directory to read.</option>
-      	  <option name="Read Row Key">Whether to read the row key from the file.</option>
-        </tab>
-        <tab name="Advanced">
-	        <option name="Number of rows per batch">The number of rows in each read batch.</option>
         </tab>
     </fullDescription>
     

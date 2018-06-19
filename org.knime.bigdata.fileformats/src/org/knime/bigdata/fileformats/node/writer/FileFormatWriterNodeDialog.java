@@ -88,14 +88,14 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
     /**
      * New pane for configuring the generic BigData file format Writer node.
      */
-    protected FileFormatWriterNodeDialog(FileFormatWriterNodeSettings settings) {
+    protected FileFormatWriterNodeDialog(final FileFormatWriterNodeSettings settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
                 RemoteFileChooser.SELECT_FILE_OR_DIR,
                 createFlowVariableModel(FileFormatWriterNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
                 createHDFSConnection());
         final DialogComponentNumberEdit chunkSize = new DialogComponentNumberEdit(m_settings.getChunkSizeModel(),
-                "Chunk size:");
+                "Chunk size in " + m_settings.getChunksizeUnit() + ":");
         final DialogComponentNumberEdit numOfLocalChunks = new DialogComponentNumberEdit(
                 m_settings.getNumOfLocalChunksModel(), "Number of local chunks:");
 
@@ -114,11 +114,6 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gridPanel.add(filePanel, gbc);
-
-        ++gbc.gridy;
-        gbc.fill = GridBagConstraints.NONE;
-        gridPanel.add(new DialogComponentBoolean(m_settings.getRowKeyModel(), "Write Row Key").getComponentPanel(),
-                gbc);
 
         ++gbc.gridy;
         gridPanel.add(

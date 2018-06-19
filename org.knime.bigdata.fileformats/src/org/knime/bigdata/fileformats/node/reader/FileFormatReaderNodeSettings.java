@@ -48,9 +48,6 @@ import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -66,11 +63,6 @@ public class FileFormatReaderNodeSettings {
 
     private final SettingsModelString m_fileName = new SettingsModelString(CFGKEY_FILE, "");
 
-    private final SettingsModelBoolean m_readRowKey = new SettingsModelBoolean("writerowKey", false);
-
-    private final SettingsModelIntegerBounded m_batchSize = new SettingsModelIntegerBounded("batchsize", 1024, 1,
-            Integer.MAX_VALUE);
-
     private final FileFormatFactory m_formatFactory;
 
     /**
@@ -78,7 +70,7 @@ public class FileFormatReaderNodeSettings {
      *
      * @param formatFactory the file format
      */
-    public FileFormatReaderNodeSettings(FileFormatFactory formatFactory) {
+    public FileFormatReaderNodeSettings(final FileFormatFactory formatFactory) {
         m_formatFactory = formatFactory;
     }
 
@@ -97,27 +89,6 @@ public class FileFormatReaderNodeSettings {
     }
 
     /**
-     * @param writeRowKey whether row key should be written
-     */
-    void setWriteRowKey(boolean writeRowKey) {
-        m_readRowKey.setBooleanValue(writeRowKey);
-    }
-
-    /**
-     * @return the batch size
-     */
-    public int getBatchSize() {
-        return m_batchSize.getIntValue();
-    }
-
-    /**
-     * @return whether row key should be written
-     */
-    boolean getReadRowKey() {
-        return m_readRowKey.getBooleanValue();
-    }
-
-    /**
      * @return the settings model for the file name
      */
     SettingsModelString getFileNameModel() {
@@ -125,26 +96,10 @@ public class FileFormatReaderNodeSettings {
     }
 
     /**
-     * @return the settings model for the row key writing
-     */
-    SettingsModelBoolean getRowKeyModel() {
-        return m_readRowKey;
-    }
-
-    /**
-     * @return the settings model for the batch size
-     */
-    SettingsModelInteger getBatchSizeModel() {
-        return m_batchSize;
-    }
-
-    /**
      * @param settings the NodeSettingsWO to write to.
      */
     void saveSettingsTo(final NodeSettingsWO settings) {
         m_fileName.saveSettingsTo(settings);
-        m_readRowKey.saveSettingsTo(settings);
-        m_batchSize.saveSettingsTo(settings);
     }
 
     /**
@@ -153,18 +108,14 @@ public class FileFormatReaderNodeSettings {
      */
     void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fileName.loadSettingsFrom(settings);
-        m_readRowKey.loadSettingsFrom(settings);
-        m_batchSize.loadSettingsFrom(settings);
     }
 
     /**
      * @param settings the NodeSettingsRO to read from.
      * @throws InvalidSettingsException if the settings are invalid.
      */
-    void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {
+    void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_fileName.validateSettings(settings);
-        m_readRowKey.validateSettings(settings);
-        m_batchSize.validateSettings(settings);
     }
 
     /**

@@ -52,14 +52,9 @@ import java.util.stream.Collectors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.parquet.hadoop.api.WriteSupport;
-import org.apache.parquet.io.api.Binary;
 import org.apache.parquet.io.api.RecordConsumer;
 import org.apache.parquet.schema.MessageType;
-import org.apache.parquet.schema.PrimitiveType;
-import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
 import org.apache.parquet.schema.Type;
-import org.apache.parquet.schema.Type.Repetition;
-import org.knime.bigdata.fileformats.parquet.ParquetTableStoreFormat;
 import org.knime.bigdata.fileformats.parquet.type.ParquetType;
 import org.knime.core.data.DataRow;
 
@@ -75,8 +70,6 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
 
     private final ParquetType[] m_columnTypes;
 
-    private final boolean m_writeRowKey;
-
     private RecordConsumer m_recordConsumer;
 
     /**
@@ -84,12 +77,10 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
      *
      * @param name name of the table
      * @param columnTypes the column types
-     * @param writeRowKey whether to write the row key
      */
-    public DataRowWriteSupport(final String name, final ParquetType[] columnTypes, final boolean writeRowKey) {
+    public DataRowWriteSupport(final String name, final ParquetType[] columnTypes) {
         m_name = name;
         m_columnTypes = columnTypes.clone();
-        m_writeRowKey = writeRowKey;
     }
 
     /**
@@ -99,11 +90,6 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
     public WriteContext init(final Configuration configuration) {
         final List<Type> fields = Arrays.stream(m_columnTypes).map(ParquetType::getParquetType)
                 .collect(Collectors.toList());
-        if (m_writeRowKey) {
-            fields.add(new PrimitiveType(Repetition.REQUIRED, PrimitiveTypeName.BINARY,
-                    ParquetTableStoreFormat.PARQUET_SCHEMA_ROWKEY));
-        }
-
         return new WriteContext(new MessageType(m_name, fields), new HashMap<>());
     }
 
@@ -127,13 +113,6 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
         for (; i < m_columnTypes.length; i++) {
             m_columnTypes[i].writeValue(m_recordConsumer, record.getCell(i), i);
         }
-        // then write row keys
-        if (m_writeRowKey) {
-            m_recordConsumer.startField(ParquetTableStoreFormat.PARQUET_SCHEMA_ROWKEY, i);
-            m_recordConsumer.addBinary(Binary.fromString(record.getKey().getString()));
-            m_recordConsumer.endField(ParquetTableStoreFormat.PARQUET_SCHEMA_ROWKEY, i);
-        }
-
         m_recordConsumer.endMessage();
     }
 }

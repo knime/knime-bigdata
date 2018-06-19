@@ -84,10 +84,6 @@ public abstract class AbstractFileFormatReader {
 
     private final RemoteFile<Connection> m_file;
 
-    private final boolean m_isReadRowKey;
-
-    private final int m_batchSize;
-
     private DataTableSpec m_tableSpec;
 
     private final ExecutionContext m_exec;
@@ -96,17 +92,12 @@ public abstract class AbstractFileFormatReader {
      * Constructor for FileFormatReader
      *
      * @param file the file or directory to read from
-     * @param isReadRowKey if the row key has to be read
-     * @param batchSize the batch size for reading
      * @param exec the execution context
      */
-    public AbstractFileFormatReader(final RemoteFile<Connection> file, final boolean isReadRowKey, final int batchSize,
-            final ExecutionContext exec) {
+    public AbstractFileFormatReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
 
         m_exec = exec;
         m_file = file;
-        m_isReadRowKey = isReadRowKey;
-        m_batchSize = batchSize;
     }
 
     /**
@@ -142,26 +133,26 @@ public abstract class AbstractFileFormatReader {
         }
         final ConnectionInformation conInfo = remotefile.getConnectionInformation();
         if (conInfo instanceof CloudConnectionInformation) {
-        	final String protocol = conInfo.getProtocol();
-			if (S3RemoteFileHandler.PROTOCOL.getName().equals(protocol)) {
-	            String accessID;
-	            String secretKey;
-	            if (((CloudConnectionInformation) remotefile.getConnectionInformation()).useKeyChain()) {
-	                final DefaultAWSCredentialsProviderChain chain = new DefaultAWSCredentialsProviderChain();
-	                chain.getCredentials().getAWSSecretKey();
-	                accessID = chain.getCredentials().getAWSAccessKeyId();
-	                secretKey = chain.getCredentials().getAWSSecretKey();
-	            } else {
-	                accessID = remotefile.getConnectionInformation().getUser();
-	                secretKey = KnimeEncryption.decrypt(remotefile.getConnectionInformation().getPassword());
-	            }
-	            conf.set("fs.s3n.awsAccessKeyId", accessID);
-	            conf.set("fs.s3n.awsSecretAccessKey", secretKey);
-	            conf.set("fs.s3.awsAccessKeyId", accessID);
-	            conf.set("fs.s3.awsSecretAccessKey", secretKey);
-        	} else {
-        		throw new IOException(protocol + " protocol not supported");
-        	}
+            final String protocol = conInfo.getProtocol();
+            if (S3RemoteFileHandler.PROTOCOL.getName().equals(protocol)) {
+                String accessID;
+                String secretKey;
+                if (((CloudConnectionInformation) remotefile.getConnectionInformation()).useKeyChain()) {
+                    final DefaultAWSCredentialsProviderChain chain = new DefaultAWSCredentialsProviderChain();
+                    chain.getCredentials().getAWSSecretKey();
+                    accessID = chain.getCredentials().getAWSAccessKeyId();
+                    secretKey = chain.getCredentials().getAWSSecretKey();
+                } else {
+                    accessID = remotefile.getConnectionInformation().getUser();
+                    secretKey = KnimeEncryption.decrypt(remotefile.getConnectionInformation().getPassword());
+                }
+                conf.set("fs.s3n.awsAccessKeyId", accessID);
+                conf.set("fs.s3n.awsSecretAccessKey", secretKey);
+                conf.set("fs.s3.awsAccessKeyId", accessID);
+                conf.set("fs.s3.awsSecretAccessKey", secretKey);
+            } else {
+                throw new IOException(protocol + " protocol not supported");
+            }
         }
     }
 
@@ -192,20 +183,6 @@ public abstract class AbstractFileFormatReader {
      */
     public RemoteFile<Connection> getFile() {
         return m_file;
-    }
-
-    /**
-     * @return whether to read the row key
-     */
-    public boolean isReadRowKey() {
-        return m_isReadRowKey;
-    }
-
-    /**
-     * @return the batch size
-     */
-    public int getBatchSize() {
-        return m_batchSize;
     }
 
     /**

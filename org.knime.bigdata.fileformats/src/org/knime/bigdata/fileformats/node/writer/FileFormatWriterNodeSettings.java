@@ -71,8 +71,6 @@ public class FileFormatWriterNodeSettings {
 
     private final SettingsModelString m_compression = new SettingsModelString("compression", "UNCOMPRESSED");
 
-    private final SettingsModelBoolean m_writeRowKey = new SettingsModelBoolean("writerowKey", false);
-
     private final SettingsModelIntegerBounded m_chunkSize = new SettingsModelIntegerBounded("chunksize", 100, 1,
             Integer.MAX_VALUE); // default 512MB, min 20MB
 
@@ -122,11 +120,11 @@ public class FileFormatWriterNodeSettings {
      * @param fileName the fileName to set
      */
     void setFileName(final String fileName) {
-    	String tmpFileName = fileName;
-        if (!fileName.isEmpty() && !fileName.endsWith(m_formatFactory.getFilenameSuffix())) {
-        	tmpFileName = fileName + m_formatFactory.getFilenameSuffix();
+        String fileWithSuffix = fileName;
+        if (!fileName.isEmpty() && !fileName.endsWith(m_formatFactory.getFilenameSuffix()) && !fileName.endsWith("/")) {
+            fileWithSuffix = fileName + m_formatFactory.getFilenameSuffix();
         }
-        m_fileName.setStringValue(tmpFileName);
+        m_fileName.setStringValue(fileWithSuffix);
     }
 
     /**
@@ -141,20 +139,6 @@ public class FileFormatWriterNodeSettings {
      */
     String getCompression() {
         return m_compression.getStringValue();
-    }
-
-    /**
-     * @param writeRowKey whether row key should be written
-     */
-    void setWriteRowKey(final boolean writeRowKey) {
-        m_writeRowKey.setBooleanValue(writeRowKey);
-    }
-
-    /**
-     * @return whether row key should be written
-     */
-    boolean getwriteRowKey() {
-        return m_writeRowKey.getBooleanValue();
     }
 
     /**
@@ -207,13 +191,6 @@ public class FileFormatWriterNodeSettings {
     }
 
     /**
-     * @return the settings model for the row key writing
-     */
-    SettingsModelBoolean getRowKeyModel() {
-        return m_writeRowKey;
-    }
-
-    /**
      * @return the settings model for the chunk size
      */
     SettingsModelNumber getChunkSizeModel() {
@@ -236,7 +213,6 @@ public class FileFormatWriterNodeSettings {
         m_fileOverwritePolicy.saveSettingsTo(settings);
         m_fileName.saveSettingsTo(settings);
         m_compression.saveSettingsTo(settings);
-        m_writeRowKey.saveSettingsTo(settings);
         m_chunkSize.saveSettingsTo(settings);
         m_numOflocalChunks.saveSettingsTo(settings);
     }
@@ -251,7 +227,6 @@ public class FileFormatWriterNodeSettings {
         m_fileOverwritePolicy.loadSettingsFrom(settings);
         m_fileName.loadSettingsFrom(settings);
         m_compression.loadSettingsFrom(settings);
-        m_writeRowKey.loadSettingsFrom(settings);
         m_chunkSize.loadSettingsFrom(settings);
         m_numOflocalChunks.loadSettingsFrom(settings);
     }
@@ -266,7 +241,6 @@ public class FileFormatWriterNodeSettings {
         m_fileOverwritePolicy.validateSettings(settings);
         m_fileName.validateSettings(settings);
         m_compression.validateSettings(settings);
-        m_writeRowKey.validateSettings(settings);
         m_chunkSize.validateSettings(settings);
         m_numOflocalChunks.validateSettings(settings);
     }
@@ -279,5 +253,12 @@ public class FileFormatWriterNodeSettings {
      */
     String[] getCompressionList() {
         return getFormatFactory().getCompressionList();
+    }
+
+    /**
+     * @return String with unit for chunksize
+     */
+    public String getChunksizeUnit() {
+        return m_formatFactory.getChunkSizeUnit();
     }
 }

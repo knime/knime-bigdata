@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.CompressionKind;
@@ -66,13 +65,11 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.bigdata.fileformats.orc.OrcTableStoreFormat;
-import org.knime.bigdata.fileformats.orc.types.OrcStringTypeFactory.OrcStringType;
 import org.knime.bigdata.fileformats.orc.types.OrcType;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.util.Pair;
 
@@ -83,8 +80,6 @@ import org.knime.core.util.Pair;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class OrcKNIMEWriter extends AbstractFileFormatWriter {
-
-    private static final String ROW_KEY = "row-key";
 
     private List<Pair<String, OrcType<?>>> m_fields;
 
@@ -102,14 +97,13 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
      *
      * @param file the target file
      * @param spec the data table spec
-     * @param isWriteRowKey whether the key should be written
      * @param batchSize size of the batch
      * @param compression the compression to use for writing
      * @throws IOException if writer cannot be initialized
      */
-    public OrcKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final boolean isWriteRowKey,
+    public OrcKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final int batchSize, final String compression) throws IOException {
-        super(file, batchSize, isWriteRowKey, spec);
+        super(file, batchSize, spec);
         m_compression = CompressionKind.valueOf(compression);
         initWriter();
         m_columnTypes = getOrcKNIMETypes();
@@ -117,9 +111,6 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
 
     private void initWriter() throws IOException {
         m_fields = new ArrayList<>();
-        if (isWriteRowKey()) {
-            m_fields.add(new Pair<>(ROW_KEY, OrcTableStoreFormat.createOrcType(StringCell.TYPE)));
-        }
         final DataTableSpec tableSpec = getTableSpec();
         for (int i = 0; i < tableSpec.getNumColumns(); i++) {
             final DataColumnSpec colSpec = tableSpec.getColumnSpec(i);
@@ -165,12 +156,8 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
         final int rowInBatch = m_rowBatch.size;
         m_rowBatch.size++;
         int c = 0;
-        if (isWriteRowKey()) {
-            OrcStringType.writeString((BytesColumnVector) m_rowBatch.cols[0], rowInBatch, row.getKey().getString());
-            c += 1;
-        }
         for (; c < m_rowBatch.numCols; c++) {
-            final DataCell cell = row.getCell(isWriteRowKey() ? c - 1 : c);
+            final DataCell cell = row.getCell(c);
             @SuppressWarnings("unchecked")
             final OrcType<ColumnVector> type = (OrcType<ColumnVector>) m_columnTypes[c];
             type.writeValue(m_rowBatch.cols[c], rowInBatch, cell);

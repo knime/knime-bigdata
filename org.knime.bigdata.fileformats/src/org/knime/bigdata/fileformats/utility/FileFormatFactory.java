@@ -65,28 +65,24 @@ public interface FileFormatFactory {
      * Creates a file reader for the given file.
      *
      * @param file the file or directory to read from
-     * @param isReadRowKey if the row key has to be read
-     * @param batchSize the batch size for reading
      * @param exec the execution context
      * @return the reader
      */
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final boolean isReadRowKey,
-            final int batchSize, final ExecutionContext exec);
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec);
 
     /**
-     * Returns a writer that writes KNIME {@link DataRow}s to an speicifc file
+     * Returns a writer that writes KNIME {@link DataRow}s to an specific file
      * format
      *
      * @param file the target file
      * @param spec the data table spec
-     * @param isWriteRowKey whether the key should be written
      * @param batchSize size of the batch
      * @param compression the compression to use for writing
      * @return the writer
      * @throws IOException throw if writer cannot be created
      */
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final boolean isWriteRowKey, final int batchSize, final String compression) throws IOException;
+            final int batchSize, final String compression) throws IOException;
 
     /**
      * Returns a list of Strings containing all compressionCodecs supported by
@@ -112,5 +108,10 @@ public interface FileFormatFactory {
 
     /** @return file name suffix for files, e.g. 'bin' or 'orc'. */
     String getFilenameSuffix();
+
+    /**
+     * @return String containing the chunksizeUnit
+     */
+    public String getChunkSizeUnit();
 
 }

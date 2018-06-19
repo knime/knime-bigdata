@@ -138,7 +138,8 @@ public class FileFormatWriterNodeModel extends NodeModel {
         return new StreamableOperator() {
 
             @Override
-            public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec) throws Exception {
+            public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
+                    throws Exception {
                 ConnectionInformationPortObject connPortObject = null;
                 final PortObjectInput portObject = (PortObjectInput) inputs[0];
                 if (portObject != null) {
@@ -195,9 +196,9 @@ public class FileFormatWriterNodeModel extends NodeModel {
             }
             fileUploader.addFile(tempFile);
         }
-        //wait for file uploader to finish
+        // wait for file uploader to finish
         final String uploadedFilesMessage = resultString.get();
-		LOGGER.info(uploadedFilesMessage);
+        LOGGER.info(uploadedFilesMessage);
     }
 
     private boolean writeToFile(final ExecutionContext exec, final RowInput input,
@@ -260,6 +261,7 @@ public class FileFormatWriterNodeModel extends NodeModel {
             throw new InvalidSettingsException(format);
         }
         final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        final String fileName = m_settings.getFileName();
         if (connSpec != null) {
             final ConnectionInformation connInfo = connSpec.getConnectionInformation();
 
@@ -267,10 +269,14 @@ public class FileFormatWriterNodeModel extends NodeModel {
             if (connInfo == null) {
                 throw new InvalidSettingsException("No connection information available.");
             }
+
+            if (fileName.endsWith("/")) {
+                m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
+            }
         } else {
 
             // Check file access
-            CheckUtils.checkDestinationFile(m_settings.getFileName(), m_settings.getFileOverwritePolicy());
+            CheckUtils.checkDestinationFile(fileName, m_settings.getFileOverwritePolicy());
         }
         return new DataTableSpec[] {};
     }
@@ -326,10 +332,9 @@ public class FileFormatWriterNodeModel extends NodeModel {
     private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile)
             throws IOException {
         final DataTableSpec dataSpec = input.getDataTableSpec();
-        final boolean writeRowKey = m_settings.getwriteRowKey();
         final int chunkSize = m_settings.getChunkSize();
         final String compression = m_settings.getCompression();
-        return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, writeRowKey, chunkSize, compression);
+        return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression);
 
     }
 }

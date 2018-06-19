@@ -60,7 +60,6 @@ import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.OrcFile;
@@ -74,7 +73,6 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
 import org.knime.bigdata.fileformats.orc.OrcTableStoreFormat;
-import org.knime.bigdata.fileformats.orc.types.OrcStringTypeFactory.OrcStringType;
 import org.knime.bigdata.fileformats.orc.types.OrcType;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.cloud.aws.s3.filehandler.S3Connection;
@@ -108,15 +106,12 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
      * KNIME Reader, that reads ORC Files into DataRows.
      *
      * @param file the file or directory to read from
-     * @param isReadRowKey if the row key has to be read
-     * @param batchSize the batch size for reading
      * @param exec the execution context
      * @throws Exception thrown if files can not be listed, if reader can not be
      *         created, or schemas of files in a directory do not match.
      */
-    public OrcKNIMEReader(final RemoteFile<Connection> file, final boolean isReadRowKey, final int batchSize,
-            final ExecutionContext exec) throws Exception {
-        super(file, isReadRowKey, batchSize, exec);
+    public OrcKNIMEReader(final RemoteFile<Connection> file, final ExecutionContext exec) throws Exception {
+        super(file, exec);
         m_readers = new ArrayDeque<>();
         init();
         if (m_readers.isEmpty()) {
@@ -209,7 +204,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         return false;
     }
 
-    private DataTableSpec createSpecFromOrcSchema(TypeDescription orcSchema) throws Exception {
+    private DataTableSpec createSpecFromOrcSchema(final TypeDescription orcSchema) throws Exception {
         ArrayList<OrcType<?>> orcTypes;
         final ArrayList<DataType> colTypes = new ArrayList<>();
         orcTypes = new ArrayList<>();
@@ -235,13 +230,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             orcTypes.add(OrcTableStoreFormat.createOrcType(dataType));
         }
         m_columnReaders = orcTypes.toArray(new OrcType[orcTypes.size()]);
-        List<String> fieldNames = orcSchema.getFieldNames();
-
-        if (isReadRowKey()) {
-            // Remove RowKey column for spec
-            colTypes.remove(0);
-            fieldNames = fieldNames.subList(1, fieldNames.size());
-        }
+        final List<String> fieldNames = orcSchema.getFieldNames();
         return new DataTableSpec(getFile().getName(), fieldNames.toArray(new String[fieldNames.size()]),
                 colTypes.toArray(new DataType[colTypes.size()]));
     }
@@ -249,8 +238,6 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     class OrcRowIterator extends FileFormatRowIterator {
 
         private final VectorizedRowBatch m_rowBatch;
-
-        private final boolean m_hasRowKey;
 
         private final RecordReader m_rows;
 
@@ -269,13 +256,12 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          * @param batchSize the batch size for reading
          * @throws IOException if file can not be read
          */
-        OrcRowIterator(final Reader reader, final boolean hasRowKey, final int batchSize,
-                final OrcType<?>[] columnReaders, final long index) throws IOException {
-            m_hasRowKey = hasRowKey;
+        OrcRowIterator(final Reader reader, final OrcType<?>[] columnReaders, final long index)
+                throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
-            m_rowBatch = m_orcReader.getSchema().createRowBatch(getBatchSize());
+            m_rowBatch = m_orcReader.getSchema().createRowBatch();
             m_orcTypeReaders = columnReaders.clone();
             m_index = index;
             internalNext();
@@ -376,11 +362,6 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          */
         @Override
         public RowKey getKey() {
-            if (m_iterator.m_hasRowKey) {
-                final String str = OrcStringType.readString((BytesColumnVector) m_iterator.m_rowBatch.cols[0],
-                        m_rowInBatch);
-                return new RowKey(str);
-            }
             return RowKey.createRowKey(m_index);
         }
 
@@ -389,10 +370,9 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          */
         @Override
         public DataCell getCell(final int index) {
-            final int c = index + (m_iterator.m_hasRowKey ? 1 : 0);
             @SuppressWarnings("unchecked")
-            final OrcType<ColumnVector> orcType = (OrcType<ColumnVector>) m_iterator.m_orcTypeReaders[c];
-            return orcType.readValue(m_iterator.m_rowBatch.cols[c], m_rowInBatch);
+            final OrcType<ColumnVector> orcType = (OrcType<ColumnVector>) m_iterator.m_orcTypeReaders[index];
+            return orcType.readValue(m_iterator.m_rowBatch.cols[index], m_rowInBatch);
         }
 
         /**
@@ -400,7 +380,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          */
         @Override
         public int getNumCells() {
-            return m_iterator.m_orcTypeReaders.length - (m_iterator.m_hasRowKey ? 1 : 0);
+            return m_iterator.m_orcTypeReaders.length;
         }
 
         /**
@@ -416,11 +396,11 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
      * {@inheritDoc}
      */
     @Override
-    public FileFormatRowIterator getNextIterator(long i) throws IOException {
+    public FileFormatRowIterator getNextIterator(final long i) throws IOException {
         final Reader reader = m_readers.poll();
         FileFormatRowIterator rowIterator = null;
         if (reader != null) {
-            rowIterator = new OrcRowIterator(reader, isReadRowKey(), getBatchSize(), m_columnReaders, i);
+            rowIterator = new OrcRowIterator(reader, m_columnReaders, i);
         }
         return rowIterator;
     }

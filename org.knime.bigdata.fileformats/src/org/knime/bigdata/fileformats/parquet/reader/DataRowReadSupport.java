@@ -68,12 +68,11 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
 
     /**
      * Read support for KNIME data rows
-     * 
+     *
      * @param columnTypes the columns types
-     * @param readRowKey whether to read the row key
      */
-    public DataRowReadSupport(final ParquetType[] columnTypes, final boolean readRowKey) {
-        m_materializer = new DataRowMaterializer(columnTypes, readRowKey);
+    public DataRowReadSupport(final ParquetType[] columnTypes) {
+        m_materializer = new DataRowMaterializer(columnTypes);
     }
 
     /**
@@ -100,8 +99,8 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
     static final class DataRowMaterializer extends RecordMaterializer<DataRow> {
         private final DataRowConverter m_rowConverter;
 
-        DataRowMaterializer(final ParquetType[] columnTypes, final boolean isReadRowKey) {
-            m_rowConverter = new DataRowConverter(columnTypes, isReadRowKey);
+        DataRowMaterializer(final ParquetType[] columnTypes) {
+            m_rowConverter = new DataRowConverter(columnTypes);
         }
 
         /**

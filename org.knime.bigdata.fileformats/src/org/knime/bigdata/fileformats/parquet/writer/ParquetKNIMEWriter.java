@@ -74,8 +74,6 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
      *
      * @param file the local file to which to write
      * @param spec the specification of the KNIME table to write to disk
-     * @param writeRowKey a flag that determines whether to store the row keys
-     *        in the Parquet file
      * @param compression The compression codec to use for writing
      * @param rowGroupSize Parquet horizontally divides tables into row groups.
      *        A row group is a logical horizontal partitioning of the data into
@@ -85,13 +83,12 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
      * @throws IOException an exception that is thrown if something goes wrong
      *         during the initialization of the {@link ParquetWriter}
      */
-    public ParquetKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final boolean writeRowKey,
+    public ParquetKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final String compression, final int rowGroupSize) throws IOException {
-        super(file, rowGroupSize, writeRowKey, spec);
+        super(file, rowGroupSize, spec);
         final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
         m_writer = new DataRowParquetWriterBuilder(new File(file.getURI()),
-                new DataRowWriteSupport(spec.getName(), ParquetTableStoreFormat.parquetTypesFromSpec(spec),
-                        isWriteRowKey())).withCompressionCodec(codec)
+                new DataRowWriteSupport(spec.getName(), ParquetTableStoreFormat.parquetTypesFromSpec(spec))).withCompressionCodec(codec)
                                 .withDictionaryEncoding(ParquetTableStoreFormat.DEFAULT_PARQUET_IS_DICTIONARY_ENABLED)
                                 .withRowGroupSize(rowGroupSize).withWriteMode(Mode.OVERWRITE).build();
     }

@@ -71,19 +71,18 @@ public class ParquetFormatFactory implements FileFormatFactory {
     private static final int TO_BYTE = 1024 * 1024;
 
     @Override
-    public AbstractFileFormatReader getReader(RemoteFile<Connection> file, boolean isReadRowKey, int batchSize,
-            ExecutionContext exec) {
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
         try {
-            return new ParquetKNIMEReader(file, isReadRowKey, batchSize, exec);
+            return new ParquetKNIMEReader(file, exec);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
     }
 
     @Override
-    public AbstractFileFormatWriter getWriter(RemoteFile<Connection> file, DataTableSpec spec, boolean isWriteRowKey,
-            int chunkSize, String compression) throws IOException {
-        return new ParquetKNIMEWriter(file, spec, isWriteRowKey, compression, chunkSize * TO_BYTE);
+    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+            final int chunkSize, final String compression) throws IOException {
+        return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE);
     }
 
     @Override
@@ -93,7 +92,7 @@ public class ParquetFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public String[] getUnsupportedTypes(DataTableSpec spec) {
+    public String[] getUnsupportedTypes(final DataTableSpec spec) {
         return ParquetTableStoreFormat.getUnsupportedTypes(spec);
     }
 
@@ -105,5 +104,13 @@ public class ParquetFormatFactory implements FileFormatFactory {
     @Override
     public String getFilenameSuffix() {
         return SUFFIX;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getChunkSizeUnit() {
+        return "MB";
     }
 }

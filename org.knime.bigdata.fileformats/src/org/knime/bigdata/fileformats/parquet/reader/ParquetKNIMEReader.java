@@ -109,15 +109,12 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      * Reader that reads Parquet files into a KNIME data table.
      *
      * @param file the file or directory to read from
-     * @param isReadRowKey if the row key has to be read
-     * @param batchSize the batch size for reading
      * @param exec the execution context
      * @throws Exception thrown if files can not be listed, if reader can not be
      *         created, or schemas of files in a directory do not match.
      */
-    public ParquetKNIMEReader(final RemoteFile<Connection> file, final boolean isReadRowKey, final int batchSize,
-            final ExecutionContext exec) throws Exception {
-        super(file, isReadRowKey, batchSize, exec);
+    public ParquetKNIMEReader(final RemoteFile<Connection> file, final ExecutionContext exec) throws Exception {
+        super(file, exec);
         m_readers = new ArrayDeque<>();
         init();
         if (m_readers.isEmpty()) {
@@ -129,7 +126,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      * @see org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader#createReader(org.knime.core.node.ExecutionContext, java.util.List, org.knime.base.filehandling.remote.files.RemoteFile)
      */
     @Override
-    protected void createReader(ExecutionContext exec, List<DataTableSpec> schemas, RemoteFile<Connection> remoteFile) {
+    protected void createReader(final ExecutionContext exec, final List<DataTableSpec> schemas, final RemoteFile<Connection> remoteFile) {
 
         final Configuration conf = new Configuration();
         try {
@@ -145,7 +142,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
 
             @SuppressWarnings("resource")
             final ParquetReader<DataRow> reader = ParquetReader
-                    .builder(new DataRowReadSupport(columnTypes, isReadRowKey()), path).withConf(conf).build();
+                    .builder(new DataRowReadSupport(columnTypes), path).withConf(conf).build();
             m_readers.add(reader);
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
             throw new BigDataFileFormatException(e);
@@ -178,7 +175,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
 
     @SuppressWarnings("resource")
     @Override
-    public FileFormatRowIterator getNextIterator(long i) throws IOException, InterruptedException {
+    public FileFormatRowIterator getNextIterator(final long i) throws IOException, InterruptedException {
         // Parquet inits the FS only during read() so we need another doAS here
         final ParquetReader<DataRow> reader = m_readers.poll();
         FileFormatRowIterator iterator = null;
@@ -187,11 +184,11 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
                 iterator = getUser().doAs(new PrivilegedExceptionAction<FileFormatRowIterator>() {
                     @Override
                     public FileFormatRowIterator run() throws Exception {
-                        return new ParquetRowIterator(i, reader, isReadRowKey());
+                        return new ParquetRowIterator(i, reader);
                     }
                 });
             } else {
-                iterator = new ParquetRowIterator(i, reader, isReadRowKey());
+                iterator = new ParquetRowIterator(i, reader);
             }
         }
         return iterator;

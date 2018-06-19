@@ -114,8 +114,8 @@ public class FileFormatReaderNodeModel extends NodeModel {
         if (connInfoObj != null) {
             connInfo = connInfoObj.getConnectionInformation();
         }
-        final RemoteFile<Connection> sourceFile =
-        		FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo);
+        final RemoteFile<Connection> sourceFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
+                connInfo);
         final AbstractFileFormatReader reader = getReader(sourceFile, exec);
         return new BigDataFileFormatTable(reader);
     }
@@ -186,14 +186,12 @@ public class FileFormatReaderNodeModel extends NodeModel {
                 @Override
                 public AbstractFileFormatReader run() throws Exception {
 
-                    return m_settings.getFormatFactory().getReader(remoteFile, m_settings.getReadRowKey(),
-                            m_settings.getBatchSize(), context);
+                    return m_settings.getFormatFactory().getReader(remoteFile, context);
                 }
             });
             reader.setUser(user);
         } else {
-            reader = m_settings.getFormatFactory().getReader(remoteFile, m_settings.getReadRowKey(),
-                    m_settings.getBatchSize(), context);
+            reader = m_settings.getFormatFactory().getReader(remoteFile, context);
         }
         return reader;
     }
@@ -249,7 +247,8 @@ public class FileFormatReaderNodeModel extends NodeModel {
         return new StreamableOperator() {
 
             @Override
-            public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec) throws Exception {
+            public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
+                    throws Exception {
                 final PortObject portObj = (PortObject) inputs[0];
                 final RowOutput out = (RowOutput) outputs[0];
                 final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject) portObj;

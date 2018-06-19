@@ -45,13 +45,10 @@
  */
 package org.knime.bigdata.fileformats.parquet.reader;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.apache.parquet.io.api.Binary;
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
-import org.apache.parquet.io.api.PrimitiveConverter;
 import org.knime.bigdata.fileformats.parquet.type.ParquetType;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
@@ -65,19 +62,15 @@ import org.knime.core.data.container.BlobSupportDataRow;
  * @author Marc Bux, KNIME AG, Zurich, Switzerland
  */
 final class DataRowConverter extends GroupConverter {
-    private final RowKeyConverter m_rowKeyConverter = new RowKeyConverter();
 
     private final ParquetType[] m_columnTypes;
-
-    private final boolean m_isReadRowKey;
 
     private DataRow m_dataRow;
 
     private long m_rowCount = 0l;
 
-    DataRowConverter(final ParquetType[] columnTypes, final boolean readRowKey) {
+    DataRowConverter(final ParquetType[] columnTypes) {
         m_columnTypes = columnTypes.clone();
-        m_isReadRowKey = readRowKey;
     }
 
     /**
@@ -93,9 +86,6 @@ final class DataRowConverter extends GroupConverter {
      */
     @Override
     public Converter getConverter(final int fieldIndex) {
-        if (fieldIndex == m_columnTypes.length - 1 && m_isReadRowKey) {
-            return m_rowKeyConverter;
-        }
         return m_columnTypes[fieldIndex].getConverter();
     }
 
@@ -105,7 +95,7 @@ final class DataRowConverter extends GroupConverter {
     @Override
     public void end() {
         final DataCell[] dataCells = Arrays.stream(m_columnTypes).map(ParquetType::readValue).toArray(DataCell[]::new);
-        final RowKey rowKey = m_isReadRowKey ? m_rowKeyConverter.getRowKey() : RowKey.createRowKey(m_rowCount);
+        final RowKey rowKey = RowKey.createRowKey(m_rowCount);
         m_rowCount++;
         m_dataRow = new BlobSupportDataRow(rowKey, dataCells);
     }
@@ -114,20 +104,4 @@ final class DataRowConverter extends GroupConverter {
         return m_dataRow;
     }
 
-    /**
-     * A class that converts row keys stored within a Parquet file to
-     * {@link RowKey} instances.
-     */
-    static final class RowKeyConverter extends PrimitiveConverter {
-        private RowKey m_rowKey;
-
-        @Override
-        public void addBinary(final Binary value) {
-            m_rowKey = new RowKey(new String(value.getBytes(), StandardCharsets.UTF_8));
-        }
-
-        RowKey getRowKey() {
-            return m_rowKey;
-        }
-    }
 }

@@ -58,18 +58,15 @@ import org.knime.core.data.container.BlobSupportDataRow;
 class ParquetRowIterator extends FileFormatRowIterator {
     long m_index;
     private final ParquetReader<DataRow> m_reader;
-    final boolean m_readRowKey;
     private DataRow m_nextRow;
 
     /**
      * @param index the index to start the row key
      * @param reader the reader to use
-     * @param readKey whether to read the row keys
      */
-    public ParquetRowIterator(long index, ParquetReader<DataRow> reader, boolean readKey) {
+    public ParquetRowIterator(final long index, final ParquetReader<DataRow> reader) {
         super();
         m_index = index;
-        m_readRowKey = readKey;
         m_reader = reader;
         m_nextRow = internalNext();
 
@@ -110,9 +107,7 @@ class ParquetRowIterator extends FileFormatRowIterator {
         }
         DataRow currentRow = m_nextRow;
         m_nextRow = internalNext();
-        if (!m_readRowKey) {
-            currentRow = new BlobSupportDataRow(RowKey.createRowKey(m_index), currentRow);
-        }
+        currentRow = new BlobSupportDataRow(RowKey.createRowKey(m_index), currentRow);
         m_index++;
         return currentRow;
     }

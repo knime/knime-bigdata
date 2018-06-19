@@ -59,8 +59,6 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public abstract class AbstractFileFormatWriter implements AutoCloseable {
 
-    private final boolean m_writeRowKey;
-
     private final DataTableSpec m_tableSpec;
 
     private final RemoteFile<Connection> m_targetFile;
@@ -72,12 +70,9 @@ public abstract class AbstractFileFormatWriter implements AutoCloseable {
      *
      * @param batchSize the batchSize for writing
      * @param file the file to write to
-     * @param writeRowKey whther to write the row key
      * @param tableSpec the data table spec
      */
-    public AbstractFileFormatWriter(RemoteFile<Connection> file, int batchSize, boolean writeRowKey,
-            DataTableSpec tableSpec) {
-        m_writeRowKey = writeRowKey;
+    public AbstractFileFormatWriter(final RemoteFile<Connection> file, final int batchSize, final DataTableSpec tableSpec) {
         m_tableSpec = tableSpec;
         m_targetFile = file;
         m_batchSize = batchSize;
@@ -105,13 +100,6 @@ public abstract class AbstractFileFormatWriter implements AutoCloseable {
      */
     @Override
     public abstract void close() throws IOException;
-
-    /**
-     * @return the m_writeRowKey
-     */
-    public boolean isWriteRowKey() {
-        return m_writeRowKey;
-    }
 
     /**
      * @return the m_tableSpec
