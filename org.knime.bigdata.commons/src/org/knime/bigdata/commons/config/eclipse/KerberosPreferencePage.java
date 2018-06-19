@@ -193,7 +193,7 @@ public class KerberosPreferencePage extends FieldEditorPreferencePage implements
         if (!KerberosLogger.getInstance().isEnabled()
                 && CommonConfigContainer.getInstance().isKerberosLoggingEnabled()) {
             MessageDialog.openInformation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Kerberos Logging", "Please restart the KNIME Analytics Platform to enable Kerberos logging");
+                "Kerberos Logging", "Please restart KNIME Analytics Platform to enable Kerberos logging");
         }
         KerberosLogger.getInstance().setEnable(CommonConfigContainer.getInstance().isKerberosLoggingEnabled(),
             CommonConfigContainer.getInstance().getKerberosLoggingLevel());
