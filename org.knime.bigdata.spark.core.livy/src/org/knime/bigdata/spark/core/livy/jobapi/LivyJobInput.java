@@ -29,7 +29,7 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * A class that wraps that wraps the actual job input for Spark jobs on Livy.  
+ * A class that wraps that wraps the actual job input for Spark jobs on Livy.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
@@ -48,7 +48,7 @@ public class LivyJobInput extends JobData {
         super(LIVY_PREFIX);
     }
 
-    LivyJobInput(final Map<String,Object> internalMap) {
+    LivyJobInput(final Map<String, Object> internalMap) {
         super(LIVY_PREFIX, internalMap);
     }
 
@@ -95,6 +95,8 @@ public class LivyJobInput extends JobData {
     }
 
     /**
+     * Wraps the given job input into an instance of {@link LivyJobInput}.
+     * 
      * @param jobInput the {@link JobInput}
      * @param sparkJobClass the Spark job class to use
      * @return the {@link LivyJobInput}
@@ -108,6 +110,8 @@ public class LivyJobInput extends JobData {
     }
 
     /**
+     * Creates a new {@link LivyJobInput} backed by the given map.
+     * 
      * @param internalMap of parameters
      * @return the {@link LivyJobInput}
      */
@@ -117,7 +121,9 @@ public class LivyJobInput extends JobData {
     }
 
     /**
-     * @param serverFilenames the path to the files
+     * Adds a list of files to be used by the job.
+     * 
+     * @param serverFilenames the path to the files.
      * @return the {@link LivyJobInput} itself
      */
     public LivyJobInput withFiles(final List<String> serverFilenames) {

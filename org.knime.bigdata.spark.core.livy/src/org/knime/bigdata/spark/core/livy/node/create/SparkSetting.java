@@ -33,17 +33,16 @@ public class SparkSetting extends DefaultKeyDescriptor {
         @JsonProperty("description") final String description) {
         super(key, defaultValue, false, description);
     }
-    
 
     /**
-     * Loads the Spark settings supported by the given Spark version from a JSON file in the respective jobs plugin. Repeated
-     * invocations of this method with the same Spark version will return the same list object.
+     * Loads the Spark settings supported by the given Spark version from a JSON file in the respective jobs plugin.
+     * Repeated invocations of this method with the same Spark version will return the same list object.
      * 
      * @param sparkVersion The Spark version to load the supported settings for.
      * @return a list of Spark settings.
      * @throws IOException If loading or deserializing the supported settings failed.
      */
-    public synchronized static List<SparkSetting> getSupportedSettings(SparkVersion sparkVersion) throws IOException {
+    public static synchronized List<SparkSetting> getSupportedSettings(SparkVersion sparkVersion) throws IOException {
 
         List<SparkSetting> toReturn = CACHED_DESCRIPTORS.get(sparkVersion);
         if (toReturn == null) {

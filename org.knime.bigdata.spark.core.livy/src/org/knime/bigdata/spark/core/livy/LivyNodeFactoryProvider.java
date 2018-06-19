@@ -14,9 +14,9 @@ import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
  */
 public class LivyNodeFactoryProvider extends DefaultSparkNodeFactoryProvider {
 
-	/**
-	 * Default constructor.
-	 */
+    /**
+     * Default constructor.
+     */
     public LivyNodeFactoryProvider() {
         super(AllVersionCompatibilityChecker.INSTANCE, new LivySparkContextCreatorNodeFactory());
     }

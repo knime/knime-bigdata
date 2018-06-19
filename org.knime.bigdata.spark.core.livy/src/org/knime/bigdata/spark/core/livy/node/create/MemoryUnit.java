@@ -1,9 +1,8 @@
 package org.knime.bigdata.spark.core.livy.node.create;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,14 +61,14 @@ public enum MemoryUnit {
             return (currentUnitValue * m_mebibytes) / targetUnit.m_mebibytes;
         }
     }
-    
-    private final static Map<MemoryUnit, Set<String>> UNIT_STRINGS = new HashMap<>();
+
+    private static final EnumMap<MemoryUnit, Set<String>> UNIT_STRINGS = new EnumMap<>(MemoryUnit.class);
     static {
         UNIT_STRINGS.put(MB, new HashSet<>(Arrays.asList("m", "mb", "M", "MB")));
         UNIT_STRINGS.put(GB, new HashSet<>(Arrays.asList("g", "gb", "G", "GB")));
         UNIT_STRINGS.put(TB, new HashSet<>(Arrays.asList("t", "tb", "T", "TB")));
     }
-    
+
     /**
      * Resolves the given unit string into a {@link MemoryUnit} enum value.
      * 
@@ -88,7 +87,7 @@ public enum MemoryUnit {
             throw new IllegalArgumentException("Unsupported memory unit: " + unitString);
         }
     }
-    
+
     /**
      * Parsed a string of the form "2g" and into a number representing the value in the given target unit. Example:
      * parseMemorySetting("2g", MB) yields 2048.

@@ -22,12 +22,12 @@ import org.knime.bigdata.spark.core.version.SparkVersion;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LivySparkContextProvider implements SparkContextProvider<LivySparkContextConfig> {
-    
+
     /**
      * The highest Spark version currently supported by the Apache Livy integration.
      */
-    public final static SparkVersion HIGHEST_SUPPORTED_SPARK_VERSION;
-    
+    public static final SparkVersion HIGHEST_SUPPORTED_SPARK_VERSION;
+
     static {
         SparkVersion currHighest = LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions().iterator().next();
         for (SparkVersion curr : LivyPlugin.LIVY_SPARK_VERSION_CHECKER.getSupportedSparkVersions()) {
@@ -37,7 +37,7 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
         }
         HIGHEST_SUPPORTED_SPARK_VERSION = currHighest;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -45,7 +45,7 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
     public CompatibilityChecker getChecker() {
         return LivyPlugin.LIVY_SPARK_VERSION_CHECKER;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -91,27 +91,27 @@ public class LivySparkContextProvider implements SparkContextProvider<LivySparkC
      */
     @Override
     public String toPrettyString(final SparkContextID contextID) {
-		try {
-			
-	        if (contextID.getScheme() != SparkContextIDScheme.SPARK_LIVY) {
-	            throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme());
-	        }
-	        
-	        final URI uri = contextID.asURI();
-	        return String.format("%s on Apache Livy server at %s:d", uri.getFragment(), uri.getHost(), uri.getPort());
+        try {
 
-		} catch (IllegalArgumentException e) {
-			// should never happen
-			throw new RuntimeException(e);
-		}
+            if (contextID.getScheme() != SparkContextIDScheme.SPARK_LIVY) {
+                throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme());
+            }
+
+            final URI uri = contextID.asURI();
+            return String.format("%s on Apache Livy server at %s:%d", uri.getFragment(), uri.getHost(), uri.getPort());
+
+        } catch (IllegalArgumentException e) {
+            // should never happen
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public Optional<SparkContext<LivySparkContextConfig>> createDefaultSparkContextIfPossible() {
-		// currently, the Livy connector never provides the default Spark context.
-		return Optional.empty();
-	}
+    @Override
+    public Optional<SparkContext<LivySparkContextConfig>> createDefaultSparkContextIfPossible() {
+        // currently, the Livy connector never provides the default Spark context.
+        return Optional.empty();
+    }
 }

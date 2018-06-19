@@ -18,7 +18,7 @@ public class DialogComponentKeyValueEdit extends DialogComponent {
 
     /** The Key-value table panel. */
     private final KeyValueTablePanel m_tablePanel;
-    
+
     private final KeyValueTableModel m_tableModel;
 
     /**
@@ -28,11 +28,11 @@ public class DialogComponentKeyValueEdit extends DialogComponent {
      */
     public DialogComponentKeyValueEdit(final SettingsModelKeyValue settingsModel) {
         super(settingsModel);
-        
+
         // update the checkbox, whenever the model changes - make sure we get
         // notified first.
-        settingsModel.prependChangeListener((e) -> updateComponent());
-        
+        settingsModel.prependChangeListener(e -> updateComponent());
+
         m_tableModel = new KeyValueTableModel(settingsModel);
         m_tablePanel = new KeyValueTablePanel(m_tableModel);
 
@@ -44,7 +44,7 @@ public class DialogComponentKeyValueEdit extends DialogComponent {
         gbc.weighty = 1;
         gbc.fill = GridBagConstraints.BOTH;
         getComponentPanel().add(m_tablePanel, gbc);
-        
+
         // call this method to be in sync with the settings model
         updateComponent();
     }

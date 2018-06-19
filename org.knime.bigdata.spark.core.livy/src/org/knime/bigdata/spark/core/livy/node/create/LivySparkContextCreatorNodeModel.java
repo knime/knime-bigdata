@@ -54,15 +54,8 @@ import org.knime.core.node.port.PortType;
  */
 public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
 
-
     private final LivySparkContextCreatorNodeSettings m_settings = new LivySparkContextCreatorNodeSettings();
-    
-    /**
-     * An ID that is unique to this node model instance, i.e. no two instances of this node model
-     * have the same value here. Additionally, it's value changes during reset.
-     */
-    private String m_uniqueContextId;
-    
+
     /**
      * Created using the {@link #m_uniqueContextId} during the configure phase.
      */
@@ -77,8 +70,10 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
     }
 
     private void resetContextID() {
-        m_uniqueContextId = UUID.randomUUID().toString();
-        m_sparkContextId = LivySparkContextCreatorNodeSettings.createSparkContextID(m_uniqueContextId);
+        // An ID that is unique to this node model instance, i.e. no two instances of this node model
+        // have the same value here. Additionally, it's value changes during reset.
+        final String uniqueContextId = UUID.randomUUID().toString();
+        m_sparkContextId = LivySparkContextCreatorNodeSettings.createSparkContextID(uniqueContextId);
     }
 
     /**
@@ -116,37 +111,38 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
 
     @Override
     protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
-        
+        throws IOException, CanceledExecutionException {
+
         // this is only to avoid errors about an unconfigured spark context. the spark context configured here is
         // has and never will be opened because m_uniqueContextId has a new and unique value.
         final String previousContextID = Files
-                .readAllLines(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"), Charset.forName("UTF-8")).get(0);
+            .readAllLines(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"), Charset.forName("UTF-8")).get(0);
         configureSparkContext(new SparkContextID(previousContextID), m_settings);
     }
-    
+
     @Override
     protected void saveAdditionalInternals(File nodeInternDir, ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
-        
+
         // see loadAdditionalInternals() for why we are doing this
         Files.write(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"),
             m_sparkContextId.toString().getBytes(Charset.forName("UTF-8")));
     }
-    
+
     @Override
     protected void resetInternal() {
-        BackgroundTasks.run(new DestroyAndDisposeSparkContextTask(m_sparkContextId));        
+        BackgroundTasks.run(new DestroyAndDisposeSparkContextTask(m_sparkContextId));
         resetContextID();
     }
-    
+
     /**
      * Internal method to ensure that the given Spark context is configured.
      * 
      * @param sparkContextId Identifies the Spark context to configure.
      * @param settings The settings from which to configure the context.
      */
-    protected static void configureSparkContext(final SparkContextID sparkContextId, final LivySparkContextCreatorNodeSettings settings) {
+    protected static void configureSparkContext(final SparkContextID sparkContextId,
+        final LivySparkContextCreatorNodeSettings settings) {
         final SparkContext<LivySparkContextConfig> sparkContext =
             SparkContextManager.getOrCreateSparkContext(sparkContextId);
         final LivySparkContextConfig config = settings.createContextConfig(sparkContextId);
@@ -157,7 +153,6 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
             throw new RuntimeException("Failed to apply Spark context settings.");
         }
     }
-
 
     /**
      * {@inheritDoc}

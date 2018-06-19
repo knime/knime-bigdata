@@ -49,7 +49,7 @@
 package org.knime.bigdata.spark.core.livy.node.create.ui;
 
 import java.awt.Component;
-import java.util.TreeSet;
+import java.util.Set;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -88,24 +88,25 @@ final class KeyValueCellEditor extends DefaultCellEditor {
      */
     @SuppressWarnings("unchecked")
     private JComboBox<String> getComboBox() {
-        return (JComboBox<String>) getComponent();
+        return (JComboBox<String>)getComponent();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column) {
+    public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected,
+        final int row, final int column) {
         // get the combobox
         final JComboBox<String> box = getComboBox();
 
         // clear all items
         box.removeAllItems();
 
-        final TreeSet<String> keysToDisplay = m_settingsModel.getUnassignedKeys();
+        final Set<String> keysToDisplay = m_settingsModel.getUnassignedKeys();
         // make sure the currently shown value is also available
-        keysToDisplay.add((String) value);
-        
+        keysToDisplay.add((String)value);
+
         // add all available items plus the currently shown value
         for (final String key : keysToDisplay) {
             box.addItem(key);
@@ -136,8 +137,8 @@ final class KeyValueCellEditor extends DefaultCellEditor {
          * {@inheritDoc}
          */
         @Override
-        public Component getListCellRendererComponent(final JList<? extends String> list, final String value, final int index,
-                final boolean isSelected, final boolean cellHasFocus) {
+        public Component getListCellRendererComponent(final JList<? extends String> list, final String value,
+            final int index, final boolean isSelected, final boolean cellHasFocus) {
             // adapt background
             if (isSelected) {
                 setBackground(list.getSelectionBackground());
@@ -153,7 +154,7 @@ final class KeyValueCellEditor extends DefaultCellEditor {
             if (keyDescriptor != null && keyDescriptor.getDescription() != null) {
                 setToolTipText(keyDescriptor.getDescription());
             }
-            
+
             return this;
         }
     }

@@ -78,10 +78,10 @@ public class KeyValueTable extends JTable {
     private static final int DEFAULT_VIEWPORT_HEIGHT = 300;
 
     /** The propert input color. */
-    private static Color PROPER_INPUT_COLOR = new Color(255, 255, 255);
+    private static final Color PROPER_INPUT_COLOR = new Color(255, 255, 255);
 
     /** The wrong input color. */
-    private static Color WRONG_INPUT_COLOR = new Color(255, 120, 120);
+    private static final Color WRONG_INPUT_COLOR = new Color(255, 120, 120);
 
     /**
      * Constructor.
@@ -94,9 +94,9 @@ public class KeyValueTable extends JTable {
         getTableHeader().setReorderingAllowed(false);
         setCellEditor(getColumnModel());
         setRenderer(getColumnModel());
-//        final RowSorter<KeyValueTableModel> rowSorter = new TableRowSorter<KeyValueTableModel>(dm);
-//        rowSorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
-//        setRowSorter(rowSorter);
+        //        final RowSorter<KeyValueTableModel> rowSorter = new TableRowSorter<KeyValueTableModel>(dm);
+        //        rowSorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(0, SortOrder.ASCENDING)));
+        //        setRowSorter(rowSorter);
         setPreferredScrollableViewportSize(new Dimension(DEFAULT_VIEWPORT_WIDTH, DEFAULT_VIEWPORT_HEIGHT));
         dm.fireTableDataChanged();
     }
@@ -238,7 +238,7 @@ public class KeyValueTable extends JTable {
     }
 
     /**
-     * Highlights the row on the given index
+     * Highlights the row on the given index.
      *
      * @param index index of the row to highlight
      */

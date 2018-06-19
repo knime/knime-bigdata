@@ -37,111 +37,110 @@ import org.knime.core.util.FileUtil;
  */
 class LivyJobController implements JobController {
 
-	private final static NodeLogger LOGGER = NodeLogger.getLogger(LivyJobController.class);
+    private static final  NodeLogger LOGGER = NodeLogger.getLogger(LivyJobController.class);
 
-	private final UploadFileCache m_uploadFileCache = new UploadFileCache();
+    private final UploadFileCache m_uploadFileCache = new UploadFileCache();
 
-	private final LivyClient m_livyClient;
+    private final LivyClient m_livyClient;
 
-	private final String m_livyJobClass;
+    private final String m_livyJobClass;
 
-	LivyJobController(final LivyClient livyClient,
-			final String livyJobClass) {
-		
-		m_livyClient = livyClient;
-		m_livyJobClass = livyJobClass;
-	}
+    LivyJobController(final LivyClient livyClient, final String livyJobClass) {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void startJobAndWaitForResult(final SimpleJobRun<?> job, final ExecutionMonitor exec)
-			throws KNIMESparkException, CanceledExecutionException {
-		startJobAndWaitForResult(job, null, exec);
-	}
+        m_livyClient = livyClient;
+        m_livyJobClass = livyJobClass;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> job,
-			final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void startJobAndWaitForResult(final SimpleJobRun<?> job, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
+        startJobAndWaitForResult(job, null, exec);
+    }
 
-		exec.setMessage("Uploading data to Spark jobserver");
-		if (job.useInputFileCopyCache() && job.getInputFilesLifetime() != FileLifetime.CONTEXT) {
-			throw new IllegalArgumentException(
-					"File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> job,
+        final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
 
-		final List<String> serverFilenames;
-		if (job.useInputFileCopyCache()) {
-			serverFilenames = uploadInputFilesCached(job, exec);
-		} else {
-			serverFilenames = doUploadFiles(job.getInputFiles(), exec);
-		}
+        exec.setMessage("Uploading data to Spark jobserver");
+        if (job.useInputFileCopyCache() && job.getInputFilesLifetime() != FileLifetime.CONTEXT) {
+            throw new IllegalArgumentException(
+                "File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
+        }
 
-		return startJobAndWaitForResult(job, serverFilenames, exec);
-	}
+        final List<String> serverFilenames;
+        if (job.useInputFileCopyCache()) {
+            serverFilenames = uploadInputFilesCached(job, exec);
+        } else {
+            serverFilenames = doUploadFiles(job.getInputFiles(), exec);
+        }
 
-	private List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job, final ExecutionMonitor exec)
-			throws KNIMESparkException, CanceledExecutionException {
+        return startJobAndWaitForResult(job, serverFilenames, exec);
+    }
 
-		final List<String> serverFilenamesToReturn = new LinkedList<>();
+    private List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
 
-		// first we determine the files we have to upload
-		final List<File> filesToUpload = new LinkedList<>();
-		for (File inputFile : job.getInputFiles()) {
-			String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
-			if (cachedServerFile != null) {
-				serverFilenamesToReturn.add(cachedServerFile);
-			} else {
-				filesToUpload.add(inputFile);
-			}
-		}
+        final List<String> serverFilenamesToReturn = new LinkedList<>();
 
-		final Iterator<String> serverFilenameIter = doUploadFiles(filesToUpload, exec).iterator();
-		final Iterator<File> localFileIter = filesToUpload.iterator();
+        // first we determine the files we have to upload
+        final List<File> filesToUpload = new LinkedList<>();
+        for (File inputFile : job.getInputFiles()) {
+            String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
+            if (cachedServerFile != null) {
+                serverFilenamesToReturn.add(cachedServerFile);
+            } else {
+                filesToUpload.add(inputFile);
+            }
+        }
 
-		while (localFileIter.hasNext()) {
-			final File localFile = localFileIter.next();
-			final String serverFilename = serverFilenameIter.next();
+        final Iterator<String> serverFilenameIter = doUploadFiles(filesToUpload, exec).iterator();
+        final Iterator<File> localFileIter = filesToUpload.iterator();
 
-			m_uploadFileCache.addFilesToCache(localFile, serverFilename);
-		}
+        while (localFileIter.hasNext()) {
+            final File localFile = localFileIter.next();
+            final String serverFilename = serverFilenameIter.next();
 
-		return serverFilenamesToReturn;
-	}
+            m_uploadFileCache.addFilesToCache(localFile, serverFilename);
+        }
 
-	private List<String> doUploadFiles(final List<File> filesToUpload, final ExecutionMonitor exec)
-			throws CanceledExecutionException, KNIMESparkException {
+        return serverFilenamesToReturn;
+    }
 
-		List<String> serverFilenames = new LinkedList<>();
+    private List<String> doUploadFiles(final List<File> filesToUpload, final ExecutionMonitor exec)
+        throws CanceledExecutionException, KNIMESparkException {
 
-		File currTempFile = null;
-		try {
+        List<String> serverFilenames = new LinkedList<>();
 
-			for (File localFileToUpload : filesToUpload) {
-				currTempFile = FileUtil.createTempFile(UUID.randomUUID().toString(), "");
-				FileUtil.copy(localFileToUpload, currTempFile);
+        File currTempFile = null;
+        try {
 
-				Future<?> uploadFuture = m_livyClient.uploadFile(currTempFile);
-				LivySparkContext.waitForFuture(uploadFuture, exec);
+            for (File localFileToUpload : filesToUpload) {
+                currTempFile = FileUtil.createTempFile(UUID.randomUUID().toString(), "");
+                FileUtil.copy(localFileToUpload, currTempFile);
 
-				serverFilenames.add(currTempFile.getName());
-				currTempFile.delete();
-			}
-		} catch (IOException e) {
-			if (currTempFile != null && currTempFile.exists()) {
-				currTempFile.delete();
-			}
-			throw new KNIMESparkException(e);
-		} catch (Exception e) {
-			LivySparkContext.handleLivyException(e);
-		}
+                Future<?> uploadFuture = m_livyClient.uploadFile(currTempFile);
+                LivySparkContext.waitForFuture(uploadFuture, exec);
 
-		return serverFilenames;
-	}
+                serverFilenames.add(currTempFile.getName());
+                currTempFile.delete();
+            }
+        } catch (IOException e) {
+            if (currTempFile != null && currTempFile.exists()) {
+                currTempFile.delete();
+            }
+            throw new KNIMESparkException(e);
+        } catch (Exception e) {
+            LivySparkContext.handleLivyException(e);
+        }
+
+        return serverFilenames;
+    }
 
     /**
      * {@inheritDoc}
@@ -171,7 +170,7 @@ class LivyJobController implements JobController {
         } catch (ClassNotFoundException | IOException e) {
             throw new KNIMESparkException(e);
         }
-        
+
         if (jobserverOutput.isError()) {
             Throwable cause = jobserverOutput.getThrowable();
             if (cause instanceof KNIMESparkException) {
@@ -189,9 +188,8 @@ class LivyJobController implements JobController {
                 throw new KNIMESparkException("Failed to deserialize Spark job output", e);
             }
         }
-    }	
-    
-    
+    }
+
     @SuppressWarnings("unchecked")
     private JobHandle<LivyJobOutput> startJobAsynchronously(final JobRun<?, ?> job,
         final List<String> inputFilesOnServer) throws KNIMESparkException {
@@ -212,8 +210,7 @@ class LivyJobController implements JobController {
             final Class<Job<LivyJobOutput>> livyJobClass =
                 (Class<Job<LivyJobOutput>>)job.getJobOutputClassLoader().loadClass(m_livyJobClass);
 
-            final Job<LivyJobOutput> livyJob =
-                livyJobClass.getConstructor(LivyJobInput.class).newInstance(jsInput);
+            final Job<LivyJobOutput> livyJob = livyJobClass.getConstructor(LivyJobInput.class).newInstance(jsInput);
 
             return m_livyClient.submit(livyJob);
         } catch (Exception e) {

@@ -36,74 +36,67 @@ import org.osgi.framework.BundleContext;
  */
 public class LivyPlugin extends AbstractUIPlugin {
 
-	/**
-	 * Compatibility checker for the Spark versions currently supported by the Livy connector plugin.
-	 */
-	public static final CompatibilityChecker LIVY_SPARK_VERSION_CHECKER = new FixedVersionCompatibilityChecker(
-			SparkVersion.V_2_2);
-	
-	/**
-	 * Holds the singleton instance of the Apache Livy connector plugin,
-	 * once it has been created by the OSGI framework.
-	 */
-	private static volatile LivyPlugin plugin;
+    /**
+     * Compatibility checker for the Spark versions currently supported by the Livy connector plugin.
+     */
+    public static final CompatibilityChecker LIVY_SPARK_VERSION_CHECKER =
+        new FixedVersionCompatibilityChecker(SparkVersion.V_2_2);
 
-	private String m_pluginRootPath;
+    /**
+     * Holds the singleton instance of the Apache Livy connector plugin, once it has been created by the OSGI framework.
+     */
+    private static volatile LivyPlugin plugin;
 
+    private String m_pluginRootPath;
 
-	/**
-	 * The constructor.
-	 */
-	public LivyPlugin() {
-		synchronized (getClass()) {
-			plugin = this;
-		}
-	}
+    /**
+     * The constructor.
+     */
+    public LivyPlugin() {
+        synchronized (LivyPlugin.class) {
+            plugin = this;
+        }
+    }
 
-	/**
-	 * This method is called upon plug-in activation.
-	 * 
-	 * @param context
-	 *            The bundle context.
-	 * @throws Exception
-	 *             If cause by super class.
-	 */
-	@Override
-	public void start(final BundleContext context) throws Exception {
-		super.start(context);
-		final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
-		final File tmpFile = new File(pluginURL.getPath());
-		m_pluginRootPath = tmpFile.getAbsolutePath();
-	}
+    /**
+     * This method is called upon plug-in activation.
+     * 
+     * @param context The bundle context.
+     * @throws Exception If cause by super class.
+     */
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        super.start(context);
+        final URL pluginURL = FileLocator.resolve(FileLocator.find(plugin.getBundle(), new Path(""), null));
+        final File tmpFile = new File(pluginURL.getPath());
+        m_pluginRootPath = tmpFile.getAbsolutePath();
+    }
 
-	/**
-	 * This method is called when the plug-in is stopped.
-	 * 
-	 * @param context
-	 *            The bundle context.
-	 * @throws Exception
-	 *             If cause by super class.
-	 */
-	@Override
-	public void stop(final BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-	}
+    /**
+     * This method is called when the plug-in is stopped.
+     * 
+     * @param context The bundle context.
+     * @throws Exception If cause by super class.
+     */
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        plugin = null;
+        super.stop(context);
+    }
 
-	/**
-	 * Returns the singleton instance of this plugin, once it has
-	 * been created by the OSGI framework.
-	 *
-	 * @return The singleton instance of this plugin.
-	 */
-	public static LivyPlugin getDefault() {
-		return plugin;
-	}
+    /**
+     * Returns the singleton instance of this plugin, once it has been created by the OSGI framework.
+     *
+     * @return The singleton instance of this plugin.
+     */
+    public static LivyPlugin getDefault() {
+        return plugin;
+    }
 
-	/**
-	 * @return the absolute root path of this plugin
-	 */
-	public String getPluginRootPath() {
-		return m_pluginRootPath;
-	}
+    /**
+     * @return the absolute root path of this plugin
+     */
+    public String getPluginRootPath() {
+        return m_pluginRootPath;
+    }
 }

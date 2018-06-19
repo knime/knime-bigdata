@@ -1,6 +1,5 @@
 package org.knime.bigdata.spark.core.livy.context;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -12,45 +11,39 @@ import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.Authe
  * {@link SparkContextConfig} implementation for a Spark context running on Apache Livy. This class holds all required
  * information to create and configure such a context.
  */
-public class LivySparkContextConfig implements SparkContextConfig, Serializable {
+public class LivySparkContextConfig implements SparkContextConfig {
 
-	private static final long serialVersionUID = 421835560130535315L;
+    private final SparkVersion m_sparkVersion;
 
-	private final SparkVersion m_sparkVersion;
-	
-	private final String m_livyUrl;
+    private final String m_livyUrl;
 
-	private final AuthenticationType m_authenticationType;
-	
-	private final int m_connectTimeoutSeconds;
-	
-	private final int m_responseTimeoutSeconds;
-	
-	private final int m_jobCheckFrequencySeconds;
-	
-	private final Map<String, String> m_customSparkSettings;
-	
-	private final SparkContextID m_sparkContextId;
-	
-	/**
-	 * Constructor.
-	 * 
-	 * @param sparkVersion
-	 * @param livyUrl
-	 * @param authenticationType
-	 * @param connectTimeoutSeconds
-	 * @param responseTimeoutSeconds
-	 * @param jobCheckFrequencySeconds
-	 * @param customSparkSettings
-	 * @param sparkContextId
-	 */
-    public LivySparkContextConfig(final SparkVersion sparkVersion,
-        final String livyUrl,
-        final AuthenticationType authenticationType,
-        final int connectTimeoutSeconds,
-        final int responseTimeoutSeconds,
-        final int jobCheckFrequencySeconds,
-        final Map<String, String> customSparkSettings,
+    private final AuthenticationType m_authenticationType;
+
+    private final int m_connectTimeoutSeconds;
+
+    private final int m_responseTimeoutSeconds;
+
+    private final int m_jobCheckFrequencySeconds;
+
+    private final Map<String, String> m_customSparkSettings;
+
+    private final SparkContextID m_sparkContextId;
+
+    /**
+     * Constructor.
+     * 
+     * @param sparkVersion
+     * @param livyUrl
+     * @param authenticationType
+     * @param connectTimeoutSeconds
+     * @param responseTimeoutSeconds
+     * @param jobCheckFrequencySeconds
+     * @param customSparkSettings
+     * @param sparkContextId
+     */
+    public LivySparkContextConfig(final SparkVersion sparkVersion, final String livyUrl,
+        final AuthenticationType authenticationType, final int connectTimeoutSeconds, final int responseTimeoutSeconds,
+        final int jobCheckFrequencySeconds, final Map<String, String> customSparkSettings,
         final SparkContextID sparkContextId) {
 
         m_sparkVersion = sparkVersion;
@@ -63,64 +56,63 @@ public class LivySparkContextConfig implements SparkContextConfig, Serializable 
         m_sparkContextId = sparkContextId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparkVersion getSparkVersion() {
+        return m_sparkVersion;
+    }
 
     /**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SparkVersion getSparkVersion() {
-		return m_sparkVersion;
-	}
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteObjectsOnDispose() {
+        return false;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean deleteObjectsOnDispose() {
-		return false;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean useCustomSparkSettings() {
+        return true;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean useCustomSparkSettings() {
-		return true;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, String> getCustomSparkSettings() {
+        return m_customSparkSettings;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Map<String, String> getCustomSparkSettings() {
-		return m_customSparkSettings;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SparkContextID getSparkContextID() {
+        return m_sparkContextId;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SparkContextID getSparkContextID() {
-		return m_sparkContextId;
-	}
+    /**
+     * @return the http(s) URL for Livy
+     */
+    public String getLivyUrl() {
+        return m_livyUrl;
+    }
 
-	/**
-	 * @return the http(s) URL for Livy
-	 */
-	public String getLivyUrl() {
-		return m_livyUrl;
-	}
-	
-	/**
-	 * @return how to authenticate against Livy
-	 */
-	protected AuthenticationType getAuthenticationType() {
+    /**
+     * @return how to authenticate against Livy
+     */
+    protected AuthenticationType getAuthenticationType() {
         return m_authenticationType;
     }
 
-	/**
-	 * @return the TCP socket connect timeout when making connections to Livy.
-	 */
+    /**
+     * @return the TCP socket connect timeout when making connections to Livy.
+     */
     protected int getConnectTimeoutSeconds() {
         return m_connectTimeoutSeconds;
     }
@@ -141,11 +133,10 @@ public class LivySparkContextConfig implements SparkContextConfig, Serializable 
         return m_jobCheckFrequencySeconds;
     }
 
-    
-	/**
-	 * Autogenerated {@link #hashCode()} implementation over all members. 
-	 */
-	@Override
+    /**
+     * Autogenerated {@link #hashCode()} implementation over all members.
+     */
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -161,7 +152,7 @@ public class LivySparkContextConfig implements SparkContextConfig, Serializable 
     }
 
     /**
-     * Autogenerated {@link #equals(Object)} implementation over all members. 
+     * Autogenerated {@link #equals(Object)} implementation over all members.
      */
     @Override
     public boolean equals(Object obj) {

@@ -51,8 +51,6 @@ package org.knime.bigdata.spark.core.livy.node.create.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -109,7 +107,7 @@ final class KeyValueTablePanel extends JPanel {
 
         // init the table and put it into a scroll pane
         m_keyValueTable = new KeyValueTable(tableModel);
-        m_keyValueTable.getSelectionModel().addListSelectionListener((e) -> toggleButtons());
+        m_keyValueTable.getSelectionModel().addListSelectionListener(e -> toggleButtons());
 
         // add the button listeners
         addButtonListeners();
@@ -119,44 +117,17 @@ final class KeyValueTablePanel extends JPanel {
 
         // toggle the buttons
         toggleButtons();
-        
+
     }
 
     /**
      * Adds the listeners to the different buttons.
      */
     private void addButtonListeners() {
-        m_addButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                onAdd();
-            }
-        });
-
-        m_addAllButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                onAddAll();
-            }
-        });
-
-        m_removeButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                onRemove();
-            }
-        });
-
-        m_removeAllButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                onRemoveAll();
-            }
-        });
+        m_addButton.addActionListener(e -> onAdd());
+        m_addAllButton.addActionListener(e -> onAddAll());
+        m_removeButton.addActionListener(e -> onRemove());
+        m_removeAllButton.addActionListener(e -> onRemoveAll());
     }
 
     /**
@@ -246,7 +217,7 @@ final class KeyValueTablePanel extends JPanel {
     private void onAddAllAction() {
         m_keyValueTable.addAllRows();
     }
-    
+
     /**
      * Invokes actions if the remove button is clicked.
      */
@@ -288,7 +259,7 @@ final class KeyValueTablePanel extends JPanel {
     }
 
     /**
-     * Enables or disables the add and addAll button
+     * Enables or disables the add and addAll button.
      *
      * @param isEnabled <code>true</code> if the add button should be enabled, otherwise <code>false</code>
      */
@@ -298,14 +269,14 @@ final class KeyValueTablePanel extends JPanel {
     }
 
     /**
-     * Actions invoked during save
+     * Actions invoked during save.
      *
-     * @throws InvalidSettingsException
+     * @throws InvalidSettingsException If something went wrong when trying to call stop editing on the cell editor.
      */
     public void onSave() throws InvalidSettingsException {
         m_keyValueTable.stopEditing();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -315,7 +286,7 @@ final class KeyValueTablePanel extends JPanel {
         if (!changed) {
             return;
         }
-        
+
         super.setEnabled(enable);
         m_keyValueTable.setEnabled(enable);
         toggleButtons();

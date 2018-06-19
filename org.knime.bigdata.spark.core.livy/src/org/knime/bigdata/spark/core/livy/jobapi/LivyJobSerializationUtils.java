@@ -43,6 +43,9 @@ public class LivyJobSerializationUtils {
 
     private static final String KEY_SERIALIZED_FIELDS = "serializedFields";
 
+    private LivyJobSerializationUtils() {
+    }
+
     /**
      * Pre-processes the given map for serialization with Kryo. This method Base64-serializes every value in the map
      * that is not null, a primitive or a String.

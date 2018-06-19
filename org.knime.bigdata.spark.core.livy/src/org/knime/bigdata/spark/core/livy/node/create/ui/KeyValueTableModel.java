@@ -71,13 +71,13 @@ public class KeyValueTableModel extends AbstractTableModel {
     /** The column index of the values in the table. */
     public static final int VAL_IDX = 1;
 
-    /** The column names to display */
+    /** The column names to display. */
     private static final String[] COLUMN_NAMES = new String[]{"Key", "Value"};
 
-    /** The column classes */
+    /** The column classes. */
     private static final Class<?>[] COLUMN_CLASSES = new Class<?>[]{String.class, String.class};
 
-    /** The underlying settings model */
+    /** The underlying settings model. */
     private final SettingsModelKeyValue m_settingsModel;
 
     /**
@@ -145,7 +145,7 @@ public class KeyValueTableModel extends AbstractTableModel {
     String getToolTipText(final int rowIndex, final int columnIndex) {
         if (checkRanges(rowIndex, columnIndex)) {
             final String key = m_settingsModel.getKey(rowIndex);
-            
+
             String tooltip = null;
             if (m_settingsModel.isSupported(key)) {
                 tooltip = m_settingsModel.getSupportedKey(key).getDescription();
@@ -273,7 +273,7 @@ public class KeyValueTableModel extends AbstractTableModel {
      * @return <code>True</code> if the indices lie within the range
      */
     private boolean checkRanges(final int rowIndex, final int columnIndex) {
-        return (rowIndex >= 0 && rowIndex < getRowCount() && columnIndex >= 0 && columnIndex < getColumnCount());
+        return rowIndex >= 0 && columnIndex >= 0 && rowIndex < getRowCount() && columnIndex < getColumnCount();
     }
 
     SettingsModelKeyValue getSettingsModel() {

@@ -28,7 +28,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *
- * A class that wraps the actual job output or exception of Spark jobs on Livy. 
+ * A class that wraps the actual job output or exception of Spark jobs on Livy.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
@@ -95,31 +95,28 @@ public class LivyJobOutput extends JobData {
      *
      * @param jobOutput output of successful job
      *
-     * @return a job result with where {@link LivyJobOutput#isError()} will be false and which contains the data
-     *         from the given job output
+     * @return a job result with where {@link LivyJobOutput#isError()} will be false and which contains the data from
+     *         the given job output
      */
     public static LivyJobOutput success(final JobOutput jobOutput) {
-        LivyJobOutput jsOutput = new LivyJobOutput(jobOutput.getInternalMap());
-        return jsOutput;
+        return new LivyJobOutput(jobOutput.getInternalMap());
     }
 
     /**
      * Create an empty {@link LivyJobOutput} indicating successful job.
      *
-     * @return a job result with where {@link LivyJobOutput#isError()} will be false and which contains the data
-     *         from the given job output
+     * @return a job result with where {@link LivyJobOutput#isError()} will be false and which contains the data from
+     *         the given job output
      */
     public static LivyJobOutput success() {
         return new LivyJobOutput();
     }
 
     /**
-     * Creates a {@link LivyJobOutput} indicating a failed job execution and which contains the given
-     * {@link Throwable}.
+     * Creates a {@link LivyJobOutput} indicating a failed job execution and which contains the given {@link Throwable}.
      *
      * @param throwable The exeption to report back to the client
-     * @return a {@link LivyJobOutput} indicating a failed job execution and which contains the given
-     *         {@link Throwable}.
+     * @return a {@link LivyJobOutput} indicating a failed job execution and which contains the given {@link Throwable}.
      */
     public static LivyJobOutput failure(final Throwable throwable) {
         LivyJobOutput toReturn = new LivyJobOutput();
@@ -129,12 +126,12 @@ public class LivyJobOutput extends JobData {
     }
 
     /**
-     *
+     * Creates a new {@link LivyJobOutput} backed by the given map.
+     * 
      * @param internalMap
      * @return a {@link LivyJobOutput} backed by the given internal map.
      */
     public static LivyJobOutput fromMap(final Map<String, Object> internalMap) {
-        LivyJobOutput jsOutput = new LivyJobOutput(internalMap);
-        return jsOutput;
+        return new LivyJobOutput(internalMap);
     }
 }
