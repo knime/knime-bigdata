@@ -17,8 +17,13 @@
  */
 package org.knime.bigdata.spark.node.preproc.missingval;
 
+import java.io.IOException;
+
 import org.knime.base.node.preproc.pmml.missingval.MissingCellHandlerFactoryManager;
+import org.knime.base.node.preproc.pmml.missingval.utils.MissingValueNodeDescriptionHelper;
 import org.knime.bigdata.spark.node.preproc.missingval.handler.DoNothingMissingValueHandlerFactory;
+import org.knime.core.node.NodeDescription;
+import org.xml.sax.SAXException;
 
 /**
  * Manager for missing spark value handler factories that are provided by extensions.
@@ -35,6 +40,9 @@ public class SparkMissingValueHandlerFactoryManager extends MissingCellHandlerFa
     private static final String EXT_POINT_ATTR_DF = "FactoryClass";
 
     private static SparkMissingValueHandlerFactoryManager instance;
+
+    /** Cached node description */
+    private NodeDescription m_nodeDescription = null;
 
     /**
      * protected constructor because this class is a singleton.
@@ -56,6 +64,24 @@ public class SparkMissingValueHandlerFactoryManager extends MissingCellHandlerFa
             instance = new SparkMissingValueHandlerFactoryManager(EXT_POINT_ID, EXT_POINT_ATTR_DF);
         }
         return instance;
+    }
+
+    /**
+     * Returns a node description with informations about the missing value handlers of this manager.
+     *
+     * @param parentDescription node description without handler informations
+     * @return node description with handler informations
+     * @throws SAXException on failures reading the handler descriptions
+     * @throws IOException on failures reading the handler descriptions
+     */
+    public synchronized NodeDescription getNodeDescription(final NodeDescription parentDescription)
+        throws SAXException, IOException {
+
+        if (m_nodeDescription == null) {
+            m_nodeDescription = MissingValueNodeDescriptionHelper.createNodeDescription(parentDescription, this);
+        }
+
+        return m_nodeDescription;
     }
 
     @Override

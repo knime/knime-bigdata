@@ -19,7 +19,6 @@ package org.knime.bigdata.spark.node.preproc.missingval.compute;
 
 import java.io.IOException;
 
-import org.knime.base.node.preproc.pmml.missingval.utils.MissingValueNodeDescriptionHelper;
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.preproc.missingval.SparkMissingValueHandlerFactoryManager;
 import org.knime.core.node.NodeDescription;
@@ -29,7 +28,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Missing value spark node factory.
- * 
+ *
  * @author Sascha Wolke, KNIME GmbH
  */
 public class SparkMissingValueNodeFactory extends DefaultSparkNodeFactory<SparkMissingValueNodeModel> {
@@ -67,12 +66,11 @@ public class SparkMissingValueNodeFactory extends DefaultSparkNodeFactory<SparkM
 
     @Override
     protected NodeDescription createNodeDescription() {
-        NodeDescription createNodeDescription = super.createNodeDescription();
+        NodeDescription parentNodeDescription = super.createNodeDescription();
         try {
-            SparkMissingValueHandlerFactoryManager manager = SparkMissingValueHandlerFactoryManager.getInstance();
-            return MissingValueNodeDescriptionHelper.createNodeDescription(createNodeDescription, manager);
+            return SparkMissingValueHandlerFactoryManager.getInstance().getNodeDescription(parentNodeDescription);
         } catch (SAXException | IOException e) {
-            return createNodeDescription;
+            return parentNodeDescription;
         }
     }
 }
