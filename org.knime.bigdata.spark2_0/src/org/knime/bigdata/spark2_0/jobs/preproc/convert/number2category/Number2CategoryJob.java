@@ -22,9 +22,9 @@ package org.knime.bigdata.spark2_0.jobs.preproc.convert.number2category;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
@@ -73,7 +73,7 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
     private static Dataset<Row> execute(final Dataset<Row> input, final ColumnBasedValueMapping map,
             final boolean keepOriginalColumns, final String colSuffix) {
 
-        final Set<Integer> idxs = new HashSet<>(map.getColumnIndices());
+        final Set<Integer> idxs = new TreeSet<>(map.getColumnIndices());
         final MapFunction<Row, Row> function = new MapFunction<Row, Row>(){
             private static final long serialVersionUID = 1L;
 
