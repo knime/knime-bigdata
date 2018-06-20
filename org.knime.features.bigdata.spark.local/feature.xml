@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.bigdata.spark.local"
-      label="KNIME Extension for local big data environments"
+      label="KNIME Extension for Local Big Data Environments"
       version="2.3.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME node to create a completely local Big Data environment with Spark, Hive and HDFS.
+      KNIME node to create a completely local big data environment
+with Apache Spark, Apache Hive and Apache HDFS.
    </description>
 
    <copyright>
