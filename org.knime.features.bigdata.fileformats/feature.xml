@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.bigdata.fileformats"
-      label="KNIME Extension for Big Data file formats"
-      version="1.0.0.qualifier"
+      label="KNIME Extension for Big Data File Formats"
+      version="3.6.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
-      KNIME nodes for reading and writing Big Data file formats
+      KNIME nodes for reading and writing Big Data file formats such
+as Apache ORC and Apache Parquet
    </description>
 
    <copyright>
