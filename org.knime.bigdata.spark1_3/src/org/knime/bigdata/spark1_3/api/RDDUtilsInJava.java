@@ -561,7 +561,7 @@ public class RDDUtilsInJava {
             for (int index : exceptColIdxLeft) {
                 max = index > max ? index : max;
             }
-            final boolean skipCol[] = new boolean[max];
+            final boolean[] skipCol = new boolean[max + 1];
             Arrays.fill(skipCol, false);
             for (int index : exceptColIdxLeft) {
                 skipCol[index] = true;
