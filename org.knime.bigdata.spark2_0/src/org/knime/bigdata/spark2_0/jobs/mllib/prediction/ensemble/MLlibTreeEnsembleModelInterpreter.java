@@ -69,7 +69,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
     public String getSummary(final SparkModel model) {
         @SuppressWarnings("unchecked")
         final M treeModel = (M)model.getModel();
-        return "Number of trees: " + treeModel.numTrees() + " Total number of nodes: " + treeModel.totalNumNodes();
+        return "Number of trees: " + treeModel.numTrees() + " / Total number of nodes: " + treeModel.totalNumNodes();
     }
 
     /**

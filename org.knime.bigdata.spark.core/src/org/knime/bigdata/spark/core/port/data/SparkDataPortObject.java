@@ -106,12 +106,7 @@ public class SparkDataPortObject extends SparkContextPortObject {
      */
     @Override
     public String getSummary() {
-        StringBuilder buf = new StringBuilder();
-        buf.append(String.format("ID: %s\n", getData().getID()));
-        buf.append(String.format("Columns: %d\n", getTableSpec().getNumColumns()));
-        buf.append(String.format("Context: %s\n", super.getSummary()));
-
-        return buf.toString();
+        return String.format("%d columns", getTableSpec().getNumColumns());
     }
 
     /**

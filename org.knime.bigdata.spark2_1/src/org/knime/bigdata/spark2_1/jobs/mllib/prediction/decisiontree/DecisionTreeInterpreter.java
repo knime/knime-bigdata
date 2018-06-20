@@ -88,7 +88,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
     @Override
     public String getSummary(final SparkModel model) {
         final DecisionTreeModel treeModel = (DecisionTreeModel)model.getModel();
-        return "Tree depth: " + treeModel.depth() + " Number of nodes: " + treeModel.numNodes();
+        return String.format("Tree depth: %d / Number of nodes: %d", treeModel.depth(), treeModel.numNodes());
     }
 
     /**
