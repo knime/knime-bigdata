@@ -1531,6 +1531,13 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="org.apache.spark_2.11"
+         download-size="0"
+         install-size="0"
+         version="2.3.1.knimebd-20180518"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.spark_2.11.source"
          download-size="0"
          install-size="0"
@@ -1549,6 +1556,13 @@ propagated with or for interoperation with KNIME.
          download-size="0"
          install-size="0"
          version="2.2.0.knimebd-20180518"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark_2.11.source"
+         download-size="0"
+         install-size="0"
+         version="2.3.1.knimebd-20180518"
          unpack="false"/>
 
    <plugin
@@ -1870,7 +1884,7 @@ propagated with or for interoperation with KNIME.
          id="org.scalanlp.breeze-merged_2.11"
          download-size="0"
          install-size="0"
-         version="0.13.1.knimebd-20180518"
+         version="0.13.2.knimebd-20180518"
          unpack="false"/>
 
    <plugin
