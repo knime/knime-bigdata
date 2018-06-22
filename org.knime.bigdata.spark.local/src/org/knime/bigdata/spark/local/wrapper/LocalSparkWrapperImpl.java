@@ -26,10 +26,10 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
-import org.knime.bigdata.spark2_2.api.NamedObjects;
-import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
-import org.knime.bigdata.spark2_2.api.SparkJob;
-import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
+import org.knime.bigdata.spark2_3.api.NamedObjects;
+import org.knime.bigdata.spark2_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark2_3.api.SparkJob;
+import org.knime.bigdata.spark2_3.api.SparkJobWithFiles;
 
 /**
  * Implementation of {@link LocalSparkWrapper} and {@link NamedObjects}. Objects of this class hold and manage an actual
