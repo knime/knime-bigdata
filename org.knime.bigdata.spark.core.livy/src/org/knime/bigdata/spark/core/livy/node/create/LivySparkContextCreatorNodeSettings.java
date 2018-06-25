@@ -424,6 +424,7 @@ public class LivySparkContextCreatorNodeSettings {
      */
     public void saveSettingsTo(final NodeSettingsWO settings) {
         m_settingsVersion.saveSettingsTo(settings);
+        m_sparkVersion.saveSettingsTo(settings);
         m_livyUrl.saveSettingsTo(settings);
         m_authentication.saveSettingsTo(settings);
 
@@ -451,6 +452,7 @@ public class LivySparkContextCreatorNodeSettings {
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settingsVersion.validateSettings(settings);
+        m_sparkVersion.validateSettings(settings);
         m_livyUrl.validateSettings(settings);
         m_authentication.validateSettings(settings);
 
@@ -514,6 +516,7 @@ public class LivySparkContextCreatorNodeSettings {
      */
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settingsVersion.loadSettingsFrom(settings);
+        m_sparkVersion.loadSettingsFrom(settings);
         m_livyUrl.loadSettingsFrom(settings);
         m_authentication.loadSettingsFrom(settings);
 
