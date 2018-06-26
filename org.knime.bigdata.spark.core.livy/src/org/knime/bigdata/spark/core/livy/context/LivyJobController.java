@@ -107,6 +107,7 @@ class LivyJobController implements JobController {
             final String serverFilename = serverFilenameIter.next();
 
             m_uploadFileCache.addFilesToCache(localFile, serverFilename);
+            serverFilenamesToReturn.add(serverFilename);
         }
 
         return serverFilenamesToReturn;
