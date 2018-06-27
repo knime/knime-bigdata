@@ -22,6 +22,9 @@
        	 <option name="File Compression">The compression codec used to write the ORC file.</option>
         </tab>
         <tab name="Chunk Upload">
+          <p>
+        	This tab is only enabled for uploads to remote file systems. 
+          </p>
       	  <option name="Chunk size in rows">The maximum size for an individual chunk.</option>
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
