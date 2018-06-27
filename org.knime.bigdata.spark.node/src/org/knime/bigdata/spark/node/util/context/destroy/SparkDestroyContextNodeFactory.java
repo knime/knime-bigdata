@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.node.util.context.destroy;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
-import org.knime.core.node.NodeDialogPane;
 
 /**
  *
@@ -47,15 +46,7 @@ public class SparkDestroyContextNodeFactory extends DefaultSparkNodeFactory<Spar
      */
     @Override
     protected boolean hasDialog() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new SparkDestroyContextNodeDialog();
+        return false;
     }
 
 }
