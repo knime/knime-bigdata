@@ -43,9 +43,9 @@ class LivyJobController implements JobController {
 
     private final LivyClient m_livyClient;
 
-    private final String m_livyJobClass;
+    private final Class<Job<LivyJobOutput>> m_livyJobClass;
 
-    LivyJobController(final LivyClient livyClient, final String livyJobClass) {
+    LivyJobController(final LivyClient livyClient, final Class<Job<LivyJobOutput>> livyJobClass) {
 
         m_livyClient = livyClient;
         m_livyJobClass = livyJobClass;
@@ -191,7 +191,6 @@ class LivyJobController implements JobController {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private JobHandle<LivyJobOutput> startJobAsynchronously(final JobRun<?, ?> job,
         final List<String> inputFilesOnServer) throws KNIMESparkException {
 
@@ -207,12 +206,7 @@ class LivyJobController implements JobController {
         jsInput.setInternalMap(LivyJobSerializationUtils.preKryoSerialize(jsInput.getInternalMap()));
 
         try {
-            // FIXME: we should use Class<?> objects here instead of strings
-            final Class<Job<LivyJobOutput>> livyJobClass =
-                (Class<Job<LivyJobOutput>>)job.getJobOutputClassLoader().loadClass(m_livyJobClass);
-
-            final Job<LivyJobOutput> livyJob = livyJobClass.getConstructor(LivyJobInput.class).newInstance(jsInput);
-
+            final Job<LivyJobOutput> livyJob = m_livyJobClass.getConstructor(LivyJobInput.class).newInstance(jsInput);
             return m_livyClient.submit(livyJob);
         } catch (Exception e) {
             LivySparkContext.handleLivyException(e);

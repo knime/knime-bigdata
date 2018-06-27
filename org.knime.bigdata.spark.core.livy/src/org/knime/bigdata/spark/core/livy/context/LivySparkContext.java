@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.livy.Job;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
@@ -50,6 +51,7 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.livy.jobapi.LivyJobOutput;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
@@ -107,12 +109,13 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
-            final Class<?> jobBindingClass =
-                getJobJar().getDescriptor().getJobBindingClasses().get(SparkContextIDScheme.SPARK_LIVY);
+            final Class<Job<LivyJobOutput>> jobBindingClass =
+                (Class<Job<LivyJobOutput>>) getJobJar().getDescriptor().getJobBindingClasses().get(SparkContextIDScheme.SPARK_LIVY);
 
-            m_jobController = new LivyJobController(m_livyClient, jobBindingClass.getName());
+            m_jobController = new LivyJobController(m_livyClient, jobBindingClass);
         }
     }
 
