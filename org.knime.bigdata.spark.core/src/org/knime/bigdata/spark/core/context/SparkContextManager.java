@@ -104,7 +104,12 @@ public class SparkContextManager {
      * @throws KNIMESparkException Thrown if anything went wrong while destroying an existing remote Spark context.
      */
     public static void ensureSparkContextDestroyed(final SparkContextID contextID) throws KNIMESparkException {
-        final SparkContext<?> context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
+        final SparkContext<?> context;
+
+        synchronized (SparkContextManager.class) {
+            context = sparkContexts.get(contextID); // do not remove the context from sparkContexts
+        }
+
         if (context != null) {
             context.ensureDestroyed();
         }
@@ -146,14 +151,16 @@ public class SparkContextManager {
      * @param sparkContextId Identifies the Spark context to destroy and dispose.
      * @throws KNIMESparkException Thrown if anything went wrong while destroying an existing remote Spark context.
      */
-    public synchronized static void disposeSparkContext(final SparkContextID sparkContextId) throws KNIMESparkException {
-        if (sparkContextId.equals(DEFAULT_SPARK_CONTEXT_ID) || defaultSparkContext.getID().equals(sparkContextId)) {
-            throw new RuntimeException("Cannot dispose default Spark context.");
-        }
+    public static void disposeSparkContext(final SparkContextID sparkContextId) throws KNIMESparkException {
         try {
             ensureSparkContextDestroyed(sparkContextId);
         } finally {
-            sparkContexts.remove(sparkContextId);
+            synchronized (SparkContextManager.class) {
+                if (sparkContextId.equals(DEFAULT_SPARK_CONTEXT_ID) || defaultSparkContext.getID().equals(sparkContextId)) {
+                    throw new RuntimeException("Cannot dispose default Spark context.");
+                }
+                sparkContexts.remove(sparkContextId);
+            }
         }
     }
 }
