@@ -1,12 +1,9 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Future;
 
 import org.apache.livy.Job;
 import org.apache.livy.JobHandle;
@@ -25,7 +22,6 @@ import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.util.FileUtil;
 
 /**
  * Handles the client-side of the job-related interactions with Apache Livy.
@@ -42,12 +38,15 @@ class LivyJobController implements JobController {
     private final UploadFileCache m_uploadFileCache = new UploadFileCache();
 
     private final LivyClient m_livyClient;
+    
+    private final RemoteFSController m_remoteFSController;
 
     private final Class<Job<LivyJobOutput>> m_livyJobClass;
 
-    LivyJobController(final LivyClient livyClient, final Class<Job<LivyJobOutput>> livyJobClass) {
+    LivyJobController(final LivyClient livyClient, final RemoteFSController remoteFSController, final Class<Job<LivyJobOutput>> livyJobClass) {
 
         m_livyClient = livyClient;
+        m_remoteFSController = remoteFSController;
         m_livyJobClass = livyJobClass;
     }
 
@@ -67,7 +66,7 @@ class LivyJobController implements JobController {
     public <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> job,
         final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
 
-        exec.setMessage("Uploading data to Spark jobserver");
+        exec.setMessage("Uploading input data to remote file system");
         if (job.useInputFileCopyCache() && job.getInputFilesLifetime() != FileLifetime.CONTEXT) {
             throw new IllegalArgumentException(
                 "File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
@@ -117,27 +116,15 @@ class LivyJobController implements JobController {
         throws CanceledExecutionException, KNIMESparkException {
 
         List<String> serverFilenames = new LinkedList<>();
-
-        File currTempFile = null;
+        
+        exec.setMessage("Uploading input file(s for job");
         try {
-
             for (File localFileToUpload : filesToUpload) {
-                currTempFile = FileUtil.createTempFile(UUID.randomUUID().toString(), "");
-                FileUtil.copy(localFileToUpload, currTempFile);
-
-                Future<?> uploadFuture = m_livyClient.uploadFile(currTempFile);
-                LivySparkContext.waitForFuture(uploadFuture, exec);
-
-                serverFilenames.add(currTempFile.getName());
-                currTempFile.delete();
+                final String stagingfileName = m_remoteFSController.upload(localFileToUpload);
+                serverFilenames.add(stagingfileName);
             }
-        } catch (IOException e) {
-            if (currTempFile != null && currTempFile.exists()) {
-                currTempFile.delete();
-            }
-            throw new KNIMESparkException(e);
         } catch (Exception e) {
-            LivySparkContext.handleLivyException(e);
+            throw new KNIMESparkException(e);
         }
 
         return serverFilenames;
@@ -161,19 +148,17 @@ class LivyJobController implements JobController {
 
         JobHandle<LivyJobOutput> jobHandle = startJobAsynchronously(job, inputFilesOnServer);
 
-        final LivyJobOutput jobserverOutput = LivySparkContext.waitForFuture(jobHandle, exec);
+        final LivyJobOutput livyJobOutput = LivySparkContext.waitForFuture(jobHandle, exec);
 
         try {
-            // FIXME this is a bad hack around classloading issues because Livy does not allow
-            // us to set a classloader for deserialization of the job result
-            jobserverOutput.setInternalMap(LivyJobSerializationUtils
-                .postKryoDeserialize(jobserverOutput.getInternalMap(), job.getJobOutputClassLoader()));
-        } catch (ClassNotFoundException | IOException e) {
+            livyJobOutput.setInternalMap(
+                m_remoteFSController.toDeserializedMap(livyJobOutput.getInternalMap(), job.getJobOutputClassLoader()));
+        } catch (Exception e) {
             throw new KNIMESparkException(e);
         }
 
-        if (jobserverOutput.isError()) {
-            Throwable cause = jobserverOutput.getThrowable();
+        if (livyJobOutput.isError()) {
+            Throwable cause = livyJobOutput.getThrowable();
             if (cause instanceof KNIMESparkException) {
                 throw (KNIMESparkException)cause;
             } else {
@@ -183,7 +168,7 @@ class LivyJobController implements JobController {
             return null;
         } else {
             try {
-                return jobserverOutput.<O> getSparkJobOutput(job.getJobOutputClass());
+                return livyJobOutput.<O> getSparkJobOutput(job.getJobOutputClass());
             } catch (InstantiationException | IllegalAccessException e) {
                 LOGGER.error("Failed to instantiate Spark job output: " + e.getMessage(), e);
                 throw new KNIMESparkException("Failed to deserialize Spark job output", e);

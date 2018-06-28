@@ -27,6 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextManager;
@@ -65,7 +68,7 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
      * Constructor.
      */
     LivySparkContextCreatorNodeModel() {
-        super(new PortType[]{}, new PortType[]{SparkContextPortObject.TYPE});
+        super(new PortType[]{ConnectionInformationPortObject.TYPE}, new PortType[]{SparkContextPortObject.TYPE});
         resetContextID();
     }
 
@@ -81,8 +84,18 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
+            throw new InvalidSettingsException("Remote file handling connection missing");
+        }
+
+        final ConnectionInformationPortObjectSpec object = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        final ConnectionInformation connInfo = object.getConnectionInformation();
+        if (connInfo == null) {
+            throw new InvalidSettingsException("No remote file handling connection information available");
+        }
+
         m_settings.validateDeeper();
-        configureSparkContext(m_sparkContextId, m_settings);
+        configureSparkContext(m_sparkContextId, connInfo, m_settings);
         return new PortObjectSpec[]{new SparkContextPortObjectSpec(m_sparkContextId)};
     }
 
@@ -91,8 +104,11 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        final ConnectionInformationPortObject object = (ConnectionInformationPortObject) inData[0];
+        final ConnectionInformation connInfo = object.getConnectionInformation();
+
         exec.setProgress(0, "Configuring Livy Spark context");
-        configureSparkContext(m_sparkContextId, m_settings);
+        configureSparkContext(m_sparkContextId, connInfo, m_settings);
 
         final LivySparkContext sparkContext =
             (LivySparkContext)SparkContextManager.<LivySparkContextConfig> getOrCreateSparkContext(m_sparkContextId);
@@ -113,11 +129,13 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
     protected void loadAdditionalInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
 
+        ConnectionInformation dummyConnInfo = new ConnectionInformation();
+
         // this is only to avoid errors about an unconfigured spark context. the spark context configured here is
         // has and never will be opened because m_uniqueContextId has a new and unique value.
         final String previousContextID = Files
             .readAllLines(Paths.get(nodeInternDir.getAbsolutePath(), "contextID"), Charset.forName("UTF-8")).get(0);
-        configureSparkContext(new SparkContextID(previousContextID), m_settings);
+        configureSparkContext(new SparkContextID(previousContextID), dummyConnInfo, m_settings);
     }
 
     @Override
@@ -139,13 +157,15 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
      * Internal method to ensure that the given Spark context is configured.
      * 
      * @param sparkContextId Identifies the Spark context to configure.
+     * @param connInfo 
      * @param settings The settings from which to configure the context.
      */
     protected static void configureSparkContext(final SparkContextID sparkContextId,
-        final LivySparkContextCreatorNodeSettings settings) {
+        ConnectionInformation connInfo, final LivySparkContextCreatorNodeSettings settings) {
+        
         final SparkContext<LivySparkContextConfig> sparkContext =
             SparkContextManager.getOrCreateSparkContext(sparkContextId);
-        final LivySparkContextConfig config = settings.createContextConfig(sparkContextId);
+        final LivySparkContextConfig config = settings.createContextConfig(sparkContextId, connInfo);
 
         final boolean configApplied = sparkContext.ensureConfigured(config, true);
         if (!configApplied) {

@@ -19,12 +19,16 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,22 +46,24 @@ import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
-import org.knime.bigdata.spark.core.context.SparkContextConstants;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
-import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobOutput;
+import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
+import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
+import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
+import org.knime.core.util.FileUtil;
 
 /**
  * Spark context implementation for Apache Livy.
@@ -73,6 +79,16 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private NamedObjectsController m_namedObjectsController;
 
     private LivyClient m_livyClient;
+
+    private RemoteFSController m_remoteFSController;
+
+    private ContextAttributes m_contextAttributes;
+
+    private class ContextAttributes {
+        String sparkWebUI;
+
+        Map<String, String> sparkConf;
+    }
 
     /**
      * Creates a new Spark context that pushes jobs to Apache Livy.
@@ -93,14 +109,27 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             case NEW:
             case CONFIGURED:
                 m_livyClient = null;
+                if (m_remoteFSController != null) {
+                    m_remoteFSController.ensureClosed();
+                    m_remoteFSController = null;
+                }
+                m_contextAttributes = null;
                 m_jobController = null;
                 m_namedObjectsController = null;
                 break;
             default: // OPEN
+                ensureRemoteFSConnection();
                 ensureJobController();
                 ensureNamedObjectsController();
                 break;
         }
+    }
+
+    private void ensureRemoteFSConnection() throws KNIMESparkException {
+        RemoteFSController tmpController = new RemoteFSController(getConfiguration().getRemoteFsConnectionInfo(),
+            getConfiguration().getStagingAreaFolder());
+        tmpController.createStagingArea();
+        m_remoteFSController = tmpController;
     }
 
     private void ensureNamedObjectsController() {
@@ -112,10 +141,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     @SuppressWarnings("unchecked")
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
-            final Class<Job<LivyJobOutput>> jobBindingClass =
-                (Class<Job<LivyJobOutput>>) getJobJar().getDescriptor().getJobBindingClasses().get(SparkContextIDScheme.SPARK_LIVY);
+            final Class<Job<LivyJobOutput>> jobBindingClass = (Class<Job<LivyJobOutput>>)getJobJar().getDescriptor()
+                .getJobBindingClasses().get(SparkContextIDScheme.SPARK_LIVY);
 
-            m_jobController = new LivyJobController(m_livyClient, jobBindingClass);
+            m_jobController = new LivyJobController(m_livyClient, m_remoteFSController, jobBindingClass);
         }
     }
 
@@ -128,8 +157,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             try {
                 if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
 
-                    final Configuration baseHadoopConf =
-                            ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+                    final Configuration baseHadoopConf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
 
                     m_livyClient = UserGroupUtil.getKerberosTGTUser(baseHadoopConf)
                         .doAs(new PrivilegedExceptionAction<LivyClient>() {
@@ -260,12 +288,53 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
-        PrepareContextJobInput prepInput = PrepareContextJobInput.create(getJobJar().getDescriptor().getHash(),
-            getSparkVersion().toString(), getJobJar().getDescriptor().getPluginVersion(),
-            IntermediateToSparkConverterRegistry.getConverters(getSparkVersion()));
+        final String stagingTestfileName = uploadStagingTestfile();
 
-        SparkContextUtil.getSimpleRunFactory(getID(), SparkContextConstants.PREPARE_CONTEXT_JOB_ID).createRun(prepInput)
-            .run(getID());
+        LivyPrepareContextJobInput prepInput = new LivyPrepareContextJobInput(getJobJar().getDescriptor().getHash(),
+            getSparkVersion().toString(), getJobJar().getDescriptor().getPluginVersion(),
+            IntermediateToSparkConverterRegistry.getConverters(getSparkVersion()),
+            m_remoteFSController.getStagingArea(), m_remoteFSController.getStagingAreaReturnsPath(),
+            stagingTestfileName);
+
+        final LivyPrepareContextJobOutput output =
+            SparkContextUtil.<LivyPrepareContextJobInput, LivyPrepareContextJobOutput> getJobRunFactory(getID(),
+                LivyPrepareContextJobInput.LIVY_PREPARE_CONTEXT_JOB_ID).createRun(prepInput).run(getID());
+
+        m_contextAttributes = new ContextAttributes();
+        m_contextAttributes.sparkWebUI = output.getSparkWebUI();
+        m_contextAttributes.sparkConf = output.getSparkConf();
+
+        downloadStagingTestfile(output.getTestfileName());
+
+    }
+
+    private void downloadStagingTestfile(String testfileName) throws KNIMESparkException {
+        try {
+            try (final InputStream in = m_remoteFSController.download(testfileName)) {
+                StagingAreaUtil.validateTestfileContent(in);
+            } finally {
+                m_remoteFSController.delete(testfileName);
+            }
+        } catch (Exception e) {
+            throw new KNIMESparkException("Remote file system download test failed: " + e.getMessage(), e);
+        }
+    }
+
+    private String uploadStagingTestfile() throws KNIMESparkException {
+        File tmpFile = null;
+        try {
+            tmpFile = FileUtil.createTempFile("uploadtest", "livy");
+            try (final OutputStream out = new FileOutputStream(tmpFile)) {
+                StagingAreaUtil.writeTestfileContent(out);
+            }
+            return m_remoteFSController.upload(tmpFile);
+        } catch (Exception e) {
+            throw new KNIMESparkException("Remote file system upload test failed: " + e.getMessage(), e);
+        } finally {
+            if (tmpFile != null) {
+                tmpFile.delete();
+            }
+        }
     }
 
     /**
@@ -273,7 +342,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
      */
     @Override
     protected void destroy() throws KNIMESparkException {
-        LOGGER.info("Destroying context " + getConfiguration().getContextName());
+        LOGGER.info("Destroying Livy Spark context ");
         try {
             ensureLivyClient();
             m_livyClient.stop(true);
@@ -373,12 +442,29 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         reps.put("url", config.getLivyUrl());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("context_state", getStatus().toString());
+        reps.put("spark_web_ui", (m_contextAttributes != null) ? m_contextAttributes.sparkWebUI : "unavailable");
+        reps.put("spark_properties", mkSparkPropertiesHTMLRows());
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read context description template");
         }
+    }
+
+    private String mkSparkPropertiesHTMLRows() {
+        if (m_contextAttributes == null) {
+            return "<tr><td>unavailable</td><td></td></tr>";
+        }
+        
+        ArrayList<String> sortedProperties = new ArrayList<>(m_contextAttributes.sparkConf.keySet());
+        Collections.sort(sortedProperties);
+        final StringBuilder buf = new StringBuilder();
+        for (String property : sortedProperties) {
+            buf.append(String.format("<tr><td>%s</td><td>%s</td></tr>\n", property,
+                m_contextAttributes.sparkConf.get(property)));
+        }
+        return buf.toString();
     }
 
     private String createAuthenticationInfoString() {

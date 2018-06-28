@@ -58,6 +58,8 @@ import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 /**
  * Cell editor showing all available keys.
  *
@@ -152,7 +154,7 @@ final class KeyValueCellEditor extends DefaultCellEditor {
             // set the tooltip text
             final KeyDescriptor keyDescriptor = m_settingsModel.getSupportedKey(value);
             if (keyDescriptor != null && keyDescriptor.getDescription() != null) {
-                setToolTipText(keyDescriptor.getDescription());
+                setToolTipText(String.format("<html>%s</html>", WordUtils.wrap(keyDescriptor.getDescription(), 100, "<br/>", false)));
             }
 
             return this;

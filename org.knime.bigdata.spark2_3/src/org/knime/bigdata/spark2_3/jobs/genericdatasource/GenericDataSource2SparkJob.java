@@ -49,6 +49,7 @@ import org.knime.bigdata.spark2_3.api.TypeConverters;
  */
 @SparkClass
 public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> {
+
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(GenericDataSource2SparkJob.class.getName());
 

@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Spark Context (Livy)</name>
+    <name>Create Spark Context via Livy (preview)</name>
     
-    <shortDescription>Creates a new Spark context.</shortDescription>
+    <shortDescription>Creates a new Spark context via Apache Livy.</shortDescription>
     
     <fullDescription>
         <intro>
-            Creates a new Spark context via <a href="Apache Livy">Apache Livy</a>.
+            Creates a new Spark context via <a href="http://livy.apache.org/">Apache Livy</a>.
+            
+            <p>
+            <i>Note</i>: Executing this node always creates a new Spark context. Resetting the node
+            or closing the KNIME workflow will destroy the Spark context. Spark contexts created by this
+            node cannot be shared between KNIME workflows.
+            </p>
         </intro>
         <tab name="General">
             <option name="Spark version">
@@ -48,6 +54,13 @@
                 If enabled you can specify the amount of memory and number of cores the Spark driver process will 
                 allocate.
             </option>
+            <option name="Set staging area for Spark jobs">
+                If enabled you can specify a directory in the connected remote file system,
+                that will be used for file transfer between KNIME and the Spark context. If no directory
+                is set, then a default directory (e.g. "/tmp") will be chosen. However, if the remote file
+                system is Amazon S3 or Azure Blob Store, then a directory <i>must</i> be provided.
+            </option>
+            
             <option name="Set custom Spark settings">
                 If enabled you can specify additional Spark setting. 
                 A tooltip is provided for the keys if available. For further information about the Spark settings
@@ -58,6 +71,8 @@
     </fullDescription>
     
     <ports>
+    	<inPort index="0" name="Remote file system connection">A connection to a remote file system. Supported file
+    	systems are HDFS, webHDFS, httpFS, Amazon S3 and Azure Blob Store.</inPort>
         <outPort index="0" name="Spark Context">Spark context.</outPort>
     </ports>    
 </knimeNode>

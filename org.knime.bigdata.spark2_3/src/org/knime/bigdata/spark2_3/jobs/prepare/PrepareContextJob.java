@@ -69,17 +69,8 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
             JobJarDescriptor jobJarInfo =
                 JobJarDescriptor.load(this.getClass().getClassLoader().getResourceAsStream(JobJarDescriptor.FILE_NAME));
 
-            if (!sparkContext.version().startsWith(input.getSparkVersion())) {
-                throw new KNIMESparkException(String.format(
-                    "Spark version mismatch: Version %s was expected, but the cluster runs %s.",
-                    input.getSparkVersion(), sparkContext.version()));
-            }
-
-            if (!input.getKNIMEPluginVersion().equals(jobJarInfo.getPluginVersion())) {
-                throw new KNIMESparkException(String.format(
-                    "Spark context was created with version %s of the KNIME Extension for Apache Spark, but you are running %s. Please create a new Spark context.",
-                    jobJarInfo.getPluginVersion(), input.getKNIMEPluginVersion()));
-            }
+            ValidationUtil.validateSparkVersion(sparkContext, input);
+            ValidationUtil.validateKNIMEPluginVersion(input, jobJarInfo);
 
             // FIXME Deactivated hash check, as this was causing trouble with win+lin on the same context.
             //            if (!input.getJobJarHash().equals(jobJarInfo.getHash())) {

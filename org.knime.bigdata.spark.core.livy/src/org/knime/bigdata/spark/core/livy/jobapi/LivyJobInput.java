@@ -87,7 +87,7 @@ public class LivyJobInput extends JobData {
     }
 
     /**
-     * @return gets the file paths for the jobs
+     * @return gets the names of files in the staging area for the job.
      * @see #isJobWithFiles()
      */
     public List<String> getFiles() {

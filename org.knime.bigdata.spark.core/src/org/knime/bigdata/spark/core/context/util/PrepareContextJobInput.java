@@ -48,6 +48,22 @@ public class PrepareContextJobInput extends JobInput {
     }
 
     /**
+     * Creates a new instance.
+     *
+     * @param jobJarHash the job jar hash
+     * @param sparkVersion the Spark version
+     * @param pluginVersion the KNIME Spark plugin version
+     * @param typeConverters the {@link IntermediateToSparkConverter} to use
+     */
+    public PrepareContextJobInput(final String jobJarHash, final String sparkVersion, final String pluginVersion,
+        final List<IntermediateToSparkConverter<?>> typeConverters) {
+        set(KEY_JOB_JAR_HASH, jobJarHash);
+        set(KEY_SPARK_VERSION, sparkVersion);
+        set(KEY_KNIME_PLUGIN_VERSION, pluginVersion);
+        set(KEY_TYPE_CONVERTERS, typeConverters);
+    }
+
+    /**
      * @return the job jar hash for comparison
      */
     public String getJobJarHash() {
@@ -76,20 +92,8 @@ public class PrepareContextJobInput extends JobInput {
         return (List<IntermediateToSparkConverter<T>>) get(KEY_TYPE_CONVERTERS);
     }
 
-    /**
-     * @param jobJarHash the job jar hash
-     * @param sparkVersion the Spark version
-     * @param pluginVersion the KNIME Spark plugin version
-     * @param typeConverters the {@link IntermediateToSparkConverter} to use
-     * @return the {@link PrepareContextJobInput}
-     */
-    public static PrepareContextJobInput create(final String jobJarHash, final String sparkVersion,
-        final String pluginVersion, final List<IntermediateToSparkConverter<?>> typeConverters) {
+    public static PrepareContextJobInput create() {
         PrepareContextJobInput ret = new PrepareContextJobInput();
-        ret.set(KEY_JOB_JAR_HASH, jobJarHash);
-        ret.set(KEY_SPARK_VERSION, sparkVersion);
-        ret.set(KEY_KNIME_PLUGIN_VERSION, pluginVersion);
-        ret.set(KEY_TYPE_CONVERTERS, typeConverters);
         return ret;
     }
 }

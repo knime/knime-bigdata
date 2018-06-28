@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
@@ -156,6 +157,10 @@ public class LivySparkContextCreatorNodeSettings {
     private final SettingsModelIntegerBounded m_dynamicExecutorsMax =
         new SettingsModelIntegerBounded("dynamicExecutorsMax", 10, 1, 1000000);
 
+    private final SettingsModelBoolean m_setStagingAreaFolder = new SettingsModelBoolean("setStagingAreaFolder", false);
+
+    private final SettingsModelString m_stagingAreaFolder = new SettingsModelString("stagingAreaFolder", "");
+
     private final SettingsModelBoolean m_overrideSparkSettings =
         new SettingsModelBoolean("overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
 
@@ -210,6 +215,7 @@ public class LivySparkContextCreatorNodeSettings {
         m_executorResources.updateEnabledness();
         m_driverResources.updateEnabledness();
         m_customSparkSettings.setEnabled(m_overrideSparkSettings.getBooleanValue());
+        m_stagingAreaFolder.setEnabled(m_setStagingAreaFolder.getBooleanValue());
     }
 
     /**
@@ -336,6 +342,37 @@ public class LivySparkContextCreatorNodeSettings {
     }
 
     /**
+     * @return true, when a staging area folder has been set.
+     */
+    public boolean isStagingAreaFolderSet() {
+        return m_setStagingAreaFolder.getBooleanValue();
+    }
+
+    /**
+     * 
+     * @return settings model for whether a staging area folder has been set.
+     */
+    public SettingsModelBoolean getSetStagingAreaFolderModel() {
+        return m_setStagingAreaFolder;
+    }
+
+    /**
+     * 
+     * @return the folder to use for the staging area
+     */
+    public String getStagingAreaFolder() {
+        return m_stagingAreaFolder.getStringValue();
+    }
+
+    /**
+     * 
+     * @return settings model for staging area folder to use
+     */
+    public SettingsModelString getStagingAreaFolderModel() {
+        return m_stagingAreaFolder;
+    }
+
+    /**
      * 
      * @return settings model for the TCP socket connection timeout in seconds when connecting to Livy.
      */
@@ -436,6 +473,8 @@ public class LivySparkContextCreatorNodeSettings {
         m_dynamicExecutorsMin.saveSettingsTo(settings);
         m_dynamicExecutorsMax.saveSettingsTo(settings);
 
+        m_setStagingAreaFolder.saveSettingsTo(settings);
+        m_stagingAreaFolder.saveSettingsTo(settings);
         m_overrideSparkSettings.saveSettingsTo(settings);
         m_customSparkSettings.saveSettingsTo(settings);
 
@@ -464,6 +503,10 @@ public class LivySparkContextCreatorNodeSettings {
         m_dynamicExecutorsMin.validateSettings(settings);
         m_dynamicExecutorsMax.validateSettings(settings);
 
+        m_setStagingAreaFolder.validateSettings(settings);
+        if (m_setStagingAreaFolder.getBooleanValue()) {
+            m_stagingAreaFolder.validateSettings(settings);
+        }
         m_overrideSparkSettings.validateSettings(settings);
         if (m_overrideSparkSettings.getBooleanValue()) {
             m_customSparkSettings.validateSettings(settings);
@@ -528,6 +571,8 @@ public class LivySparkContextCreatorNodeSettings {
         m_dynamicExecutorsMin.loadSettingsFrom(settings);
         m_dynamicExecutorsMax.loadSettingsFrom(settings);
 
+        m_setStagingAreaFolder.loadSettingsFrom(settings);
+        m_stagingAreaFolder.loadSettingsFrom(settings);
         m_overrideSparkSettings.loadSettingsFrom(settings);
         m_customSparkSettings.loadSettingsFrom(settings);
 
@@ -550,13 +595,17 @@ public class LivySparkContextCreatorNodeSettings {
 
     /**
      * @param contextId The ID of the Spark context for which to create the config object.
+     * @param connInfo
      * @return a new {@link LivySparkContextConfig} derived from the current settings.
      */
-    public LivySparkContextConfig createContextConfig(final SparkContextID contextId) {
+    public LivySparkContextConfig createContextConfig(final SparkContextID contextId,
+        final ConnectionInformation connInfo) {
+        
         final Map<String, String> sparkSettings = generateSparkSettings();
 
-        return new LivySparkContextConfig(getSparkVersion(), getLivyUrl(), getAuthenticationType(), getConnectTimeout(),
-            getResponseTimeout(), getJobCheckFrequency(), sparkSettings, contextId);
+        return new LivySparkContextConfig(getSparkVersion(), getLivyUrl(), getAuthenticationType(),
+            (isStagingAreaFolderSet()) ? getStagingAreaFolder() : null, getConnectTimeout(), getResponseTimeout(),
+            getJobCheckFrequency(), sparkSettings, contextId, connInfo);
     }
 
     private Map<String, String> generateSparkSettings() {

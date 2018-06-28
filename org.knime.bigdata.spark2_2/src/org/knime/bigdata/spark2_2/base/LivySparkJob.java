@@ -21,19 +21,21 @@
 package org.knime.bigdata.spark2_2.base;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.livy.Job;
 import org.apache.livy.JobContext;
 import org.apache.spark.SparkContext;
-import org.apache.spark.SparkFiles;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils;
+import org.knime.bigdata.spark.core.livy.jobapi.StagingArea;
+import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
 import org.knime.bigdata.spark2_2.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJob;
 import org.knime.bigdata.spark2_2.api.SparkJobWithFiles;
@@ -73,7 +75,7 @@ public class LivySparkJob implements Job<LivyJobOutput> {
 
             NamedObjectsImpl.ensureNamedInputObjectsExist(jobInput);
             NamedObjectsImpl.ensureNamedOutputObjectsDoNotExist(jobInput);
-            List<File> inputFiles = validateInputFiles();
+            List<File> inputFiles = downloadInputFiles();
 
             Object sparkJob = getClass().getClassLoader().loadClass(m_livyInput.getSparkJobClass()).newInstance();
 
@@ -92,23 +94,33 @@ public class LivySparkJob implements Job<LivyJobOutput> {
         } catch (KNIMESparkException e) {
             toReturn = LivyJobOutput.failure(e);
         } catch (Throwable t) {
-            toReturn =
-                LivyJobOutput.failure(new KNIMESparkException("Failed to execute Spark job: " + t.getMessage(), t));
+            toReturn = LivyJobOutput.failure(new KNIMESparkException(t));
         }
 
-        return LivyJobOutput.fromMap(LivyJobSerializationUtils.preKryoSerialize(toReturn.getInternalMap()));
+        try {
+            // this call to StagingAreaUtil.toSerializedMap() may involve I/O to HDFS/S3/... and can thus fail
+            return LivyJobOutput.fromMap(StagingAreaUtil.toSerializedMap(toReturn.getInternalMap()));
+        } catch (Throwable e) {
+            // this call to StagingAreaUtil.toSerializedMap () will NOT fail, because Throwables receive
+            // special treatment
+            return LivyJobOutput.fromMap(StagingAreaUtil.toSerializedMap(LivyJobOutput.failure(e).getInternalMap()));
+        }
     }
 
-    private List<File> validateInputFiles() throws KNIMESparkException {
+    private List<File> downloadInputFiles() throws KNIMESparkException {
         final List<File> inputFiles = new LinkedList<>();
 
-        for (String filename : m_livyInput.getFiles()) {
-            File inputFile = new File(SparkFiles.get(filename));
-            if (inputFile.canRead()) {
-                inputFiles.add(inputFile);
-            } else {
-                throw new KNIMESparkException("Cannot read job input file on driver: " + filename);
+        try {
+            for (String stagingAreaFilename : m_livyInput.getFiles()) {
+                final File inputFile = StagingArea.downloadToFileCached(stagingAreaFilename);
+                if (inputFile.canRead()) {
+                    inputFiles.add(inputFile);
+                } else {
+                    throw new KNIMESparkException("Cannot read job input file on driver: " + stagingAreaFilename);
+                }
             }
+        } catch (IOException e) {
+            throw new KNIMESparkException("Failed to download input file to driver: " + e.getMessage(), e);
         }
 
         return inputFiles;

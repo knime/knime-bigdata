@@ -38,6 +38,10 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
+import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
+import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.bigdata.spark.core.livy.LivySparkContextProvider;
 import org.knime.bigdata.spark.core.livy.node.create.LivySparkContextCreatorNodeSettings.ExecutorAllocation;
 import org.knime.bigdata.spark.core.livy.node.create.ui.DialogComponentKeyValueEdit;
@@ -56,6 +60,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * Node dialog of the "Create Spark Context (Livy)" node.
@@ -100,6 +105,11 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     private final ContainerResourceDialogPanel m_overrideDriverResourcePanel =
         new ContainerResourceDialogPanel("Spark driver", m_settings.getDriverResources());
 
+    private final DialogComponentBoolean m_setStagingAreaFolder =
+        new DialogComponentBoolean(m_settings.getSetStagingAreaFolderModel(), "Set staging area for Spark jobs");
+
+    private RemoteFileChooserPanel m_stagingAreaFolder;
+
     private final DialogComponentBoolean m_useCustomSparkSettings =
         new DialogComponentBoolean(m_settings.getUseCustomSparkSettingsModel(), "Set custom Spark settings");
 
@@ -142,6 +152,23 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.insets = new Insets(5, 0, 5, 5);
+        addDialogComponentToPanel(m_setStagingAreaFolder, panel, gbc);
+        m_setStagingAreaFolder.getModel().addChangeListener(this);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.insets = new Insets(5, 25, 5, 20);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        m_stagingAreaFolder = new RemoteFileChooserPanel(panel, "Staging area folder", false,
+            "livyStagingAreaFolderHistory", RemoteFileChooser.SELECT_DIR,
+            createFlowVariableModel(m_settings.getStagingAreaFolderModel().getKey(), FlowVariable.Type.STRING), null);
+        panel.add(m_stagingAreaFolder.getPanel(), gbc);
+        m_settings.getStagingAreaFolderModel().addChangeListener(this);
+        gbc.fill = GridBagConstraints.NONE;
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.insets = new Insets(5, 0, 5, 5);
         addDialogComponentToPanel(m_useCustomSparkSettings, panel, gbc);
         m_useCustomSparkSettings.getModel().addChangeListener(this);
 
@@ -150,7 +177,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 15, 5, 15);
+        gbc.insets = new Insets(5, 25, 5, 15);
         addDialogComponentToPanel(m_customSparkSettings, panel, gbc);
         m_customSparkSettings.getModel().addChangeListener(this);
         gbc.fill = GridBagConstraints.NONE;
@@ -160,6 +187,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         gbc.weightx = 0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(5, 5, 5, 5);
         addDialogComponentToPanel(m_connectTimeout, panel, gbc);
 
         gbc.gridx = 0;
@@ -286,6 +314,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     @Override
     public void stateChanged(final ChangeEvent e) {
         m_settings.updateEnabledness();
+        m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
         updateExecutorAllocationOptions();
         updateExecutorResourceSummary();
     }
@@ -295,6 +324,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.getStagingAreaFolderModel().setStringValue(m_stagingAreaFolder.getSelection());
         m_settings.validateDeeper();
         m_settings.saveSettingsTo(settings);
 
@@ -319,8 +349,17 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
             m_settings.loadSettingsFrom(settings);
             updateExecutorAllocationOptions();
             updateExecutorResourceSummary();
+            m_stagingAreaFolder.setSelection(m_settings.getStagingAreaFolder());
+            m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
         } catch (InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
+        }
+
+        if (specs.length > 0 && specs[0] != null) {
+            ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
+            m_stagingAreaFolder.setConnectionInformation(connInfo);
+        } else {
+            m_stagingAreaFolder.setConnectionInformation(null);
         }
     }
 }

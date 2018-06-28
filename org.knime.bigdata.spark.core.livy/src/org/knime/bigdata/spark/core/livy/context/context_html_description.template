@@ -8,3 +8,14 @@
 <br/>
 <strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
 <br/>
+<strong>Spark WebUI: </strong>&nbsp;&nbsp;<a href="${spark_web_ui}">${spark_web_ui}<a/>
+<br/>
+<br/>
+<strong>Spark Properties: </strong>
+<table align="left" width="80%">
+  <tr>
+    <th align="left">Name</th>
+    <th align="left">Value</th>
+  </tr>
+  ${spark_properties}
+ </table>

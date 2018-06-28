@@ -2,6 +2,7 @@ package org.knime.bigdata.spark.core.livy.context;
 
 import java.util.Map;
 
+import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -18,6 +19,8 @@ public class LivySparkContextConfig implements SparkContextConfig {
     private final String m_livyUrl;
 
     private final AuthenticationType m_authenticationType;
+    
+    private final String m_stagingAreaFolder;
 
     private final int m_connectTimeoutSeconds;
 
@@ -28,6 +31,8 @@ public class LivySparkContextConfig implements SparkContextConfig {
     private final Map<String, String> m_customSparkSettings;
 
     private final SparkContextID m_sparkContextId;
+    
+    private final ConnectionInformation m_remoteFsConnectionInfo;
 
     /**
      * Constructor.
@@ -35,25 +40,30 @@ public class LivySparkContextConfig implements SparkContextConfig {
      * @param sparkVersion
      * @param livyUrl
      * @param authenticationType
+     * @param stagingAreaFolder
      * @param connectTimeoutSeconds
      * @param responseTimeoutSeconds
      * @param jobCheckFrequencySeconds
      * @param customSparkSettings
      * @param sparkContextId
+     * @param remoteFsConnectionInfo 
      */
     public LivySparkContextConfig(final SparkVersion sparkVersion, final String livyUrl,
-        final AuthenticationType authenticationType, final int connectTimeoutSeconds, final int responseTimeoutSeconds,
-        final int jobCheckFrequencySeconds, final Map<String, String> customSparkSettings,
-        final SparkContextID sparkContextId) {
+        final AuthenticationType authenticationType, final String stagingAreaFolder, final int connectTimeoutSeconds,
+        final int responseTimeoutSeconds, final int jobCheckFrequencySeconds,
+        final Map<String, String> customSparkSettings, final SparkContextID sparkContextId,
+        ConnectionInformation remoteFsConnectionInfo) {
 
         m_sparkVersion = sparkVersion;
         m_livyUrl = livyUrl;
         m_authenticationType = authenticationType;
+        m_stagingAreaFolder = stagingAreaFolder;
         m_connectTimeoutSeconds = connectTimeoutSeconds;
         m_responseTimeoutSeconds = responseTimeoutSeconds;
         m_jobCheckFrequencySeconds = jobCheckFrequencySeconds;
         m_customSparkSettings = customSparkSettings;
         m_sparkContextId = sparkContextId;
+        m_remoteFsConnectionInfo = remoteFsConnectionInfo;
     }
 
     /**
@@ -97,6 +107,14 @@ public class LivySparkContextConfig implements SparkContextConfig {
     }
 
     /**
+     * 
+     * @return a {@link ConnectionInformation} object to use for the staging area
+     */
+    public ConnectionInformation getRemoteFsConnectionInfo() {
+        return m_remoteFsConnectionInfo;
+    }
+
+    /**
      * @return the http(s) URL for Livy
      */
     public String getLivyUrl() {
@@ -108,6 +126,14 @@ public class LivySparkContextConfig implements SparkContextConfig {
      */
     protected AuthenticationType getAuthenticationType() {
         return m_authenticationType;
+    }
+    
+    /**
+     * 
+     * @return the staging area folder to use, or null if none was set.
+     */
+    public String getStagingAreaFolder() {
+        return m_stagingAreaFolder;
     }
 
     /**
@@ -141,6 +167,7 @@ public class LivySparkContextConfig implements SparkContextConfig {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((m_authenticationType == null) ? 0 : m_authenticationType.hashCode());
+        result = prime * result + ((m_stagingAreaFolder == null) ? 0 : m_stagingAreaFolder.hashCode());
         result = prime * result + m_connectTimeoutSeconds;
         result = prime * result + ((m_customSparkSettings == null) ? 0 : m_customSparkSettings.hashCode());
         result = prime * result + m_jobCheckFrequencySeconds;
@@ -164,6 +191,11 @@ public class LivySparkContextConfig implements SparkContextConfig {
             return false;
         LivySparkContextConfig other = (LivySparkContextConfig)obj;
         if (m_authenticationType != other.m_authenticationType)
+            return false;
+        if (m_stagingAreaFolder == null) {
+            if (other.m_stagingAreaFolder != null)
+                return false;
+        } else if (!m_stagingAreaFolder.equals(other.m_stagingAreaFolder))
             return false;
         if (m_connectTimeoutSeconds != other.m_connectTimeoutSeconds)
             return false;

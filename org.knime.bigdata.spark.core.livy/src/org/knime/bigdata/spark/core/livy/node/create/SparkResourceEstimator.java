@@ -26,7 +26,7 @@ public class SparkResourceEstimator {
 
     private static final int DRIVER_MEMORY_OVERHEAD_MIN = 384;
 
-    private static final int YARN_MEMORY_INCREMENT = 512;
+    private static final int YARN_MEMORY_INCREMENT = 1024;
 
     private final LivySparkContextCreatorNodeSettings m_settings;
 

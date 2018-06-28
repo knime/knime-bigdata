@@ -215,7 +215,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	private void validateAndPrepareContext() throws KNIMESparkException {
 		final SparkVersion sparkVersion = getSparkVersion();
 
-		final PrepareContextJobInput prepInput = PrepareContextJobInput.create(getJobJar().getDescriptor().getHash(),
+		final PrepareContextJobInput prepInput = new PrepareContextJobInput(getJobJar().getDescriptor().getHash(),
 				sparkVersion.toString(),
 				getJobJar().getDescriptor().getPluginVersion(),
 				IntermediateToSparkConverterRegistry.getConverters(sparkVersion));

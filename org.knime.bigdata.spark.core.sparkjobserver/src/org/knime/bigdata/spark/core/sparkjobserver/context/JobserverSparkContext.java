@@ -230,7 +230,7 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
     }
 
     private void validateAndPrepareContext() throws KNIMESparkException {
-        PrepareContextJobInput prepInput = PrepareContextJobInput.create(getJobJar().getDescriptor().getHash(),
+        PrepareContextJobInput prepInput = new PrepareContextJobInput(getJobJar().getDescriptor().getHash(),
             getSparkVersion().toString(),
             getJobJar().getDescriptor().getPluginVersion(),
             IntermediateToSparkConverterRegistry.getConverters(getSparkVersion()));
