@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.preproc.joiner;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.preproc.joiner.Joiner;
 import org.knime.base.node.preproc.joiner.Joiner2Settings;
@@ -59,8 +60,8 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * Constructor.
      */
     protected SparkJoinerNodeModel() {
-        super(new PortType[] {SparkDataPortObject.TYPE, SparkDataPortObject.TYPE},
-            new PortType[] {SparkDataPortObject.TYPE});
+        super(new PortType[]{SparkDataPortObject.TYPE, SparkDataPortObject.TYPE},
+            new PortType[]{SparkDataPortObject.TYPE});
     }
 
     private final Joiner2Settings m_settings = new Joiner2Settings();
@@ -77,14 +78,28 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
             throw new InvalidSettingsException(
                 "Spark context of first input incompatible with Spark context of second input");
         }
+        checkColumnNames(left, right);
         final Joiner joiner = new Joiner(left.getTableSpec(), right.getTableSpec(), m_settings);
         final PortObjectSpec[] spec =
-                new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec())};
+            new PortObjectSpec[]{new SparkDataPortObjectSpec(context, joiner.getOutputSpec())};
 
         if (!joiner.getConfigWarnings().isEmpty()) {
             setWarningMessage(StringUtils.join(joiner.getConfigWarnings(), "\n"));
         }
         return spec;
+    }
+
+    private static void checkColumnNames(final SparkDataPortObjectSpec left, final SparkDataPortObjectSpec right)
+        throws InvalidSettingsException {
+        String[] allcolumnNames =
+            ArrayUtils.addAll(left.getTableSpec().getColumnNames(), right.getTableSpec().getColumnNames());
+
+        for (String colName : allcolumnNames) {
+            if (colName.contains(".")) {
+                throw new InvalidSettingsException(
+                    "Spark does not support joins on tables with '.' in column names");
+            }
+        }
     }
 
     /**
@@ -114,17 +129,19 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
 
         final JoinMode joinMode = m_settings.getJoinMode();
         final org.knime.bigdata.spark.node.preproc.joiner.JoinMode sparkJoinMode =
-                org.knime.bigdata.spark.node.preproc.joiner.JoinMode.fromKnimeJoinMode(joinMode.toString());
+            org.knime.bigdata.spark.node.preproc.joiner.JoinMode.fromKnimeJoinMode(joinMode.toString());
         final DataTableSpec outputSpec = joiner.getOutputSpec();
         final IntermediateSpec intermediaSpec = SparkDataTableUtil.toIntermediateSpec(outputSpec);
         final SparkDataTable resultTable = new SparkDataTable(context, outputSpec);
 
-        final SimpleJobRunFactory<SparkJoinerJobInput> runFactory = SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
-        final SparkJoinerJobInput jobInput = new SparkJoinerJobInput(left.getData().getID(), right.getData().getID(), sparkJoinMode,
-            leftJoinColumns, rightJoinColumns, leftIncludCols, rightIncludCols, resultTable.getID(), intermediaSpec);
+        final SimpleJobRunFactory<SparkJoinerJobInput> runFactory =
+            SparkContextUtil.getSimpleRunFactory(context, JOB_ID);
+        final SparkJoinerJobInput jobInput =
+            new SparkJoinerJobInput(left.getData().getID(), right.getData().getID(), sparkJoinMode, leftJoinColumns,
+                rightJoinColumns, leftIncludCols, rightIncludCols, resultTable.getID(), intermediaSpec);
         runFactory.createRun(jobInput).run(context, exec);
 
-        return new PortObject[] {new SparkDataPortObject(resultTable)};
+        return new PortObject[]{new SparkDataPortObject(resultTable)};
     }
 
     /**
@@ -139,8 +156,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateAdditionalSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
+    protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         Joiner2Settings s = new Joiner2Settings();
         s.loadSettings(settings);
         Joiner.validateSettings(s);
@@ -150,8 +166,7 @@ public class SparkJoinerNodeModel extends SparkNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
+    protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettings(settings);
     }
 }
