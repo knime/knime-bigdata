@@ -30,6 +30,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.flowvariable.FlowVariablePortObject;
 
 /**
  *
@@ -38,7 +39,7 @@ import org.knime.core.node.port.PortType;
 public class SparkDestroyContextNodeModel extends SparkNodeModel {
 
     SparkDestroyContextNodeModel() {
-        super(new PortType[]{SparkContextPortObject.TYPE}, new PortType[0]);
+        super(new PortType[]{SparkContextPortObject.TYPE, FlowVariablePortObject.TYPE_OPTIONAL}, new PortType[0]);
     }
 
     /**

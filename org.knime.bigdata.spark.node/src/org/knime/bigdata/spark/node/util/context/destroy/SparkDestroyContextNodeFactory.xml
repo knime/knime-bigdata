@@ -15,5 +15,6 @@
 
     <ports>
         <inPort index="0" name="Spark context to destroy">The Spark context to destroy.</inPort>
+        <inPort index="1" name="Flow variables (optional)">Optional flow variables port to control execution order.</inPort>
     </ports>
 </knimeNode>
