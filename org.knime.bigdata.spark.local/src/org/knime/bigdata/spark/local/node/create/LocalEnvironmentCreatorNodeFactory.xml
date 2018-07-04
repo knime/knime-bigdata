@@ -3,69 +3,60 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
     <name>Create Local Big Data Environment</name>
     
-    <shortDescription>Creates a local big data environment.</shortDescription>
+    <shortDescription>Creates a fully functional local big data environment.</shortDescription>
     
     <fullDescription>
         <intro>
-            Creates a local big data environment. The settings affect all connected Spark nodes and 
-            their successors.
-            <p>The default values of the node are taken from the Spark preference page which
-            you can open via <i>File->Preferences->KNIME->Spark</i>.</p>
+            Creates a fully functional local big data environment including Apache Hive, Apache Spark and HDFS.
+            <p>
+            The Spark WebUI of the created local Spark context is available via the Spark context outport view.
+            Simply click on the <i>Click here to open</i> link and the Spark WebUI is opened in the internal web browser.
+            </p>
+            <p>
+            In order to browse the log file of the local Spark context go to <i>View-> Open Local Spark log</i>.
+            </p>
         </intro>
-        <tab name="Context Settings">
-        <option name="Spark version">
-        	The Spark version used on Spark Jobserver.
+        <option name="Context name">The unique name of the context. Only one Spark context will be created when you 
+        execute several <i>Create Local Big Data Environment</i> nodes with the same context name.</option>
+        <option name="Number of threads">The number of threads the local Spark runtime can be use.</option>
+        <option name="Action to perform on dispose">Decides what happens with the Spark context when the workflow or
+        KNIME is closed.
+        <ul>
+            <li><b>Destroy Spark context:</b> Will destroy the Spark context and free up all allocated resources.</li>
+            <li><b>Delete Spark DataFrames:</b> Will delete all Spark DataFrames but keeps the Spark context with all the 
+            allocated resources open.</li>
+            <li><b>Do nothing:</b> Leaves the Spark context and all created Spark DataFrames as is.</li>
+        </ul>
         </option>
-        <option name="Context name">The unique name of the context.</option>
-        <option name="Destroy Spark context on dispose">If selected, the Spark context will be destroyed when the workflow or
-        KNIME is closed. This way, resources on the cluster are released, but all data cached inside the Spark context
-        are lost, unless they have been saved to persistent storage such as HDFS.
+        <option name="Use custom Spark settings">Select this option to specify additional Spark settings. For more
+        details see Custom Spark settings description.</option>
+        <option name="Custom Spark settings">Allows you to pass on any settings to the Spark context. 
+        Especially interesting if you want to add additional jars e.g. to test your own UDFs.</option>
+        <option name="SQL Support">
+        <ul>
+            <li><b>Spark SQL only:</b> The Spark SQL node will only support Spark SQL syntax. 
+            The Hive connection port will be disabled.</li>
+            <li><b>HiveQL:</b> The Spark SQL node will support HiveQL syntax.
+            The Hive connection port will be disabled.</li>
+            <li><b>HiveQL and provide JDBC connection:</b> The Spark SQL node will support HiveQL syntax.
+            The Hive connection port will be enabled which allows you to also work with a local Hive instance using the 
+            KNIME database nodes.</li>
+        </ul>
         </option>
-        <option name="Delete Spark DataFrames/RDDs on dispose">If selected, KNIME deletes the created RDDs/DataFrames when 
-        the workflow or KNIME is closed. This way, resources on the cluster are released, but all data that the current workflow
-        holds in the Spark context are lost, unless they have been saved to persistent storage such as HDFS.
+        <option name="Use custom Hive data folder (Metastore DB &amp; Warehouse)">If selected, the Hive table definitions 
+        and data files are stored in the specified location and will be also available after a KNIME restart. 
+        If not selected, all Hive related information is stored in a temporary location which will be deleted on KNIME
+        shutdown.
         </option>
-        <option name="Spark job log level">The log level to use for Spark jobs within the Spark runtime.</option>
-        <option name="Override Spark settings">Select this option to set custom Spark settings.</option>
-        <option name="Custom Spark settings">Custom Spark settings to add to or overwrite the default settings defined by Spark Jobserver. 
-        See <a href="https://spark.apache.org/docs/latest/configuration.html">Spark documentation</a> for more information.
-        </option>
-	<option name="Hide warning about an existing Spark context">Enable this option to suppress a warning message
+	   <option name="Hide warning about an existing local Spark context">Enable this option to suppress a warning message
 		shown when the Spark context to be created by this node already
-		exists.
+		exists. For further details see the <i>Context name</i> option.
 		</option>
-        </tab>
-        <tab name="Connection Settings">
-        <option name="Jobserver URL">The URL of the Spark Jobserver including protocol and port e.g. http://localhost:8090.</option>
-	<option name="Authentication">
-		Select
-		<ul>
-			<li>
-				<i>None</i>, if Spark jobserver does not require any credentials.
-			</li>
-			<li>
-				<i>Username &amp; password</i>
-				and enter the respective credentials, which will be saved with the
-				workflow.
-			</li>
-			<li>
-				<i>Credentials</i>
-				and select from the available credentials.
-			</li>
-		</ul>
-	</option>
-	<option name="Jobserver response timeout (seconds)">Time to wait for a response when making a request
-		to Spark Jobserver (0 is infinite).
-	</option>
-	<option name="Spark job check frequency (seconds)">The frequency with which KNIME polls the status of
-		a job.
-	</option>        
-    </tab>
     </fullDescription>
     
     <ports>
-    	<outPort index="0" name="Database JDBC Connection">A database JDBC connection</outPort>
-        <outPort index="1" name="Local HDFS Connection Information Port">Spark context.</outPort>
-        <outPort index="2" name="Spark Context">Spark context.</outPort>
+    	<outPort index="0" name="Hive Connection">JDBC connection to a local Hive instance</outPort>
+        <outPort index="1" name="HDFS Connection">Local HDFS connection.</outPort>
+        <outPort index="2" name="Spark Context">Local Spark context.</outPort>
     </ports>    
 </knimeNode>
