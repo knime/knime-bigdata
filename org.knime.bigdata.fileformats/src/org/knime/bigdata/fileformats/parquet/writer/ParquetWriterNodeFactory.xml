@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./parquetwriter-icon.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<knimeNode icon="./parquetwriter-icon.png" type="Sink" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
     <name>Parquet Writer</name>
     
     <shortDescription>
@@ -11,7 +11,8 @@
         It converts int, double, boolean and binary in the corresponding Parquet primitives. Other types are not yet supported. 
         <p>
         For remote connections, the writer stores chunks locally and uploads them in parallel. 
-        The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" tab.
+        The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" 
+        tab which is only enabled for remote file systems.
         </p>
         </intro>
         <tab name="Options">
@@ -19,10 +20,7 @@
        	 <option name="Overwrite">If this option is selected the file will be overwritten if it exists</option>
        	 <option name="File Compression">The compression codec used to write the Parquet file.</option>
         </tab>
-        <tab name="Chunk Upload">   
-          <p>
-        	This tab is only enabled for uploads to remote file systems. 
-          </p>
+        <tab name="Chunk Upload">
       	  <option name="Chunk size in MB">The maximum size for an individual chunk.</option>
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
