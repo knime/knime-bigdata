@@ -57,16 +57,23 @@ import org.knime.core.node.port.PortObjectSpec;
  */
 public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener {
     private final MLlibPCASettings m_settings;
+
     private final DialogComponentBoolean m_failOnMissingValues;
+
     private final DialogComponentButtonGroup m_targetDimMode;
+
     private final DialogComponentNumber m_noOfComponents;
+
     private final DialogComponentNumber m_minQuality;
+
     private final DialogComponentBoolean m_replaceInputColumns;
+
     private final DialogComponentColumnFilter2 m_featureColumns;
 
     private final boolean m_legacyMode;
 
     private DataTableSpec m_inSpec;
+
     private boolean m_supportsMinQuality;
 
     /**
@@ -77,16 +84,15 @@ public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener
     public MLlibPCANodeDialog(final boolean legacyMode) {
         m_legacyMode = legacyMode;
         m_settings = new MLlibPCASettings(legacyMode);
-        m_failOnMissingValues =
-            new DialogComponentBoolean(m_settings.getFailOnMissingValuesModel(), "Fail if missing values are encountered (skipped per default)");
-        m_targetDimMode =
-            new DialogComponentButtonGroup(m_settings.getTargetDimModeModel(), null, true,
-                new String [] { "Dimensions to reduce to", "Minimum information fraction to preserve (%)" },
-                new String[] { TARGET_DIM_MODE_FIXED, TARGET_DIM_MODE_QUALITY });
-        m_noOfComponents =
-            new DialogComponentNumber(m_settings.getNoOfComponentsModel(), "", 1, 10);
-        m_minQuality =
-            new DialogComponentNumber(m_settings.getMinQualityModel(), "", 1, 9);
+        m_failOnMissingValues = new DialogComponentBoolean(m_settings.getFailOnMissingValuesModel(),
+            "Fail if missing values are encountered (skipped per default)");
+
+        m_targetDimMode = new DialogComponentButtonGroup(m_settings.getTargetDimModeModel(), null, true,
+            new String[]{"Dimensions to reduce to", "Minimum information fraction to preserve (%)"},
+            new String[]{TARGET_DIM_MODE_FIXED, TARGET_DIM_MODE_QUALITY});
+
+        m_noOfComponents = new DialogComponentNumber(m_settings.getNoOfComponentsModel(), "", 1, 10);
+        m_minQuality = new DialogComponentNumber(m_settings.getMinQualityModel(), "", 1, 9);
         m_replaceInputColumns =
             new DialogComponentBoolean(m_settings.getReplaceInputColumnsModel(), "Replace original data columns");
         m_featureColumns = new DialogComponentColumnFilter2(m_settings.getFeatureColumnsModel(), 0);
@@ -102,6 +108,7 @@ public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener
         }
         panel.add(m_featureColumns.getComponentPanel());
         addTab("Settings", panel);
+        m_settings.getTargetDimModeModel().addChangeListener(this);
     }
 
     private JPanel createTargetDimensionPanel() {
@@ -132,12 +139,12 @@ public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener
 
             panel.add(subPanel);
         }
-
         return panel;
     }
 
     @Override
-    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+        throws NotConfigurableException {
         if (specs == null || specs.length < 1 || specs[0] == null) {
             throw new NotConfigurableException("Spark input data spec required.");
         }
@@ -163,10 +170,8 @@ public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener
                 m_targetDimMode.getButton(TARGET_DIM_MODE_QUALITY).setEnabled(true);
                 m_supportsMinQuality = true;
             }
-
-            m_settings.getTargetDimModeModel().addChangeListener(this);
-            updateTargetDimState();
         }
+        updateTargetDimState();
     }
 
     @Override
@@ -181,8 +186,6 @@ public class MLlibPCANodeDialog extends NodeDialogPane implements ChangeListener
             m_targetDimMode.saveSettingsTo(settings);
             m_minQuality.saveSettingsTo(settings);
             m_replaceInputColumns.saveSettingsTo(settings);
-
-            m_settings.getTargetDimModeModel().removeChangeListener(this);
         }
     }
 
