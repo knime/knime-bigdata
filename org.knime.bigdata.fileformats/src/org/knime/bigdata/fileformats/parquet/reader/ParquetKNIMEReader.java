@@ -152,7 +152,13 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             final ParquetReader<DataRow> reader = ParquetReader.builder(new DataRowReadSupport(columnTypes), path)
                     .withConf(conf).build();
             m_readers.add(reader);
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
+        } catch (final IOException ioe) {
+            if (ioe.getMessage().contains("No FileSystem for scheme")) {
+                throw new BigDataFileFormatException(
+                        "Protocol " + remoteFile.getConnectionInformation().getProtocol() + " is not supported.");
+            }
+            throw new BigDataFileFormatException(ioe);
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
             throw new BigDataFileFormatException(e);
         }
     }

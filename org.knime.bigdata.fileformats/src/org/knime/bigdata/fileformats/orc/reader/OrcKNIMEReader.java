@@ -135,6 +135,12 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             }
             schemas.add(createSpecFromOrcSchema(reader.getSchema()));
 
+        } catch (final IOException ioe) {
+            if (ioe.getMessage().contains("No FileSystem for scheme")) {
+                throw new BigDataFileFormatException(
+                        "Protocol " + remotefile.getConnectionInformation().getProtocol() + " is not supported.");
+            }
+            throw new BigDataFileFormatException(ioe);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
@@ -256,8 +262,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          * @param batchSize the batch size for reading
          * @throws IOException if file can not be read
          */
-        OrcRowIterator(final Reader reader, final OrcType<?>[] columnReaders, final long index)
-                throws IOException {
+        OrcRowIterator(final Reader reader, final OrcType<?>[] columnReaders, final long index) throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
