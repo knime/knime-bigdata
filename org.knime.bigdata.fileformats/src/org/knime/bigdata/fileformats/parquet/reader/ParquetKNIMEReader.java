@@ -65,6 +65,7 @@ import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.metadata.FileMetaData;
 import org.apache.parquet.hadoop.metadata.ParquetMetadata;
 import org.apache.parquet.schema.MessageType;
+import org.apache.parquet.schema.OriginalType;
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
 import org.apache.parquet.schema.Type;
 import org.knime.base.filehandling.remote.files.Connection;
@@ -79,6 +80,7 @@ import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.blob.BinaryObjectDataCell;
 import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
@@ -102,7 +104,12 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
         m_types.put(PrimitiveTypeName.INT32, IntCell.TYPE);
         m_types.put(PrimitiveTypeName.DOUBLE, DoubleCell.TYPE);
         m_types.put(PrimitiveTypeName.BOOLEAN, BooleanCell.TYPE);
-        m_types.put(PrimitiveTypeName.BINARY, StringCell.TYPE);
+        m_types.put(PrimitiveTypeName.BINARY, BinaryObjectDataCell.TYPE);
+    }
+    private final Map<OriginalType, DataType> m_orgTypes = new EnumMap<>(OriginalType.class);
+
+    {
+        m_orgTypes.put(OriginalType.UTF8, StringCell.TYPE);
     }
 
     /**
@@ -126,7 +133,8 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      * @see org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader#createReader(org.knime.core.node.ExecutionContext, java.util.List, org.knime.base.filehandling.remote.files.RemoteFile)
      */
     @Override
-    protected void createReader(final ExecutionContext exec, final List<DataTableSpec> schemas, final RemoteFile<Connection> remoteFile) {
+    protected void createReader(final ExecutionContext exec, final List<DataTableSpec> schemas,
+            final RemoteFile<Connection> remoteFile) {
 
         final Configuration conf = new Configuration();
         try {
@@ -141,8 +149,8 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             final ParquetType[] columnTypes = ParquetTableStoreFormat.parquetTypesFromSpec(tableSpec);
 
             @SuppressWarnings("resource")
-            final ParquetReader<DataRow> reader = ParquetReader
-                    .builder(new DataRowReadSupport(columnTypes), path).withConf(conf).build();
+            final ParquetReader<DataRow> reader = ParquetReader.builder(new DataRowReadSupport(columnTypes), path)
+                    .withConf(conf).build();
             m_readers.add(reader);
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | IOException e) {
             throw new BigDataFileFormatException(e);
@@ -161,9 +169,17 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
                 throw new BigDataFileFormatException(
                         String.format("Non Primitve type %s is not yet supported.", field.getOriginalType()));
             }
-            final DataType type = m_types.get(field.asPrimitiveType().getPrimitiveTypeName());
+            DataType type = null;
+            String parquettype;
+            if (field.getOriginalType() != null) {
+                type = m_orgTypes.get(field.getOriginalType());
+                parquettype = field.getOriginalType().name();
+            } else {
+                type = m_types.get(field.asPrimitiveType().getPrimitiveTypeName());
+                parquettype = field.asPrimitiveType().getName();
+            }
             if (type == null) {
-                throw new BigDataFileFormatException(String.format("Type %s is not yet supported.", field));
+                throw new BigDataFileFormatException(String.format("Type %s is not yet supported.", parquettype));
             }
             columnNames.add(field.getName());
             columnTypes.add(type);
