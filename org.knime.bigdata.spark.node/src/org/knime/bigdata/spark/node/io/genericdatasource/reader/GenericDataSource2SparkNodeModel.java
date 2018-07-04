@@ -88,6 +88,7 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
     @Override
     protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+
         if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
             throw new InvalidSettingsException("HDFS connection information missing");
         }
@@ -217,6 +218,10 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        String inpath = settings.getString( GenericDataSource2SparkSettings.CFG_INPUT_PATH);
+        if(inpath.contains(" ")){
+            throw new InvalidSettingsException("Paths with whitespaces are not supported by Spark");
+        }
         m_settings.validateSettings(settings);
     }
 
