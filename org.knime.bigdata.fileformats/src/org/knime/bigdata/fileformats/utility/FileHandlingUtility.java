@@ -50,6 +50,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
+import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.files.Connection;
@@ -129,12 +130,12 @@ public class FileHandlingUtility {
      */
 
     @SuppressWarnings({ "unchecked" })
-    public static RemoteFile<Connection> createRemoteDir(final ConnectionInformationPortObject connObj, final String fileName)
-            throws Exception {
+    public static RemoteFile<Connection> createRemoteDir(final ConnectionInformationPortObject connObj,
+            final String fileName) throws Exception {
 
         final ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
         final ConnectionInformation connInfo = connObj.getConnectionInformation();
-        final URI targetURI = new URI(connInfo.toURI().toString() + fileName + "/");
+        final URI targetURI = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(fileName) + "/");
         LOGGER.info("Creating remote File " + targetURI + " from name " + fileName);
         return (RemoteFile<Connection>) RemoteFileFactory.createRemoteFile(targetURI, connInfo, connMonitor);
     }
@@ -148,7 +149,8 @@ public class FileHandlingUtility {
      * @throws Exception if the file exists, and should not be overwritten. Or
      *         if the file can not be deleted.
      */
-    public static void checkOverwrite(final RemoteFile<Connection> remoteFile, final boolean overwrite) throws Exception {
+    public static void checkOverwrite(final RemoteFile<Connection> remoteFile, final boolean overwrite)
+            throws Exception {
         if (remoteFile.exists()) {
             if (overwrite) {
                 LOGGER.debug(String.format("File %s already exists. Deleting it.", remoteFile.getFullName()));
@@ -172,9 +174,9 @@ public class FileHandlingUtility {
      * @throws Exception if file creation fails
      */
     public static RemoteFile<Connection> createTempFile(final File path, final int filecount) throws Exception {
-        final String fileNameEnding =
-        		String.format("%s_%05d", UUID.randomUUID().toString().replace('-', '_'), filecount);
-		final File file = new File(path, fileNameEnding);
+        final String fileNameEnding = String.format("%s_%05d", UUID.randomUUID().toString().replace('-', '_'),
+                filecount);
+        final File file = new File(path, fileNameEnding);
         return RemoteFileFactory.createRemoteFile(file.toURI(), null, null);
     }
 

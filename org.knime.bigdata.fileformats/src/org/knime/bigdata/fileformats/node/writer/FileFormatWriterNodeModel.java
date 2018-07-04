@@ -46,6 +46,7 @@ package org.knime.bigdata.fileformats.node.writer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,7 +59,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.bigdata.fileformats.utility.FileUploader;
-import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -155,7 +156,8 @@ public class FileFormatWriterNodeModel extends NodeModel {
     private void writeRowInput(final ExecutionContext exec, final RowInput input,
             final ConnectionInformationPortObject connInfo) throws Exception {
 
-        if (connInfo != null && !(connInfo.getConnectionInformation() instanceof HDFSLocalConnectionInformation)) {
+        if (connInfo != null && !(connInfo.getConnectionInformation().getProtocol()
+                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName()))) {
             final RemoteFile<Connection> remoteDir = FileHandlingUtility.createRemoteDir(connInfo,
                     m_settings.getFileName());
             FileHandlingUtility.checkOverwrite(remoteDir, m_settings.getFileOverwritePolicy());
@@ -163,7 +165,8 @@ public class FileFormatWriterNodeModel extends NodeModel {
             // the file afterwards.
             writeTempFilesAndUpload(exec, input, remoteDir);
         } else {
-            final RemoteFile<Connection> remoteFile = FileHandlingUtility.createLocalFile(m_settings.getFileName());
+            final RemoteFile<Connection> remoteFile = FileHandlingUtility
+                    .createLocalFile(m_settings.getFileNameWithSuffix());
             FileHandlingUtility.checkOverwrite(remoteFile, m_settings.getFileOverwritePolicy());
 
             // For local or HDFS_local connection write directly.
@@ -179,7 +182,7 @@ public class FileFormatWriterNodeModel extends NodeModel {
         int filecount = 0;
 
         final FileUploader fileUploader = new FileUploader(m_settings.getNumOfLocalChunks(), remoteFile,
-                exec.createSubExecutionContext(0.5));
+                exec.createSubExecutionContext(0.5), m_settings.getFilenameSuffix());
         final ExecutorService uploadExecutor = Executors.newSingleThreadExecutor();
         final Future<String> resultString = uploadExecutor.submit(fileUploader);
 
@@ -261,7 +264,7 @@ public class FileFormatWriterNodeModel extends NodeModel {
             throw new InvalidSettingsException(format);
         }
         final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
-        final String fileName = m_settings.getFileName();
+
         if (connSpec != null) {
             final ConnectionInformation connInfo = connSpec.getConnectionInformation();
 
@@ -269,14 +272,24 @@ public class FileFormatWriterNodeModel extends NodeModel {
             if (connInfo == null) {
                 throw new InvalidSettingsException("No connection information available.");
             }
-
+            final String fileName = m_settings.getFileName();
             if (fileName.endsWith("/")) {
                 m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
             }
+            try {
+                final URI uri = new URI(m_settings.getFileName());
+                if (uri.getScheme() != null) {
+                    connInfo.fitsToURI(uri);
+                }
+            } catch (final Exception e) {
+                LOGGER.debug("Could not configure node.", e);
+                throw new InvalidSettingsException(e.getMessage());
+            }
+
         } else {
 
             // Check file access
-            CheckUtils.checkDestinationFile(fileName, m_settings.getFileOverwritePolicy());
+            CheckUtils.checkDestinationFile(m_settings.getFileNameWithSuffix(), m_settings.getFileOverwritePolicy());
         }
         return new DataTableSpec[] {};
     }

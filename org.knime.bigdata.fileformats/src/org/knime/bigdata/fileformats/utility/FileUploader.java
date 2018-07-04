@@ -73,6 +73,8 @@ public class FileUploader implements Callable<String> {
 
     final String m_filePrefix;
 
+    private final String m_fileSuffix;
+
     /**
      * Upload for temporary files to a remote destination. It creates a
      * directory with the name given in {@code target} and stores the files with
@@ -81,9 +83,11 @@ public class FileUploader implements Callable<String> {
      * @param numberOfChunks the number of chunks allowed
      * @param target the target file
      * @param exec the execution context
+     * @param fileSuffix The suffix for the files
      * @throws Exception if the directory or files can not be created.
      */
-    public FileUploader(int numberOfChunks, RemoteFile<Connection> target, ExecutionContext exec) throws Exception {
+    public FileUploader(int numberOfChunks, RemoteFile<Connection> target, ExecutionContext exec, String fileSuffix)
+            throws Exception {
         m_tempFileQueue = new ArrayBlockingQueue<>(numberOfChunks);
         m_exec = exec;
         final URI targetURI = new URI(String.format("%s", target.getURI().toString()));
@@ -91,6 +95,7 @@ public class FileUploader implements Callable<String> {
                 target.getConnectionMonitor());
         m_targetDir.mkDir();
         m_filePrefix = target.getName();
+        m_fileSuffix = fileSuffix;
     }
 
     /**
@@ -111,8 +116,8 @@ public class FileUploader implements Callable<String> {
         while (true) {
             try {
                 final RemoteFile<Connection> tempFile = m_tempFileQueue.take();
-                final URI targetURI = new URI(
-                        String.format("%s%s_%05d", m_targetDir.getURI().toString(), m_filePrefix, fileCount));
+                final URI targetURI = new URI(String.format("%s%s_%05d%s", m_targetDir.getURI().toString(),
+                        m_filePrefix, fileCount, m_fileSuffix));
                 final RemoteFile<Connection> targetFile = RemoteFileFactory.createRemoteFile(targetURI,
                         m_targetDir.getConnectionInformation(), m_targetDir.getConnectionMonitor());
                 m_exec.setProgress(String.format("Writing remote File %s", targetURI.toString()));

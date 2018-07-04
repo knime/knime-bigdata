@@ -117,14 +117,22 @@ public class FileFormatWriterNodeSettings {
     }
 
     /**
-     * @param fileName the fileName to set
+     * @return the fileName
      */
-    void setFileName(final String fileName) {
+    String getFileNameWithSuffix() {
+        final String fileName = m_fileName.getStringValue();
         String fileWithSuffix = fileName;
         if (!fileName.isEmpty() && !fileName.endsWith(m_formatFactory.getFilenameSuffix()) && !fileName.endsWith("/")) {
             fileWithSuffix = fileName + m_formatFactory.getFilenameSuffix();
         }
-        m_fileName.setStringValue(fileWithSuffix);
+        return fileWithSuffix;
+    }
+
+    /**
+     * @param fileName the fileName to set
+     */
+    void setFileName(final String fileName) {
+        m_fileName.setStringValue(fileName);
     }
 
     /**
@@ -260,5 +268,12 @@ public class FileFormatWriterNodeSettings {
      */
     public String getChunksizeUnit() {
         return m_formatFactory.getChunkSizeUnit();
+    }
+
+    /**
+     * @return the filename suffix
+     */
+    public String getFilenameSuffix() {
+        return m_formatFactory.getFilenameSuffix();
     }
 }

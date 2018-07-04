@@ -164,7 +164,9 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
             m_filePanel.setConnectionInformation(connInfo);
 
             // Enable advanced options for remote connections
-            setEnabled(!(connInfo instanceof HDFSLocalConnectionInformation), CHUNK_UPLOAD);
+            final boolean isHDFSLocal = connInfo.getProtocol()
+                    .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName());
+            setEnabled(!isHDFSLocal, CHUNK_UPLOAD);
 
         } else {
             setEnabled(false, CHUNK_UPLOAD);
