@@ -350,7 +350,21 @@ public class LocalSparkContextSettings {
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
-        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL+ "://" + getContextName());
+        String ctxName = getContextName();
+        
+        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
+            final Optional<String> wfUser = NodeContext.getWorkflowUser();
+            if (wfUser.isPresent()) {
+                LOG.info(String.format(
+                    "Running on KNIME Server. Prefixing local Spark context workflow user %s", wfUser.get()));
+                ctxName = wfUser.get() + "-" + getContextName();
+            } else {
+                LOG.warn(
+                    "Running on KNIME Server but no workflow user is present in node context.");
+            }
+        }
+        
+        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL+ "://" + ctxName);
     }
 
     /**
@@ -444,35 +458,19 @@ public class LocalSparkContextSettings {
 		m_hideExistsWarning.loadSettingsFrom(settings);
 	}
 
-	/**
-	 * @return a new {@link LocalSparkContextConfig} derived from the current
-	 *         settings.
-	 */
-	public LocalSparkContextConfig createContextConfig() {
-		boolean enableHiveSupport = false;
-		boolean startThriftserver = false;
+        return new LocalSparkContextConfig(
+            // Spark
+            getSparkContextID(),
+            getContextName(),
+            getNumberOfThreads(),
+            getOnDisposeAction() == OnDisposeAction.DELETE_DATA,
+            useCustomSparkSettings(),
+            getCustomSparkSettings(),
 
-		if (getSQLSupport() == SQLSupport.HIVEQL_WITH_JDBC) {
-			enableHiveSupport = true;
-			startThriftserver = true;
-		} else if (getSQLSupport() == SQLSupport.HIVEQL_ONLY) {
-			enableHiveSupport = true;
-		}
-
-		return new LocalSparkContextConfig(
-				// Spark
-				getContextName(),
-				getNumberOfThreads(),
-				getOnDisposeAction() == OnDisposeAction.DELETE_DATA,
-				useCustomSparkSettings(),
-				getCustomSparkSettings(),
-
-				// Hive
-				enableHiveSupport,
-				startThriftserver,
-				useHiveDataFolder(),
-				useHiveDataFolder()
-					? getHiveDataFolder()
-					: null);
-	}
+            // Hive
+            enableHiveSupport,
+            startThriftserver,
+            useHiveDataFolder(),
+            useHiveDataFolder() ? getHiveDataFolder() : null);
+    }
 }

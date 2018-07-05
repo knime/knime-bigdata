@@ -20,6 +20,8 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     
 	private final SparkVersion m_sparkVersion = LocalSparkVersion.SUPPORTED_SPARK_VERSION;
 
+    private final SparkContextID m_contextID;
+
     private final String m_contextName;
 
     private final int m_numberOfThreads;
@@ -52,6 +54,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
      * @param hiveDataFolder A folder where to store Hive's Metastore and warehouse.
      */
     public LocalSparkContextConfig(
+        final SparkContextID contextID,
         final String contextName, 
         final int numberOfThreads,
         final boolean deleteObjectsOnDispose, 
@@ -61,6 +64,10 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         final boolean startThriftserver, 
         final boolean useHiveDataFolder,
         final String hiveDataFolder) {
+
+        if (contextID == null) {
+            throw new IllegalArgumentException("Spark context ID must not be null");
+        }
 
         if (contextName == null || contextName.isEmpty()) {
             throw new IllegalArgumentException("Context name must not be empty");
@@ -79,6 +86,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 		}
 
         // Spark
+        this.m_contextID = contextID;
         this.m_contextName = contextName;
         this.m_numberOfThreads = numberOfThreads;
         this.m_deleteObjectsOnDispose = deleteObjectsOnDispose;
@@ -178,7 +186,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
      */
     @Override
     public SparkContextID getSparkContextID() {
-        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL + "://" + m_contextName);
+        return m_contextID;
     }
     
 	@Override
