@@ -375,6 +375,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	private static void deleteRecursivelyOnExit(final File tmpData) {
+	    // ensure that FileUtils class is loaded before class loader shutdown:
+	    FileUtils.class.toString();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(tmpData)));
 	}
 
@@ -386,13 +388,15 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
 	@Override
 	public synchronized void destroy() throws KNIMESparkException {
-		m_sparkSession.close();
-		m_sparkSession = null;
-		try {
-			// shut down the entire derby system
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException e) {
-		}
+	    if (m_sparkSession != null) {
+    		m_sparkSession.close();
+    		m_sparkSession = null;
+    		try {
+    			// shut down the entire derby system
+    			DriverManager.getConnection("jdbc:derby:;shutdown=true");
+    		} catch (SQLException e) {
+    		}
+	    }
 		FileUtils.deleteQuietly(m_sparkTmpDir);
 	}
 
