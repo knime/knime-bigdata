@@ -23,29 +23,11 @@
 		ProviderClass="org.knime.bigdata.spark.local.LocalSparkJobRunFactoryProvider">
 	</JobRunFactoryProvider>
 </extension>
-       <extension
-             point="org.eclipse.ui.actionSets">
-          <actionSet
-                id="org.knime.workbench.ui.localspark"
-                label="KNIME"
-                visible="true">
-             <action
-                   class="org.knime.bigdata.spark.local.ui.OpenLocalSparkLogfileAction"
-                   hoverIcon="icons/open_logfile.png"
-                   icon="icons/open_logfile.png"
-                   id="org.knime.workbench.ui.localspark.openLocalSparkLogfile"
-                   label="Open Local Spark log"
-                   menubarPath="view/localsparklog"
-                   tooltip="Opens local Spark log file in a text editor">
-             </action>
-          </actionSet>
-       </extension>
-       <extension
-             point="org.knime.core.DatabaseUtility">
-          <databaseUtility
-                class="org.knime.bigdata.spark.local.database.LocalHiveUtility"
-                database="localhive2">
-          </databaseUtility>
-       </extension>
 
+<extension point="org.knime.core.DatabaseUtility">
+  <databaseUtility
+    class="org.knime.bigdata.spark.local.database.LocalHiveUtility"
+    database="localhive2">
+  </databaseUtility>
+</extension>
 </plugin>
