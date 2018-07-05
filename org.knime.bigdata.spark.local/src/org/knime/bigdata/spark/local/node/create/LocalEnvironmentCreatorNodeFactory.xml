@@ -13,7 +13,11 @@
             Simply click on the <i>Click here to open</i> link and the Spark WebUI is opened in the internal web browser.
             </p>
             <p>
-            In order to browse the log file of the local Spark context go to <i>View-> Open Local Spark log</i>.
+            <i>Note</i>: Executing this node only creates a new Spark context, when no local
+            Spark context with the same <i>Context name</i> currently exists. Resetting the node does not destroy the
+            context. Whether closing the KNIME workflow will destroy the context or not, depends on the configured
+            <i>Action to perform on dispose</i>. Spark contexts created by this node can be shared between
+            KNIME workflows.
             </p>
         </intro>
         <option name="Context name">The unique name of the context. Only one Spark context will be created when you 
@@ -39,14 +43,14 @@
             <li><b>HiveQL:</b> The Spark SQL node will support HiveQL syntax.
             The Hive connection port will be disabled.</li>
             <li><b>HiveQL and provide JDBC connection:</b> The Spark SQL node will support HiveQL syntax.
-            The Hive connection port will be enabled which allows you to also work with a local Hive instance using the 
+            The Hive connection port will be enabled, which allows you to also work with a local Hive instance using the 
             KNIME database nodes.</li>
         </ul>
         </option>
         <option name="Use custom Hive data folder (Metastore DB &amp; Warehouse)">If selected, the Hive table definitions 
         and data files are stored in the specified location and will be also available after a KNIME restart. 
-        If not selected, all Hive related information is stored in a temporary location which will be deleted on KNIME
-        shutdown.
+        If not selected, all Hive related information is stored in a temporary location which will be deleted when the
+        local Spark context is destroyed.
         </option>
 	   <option name="Hide warning about an existing local Spark context">Enable this option to suppress a warning message
 		shown when the Spark context to be created by this node already
@@ -55,8 +59,10 @@
     </fullDescription>
     
     <ports>
-    	<outPort index="0" name="Hive Connection">JDBC connection to a local Hive instance</outPort>
-        <outPort index="1" name="HDFS Connection">Local HDFS connection.</outPort>
-        <outPort index="2" name="Spark Context">Local Spark context.</outPort>
+    	<outPort index="0" name="Hive Connection">JDBC connection to a local Hive instance. This port can be connected to the KNIME database nodes.</outPort>
+	<outPort index="1" name="HDFS Connection">HDFS connection that points to the
+		local file system. This port can be connected for example to the Spark
+		nodes that read/write files.</outPort>
+        <outPort index="2" name="Spark Context">Local Spark context, that can be connected to all Spark nodes.</outPort>
     </ports>    
 </knimeNode>
