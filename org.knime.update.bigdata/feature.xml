@@ -40,4 +40,8 @@
          id="org.knime.features.bigdata.fileformats"
          version="0.0.0"/>
 
+   <includes
+         id="com.knime.features.bigdata.knosp"
+         version="0.0.0"/>
+
 </feature>
