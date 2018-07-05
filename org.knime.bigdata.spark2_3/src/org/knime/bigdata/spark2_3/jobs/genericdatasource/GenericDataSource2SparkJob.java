@@ -31,6 +31,7 @@ import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.parser.ParseException;
 import org.apache.spark.sql.types.StructField;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -87,6 +88,12 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
             return new GenericDataSource2SparkJobOutput(namedObject, spec);
 
         } catch (Exception e) {
+            if (e instanceof ParseException) {
+                // special characters are known to cause a ParseException with Spark to ORC and ORC to Spark nodes (see BD-701)
+                throw new KNIMESparkException(String.format(
+                    "Failed to read input path with name '%s'. This might be caused by special characters in column names.",
+                    inputPath, e.getMessage()));
+            }
             throw new KNIMESparkException(
                 String.format("Failed to read input path with name '%s'. Reason: %s", inputPath, e.getMessage()));
         }

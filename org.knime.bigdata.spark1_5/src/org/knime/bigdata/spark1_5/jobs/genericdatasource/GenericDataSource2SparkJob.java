@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
+import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.SQLContext;
@@ -107,6 +108,12 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
             return new GenericDataSource2SparkJobOutput(namedObject, spec);
 
         } catch (Exception e) {
+            if (e instanceof AnalysisException) {
+                // special characters are known to cause an AnalysisException with Spark to ORC and ORC to Spark nodes (see BD-701)
+                throw new KNIMESparkException(String.format(
+                    "Failed to read input path with name '%s'. This might be caused by special characters in column names.",
+                    inputPath, e.getMessage()));
+            }
             throw new KNIMESparkException(
                 String.format("Failed to read input path with name '%s'. Reason: %s", inputPath, e.getMessage()));
         }
