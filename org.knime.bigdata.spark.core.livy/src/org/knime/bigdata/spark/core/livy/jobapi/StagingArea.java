@@ -170,12 +170,14 @@ public class StagingArea {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("resource")
     public static void cleanUp() {
         LOG.info("Cleaning up staging area for KNIME Spark jobs");
         try {
             final FileSystem fs = FileSystem.get(stagingAreaURI, hadoopConf);
-            fs.delete(new Path(stagingAreaURI), true);
+            
+            // when the URI ends with a slash, then only the directory contents but not the directory itself will be deleted
+            fs.delete(new Path(URI.create(stagingAreaURI.toString().replaceFirst("/$", ""))), true);
         } catch (IOException e) {
             LOG.error("Error while deleting staging are for KNIME Spark jobs: " + e.getMessage(), e);
         }
