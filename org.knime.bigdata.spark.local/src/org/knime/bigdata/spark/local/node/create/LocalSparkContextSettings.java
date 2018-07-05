@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
@@ -37,6 +38,7 @@ import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
 import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -44,6 +46,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.ButtonGroupEnumInterface;
+import org.knime.core.node.workflow.NodeContext;
+import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * Settings class for the "Create Local Big Data Environment" node.
@@ -54,94 +58,108 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
  */
 public class LocalSparkContextSettings {
 
-	/**
-	 * Enum to model what happens when the KNIME workflow is closed.
-	 *
-	 * @author Bjoern Lohrmann, KNIME GmbH
-	 */
+    private static final NodeLogger LOG = NodeLogger.getLogger(LocalSparkContextSettings.class);
+
+    /**
+     * Enum to model what happens when the KNIME workflow is closed.
+     *
+     * @author Bjoern Lohrmann, KNIME GmbH
+     */
     public enum OnDisposeAction implements ButtonGroupEnumInterface {
 
-		/**
-		 * Destroy context on dispose.
-		 */
-		DESTROY_CTX,
-		/**
-		 * Delete named objects on dispose.
-		 */
-		DELETE_DATA,
+            /**
+             * Destroy context on dispose.
+             */
+            DESTROY_CTX,
+            /**
+             * Delete named objects on dispose.
+             */
+            DELETE_DATA,
 
-		/**
-		 * Do nothing on dispose.
-		 */
-		DO_NOTHING;
+            /**
+             * Do nothing on dispose.
+             */
+            DO_NOTHING;
 
-		@Override
-		public String getText() {
-			switch(this) {
-			case DESTROY_CTX:
-				return "Destroy Spark context";
-			case DELETE_DATA:
-				return "Delete Spark DataFrames";
-			default:
-				return "Do nothing";
-			}
-		}
+        @Override
+        public String getText() {
+            switch (this) {
+                case DESTROY_CTX:
+                    return "Destroy Spark context";
+                case DELETE_DATA:
+                    return "Delete Spark DataFrames";
+                default:
+                    return "Do nothing";
+            }
+        }
 
-		@Override
-		public String getActionCommand() { return this.toString(); }
+        @Override
+        public String getActionCommand() {
+            return this.toString();
+        }
 
-		@Override
-		public String getToolTip() { return null; }
+        @Override
+        public String getToolTip() {
+            return null;
+        }
 
-		@Override
-		public boolean isDefault() { return this == DELETE_DATA; }
-	}
+        @Override
+        public boolean isDefault() {
+            return this == DELETE_DATA;
+        }
+    }
 
-	/**
-	 * Enum to model which type of SQL to support with local Spark.
-	 *
-	 * @author Bjoern Lohrmann, KNIME GmbH
-	 */
-	public enum SQLSupport implements ButtonGroupEnumInterface {
+    /**
+     * Enum to model which type of SQL to support with local Spark.
+     *
+     * @author Bjoern Lohrmann, KNIME GmbH
+     */
+    public enum SQLSupport implements ButtonGroupEnumInterface {
 
-	    /**
-	     * Only provide the basic SparkSQL dialect.
-	     */
-		SPARK_SQL_ONLY,
+            /**
+             * Only provide the basic SparkSQL dialect.
+             */
+            SPARK_SQL_ONLY,
 
-		/**
-         * Provide full HiveQL dialect, but do not start Spark Thriftserver (for JDBC).
-         */
-		HIVEQL_ONLY,
+            /**
+             * Provide full HiveQL dialect, but do not start Spark Thriftserver (for JDBC).
+             */
+            HIVEQL_ONLY,
 
-		/**
-         * Provide full HiveQL dialect and start Spark Thriftserver to allow JDBC connections to be made.
-         */
-		HIVEQL_WITH_JDBC;
+            /**
+             * Provide full HiveQL dialect and start Spark Thriftserver to allow JDBC connections to be made.
+             */
+            HIVEQL_WITH_JDBC;
 
-		@Override
-		public String getText() {
-			switch(this) {
-			case SPARK_SQL_ONLY:
-				return "Spark SQL only";
-			case HIVEQL_ONLY:
-				return "HiveQL";
-			default:
-				return "HiveQL and provide JDBC connection";
-			}
-		}
+        @Override
+        public String getText() {
+            switch (this) {
+                case SPARK_SQL_ONLY:
+                    return "Spark SQL only";
+                case HIVEQL_ONLY:
+                    return "HiveQL";
+                default:
+                    return "HiveQL and provide JDBC connection";
+            }
+        }
 
-		@Override
-		public String getActionCommand() { return this.toString(); }
+        @Override
+        public String getActionCommand() {
+            return this.toString();
+        }
 
-		@Override
-		public String getToolTip() { return null; }
+        @Override
+        public String getToolTip() {
+            return null;
+        }
 
-		@Override
-		public boolean isDefault() { return this == HIVEQL_WITH_JDBC; }
-	}
+        @Override
+        public boolean isDefault() {
+            return this == HIVEQL_WITH_JDBC;
+        }
+    }
 
-	private static final String DEFAULT_CONTEXT_NAME = "knimeSparkContext";
+    private static final String DEFAULT_CONTEXT_NAME = "knimeSparkContext";
 
     private static final String DEFAULT_CUSTOM_SPARK_SETTINGS = "spark.jars: /path/to/some.jar\n";
 
@@ -151,8 +169,8 @@ public class LocalSparkContextSettings {
     private final SettingsModelInteger m_numberOfThreads =
         new SettingsModelIntegerBounded("numberOfThreads", 2, 1, Integer.MAX_VALUE);
 
-	private final SettingsModelString m_onDisposeAction = new SettingsModelString("onDisposeAction",
-			LocalSparkContextSettings.OnDisposeAction.DELETE_DATA.getActionCommand());
+    private final SettingsModelString m_onDisposeAction = new SettingsModelString("onDisposeAction",
+        LocalSparkContextSettings.OnDisposeAction.DELETE_DATA.getActionCommand());
 
     private final SettingsModelBoolean m_overrideSparkSettings =
         new SettingsModelBoolean("overrideSparkSettings", KNIMEConfigContainer.overrideSparkSettings());
@@ -161,15 +179,14 @@ public class LocalSparkContextSettings {
         new SettingsModelString("customSparkSettings", DEFAULT_CUSTOM_SPARK_SETTINGS);
 
     // SQL settings
-    private final SettingsModelString m_sqlSupport = new SettingsModelString("sqlSupport", SQLSupport.HIVEQL_WITH_JDBC.getActionCommand());
+    private final SettingsModelString m_sqlSupport =
+        new SettingsModelString("sqlSupport", SQLSupport.HIVEQL_WITH_JDBC.getActionCommand());
 
     private final SettingsModelBoolean m_useHiveDataFolder = new SettingsModelBoolean("useHiveDataFolder", false);
 
     private final SettingsModelString m_hiveDataFolder = new SettingsModelString("hiveDataFolder", "");
 
-    private final SettingsModelBoolean m_hideExistsWarning =
-            new SettingsModelBoolean("hideExistsWarning", false);
-
+    private final SettingsModelBoolean m_hideExistsWarning = new SettingsModelBoolean("hideExistsWarning", false);
 
     /**
      * Constructor.
@@ -194,7 +211,7 @@ public class LocalSparkContextSettings {
      * @return a unique, human-readable name for the local Spark context.
      */
     public String getContextName() {
-    	return m_contextName.getStringValue();
+        return m_contextName.getStringValue();
     }
 
     /**
@@ -211,7 +228,7 @@ public class LocalSparkContextSettings {
      * @return the number of worker threads in local Spark.
      */
     public int getNumberOfThreads() {
-    	return m_numberOfThreads.getIntValue();
+        return m_numberOfThreads.getIntValue();
     }
 
     /**
@@ -219,17 +236,16 @@ public class LocalSparkContextSettings {
      * @return the action to take when the KNIME workflow is closed.
      */
     public OnDisposeAction getOnDisposeAction() {
-    	return OnDisposeAction.valueOf(m_onDisposeAction.getStringValue());
+        return OnDisposeAction.valueOf(m_onDisposeAction.getStringValue());
     }
 
-	/**
-	 *
-	 * @return settings model for the action to take when the KNIME workflow is
-	 *         closed.
-	 * @see #getOnDisposeAction()
-	 */
+    /**
+     *
+     * @return settings model for the action to take when the KNIME workflow is closed.
+     * @see #getOnDisposeAction()
+     */
     public SettingsModelString getOnDisposeActionModel() {
-    	return m_onDisposeAction;
+        return m_onDisposeAction;
     }
 
     /**
@@ -258,16 +274,14 @@ public class LocalSparkContextSettings {
         return m_customSparkSettings.getStringValue();
     }
 
-
-	/**
-	 * Parses the custom Spark settings string (see
-	 * {@link #getCustomSparkSettingsString()}) into a map and returns it.
-	 *
-	 * @return the parsed custom Spark settings as a map.
-	 */
-	public Map<String, String> getCustomSparkSettings() {
-		return SparkPreferenceValidator.parseSettingsString(getCustomSparkSettingsString());
-	}
+    /**
+     * Parses the custom Spark settings string (see {@link #getCustomSparkSettingsString()}) into a map and returns it.
+     *
+     * @return the parsed custom Spark settings as a map.
+     */
+    public Map<String, String> getCustomSparkSettings() {
+        return SparkPreferenceValidator.parseSettingsString(getCustomSparkSettingsString());
+    }
 
     /**
      *
@@ -282,68 +296,68 @@ public class LocalSparkContextSettings {
      * @return settings model that says which type of SQL support to use in local Spark.
      * @see #getSQLSupport()
      */
-	public SettingsModelString getSqlSupportModel() {
-		return m_sqlSupport;
-	}
+    public SettingsModelString getSqlSupportModel() {
+        return m_sqlSupport;
+    }
 
-	/**
-	 *
-	 * @return which type of SQL support to use in local Spark.
-	 */
-	public SQLSupport getSQLSupport() {
-		return SQLSupport.valueOf(m_sqlSupport.getStringValue());
-	}
+    /**
+     *
+     * @return which type of SQL support to use in local Spark.
+     */
+    public SQLSupport getSQLSupport() {
+        return SQLSupport.valueOf(m_sqlSupport.getStringValue());
+    }
 
-	/**
-	 *
-	 * @return settings model that says whether or not to use a custom folder for the Hive Metastore DB and warehouse.
-	 * @see #useHiveDataFolder()
-	 */
+    /**
+     *
+     * @return settings model that says whether or not to use a custom folder for the Hive Metastore DB and warehouse.
+     * @see #useHiveDataFolder()
+     */
     protected SettingsModelBoolean getUseHiveDataFolderModel() {
         return m_useHiveDataFolder;
     }
-	/**
-	 *
-	 * @return whether or not to use a custom folder for the Hive Metastore DB and warehouse.
-	 */
+
+    /**
+     *
+     * @return whether or not to use a custom folder for the Hive Metastore DB and warehouse.
+     */
     public boolean useHiveDataFolder() {
         return m_useHiveDataFolder.getBooleanValue();
     }
 
-	/**
-	 *
-	 * @return settings model that says which folder to use for the Hive Metastore DB and warehouse.
-	 * @see #getHiveDataFolder()
-	 */
+    /**
+     *
+     * @return settings model that says which folder to use for the Hive Metastore DB and warehouse.
+     * @see #getHiveDataFolder()
+     */
     protected SettingsModelString getHiveDataFolderModel() {
         return m_hiveDataFolder;
     }
 
-	/**
-	 *
-	 * @return which folder to use for the Hive Metastore DB and warehouse.
-	 */
+    /**
+     *
+     * @return which folder to use for the Hive Metastore DB and warehouse.
+     */
     public String getHiveDataFolder() {
         return m_hiveDataFolder.getStringValue();
     }
 
-	/**
-	 *
-	 * @return settings model for whether to warn when the local Spark context
-	 *         already exists prior to trying to create it.
-	 * @see #hideExistsWarning()
-	 */
+    /**
+     *
+     * @return settings model for whether to warn when the local Spark context already exists prior to trying to create
+     *         it.
+     * @see #hideExistsWarning()
+     */
     protected SettingsModelBoolean getHideExistsWarningModel() {
-    	return m_hideExistsWarning;
+        return m_hideExistsWarning;
     }
 
-	/**
-	 *
-	 * @return whether to warn when the local Spark context
-	 *         already exists prior to trying to create it.
-	 */
+    /**
+     *
+     * @return whether to warn when the local Spark context already exists prior to trying to create it.
+     */
     public boolean hideExistsWarning() {
-    	return m_hideExistsWarning.getBooleanValue();
+        return m_hideExistsWarning.getBooleanValue();
     }
 
     /**
@@ -390,8 +404,8 @@ public class LocalSparkContextSettings {
      */
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
 
-    	m_contextName.validateSettings(settings);
-    	m_numberOfThreads.validateSettings(settings);
+        m_contextName.validateSettings(settings);
+        m_numberOfThreads.validateSettings(settings);
         m_onDisposeAction.validateSettings(settings);
         m_overrideSparkSettings.validateSettings(settings);
         if (m_overrideSparkSettings.getBooleanValue()) {
@@ -417,21 +431,22 @@ public class LocalSparkContextSettings {
      * @throws InvalidSettingsException if the settings are invalid.
      */
     public void validateDeeper() throws InvalidSettingsException {
-    	final List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
 
-    	SparkPreferenceValidator.validateSparkContextName(getContextName(), errors);
-    	SparkPreferenceValidator.validateCustomSparkSettings(useCustomSparkSettings(), getCustomSparkSettingsString(), errors);
+        SparkPreferenceValidator.validateSparkContextName(getContextName(), errors);
+        SparkPreferenceValidator.validateCustomSparkSettings(useCustomSparkSettings(), getCustomSparkSettingsString(),
+            errors);
 
-    	if (useHiveDataFolder()) {
-    		final File hiveDataFolder = new File(getHiveDataFolder());
-    		if (!hiveDataFolder.exists()) {
-    			errors.add("Hive data folder does not exist.");
-    		} else if (!hiveDataFolder.isDirectory()) {
-    			errors.add("The configured Hive data folder exists but is not a folder.");
-    		} else if (!hiveDataFolder.canWrite()) {
-    			errors.add("Cannot write to the configured Hive data folder.");
-    		}
-    	}
+        if (useHiveDataFolder()) {
+            final File hiveDataFolder = new File(getHiveDataFolder());
+            if (!hiveDataFolder.exists()) {
+                errors.add("Hive data folder does not exist.");
+            } else if (!hiveDataFolder.isDirectory()) {
+                errors.add("The configured Hive data folder exists but is not a folder.");
+            } else if (!hiveDataFolder.canWrite()) {
+                errors.add("Cannot write to the configured Hive data folder.");
+            }
+        }
 
         if (!errors.isEmpty()) {
             throw new InvalidSettingsException(SparkPreferenceValidator.mergeErrors(errors));
@@ -444,19 +459,33 @@ public class LocalSparkContextSettings {
 	 * @throws InvalidSettingsException
 	 *             if the settings are invalid.
 	 */
-	public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-		m_contextName.loadSettingsFrom(settings);
-		m_numberOfThreads.loadSettingsFrom(settings);
-		m_onDisposeAction.loadSettingsFrom(settings);
-		m_overrideSparkSettings.loadSettingsFrom(settings);
-		m_customSparkSettings.loadSettingsFrom(settings);
+    public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_contextName.loadSettingsFrom(settings);
+        m_numberOfThreads.loadSettingsFrom(settings);
+        m_onDisposeAction.loadSettingsFrom(settings);
+        m_overrideSparkSettings.loadSettingsFrom(settings);
+        m_customSparkSettings.loadSettingsFrom(settings);
 
-		m_sqlSupport.loadSettingsFrom(settings);
-		m_useHiveDataFolder.loadSettingsFrom(settings);
-		m_hiveDataFolder.loadSettingsFrom(settings);
+        m_sqlSupport.loadSettingsFrom(settings);
+        m_useHiveDataFolder.loadSettingsFrom(settings);
+        m_hiveDataFolder.loadSettingsFrom(settings);
 
-		m_hideExistsWarning.loadSettingsFrom(settings);
-	}
+        m_hideExistsWarning.loadSettingsFrom(settings);
+    }
+
+    /**
+     * @return a new {@link LocalSparkContextConfig} derived from the current settings.
+     */
+    public LocalSparkContextConfig createContextConfig() {
+        boolean enableHiveSupport = false;
+        boolean startThriftserver = false;
+
+        if (getSQLSupport() == SQLSupport.HIVEQL_WITH_JDBC) {
+            enableHiveSupport = true;
+            startThriftserver = true;
+        } else if (getSQLSupport() == SQLSupport.HIVEQL_ONLY) {
+            enableHiveSupport = true;
+        }
 
         return new LocalSparkContextConfig(
             // Spark

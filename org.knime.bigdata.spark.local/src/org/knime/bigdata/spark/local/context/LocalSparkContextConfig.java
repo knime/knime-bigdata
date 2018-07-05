@@ -6,7 +6,6 @@ package org.knime.bigdata.spark.local.context;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
-import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.LocalSparkVersion;
@@ -18,7 +17,7 @@ import org.knime.bigdata.spark.local.LocalSparkVersion;
  */
 public class LocalSparkContextConfig implements SparkContextConfig {
     
-	private final SparkVersion m_sparkVersion = LocalSparkVersion.SUPPORTED_SPARK_VERSION;
+    private final SparkVersion m_sparkVersion = LocalSparkVersion.SUPPORTED_SPARK_VERSION;
 
     private final SparkContextID m_contextID;
 
@@ -31,11 +30,11 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     private final boolean m_useCustomSparkSettings;
 
     private final Map<String, String> m_customSparkSettings;
-    
+
     private final boolean m_enableHiveSupport;
-    
+
     private final boolean m_startThriftserver;
-    
+
     private final boolean m_useHiveDataFolder;
 
     private final String m_hiveDataFolder;
@@ -43,6 +42,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     /**
      * Constructor.
      * 
+     * @param contextID The ID of the Spark context. 
      * @param contextName Name of the local Spark context.
      * @param numberOfThreads Number of worker threads in Spark.
      * @param deleteObjectsOnDispose Whether to delete named objects on dispose.
@@ -80,10 +80,10 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         if (useCustomSparkSettings && (customSparkSettings == null || customSparkSettings.isEmpty())) {
             throw new IllegalArgumentException("Can't override spark settings with empty settings");
         }
-        
-		if (useHiveDataFolder && (hiveDataFolder == null || hiveDataFolder.isEmpty())) {
-			throw new IllegalArgumentException("Name of persistent Hive folder must not be empty.");
-		}
+
+        if (useHiveDataFolder && (hiveDataFolder == null || hiveDataFolder.isEmpty())) {
+            throw new IllegalArgumentException("Name of persistent Hive folder must not be empty.");
+        }
 
         // Spark
         this.m_contextID = contextID;
@@ -92,7 +92,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         this.m_deleteObjectsOnDispose = deleteObjectsOnDispose;
         this.m_useCustomSparkSettings = useCustomSparkSettings;
         this.m_customSparkSettings = customSparkSettings;
-        
+
         // Hive
         this.m_enableHiveSupport = enableHiveSupport;
         this.m_startThriftserver = startThriftserver;
