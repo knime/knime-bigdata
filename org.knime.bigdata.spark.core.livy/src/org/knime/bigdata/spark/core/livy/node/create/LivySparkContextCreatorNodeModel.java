@@ -197,4 +197,12 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
     protected void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadSettingsFrom(settings);
     }
+
+    /**
+     * 
+     * @return the current Spark context ID.
+     */
+    public SparkContextID getSparkContextID() {
+        return m_sparkContextId;
+    }
 }

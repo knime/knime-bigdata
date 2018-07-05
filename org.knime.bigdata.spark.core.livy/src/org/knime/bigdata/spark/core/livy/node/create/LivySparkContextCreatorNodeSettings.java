@@ -14,15 +14,6 @@
  * website: www.knime.com
  * email: contact@knime.com
  * ---------------------------------------------------------------------
- *
- * History
- *   Created on 03.07.2015 by koetter
- *   Changes on 07.06.2016 by Sascha Wolke:
- *     - fields added: jobServerUrl, authentication, sparkJobLogLevel, overrideSparkSettings, customSparkSettings
- *     - protocol+host+port migrated into jobServerUrl
- *     - authentication flag added
- *     - deleteRDDsOnDispose renamed to deleteObjectsOnDispose
- *     - memPerNode migrated into overrideSparkSettings+customSparkSettings
  */
 package org.knime.bigdata.spark.core.livy.node.create;
 

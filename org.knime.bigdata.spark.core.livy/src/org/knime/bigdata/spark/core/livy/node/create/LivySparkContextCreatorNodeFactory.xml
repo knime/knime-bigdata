@@ -74,5 +74,11 @@
     	<inPort index="0" name="Remote file system connection">A connection to a remote file system. Supported file
     	systems are HDFS, webHDFS, httpFS, Amazon S3 and Azure Blob Store.</inPort>
         <outPort index="0" name="Spark Context">Spark context.</outPort>
-    </ports>    
+    </ports>
+    <views>
+      <view index="0" name="Spark log">
+        Displays the log messages returned by the spark-submit process on the
+        Livy server machine. This view does not provide the YARN container logs.
+      </view>
+    </views>
 </knimeNode>

@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.livy.node.create;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeView;
 
 /**
  *
@@ -59,4 +60,26 @@ public class LivySparkContextCreatorNodeFactory extends DefaultSparkNodeFactory<
     protected NodeDialogPane createNodeDialogPane() {
         return new LivySparkContextCreatorNodeDialog();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getNrNodeViews() {
+        return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<LivySparkContextCreatorNodeModel> createNodeView(final int viewIndex,
+        final LivySparkContextCreatorNodeModel nodeModel) {
+        if (viewIndex == 0) {
+            return new LivySparkContextLogView(nodeModel);
+        } else {
+            throw new IllegalArgumentException("No such view");
+        }
+    }
+
 }

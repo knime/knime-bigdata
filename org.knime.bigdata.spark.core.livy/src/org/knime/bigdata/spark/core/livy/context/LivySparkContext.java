@@ -30,6 +30,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
@@ -514,5 +515,26 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             buf.append("\n");
         }
         return buf.toString();
+    }
+
+    /**
+     * Fetches the Spark driver logs.
+     * 
+     * @param rows The number of rows to fetch.
+     * @param exec Execution monitor to check for cancelation.
+     * @return a list of the last lines from the Spark driver log.
+     * @throws KNIMESparkException if context was not OPEN or something went wrong while fetching the logs.
+     * @throws CanceledExecutionException if given {@link ExecutionMonitor} was canceled.
+     */
+    public synchronized List<String> getSparkDriverLogs(final int rows, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
+        
+        switch (getStatus()) {
+            case NEW:
+            case CONFIGURED:
+                throw new KNIMESparkException("Spark context needs to be configured before opening.");
+            default: // this is actually OPEN
+                return waitForFuture(m_livyClient.getDriverLog(rows), exec);
+        }
     }
 }
