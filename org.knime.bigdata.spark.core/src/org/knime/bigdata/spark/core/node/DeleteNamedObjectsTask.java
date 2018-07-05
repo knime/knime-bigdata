@@ -20,7 +20,8 @@
  */
 package org.knime.bigdata.spark.core.node;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -63,7 +64,8 @@ public class DeleteNamedObjectsTask implements Runnable {
             try {
                 final SparkContext context = SparkContextManager.getOrCreateSparkContext(contextID);
                 if (SparkContextStatus.OPEN.equals(context.getStatus())) {
-                    context.deleteNamedObjects(Collections.singleton(e.getValue()));
+                    final String[] toDelete = e.getValue();
+                    context.deleteNamedObjects(new HashSet<String>(Arrays.asList(toDelete)));
                 }
             } catch (final Throwable ex) {
                 // this does not log the full exception on purpose. In large workflows
