@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +64,9 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
+import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.util.FileUtil;
+import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * Spark context implementation for Apache Livy.
@@ -208,9 +211,29 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             livyHttpConf.setProperty("livy.client.http.spnego.enable", "false");
         }
 
+        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
+            final Optional<String> wfUser = NodeContext.getWorkflowUser();
+            if (wfUser.isPresent()) {
+                LOGGER.info(String.format(
+                    "Running on KNIME Server. Opening Spark context with proxyUser=%s to impersonate the workflow user",
+                    wfUser.get()));
+                livyHttpConf.setProperty("livy.client.http.proxyUser", wfUser.get());
+            } else {
+                LOGGER.warn(
+                    "Running on KNIME Server but no workflow user is present in node context. No impersonation/proxyUser will be used for Spark context.");
+            }
+        }
+
         // transfer all custom Spark settings
         for (Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
-            livyHttpConf.setProperty(customSparkSetting.getKey(), customSparkSetting.getValue());
+            final String settingName = customSparkSetting.getKey();
+            if (!settingName.startsWith("livy.client.http.")) {
+                livyHttpConf.setProperty(customSparkSetting.getKey(), customSparkSetting.getValue());
+            } else {
+                LOGGER.warn(String.format(
+                    "Ignoring custom Spark setting %s=%s. Custom Spark settings must not start with \"livy.client.http\"",
+                    settingName, customSparkSetting.getValue()));
+            }
         }
 
         return livyHttpConf;
