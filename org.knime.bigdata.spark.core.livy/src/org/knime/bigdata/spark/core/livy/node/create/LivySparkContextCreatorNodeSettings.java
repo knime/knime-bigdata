@@ -170,7 +170,7 @@ public class LivySparkContextCreatorNodeSettings {
         new SettingsModelIntegerBounded("connectTimeout", 30, 0, Integer.MAX_VALUE);
 
     private final SettingsModelIntegerBounded m_responseTimeout =
-        new SettingsModelIntegerBounded("requestTimeout", 30, 0, Integer.MAX_VALUE);
+        new SettingsModelIntegerBounded("requestTimeout", 60, 0, Integer.MAX_VALUE);
 
     private final SettingsModelIntegerBounded m_jobCheckFrequency =
         new SettingsModelIntegerBounded("jobCheckFrequency", 1, 1, Integer.MAX_VALUE);
