@@ -1,11 +1,12 @@
 = Secured Cluster Connection Guide for KNIME Server
 KNIME GmbH
-Version 1.0, 2018-01-16
+Version 1.0, January 16, 2018
 :version: 1.0
 :toc: left
 :sectlinks:
 :stem: latexmath
 :imagesdir: ./img
+:icons: font
 
 include::server_overview.adoc[]
 
