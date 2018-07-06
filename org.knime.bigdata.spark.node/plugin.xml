@@ -230,9 +230,6 @@
      <SparkMissingValueHandler
          FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.RoundedMeanMissingValueHandlerFactory">
      </SparkMissingValueHandler>
-     <SparkMissingValueHandler
-         FactoryClass="org.knime.bigdata.spark.node.preproc.missingval.handler.TruncatedMeanMissingValueHandlerFactory">
-     </SparkMissingValueHandler>
    </extension>
    <extension
          point="org.knime.bigdata.spark.node.SparkSQLFunctionDialogProvider">
