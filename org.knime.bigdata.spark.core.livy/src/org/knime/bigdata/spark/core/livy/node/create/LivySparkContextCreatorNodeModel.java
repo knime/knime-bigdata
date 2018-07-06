@@ -40,6 +40,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObjectSpec;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.bigdata.spark.node.util.context.create.DestroyAndDisposeSparkContextTask;
+import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -93,6 +94,12 @@ public class LivySparkContextCreatorNodeModel extends SparkNodeModel {
         if (connInfo == null) {
             throw new InvalidSettingsException("No remote file handling connection information available");
         }
+        
+        if (connInfo instanceof CloudConnectionInformation && !m_settings.isStagingAreaFolderSet()) {
+            throw new InvalidSettingsException(
+                String.format("When connecting to %s a staging directory must be specified (see Advanced tab).",
+                    connInfo.getProtocol()));
+        }            
 
         m_settings.validateDeeper();
         configureSparkContext(m_sparkContextId, connInfo, m_settings);

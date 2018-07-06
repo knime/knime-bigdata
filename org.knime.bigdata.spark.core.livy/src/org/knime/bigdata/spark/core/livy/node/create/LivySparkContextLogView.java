@@ -176,8 +176,8 @@ public class LivySparkContextLogView extends NodeView<LivySparkContextCreatorNod
                     if (cause instanceof CanceledExecutionException) {
                         updateUI(false, "");
                     } else {
-                        updateUI(false, "Error while fetching Spark log. Reason: " + ee.getMessage());
-                        LOGGER.warn("Error while fetching Spark log. Reason: " + ee.getMessage(), ee);
+                        updateUI(false, "Error while fetching Spark log. Reason: " + cause.getMessage());
+                        LOGGER.warn("Error while fetching Spark log. Reason: " + cause.getMessage(), cause);
                     }
                 }
             }

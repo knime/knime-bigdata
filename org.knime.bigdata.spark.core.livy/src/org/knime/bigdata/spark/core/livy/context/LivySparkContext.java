@@ -532,7 +532,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         switch (getStatus()) {
             case NEW:
             case CONFIGURED:
-                throw new KNIMESparkException("Spark context needs to be configured before opening.");
+                throw new KNIMESparkException("Spark context does not exist (anymore).");
             default: // this is actually OPEN
                 return waitForFuture(m_livyClient.getDriverLog(rows), exec);
         }

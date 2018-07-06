@@ -7,7 +7,12 @@
     
     <fullDescription>
         <intro>
-            Creates a new Spark context via <a href="http://livy.apache.org/">Apache Livy</a>.
+            Creates a new Spark context via <a href="http://livy.apache.org/">Apache Livy</a>. 
+            
+            <p>
+            This node requires access to a remote file system such as HDFS/webHDFs/httpFS or S3/Blob Store
+            in order to exchange temporary files between KNIME and the Spark context (running on the cluster).
+            </p>
             
             <p>
             <i>Note</i>: Executing this node always creates a new Spark context. Resetting the node
@@ -56,9 +61,9 @@
             </option>
             <option name="Set staging area for Spark jobs">
                 If enabled you can specify a directory in the connected remote file system,
-                that will be used for file transfer between KNIME and the Spark context. If no directory
-                is set, then a default directory (e.g. "/tmp") will be chosen. However, if the remote file
-                system is Amazon S3 or Azure Blob Store, then a directory <i>must</i> be provided.
+                that will be used to transfer temporary files between KNIME and the Spark context. If no directory
+                is set, then a default directory will be chosen, e.g. the HDFS user home directory. However, if the remote file
+                system is Amazon S3 or Azure Blob Store, then a staging directory <i>must</i> be provided.
             </option>
             
             <option name="Set custom Spark settings">
@@ -71,9 +76,17 @@
     </fullDescription>
     
     <ports>
-    	<inPort index="0" name="Remote file system connection">A connection to a remote file system. Supported file
-    	systems are HDFS, webHDFS, httpFS, Amazon S3 and Azure Blob Store.</inPort>
-        <outPort index="0" name="Spark Context">Spark context.</outPort>
+	<inPort index="0" name="Remote file system connection">A connection to a remote file system to
+		exchange temporary files between KNIME and the Spark context (running on the cluster). Supported file systems are:
+		<ul>
+		<li>HDFS, webHDFS and httpFS. Note that here KNIME must access the remote file system with the same user as Spark,
+		otherwise Spark context creation fails. When authenticating with <i>Kerberos</i> against both HDFS/webHDFs/httpFS and Livy,
+		then usually the same user will be used. Otherwise, this must be ensured manually.</li>
+		<li>Amazon S3 and Azure Blob Store (recommended when using Spark on Amazon EMR/Azure HDInsight). Note that for these file systems
+		a <i>staging area</i> must be specified (see above).</li>
+		</ul>
+	</inPort>
+	<outPort index="0" name="Spark Context">Spark context.</outPort>
     </ports>
     <views>
       <view index="0" name="Spark log">
