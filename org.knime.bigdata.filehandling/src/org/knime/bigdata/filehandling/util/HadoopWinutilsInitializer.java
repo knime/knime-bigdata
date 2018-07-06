@@ -49,11 +49,11 @@ public class HadoopWinutilsInitializer {
         final String hadoopHome =
             new File(FileHandlingPlugin.getDefault().getPluginRootPath(), "hadoop_home").getCanonicalPath();
         if (System.getProperty(HADOOP_HOME_SYSPROPERTY) == null) {
-            LOG.info(String.format("Setting system property %s to %s (for Hadoop winutils).", HADOOP_HOME_SYSPROPERTY,
+            LOG.debug(String.format("Setting system property %s to %s (for Hadoop winutils).", HADOOP_HOME_SYSPROPERTY,
                 hadoopHome));
             System.setProperty(HADOOP_HOME_SYSPROPERTY, hadoopHome);
         } else {
-            LOG.warn(String.format("System property %s is already set to %s. Doing nothing (not overwriting).",
+            LOG.debug(String.format("System property %s is already set to %s. Doing nothing (not overwriting).",
                 HADOOP_HOME_SYSPROPERTY, System.getProperty(HADOOP_HOME_SYSPROPERTY)));
         }
     }
