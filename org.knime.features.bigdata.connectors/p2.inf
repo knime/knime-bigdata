@@ -1,5 +1,0 @@
-update.matchExp = providedCapabilities.exists(pc | \
-  pc.namespace == 'org.eclipse.equinox.p2.iu' && \
-  (pc.name == 'com.knime.features.bigdata.connectors.feature.group' || \
-    (pc.name == 'org.knime.features.bigdata.feature.group' && pc.version ~= range('[0.0.0,$version$)'))))
-update.severity = 1
