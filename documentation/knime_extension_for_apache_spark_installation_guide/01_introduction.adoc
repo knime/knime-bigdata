@@ -1,0 +1,70 @@
+== Introduction
+
+This document describes the installation procedure of the KNIME Extension for Apache Spark(TM) to be used with KNIME Analytics Platform and KNIME Server.
+
+As depicted below, KNIME Extension for Apache Spark consists of:
+
+* a client-side extension for KNIME Analytics Platform/KNIME Server
+* a cluster-side REST service, that needs to be installed on an edge node of your Hadoop cluster or a node that can execute the `spark-submit` command. The service must be one of:
+** Spark Job Server (*recommended*)
+** http://livy.apache.org/[Apache Livy] (preview)
+
+image::sparkitechture.png[]
+
+=== Supported Hadoop distributions
+
+* Supported with Kerberos security:
+** Hortonworks HDP 2.4.2 with Spark 1.6
+** Hortonworks HDP 2.4.3 with Spark 1.6
+** Hortonworks HDP 2.5.x with Spark 1.6 and 2.0
+** Hortonworks HDP 2.6.x with Spark 1.6 and 2.1
+** Hortonworks HDP 2.6.3 with Spark 1.6 and 2.2
+** Hortonworks HDP 2.6.4 with Spark 1.6 and 2.2
+** Hortonworks HDP 2.6.5 with Spark 1.6 and 2.3
+** Cloudera CDH 5.7 with Spark 1.6, 2.0 and 2.1
+** Cloudera CDH 5.8 with Spark 1.6, 2.0, 2.1 and 2.2
+** Cloudera CDH 5.9 with Spark 1.6, 2.0, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.10 with Spark 1.6, 2.0, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.11 with Spark 1.6, 2.0, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.12 with Spark 1.6, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.13 with Spark 1.6, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.14 with Spark 1.6, 2.1, 2.2 and 2.3
+** Cloudera CDH 5.15 with Spark 1.6, 2.1, 2.2 and 2.3
+
+* In addition, supported without Kerberos security:
+** Hortonworks HDP 2.2 with Spark 1.2
+** Hortonworks HDP 2.3.0 with Spark 1.3
+** Hortonworks HDP 2.3.4 with Spark 1.5
+** Hortonworks HDP 2.4.x with Spark 1.6
+** Cloudera CDH 5.3 with Spark 1.2
+** Cloudera CDH 5.4 with Spark 1.3
+** Cloudera CDH 5.5 with Spark 1.5
+** Cloudera CDH 5.6 with Spark 1.5
+
+=== Supported Spark Job Server versions
+
+KNIME Extension for Apache Spark is compatible with the following Spark Job Server versions (provided by KNIME):
+
+* 0.6.2.3-KNIME (for Spark 1.x)
+* 0.7.0.3-KNIME (for Spark 2.x).
+
+=== Supported Apache Livy versions
+
+KNIME Extension for Apache Spark is compatible with Apache Livy 0.4.0 (not provided by KNIME). This version is shipped as part of:
+
+* 0.4.0 shipped with Hortonworks HDP 2.6.3 and higher
+* Amazon EMR 5.9.0 and higher
+
+[NOTE]
+====
+Support for Apache Livy is currently in *preview* status.
+====
+
+[[intro_supported_knime_sw]]
+=== Supported versions of KNIME software
+
+KNIME Extension for Apache Spark is compatible with the following versions of KNIME software:
+
+* KNIME Analytics Platform 3.6
+* KNIME Server 4.7
+

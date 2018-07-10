@@ -1,0 +1,111 @@
+== Setting up KNIME Extension for Apache Spark
+
+This section describes how to install the client-side KNIME Extension for Apache Spark in KNIME Analytics Platform or KNIME Server. The extension provides all the necessary KNIME nodes to create workflows that execute on Apache Spark.
+
+
+=== Requirements
+
+*Required Software:* A compatible version of KNIME Analytics Platform or KNIME Server (see <<intro_supported_knime_sw>>).
+
+*Network Connectivity Requirements:* KNIME Extension for Apache Spark (the client) needs to be able to make a network connection to the Spark Job Server service. There are two ways to make this connection:
+
+* *Direct connection (recommended):* Client -> Spark Job Server (default port 8090).
+* Proxied connection: Client -> TTP/HTTPS/SOCKS Proxy -> Spark Job Server (default port 8090). Currently, only proxies that do not require any authentication are supported. Note that KNIME does not provide the proxy software itself.
+
+=== Installation
+
+The extension can be installed via the KNIME Update Manager:
+
+. Go to *File* > *Install KNIME Extensions*.
+. Open the category *KNIME Big Data Extensions*.
+. Select *KNIME Extension for Apache Spark*.
+. Click on *Next* and follow the subsequent dialog steps to install the extension.
+
+If you don't have direct internet access you can also install the extension from a zipped update site:
+
+. Download the zipped *KNIME Analytics Platform* update site from https://www.knime.com/downloads/update[here]. 
+. Register the update site in KNIME Analytics Platform via *File* > *Preferences* > *Install/Update* > *Available Software Sites*.
+. Follow the installation steps for the KNIME Update Manager as above.
+
+=== Managing Spark contexts
+
+After installing the client-side extension, you should configure it to work with your environment e.g. your Spark Job Server or Apache Livy server.
+
+To work with Spark you first need to create a new Spark Context, which can be done using one of the *Create Spark Context* and *Create Spark Context via Livy* nodes.
+
+[[knime_ext_create_spark_context]]
+==== Create Spark Context node
+
+This node connects to Spark Job Server to create a new Spark context.
+
+image::create_spark_context.png[]
+
+Its node dialog has two main tabs. The first tab is the Context Settings tab which allows you to specify the following Spark Context settings:
+
+. *Spark version:* Please choose the Spark version of the Hadoop cluster you are connecting to.
+. *Context name:* A unique name for the Spark context.
+. *Delete objects on dispose:* KNIME workflows with Spark nodes create objects such as DataFrames/RDDs during execution. This setting specifies whether those objects shall be deleted when closing a workflow.
+. *Override Spark settings:* Custom settings for the Spark context, e.g. the amount of memory to allocate per Spark executor. These settings override those from Job Server’s `environment.conf`.
+. *Hide context exists warning:* If not enabled the node will show a warning if a Spark Context with the defined name already exists.
+
+.Create Spark Context: Context Settings tab
+image::create_spark_context_tab1.png[]
+
+The second tab is the *Connection Settings* tab which allows you to specify the following connection settings:
+
+. *Job server URL*: This is the HTTP/HTTPS URL under which the Spark Job Server WebUI can be reached. The default URL is `http://localhost:8090/`.
+. *Credentials:* If you have activated user authentication, you need to enter a username and password here.
+. *Job timeout in seconds/Job check frequency:* These settings specify how long a single Spark job can run before being considered failed, and, respectively, in which intervals the status of a job shall be polled.
+
+.Create Spark Context: Connection Settings tab
+image::create_spark_context_tab2.png[]
+
+==== Create Spark Context via Livy node
+
+This node connects to an http://livy.apache.org/[Apache Livy] server to create a new Spark context. This node is a *preview* and may change in future releases.
+
+image::create_spark_context_livy.png[]
+
+This node requires access to a remote file system to exchange temporary files between KNIME and the Spark context (running on the cluster). Supported file systems are:
+
+* HDFS, webHDFS and httpFS. Note that here KNIME must access the remote file system with the same user as Spark, otherwise Spark context creation fails. When authenticating with Kerberos against both HDFS/webHDFs/httpFS and Livy, then usually the same user will be used. Otherwise, this must be ensured manually.
+
+* Amazon S3 and Azure Blob Store, which is recommended when using Spark on Amazon EMR/Azure HDInsight. Note that for these file systems a staging area must be specified in the *Advanced* tab.
+
+image::create_spark_context_livy_tab1.png[]
+
+Its node dialog has two tabs. The first tab provides the most commonly used settings when working with Spark:
+
+. *Spark version:* Please choose the Spark version of the Hadoop cluster you are connecting to.
+. *Livy URL:* The URL of Livy including protocol and port e.g. `http://localhost:8998/`.
+. *Authentication:* How to authenticate against Livy. Supported mechanism are Kerberos and None.
+. *Spark Executor resources:* Sets the resources to be request for the Spark executors. If enabled, you can specify the amount of memory and the number of cores for each executor.  In addition you can specify the Spark executor allocation strategy.
+. *Estimated resources:* An estimation of the resources that are allocated in your cluster by the Spark context. The calculation uses default settings for memory overheads etc and is thus only an estimate. The exact resources might be different depending on your specific cluster settings.
+
+image::create_spark_context_livy_tab2.png[]
+
+The second tab provides the advanced settings that are sometimes useful when working with Spark:
+
+. *Override default Spark driver resources:* If enabled, you can specify the amount of memory and number of cores to be allocated for the Spark driver process.
+. *Set staging area for Spark jobs:* If enabled, you can specify a directory in the connected remote file system, that will be used to transfer temporary files between KNIME and the Spark context. If no directory is set, then a default directory will be chosen, e.g. the HDFS user home directory. However, if the remote file system is Amazon S3 or Azure Blob Store, then a staging directory must be provided.
+. *Set custom Spark settings:* If enabled, you can specify additional Spark settings. A tooltip is provided for the keys if available. For further information about the Spark settings refer to the Spark documentation.
+
+
+
+==== Destroy Spark Context node
+
+Once you have finished your Spark job, you should destroy the created context to free up the resources your Spark Context has allocated on the cluster. To do so you can use the *Destroy Spark Context* node.
+
+.The Destroy Spark Context node
+image::destroy_spark_context.png[]
+
+.Simple example of a Spark workflow
+image::simple_spark_workflow_example.png[]
+
+==== Adapting default settings for the Create Spark Context node
+
+The default settings of the Create Spark Context node can be specified via a preference page. The default settings are applied whenever the node is added to a KNIME workflow. To change the default settings, open *File* > *Preferences* > *KNIME* > *Big Data* > *Spark* and adapt them to your environment (see <<knime_ext_create_spark_context>>).
+
+=== Proxy settings
+
+If your network requires you to connect to Spark Job Server via a proxy, please open *File* > *Preferences* > *Network Connections*. Here you can configure the details of your HTTP/HTTPS/SOCKS proxies. Please consult the official https://help.eclipse.org/oxygen/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Freference%2Fref-net-preferences.htm[Eclipse documentation] on how to configure proxies.

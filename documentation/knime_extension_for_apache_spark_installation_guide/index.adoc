@@ -1,0 +1,16 @@
+= KNIME Extension for Apache Spark(TM): Installation Guide
+KNIME GmbH
+Version 2.3.0, July 11th, 2018
+:version: 2.3.0
+:toc: left
+:sectlinks:
+:stem: latexmath
+:imagesdir: ./img
+:icons: font
+
+include::01_introduction.adoc[]
+
+include::02_sjs_setup.adoc[]
+
+include::03_knime_extension_setup.adoc[]
+
