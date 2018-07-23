@@ -227,21 +227,21 @@ public class CommonConfigContainer {
     }
 
     /**
-     * @noreference This method should be used by other plugins then the hdfs file handling plugin
+     * @noreference This method should be used by other plugins than the hdfs file handling plugin
      */
     public void hdfsSupported() {
         m_hdfsSupported = true;
     }
 
     /**
-     * @noreference This method should be used by other plugins then the hdfs file handling plugin
+     * @noreference This method should be used by other plugins than the hdfs file handling plugin
      */
     public void hiveSupported() {
         m_hiveSupported = true;
     }
 
     /**
-     * @noreference This method should be used by other plugins then the hdfs file handling plugin
+     * @noreference This method should be used by other plugins than the hdfs file handling plugin
      */
     public void sparkSupported() {
         m_sparkSupported = true;
