@@ -56,9 +56,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
-import org.knime.base.filehandling.remote.files.Protocol;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
-import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
@@ -88,7 +86,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
                 RemoteFileChooser.SELECT_FILE_OR_DIR,
                 createFlowVariableModel(FileFormatReaderNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
-                createHDFSConnection());
+                HDFSLocalConnectionInformation.getInstance());
         final JPanel filePanel = new JPanel();
         filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.X_AXIS));
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input:"));
@@ -135,26 +133,8 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
             m_filePanel.setConnectionInformation(connInfo);
         } else {
             // No connection set, create local HDFS Connection
-            m_filePanel.setConnectionInformation(createHDFSConnection());
+            m_filePanel.setConnectionInformation(HDFSLocalConnectionInformation.getInstance());
         }
         m_filePanel.setSelection(m_settings.getFileName());
     }
-
-    /**
-     * Create the spec for the local hdfs.
-     *
-     * @return ConnectionInformation for a local HDFs connection
-     * @throws InvalidSettingsException
-     */
-    private static ConnectionInformation createHDFSConnection() {
-        final HDFSLocalConnectionInformation connectionInformation = new HDFSLocalConnectionInformation();
-        final Protocol protocol = HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL;
-        connectionInformation.setProtocol(protocol.getName());
-        connectionInformation.setHost("localhost");
-        connectionInformation.setPort(protocol.getPort());
-        connectionInformation.setUser(null);
-        connectionInformation.setPassword(null);
-        return connectionInformation;
-    }
-
 }

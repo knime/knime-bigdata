@@ -193,14 +193,7 @@ public class LocalEnvironmentCreatorNodeModel extends SparkNodeModel {
 	 * @throws InvalidSettingsException ...
 	 */
 	private static ConnectionInformationPortObjectSpec createHDFSConnectionSpec() throws InvalidSettingsException {
-		final HDFSLocalConnectionInformation connectionInformation = new HDFSLocalConnectionInformation();
-		final Protocol protocol = HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL;
-		connectionInformation.setProtocol(protocol.getName());
-		connectionInformation.setHost("localhost");
-		connectionInformation.setPort(protocol.getPort());
-		connectionInformation.setUser(null);
-		connectionInformation.setPassword(null);
-		return new ConnectionInformationPortObjectSpec(connectionInformation);
+		return new ConnectionInformationPortObjectSpec(HDFSLocalConnectionInformation.getInstance());
 	}
 
 	@Override

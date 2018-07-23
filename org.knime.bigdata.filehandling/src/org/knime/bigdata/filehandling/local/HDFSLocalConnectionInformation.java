@@ -30,6 +30,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContentRO;
 
 /**
+ * Subclass of {@link ConnectionInformation} to model local HDFS connections. This class is a singleton, use
+ * {@link #getInstance()} to obtain a reference.
  *
  * @author Ole Ostergaard, KNIME GmbH, Konstanz, Germany
  */
@@ -37,13 +39,29 @@ public class HDFSLocalConnectionInformation extends ConnectionInformation {
 
     private static final long serialVersionUID = 1L;
 
+    private static ConnectionInformation INSTANCE;
 
     /**
-     * Parameterless constructor.
+     * @return the singleton instance of type {@link HDFSLocalConnectionInformation}.
      */
-    public HDFSLocalConnectionInformation() {
-        setHost("localhost");
-        setProtocol("hdfs-local");
+    public static synchronized ConnectionInformation getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new HDFSLocalConnectionInformation();
+            INSTANCE.setProtocol(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName());
+            INSTANCE.setHost("localhost");
+            INSTANCE.setPort(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getPort());
+            INSTANCE.setUser(null);
+            INSTANCE.setPassword(null);
+        }
+
+        return INSTANCE;
+    }
+
+    /**
+     * Private  constructor.
+     */
+    private HDFSLocalConnectionInformation() {
+
     }
 
     /**
