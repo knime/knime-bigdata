@@ -364,21 +364,29 @@ public class LocalSparkContextSettings {
      * @return the {@link SparkContextID} derived from the configuration settings.
      */
     public SparkContextID getSparkContextID() {
-        String ctxName = getContextName();
-        
+        return createSparkContextID(getContextName());
+    }
+
+    /**
+     * Static method to derive a {@link SparkContextID} for the given chosen context name.
+     * 
+     * @param ctxName User-defined name for the local Spark context.
+     * @return the corresponding {@link SparkContextID}.
+     */
+    public final static SparkContextID createSparkContextID(final String ctxName) {
+        String suffix = ctxName;
         if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
             final Optional<String> wfUser = NodeContext.getWorkflowUser();
             if (wfUser.isPresent()) {
-                LOG.info(String.format(
-                    "Running on KNIME Server. Prefixing local Spark context workflow user %s", wfUser.get()));
-                ctxName = wfUser.get() + "-" + getContextName();
+                LOG.info(String.format("Running on KNIME Server. Prefixing local Spark context workflow user %s",
+                    wfUser.get()));
+                suffix = wfUser.get() + "-" + ctxName;
             } else {
-                LOG.warn(
-                    "Running on KNIME Server but no workflow user is present in node context.");
+                LOG.warn("Running on KNIME Server but no workflow user is present in node context.");
             }
         }
-        
-        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL+ "://" + ctxName);
+
+        return new SparkContextID(SparkContextIDScheme.SPARK_LOCAL + "://" + suffix);
     }
 
     /**
@@ -499,6 +507,7 @@ public class LocalSparkContextSettings {
             // Hive
             enableHiveSupport,
             startThriftserver,
+            -1,
             useHiveDataFolder(),
             useHiveDataFolder() ? getHiveDataFolder() : null);
     }

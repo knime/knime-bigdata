@@ -25,12 +25,14 @@ public interface LocalSparkWrapper {
      * @param sparkConf A map with key-value pairs to inject into the actual SparkConf.
      * @param enableHiveSupport Whether to support HiveQL or just SparkSQL.
      * @param startThriftserver Whether to start Spark Thriftserver or not.
+     * @param thriftserverPort The TCP port on which Spark Thriftserver shall listen for JDBC connections. May be -1,
+     *            which results in the port being chosen randomly if necessary.
      * @param hiveDataFolder Where to store the MetastoreDB and warehouse of Spark Thriftserver. If null, a temporary
      *            location will be chosen ad-hoc.
      * @throws KNIMESparkException if something goes wrong while creating the Spark context.
      */
     void openSparkContext(String name, int workerThreads, Map<String, String> sparkConf, boolean enableHiveSupport,
-        boolean startThriftserver, String hiveDataFolder) throws KNIMESparkException;
+        boolean startThriftserver, int thriftserverPort, String hiveDataFolder) throws KNIMESparkException;
 
     /**
      * Shuts the Spark context down and releases the resources it holds.

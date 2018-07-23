@@ -34,6 +34,8 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     private final boolean m_enableHiveSupport;
 
     private final boolean m_startThriftserver;
+    
+    private final int m_thriftserverPort;
 
     private final boolean m_useHiveDataFolder;
 
@@ -42,7 +44,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
     /**
      * Constructor.
      * 
-     * @param contextID The ID of the Spark context. 
+     * @param contextID The ID of the Spark context.
      * @param contextName Name of the local Spark context.
      * @param numberOfThreads Number of worker threads in Spark.
      * @param deleteObjectsOnDispose Whether to delete named objects on dispose.
@@ -50,6 +52,8 @@ public class LocalSparkContextConfig implements SparkContextConfig {
      * @param customSparkSettings Key-value pairs of custom settings to inject into SparkConf.
      * @param enableHiveSupport Whether to provide HiveQL (or just SparkSQL).
      * @param startThriftserver Whether to start Spark Thriftserver or not.
+     * @param thriftserverPort The TCP port on which Spark Thriftserver shall listen for JDBC connections. May be -1,
+     *            which results in the port being chosen randomly if necessary.
      * @param useHiveDataFolder Whether to store Hive's Metastore and warehouse in the given Hive data folder.
      * @param hiveDataFolder A folder where to store Hive's Metastore and warehouse.
      */
@@ -62,6 +66,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         final Map<String, String> customSparkSettings,
         final boolean enableHiveSupport,
         final boolean startThriftserver, 
+        final int thriftserverPort,
         final boolean useHiveDataFolder,
         final String hiveDataFolder) {
 
@@ -86,18 +91,19 @@ public class LocalSparkContextConfig implements SparkContextConfig {
         }
 
         // Spark
-        this.m_contextID = contextID;
-        this.m_contextName = contextName;
-        this.m_numberOfThreads = numberOfThreads;
-        this.m_deleteObjectsOnDispose = deleteObjectsOnDispose;
-        this.m_useCustomSparkSettings = useCustomSparkSettings;
-        this.m_customSparkSettings = customSparkSettings;
+        m_contextID = contextID;
+        m_contextName = contextName;
+        m_numberOfThreads = numberOfThreads;
+        m_deleteObjectsOnDispose = deleteObjectsOnDispose;
+        m_useCustomSparkSettings = useCustomSparkSettings;
+        m_customSparkSettings = customSparkSettings;
 
         // Hive
-        this.m_enableHiveSupport = enableHiveSupport;
-        this.m_startThriftserver = startThriftserver;
-        this.m_useHiveDataFolder = useHiveDataFolder;
-        this.m_hiveDataFolder = hiveDataFolder;
+        m_enableHiveSupport = enableHiveSupport;
+        m_startThriftserver = startThriftserver;
+        m_thriftserverPort = thriftserverPort;
+        m_useHiveDataFolder = useHiveDataFolder;
+        m_hiveDataFolder = hiveDataFolder;
     }
 
     /**
@@ -163,8 +169,18 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 	public boolean startThriftserver() {
 		return m_startThriftserver;
 	}
+	
+	
+    /**
+     * 
+     * @return The TCP port on which Spark Thriftserver shall listen for JDBC connections. May return -1, if no port was
+     *         specified.
+     */
+	public int getThriftserverPort() {
+        return m_thriftserverPort;
+    }
 
-	/**
+    /**
 	 * 
 	 * @return true, if the Hive metastore DB and warehouse should be persisted
 	 *         in a non-ephemeral folder, false otherwise.
@@ -201,6 +217,7 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 		result = prime * result + m_numberOfThreads;
 		result = prime * result + ((m_sparkVersion == null) ? 0 : m_sparkVersion.hashCode());
 		result = prime * result + (m_startThriftserver ? 1231 : 1237);
+        result = prime * result + m_thriftserverPort;
 		result = prime * result + (m_useCustomSparkSettings ? 1231 : 1237);
 		result = prime * result + (m_useHiveDataFolder ? 1231 : 1237);
 		return result;
@@ -243,6 +260,8 @@ public class LocalSparkContextConfig implements SparkContextConfig {
 			return false;
 		if (m_startThriftserver != other.m_startThriftserver)
 			return false;
+        if (m_thriftserverPort != other.m_thriftserverPort)
+            return false;
 		if (m_useCustomSparkSettings != other.m_useCustomSparkSettings)
 			return false;
 		if (m_useHiveDataFolder != other.m_useHiveDataFolder)

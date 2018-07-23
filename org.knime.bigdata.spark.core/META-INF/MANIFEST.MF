@@ -10,6 +10,7 @@ Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: com.knime.bigdata.spark.core.port.data,
  org.knime.bigdata.spark.core.context,
  org.knime.bigdata.spark.core.context.namedobjects,
+ org.knime.bigdata.spark.core.context.testing,
  org.knime.bigdata.spark.core.context.util,
  org.knime.bigdata.spark.core.exception,
  org.knime.bigdata.spark.core.jar,

@@ -207,8 +207,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
 	@Override
-	public synchronized void openSparkContext(String name, int workerThreads, Map<String, String> userSparkConf,
-			boolean enableHiveSupport, boolean startThriftserver, String hiveDataFolder) throws KNIMESparkException {
+    public synchronized void openSparkContext(String name, int workerThreads, Map<String, String> userSparkConf,
+        boolean enableHiveSupport, boolean startThriftserver, int thriftserverPort, String hiveDataFolder)
+        throws KNIMESparkException {
 		
 		// we need to replace the current context class loader (which comes from OSGI)
 		// with the spark class loader, otherwise Java's ServiceLoader frame does not
@@ -230,7 +231,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				configureHiveSupport(sparkConf, hiveDataFolder);
 
 				if (startThriftserver) {
-					configureThriftserver(sparkConf);
+					configureThriftserver(sparkConf, thriftserverPort);
 				}
 			}
 
@@ -268,12 +269,16 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
-	private void configureThriftserver(SparkConf sparkConf) throws IOException {
-		m_hiveserverPort = findRandomFreePort();
-		
-		sparkConf.set("hive.server2.thrift.port", Integer.toString(m_hiveserverPort));
-		sparkConf.set("hive.server2.thrift.bind.host", "localhost");
-	}
+    private void configureThriftserver(final SparkConf sparkConf, final int thriftserverPort) throws IOException {
+        if (thriftserverPort == -1) {
+            m_hiveserverPort = findRandomFreePort();
+        } else {
+            m_hiveserverPort = thriftserverPort;
+        }
+
+        sparkConf.set("hive.server2.thrift.port", Integer.toString(m_hiveserverPort));
+        sparkConf.set("hive.server2.thrift.bind.host", "localhost");
+    }
 
 	private static int findRandomFreePort() throws IOException {
 		int freePort;

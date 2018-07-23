@@ -147,6 +147,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 					sparkConf,
 					config.enableHiveSupport(),
 					config.startThriftserver(),
+					config.getThriftserverPort(),
 					config.useHiveDataFolder()
 							? config.getHiveDataFolder()
 							: null);

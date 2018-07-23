@@ -6,6 +6,7 @@ Bundle-Version: 3.6.0.qualifier
 Bundle-Activator: org.knime.bigdata.hdfs.FileHandlingPlugin
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.filehandling.local,
+ org.knime.bigdata.filehandling.testing,
  org.knime.bigdata.filehandling.util,
  org.knime.bigdata.hdfs.filehandler
 Require-Bundle: org.knime.core;bundle-version="[3.0.0,4.0.0)",

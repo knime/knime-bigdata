@@ -46,7 +46,7 @@ import org.knime.core.node.port.database.DatabaseConnectionSettings;
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
-class HiveConnectorNodeModel extends NodeModel {
+public class HiveConnectorNodeModel extends NodeModel {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveConnectorNodeModel.class);
     private final HiveConnectorSettings m_settings = new HiveConnectorSettings();
 
@@ -88,7 +88,13 @@ class HiveConnectorNodeModel extends NodeModel {
         return spec;
     }
 
-    static String getJDBCURL(final HiveConnectorSettings settings) {
+    /**
+     * Creates a JDBC URL from the given {@link HiveConnectorSettings}.
+     *
+     * @param settings {@link HiveConnectorSettings} to use when building the URL.
+     * @return a JDBC URL.
+     */
+    public static String getJDBCURL(final HiveConnectorSettings settings) {
         final String host = settings.getHost();
         final int port = settings.getPort();
         final String dbName = settings.getDatabaseName();

@@ -28,9 +28,12 @@ import org.knime.bigdata.hive.utility.HiveUtility;
  *
  * @author Thorsten Meinl, KNIME AG, Zurich, Switzerland
  */
-class HiveConnectorSettings extends ParameterizedDatabaseConnectionSettings {
+public class HiveConnectorSettings extends ParameterizedDatabaseConnectionSettings {
 
-    HiveConnectorSettings() {
+    /**
+     * Default constructor.
+     */
+    public HiveConnectorSettings() {
         setPort(10000);
         setRowIdsStartWithZero(true);
         setRetrieveMetadataInConfigure(false);

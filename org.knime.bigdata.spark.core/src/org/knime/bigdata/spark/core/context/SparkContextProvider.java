@@ -20,17 +20,20 @@
  */
 package org.knime.bigdata.spark.core.context;
 
+import java.util.Map;
 import java.util.Optional;
 
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.spark.core.context.SparkContext.SparkContextStatus;
 import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * Interface for different providers of Spark contexts. Providers can be registered via the respective extension point.
  *
- * @author Oleg Yasnev, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  * @param <T> Spark context configuration class.
  */
 public interface SparkContextProvider<T extends SparkContextConfig> extends SparkProvider {
@@ -46,7 +49,7 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
     /**
      * Returns the URL scheme for {@link SparkContextID}s that is supported by this provider.
      *
-     * @return the scheme as a string (without ://).
+     * @return the scheme as an enum.
      */
     SparkContextIDScheme getSupportedScheme();
 
@@ -76,4 +79,17 @@ public interface SparkContextProvider<T extends SparkContextConfig> extends Spar
      *         {@link SparkContextStatus#CONFIGURED}.
      */
     Optional<SparkContext<T>> createDefaultSparkContextIfPossible();
+
+
+    /**
+     * Creates a new Spark context configuration based on the given map of flow variables. Which flow variables are
+     * expected is up to the implementing class.
+     *
+     * @param flowVariables A map of flow variables used to configure the context. Which flow variables are expected is
+     *            up to the implementing class.
+     * @return a new Spark context configuration based on the given map of flow variables.
+     * @noreference This is testing code and its API is subject to change without notice.
+     * @see TestflowVariable
+     */
+    public T createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables);
 }

@@ -4,22 +4,28 @@
 package org.knime.bigdata.spark.local;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.knime.bigdata.commons.testing.TestflowVariable;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
 import org.knime.bigdata.spark.core.context.SparkContextProvider;
+import org.knime.bigdata.spark.core.preferences.SparkPreferenceValidator;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.bigdata.spark.local.context.LocalSparkContext;
 import org.knime.bigdata.spark.local.context.LocalSparkContextConfig;
+import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings;
+import org.knime.bigdata.spark.local.node.create.LocalSparkContextSettings.SQLSupport;
+import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * Spark context provider that provides local Spark.
  * 
- * @author Oleg Yasnev, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class SparkLocalContextProvider implements SparkContextProvider<LocalSparkContextConfig> {
 
@@ -30,7 +36,7 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
     public CompatibilityChecker getChecker() {
         return LocalSparkVersion.VERSION_CHECKER;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -74,22 +80,54 @@ public class SparkLocalContextProvider implements SparkContextProvider<LocalSpar
     /**
      * {@inheritDoc}
      */
-	@Override
-	public String toPrettyString(SparkContextID contextID) {
-		if (contextID.getScheme() != SparkContextIDScheme.SPARK_LOCAL) {
-			throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme().toString());
-		}
+    @Override
+    public String toPrettyString(SparkContextID contextID) {
+        if (contextID.getScheme() != SparkContextIDScheme.SPARK_LOCAL) {
+            throw new IllegalArgumentException("Unsupported scheme: " + contextID.getScheme().toString());
+        }
 
-		final URI uri = contextID.asURI();
-		return String.format(String.format("Local Spark Context (%s)", uri.getHost()));
-	}
+        final URI uri = contextID.asURI();
+        return String.format(String.format("Local Spark Context (%s)", uri.getHost()));
+    }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public Optional<SparkContext<LocalSparkContextConfig>> createDefaultSparkContextIfPossible() {
-		// currently, local Spark never provides the default Spark context.
-		return Optional.empty();
-	}
+    @Override
+    public Optional<SparkContext<LocalSparkContextConfig>> createDefaultSparkContextIfPossible() {
+        // currently, local Spark never provides the default Spark context.
+        return Optional.empty();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LocalSparkContextConfig createTestingSparkContextConfig(Map<String, FlowVariable> flowVariables) {
+
+        final String contextName = TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
+        final SparkContextID contextID = LocalSparkContextSettings.createSparkContextID(contextName);
+        final int numberOfThreads = TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THREADS, flowVariables);
+        final boolean deleteObjectsOnDispose = true;
+        final boolean useCustomSparkSettings =
+            TestflowVariable.isTrue(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+        final Map<String, String> customSparkSettings = SparkPreferenceValidator
+            .parseSettingsString(TestflowVariable.getString(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables));
+        boolean enableHiveSupport = TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT,
+            SQLSupport.HIVEQL_WITH_JDBC.getActionCommand(), flowVariables)
+            || TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT,
+                SQLSupport.HIVEQL_ONLY.getActionCommand(), flowVariables);
+        final boolean startThriftserver = TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT,
+            SQLSupport.HIVEQL_WITH_JDBC.getActionCommand(), flowVariables);
+        final int thriftserverPort =
+            TestflowVariable.getInt(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVariables);
+        final boolean useHiveDataFolder =
+            TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables);
+        final String hiveDataFolder =
+            TestflowVariable.getString(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
+
+        return new LocalSparkContextConfig(contextID, contextName, numberOfThreads, deleteObjectsOnDispose,
+            useCustomSparkSettings, customSparkSettings, enableHiveSupport, startThriftserver, thriftserverPort,
+            useHiveDataFolder, hiveDataFolder);
+    }
 }
