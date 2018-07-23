@@ -1,0 +1,299 @@
+package org.knime.bigdata.testing;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.Platform;
+import org.knime.bigdata.commons.testing.TestflowVariable;
+import org.knime.bigdata.spark.core.context.SparkContextIDScheme;
+import org.knime.core.node.workflow.CredentialsStore;
+import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.util.FileUtil;
+
+/**
+ * Reads flow variables from a CSV file. See {@link TestflowVariable} for definitions and descriptions.
+ * 
+ * For the connector nodes that support credentials (HDFS/webHDFS/httpFS, Hive, Impala, Create Spark Context)
+ * additional credentials variables will be automatically injected. The credentials are built from the
+ * provided username/password flow variables.
+ * 
+ * Minimum node settings <-> variables:
+ *   HDFS nodes:
+ *     - useworkflowcredentials = hdfs.useCredentials
+ *     - workflowcredentials = hdfs.credentialsName
+ *     - user = hdfs.user (optional, backward compatibility)
+ *     - host = hostname
+ *     - authenticationmethod = hdfs.authMethod
+ *
+ *   Hive/Impala nodes:
+ *     - kerberos = hive.useKerberos
+ *     - credentials_name = hive.credentialsName
+ *     - username = hive.username (optional, backward compatibility)
+ *     - password = hive.password (optional, backward compatibility)
+ *     - default-connection.hostname = hostname
+ *     - default-connection.databaseName = hive.databasename
+ *     - parameter.parameter = hive.parameter
+ *
+ *   SSH node:
+ *     - useworkflowcredentials = ssh.useCredentials
+ *     - workflowcredentials = ssh.credentialsName
+ *     - user = ssh.username (optional, backward compatibility)
+ *     - host = hostname
+ *     - authenticationmethod = ssh.authMethod
+ *
+ *   Spark Create Context node:
+ *     - spark.version
+ *     - spark.contextIdScheme
+ *     - spark.settingsOverride
+ *     - spark.settingsCustom
+ *     - spark.sjs.* or spark.local.* or spark.livy.*
+ *
+ * @author Sascha Wolke, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME GmbH
+ *
+ */
+public class FlowVariableReader {
+
+    /** Default CSV file path if FLOWVARS is not set in ENV. */
+    public final static String DEFAULT_PATH_WORKFLOW = "knime://knime.workflow/../flowvariables.csv";
+
+    /** Default flowvariables.csv path in workspace. */
+    public final static String DEFAULT_PATH_WORKSPACE = Platform.getLocation().append("/flowvariables.csv").toString();
+
+    /**
+     * Reads flow variable definitions from a CSV file and puts them into a map. It also performs some validation and
+     * generates additional credentials flow variables for HDFS, Hive, Impala, SSH and Spark Jobserver connector nodes.
+     * 
+     * @return a map with flow variables to inject into the workflow.
+     * @throws Exception
+     */
+    public static Map<String, FlowVariable> readFromCsv() throws Exception {
+        final Map<String, FlowVariable> flowVariables = new HashMap<>();
+
+        try (final BufferedReader reader = new BufferedReader(new FileReader(getInputFile()))) {
+
+            // Read lines into string flow variables, ignore variables with
+            // empty values.
+            String line = reader.readLine(); // skip header
+            while ((line = reader.readLine()) != null) {
+                if (!StringUtils.isBlank(line) && !line.startsWith("#")) {
+                    final String kv[] = line.split(",", 2);
+                    
+                    // validate the flow variable name
+                    final TestflowVariable flowVar = TestflowVariable.fromName(kv[0]);
+                    final String value = (kv.length == 1) ? "" : kv[1];
+                    flowVar.validateValue(value);
+                    
+                    if (flowVar.isString() || flowVar.isBoolean()) {
+                        flowVariables.put(kv[0], new FlowVariable(kv[0], value));
+                    } else if (flowVar.isInt()) {
+                        flowVariables.put(kv[0], new FlowVariable(kv[0], Integer.parseInt(value)));
+                    }
+                }
+            }
+        }
+        
+        ensureRequiredFlowVariables(flowVariables);
+
+        if (flowVariables.containsKey(TestflowVariable.HOSTNAME.getName())) {
+            addCredentialsFlowVariable("hdfs", TestflowVariable.isTrue(TestflowVariable.HDFS_USECREDENTIALS, flowVariables), flowVariables);
+    
+            addCredentialsFlowVariable("hive", !TestflowVariable.isTrue(TestflowVariable.HIVE_USE_KERBEROS, flowVariables), flowVariables);
+    
+            addCredentialsFlowVariable("impala", !TestflowVariable.isTrue(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables),
+                flowVariables);
+    
+            addCredentialsFlowVariable("ssh", TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables), flowVariables);
+        }
+
+        if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
+            
+            final boolean sparkUseCredentials =
+                flowVariables.containsKey(TestflowVariable.SPARK_SJS_AUTHMETHOD.getName())
+                    && flowVariables.get(TestflowVariable.SPARK_SJS_AUTHMETHOD.getName()).getStringValue()
+                        .equalsIgnoreCase("CREDENTIALS");
+            addCredentialsFlowVariable("spark.sjs", sparkUseCredentials, flowVariables);
+        }
+        
+        return flowVariables;
+    }
+    
+    private static void ensureRequiredFlowVariables(Map<String, FlowVariable> flowVariables) throws IllegalArgumentException {
+        // if the "global" hostname is set, then we can assume to be connecting to something that is not local big data environment
+        if (has(TestflowVariable.HOSTNAME, flowVariables)) {
+            // HDFS is mandatory when the 
+            ensureHas(TestflowVariable.HDFS_AUTH_METHOD, flowVariables);
+            ensureHas(TestflowVariable.HDFS_URL, flowVariables);
+            ensureHas(TestflowVariable.HDFS_USECREDENTIALS, flowVariables);
+            if (TestflowVariable.isTrue(TestflowVariable.HDFS_USECREDENTIALS, flowVariables)) {
+                ensureHas(TestflowVariable.HDFS_USERNAME, flowVariables);
+            }
+            
+            // Hive is mandatory
+            ensureHas(TestflowVariable.HIVE_DATABASENAME, flowVariables);
+            ensureHas(TestflowVariable.HIVE_PARAMETER, flowVariables);
+            ensureHas(TestflowVariable.HIVE_USE_KERBEROS, flowVariables);
+            if (!TestflowVariable.isTrue(TestflowVariable.HIVE_USE_KERBEROS, flowVariables)) {
+                ensureHas(TestflowVariable.HIVE_USERNAME, flowVariables);
+                ensureHas(TestflowVariable.HIVE_PASSWORD, flowVariables);
+            }
+            
+            // SSH is mandatory
+            ensureHas(TestflowVariable.SSH_AUTHMETHOD, flowVariables);
+            ensureHas(TestflowVariable.SSH_PORT, flowVariables);
+            ensureHas(TestflowVariable.SSH_USECREDENTIALS, flowVariables);
+            if (TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables)) {
+                ensureHas(TestflowVariable.SSH_USERNAME, flowVariables);
+                ensureHas(TestflowVariable.SSH_PASSWORD, flowVariables);
+            } else {
+                ensureHas(TestflowVariable.SSH_KEYFILE, flowVariables);
+            }
+            
+            // Impala is optional, but if anything for Impala is defined, everything must be defined.
+            if (has(TestflowVariable.IMPALA_DATABASENAME, flowVariables)
+                || has(TestflowVariable.IMPALA_PARAMETER, flowVariables)
+                || has(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables)
+                || has(TestflowVariable.IMPALA_USERNAME, flowVariables)
+                || has(TestflowVariable.IMPALA_PASSWORD, flowVariables)) {
+                
+                ensureHas(TestflowVariable.IMPALA_DATABASENAME, flowVariables);
+                ensureHas(TestflowVariable.IMPALA_PARAMETER, flowVariables);
+                ensureHas(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables);
+                
+                if (!TestflowVariable.isTrue(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables)) {
+                    ensureHas(TestflowVariable.IMPALA_USERNAME, flowVariables);
+                    ensureHas(TestflowVariable.IMPALA_PASSWORD, flowVariables);
+                }
+            }
+        }
+        
+        ensureHas(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables);
+        ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+        ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
+
+        if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_LOCAL.toString(), flowVariables)) {
+            
+            ensureHas(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LOCAL_THREADS, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, flowVariables);
+            if (TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, "HIVEQL_WITH_JDBC", flowVariables)) {
+                ensureHas(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVariables);
+            }
+            ensureHas(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables);
+            if (TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables)) {
+                ensureHas(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
+            }
+        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
+            
+            ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
+            ensureHas(TestflowVariable.SPARK_SJS_URL, flowVariables);
+            ensureHas(TestflowVariable.SPARK_SJS_CONTEXTNAME, flowVariables);
+            ensureHas(TestflowVariable.SPARK_SJS_AUTHMETHOD, flowVariables);
+            if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_SJS_AUTHMETHOD, "CREDENTIALS", flowVariables)) {
+                ensureHas(TestflowVariable.SPARK_SJS_USERNAME, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SJS_PASSWORD, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SJS_RECEIVETIMEOUT, flowVariables);
+            }
+        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+            SparkContextIDScheme.SPARK_LIVY.toString(), flowVariables)) {
+            
+            ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LIVY_URL, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LIVY_AUTHMETHOD, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables);
+            if (TestflowVariable.isTrue(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables)) {
+                ensureHas(TestflowVariable.SPARK_LIVY_STAGINGAREAFOLDER, flowVariables);
+            }
+            ensureHas(TestflowVariable.SPARK_LIVY_CONNECTTIMEOUT, flowVariables);
+            ensureHas(TestflowVariable.SPARK_LIVY_RESPONSETIMEOUT, flowVariables);
+        }
+
+    }
+    
+    private static void ensureHas(TestflowVariable flowVar, Map<String, FlowVariable> flowVariables) {
+        if (!has(flowVar, flowVariables)) {
+            throw new IllegalArgumentException("Missing flow variable definition in csv: " + flowVar.getName());
+        }
+    }
+    
+    private static boolean has(TestflowVariable flowVar, Map<String, FlowVariable> flowVariables) {
+        return flowVariables.containsKey(flowVar.getName());
+    }
+
+    /**
+     * Create a [prefix].credentials and [prefix].credentialsName flow variable with given username and password
+     * variable.
+     *
+     * @param prefix hdfs/hive/impala/ssh/spark
+     * @param realCredentials create real or dummy credentials (username might be empty in this case)
+     * @param flowVariables map with all flow variables
+     * @throws Exception if username or password missing
+     */
+    private static void addCredentialsFlowVariable(final String prefix, final boolean realCredentials, final Map<String, FlowVariable> flowVariables) throws Exception {
+        
+        final String credsVar = prefix + ".credentials";
+        final String credsNameVar = prefix + ".credentialsName";
+        final String usernameVar = prefix + ".username";
+        final String passwordVar = prefix + ".password";
+
+        String username = "dummy";
+        String password = "dummy";
+        if (realCredentials) {
+            if (!flowVariables.containsKey(usernameVar)) {
+                throw new IllegalArgumentException("Missing flow variable definition in csv: " + usernameVar);
+            }
+            username = flowVariables.get(usernameVar).getStringValue();
+            
+            if (!flowVariables.containsKey(passwordVar)) {
+                throw new IllegalArgumentException("Missing flow variable definition in csv: " + passwordVar);
+            }
+            password = flowVariables.get(passwordVar).getStringValue();
+            
+        }
+        flowVariables.put(usernameVar, new FlowVariable(usernameVar, username));
+        flowVariables.put(passwordVar, new FlowVariable(passwordVar, password));
+        
+        flowVariables.put(credsNameVar, new FlowVariable(credsNameVar, credsVar));
+        flowVariables.put(credsVar,
+            CredentialsStore.newCredentialsFlowVariable(credsVar, username, password, false, false));
+    }
+
+    /**
+     * Searches for flowvariables.csv in FLOWVARS ENV, {@link #DEFAULT_PATH_WORKFLOW} or
+     * {@link #DEFAULT_PATH_WORKSPACE}.
+     * 
+     * @return File if found
+     * @throws FileNotFoundException - If no location contains CSV file.
+     * @throws MalformedURLException - If {@link #DEFAULT_PATH_WORKFLOW} has wrong format.
+     */
+    private static File getInputFile() throws FileNotFoundException, MalformedURLException {
+        if (System.getenv("FLOWVARS") != null) {
+            final File env = new File(System.getenv("FLOWVARS"));
+            if (env.exists() && env.canRead()) {
+                return env;
+            }
+        }
+
+        final File workflow = FileUtil.getFileFromURL(new URL(DEFAULT_PATH_WORKFLOW));
+        if (workflow.exists() && workflow.canRead()) {
+            return workflow;
+        }
+
+        final File workspace = new File(DEFAULT_PATH_WORKSPACE);
+        if (workspace.exists() && workspace.canRead()) {
+            return workspace;
+        }
+
+        throw new FileNotFoundException("Unable to locate flowvariables.csv");
+    }
+}
