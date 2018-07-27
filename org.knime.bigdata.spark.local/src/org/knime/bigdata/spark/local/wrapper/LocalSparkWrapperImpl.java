@@ -48,6 +48,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	
 	private final static String SPARK_LOCAL_DIR = "spark.local.dir";
 	
+	private final static String SPARK_DRIVER_HOST = "spark.driver.host";
+	
 	private String m_derbyUrl;
 	
 	private int m_hiveserverPort = -1;
@@ -245,6 +247,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.config("spark.logConf", "true")
 				.config("spark.kryo.unsafe", "true")
 				.config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+				.config(SPARK_DRIVER_HOST, "localhost")
 				.config(sparkConf)
 				.getOrCreate();
 			
@@ -368,6 +371,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		final Map<String, String> filteredMap = new HashMap<>(sparkConfMap);
 		filteredMap.remove(SPARK_APP_NAME);
 		filteredMap.remove(SPARK_MASTER);
+		filteredMap.remove(SPARK_DRIVER_HOST);
 
 		// not filtering SPARK_LOCAL_DIR because the user *may* want to set this
 
