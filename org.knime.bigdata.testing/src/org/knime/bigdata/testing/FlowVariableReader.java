@@ -103,14 +103,14 @@ public class FlowVariableReader {
         ensureRequiredFlowVariables(flowVariables);
 
         if (flowVariables.containsKey(TestflowVariable.HOSTNAME.getName())) {
-            addCredentialsFlowVariable("hdfs", TestflowVariable.isTrue(TestflowVariable.HDFS_USECREDENTIALS, flowVariables), flowVariables);
+            addCredentialsFlowVariable("hdfs", TestflowVariable.isTrue(TestflowVariable.HDFS_USECREDENTIALS, flowVariables), false, flowVariables);
     
-            addCredentialsFlowVariable("hive", !TestflowVariable.isTrue(TestflowVariable.HIVE_USE_KERBEROS, flowVariables), flowVariables);
+            addCredentialsFlowVariable("hive", !TestflowVariable.isTrue(TestflowVariable.HIVE_USE_KERBEROS, flowVariables), true, flowVariables);
     
-            addCredentialsFlowVariable("impala", !TestflowVariable.isTrue(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables),
+            addCredentialsFlowVariable("impala", !TestflowVariable.isTrue(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables), true,
                 flowVariables);
     
-            addCredentialsFlowVariable("ssh", TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables), flowVariables);
+            addCredentialsFlowVariable("ssh", TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables), true, flowVariables);
         }
 
         if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
@@ -120,7 +120,7 @@ public class FlowVariableReader {
                 flowVariables.containsKey(TestflowVariable.SPARK_SJS_AUTHMETHOD.getName())
                     && flowVariables.get(TestflowVariable.SPARK_SJS_AUTHMETHOD.getName()).getStringValue()
                         .equalsIgnoreCase("CREDENTIALS");
-            addCredentialsFlowVariable("spark.sjs", sparkUseCredentials, flowVariables);
+            addCredentialsFlowVariable("spark.sjs", sparkUseCredentials, true, flowVariables);
         }
         
         return flowVariables;
@@ -236,10 +236,13 @@ public class FlowVariableReader {
      *
      * @param prefix hdfs/hive/impala/ssh/spark
      * @param realCredentials create real or dummy credentials (username might be empty in this case)
+     * @param hasPassword Whether there is a password flow variable under the given prefix. If yes, this will be used to
+     *            generate the credentials. Otherwise an empty password will be used.
      * @param flowVariables map with all flow variables
      * @throws Exception if username or password missing
      */
-    private static void addCredentialsFlowVariable(final String prefix, final boolean realCredentials, final Map<String, FlowVariable> flowVariables) throws Exception {
+    private static void addCredentialsFlowVariable(final String prefix, final boolean realCredentials,
+        final boolean hasPassword, final Map<String, FlowVariable> flowVariables) throws Exception {
         
         final String credsVar = prefix + ".credentials";
         final String credsNameVar = prefix + ".credentialsName";
@@ -253,12 +256,16 @@ public class FlowVariableReader {
                 throw new IllegalArgumentException("Missing flow variable definition in csv: " + usernameVar);
             }
             username = flowVariables.get(usernameVar).getStringValue();
-            
-            if (!flowVariables.containsKey(passwordVar)) {
-                throw new IllegalArgumentException("Missing flow variable definition in csv: " + passwordVar);
+
+            if (hasPassword) {
+                if (!flowVariables.containsKey(passwordVar)) {
+                    throw new IllegalArgumentException("Missing flow variable definition in csv: " + passwordVar);
+                }
+                password = flowVariables.get(passwordVar).getStringValue();
+            } else {
+                password = "";
             }
-            password = flowVariables.get(passwordVar).getStringValue();
-            
+
         }
         flowVariables.put(usernameVar, new FlowVariable(usernameVar, username));
         flowVariables.put(passwordVar, new FlowVariable(passwordVar, password));
