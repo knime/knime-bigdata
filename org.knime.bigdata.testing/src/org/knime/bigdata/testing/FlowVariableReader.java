@@ -20,6 +20,9 @@ import org.knime.core.util.FileUtil;
 /**
  * Reads flow variables from a CSV file. See {@link TestflowVariable} for definitions and descriptions.
  * 
+ * Location of flowvariables.csv: If FLOWVARS ENV is not set, this janitor searches in
+ * {@link #DEFAULT_PATH_WORKFLOW} or {@link #DEFAULT_PATH_WORKSPACE} for flowvariables.csv.
+ * 
  * For the connector nodes that support credentials (HDFS/webHDFS/httpFS, Hive, Impala, Create Spark Context)
  * additional credentials variables will be automatically injected. The credentials are built from the
  * provided username/password flow variables.

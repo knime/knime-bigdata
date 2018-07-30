@@ -48,26 +48,13 @@
  */
 package com.knime.bigdata.testing;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.Platform;
 import org.knime.bigdata.testing.FlowVariableReader;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.workflow.CredentialsStore;
 import org.knime.core.node.workflow.FlowVariable;
-import org.knime.core.util.FileUtil;
 import org.knime.testing.core.TestrunJanitor;
 
 /**
@@ -75,55 +62,42 @@ import org.knime.testing.core.TestrunJanitor;
  *
  * Additional, KRB5_CONFIG can be set in ENV and system property java.security.krb5.conf will be provided.
  *
- * Location of flowvariables.csv:
- *    If FLOWVARS ENV is not set, this janitor searches in {@link BigDataExtensionJanitor#DEFAULT_PATH_WORKFLOW} or
- *    {@link #DEFAULT_PATH_WORKSPACE} for flowvariables.csv.
- *
- *
- *
- * @author Sascha Wolke, KNIME.com
+ * @author Sascha Wolke, KNIME GmbH
  */
 public class BigDataExtensionJanitor extends TestrunJanitor {
     private final static NodeLogger LOGGER = NodeLogger.getLogger(BigDataExtensionJanitor.class);
 
-    private volatile List<FlowVariable> m_flowVariables;
+    private final List<FlowVariable> m_flowVariables = new ArrayList<>();
 
     /** Default constructor. */
     public BigDataExtensionJanitor() {
-		final String kerberosConfig = System.getenv("KRB5_CONFIG");
-		if (kerberosConfig != null && !System.getProperties().contains("java.security.krb5.conf")) {
-			LOGGER.info("Setting system property java.security.krb5.conf = " + kerberosConfig);
-			System.setProperty("java.security.krb5.conf", kerberosConfig);
-		}
-    }
-
-    @Override
-    public List<FlowVariable> getFlowVariables() {
-        return m_flowVariables;
-    }
-
-
-    @Override
-    public void before() throws Exception {
-        if (m_flowVariables == null) {
-            synchronized (BigDataExtensionJanitor.class) {
-                final List<FlowVariable> flowVariables = new ArrayList<>();
-                flowVariables.addAll(FlowVariableReader.readFromCsv().values());
-                flowVariables.sort(new Comparator<FlowVariable>() {
-                    @Override
-                    public int compare(FlowVariable a, FlowVariable b) {
-                        return b.getName().compareTo(a.getName());
-                    }
-                });
-                m_flowVariables = flowVariables;
-            }
+        final String kerberosConfig = System.getenv("KRB5_CONFIG");
+        if (kerberosConfig != null && !System.getProperties().contains("java.security.krb5.conf")) {
+            LOGGER.info("Setting system property java.security.krb5.conf = " + kerberosConfig);
+            System.setProperty("java.security.krb5.conf", kerberosConfig);
         }
     }
 
+    @Override
+    public synchronized List<FlowVariable> getFlowVariables() {
+        return m_flowVariables;
+    }
+
+    @Override
+    public synchronized void before() throws Exception {
+        m_flowVariables.clear();
+        m_flowVariables.addAll(FlowVariableReader.readFromCsv().values());
+        m_flowVariables.sort(new Comparator<FlowVariable>() {
+            @Override
+            public int compare(FlowVariable a, FlowVariable b) {
+                return b.getName().compareTo(a.getName());
+            }
+        });
+    }
 
     @Override
     public void after() throws Exception {
-    	//nothing to do
+        //nothing to do
     }
 
     @Override
