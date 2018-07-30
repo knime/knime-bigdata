@@ -21,6 +21,10 @@
          version="0.0.0"/>
 
    <includes
+         id="org.knime.features.bigdata.testing"
+         version="0.0.0"/>
+
+   <includes
          id="org.knime.features.orc"
          version="0.0.0"/>
 
