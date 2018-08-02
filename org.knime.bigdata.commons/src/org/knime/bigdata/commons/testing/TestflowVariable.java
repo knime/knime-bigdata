@@ -75,7 +75,7 @@ public enum TestflowVariable {
         /**
          * Flow variable for the "parameter" setting of the Hive connection node.
          */
-        HIVE_PARAMETER("hive.parameter"),
+        HIVE_PARAMETER("hive.parameter", Type.STRING, true),
 
         /**
          * Flow variable for the "kerberos" setting of the Hive connection node. Possible values: true, false.
@@ -108,7 +108,7 @@ public enum TestflowVariable {
         /**
          * Flow variable for the "parameter" setting of the Impala Connection node.
          */
-        IMPALA_PARAMETER("impala.parameter"),
+        IMPALA_PARAMETER("impala.parameter", Type.STRING, true),
 
         /**
          * Flow variable for the "kerberos" setting of the Impala Connection node. Possible values: true, false.
