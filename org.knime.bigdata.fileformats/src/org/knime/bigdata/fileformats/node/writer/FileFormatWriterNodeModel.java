@@ -52,11 +52,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.core.runtime.URIUtil;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.base.filehandling.remote.files.RemoteFileFactory;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.bigdata.fileformats.utility.FileUploader;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
@@ -274,6 +277,9 @@ public class FileFormatWriterNodeModel extends NodeModel {
             }
             final String fileName = m_settings.getFileName();
             if (fileName.endsWith("/")) {
+            	if(m_settings.getFileOverwritePolicy()) {
+            		checkDirContent(connInfo, fileName);
+            	}
                 m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
             }
             try {
@@ -293,6 +299,7 @@ public class FileFormatWriterNodeModel extends NodeModel {
         }
         return new DataTableSpec[] {};
     }
+
 
     /**
      * {@inheritDoc}
@@ -350,4 +357,33 @@ public class FileFormatWriterNodeModel extends NodeModel {
         return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression);
 
     }
+    /**
+     * Checks if the dir contains files, that do not end with the right suffix and gives a warning if it does.
+     * @param connInfo
+     * @param fileName
+     */
+	private void checkDirContent(final ConnectionInformation connInfo, final String fileName) {
+		try {
+		ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
+		URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
+		RemoteFile<Connection> remotefile = 
+				RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
+
+		RemoteFile<Connection>[] fileList = remotefile.listFiles();
+		for(RemoteFile<Connection> file : fileList) {
+			String name = file.getName();
+			//ignore known Spark and HDFS metafiles
+			if(!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc") ) {
+					String suffix = m_settings.getFilenameSuffix();
+					if(!name.endsWith(suffix)) {
+				setWarningMessage(String.format("The directory contains files without '%s' suffix. "
+						+ "The directory will be overwritten with the current settings.", m_settings.getFilenameSuffix()));
+					}
+			}
+		}
+			
+		} catch (Exception e) {
+			LOGGER.debug(e.getMessage(), e);
+		}
+	}
 }
