@@ -1,9 +1,9 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.livy.Job;
 import org.apache.livy.JobHandle;
@@ -85,31 +85,24 @@ class LivyJobController implements JobController {
     private List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
 
-        final List<String> serverFilenamesToReturn = new LinkedList<>();
-
         // first we determine the files we have to upload
-        final List<File> filesToUpload = new LinkedList<>();
+        exec.setMessage("Uploading input file(s for job");
         for (File inputFile : job.getInputFiles()) {
             String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
-            if (cachedServerFile != null) {
-                serverFilenamesToReturn.add(cachedServerFile);
-            } else {
-                filesToUpload.add(inputFile);
+            if (cachedServerFile == null) {
+                exec.checkCanceled();
+                try {
+                    final String stagingfileName = m_remoteFSController.upload(inputFile);
+                    m_uploadFileCache.addFilesToCache(inputFile, stagingfileName);
+                } catch (Exception e) {
+                    throw new KNIMESparkException(e);
+                }
             }
         }
 
-        final Iterator<String> serverFilenameIter = doUploadFiles(filesToUpload, exec).iterator();
-        final Iterator<File> localFileIter = filesToUpload.iterator();
-
-        while (localFileIter.hasNext()) {
-            final File localFile = localFileIter.next();
-            final String serverFilename = serverFilenameIter.next();
-
-            m_uploadFileCache.addFilesToCache(localFile, serverFilename);
-            serverFilenamesToReturn.add(serverFilename);
-        }
-
-        return serverFilenamesToReturn;
+        return job.getInputFiles().stream()
+            .map(m_uploadFileCache::tryToGetServerFileFromCache)
+            .collect(Collectors.toList());
     }
 
     private List<String> doUploadFiles(final List<File> filesToUpload, final ExecutionMonitor exec)
@@ -120,6 +113,7 @@ class LivyJobController implements JobController {
         exec.setMessage("Uploading input file(s for job");
         try {
             for (File localFileToUpload : filesToUpload) {
+                exec.checkCanceled();
                 final String stagingfileName = m_remoteFSController.upload(localFileToUpload);
                 serverFilenames.add(stagingfileName);
             }
