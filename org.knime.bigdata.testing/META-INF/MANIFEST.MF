@@ -2,21 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Big Data Extensions
 Bundle-SymbolicName: org.knime.bigdata.testing;singleton:=true
-Bundle-Version: 3.6.0.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-ClassPath: bigdata-testing.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.testing;bundle-version="[3.3.0,4.0.0)",
- org.knime.core;bundle-version="[3.0.0,4.0.0)",
- org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
- org.knime.bigdata.spark.core;bundle-version="[2.3.0,3.0.0)",
- org.knime.bigdata.spark.node;bundle-version="2.3.0",
- org.knime.bigdata.spark.core.sparkjobserver;bundle-version="[2.3.0,3.0.0)",
- org.knime.bigdata.spark.core.livy;bundle-version="[2.3.0,3.0.0)",
- org.knime.bigdata.spark.local;bundle-version="[2.3.0,3.0.0)",
- org.knime.bigdata.filehandling;bundle-version="[3.6.0,4.0.0)",
- org.knime.base.filehandling;bundle-version="[3.6.0,4.0.0)",
- org.knime.base;bundle-version="[3.6.0,4.0.0)",
- org.knime.bigdata.hive;bundle-version="[3.6.0,4.0.0)",
- org.knime.bigdata.commons
+  org.knime.core;bundle-version="[3.0.0,4.0.0)",
+  org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
+  org.knime.bigdata.spark.core;bundle-version="[2.3.0,3.0.0)",
+  org.knime.bigdata.spark.node;bundle-version="2.3.0",
+  org.knime.bigdata.spark.core.sparkjobserver;bundle-version="[2.3.0,3.0.0)",
+  org.knime.bigdata.spark.core.livy;bundle-version="[2.3.0,3.0.0)",
+  org.knime.bigdata.spark.local;bundle-version="[2.3.0,3.0.0)",
+  org.knime.bigdata.filehandling;bundle-version="[3.6.0,4.0.0)",
+  org.knime.base.filehandling;bundle-version="[3.6.0,4.0.0)",
+  org.knime.base;bundle-version="[3.6.0,4.0.0)",
+  org.knime.bigdata.hive;bundle-version="[3.6.0,4.0.0)",
+  org.knime.bigdata.commons
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
