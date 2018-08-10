@@ -2,7 +2,7 @@
 # generated bundles where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180518
+version: knimebd-20180810
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -111,8 +111,9 @@ mavenBlacklist:
   # javax.annotation packages from jsr305  are never required at runtime
   - com\.google\.code\.findbugs:jsr305:jar:.*
   
-  # junit is never required at runtime
+  # junit and mockito are never required at runtime
   - junit:junit:jar:.*
+  - org.mockito:.*
   
   # this is a dummy artifact that Spark uses along with the shading plug-in
   - org\.spark-project\.spark:unused:.*
@@ -198,8 +199,9 @@ mavenDependencyBlacklist:
   # javax.annotation packages from jsr305  are never required at runtime
   - com\.google\.code\.findbugs:jsr305:jar:.*
   
-  # junit is never required at runtime
+  # junit and mockito are never required at runtime
   - junit:junit:jar:.*
+  - org.mockito:.*
 
   # dummy dependency that Spark uses along with the shading plug-in
   - org\.spark-project\.spark:unused:.*
