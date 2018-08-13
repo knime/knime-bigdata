@@ -14,7 +14,7 @@
 		<tycho-extras-version>1.1.0</tycho-extras-version>
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
 		a file:// or http:// URL pointing to org.knime.update.org  -->
-		<knime-p2>REPLACE_ME_WITH_URL</knime-p2>
+		<org.knime.update.org>REPLACE_ME_WITH_URL</org.knime.update.org>
 	</properties>
 
 	<modules>
@@ -112,7 +112,7 @@
 		<repository>
 			<id>org.knime.update.org</id>
 			<layout>p2</layout>
-			<url>${knime-p2}</url>
+			<url>${org.knime.update.org}</url>
 		</repository>
 	</repositories>
 

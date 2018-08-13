@@ -12,7 +12,7 @@ node {
 	stage('Clean workspace') {
 		cleanWorkspace()
 		try {
-			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target com.knime.update.bigdata.externals org.knime.update.bigdata.externals'
+			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target org.knime.update.bigdata.externals'
 		} catch (ex) {
 			currentBuild.result = 'FAILED'
 			emailext (
@@ -43,7 +43,7 @@ node {
 
 	stage('Maven-to-OSGi') {
 		try {
-			// in preparation for building org.knime.update.bigdata.externals, this converts
+			// in preparation for building org.knime.update.bigdata.externals, this
 			// performs the actual conversion from maven artifacts to OSGi bundles
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
@@ -57,7 +57,7 @@ node {
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.externals-parent
-					mvn -Dknime-p2="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.targetPlatform'].p2 + '''" clean package
+					mvn -Dorg.knime.update.org="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.org'].p2 + '''" clean package
 					popd
 				'''
 			}
