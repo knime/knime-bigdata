@@ -135,6 +135,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			final LocalSparkContextConfig config = getConfiguration();
 			final Map<String, String> sparkConf = new HashMap<>();
 
+			// reduce the shuffle default (200 partitions) to something smaller in local mode
+			sparkConf.put("spark.sql.shuffle.partitions", "" + (3 * config.getNumberOfThreads()));
+
 			if (config.useCustomSparkSettings()) {
 				sparkConf.putAll(config.getCustomSparkSettings());
 			}
