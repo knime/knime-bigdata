@@ -228,7 +228,7 @@ public class LivySparkContextConfig implements SparkContextConfig {
 
     @Override
     public String getContextName() {
-        final String uniqueId = m_sparkContextId.asURI().getFragment();
+        final String uniqueId = m_sparkContextId.asURI().getHost();
         return "KNIME Spark Context " + uniqueId;
     }
 }

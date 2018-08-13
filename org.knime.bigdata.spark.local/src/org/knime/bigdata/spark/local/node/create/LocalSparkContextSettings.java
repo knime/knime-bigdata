@@ -161,7 +161,7 @@ public class LocalSparkContextSettings {
 
     private static final String DEFAULT_CONTEXT_NAME = "knimeSparkContext";
 
-    private static final String DEFAULT_CUSTOM_SPARK_SETTINGS = "spark.jars: /path/to/some.jar\n";
+    private static final String DEFAULT_CUSTOM_SPARK_SETTINGS = "spark.jars: /path/to/some.jar\nspark.sql.shuffle.partitions: 100\n";
 
     // Spark context settings
     private final SettingsModelString m_contextName = new SettingsModelString("contextName", DEFAULT_CONTEXT_NAME);
