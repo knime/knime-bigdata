@@ -3,32 +3,40 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.knime.bigdata</groupId>
 	<artifactId>bigdata-parent</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
+	<version>2.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Parent pom for org.knime.update.bigdata</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tycho-version>1.1.0</tycho-version>
-		<tycho-extras-version>1.1.0</tycho-extras-version>
+
+		<tycho-version>1.2.0</tycho-version>
+		<tycho-extras-version>1.2.0</tycho-extras-version>
+
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
 		a file:// or http:// URL pointing to org.knime.update.org  -->
-		<knime-p2>REPLACE_ME_WITH_URL</knime-p2>
-    <compiledpmml-p2>REPLACE_ME_WITH_URL</compiledpmml-p2>
+		<org.knime.update.org>REPLACE_ME_WITH_URL</org.knime.update.org>
+
+		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
+		a file:// or http:// URL pointing to com.knime.update.pmml.compilation -->
+		<com.knime.update.pmml.compilation>REPLACE_ME_WITH_URL</com.knime.update.pmml.compilation>
+
+		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
+		a file:// or http:// URL pointing to org.knime.update.labsn -->
+		<org.knime.update.labs>REPLACE_ME_WITH_URL</org.knime.update.labs>
+
 	</properties>
 
 	<modules>
-    <module>org.knime.features.bigdata.externals</module>
-    <module>org.knime.update.bigdata.externals</module>
     <module>org.knime.bigdata.commons</module>
+    <module>org.knime.bigdata.fileformats</module>
     <module>org.knime.bigdata.filehandling</module>
     <module>org.knime.bigdata.hive</module>
     <module>org.knime.bigdata.impala</module>
-    <module>org.knime.bigdata.parquet</module>
     <module>org.knime.bigdata.scripting</module>
     <module>org.knime.bigdata.spark.core</module>
-    <module>org.knime.bigdata.spark.core.sparkjobserver</module>
     <module>org.knime.bigdata.spark.core.livy</module>
+    <module>org.knime.bigdata.spark.core.sparkjobserver</module>
     <module>org.knime.bigdata.spark.local</module>
     <module>org.knime.bigdata.spark.node</module>
     <module>org.knime.bigdata.spark1_2</module>
@@ -39,10 +47,16 @@
     <module>org.knime.bigdata.spark2_0</module>
     <module>org.knime.bigdata.spark2_1</module>
     <module>org.knime.bigdata.spark2_2</module>
+    <module>org.knime.bigdata.spark2_3</module>
+    <module>org.knime.bigdata.testing</module>
     <module>org.knime.features.bigdata.connectors</module>
+    <module>org.knime.features.bigdata.externals</module>
+    <module>org.knime.features.bigdata.fileformats</module>
     <module>org.knime.features.bigdata.spark</module>
     <module>org.knime.features.bigdata.spark.local</module>
+    <!-- <module>org.knime.features.bigdata.testing</module> -->
     <module>org.knime.update.bigdata</module>
+    <module>org.knime.update.bigdata.externals</module>
 	</modules>
 
 	<build>
@@ -133,15 +147,19 @@
 		<repository>
 			<id>org.knime.update.org</id>
 			<layout>p2</layout>
-			<url>${knime-p2}</url>
+			<url>${org.knime.update.org}</url>
 		</repository>
 
-    		<repository>
+		<repository>
 			<id>com.knime.update.pmml.compilation</id>
 			<layout>p2</layout>
-			<url>${compiledpmml-p2}</url>
+			<url>${com.knime.update.pmml.compilation}</url>
 		</repository>
 
+		<repository>
+			<id>org.knime.update.labs</id>
+			<layout>p2</layout>
+			<url>${org.knime.update.labs}</url>
+		</repository>
 	</repositories>
-
 </project>
