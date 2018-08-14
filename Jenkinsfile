@@ -48,7 +48,7 @@ node {
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder
-					mvn clean scala:compile scala:run
+					mvn clean package
 					popd
 				'''
 			}
