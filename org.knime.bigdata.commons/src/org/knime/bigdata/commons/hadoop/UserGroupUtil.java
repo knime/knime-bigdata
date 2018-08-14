@@ -112,17 +112,24 @@ public class UserGroupUtil {
 
         final UserGroupInformation user;
         if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
-            //Always use the workflow user on the server in Kerberos mode because of security reasons!!!
-            Optional<String> wfUser = NodeContext.getWorkflowUser();
-            if (wfUser.isPresent() && !kerberosTGTUser.getUserName().equals(wfUser.get())
-                    && !kerberosTGTUser.getShortUserName().equals(wfUser.get())) {
-                LOGGER.debug("Creating proxy user for workflow user " + wfUser
-                    + " using Kerberos TGT user " + kerberosTGTUser.getUserName() + " on server");
-                //the Kerberos user differs from the workflow user so we have to impersonate it
-                user = UserGroupInformation.createProxyUser(wfUser.get(), kerberosTGTUser);
-            } else {
-                LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the server.");
+            if (CommonConfigContainer.getInstance().disableKerberosImpersonation()) {
+                //use the Kerberos user as login user on the client
+                LOGGER.debug("IMPERSONATION DISABLED! Using Kerberos user: " + kerberosTGTUser.getUserName()
+                + " as login user on the server.");
+                //the real user is the same as the login user so we can simply use the real user
                 user = kerberosTGTUser;
+            } else {
+                Optional<String> wfUser = NodeContext.getWorkflowUser();
+                if (wfUser.isPresent() && !kerberosTGTUser.getUserName().equals(wfUser.get())
+                        && !kerberosTGTUser.getShortUserName().equals(wfUser.get())) {
+                    LOGGER.debug("Creating proxy user for workflow user " + wfUser
+                        + " using Kerberos TGT user " + kerberosTGTUser.getUserName() + " on server");
+                    //the Kerberos user differs from the workflow user so we have to impersonate it
+                    user = UserGroupInformation.createProxyUser(wfUser.get(), kerberosTGTUser);
+                } else {
+                    LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the server.");
+                    user = kerberosTGTUser;
+                }
             }
         } else {
             //use the Kerberos user as login user on the client
