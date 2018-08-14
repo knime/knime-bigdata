@@ -14,7 +14,7 @@
 		<tycho-extras-version>1.2.0</tycho-extras-version>
 
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
-		a file:// or http:// URL pointing to org.knime.update.org  -->
+		a file:// or http:// URL pointing to org.knime.update.org	-->
 		<org.knime.update.org>REPLACE_ME_WITH_URL</org.knime.update.org>
 
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
@@ -22,41 +22,67 @@
 		<com.knime.update.pmml.compilation>REPLACE_ME_WITH_URL</com.knime.update.pmml.compilation>
 
 		<!-- Jenkins sets this via maven commandline (-D). For building locally you can replace it with
-		a file:// or http:// URL pointing to org.knime.update.labsn -->
+		a file:// or http:// URL pointing to org.knime.update.labs -->
 		<org.knime.update.labs>REPLACE_ME_WITH_URL</org.knime.update.labs>
-
+		
+		<com.knime.tpbuilder>file:${project.basedir}/../com.knime.tpbuilder/target/repository/</com.knime.tpbuilder>
 	</properties>
 
 	<modules>
-    <module>org.knime.bigdata.commons</module>
-    <module>org.knime.bigdata.fileformats</module>
-    <module>org.knime.bigdata.filehandling</module>
-    <module>org.knime.bigdata.hive</module>
-    <module>org.knime.bigdata.impala</module>
-    <module>org.knime.bigdata.scripting</module>
-    <module>org.knime.bigdata.spark.core</module>
-    <module>org.knime.bigdata.spark.core.livy</module>
-    <module>org.knime.bigdata.spark.core.sparkjobserver</module>
-    <module>org.knime.bigdata.spark.local</module>
-    <module>org.knime.bigdata.spark.node</module>
-    <module>org.knime.bigdata.spark1_2</module>
-    <module>org.knime.bigdata.spark1_3</module>
-    <module>org.knime.bigdata.spark1_5</module>
-    <module>org.knime.bigdata.spark1_6</module>
-    <module>org.knime.bigdata.spark1_6_cdh5_9</module>
-    <module>org.knime.bigdata.spark2_0</module>
-    <module>org.knime.bigdata.spark2_1</module>
-    <module>org.knime.bigdata.spark2_2</module>
-    <module>org.knime.bigdata.spark2_3</module>
-    <module>org.knime.bigdata.testing</module>
-    <module>org.knime.features.bigdata.connectors</module>
-    <module>org.knime.features.bigdata.externals</module>
-    <module>org.knime.features.bigdata.fileformats</module>
-    <module>org.knime.features.bigdata.spark</module>
-    <module>org.knime.features.bigdata.spark.local</module>
-    <!-- <module>org.knime.features.bigdata.testing</module> -->
-    <module>org.knime.update.bigdata</module>
-    <module>org.knime.update.bigdata.externals</module>
+		<!-- this needs to go first because it ensures that jar files required by spark.local are present -->
+		<module>org.knime.bigdata.spark.local/libs/fetch_jars</module>
+	
+		<module>../knime-on-spark/com.knime.bigdata.knosp.node</module>
+		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_2</module>
+		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_3</module>
+		<module>../knime-on-spark/com.knime.osgiproxy</module>
+		<module>../knime-on-spark/com.knime.features.bigdata.knosp</module>
+		
+		<module>../knime-parquet/org.knime.parquet</module>
+		<module>../knime-parquet/org.knime.features.parquet</module>
+
+
+		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark.node</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_2</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_3</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.spark</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.node</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_2</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_3</module>
+		<module>../knime-sparkling-water/org.knime.features.ext.h2o.spark</module>
+		<module>../knime-sparkling-water/org.knime.features.ext.h2o.mojo.spark</module>
+
+		<module>../knime-orc/org.knime.orc</module>
+		<module>../knime-orc/org.knime.features.orc</module>
+
+		<module>org.knime.bigdata.commons</module>
+		<module>org.knime.bigdata.fileformats</module>
+		<module>org.knime.bigdata.filehandling</module>
+		<module>org.knime.bigdata.hive</module>
+		<module>org.knime.bigdata.impala</module>
+		<module>org.knime.bigdata.scripting</module>
+		<module>org.knime.bigdata.spark.core</module>
+		<module>org.knime.bigdata.spark.core.livy</module>
+		<module>org.knime.bigdata.spark.core.sparkjobserver</module>
+		<module>org.knime.bigdata.spark.local</module>
+		<module>org.knime.bigdata.spark.node</module>
+		<module>org.knime.bigdata.spark1_2</module>
+		<module>org.knime.bigdata.spark1_3</module>
+		<module>org.knime.bigdata.spark1_5</module>
+		<module>org.knime.bigdata.spark1_6</module>
+		<module>org.knime.bigdata.spark1_6_cdh5_9</module>
+		<module>org.knime.bigdata.spark2_0</module>
+		<module>org.knime.bigdata.spark2_1</module>
+		<module>org.knime.bigdata.spark2_2</module>
+		<module>org.knime.bigdata.spark2_3</module>
+		<module>org.knime.bigdata.testing</module>
+		<module>org.knime.features.bigdata.connectors</module>
+		<module>org.knime.features.bigdata.externals</module>
+		<module>org.knime.features.bigdata.fileformats</module>
+		<module>org.knime.features.bigdata.spark</module>
+		<module>org.knime.features.bigdata.spark.local</module>
+		<module>org.knime.features.bigdata.testing</module>
+		<module>org.knime.update.bigdata</module>
 	</modules>
 
 	<build>
@@ -117,6 +143,25 @@
 					</environments>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
@@ -133,6 +178,19 @@
 					<artifactId>target-platform-configuration</artifactId>
 					<version>${tycho-version}</version>
 				</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.4</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+				<version>${tycho-version}</version>
+			</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -141,7 +199,7 @@
 		<repository>
 			<id>com.knime.tpbuilder</id>
 			<layout>p2</layout>
-			<url>file:${project.basedir}/../com.knime.tpbuilder/target/repository/</url>
+			<url>${com.knime.tpbuilder}</url>
 		</repository>
 
 		<repository>

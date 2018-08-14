@@ -121,10 +121,6 @@
 			<artifactId>wagon-ssh</artifactId>
 			<version>${wagonVersion}</version>
 		</dependency>
-
-
-
-
 	</dependencies>
 
 
@@ -144,10 +140,26 @@
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.2.2</version>
-				<configuration>
-					<mainClass>com.knime.tpbuilder.Main</mainClass>
-					<addArgs>${tp.config.yml}</addArgs>
-				</configuration>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>run</id>
+						<phase>package</phase>
+						<configuration>
+							<mainClass>com.knime.tpbuilder.Main</mainClass>
+							<addArgs>${tp.config.yml}</addArgs>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

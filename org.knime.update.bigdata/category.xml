@@ -9,4 +9,17 @@
 
    <feature id="org.knime.features.bigdata.externals" />
 
+   <feature id="org.knime.features.bigdata.testing" />
+
+   <feature id="org.knime.features.orc" />
+
+   <feature id="org.knime.features.ext.h2o.spark" />
+
+   <feature id="org.knime.features.ext.h2o.mojo.spark" />
+
+   <feature id="org.knime.features.parquet" />
+
+   <feature id="org.knime.features.bigdata.fileformats" />
+
+   <feature id="com.knime.features.bigdata.knosp" />
 </site>
