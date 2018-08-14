@@ -88,6 +88,9 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     public static final String PREF_KERBEROS_USER = "org.knime.bigdata.config.kerberos.user";
     /** Preference key for custom kerberos keytab file. */
     public static final String PREF_KERBEROS_KEYTAB_FILE = "org.knime.bigdata.config.kerberos.keytab.file";
+    /** Preference key to disable Kerberos impersonation on the server. */
+    public static final String PREF_KERBEROS_IMPERSONATION_PARAM =
+            "org.knime.bigdata.config.kerberos.impersonation.disabled";
 
     /**Kerberos logging flag.*/
     public static final String PREF_KERBEROS_LOGGING_ENABLED = "org.knime.bigdata.config.kerberos.logging.enabled";
@@ -100,6 +103,7 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     /** Preference key for JDBC impersonation parameter. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM =
             "org.knime.bigdata.config.kerberos.jdbc.impersonation.param";
+
     @Override
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = CommonsPlugin.getDefault().getPreferenceStore();
@@ -130,5 +134,6 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KERBEROS_KEYTAB_FILE, "");
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG, false);
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER);
+        store.setDefault(PREF_KERBEROS_IMPERSONATION_PARAM, false);
     }
 }

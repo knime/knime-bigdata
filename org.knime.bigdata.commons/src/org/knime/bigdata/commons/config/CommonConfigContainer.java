@@ -163,6 +163,13 @@ public class CommonConfigContainer {
     }
 
     /**
+     * @return <code>true</code> if Kerberos impersonation should be disabled on the server
+     */
+    public boolean disableKerberosImpersonation() {
+        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KERBEROS_IMPERSONATION_PARAM);
+    }
+
+    /**
      * @return the file path to the custom kerberos keytab or <code>null</code> if the default should be used
      */
     public String getKerberosKeytabConfig() {
