@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.URIUtil;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -165,11 +166,12 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
         if (connectionInfo instanceof CloudConnectionInformation) {
             try {
-                URI knimeUri = connectionInfo.toURI().resolve(settings.getInputPath());
+                URI inUri = URIUtil.fromString(settings.getInputPath());
+                URI knimeUri = connectionInfo.toURI().resolve(inUri);
                 ConnectionMonitor<? extends Connection> connectionMonitor = new ConnectionMonitor<Connection>();
                 RemoteFile<? extends Connection> remoteFile = RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
                 CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>) remoteFile;
-                final String inputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
+                final String inputPath = cloudRemoteFile.getHadoopFilesystemString();
                 jobInput = new GenericDataSource2SparkJobInput(namedOutputObject, format, uploadDriver, inputPath, false);
             } catch(UnsupportedOperationException e) {
                 throw new InvalidSettingsException("Unsupported remote file connection.");
@@ -218,10 +220,6 @@ public class GenericDataSource2SparkNodeModel<T extends GenericDataSource2SparkS
 
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        String inpath = settings.getString( GenericDataSource2SparkSettings.CFG_INPUT_PATH);
-        if(inpath.contains(" ")){
-            throw new InvalidSettingsException("Paths with whitespaces are not supported by Spark");
-        }
         m_settings.validateSettings(settings);
     }
 

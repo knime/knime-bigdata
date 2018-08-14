@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.URIUtil;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -112,7 +113,7 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
         }
 
         if (m_settings.supportsPartitioning()) {
-            String partitions[] = m_settings.getPartitionBy().applyTo(tableSpec).getIncludes();
+            String[] partitions = m_settings.getPartitionBy().applyTo(tableSpec).getIncludes();
             if (partitions.length > 0) {
                 for (String colName : partitions) {
                     if (tableSpec.getColumnSpec(colName) == null) {
@@ -153,12 +154,13 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
 
         if (connectionInfo instanceof CloudConnectionInformation) {
             try {
-                URI knimeUri = connectionInfo.toURI().resolve(outputPath);
+                URI outURI = URIUtil.fromString(outputPath);
+                URI knimeUri = connectionInfo.toURI().resolve(outURI);
                 ConnectionMonitor<? extends Connection> connectionMonitor = new ConnectionMonitor<Connection>();
                 RemoteFile<? extends Connection> remoteFile =
                     RemoteFileFactory.createRemoteFile(knimeUri, connectionInfo, connectionMonitor);
                 CloudRemoteFile<?> cloudRemoteFile = (CloudRemoteFile<?>)remoteFile;
-                final String clusterOutputPath = cloudRemoteFile.getHadoopFilesystemURI().toString();
+                final String clusterOutputPath = cloudRemoteFile.getHadoopFilesystemString();
                 jobInput = new Spark2GenericDataSourceJobInput(rdd.getData().getID(), format, uploadDriver,
                     clusterOutputPath, false, schema, saveMode);
             } catch (UnsupportedOperationException e) {
@@ -217,11 +219,6 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
 
     @Override
     protected void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        final String outputPath = settings.getString(Spark2GenericDataSourceSettings.CFG_DIRECTORY) + "/"
-            + settings.getString(Spark2GenericDataSourceSettings.CFG_NAME);
-        if (outputPath.contains(" ")) {
-            throw new InvalidSettingsException("Paths with whitespaces are not supported by Spark");
-        }
         m_settings.validateSettings(settings);
     }
 

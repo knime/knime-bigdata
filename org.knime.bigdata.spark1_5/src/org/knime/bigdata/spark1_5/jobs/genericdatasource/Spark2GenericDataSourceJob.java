@@ -23,8 +23,6 @@ package org.knime.bigdata.spark1_5.jobs.genericdatasource;
 import java.io.File;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
@@ -35,7 +33,6 @@ import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructType;
-import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
@@ -57,75 +54,60 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOGGER = Logger.getLogger(Spark2GenericDataSourceJob.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(Spark2GenericDataSourceJob.class);
 
     @Override
     public EmptyJobOutput runJob(final SparkContext sparkContext, final Spark2GenericDataSourceJobInput input, final List<File> inputFiles,
-            final NamedObjects namedObjects) throws KNIMESparkException {
+            final NamedObjects namedObjects) throws Exception {
 
         final String namedObject = input.getFirstNamedInputObject();
-        final String outputPath = getOutputPath(input);
+        final String outputPath = input.getOutputPath();
 
         LOGGER.info("Writing rdd " + namedObject + " into " + outputPath);
 
-        try {
-            if (!inputFiles.isEmpty()) {
-                JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(inputFiles);
-            }
-
-            final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(namedObject);
-            final IntermediateSpec resultSchema = input.getSpec(namedObject);
-            final StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
-            final DataFrame schemaPredictedData;
-
-            if (input.useHiveContext()) {
-                schemaPredictedData = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
-                    @Override
-                    public DataFrame runWithHiveContext(final HiveContext hiveContext) {
-                        return hiveContext.createDataFrame(rowRDD, sparkSchema);
-                    }
-                });
-            } else {
-                final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
-                schemaPredictedData = sqlContext.createDataFrame(rowRDD, sparkSchema);
-            }
-
-            final DataFrameWriter writer;
-            if (input.overwriteNumPartitons()) {
-                writer = schemaPredictedData.coalesce(input.getNumPartitions()).write();
-            } else {
-                writer = schemaPredictedData.write();
-            }
-
-            writer.format(input.getFormat());
-            writer.mode(SaveMode.valueOf(input.getSaveMode()));
-
-            if (input.hasOptions()) {
-                writer.options(input.getOptions());
-            }
-
-            if (input.usePartitioning()) {
-                writer.partitionBy(input.getPartitionBy());
-            }
-
-            writer.save(outputPath);
-
-        } catch (Exception e) {
-            throw new KNIMESparkException(
-                String.format("Failed to create output path with name '%s'. Reason: %s", outputPath, e.getMessage()));
+        if (!inputFiles.isEmpty()) {
+            JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(inputFiles);
         }
+
+        final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(namedObject);
+        final IntermediateSpec resultSchema = input.getSpec(namedObject);
+        final StructType sparkSchema = TypeConverters.convertSpec(resultSchema);
+        final DataFrame schemaPredictedData;
+
+        if (input.useHiveContext()) {
+            schemaPredictedData = HiveContextProvider.runWithHiveContext(sparkContext, new HiveContextAction<DataFrame>() {
+                @Override
+                public DataFrame runWithHiveContext(final HiveContext hiveContext) {
+                    return hiveContext.createDataFrame(rowRDD, sparkSchema);
+                }
+            });
+        } else {
+            final SQLContext sqlContext = SQLContext.getOrCreate(sparkContext);
+            schemaPredictedData = sqlContext.createDataFrame(rowRDD, sparkSchema);
+        }
+
+        final DataFrameWriter writer;
+        if (input.overwriteNumPartitons()) {
+            writer = schemaPredictedData.coalesce(input.getNumPartitions()).write();
+        } else {
+            writer = schemaPredictedData.write();
+        }
+
+        writer.format(input.getFormat());
+        writer.mode(SaveMode.valueOf(input.getSaveMode()));
+
+        if (input.hasOptions()) {
+            writer.options(input.getOptions());
+        }
+
+        if (input.usePartitioning()) {
+            writer.partitionBy(input.getPartitionBy());
+        }
+
+        writer.save(outputPath);
 
         LOGGER.info("Writing rdd " + namedObject + " into " + outputPath +  " done.");
 
         return new EmptyJobOutput();
     }
-
-    private String getOutputPath(final Spark2GenericDataSourceJobInput input) {
-        if (input.useDefaultFS()) {
-            return FileSystem.getDefaultUri(new Configuration()).resolve(input.getOutputPath()).toString();
-        } else {
-            return input.getOutputPath();
-        }
-    }
-
 }
