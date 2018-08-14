@@ -23,8 +23,6 @@ package org.knime.bigdata.spark2_3.jobs.genericdatasource;
 import java.io.File;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.DataFrameReader;
@@ -52,15 +50,15 @@ import org.knime.bigdata.spark2_3.api.TypeConverters;
 public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericDataSource2SparkJobInput, GenericDataSource2SparkJobOutput> {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = Logger.getLogger(GenericDataSource2SparkJob.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GenericDataSource2SparkJob.class);
 
     @Override
     public GenericDataSource2SparkJobOutput runJob(final SparkContext sparkContext, final GenericDataSource2SparkJobInput input,
-            final List<File> inputFiles, final NamedObjects namedObjects) throws KNIMESparkException, Exception {
+            final List<File> inputFiles, final NamedObjects namedObjects) throws Exception {
 
         final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
         final String namedObject = input.getFirstNamedOutputObject();
-        final String inputPath = getInputPath(input);
+        final String inputPath = input.getInputPath();
 
         LOGGER.info("Reading path " + inputPath + " into data frame " + namedObject);
 
@@ -92,18 +90,10 @@ public class GenericDataSource2SparkJob implements SparkJobWithFiles<GenericData
                 // special characters are known to cause a ParseException with Spark to ORC and ORC to Spark nodes (see BD-701)
                 throw new KNIMESparkException(String.format(
                     "Failed to read input path with name '%s'. This might be caused by special characters in column names.",
-                    inputPath, e.getMessage()));
+                    inputPath), e);
+            } else {
+                throw e;
             }
-            throw new KNIMESparkException(
-                String.format("Failed to read input path with name '%s'. Reason: %s", inputPath, e.getMessage()));
-        }
-    }
-
-    private String getInputPath(final GenericDataSource2SparkJobInput input) {
-        if (input.useDefaultFS()) {
-            return FileSystem.getDefaultUri(new Configuration()).resolve(input.getInputPath()).toString();
-        } else {
-            return input.getInputPath();
         }
     }
 }
