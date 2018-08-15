@@ -113,7 +113,7 @@ public class FlowVariableReader {
             addCredentialsFlowVariable("impala", !TestflowVariable.isTrue(TestflowVariable.IMPALA_USE_KERBEROS, flowVariables), true,
                 flowVariables);
     
-            addCredentialsFlowVariable("ssh", TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables), true, flowVariables);
+            addCredentialsFlowVariable("ssh", true, true, flowVariables);
         }
 
         if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
@@ -150,15 +150,10 @@ public class FlowVariableReader {
             }
             
             // SSH is mandatory
-            ensureHas(TestflowVariable.SSH_AUTHMETHOD, flowVariables);
             ensureHas(TestflowVariable.SSH_PORT, flowVariables);
-            ensureHas(TestflowVariable.SSH_USECREDENTIALS, flowVariables);
-            if (TestflowVariable.isTrue(TestflowVariable.SSH_USECREDENTIALS, flowVariables)) {
-                ensureHas(TestflowVariable.SSH_USERNAME, flowVariables);
-                ensureHas(TestflowVariable.SSH_PASSWORD, flowVariables);
-            } else {
-                ensureHas(TestflowVariable.SSH_KEYFILE, flowVariables);
-            }
+            ensureHas(TestflowVariable.SSH_USERNAME, flowVariables);
+            ensureHas(TestflowVariable.SSH_PASSWORD, flowVariables);
+            ensureHas(TestflowVariable.SSH_KEYFILE, flowVariables);
             
             // Impala is optional, but if anything for Impala is defined, everything must be defined.
             if (has(TestflowVariable.IMPALA_DATABASENAME, flowVariables)

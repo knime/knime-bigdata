@@ -98,7 +98,7 @@ public enum TestflowVariable {
          * Password for the credentials flow variable called "hive.credentials" that will be automatically injected,
          * when {@link #HIVE_USE_KERBEROS} is false.
          */
-        HIVE_PASSWORD("hive.password"),
+        HIVE_PASSWORD("hive.password", Type.STRING, true),
 
         /**
          * Flow variable for the "database" setting of the Impala Connection node.
@@ -131,13 +131,7 @@ public enum TestflowVariable {
          * Password for the credentials flow variable called "impala.credentials" that will be automatically injected,
          * when {@link #IMPALA_USE_KERBEROS} is false.
          */
-        IMPALA_PASSWORD("impala.password"),
-
-        /**
-         * Flow variable for the "authenticationmethod" setting of the SSH Connection node. Possible values: Password
-         * (use also when using credentials), Keyfile
-         */
-        SSH_AUTHMETHOD("ssh.authMethod"),
+        IMPALA_PASSWORD("impala.password", Type.STRING, true),
 
         /**
          * Flow variable for the "port" setting of the SSH Connection node.
@@ -145,27 +139,15 @@ public enum TestflowVariable {
         SSH_PORT("ssh.port", Type.INT),
 
         /**
-         * Flow variable for the "useworkflowcredentials" setting of the SSH Connection node. Possible values: true,
-         * false.
-         *
-         * <p>
-         * If true, then a credentials flow variable called "ssh.credentials" will be automatically injected. The
-         * username of the injected credentials is taken from {@link #HDFS_USERNAME}.
-         * </p>
-         */
-        SSH_USECREDENTIALS("ssh.useCredentials", Type.BOOLEAN),
-
-        /**
-         * Username for the credentials flow variable called "ssh.credentials" that will be automatically injected, when
-         * {@link #SSH_USECREDENTIALS} is true.
+         * Username for the credentials flow variable called "ssh.credentials" that will be automatically injected.
          */
         SSH_USERNAME("ssh.username"),
 
         /**
-         * Password for the credentials flow variable called "ssh.credentials" that will be automatically injected, when
-         * {@link #SSH_USECREDENTIALS} is true.
+         * Password for the credentials flow variable called "ssh.credentials" that will be automatically injected.
+         * The password will be used to open the keyfile.
          */
-        SSH_PASSWORD("ssh.password"),
+        SSH_PASSWORD("ssh.password", Type.STRING, true),
 
         /**
          * Flow variable for the "keyfile" setting of the SSH Connection node.
@@ -237,7 +219,7 @@ public enum TestflowVariable {
          * Also, this flow variable will be picked up for the same purpose by the "Create Big Data Test Environment"
          * node when creating a Spark Jobserver Spark context.
          */
-        SPARK_SJS_PASSWORD("spark.sjs.password"),
+        SPARK_SJS_PASSWORD("spark.sjs.password", Type.STRING, true),
 
         /**
          * Flow variable for the "v1_6.sparkReceiveTimeout" node setting of the "Create Spark Context" node. Also, this
@@ -456,7 +438,7 @@ public enum TestflowVariable {
             default: // STRING
                 if (!m_blankValuesAllowed && value.isEmpty()) {
                     throw new IllegalArgumentException(
-                        String.format("Flow variable %s must not have a blank value.", value, m_name));
+                        String.format("Flow variable %s must not have a blank value.", m_name));
                 }
                 break;
         }

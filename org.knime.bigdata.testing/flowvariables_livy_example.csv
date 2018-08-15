@@ -12,10 +12,9 @@ impala.databasename,default
 impala.parameter,principal=impala/ip-10-0-0-60.eu-west-1.compute.internal@HADOOP
 impala.useKerberos,true
 
-ssh.authMethod,KEYFILE
 ssh.port,22
-ssh.useCredentials,false
 ssh.username,ec2-user
+ssh.password,
 ssh.keyfile,/home/user/.ssh/id_rsa
 
 spark.contextIdScheme,sparkLivy
