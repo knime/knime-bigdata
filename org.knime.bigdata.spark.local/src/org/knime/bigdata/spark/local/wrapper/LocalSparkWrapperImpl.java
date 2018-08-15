@@ -347,6 +347,11 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		sparkConf.set("hive.server2.logging.operation.log.location", hiveOperationLogsDir.getCanonicalPath());
 		sparkConf.set("spark.sql.catalogImplementation", "hive");
 		sparkConf.set("hive.exec.scratchdir", hiveScratchDir.getCanonicalPath());
+
+		// To shutdown the derby system on destroy, the Derby driver needs to be loaded
+		// from the same (shared) class loader in the Hiveserver
+		// Note: This fix can be removed in Spark 2.4: https://issues.apache.org/jira/browse/SPARK-23831
+		sparkConf.set("spark.sql.hive.metastore.sharedPrefixes", "org.apache.derby.");
 	}
 	
 	private static void ensureWritableDirectory(final File maybeDir, final String errorMsgName) throws IOException {
