@@ -1,8 +1,8 @@
-# version will be appended the OSGI version qualifier of all
-# generated bundles where either 
+# This version will be appended to the OSGI version qualifier of all
+# generated bundles, where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180810
+version: knimebd-20180816
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -66,12 +66,13 @@ properties:
 # Syntax:
 #   - <mvn-coordinate-regex>
 mavenBlacklist:
-  # J2SE/Equinox/OSGI already provides these:
+  # J2SE/Eclipse/Equinox/OSGI already provides these:
   - javax\.annotation:.*
   - javax\.activation:activation:jar:.*
   - javax\.xml\.bind:jaxb-api:.*
   - stax:stax-api:jar:.*
-  - org\.osgi:.*
+  - org\.osgi:.* 
+  - tomcat:jasper-.*
 
   # KNIME TP already provides these:
   - log4j:.*
@@ -264,6 +265,10 @@ mavenDependencyBlacklist:
 #     replacement: <RequireBundle-Clause>[,<RequireBundle-Clause>[,...]]
 #
 requireBundleOverrides:
+  # Eclipse already provides these
+  - coordPattern: tomcat:jasper-.*
+    replacement: org.apache.jasper.glassfish;bundle-version="[2,3)"
+
   # KNIME TP already provides these:
   - coordPattern: org\.slf4j:slf4j-api:.*
     replacement: org.slf4j.api;bundle-version="${knime_slf4j_version}"
