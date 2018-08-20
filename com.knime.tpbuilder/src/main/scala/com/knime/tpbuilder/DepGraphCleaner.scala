@@ -47,15 +47,7 @@ object DepGraphCleaner {
 
   private def computeDuplicateRemovals(artifacts: Iterable[Artifact], config: TPConfig): Map[Artifact, Artifact] = {
     // key is (groupId, artifactId, major.minor)
-    val lookupMap = HashMap[String, Set[Artifact]]()
-    
-    // for conversion of maven version strings into osgi version strings
-    
-
-    for (art <- artifacts) {
-      val key = s"${art.group}:${art.artifact}:${art.classifier.getOrElse("")}:${cropMicroVersion(toBundleVersion(art.version))}"
-      lookupMap.getOrElseUpdate(key, HashSet[Artifact]()).add(art)
-    }
+    val lookupMap = createMapWithCroppedMicroVersions(artifacts)
 
     val removals = HashMap[Artifact, Artifact]()
 
@@ -72,6 +64,22 @@ object DepGraphCleaner {
     }
 
     removals
+  }
+  
+  private def createMapWithCroppedMicroVersions(artifacts: Iterable[Artifact]): Map[String, Set[Artifact]] = {
+    // key is (groupId, artifactId, major.minor)
+    val lookupMap = Map[String, Set[Artifact]]()
+
+    for (art <- artifacts) {
+      val key = toLookupKey(art)
+      lookupMap.getOrElseUpdate(key, HashSet[Artifact]()).add(art)
+    }
+
+    lookupMap
+  }
+  
+  private def toLookupKey(art: Artifact): String = {
+    s"${art.group}:${art.artifact}:${art.classifier.getOrElse("")}:${cropMicroVersion(toBundleVersion(art.version))}"
   }
 
   private def cropMicroVersion(osgiVersion: Version): String = {
@@ -99,5 +107,31 @@ object DepGraphCleaner {
   private def addReachableArtifacts(reachableArts: Set[Artifact], depGraph: Map[Artifact, Set[Artifact]])(root: Artifact): Unit = {
     reachableArts += root
     depGraph.getOrElse(root, Set()).foreach(addReachableArtifacts(reachableArts, depGraph))
+  }
+
+  def rewriteDepsToHighestMicro(depGraph: Map[Artifact, Set[Artifact]], config: TPConfig): Unit = {
+    // key is (groupId, artifactId, major.minor). The sets are assumed to have only one element
+    // because duplicates have already been removed
+    val lookupMap = createMapWithCroppedMicroVersions(depGraph.keys).mapValues(arts => arts.head)
+
+    val newDepGraph = Map[Artifact, Set[Artifact]]()
+
+    var rewriteCounter = 0
+    
+    for ((art, artDeps) <- depGraph.iterator) {
+      newDepGraph += art -> artDeps.map(artDep => {
+        val newArtDep = lookupMap.getOrElse(toLookupKey(artDep), artDep)
+        
+        if (newArtDep != artDep) {
+          rewriteCounter += 1
+          println(s"${art.toString}: Rewrite dependency on ${artDep.toString} to ${newArtDep.toString}")
+        }
+        
+        newArtDep
+      })
+    }
+    
+    depGraph.clear()
+    depGraph ++= newDepGraph.iterator
   }
 }

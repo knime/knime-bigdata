@@ -46,6 +46,10 @@ object Main extends App {
   println("Got dependency graph with %d artifacts".format(depGraph.size))
   println()
   
+  println("=== Rewrite dependencies to highest available micro version ===")
+  DepGraphCleaner.rewriteDepsToHighestMicro(depGraph, config)
+  println()
+  
   println("=== Removing orphaned artifacts (i.e. those that nothing depends on) from dependency graph ===")
   DepGraphCleaner.removeOrphanedArtifacts(depGraph, config)
   println("Got dependency graph with %d artifacts".format(depGraph.size))

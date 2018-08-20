@@ -2,7 +2,7 @@
 # generated bundles, where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180817
+version: knimebd-20180821
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
