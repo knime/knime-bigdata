@@ -267,8 +267,10 @@ public class FileFormatWriterNodeModel extends NodeModel {
             throw new InvalidSettingsException(format);
         }
         final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
-
-        if (connSpec != null) {
+        if (connSpec != null &&
+        		!connSpec.getConnectionInformation().getProtocol()
+        		.equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
+        	
             final ConnectionInformation connInfo = connSpec.getConnectionInformation();
 
             // Check if the port object has connection information
@@ -276,10 +278,12 @@ public class FileFormatWriterNodeModel extends NodeModel {
                 throw new InvalidSettingsException("No connection information available.");
             }
             final String fileName = m_settings.getFileName();
+            
+        	if(m_settings.getFileOverwritePolicy()) {
+        		checkDirContent(connInfo, fileName);
+        	}
+        	
             if (fileName.endsWith("/")) {
-            	if(m_settings.getFileOverwritePolicy()) {
-            		checkDirContent(connInfo, fileName);
-            	}
                 m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
             }
             try {
@@ -364,24 +368,24 @@ public class FileFormatWriterNodeModel extends NodeModel {
      */
 	private void checkDirContent(final ConnectionInformation connInfo, final String fileName) {
 		try {
-		ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
-		URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
-		RemoteFile<Connection> remotefile = 
-				RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
-
-		RemoteFile<Connection>[] fileList = remotefile.listFiles();
-		for(RemoteFile<Connection> file : fileList) {
-			String name = file.getName();
-			//ignore known Spark and HDFS metafiles
-			if(!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc") ) {
-					String suffix = m_settings.getFilenameSuffix();
-					if(!name.endsWith(suffix)) {
-				setWarningMessage(String.format("The directory contains files without '%s' suffix. "
-						+ "The directory will be overwritten with the current settings.", m_settings.getFilenameSuffix()));
+			ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
+			URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
+			RemoteFile<Connection> remotefile = 
+					RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
+			if(remotefile.isDirectory()) {
+				RemoteFile<Connection>[] fileList = remotefile.listFiles();
+				for(RemoteFile<Connection> file : fileList) {
+					String name = file.getName();
+					//ignore known Spark and HDFS metafiles
+					if(!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc") ) {
+							String suffix = m_settings.getFilenameSuffix();
+							if(!name.endsWith(suffix)) {
+						setWarningMessage(String.format("The directory contains files without '%s' suffix. "
+								+ "The directory will be overwritten with the current settings.", m_settings.getFilenameSuffix()));
+							}
 					}
-			}
-		}
-			
+				}
+			}	
 		} catch (Exception e) {
 			LOGGER.debug(e.getMessage(), e);
 		}
