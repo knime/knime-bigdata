@@ -242,7 +242,7 @@ public class HDFSConnection extends Connection {
                         }
                     });
                 } catch (Exception e) {
-                    LOGGER.debug("Exception while opening HDFS conection: " + e.getMessage(), e);
+                    LOGGER.debug("Exception while opening HDFS connection: " + e.getMessage(), e);
                     throw new IOException(e.getMessage(), e.getCause());
                 }
             }
