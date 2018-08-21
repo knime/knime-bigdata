@@ -36,8 +36,6 @@ import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
-import org.knime.core.node.workflow.NodeContext;
-import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * {@link CachedConnectionFactory} implementation for Hive and Impala that supports Kerberos authentication.
@@ -71,10 +69,10 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
 
             final UserGroupInformation ugi;
             final String jdbcImpersonationURL;
-            if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter()
-                    && KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
+            final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
+            if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter() && userToImpersonate.isPresent()) {
                 LOGGER.debug("Using JDBC impersonation parameter instead of proxy user on KNIME Server");
-                jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl);
+                jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl, userToImpersonate.get());
                 ugi = UserGroupUtil.getKerberosTGTUser(conf);
             } else {
                 ugi = UserGroupUtil.getKerberosUser(conf);
@@ -100,28 +98,26 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
         }
     }
 
-    private static String appendImpersonationParameter(final String jdbcUrl) {
+    private static String appendImpersonationParameter(final String jdbcUrl, final String userToImpersonate) {
         final String param = CommonConfigContainer.getInstance().getJDBCImpersonationParameter();
         LOGGER.debug("JDBC impersonation parameter: " + param);
         LOGGER.debug("Original JDBC URL: " + jdbcUrl);
+
+        //this checks that the user does not maliciously uses the impersonation parameter
         final String searchString = param.replace(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER, "");
         if (jdbcUrl.contains(searchString)) {
             throw new IllegalArgumentException("JDBC URL must not contain Kerberos impersonation parameter");
         }
-        final Optional<String> wfUser = NodeContext.getWorkflowUser();
-        if (wfUser.isPresent()) {
-            final String replacedParam = param.replaceAll(
-                Pattern.quote(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER), wfUser.get());
-            final StringBuilder buf = new StringBuilder(jdbcUrl);
-            if (!jdbcUrl.endsWith(";")) {
-                buf.append(";");
-            }
-            buf.append(replacedParam);
-            final String newJDBCurl = buf.toString();
-            LOGGER.debug("JDBC URL with impersonation parameter: " + newJDBCurl);
-            return newJDBCurl;
+
+        final String replacedParam = param.replaceAll(
+            Pattern.quote(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER), userToImpersonate);
+        final StringBuilder buf = new StringBuilder(jdbcUrl);
+        if (!jdbcUrl.endsWith(";")) {
+            buf.append(";");
         }
-        LOGGER.warn("No workflow user found. Using original JDBC URL");
-        return jdbcUrl;
+        buf.append(replacedParam);
+        final String newJDBCurl = buf.toString();
+        LOGGER.debug("JDBC URL with impersonation parameter: " + newJDBCurl);
+        return newJDBCurl;
     }
 }

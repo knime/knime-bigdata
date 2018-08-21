@@ -26,8 +26,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.workflow.NodeContext;
-import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * Utility class to obtain Hadoop {@link UserGroupInformation} objects, through which we perform Kerberos logins, Hadoop
@@ -110,32 +108,16 @@ public class UserGroupUtil {
         //Get the user with the Kerberos TGT
         final UserGroupInformation kerberosTGTUser = getKerberosTGTUser(conf);
 
-        final UserGroupInformation user;
-        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
-            if (CommonConfigContainer.getInstance().disableKerberosImpersonation()) {
-                //use the Kerberos user as login user on the client
-                LOGGER.debug("IMPERSONATION DISABLED! Using Kerberos user: " + kerberosTGTUser.getUserName()
-                + " as login user on the server.");
-                //the real user is the same as the login user so we can simply use the real user
-                user = kerberosTGTUser;
+        UserGroupInformation user = kerberosTGTUser;
+        final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
+        if (userToImpersonate.isPresent()) {
+            if (!kerberosTGTUser.getUserName().equals(userToImpersonate.get())
+                    && !kerberosTGTUser.getShortUserName().equals(userToImpersonate.get())) {
+                //the Kerberos user differs from the workflow user so we have to impersonate it
+                user = UserGroupInformation.createProxyUser(userToImpersonate.get(), kerberosTGTUser);
             } else {
-                Optional<String> wfUser = NodeContext.getWorkflowUser();
-                if (wfUser.isPresent() && !kerberosTGTUser.getUserName().equals(wfUser.get())
-                        && !kerberosTGTUser.getShortUserName().equals(wfUser.get())) {
-                    LOGGER.debug("Creating proxy user for workflow user " + wfUser
-                        + " using Kerberos TGT user " + kerberosTGTUser.getUserName() + " on server");
-                    //the Kerberos user differs from the workflow user so we have to impersonate it
-                    user = UserGroupInformation.createProxyUser(wfUser.get(), kerberosTGTUser);
-                } else {
-                    LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the server.");
-                    user = kerberosTGTUser;
-                }
+                LOGGER.debug("Kerberos TGT user same as user to impersonate.");
             }
-        } else {
-            //use the Kerberos user as login user on the client
-            LOGGER.debug("Using Kerberos user: " + kerberosTGTUser.getUserName() + " as login user on the client.");
-            //the real user is the same as the login user so we can simply use the real user
-            user = kerberosTGTUser;
         }
         LOGGER.debug("Returning Kerberos user: " + user.toString());
         return user;

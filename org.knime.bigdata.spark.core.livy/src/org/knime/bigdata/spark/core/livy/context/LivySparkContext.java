@@ -32,8 +32,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,6 +44,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.livy.Job;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
+import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.spark.core.context.JobController;
@@ -65,9 +66,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
-import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.util.FileUtil;
-import org.knime.core.util.KNIMERuntimeContext;
 
 /**
  * Spark context implementation for Apache Livy.
@@ -130,7 +129,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     }
 
     private void ensureRemoteFSConnection() throws KNIMESparkException {
-        RemoteFSController tmpController = new RemoteFSController(getConfiguration().getRemoteFsConnectionInfo(),
+        final RemoteFSController tmpController = new RemoteFSController(getConfiguration().getRemoteFsConnectionInfo(),
             getConfiguration().getStagingAreaFolder());
         tmpController.createStagingArea();
         m_remoteFSController = tmpController;
@@ -173,10 +172,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 } else {
                     m_livyClient = buildLivyClient(livyHttpConf, config.getLivyUrl());
                 }
-            } catch (PrivilegedActionException e) {
+            } catch (final PrivilegedActionException e) {
                 // just rethrow the original exception thrown in the run() method
                 throw new KNIMESparkException(e.getException());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new KNIMESparkException(e);
             }
         }
@@ -185,7 +184,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private static Properties createLivyHttpConf(final LivySparkContextConfig config) {
         final Properties livyHttpConf = new Properties();
 
-        // timeout until a connection is established. zero means infinite timeout. 
+        // timeout until a connection is established. zero means infinite timeout.
         livyHttpConf.setProperty("livy.client.http.connection.timeout",
             String.format("%ds", config.getConnectTimeoutSeconds()));
 
@@ -197,7 +196,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         // idle HTTP connections will be closed after this timeout
         livyHttpConf.setProperty("livy.client.http.connection.idle.timeout", "15s");
 
-        // whether the target server is requested to compress content. 
+        // whether the target server is requested to compress content.
         livyHttpConf.setProperty("livy.client.http.content.compress.enable", "true");
 
         // job status polling interval
@@ -211,22 +210,16 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         } else {
             livyHttpConf.setProperty("livy.client.http.spnego.enable", "false");
         }
-
-        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
-            final Optional<String> wfUser = NodeContext.getWorkflowUser();
-            if (wfUser.isPresent()) {
-                LOGGER.info(String.format(
-                    "Running on KNIME Server. Opening Spark context with proxyUser=%s to impersonate the workflow user",
-                    wfUser.get()));
-                livyHttpConf.setProperty("livy.client.http.proxyUser", wfUser.get());
-            } else {
-                LOGGER.warn(
-                    "Running on KNIME Server but no workflow user is present in node context. No impersonation/proxyUser will be used for Spark context.");
-            }
+        final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
+        if (userToImpersonate.isPresent()) {
+            LOGGER.info(String.format(
+                "Running on KNIME Server. Opening Spark context with proxyUser=%s to impersonate the workflow user",
+                userToImpersonate.get()));
+            livyHttpConf.setProperty("livy.client.http.proxyUser", userToImpersonate.get());
         }
 
         // transfer all custom Spark settings
-        for (Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
+        for (final Entry<String, String> customSparkSetting : config.getCustomSparkSettings().entrySet()) {
             final String settingName = customSparkSetting.getKey();
             if (!settingName.startsWith("livy.client.http.")) {
                 livyHttpConf.setProperty(customSparkSetting.getKey(), customSparkSetting.getValue());
@@ -293,13 +286,13 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             exec.setProgress(0.9, "Running job to prepare context");
             validateAndPrepareContext();
             exec.setProgress(1);
-        } catch (KNIMESparkException e) {
+        } catch (final KNIMESparkException e) {
 
             // make sure we don't leave a broken context behind
             if (contextWasCreated) {
                 try {
                     destroy();
-                } catch (KNIMESparkException toIgnore) {
+                } catch (final KNIMESparkException toIgnore) {
                     // ignore
                 }
             }
@@ -314,7 +307,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private void validateAndPrepareContext() throws KNIMESparkException {
         final String stagingTestfileName = uploadStagingTestfile();
 
-        LivyPrepareContextJobInput prepInput = new LivyPrepareContextJobInput(getJobJar().getDescriptor().getHash(),
+        final LivyPrepareContextJobInput prepInput = new LivyPrepareContextJobInput(getJobJar().getDescriptor().getHash(),
             getSparkVersion().toString(), getJobJar().getDescriptor().getPluginVersion(),
             IntermediateToSparkConverterRegistry.getConverters(getSparkVersion()),
             m_remoteFSController.getStagingArea(), m_remoteFSController.getStagingAreaReturnsPath(),
@@ -332,14 +325,14 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 
     }
 
-    private void downloadStagingTestfile(String testfileName) throws KNIMESparkException {
+    private void downloadStagingTestfile(final String testfileName) throws KNIMESparkException {
         try {
             try (final InputStream in = m_remoteFSController.download(testfileName)) {
                 StagingAreaUtil.validateTestfileContent(in);
             } finally {
                 m_remoteFSController.delete(testfileName);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new KNIMESparkException("Remote file system download test failed: " + e.getMessage(), e);
         }
     }
@@ -352,7 +345,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 StagingAreaUtil.writeTestfileContent(out);
             }
             return m_remoteFSController.upload(tmpFile);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new KNIMESparkException("Remote file system upload test failed: " + e.getMessage(), e);
         } finally {
             if (tmpFile != null) {
@@ -380,9 +373,9 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         try {
             final File jobJarFile = getJobJar().getJarFile();
             LOGGER.debug(String.format("Uploading job jar: %s", jobJarFile.getAbsolutePath()));
-            Future<?> uploadFuture = m_livyClient.uploadJar(jobJarFile);
+            final Future<?> uploadFuture = m_livyClient.uploadJar(jobJarFile);
             waitForFuture(uploadFuture, null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             handleLivyException(e);
         }
     }
@@ -390,7 +383,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private boolean createRemoteSparkContext() throws KNIMESparkException {
         try {
             m_livyClient.startOrConnectSession();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             handleLivyException(e);
         }
 
@@ -404,25 +397,25 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         while (true) {
             try {
                 return future.get(500, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException e) {
+            } catch (final TimeoutException e) {
                 if (exec != null) {
                     try {
                         exec.checkCanceled();
-                    } catch (CanceledExecutionException canceledInKNIME) {
+                    } catch (final CanceledExecutionException canceledInKNIME) {
                         future.cancel(true);
                         throw canceledInKNIME;
                     }
                 }
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof KNIMESparkException) {
                     throw (KNIMESparkException)cause;
                 } else {
                     throw new KNIMESparkException(e);
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 throw new KNIMESparkException("Execution was interrupted");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 handleLivyException(e);
             }
         }
@@ -466,12 +459,12 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         reps.put("url", config.getLivyUrl());
         reps.put("authentication", createAuthenticationInfoString());
         reps.put("context_state", getStatus().toString());
-        reps.put("spark_web_ui", (m_contextAttributes != null) ? m_contextAttributes.sparkWebUI : "unavailable");
+        reps.put("spark_web_ui", m_contextAttributes != null ? m_contextAttributes.sparkWebUI : "unavailable");
         reps.put("spark_properties", mkSparkPropertiesHTMLRows());
 
         try (InputStream r = getClass().getResourceAsStream("context_html_description.template")) {
             return TextTemplateUtil.fillOutTemplate(r, reps);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Failed to read context description template");
         }
     }
@@ -480,11 +473,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         if (m_contextAttributes == null) {
             return "<tr><td>unavailable</td><td></td></tr>";
         }
-        
-        ArrayList<String> sortedProperties = new ArrayList<>(m_contextAttributes.sparkConf.keySet());
+
+        final ArrayList<String> sortedProperties = new ArrayList<>(m_contextAttributes.sparkConf.keySet());
         Collections.sort(sortedProperties);
         final StringBuilder buf = new StringBuilder();
-        for (String property : sortedProperties) {
+        for (final String property : sortedProperties) {
             buf.append(String.format("<tr><td>%s</td><td>%s</td></tr>\n", property,
                 m_contextAttributes.sparkConf.get(property)));
         }
@@ -497,7 +490,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             try {
                 return String.format("Kerberos (authenticated as: %s)", UserGroupUtil
                     .getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth()).getUserName());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return "Kerberos";
             }
         } else {
@@ -508,7 +501,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private static String renderCustomSparkSettings(final Map<String, String> customSparkSettings) {
         final StringBuilder buf = new StringBuilder();
 
-        for (String key : customSparkSettings.keySet()) {
+        for (final String key : customSparkSettings.keySet()) {
             buf.append(key);
             buf.append(": ");
             buf.append(customSparkSettings.get(key));
@@ -519,7 +512,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 
     /**
      * Fetches the Spark driver logs.
-     * 
+     *
      * @param rows The number of rows to fetch.
      * @param exec Execution monitor to check for cancelation.
      * @return a list of the last lines from the Spark driver log.
@@ -528,7 +521,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
      */
     public synchronized List<String> getSparkDriverLogs(final int rows, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
-        
+
         switch (getStatus()) {
             case NEW:
             case CONFIGURED:
