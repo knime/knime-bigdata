@@ -185,7 +185,7 @@ public class Spark2GenericDataSourceNodeModel<T extends Spark2GenericDataSourceS
             runFactory.createRun(jobInput, toUpload).run(rdd.getContextID(), exec);
         } catch (KNIMESparkException e) {
             final String message = e.getMessage();
-            if (message != null && message.contains("Reason: Failed to find data source:")) {
+            if (message != null && message.contains("Failed to find data source:")) {
                 LOGGER.debug(
                     "Required data source driver not found in cluster. Original error message: " + e.getMessage());
                 throw new InvalidSettingsException(
