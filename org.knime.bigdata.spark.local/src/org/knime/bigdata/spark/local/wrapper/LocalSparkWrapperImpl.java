@@ -278,6 +278,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
         sparkConf.set("hive.server2.thrift.port", Integer.toString(m_hiveserverPort));
         sparkConf.set("hive.server2.thrift.bind.host", "localhost");
+        sparkConf.set("hive.server2.session.check.interval", "30s"); // default: 6h
+        sparkConf.set("hive.server2.idle.session.timeout", "30s"); // default: 7d
     }
 
 	private static int findRandomFreePort() throws IOException {
