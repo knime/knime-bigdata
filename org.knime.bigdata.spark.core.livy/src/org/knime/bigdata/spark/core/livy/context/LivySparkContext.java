@@ -361,10 +361,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     protected void destroy() throws KNIMESparkException {
         LOGGER.info("Destroying Livy Spark context ");
         try {
-            ensureLivyClient();
-            m_livyClient.stop(true);
+            if (getStatus() == SparkContextStatus.OPEN) {
+                m_livyClient.stop(true);
+            }
         } finally {
-            m_livyClient = null;
             setStatus(SparkContextStatus.CONFIGURED);
         }
     }
