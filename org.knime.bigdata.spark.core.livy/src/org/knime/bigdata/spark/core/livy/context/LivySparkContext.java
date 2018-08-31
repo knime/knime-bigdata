@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.livy.CreateSessionHandle;
 import org.apache.livy.Job;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
@@ -266,7 +267,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
      * {@inheritDoc}
      */
     @Override
-    protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException {
+    protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         boolean contextWasCreated = false;
         try {
             exec.setProgress(0, "Opening remote Spark context on Apache Livy");
@@ -275,7 +276,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             setStatus(SparkContextStatus.OPEN);
 
             if (createRemoteContext) {
-                contextWasCreated = createRemoteSparkContext();
+                createRemoteSparkContext(exec);
+                contextWasCreated = true;
             } else {
                 throw new SparkContextNotFoundException(getID());
             }
@@ -286,15 +288,12 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             exec.setProgress(0.9, "Running job to prepare context");
             validateAndPrepareContext();
             exec.setProgress(1);
-        } catch (final KNIMESparkException e) {
-
+        } catch (final Exception e) {
             // make sure we don't leave a broken context behind
-            if (contextWasCreated) {
-                try {
-                    destroy();
-                } catch (final KNIMESparkException toIgnore) {
-                    // ignore
-                }
+            try {
+                destroy();
+            } catch (final KNIMESparkException toIgnore) {
+                // ignore
             }
 
             setStatus(SparkContextStatus.CONFIGURED);
@@ -380,15 +379,20 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private boolean createRemoteSparkContext() throws KNIMESparkException {
-        try {
-            m_livyClient.startOrConnectSession();
-        } catch (final Exception e) {
-            handleLivyException(e);
+    private void createRemoteSparkContext(ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        CreateSessionHandle handle = m_livyClient.startOrConnectSession();
+        waitForFuture(handle, exec);
+        switch(handle.getState()) {
+            case DONE_CANCELLED:
+                throw new CanceledExecutionException();
+            case DONE_ERROR:
+                throw new KNIMESparkException(handle.getError());
+            case DONE_SUCCESS:
+                break;
+            default:
+                // should never happen
+                throw new RuntimeException("Unexpected state: " + handle.getState());
         }
-
-        return true;
-
     }
 
     static <O> O waitForFuture(final Future<O> future, final ExecutionMonitor exec)
@@ -397,15 +401,8 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         while (true) {
             try {
                 return future.get(500, TimeUnit.MILLISECONDS);
-            } catch (final TimeoutException e) {
-                if (exec != null) {
-                    try {
-                        exec.checkCanceled();
-                    } catch (final CanceledExecutionException canceledInKNIME) {
-                        future.cancel(true);
-                        throw canceledInKNIME;
-                    }
-                }
+            } catch (final TimeoutException | InterruptedException e) {
+                checkForCancelation(future, exec);
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof KNIMESparkException) {
@@ -413,10 +410,18 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 } else {
                     throw new KNIMESparkException(e);
                 }
-            } catch (final InterruptedException e) {
-                throw new KNIMESparkException("Execution was interrupted");
             } catch (final Exception e) {
                 handleLivyException(e);
+            }
+        }
+    }
+
+    private static void checkForCancelation(Future<?> future, ExecutionMonitor exec) {
+        if (exec != null) {
+            try {
+                exec.checkCanceled();
+            } catch (final CanceledExecutionException canceledInKNIME) {
+                future.cancel(true);
             }
         }
     }

@@ -129,12 +129,13 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *         cluster.
      *
      * @throws SparkContextNotFoundException if Spark context was non-existent and createRemoteContext=false.
+     * @throws CanceledExecutionException if the execution was canceled by the user.
      * @throws KNIMESparkException if something went wrong while creating the Spark context, or if context was not in
      *             state configured.
      *
      */
     public final synchronized boolean ensureOpened(final boolean createRemoteContext, final ExecutionMonitor exec)
-            throws SparkContextNotFoundException, KNIMESparkException {
+            throws SparkContextNotFoundException, CanceledExecutionException, KNIMESparkException {
             switch (getStatus()) {
                 case NEW:
                     throw new KNIMESparkException("Spark context needs to be configured before opening.");
@@ -455,6 +456,8 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
+        } catch (CanceledExecutionException e) {
+            return null; // never happens
         }
     }
 
@@ -474,6 +477,8 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         } catch (SparkContextNotFoundException e) {
             setStatus(SparkContextStatus.CONFIGURED);
             throw e;
+        } catch (CanceledExecutionException e) {
+            // never happens
         }
     }
 
@@ -492,10 +497,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
      *
      * @throws KNIMESparkException Thrown if something went wrong while creating a Spark context, or if context was not
      *             in state configured.
+     * @throws CanceledExecutionException
      * @throws SparkContextNotFoundException Thrown if Spark context was non-existent and createRemoteContext=false
      */
     protected abstract boolean open(final boolean createRemoteContext, final ExecutionMonitor exec)
-        throws KNIMESparkException, SparkContextNotFoundException;
+        throws KNIMESparkException, CanceledExecutionException, SparkContextNotFoundException;
 
     /**
      * Destroys the Spark context within the cluster and frees up all resources. Implementations can assume that the

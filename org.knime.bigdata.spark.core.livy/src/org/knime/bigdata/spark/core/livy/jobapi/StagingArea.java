@@ -179,16 +179,17 @@ public class StagingArea {
             // when the URI ends with a slash, then only the directory contents but not the directory itself will be deleted
             fs.delete(new Path(URI.create(stagingAreaURI.toString().replaceFirst("/$", ""))), true);
         } catch (IOException e) {
-            LOG.error("Error while deleting staging are for KNIME Spark jobs: " + e.getMessage(), e);
+            LOG.error("Error while deleting staging area for KNIME Spark jobs: " + e.getMessage(), e);
         }
 
         LOG.info("Cleaning up local temp file directory for KNIME Spark jobs");
         try {
-            final List<java.nio.file.Path> files = Files.walk(localTmpDir.toPath())
-                    .sorted(Comparator.reverseOrder())
-                    .collect(Collectors.toList());
-            for (java.nio.file.Path toDelete : files) {
-                Files.deleteIfExists(toDelete);
+            if (localTmpDir.exists()) {
+                final List<java.nio.file.Path> files =
+                    Files.walk(localTmpDir.toPath()).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                for (java.nio.file.Path toDelete : files) {
+                    Files.deleteIfExists(toDelete);
+                }
             }
         } catch (IOException e) {
             LOG.error("Error while deleting local temp file directory of KNIME Spark jobs: " + e.getMessage(), e);
