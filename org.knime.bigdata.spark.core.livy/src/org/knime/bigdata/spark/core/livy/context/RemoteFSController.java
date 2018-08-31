@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.FileRemoteFileHandler;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFile;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -92,7 +95,8 @@ public class RemoteFSController {
     }
 
     private static boolean stagingAreaIsPath(final ConnectionInformation connInfo) {
-        if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)) {
+        if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)
+            || HDFSLocalRemoteFileHandler.isSupportedConnection(connInfo)) {
             return true;
         } else if (connInfo instanceof CloudConnectionInformation) {
             // FIXME: this test does not always work, e.g. if the ingoing port object was persisted
@@ -104,7 +108,9 @@ public class RemoteFSController {
 
     private List<String> generateStagingAreaCandidates() throws Exception {
         if (HDFSRemoteFileHandler.isSupportedConnection(m_connectionInformation)) {
-            return generatestagingAreaCandidatesForHDFS();
+            return generateStagingAreaCandidatesForHDFS();
+        } else if (HDFSLocalRemoteFileHandler.isSupportedConnection(m_connectionInformation)) {
+            return generateStagingAreaCandidatesForLocalHDFS();
         } else if (m_connectionInformation instanceof CloudConnectionInformation) {
             // FIXME: this test does not always work, e.g. if the ingoing port object was persisted
             return generateCloudstagingAreaCandidates();
@@ -112,6 +118,13 @@ public class RemoteFSController {
             throw new IllegalArgumentException(
                 "Unsupported remote file system: " + m_connectionInformation.getProtocol());
         }
+    }
+
+    private static List<String> generateStagingAreaCandidatesForLocalHDFS() {
+        final String stagingDir = ".knime-spark-staging-" + UUID.randomUUID().toString();
+        final String stagingDirParent = Paths.get(System.getProperty("java.io.tmpdir")).toUri().getPath();
+
+        return Collections.singletonList(appendDirs(stagingDirParent, stagingDir));
     }
 
     private List<String> generateCloudstagingAreaCandidates() throws Exception {
@@ -130,7 +143,7 @@ public class RemoteFSController {
     }
 
     @SuppressWarnings("resource")
-    private List<String> generatestagingAreaCandidatesForHDFS() throws Exception {
+    private List<String> generateStagingAreaCandidatesForHDFS() throws Exception {
         final FileSystem hadoopFs = getHadoopFS();
         final List<String> toReturn = new LinkedList<>();
 
