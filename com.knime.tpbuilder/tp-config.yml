@@ -1223,5 +1223,5 @@ artifactGroups:
   # ##############################################################
   - name: Livy 0.4 Client
     singleArtifacts:
-      - id: org.apache.livy:livy-client-http:0.4.1.knime5
+      - id: org.apache.livy:livy-client-http:0.4.1.knime6
         transitiveSourceDepth: 2

@@ -26,6 +26,7 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -109,8 +110,9 @@ public abstract class SparkSourceNodeModel extends SparkNodeModel {
      * @param contextID the contextID to ensure.
      * @param exec ExecutionMonitor to track progress.
      * @throws KNIMESparkException
+     * @throws CanceledExecutionException
      */
-    public static void ensureContextIsOpen(final SparkContextID contextID, final ExecutionMonitor exec) throws KNIMESparkException {
+    public static void ensureContextIsOpen(final SparkContextID contextID, final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         SparkContextManager.getOrCreateSparkContext(contextID).ensureOpened(true, exec);
     }
 
