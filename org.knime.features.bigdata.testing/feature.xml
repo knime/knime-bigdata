@@ -738,7 +738,7 @@ propagated with or for interoperation with KNIME.
       <import feature="org.knime.features.ext.h2o.spark"/>
       <import feature="org.knime.features.testingapplication"/>
       
-      
+      <import features="com.knime.features.bigdata.knosp"/>
    </requires>
 
    <plugin
