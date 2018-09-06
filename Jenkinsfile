@@ -48,7 +48,7 @@ node {
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder
-					mvn clean package
+					${maven} clean package 
 					popd
 				'''
 			}
@@ -57,7 +57,7 @@ node {
 			withMaven(maven: 'Maven 3.2') {
 				sh '''
 					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.externals-parent
-					mvn -Dorg.knime.update.org="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.org'].p2 + '''" clean package
+					${maven} -Dorg.knime.update.org="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.org'].p2 + '''" clean package
 					popd
 				'''
 			}
@@ -73,7 +73,7 @@ node {
 				sh '''
 					rm -f "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/*.jar
 					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars
-					mvn clean package
+					${maven} clean package
 					popd
 				'''
 			}
