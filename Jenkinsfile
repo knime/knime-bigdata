@@ -2,7 +2,10 @@
 
 library "knime-pipeline@$BRANCH_NAME"
 
+
 node {
+	def maven = (isUnix()) ? 'mvn' : 'mvn.bat'
+	
 	def upstreamParams = defaultProperties('org.knime.update.org',
 		'com.knime.update.pmml.compilation',
 		'org.knime.update.labs',
@@ -46,20 +49,16 @@ node {
 			// in preparation for building org.knime.update.bigdata.externals, this
 			// performs the actual conversion from maven artifacts to OSGi bundles
 			withMaven(maven: 'Maven 3.2') {
-				sh '''
-					pushd "$WORKSPACE"/git/knime-bigdata/com.knime.tpbuilder
-					${maven} clean package 
-					popd
-				'''
+				dir("${env.WORKSPACE}/git/knime-bigdata/com.knime.tpbuilder") {
+					sh "${maven} clean package"
+				}
 			}
 
 			// build org.knime.update.bigdata.externals
 			withMaven(maven: 'Maven 3.2') {
-				sh '''
-					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.externals-parent
-					${maven} -Dorg.knime.update.org="$JENKINS_URL/jobs/''' + upstreamParams['org.knime.update.org'].p2 + '''" clean package
-					popd
-				'''
+				dir("${env.WORKSPACE}/git/knime-bigdata/org.knime.bigdata.externals-parent") {
+					sh "${maven} -Dorg.knime.update.org=$JENKINS_URL/jobs/${upstreamParams['org.knime.update.org'].p2} clean package"
+				}
 			}
 
 			// copy org.knime.update.bigdata.externals into a useful location for buckminster
@@ -70,12 +69,10 @@ node {
 
 			// Local Spark: Download jars from maven into the libs/ folder of the local Spark plugin
 			withMaven(maven: 'Maven 3.5') {
-				sh '''
-					rm -f "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/*.jar
-					pushd "$WORKSPACE"/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars
-					${maven} clean package
-					popd
-				'''
+				dir("${env.WORKSPACE}/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars") {
+					sh "rm -f ../*.jar"
+					sh "${maven} clean package"
+				}
 			}
 		} catch (ex) {
 			if (currentBuild.result == null) {
