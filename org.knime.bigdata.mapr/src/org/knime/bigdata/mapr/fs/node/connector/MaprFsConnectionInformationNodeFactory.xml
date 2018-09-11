@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" 
+    icon="./hdfsconnection16x16.png" type="Source">
+    <name>MapR-FS Connection</name>
+
+    <shortDescription>
+        Configures the connection information used to connect to 
+        MapR-FS.
+    </shortDescription>
+
+    <fullDescription>
+        <intro>
+            This node configures the connection information that will be used to
+            connect to MapR-FS.
+        </intro>
+
+<!--         <option name="Host">
+            Address of the host.
+        </option>
+        <option name="Port">
+            Port of the service.
+        </option>
+        <option name="Authentication">
+            Method of authentication.
+            <br/>
+            <b>User</b>
+            <br/>
+            user name based authentication.
+            <br />
+            <b>Kerberos</b>
+            <br />
+            Kerberos ticket based authentication.
+        </option>
+        <option name="Workflow credentials">
+            Use workflow credentials to determine user.
+        </option>
+        <option name="User">
+            Name of the user. Optional for Kerberos authentication.
+        </option>
+        <option name="Test connection">
+            Open dialog that test the current connection.
+        </option> -->
+    </fullDescription> 
+
+    <ports>
+        <outPort name="MapR-FS Connection information port" index="0">
+            Port object containing the MapR-FS connection information.
+        </outPort>
+    </ports>
+</knimeNode>
