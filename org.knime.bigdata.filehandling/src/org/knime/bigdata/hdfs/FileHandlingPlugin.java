@@ -33,6 +33,8 @@ import org.knime.bigdata.filehandling.util.HadoopWinutilsInitializer;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
 
+import com.sun.ws.rs.ext.RuntimeDelegateImpl;
+
 /**
  * Plugin activator for the big data filehandling plugin.
  *
@@ -80,6 +82,7 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
         } catch (Throwable t) {
             LOG.error("Failed to initialize the JAX-RS 1.x RuntimeDelegate. Provided error message: " + t.getMessage(),
                 t);
+            RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
         }
 
         HadoopWinutilsInitializer.ensureInitialized();
