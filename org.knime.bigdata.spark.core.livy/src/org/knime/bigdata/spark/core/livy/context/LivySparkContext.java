@@ -382,7 +382,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private void createRemoteSparkContext(ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
         CreateSessionHandle handle = m_livyClient.startOrConnectSession();
         waitForFuture(handle, exec);
-        switch(handle.getState()) {
+        switch(handle.getHandleState()) {
             case DONE_CANCELLED:
                 throw new CanceledExecutionException();
             case DONE_ERROR:
@@ -391,7 +391,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 break;
             default:
                 // should never happen
-                throw new RuntimeException("Unexpected state: " + handle.getState());
+                throw new RuntimeException("Unexpected state: " + handle.getHandleState());
         }
     }
 
