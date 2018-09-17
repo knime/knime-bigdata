@@ -135,6 +135,7 @@ public class FlowVariableReader {
             // HDFS is mandatory when the 
             ensureHas(TestflowVariable.HDFS_AUTH_METHOD, flowVariables);
             ensureHas(TestflowVariable.HDFS_URL, flowVariables);
+            ensureHas(TestflowVariable.HDFS_WEBHDFS_PORT, flowVariables);
             ensureHas(TestflowVariable.HDFS_USECREDENTIALS, flowVariables);
             if (TestflowVariable.isTrue(TestflowVariable.HDFS_USECREDENTIALS, flowVariables)) {
                 ensureHas(TestflowVariable.HDFS_USERNAME, flowVariables);

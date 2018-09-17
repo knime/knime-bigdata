@@ -19,7 +19,8 @@
             Address of the host.
         </option>
         <option name="Port">
-            Port of the service.
+            The port where the DFS NameNode Web UI is listen on.
+            The default port on Hadoop 2.x is 50070 and on HDFS 3.0 the default is 9870.
         </option>
         <option name="Authentication">
             Method of authentication.

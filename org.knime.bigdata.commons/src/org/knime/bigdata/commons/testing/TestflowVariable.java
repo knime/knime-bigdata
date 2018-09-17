@@ -68,6 +68,11 @@ public enum TestflowVariable {
         HDFS_USERNAME("hdfs.username"),
 
         /**
+         * Flow variable with the WebHDFS port.
+         */
+        HDFS_WEBHDFS_PORT("hdfs.webhdfs.port", Type.INT),
+
+        /**
          * Flow variable for the "database" setting of the Hive connection node.
          */
         HIVE_DATABASENAME("hive.databasename"),
