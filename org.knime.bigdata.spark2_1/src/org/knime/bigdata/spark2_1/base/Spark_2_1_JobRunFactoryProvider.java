@@ -65,6 +65,7 @@ import org.knime.bigdata.spark2_1.jobs.scorer.EntropyScorerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.scorer.ScorerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.scripting.java.JavaDataFrameSnippetJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.scripting.java.JavaSnippetJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.scripting.python.PySparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.sql.SparkSQLFunctionsJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.sql.SparkSQLJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.statistics.compute.StatisticsJobRunFactory;
@@ -140,6 +141,7 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new SparkSQLJobRunFactory(),
             new SparkSQLFunctionsJobRunFactory(),
             new CheckJarPresenceJobRunFactory(),
-            new UploadJarJobRunFactory());
+            new UploadJarJobRunFactory(),
+            new PySparkJobRunFactory());
     }
 }

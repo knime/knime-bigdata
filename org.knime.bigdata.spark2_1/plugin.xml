@@ -58,4 +58,10 @@
             ProviderClass="org.knime.bigdata.spark2_1.base.Spark_2_1_PMMLPortObjectFactoryProvider">
       </PMMLPortObjectFactoryProvider>
    </extension>
+   <extension
+         point="org.knime.bigdata.spark.node.PySparkHelper">
+      <PySparkHelper
+            HelperClass="org.knime.bigdata.spark2_1.base.Spark_2_1_PySparkHelper">
+      </PySparkHelper>
+   </extension>
 </plugin>

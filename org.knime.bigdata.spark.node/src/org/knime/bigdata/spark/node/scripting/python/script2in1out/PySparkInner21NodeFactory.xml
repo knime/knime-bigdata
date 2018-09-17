@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="../pysparkicon.png">
+	<name>PySpark Script (2&#8658;1)</name>
+	<shortDescription>Execute arbitrary Python code in Spark.</shortDescription>
+    <fullDescription>
+        <intro>
+            <p>This node allows you to execute arbitrary Python code on Spark. The code has to put the desired output
+            in the data frame with the name resultDataFrame1 and resultDataFrame2</p>
+            
+        </intro>
+        <tab name="PySpark Script Node">
+	        <option name="Flow Variable List">
+	          The list contains the flow variables that are currently available at
+	          the node input. Double clicking any of the entries will insert the
+	          respective identifier at the current cursor position (replacing the
+	          selection, if any).
+	        </option>
+	        <option name="Snippet text area">
+	          <p>Enter your Python code here.</p>
+
+	          <p>
+	          The <i>SparkSession</i> can be accessed via the global variable <i>spark</i>.
+	          The input <i>Dataset&lt;Row&gt;</i> can be accessed via the method input parameter <i>dataFrame1</i> and <i>dataFrame2</i>.
+ 			  The output <i>Dataset&lt;Row&gt;</i> must be called <i>resultDataFrame1</i>.</p>
+
+	        </option>
+	   </tab>
+	   
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="First Spark Data">First input Spark DataFrame.</inPort>
+        <inPort index="1" name="Second Spark Data">First input Spark DataFrame.</inPort>
+        <outPort index="0" name="Result Spark Data">Result Spark DataFrame.</outPort>
+	</ports>
+</knimeNode>

@@ -88,6 +88,11 @@ import org.knime.bigdata.spark.node.scripting.java.snippet.SparkDataFrameJavaSni
 import org.knime.bigdata.spark.node.scripting.java.snippet.SparkJavaSnippetNodeFactory;
 import org.knime.bigdata.spark.node.scripting.java.source.SparkDataFrameJavaSnippetSourceNodeFactory;
 import org.knime.bigdata.spark.node.scripting.java.source.SparkJavaSnippetSourceNodeFactory2;
+import org.knime.bigdata.spark.node.scripting.python.script1in1out.PySparkInner11NodeFactory;
+import org.knime.bigdata.spark.node.scripting.python.script1in2out.PySparkInner12NodeFactory;
+import org.knime.bigdata.spark.node.scripting.python.script2in1out.PySparkInner21NodeFactory;
+import org.knime.bigdata.spark.node.scripting.python.script2in2out.PySparkInner22NodeFactory;
+import org.knime.bigdata.spark.node.scripting.python.source.PySparkSourceNodeFactory;
 import org.knime.bigdata.spark.node.sql.SparkSQLNodeFactory;
 import org.knime.bigdata.spark.node.statistics.compute.MLlibStatisticsNodeFactory;
 import org.knime.bigdata.spark.node.statistics.correlation.column.MLlibCorrelationColumnNodeFactory;
@@ -197,7 +202,11 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkContextCreatorNodeFactory(),
             new Spark2ImpalaNodeFactory(),
             new Impala2SparkNodeFactory2(),
-
+            new PySparkInner11NodeFactory(),
+            new PySparkInner22NodeFactory(),
+            new PySparkInner21NodeFactory(),
+            new PySparkInner12NodeFactory(),
+            new PySparkSourceNodeFactory(),
             // deprecated
             new Avro2SparkNodeFactory(),
             new CSV2SparkNodeFactory(),
