@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="../pysparkicon.png">
-	<name>PySpark Script (1&#8658;1)</name>
+	<name>PySpark Script (1 to 1)</name>
 	<shortDescription>Execute arbitrary Python code in Spark.</shortDescription>
     <fullDescription>
         <intro>
