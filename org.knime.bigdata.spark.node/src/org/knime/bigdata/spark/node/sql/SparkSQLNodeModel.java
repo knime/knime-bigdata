@@ -109,7 +109,7 @@ public class SparkSQLNodeModel extends SparkNodeModel implements FlowVariablePro
      */
     public static List<String> getSQLFunctions(final SparkContextID contextID) throws KNIMESparkException {
         final JobRunFactory<EmptyJobInput, SparkSQLFunctionsJobOutput> factory = SparkContextUtil.getJobRunFactory(contextID, FUNCTIONS_JOB_ID);
-        final SparkSQLFunctionsJobOutput output = factory.createRun(new EmptyJobInput()).run(contextID);
+        final SparkSQLFunctionsJobOutput output = factory.createRun(EmptyJobInput.getInstance()).run(contextID);
         return output.getFunctions();
     }
 

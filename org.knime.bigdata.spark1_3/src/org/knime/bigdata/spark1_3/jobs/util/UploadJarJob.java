@@ -52,7 +52,7 @@ public class UploadJarJob implements SparkJobWithFiles<EmptyJobInput, EmptyJobOu
         throws KNIMESparkException, Exception {
         JarRegistry.getInstance(sparkContext).ensureJarsAreLoaded(inputFiles);
         LOGGER.info("Ensured that list of Jars is loaded");
-        return new EmptyJobOutput();
+        return EmptyJobOutput.getInstance();
     }
 
 }
