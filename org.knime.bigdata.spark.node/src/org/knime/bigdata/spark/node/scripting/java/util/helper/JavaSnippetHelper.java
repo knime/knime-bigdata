@@ -23,10 +23,10 @@ package org.knime.bigdata.spark.node.scripting.java.util.helper;
 import java.io.File;
 import java.util.List;
 
-import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
 import org.knime.bigdata.spark.core.version.SparkProvider;
+import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 
 /**
  * Instances of this class are used by the Spark Java snippet nodes to obtain everything that is required to write Spark

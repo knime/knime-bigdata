@@ -30,8 +30,6 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.loader.sources.SingleSourcePackage;
-import org.knime.base.node.jsnippet.guarded.GuardedDocument;
-import org.knime.base.node.jsnippet.guarded.GuardedSection;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.util.JavaSnippetFields;
 import org.knime.base.node.jsnippet.util.JavaSnippetSettings;
@@ -43,6 +41,8 @@ import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
 import org.knime.bigdata.spark2_0.api.Spark_2_0_CompatibilityChecker;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedSection;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
