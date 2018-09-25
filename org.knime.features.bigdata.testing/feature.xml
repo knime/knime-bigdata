@@ -739,6 +739,7 @@ propagated with or for interoperation with KNIME.
       <import feature="org.knime.features.testingapplication"/>
       
       <import feature="com.knime.features.bigdata.knosp"/>
+      <import feature="org.knime.features.ext.perl"/>
    </requires>
 
    <plugin
