@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -21,8 +23,9 @@ import org.osgi.framework.FrameworkUtil;
  */
 public class LocalSparkWrapperFactory {
 
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalSparkWrapperFactory.class);
+	private static final String KNOSP_NODE_PLUGIN = "com.knime.bigdata.knosp.node";
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(LocalSparkWrapperFactory.class);
 
 	/**
 	 * Creates a {@link LocalSparkWrapper} that lives in its own class loader
@@ -49,25 +52,40 @@ public class LocalSparkWrapperFactory {
 		return null;
 	}
 
-	private static ClassLoader createSparkClassLoader(final File jobJar, final File[] extraJars) throws IOException {
-		final Bundle hadoopBundle = FrameworkUtil.getBundle(Configuration.class);
-		final Bundle scalaLibraryBundle = FrameworkUtil.getBundle(scala.Boolean.class);
-		final Bundle scalaReflectBundle = FrameworkUtil.getBundle(scala.reflect.api.Annotations.class);
-		final Bundle scalaCompilerBundle = FrameworkUtil.getBundle(scala.tools.nsc.Main.class);
-		final Bundle scalaPBundle = FrameworkUtil.getBundle(scala.tools.scalap.Main.class);
-		final Bundle scalaXmlBundle = FrameworkUtil.getBundle(scala.xml.Document.class);
+    private static ClassLoader createSparkClassLoader(final File jobJar, final File[] extraJars) throws IOException {
+
+        final List<Bundle> bundles = new ArrayList<>();
+
+		// hadoop
+	    bundles.add(FrameworkUtil.getBundle(Configuration.class));
+	    
+	    // scala-library
+	    bundles.add(FrameworkUtil.getBundle(scala.Boolean.class));
+
+	    // scala-reflect
+	    bundles.add(FrameworkUtil.getBundle(scala.reflect.api.Annotations.class));
+
+	    // scala-compiler
+	    bundles.add(FrameworkUtil.getBundle(scala.tools.nsc.Main.class));
+
+	    // scalap
+	    bundles.add(FrameworkUtil.getBundle(scala.tools.scalap.Main.class));
+
+	    // scala-xml
+	    bundles.add(FrameworkUtil.getBundle(scala.xml.Document.class));
+		
+		// knosp.node (KNIME-on-Spark, aka KNIME Workflow Executor for Apache Spark)
+	    final Bundle knospNodeBundle = Platform.getBundle(KNOSP_NODE_PLUGIN);
+	    if (knospNodeBundle != null) {
+	        bundles.add(knospNodeBundle);
+	    }
 		
 		// put io.nettyo on the package blacklist in the bundleDelegatingLoader,
 		// because the hadoop bundle has this package on its classpath but in a version
 		// that is older than the one in Spark. Otherwise we get NoSuchMethod exceptions.
 		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(
 				new String[] { "com.fasterxml.jackson", "io.netty", "org.apache.avro" },
-				scalaLibraryBundle,
-				scalaReflectBundle,
-				scalaCompilerBundle,
-				scalaPBundle,
-				scalaXmlBundle,
-				hadoopBundle);
+				bundles.toArray(new Bundle[0]));
 		
 		
 		return new URLClassLoader(getJars(jobJar, extraJars), bundleDelegatingLoader) {

@@ -245,6 +245,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.builder()
 				.appName(String.format("Local Spark (%s)", name))
 				.master(String.format("local[%d]", workerThreads))
+				.config("spark.knime.knosp.localBigDataEnv", "true")
 				.config("spark.logConf", "true")
 				.config("spark.kryo.unsafe", "true")
 				.config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
