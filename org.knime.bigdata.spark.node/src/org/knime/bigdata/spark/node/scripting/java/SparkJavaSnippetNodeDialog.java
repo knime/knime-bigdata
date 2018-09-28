@@ -86,7 +86,6 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.template.AddTemplateDialog;
 import org.knime.base.node.jsnippet.template.DefaultTemplateController;
@@ -123,6 +122,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
+import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 import org.knime.core.node.workflow.FlowVariable;
 
 /**

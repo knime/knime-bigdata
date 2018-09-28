@@ -38,7 +38,6 @@ import javax.tools.JavaFileObject.Kind;
 
 import org.eclipse.jdt.internal.compiler.tool.EclipseFileObject;
 import org.fife.ui.rsyntaxtextarea.parser.Parser;
-import org.knime.base.node.jsnippet.guarded.GuardedDocument;
 import org.knime.base.node.jsnippet.guarded.JavaSnippetDocument;
 import org.knime.base.node.jsnippet.ui.JSnippetParser;
 import org.knime.base.node.jsnippet.util.JSnippet;
@@ -52,6 +51,7 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
 import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 import org.knime.core.util.FileUtil;
 
 /**
