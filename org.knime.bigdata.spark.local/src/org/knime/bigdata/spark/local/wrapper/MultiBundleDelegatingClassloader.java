@@ -21,20 +21,22 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
 	private final Bundle[] m_bundles;
 	
 	private final String[] m_pkgBlacklist;
+	
+	private final String[] m_pkgWhitelist;
 
 	/**
-	 * Creates a new instance.
-	 * 
-	 * @param pkgBlacklist
-	 *            A package blacklist that is consulted before classloading.
-	 *            This classloader only loads classes from those packages that
-	 *            are not on the blacklist.
-	 * @param bundles
-	 *            An array of bundles that classes are to be loaded from.
-	 */
-	public MultiBundleDelegatingClassloader(final String[] pkgBlacklist, Bundle... bundles) {
+     * Creates a new instance.
+     * 
+     * @param pkgBlacklist A package blacklist that is consulted before classloading. This classloader only loads
+     *            classes from those packages that are not on the blacklist, unless they are explicitly whitelisted.
+     * @param pkgWhitelist A package whitelist that is consulted when trying to load a class from a blacklisted package.
+     *            This classloader will always load classes from whitelisted packages, even if they are blacklisted.
+     * @param bundles An array of bundles that classes are to be loaded from.
+     */
+	public MultiBundleDelegatingClassloader(final String[] pkgBlacklist, final String[] pkgWhitelist, Bundle... bundles) {
 		m_bundles = bundles;
 		m_pkgBlacklist = pkgBlacklist;
+		m_pkgWhitelist = pkgWhitelist;
 	}
 
 	/**
@@ -46,16 +48,27 @@ public class MultiBundleDelegatingClassloader extends ClassLoader {
     protected Class<?> findClass(final String name) throws ClassNotFoundException {
 		Class<?> clazz = null;
 		
-		boolean onBlacklist = false;
+		boolean mayLoadClass = true;
 		
+		// do blacklist check
 		for(String blacklistedPkg : m_pkgBlacklist) {
 			if (name.startsWith(blacklistedPkg)) {
-				onBlacklist = true;
+				mayLoadClass = false;
 				break;
 			}
 		}
 		
-		if (onBlacklist) {
+		// do whitelist check only if package was blacklisted
+        if (!mayLoadClass) {
+            for (String whitelistedPkg : m_pkgWhitelist) {
+                if (name.startsWith(whitelistedPkg)) {
+                    mayLoadClass = true;
+                    break;
+                }
+            }
+        }
+		
+		if (!mayLoadClass) {
 			throw new ClassNotFoundException("Package is on blacklist of MultiBundleDelegatingClassloader");
 		}
 		

@@ -84,7 +84,8 @@ public class LocalSparkWrapperFactory {
 		// because the hadoop bundle has this package on its classpath but in a version
 		// that is older than the one in Spark. Otherwise we get NoSuchMethod exceptions.
 		final ClassLoader bundleDelegatingLoader = new MultiBundleDelegatingClassloader(
-				new String[] { "com.fasterxml.jackson", "io.netty", "org.apache.avro" },
+				new String[] { "com.fasterxml.jackson", "io.netty", "org.apache.avro", "org.knime", "com.knime", "org.eclipse" },
+				new String[] { "com.knime.bigdata.knosp.node.jobmanager.proxy" },
 				bundles.toArray(new Bundle[0]));
 		
 		
