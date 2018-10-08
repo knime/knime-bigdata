@@ -28,7 +28,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,6 +60,10 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
 
     private static final String ENCODING = "UTF-8";
 
+    private static final int SHOW_ROW_COUNT = 10;
+
+    private static final boolean CLOUMN_TRUNCAT = true;
+
     private static final long serialVersionUID = -3523554160144305457L;
 
     private static final Logger LOGGER = Logger.getLogger(PySparkJob.class.getName());
@@ -88,6 +91,10 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
         } catch (Exception ex) {
             LOGGER.info(ex);
             //outStream will be closed in finally
+            String out = outStream.toString(ENCODING);
+            if(out.isEmpty()) {
+                out = ex.getMessage();
+            }
             throw new KNIMESparkException(outStream.toString(ENCODING));
         } finally {
             //Everything went fine reset the output
@@ -103,7 +110,7 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
     }
 
     /**
-     * Creates a String with the first 10 lines of the result dataframes
+     * Creates a String with the first lines of the result dataframes
      */
     private static String createOutputforConsole(final PySparkJobInput input, final String[] resultFrames) {
         StringBuilder sb = new StringBuilder();
@@ -112,12 +119,8 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
 
             String resultFrame = input.getUID() + "_resultDataFrame" + (i + 1);
             Dataset<Row> pydf = EXCHANGER.getDataFrame(resultFrame);
-            sb.append("resultDataFrame" + (i + 1) + "(10 of " + pydf.count() + " rows):\n");
-            sb.append(Arrays.toString(pydf.schema().fieldNames()).replaceAll(",", "|") + "\n");
-            List<Row> rowList = pydf.takeAsList(10);
-            for (Row row : rowList) {
-                sb.append(row.mkString("[", "|", "]") + "\n");
-            }
+            sb.append("resultDataFrame" + (i + 1) + "(" + SHOW_ROW_COUNT +" of " + pydf.count() + " rows):\n");
+            sb.append(pydf.showString(SHOW_ROW_COUNT, CLOUMN_TRUNCAT));
             sb.append("\n");
         }
         return sb.toString();

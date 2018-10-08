@@ -40,6 +40,7 @@ import org.knime.bigdata.spark.node.scripting.python.util.PySparkJobInput;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkJobOutput;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -132,7 +133,7 @@ public class PySparkNodeModel extends SparkNodeModel {
      * @throws Exception if an error occurs in the Spark job execution
      */
     public static PortObject[] executeScript(final PortObject[] inData, final int inputCount, final int outputCount,
-        final PySparkDocument doc, final ExecutionContext exec, final int numRows) throws Exception {
+        final PySparkDocument doc, final ExecutionMonitor exec, final int numRows) throws Exception {
 
         SparkContextID contextID = getContextID(inData);
         final String dataFrame1 = getDataFrameIDFromPortObjects(inData, 0);

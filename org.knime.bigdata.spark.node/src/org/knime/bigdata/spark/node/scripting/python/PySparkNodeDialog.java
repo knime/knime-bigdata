@@ -47,6 +47,10 @@
  */
 package org.knime.bigdata.spark.node.scripting.python;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.folding.Fold;
+import org.fife.ui.rsyntaxtextarea.folding.FoldManager;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.SparkContextProvider;
 import org.knime.bigdata.spark.core.preferences.KNIMEConfigContainer;
@@ -162,6 +166,20 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
      */
     @Override
     public void onOpen() {
+        RSyntaxTextArea editor = m_sourceCodePanel.getEditor();
+        editor.requestFocus();
+        editor.requestFocusInWindow();
+        // reset style which causes a recreation of the popup window with
+        // the side effect, that all folds are recreated, so that we must collapse
+        editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+        editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+        // collapse all folds
+        FoldManager foldManager = editor.getFoldManager();
+        int foldCount = foldManager.getFoldCount();
+        for (int i = 0; i < foldCount; i++) {
+            Fold fold = foldManager.getFold(i);
+            fold.setCollapsed(true);
+        }
         m_sourceCodePanel.open();
     }
 

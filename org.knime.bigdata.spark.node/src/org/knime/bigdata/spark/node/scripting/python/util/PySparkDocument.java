@@ -78,19 +78,21 @@ public class PySparkDocument extends GuardedDocument {
     public void writeFlowVariables(final FlowVariable[] variables) {
         StringBuilder sb = new StringBuilder();
         sb.append("#Flowariables \n");
+        sb.append("flow_variables = {} \n");
         for(FlowVariable flowVariable : variables) {
+           String escapedName = flowVariable.getName().replaceAll("[^A-Za-z0-9_]", "_");
         switch (flowVariable.getType()) {
                 case INTEGER:
-                    sb.append("v_" + flowVariable.getName() + " = " + flowVariable.getIntValue() + "\n");
+                    sb.append("flow_variables['v_" + escapedName + "'] = " + flowVariable.getIntValue() + "\n");
                     break;
                 case DOUBLE:
-                    sb.append("v_" + flowVariable.getName() + " = " + flowVariable.getDoubleValue() + "\n");
+                    sb.append("flow_variables['v_" + escapedName + "'] = " + flowVariable.getDoubleValue() + "\n");
                     break;
                 case STRING:
-                    sb.append("v_" + flowVariable.getName() + " = \"" + flowVariable.getStringValue() + "\"\n");
+                    sb.append("flow_variables['v_" + escapedName + "'] = \"" + flowVariable.getStringValue() + "\"\n");
                     break;
                 default:
-                    sb.append("v_" + flowVariable.getName() + " = \"" + flowVariable.getValueAsString() + "\"\n");
+                    sb.append("flow_variables['v_" + escapedName + "'] = \"" + flowVariable.getValueAsString() + "\"\n");
                     break;
             }
         }

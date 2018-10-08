@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+<knimeNode xmlns="http://knime.org/node/v3.6"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://knime.org/node/v3.6 http://knime.org/node/v3.6.xsd"
 	type="Source" icon="../pysparkicon.png">
 	<name>PySpark Script Source</name>
 	<shortDescription>Execute arbitrary Python code in Spark.</shortDescription>
     <fullDescription>
         <intro>
-            <p>This node allows you to execute arbitrary Python code on Spark. The code has to put the desired output
-            in the data frame with the name resultDataFrame1</p>
-            
+            <p>This node allows you to execute Python code on Spark
+             (<a href="http://spark.apache.org/docs/latest/api/python/">See PySpark documentation</a>).
+             The code has to put the desired output in the data frame with the name resultDataFrame1</p>
         </intro>
         <tab name="PySpark Script Node">
 	        <option name="Flow Variable List">

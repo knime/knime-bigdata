@@ -70,12 +70,14 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
         sb.append("\t# The output dataFrame(s) must be: " + Arrays.toString(getOutputFrames(outCount)) + "\n");
 
         if(inCount > 0) {
-            for(String dataframe : getOutputFrames(outCount)) {
-                sb.append("\t"+dataframe + " = "+ getInputFrames(inCount)[0] + "\n" );
+            for(int i = 0; i < outCount; i++) {
+                int diff = outCount-inCount;
+                String dataframe = getOutputFrames(outCount)[i];
+                sb.append("\t"+dataframe + " = "+ getInputFrames(inCount)[(i-diff)*i] + "\n" );
             }
         }else {
             for(String dataframe : getOutputFrames(outCount)) {
-                sb.append("\t" + dataframe +" = spark.emptyDataFrame()\n" );
+                sb.append("\t" + dataframe +" = spark.createDataFrame([('ABC', 1)])\n" );
             }
         }
         sb.append("\t\n\t\n\t\n\t\n");
@@ -234,7 +236,8 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
             + "from pyspark import SparkContext, SparkFiles\n" + "from pyspark.sql import SQLContext\n"
             + "from pyspark.serializers import PickleSerializer\n" + "from pyspark.sql import SparkSession\n"
             + "from pyspark.sql.types import *\n" + "from pyspark.java_gateway import launch_gateway\n"
-            + "from pyspark.profiler import BasicProfiler\n");
+            + "from pyspark.profiler import BasicProfiler\n"
+            + "from collections import OrderedDict \n");
         addExchanger(sb);
         return sb.toString();
     }
@@ -272,7 +275,7 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
     }
 
     private void addExchanger(final StringBuilder sb) {
-        sb.append("class Exchanger(object):\n");
+        sb.append("\nclass Exchanger(object):\n");
         sb.append("\t_spark = None\n");
         sb.append("\t_jexchange = None\n");
 

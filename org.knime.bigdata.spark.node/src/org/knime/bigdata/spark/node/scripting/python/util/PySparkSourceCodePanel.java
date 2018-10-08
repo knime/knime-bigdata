@@ -40,6 +40,8 @@ import org.knime.bigdata.spark.node.scripting.python.PySparkNodeConfig;
 import org.knime.bigdata.spark.node.scripting.python.PySparkNodeModel;
 import org.knime.bigdata.spark.node.scripting.python.PySparkOutRedirectException;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
@@ -58,12 +60,16 @@ import org.knime.python2.generic.VariableNames;
  */
 public class PySparkSourceCodePanel extends SourceCodePanel {
 
+    private static final long serialVersionUID = 1821218187292351246L;
+    private static final String VALIDATE_ON_CLUSTER = "Validate on Cluster";
     private static final int DEFAULT_VALIADTE_ROW_COUNT = 50;
     private HashMap<String, FlowVariable> m_usedFlowVariables = new HashMap<>();
-    private JButton m_validate = new JButton("Validate on Cluster");
+    private final JButton m_validate = new JButton(VALIDATE_ON_CLUSTER);
+    private JButton m_cancel = new JButton("Cancel");
     private PortObject[] m_input;
     private SettingsModelInteger m_rowcount = new SettingsModelInteger("RowCount", DEFAULT_VALIADTE_ROW_COUNT);
 
+    private ExecutionMonitor m_exec;
     /**
      * Creates a PySparkSourceCode Panel for the given variables
      *
@@ -77,10 +83,11 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         format.setParseIntegerOnly(true);
         format.setMaximumIntegerDigits(4);
         format.setMinimumIntegerDigits(1);
-
         DialogComponentNumberEdit rowCount =
                 new DialogComponentNumberEdit(m_rowcount, "Number of rows to validate on", 5);
         m_editorButtons.removeAll();
+        m_editorButtons.add(m_cancel);
+        m_cancel.setVisible(false);
         m_editorButtons.add(m_validate);
         m_editorButtons.add(rowCount.getComponentPanel());
         m_validate.addActionListener(new ActionListener() {
@@ -89,31 +96,107 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
              */
             @Override
             public void actionPerformed(final ActionEvent e) {
-                runExec("");
+                    m_validate.setEnabled(false);
+                    m_validate.setText("Executing job on cluster");
+                    m_cancel.setVisible(true);
+                    m_editorButtons.revalidate();
+
+                    Thread t = new Thread(new Executer());
+                    t.start();
             }
         });
+
+        m_cancel.addActionListener(new ActionListener() {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+
+                   m_exec.getProgressMonitor().setExecuteCanceled();
+
+            }
+        });
+
         if(m_input == null) {
             setInteractive(false);
             m_validate.setEnabled(false);
         }
         showWorkspacePanel(false);
+
+        int foldCount = getEditor().getFoldManager().getFoldCount();
+        for (int i = 0; i < foldCount; i++) {
+            Fold fold = getEditor().getFoldManager().getFold(i);
+            fold.setCollapsed(true);
+        }
     }
 
-    private static final long serialVersionUID = 1821218187292351246L;
+
+
+
+
+    private class Executer implements Runnable{
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            int outCount = getVariableNames().getOutputObjects().length;
+            PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
+            PortObject[] outObj = {};
+            if(m_input == null) {
+                errorToConsole("No input data available");
+            }else {
+
+                try {
+                   m_exec = new ExecutionMonitor();
+                    outObj = PySparkNodeModel.executeScript(m_input, m_input.length, outCount, doc, m_exec,
+                        m_rowcount.getIntValue());
+                } catch (PySparkOutRedirectException e) {
+                    messageToConsole(e.getMessage());
+                 }catch (Exception e) {
+                     String message = e.getMessage();
+                   try {
+                       m_exec.checkCanceled();
+                   }catch (CanceledExecutionException ce){
+                       message = "Execution Canceled.";
+                   }
+                   errorToConsole(message);
+                }
+            }
+            for(PortObject ob : outObj) {
+                SparkDataPortObject sparkObj = (SparkDataPortObject)ob;
+
+                messageToConsole(sparkObj.getTableSpec().toString() + "\n");
+            }
+            runFinished();
+        }
+
+        private void runFinished() {
+            m_validate.setEnabled(true);
+            m_validate.setText(VALIDATE_ON_CLUSTER);
+            m_cancel.setVisible(false);
+            m_editorButtons.revalidate();
+        }
+
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected void runExec(final String sourceCode) {
+
         int outCount = getVariableNames().getOutputObjects().length;
         PySparkDocument doc = (PySparkDocument)getEditor().getDocument();
         PortObject[] outObj = {};
         if(m_input == null) {
             errorToConsole("No input data available");
         }else {
+
             try {
-                outObj = PySparkNodeModel.executeScript(m_input, m_input.length, outCount, doc, null,
+               m_exec = new ExecutionMonitor();
+                outObj = PySparkNodeModel.executeScript(m_input, m_input.length, outCount, doc, m_exec,
                     m_rowcount.getIntValue());
             } catch (PySparkOutRedirectException e) {
                 messageToConsole(e.getMessage());
@@ -128,6 +211,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         }
 
     }
+
 
     /**
      * {@inheritDoc}
@@ -169,11 +253,11 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
                     break;
                 }
             }
-            writeFlowVariables();
-            return "v_" + field;
+           writeFlowVariables();
+            return "flow_variables['v_" + field.replaceAll("[^A-Za-z0-9_]", "_") + "']";
         } else {
 
-            return "'" + field + "'";
+            return String.format("%s.col('%s')", variable, field);
         }
     }
 
@@ -227,6 +311,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
      * @param input the input data
      */
     public void updatePortObjects(final PortObject[] input) {
+
         boolean active = (input != null);
         m_input = input != null ? input.clone() : null;
         setInteractive(active);
