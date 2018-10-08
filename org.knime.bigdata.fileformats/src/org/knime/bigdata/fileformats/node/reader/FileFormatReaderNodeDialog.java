@@ -111,7 +111,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
 
         final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
         typeMappingBox.add(Box.createHorizontalGlue());
-        m_outputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getmappingModel());
+        m_outputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel());
         typeMappingBox.add(m_outputTypeMappingComponent.getComponentPanel());
         typeMappingBox.add(Box.createHorizontalGlue());
         if (m_settings.getFormatFactory() instanceof OrcFormatFactory) {

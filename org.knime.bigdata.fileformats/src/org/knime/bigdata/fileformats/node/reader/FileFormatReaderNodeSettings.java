@@ -106,7 +106,7 @@ public class FileFormatReaderNodeSettings {
     /**
      * @return the m_mappingModel
      */
-    public SettingsModelORCDataTypeMapping getmappingModel() {
+    public SettingsModelORCDataTypeMapping getMappingModel() {
         return m_mappingModel;
     }
 

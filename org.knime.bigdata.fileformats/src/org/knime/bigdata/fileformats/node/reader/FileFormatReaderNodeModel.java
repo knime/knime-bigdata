@@ -116,7 +116,7 @@ public class FileFormatReaderNodeModel extends NodeModel {
         }
         final RemoteFile<Connection> sourceFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                 connInfo);
-		final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getmappingModel()
+		final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getMappingModel()
 				.getDataTypeMappingConfiguration();
 		final AbstractFileFormatReader reader = getReader(sourceFile, exec, outputDataTypeMappingConfiguration);
         return new BigDataFileFormatTable(reader);
@@ -153,7 +153,7 @@ public class FileFormatReaderNodeModel extends NodeModel {
             }
         }
         try {
-			final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getmappingModel()
+			final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getMappingModel()
 					.getDataTypeMappingConfiguration();
             // Create a reader to get the generated TableSpec
             final RemoteFile<Connection> remoteFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
