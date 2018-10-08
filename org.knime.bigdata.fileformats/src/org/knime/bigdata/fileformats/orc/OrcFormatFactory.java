@@ -63,6 +63,7 @@ import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * Factory for ORC format
@@ -75,8 +76,32 @@ public class OrcFormatFactory implements FileFormatFactory {
 
     private static final String NAME = "ORC";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
+    public String getChunkSizeUnit() {
+        return "rows";
+    }
+
+    @Override
+    public String[] getCompressionList() {
+        return Stream.of(CompressionKind.values()).map(Enum::name).toArray(String[]::new);
+    }
+
+    @Override
+    public String getFilenameSuffix() {
+        return SUFFIX;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
+            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
         try {
             AbstractFileFormatReader reader;
             if (file.getConnectionInformation() != null && file.getConnectionInformation().useKerberos()) {
@@ -85,11 +110,11 @@ public class OrcFormatFactory implements FileFormatFactory {
                 reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
                     @Override
                     public AbstractFileFormatReader run() throws Exception {
-                        return new OrcKNIMEReader(file, exec);
+                        return new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
                     }
                 });
             } else {
-                reader = new OrcKNIMEReader(file, exec);
+                reader = new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
             }
             return reader;
         } catch (final Exception e) {
@@ -99,36 +124,9 @@ public class OrcFormatFactory implements FileFormatFactory {
 
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-    		final int chunkSize, final String compression) throws IOException {
-        return new OrcKNIMEWriter(file, spec, chunkSize, compression);
-    }
-
-    @Override
-    public String[] getCompressionList() {
-        return Stream.of(CompressionKind.values()).map(Enum::name).toArray(String[]::new);
-    }
-
-    @Override
-    public String[] getUnsupportedTypes(final DataTableSpec spec) {
-        return OrcTableStoreFormat.getUnsupportedTypes(spec);
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public String getFilenameSuffix() {
-        return SUFFIX;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getChunkSizeUnit() {
-        return "rows";
+            final int chunkSize, final String compression,
+            DataTypeMappingConfiguration<?> typeMappingConf) throws IOException {
+        return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
     }
 
 }

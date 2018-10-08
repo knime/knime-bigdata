@@ -68,38 +68,35 @@ public abstract class AbstractFileFormatWriter implements AutoCloseable {
     /**
      * Creates a AbstractFIleFormatWriter
      *
-     * @param batchSize the batchSize for writing
-     * @param file the file to write to
-     * @param tableSpec the data table spec
+     * @param batchSize
+     *            the batchSize for writing
+     * @param file
+     *            the file to write to
+     * @param tableSpec
+     *            the data table spec
      */
-    public AbstractFileFormatWriter(final RemoteFile<Connection> file, final int batchSize, final DataTableSpec tableSpec) {
+    public AbstractFileFormatWriter(final RemoteFile<Connection> file, final int batchSize,
+            final DataTableSpec tableSpec) {
         m_tableSpec = tableSpec;
         m_targetFile = file;
         m_batchSize = batchSize;
     }
 
     /**
-     * Writes a row to file.
-     *
-     * @param row the {@link DataRow}
-     * @throws IOException if row cannot be written
-     */
-    public abstract void writeRow(final DataRow row) throws IOException;
-
-    /**
-     * Writes additional metadata to the the file
-     *
-     * @param settings node settings for metadata
-     */
-    public abstract void writeMetaInfoAfterWrite(final NodeSettingsWO settings);
-
-    /**
      * Closes the writer.
      *
-     * @throws IOException if writer cannot be closed
+     * @throws IOException
+     *             if writer cannot be closed
      */
     @Override
     public abstract void close() throws IOException;
+
+    /**
+     * @return the m_batchSize
+     */
+    public int getBatchSize() {
+        return m_batchSize;
+    }
 
     /**
      * @return the m_tableSpec
@@ -116,10 +113,21 @@ public abstract class AbstractFileFormatWriter implements AutoCloseable {
     }
 
     /**
-     * @return the m_batchSize
+     * Writes additional metadata to the the file
+     *
+     * @param settings
+     *            node settings for metadata
      */
-    public int getBatchSize() {
-        return m_batchSize;
-    }
+    public abstract void writeMetaInfoAfterWrite(final NodeSettingsWO settings);
+
+    /**
+     * Writes a row to file.
+     *
+     * @param row
+     *            the {@link DataRow}
+     * @throws Exception
+     *             if row cannot be written
+     */
+    public abstract void writeRow(final DataRow row) throws Exception;
 
 }

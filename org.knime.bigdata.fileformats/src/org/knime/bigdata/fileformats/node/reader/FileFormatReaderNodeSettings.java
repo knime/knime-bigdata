@@ -44,11 +44,13 @@
  */
 package org.knime.bigdata.fileformats.node.reader;
 
+import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
 
 /**
  * Settings for generic file format reader.
@@ -56,6 +58,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class FileFormatReaderNodeSettings {
+    private static final String CFKEY_TYPE_MAPPING = "output_type_mapping";
+
     /**
      * Configuration key for the filename
      */
@@ -65,10 +69,14 @@ public class FileFormatReaderNodeSettings {
 
     private final FileFormatFactory m_formatFactory;
 
+    private final SettingsModelORCDataTypeMapping m_mappingModel = new SettingsModelORCDataTypeMapping(
+            CFKEY_TYPE_MAPPING, DataTypeMappingDirection.EXTERNAL_TO_KNIME);
+
     /**
      * Creates initial settings for the given file format.
      *
-     * @param formatFactory the file format
+     * @param formatFactory
+     *            the file format
      */
     public FileFormatReaderNodeSettings(final FileFormatFactory formatFactory) {
         m_formatFactory = formatFactory;
@@ -82,13 +90,6 @@ public class FileFormatReaderNodeSettings {
     }
 
     /**
-     * @param fileName the fileName to set
-     */
-    void setFileName(final String fileName) {
-        m_fileName.setStringValue(fileName);
-    }
-
-    /**
      * @return the settings model for the file name
      */
     SettingsModelString getFileNameModel() {
@@ -96,33 +97,60 @@ public class FileFormatReaderNodeSettings {
     }
 
     /**
-     * @param settings the NodeSettingsWO to write to.
-     */
-    void saveSettingsTo(final NodeSettingsWO settings) {
-        m_fileName.saveSettingsTo(settings);
-    }
-
-    /**
-     * @param settings the NodeSettingsRO to read from.
-     * @throws InvalidSettingsException if the settings are invalid.
-     */
-    void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_fileName.loadSettingsFrom(settings);
-    }
-
-    /**
-     * @param settings the NodeSettingsRO to read from.
-     * @throws InvalidSettingsException if the settings are invalid.
-     */
-    void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_fileName.validateSettings(settings);
-    }
-
-    /**
      * @return the m_formatFactory
      */
     public FileFormatFactory getFormatFactory() {
         return m_formatFactory;
+    }
+
+    /**
+     * @return the m_mappingModel
+     */
+    public SettingsModelORCDataTypeMapping getmappingModel() {
+        return m_mappingModel;
+    }
+
+    /**
+     * @param settings
+     *            the NodeSettingsRO to read from.
+     * @throws InvalidSettingsException
+     *             if the settings are invalid.
+     */
+    void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_fileName.loadSettingsFrom(settings);
+        if (settings.containsKey(CFKEY_TYPE_MAPPING)) {
+            m_mappingModel.loadSettingsFrom(settings);
+        }
+    }
+
+    /**
+     * @param settings
+     *            the NodeSettingsWO to write to.
+     */
+    void saveSettingsTo(final NodeSettingsWO settings) {
+        m_fileName.saveSettingsTo(settings);
+        m_mappingModel.saveSettingsTo(settings);
+    }
+
+    /**
+     * @param fileName
+     *            the fileName to set
+     */
+    void setFileName(final String fileName) {
+        m_fileName.setStringValue(fileName);
+    }
+
+    /**
+     * @param settings
+     *            the NodeSettingsRO to read from.
+     * @throws InvalidSettingsException
+     *             if the settings are invalid.
+     */
+    void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_fileName.validateSettings(settings);
+        if(settings.containsKey(CFKEY_TYPE_MAPPING)) {
+            m_mappingModel.validateSettings(settings);
+        }
     }
 
 }

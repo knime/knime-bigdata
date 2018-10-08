@@ -52,10 +52,12 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
+import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.core.node.InvalidSettingsException;
@@ -69,6 +71,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
  * Node Dialog for generic BigData file format writer.
@@ -83,6 +86,8 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
     private final FileFormatWriterNodeSettings m_settings;
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
+
+    private final DialogComponentDataTypeMapping<TypeDescription> m_inputTypeMappingComponent;
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
@@ -133,15 +138,15 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         addTab(CHUNK_UPLOAD, chunkUploadPanel);
         setEnabled(false, CHUNK_UPLOAD);
 
-    }
+        final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
+        typeMappingBox.add(Box.createHorizontalGlue());
+        m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel());
+        typeMappingBox.add(m_inputTypeMappingComponent.getComponentPanel());
+        typeMappingBox.add(Box.createHorizontalGlue());
+        if (m_settings.getFormatFactory() instanceof OrcFormatFactory) {
+            addTab("Type Mapping", typeMappingBox);
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        m_settings.setFileName(m_filePanel.getSelection().trim());
-        m_settings.saveSettingsTo(settings);
     }
 
     /**
@@ -172,6 +177,18 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
             // No connection set, create local HDFS Connection
             m_filePanel.setConnectionInformation(HDFSLocalConnectionInformation.getInstance());
         }
-        m_filePanel.setSelection(m_settings.getFileName());
+        m_filePanel.setSelection(m_settings.getFileNameWithSuffix());
+
+        m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_inputTypeMappingComponent.saveSettingsTo(settings);
+        m_settings.setFileName(m_filePanel.getSelection().trim());
+        m_settings.saveSettingsTo(settings);
     }
 }

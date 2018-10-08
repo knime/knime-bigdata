@@ -50,11 +50,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.CompressionKind;
 import org.apache.orc.OrcFile;
@@ -64,14 +62,19 @@ import org.apache.orc.Writer;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.orc.OrcTableStoreFormat;
-import org.knime.bigdata.fileformats.orc.types.OrcType;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCDestination;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCParameter;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.MappingFramework;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.util.Pair;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * ORC Writer for KNIME {@link DataRow}. It holds the rows in batches and hands
@@ -81,43 +84,88 @@ import org.knime.core.util.Pair;
  */
 public class OrcKNIMEWriter extends AbstractFileFormatWriter {
 
-    private List<Pair<String, OrcType<?>>> m_fields;
+    private List<Pair<String, TypeDescription>> m_fields;
 
     private Writer m_writer;
 
     private VectorizedRowBatch m_rowBatch;
 
-    private final OrcType<?>[] m_columnTypes;
-
     private final CompressionKind m_compression;
 
+    private final DataTypeMappingConfiguration<?> m_inputputDataTypeMappingConfiguration;
+
+    private final ORCParameter[] m_params;
+
+    private ORCDestination m_destination;
+
     /**
-     * Constructor for ORC writer, that writes KNIME {@link DataRow}s to an ORC
-     * file
+     * Constructor for ORC writer, that writes KNIME {@link DataRow}s to an ORC file
      *
-     * @param file the target file
-     * @param spec the data table spec
-     * @param batchSize size of the batch
-     * @param compression the compression to use for writing
-     * @throws IOException if writer cannot be initialized
+     * @param file
+     *            the target file
+     * @param spec
+     *            the data table spec
+     * @param batchSize
+     *            size of the batch
+     * @param compression
+     *            the compression to use for writing
+     * @param inputputDataTypeMappingConfiguration
+     *            the type mapping configuration
+     * @throws IOException
+     *             if writer cannot be initialized
      */
-    public OrcKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int batchSize, final String compression) throws IOException {
+    public OrcKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final int batchSize,
+            final String compression, DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration)
+                    throws IOException {
         super(file, batchSize, spec);
         m_compression = CompressionKind.valueOf(compression);
+        m_inputputDataTypeMappingConfiguration = inputputDataTypeMappingConfiguration;
+        m_params = new ORCParameter[spec.getNumColumns()];
+        for (int i = 0; i < spec.getNumColumns(); i++) {
+            m_params[i] = new ORCParameter(i);
+        }
         initWriter();
-        m_columnTypes = getOrcKNIMETypes();
+    }
+
+    /**
+     * Closes the ORC Writer.
+     *
+     * @throws IOException
+     *             if writer cannot be closed
+     */
+    @Override
+    public void close() throws IOException {
+        if (m_rowBatch.size != 0) {
+            m_writer.addRowBatch(m_rowBatch);
+            m_rowBatch.reset();
+        }
+        m_writer.close();
+    }
+
+    /** Internal helper */
+    private TypeDescription deriveTypeDescription() {
+        final TypeDescription schema = TypeDescription.createStruct();
+
+        for (final Pair<String, TypeDescription> colEntry : m_fields) {
+            schema.addField(colEntry.getFirst(), colEntry.getSecond());
+        }
+        return schema;
     }
 
     private void initWriter() throws IOException {
         m_fields = new ArrayList<>();
         final DataTableSpec tableSpec = getTableSpec();
-        for (int i = 0; i < tableSpec.getNumColumns(); i++) {
-            final DataColumnSpec colSpec = tableSpec.getColumnSpec(i);
-            // final String name = colSpec.getName().replaceAll("[^a-zA-Z]",
-            // "-");
-            m_fields.add(new Pair<>(colSpec.getName(), OrcTableStoreFormat.createOrcType(colSpec.getType())));
-
+        ConsumptionPath[] consumptionPathes;
+        try {
+            consumptionPathes = m_inputputDataTypeMappingConfiguration.getConsumptionPathsFor(tableSpec);
+        } catch (final InvalidSettingsException e) {
+            throw new BigDataFileFormatException(e);
+        }
+        for(int i = 0; i < tableSpec.getNumColumns(); i++) {
+            final TypeDescription orcType = (TypeDescription) consumptionPathes[i].getConsumerFactory()
+                    .getDestinationType();
+            final String colName = tableSpec.getColumnSpec(i).getName();
+            m_fields.add(new Pair<>(colName, TypeDescription.fromString(orcType.toString())));
         }
         final Configuration conf = new Configuration();
         final TypeDescription schema = deriveTypeDescription();
@@ -129,68 +177,19 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
 
         m_writer = OrcFile.createWriter(new Path(getTargetFile().getURI()), orcConf);
         m_rowBatch = schema.createRowBatch();
-    }
-
-    private OrcType<?>[] getOrcKNIMETypes() {
-        final List<OrcType<?>> collect = m_fields.stream().map(Pair::getSecond).collect(Collectors.toList());
-        return collect.toArray(new OrcType<?>[collect.size()]);
-    }
-
-    /** Internal helper */
-    private TypeDescription deriveTypeDescription() {
-        final TypeDescription schema = TypeDescription.createStruct();
-        for (final Pair<String, OrcType<?>> colEntry : m_fields) {
-            schema.addField(colEntry.getFirst(), colEntry.getSecond().getTypeDescription());
-        }
-        return schema;
-    }
-
-    /**
-     * Writes a row to ORC.
-     *
-     * @param row the {@link DataRow}
-     * @throws IOException if row cannot be written
-     */
-    @Override
-    public void writeRow(final DataRow row) throws IOException {
-        final int rowInBatch = m_rowBatch.size;
-        m_rowBatch.size++;
-        int c = 0;
-        for (; c < m_rowBatch.numCols; c++) {
-            final DataCell cell = row.getCell(c);
-            @SuppressWarnings("unchecked")
-            final OrcType<ColumnVector> type = (OrcType<ColumnVector>) m_columnTypes[c];
-            type.writeValue(m_rowBatch.cols[c], rowInBatch, cell);
-        }
-        if (m_rowBatch.size == getBatchSize() - 1) {
-            m_writer.addRowBatch(m_rowBatch);
-            m_rowBatch.reset();
-        }
-    }
-
-    /**
-     * Closes the ORC Writer.
-     *
-     * @throws IOException if writer cannot be closed
-     */
-    @Override
-    public void close() throws IOException {
-        if (m_rowBatch.size != 0) {
-            m_writer.addRowBatch(m_rowBatch);
-            m_rowBatch.reset();
-        }
-        m_writer.close();
+        m_destination = new ORCDestination(m_rowBatch, m_rowBatch.size);
     }
 
     /**
      * Writes additional metadata to the the file
      *
-     * @param settings node settings for metadata
+     * @param settings
+     *            node settings for metadata
      */
     @Override
     public void writeMetaInfoAfterWrite(final NodeSettingsWO settings) {
         final NodeSettingsWO columnsSettings = settings.addNodeSettings("columns");
-        for (final Pair<String, OrcType<?>> entry : m_fields) {
+        for (final Pair<String, TypeDescription> entry : m_fields) {
             // Remember the type which has been used to write this thingy..
             final NodeSettingsWO colSetting = columnsSettings.addNodeSettings(entry.getFirst());
             colSetting.addString("type", entry.getSecond().getClass().getName());
@@ -204,6 +203,31 @@ public class OrcKNIMEWriter extends AbstractFileFormatWriter {
                 m_writer.addUserMetadata("knime." + column,
                         ByteBuffer.wrap(cellClass.toString().getBytes(Charset.forName("UTF-8"))));
             }
+        }
+    }
+
+    /**
+     * Writes a row to ORC.
+     *
+     * @param row
+     *            the {@link DataRow}
+     * @throws Exception
+     */
+    @Override
+    public void writeRow(final DataRow row) throws Exception {
+
+        ConsumptionPath[] consumptionPaths;
+        try {
+            consumptionPaths = m_inputputDataTypeMappingConfiguration.getConsumptionPathsFor(getTableSpec());
+        } catch (final InvalidSettingsException e) {
+            throw new BigDataFileFormatException(e);
+        }
+        m_destination.next();
+        MappingFramework.map(row, m_destination, consumptionPaths, m_params);
+
+        if (m_rowBatch.size == getBatchSize() - 1) {
+            m_writer.addRowBatch(m_rowBatch);
+            m_rowBatch.reset();
         }
     }
 }

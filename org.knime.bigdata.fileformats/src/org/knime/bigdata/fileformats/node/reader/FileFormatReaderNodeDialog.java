@@ -52,10 +52,12 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
+import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
@@ -65,6 +67,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
  * Node dialog for generic file format reader.
@@ -77,6 +80,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
     private final FileFormatReaderNodeSettings m_settings;
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
+    private final DialogComponentDataTypeMapping<TypeDescription> m_outputTypeMappingComponent;
 
     /**
      * New pane for configuring the OrcWriter node.
@@ -104,15 +108,15 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
         panel.add(filePanel, gbc);
 
         addTab("Options", panel);
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
-        m_settings.setFileName(m_filePanel.getSelection().trim());
-        m_settings.saveSettingsTo(settings);
+        final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
+        typeMappingBox.add(Box.createHorizontalGlue());
+        m_outputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getmappingModel());
+        typeMappingBox.add(m_outputTypeMappingComponent.getComponentPanel());
+        typeMappingBox.add(Box.createHorizontalGlue());
+        if (m_settings.getFormatFactory() instanceof OrcFormatFactory) {
+            addTab("Type Mapping", typeMappingBox);
+        }
     }
 
     /**
@@ -136,5 +140,16 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
             m_filePanel.setConnectionInformation(HDFSLocalConnectionInformation.getInstance());
         }
         m_filePanel.setSelection(m_settings.getFileName());
+        m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_settings.setFileName(m_filePanel.getSelection().trim());
+        m_outputTypeMappingComponent.saveSettingsTo(settings);
+        m_settings.saveSettingsTo(settings);
     }
 }

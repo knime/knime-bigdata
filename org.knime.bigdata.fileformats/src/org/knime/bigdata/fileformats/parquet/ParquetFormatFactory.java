@@ -58,6 +58,7 @@ import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * Factory for Parquet file format.
@@ -70,19 +71,12 @@ public class ParquetFormatFactory implements FileFormatFactory {
     private static final String NAME = "Parquet";
     private static final int TO_BYTE = 1024 * 1024;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
-        try {
-            return new ParquetKNIMEReader(file, exec);
-        } catch (final Exception e) {
-            throw new BigDataFileFormatException(e);
-        }
-    }
-
-    @Override
-    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int chunkSize, final String compression) throws IOException {
-        return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE);
+    public String getChunkSizeUnit() {
+        return "MB";
     }
 
     @Override
@@ -92,8 +86,8 @@ public class ParquetFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public String[] getUnsupportedTypes(final DataTableSpec spec) {
-        return ParquetTableStoreFormat.getUnsupportedTypes(spec);
+    public String getFilenameSuffix() {
+        return SUFFIX;
     }
 
     @Override
@@ -102,15 +96,19 @@ public class ParquetFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public String getFilenameSuffix() {
-        return SUFFIX;
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file,
+            final ExecutionContext exec, DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
+        try {
+            return new ParquetKNIMEReader(file, exec);
+        } catch (final Exception e) {
+            throw new BigDataFileFormatException(e);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String getChunkSizeUnit() {
-        return "MB";
+    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+            final int chunkSize, final String compression, DataTypeMappingConfiguration<?> typeMappingConf)
+            throws IOException {
+        return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE);
     }
 }

@@ -53,6 +53,7 @@ import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * Interface for reader factories.
@@ -62,56 +63,60 @@ import org.knime.core.node.ExecutionContext;
 public interface FileFormatFactory {
 
     /**
-     * Creates a file reader for the given file.
-     *
-     * @param file the file or directory to read from
-     * @param exec the execution context
-     * @return the reader
+     * @return String containing the chunksizeUnit
      */
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec);
+    public String getChunkSizeUnit();
 
     /**
-     * Returns a writer that writes KNIME {@link DataRow}s to an specific file
-     * format
-     *
-     * @param file the target file
-     * @param spec the data table spec
-     * @param batchSize size of the batch
-     * @param compression the compression to use for writing
-     * @return the writer
-     * @throws IOException throw if writer cannot be created
-     */
-    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int batchSize, final String compression) throws IOException;
-
-    /**
-     * Returns a list of Strings containing all compressionCodecs supported by
-     * the specified file format.
+     * Returns a list of Strings containing all compressionCodecs supported by the
+     * specified file format.
      *
      * @return the list of available compressions
      */
     public String[] getCompressionList();
 
-    /**
-     * Returns an array of all unsupported types for a given table spec, array
-     * might be empty if all types are supported.
-     *
-     * @param spec the table spec to check
-     * @return the array containing the unsupported types
-     */
-    public abstract String[] getUnsupportedTypes(final DataTableSpec spec);
+    /** @return file name suffix for files, e.g. 'bin' or 'orc'. */
+    String getFilenameSuffix();
 
     /**
      * @return non-blank short name shown in dialogs
      */
     String getName();
 
-    /** @return file name suffix for files, e.g. 'bin' or 'orc'. */
-    String getFilenameSuffix();
+    /**
+     * Creates a file reader for the given file.
+     *
+     * @param file
+     *            the file or directory to read from
+     * @param exec
+     *            the execution context
+     * @param outputDataTypeMappingConfiguration
+     *            the type mapping configuration
+     * @return the reader
+     */
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
+            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration);
 
     /**
-     * @return String containing the chunksizeUnit
+     * Returns a writer that writes KNIME {@link DataRow}s to an specific file
+     * format
+     *
+     * @param file
+     *            the target file
+     * @param spec
+     *            the data table spec
+     * @param batchSize
+     *            size of the batch
+     * @param compression
+     *            the compression to use for writing
+     * @param typeMappingConf
+     *            the type mapping configuration
+     * @return the writer
+     * @throws IOException
+     *             throw if writer cannot be created
      */
-    public String getChunkSizeUnit();
+    public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+            final int batchSize, final String compression,
+            DataTypeMappingConfiguration<?> typeMappingConf) throws IOException;
 
 }

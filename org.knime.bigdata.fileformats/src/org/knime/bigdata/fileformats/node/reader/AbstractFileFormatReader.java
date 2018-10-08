@@ -70,6 +70,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.util.KnimeEncryption;
+import org.knime.datatype.mapping.ExternalDataTableSpec;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
@@ -80,46 +81,21 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
  */
 public abstract class AbstractFileFormatReader {
 
-    protected UserGroupInformation m_user = null;
-
-    private final RemoteFile<Connection> m_file;
-
-    private DataTableSpec m_tableSpec;
-
-    private final ExecutionContext m_exec;
-
     /**
-     * Constructor for FileFormatReader
+     * Checks whether the schema match.
      *
-     * @param file the file or directory to read from
-     * @param exec the execution context
+     * @param schemas
+     *            the schemas
+     * @throws FileFormatException
+     *             thrown is schemas do not match
      */
-    public AbstractFileFormatReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
-
-        m_exec = exec;
-        m_file = file;
-    }
-
-    /**
-     * Returns a RowIterator that iterates over the read DataRows.
-     *
-     * @return the RowIterator
-     * @throws IOException thrown if reading errors occur
-     * @throws InterruptedException if underlying iterator throws Interrupted
-     *         exception
-     */
-    public RowIterator iterator() throws IOException, InterruptedException {
-
-        return new DirIterator(this);
-    }
-
-    /**
-     * Get the table spec that was generated from the files informations.
-     *
-     * @return the table spec read from the file.
-     */
-    public DataTableSpec getTableSpec() {
-        return m_tableSpec;
+    protected static void checkSchemas(final List<DataTableSpec> schemas) throws FileFormatException {
+        final DataTableSpec refSchema = schemas.get(0);
+        for (int i = 1; i < schemas.size(); i++) {
+            if (!schemas.get(i).equals(refSchema)) {
+                throw new FileFormatException("Schemas of input files do not match.");
+            }
+        }
     }
 
     protected static void createConfig(final RemoteFile<Connection> remotefile, final Configuration conf)
@@ -156,26 +132,63 @@ public abstract class AbstractFileFormatReader {
         }
     }
 
-    /**
-     * Checks whether the schema match.
-     *
-     * @param schemas the schemas
-     * @throws FileFormatException thrown is schemas do not match
-     */
-    protected static void checkSchemas(final List<DataTableSpec> schemas) throws FileFormatException {
-        final DataTableSpec refSchema = schemas.get(0);
-        for (int i = 1; i < schemas.size(); i++) {
-            if (!schemas.get(i).equals(refSchema)) {
-                throw new FileFormatException("Schemas of input files do not match.");
-            }
+    protected static Path generateS3nPath(final CloudRemoteFile<Connection> cloudcon) {
+        try {
+            return new Path(new URI("s3n", cloudcon.getContainerName(), "/" + cloudcon.getBlobName(), null));
+        } catch (final Exception e) {
+            throw new BigDataFileFormatException(e);
         }
     }
+
+    protected UserGroupInformation m_user = null;
+
+    private final RemoteFile<Connection> m_file;
+
+    private DataTableSpec m_tableSpec;
+
+    private final ExecutionContext m_exec;
+
+    private ExternalDataTableSpec<?> m_externalTableSpec;
+
+    /**
+     * Constructor for FileFormatReader
+     *
+     * @param file
+     *            the file or directory to read from
+     * @param exec
+     *            the execution context
+     */
+    public AbstractFileFormatReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
+
+        m_exec = exec;
+        m_file = file;
+    }
+
+    /**
+     * Creates a reader instance
+     *
+     * @param exec
+     *            the execution context
+     * @param schemas
+     *            the list to store the table spec
+     * @param remotefile
+     *            the remote file to read
+     */
+    protected abstract void createReader(ExecutionContext exec, List<DataTableSpec> schemas,
+            RemoteFile<Connection> remotefile);
 
     /**
      * @return the execution context
      */
     public ExecutionContext getExec() {
         return m_exec;
+    }
+
+    /**
+     * @return the m_externalTableSpec
+     */
+    public ExternalDataTableSpec<?> getexternalTableSpec() {
+        return m_externalTableSpec;
     }
 
     /**
@@ -186,23 +199,34 @@ public abstract class AbstractFileFormatReader {
     }
 
     /**
-     * @param tableSpec the DataTableSpec to set
+     * Returns the iterator for the next file or null if no more files have to be
+     * read.
+     *
+     * @param index
+     *            the current index
+     * @return the next FileFormatRowIterator or null if all files are read
+     * @throws IOException
+     *             thrown if files can not be read
+     * @throws InterruptedException
+     *             if file iterator throws Interrupted Exception
      */
-    public void setTableSpec(final DataTableSpec tableSpec) {
-        m_tableSpec = tableSpec;
+    public abstract FileFormatRowIterator getNextIterator(long index) throws IOException, InterruptedException;
+
+    /**
+     * Get the table spec that was generated from the files informations.
+     *
+     * @return the table spec read from the file.
+     */
+    public DataTableSpec getTableSpec() {
+        return m_tableSpec;
     }
 
     /**
-     * Returns the iterator for the next file or null if no more files have to
-     * be read.
-     *
-     * @param index the current index
-     * @return the next FileFormatRowIterator or null if all files are read
-     * @throws IOException thrown if files can not be read
-     * @throws InterruptedException if file iterator throws Interrupted
-     *         Exception
+     * @return the user to use probably null
      */
-    public abstract FileFormatRowIterator getNextIterator(long index) throws IOException, InterruptedException;
+    public UserGroupInformation getUser() {
+        return m_user;
+    }
 
     protected void init() throws Exception {
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -237,36 +261,44 @@ public abstract class AbstractFileFormatReader {
     }
 
     /**
-     * Creates a reader instance
+     * Returns a RowIterator that iterates over the read DataRows.
      *
-     * @param exec the execution context
-     * @param schemas the list to store the table spec
-     * @param remotefile the remote file to read
+     * @return the RowIterator
+     * @throws IOException
+     *             thrown if reading errors occur
+     * @throws InterruptedException
+     *             if underlying iterator throws Interrupted exception
      */
-    protected abstract void createReader(ExecutionContext exec, List<DataTableSpec> schemas,
-            RemoteFile<Connection> remotefile);
+    public RowIterator iterator() throws IOException, InterruptedException {
+
+        return new DirIterator(this);
+    }
 
     /**
-     * @return the user to use probably null
+     * Sets the external table spec
+     * 
+     * @param externalTableSpec
+     *            the externalTableSpec to set
      */
-    public UserGroupInformation getUser() {
-        return m_user;
+    public void setexternalTableSpec(ExternalDataTableSpec<?> externalTableSpec) {
+        this.m_externalTableSpec = externalTableSpec;
+    }
+
+    /**
+     * @param tableSpec
+     *            the DataTableSpec to set
+     */
+    public void setTableSpec(final DataTableSpec tableSpec) {
+        m_tableSpec = tableSpec;
     }
 
     /**
      * Sets the user that is used in HDFS context
      *
-     * @param user the user
+     * @param user
+     *            the user
      */
     public void setUser(final UserGroupInformation user) {
         m_user = user;
-    }
-
-    protected static Path generateS3nPath(final CloudRemoteFile<Connection> cloudcon) {
-        try {
-            return new Path(new URI("s3n", cloudcon.getContainerName(), "/" + cloudcon.getBlobName(), null));
-        } catch (final Exception e) {
-            throw new BigDataFileFormatException(e);
-        }
     }
 }

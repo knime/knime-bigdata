@@ -44,76 +44,53 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   02.05.2018 ("Mareike Hoeger, KNIME GmbH, Konstanz, Germany"): created
+ *   Sep 11, 2018 (Mareike Höger): created
  */
-package org.knime.bigdata.fileformats.orc.types;
 
-import java.sql.Timestamp;
+package org.knime.bigdata.fileformats.orc.datatype.mapping;
 
-import org.apache.hadoop.hive.ql.exec.vector.TimestampColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
+import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.orc.TypeDescription;
-import org.knime.bigdata.fileformats.orc.types.OrcTimestampTypeFactory.OrcTimestampType;
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataType;
-import org.knime.core.data.time.localdatetime.LocalDateTimeCell;
-import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
-import org.knime.bigdata.fileformats.orc.types.AbstractOrcType;
-import org.knime.bigdata.fileformats.orc.types.OrcTypeFactory;
+import org.knime.core.data.convert.map.Source;
 
 /**
- * Factory for the ORC Timstamp
- *
+ * Source object for the ORC type mapping
+ * 
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ *
  */
-public class OrcTimestampTypeFactory implements OrcTypeFactory<OrcTimestampType> {
+public class ORCSource implements Source<TypeDescription> {
+
+    VectorizedRowBatch m_rowBatch;
+    long m_rowIndex = 0;
 
     /**
-     * {@inheritDoc}
+     * Constructs a ORC source object
+     * 
+     * @param rowBatch
+     *            the row batch to read from
      */
-    @Override
-    public OrcTimestampType create() {
-        return new OrcTimestampType();
+    public ORCSource(VectorizedRowBatch rowBatch) {
+        m_rowBatch = rowBatch;
+    }
+
+    ColumnVector getColumVector(int colIndex) {
+        return m_rowBatch.cols[colIndex];
     }
 
     /**
-     * {@inheritDoc}
+     * @return the current row index
      */
-    @Override
-    public DataType type() {
-        return LocalDateTimeCellFactory.TYPE;
+    public long getRowIndex() {
+        return m_rowIndex;
     }
 
     /**
-     * Type for ORC timestamp type.
-     *
-     * @author "Mareike Hoeger, KNIME GmbH, Konstanz, Germany"
+     * switches to the next row
      */
-    public static class OrcTimestampType extends AbstractOrcType<TimestampColumnVector> {
-
-        /**
-         * Creates ORC timestamp type object.
-         */
-        public OrcTimestampType() {
-            super(TypeDescription.createTimestamp());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected DataCell readValueNonNull(final TimestampColumnVector columnVector, final int rowInBatchCorrected) {
-            return LocalDateTimeCellFactory
-                .create(columnVector.asScratchTimestamp(rowInBatchCorrected).toLocalDateTime());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected void writeValueNonNull(final TimestampColumnVector columnVector, final int rowInBatch,
-            final DataCell cell) {
-            Timestamp timestamp = Timestamp.valueOf(((LocalDateTimeCell)cell).getLocalDateTime());
-            columnVector.set(rowInBatch, timestamp);
-        }
+    public void next() {
+        m_rowIndex++;
     }
+
 }

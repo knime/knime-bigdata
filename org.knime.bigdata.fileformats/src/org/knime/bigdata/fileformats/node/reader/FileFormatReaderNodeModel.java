@@ -77,6 +77,7 @@ import org.knime.core.node.streamable.PortInput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableOperator;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * Node model for generic file format reader.
@@ -85,8 +86,7 @@ import org.knime.core.node.streamable.StreamableOperator;
  */
 public class FileFormatReaderNodeModel extends NodeModel {
     private final FileFormatReaderNodeSettings m_settings;
-
-    /**
+	/**
      * Constructor for the node model.
      */
     protected FileFormatReaderNodeModel(final FileFormatReaderNodeSettings settings) {
@@ -116,7 +116,9 @@ public class FileFormatReaderNodeModel extends NodeModel {
         }
         final RemoteFile<Connection> sourceFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                 connInfo);
-        final AbstractFileFormatReader reader = getReader(sourceFile, exec);
+		final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getmappingModel()
+				.getDataTypeMappingConfiguration();
+		final AbstractFileFormatReader reader = getReader(sourceFile, exec, outputDataTypeMappingConfiguration);
         return new BigDataFileFormatTable(reader);
     }
 
@@ -151,6 +153,8 @@ public class FileFormatReaderNodeModel extends NodeModel {
             }
         }
         try {
+			final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getmappingModel()
+					.getDataTypeMappingConfiguration();
             // Create a reader to get the generated TableSpec
             final RemoteFile<Connection> remoteFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                     connInfo);
@@ -160,7 +164,7 @@ public class FileFormatReaderNodeModel extends NodeModel {
             if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
                 throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
             }
-            final AbstractFileFormatReader reader = getReader(remoteFile, null);
+			final AbstractFileFormatReader reader = getReader(remoteFile, null, outputDataTypeMappingConfiguration);
             final DataTableSpec spec = reader.getTableSpec();
             return new DataTableSpec[] { spec };
 
@@ -170,28 +174,33 @@ public class FileFormatReaderNodeModel extends NodeModel {
     }
 
     /**
-     * @param remoteFile the file to read
-     * @param context the execution context
-     * @return the reader object
-     * @throws Exception thrown if doAs user does not work
-     */
-    private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context)
+	 * @param remoteFile
+	 *            the file to read
+	 * @param context
+	 *            the execution context
+	 * @param outputDataTypeMappingConfiguration
+	 * @return the reader object
+	 * @throws Exception
+	 *             thrown if doAs user does not work
+	 */
+	private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context,
+			DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration)
             throws Exception {
         final AbstractFileFormatReader reader;
-
-        if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
+		if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
             final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
             final UserGroupInformation user = UserGroupUtil.getKerberosUser(conf);
             reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
                 @Override
                 public AbstractFileFormatReader run() throws Exception {
 
-                    return m_settings.getFormatFactory().getReader(remoteFile, context);
+					return m_settings.getFormatFactory().getReader(remoteFile, context,
+							outputDataTypeMappingConfiguration);
                 }
             });
             reader.setUser(user);
         } else {
-            reader = m_settings.getFormatFactory().getReader(remoteFile, context);
+			reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration);
         }
         return reader;
     }

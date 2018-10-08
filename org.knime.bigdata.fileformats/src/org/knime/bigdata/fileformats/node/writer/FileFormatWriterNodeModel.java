@@ -47,11 +47,11 @@ package org.knime.bigdata.fileformats.node.writer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.orc.TypeDescription;
 import org.eclipse.core.runtime.URIUtil;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -87,6 +87,7 @@ import org.knime.core.node.streamable.RowInput;
 import org.knime.core.node.streamable.StreamableOperator;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * Generic node model for BigData file format writer.
@@ -114,23 +115,79 @@ public class FileFormatWriterNodeModel extends NodeModel {
     }
 
     /**
+     * Checks if the dir contains files, that do not end with the right suffix and
+     * gives a warning if it does.
+     * 
+     * @param connInfo
+     * @param fileName
+     */
+    private void checkDirContent(final ConnectionInformation connInfo, final String fileName) {
+        try {
+            final ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
+            final URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
+            final RemoteFile<Connection> remotefile = RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
+            if (remotefile.isDirectory()) {
+                final RemoteFile<Connection>[] fileList = remotefile.listFiles();
+                for (final RemoteFile<Connection> file : fileList) {
+                    final String name = file.getName();
+                    // ignore known Spark and HDFS metafiles
+                    if (!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc")) {
+                        final String suffix = m_settings.getFilenameSuffix();
+                        if (!name.endsWith(suffix)) {
+                            setWarningMessage(String.format(
+                                    "The directory contains files without '%s' suffix. "
+                                            + "The directory will be overwritten with the current settings.",
+                                            m_settings.getFilenameSuffix()));
+                        }
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            LOGGER.debug(e.getMessage(), e);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
-    protected BufferedDataTable[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final BufferedDataTable input = (BufferedDataTable) inObjects[1];
+    protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
 
-        if (input.size() == 0) {
+        final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        if (connSpec != null && !connSpec.getConnectionInformation().getProtocol()
+                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
 
-            // empty table nothing to do.
-            LOGGER.debug("Input empty, no file is written.");
-            return new BufferedDataTable[] {};
+            final ConnectionInformation connInfo = connSpec.getConnectionInformation();
+
+            // Check if the port object has connection information
+            if (connInfo == null) {
+                throw new InvalidSettingsException("No connection information available.");
+            }
+            final String fileName = m_settings.getFileName();
+
+            if (m_settings.getFileOverwritePolicy()) {
+                checkDirContent(connInfo, fileName);
+            }
+
+            if (fileName.endsWith("/")) {
+                m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
+            }
+            try {
+                final URI uri = new URI(m_settings.getFileName());
+                if (uri.getScheme() != null) {
+                    connInfo.fitsToURI(uri);
+                }
+            } catch (final Exception e) {
+                LOGGER.debug("Could not configure node.", e);
+                throw new InvalidSettingsException(e.getMessage());
+            }
+
+        } else {
+
+            // Check file access
+            CheckUtils.checkDestinationFile(m_settings.getFileNameWithSuffix(), m_settings.getFileOverwritePolicy());
         }
-        final ConnectionInformationPortObject connInfo = (ConnectionInformationPortObject) inObjects[0];
-        final RowInput rowInput = new DataTableRowInput(input);
-        writeRowInput(exec, rowInput, connInfo);
-
-        return new BufferedDataTable[] {};
+        return new DataTableSpec[] {};
     }
 
     /**
@@ -154,6 +211,92 @@ public class FileFormatWriterNodeModel extends NodeModel {
                 writeRowInput(exec, input, connPortObject);
             }
         };
+    }
+
+    private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
+            DataTypeMappingConfiguration<TypeDescription> dataTypeMappingConfiguration) throws IOException {
+        final DataTableSpec dataSpec = input.getDataTableSpec();
+        final int chunkSize = m_settings.getChunkSize();
+        final String compression = m_settings.getCompression();
+        return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression,
+                dataTypeMappingConfiguration);
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected BufferedDataTable[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
+        final BufferedDataTable input = (BufferedDataTable) inObjects[1];
+
+        if (input.size() == 0) {
+
+            // empty table nothing to do.
+            LOGGER.debug("Input empty, no file is written.");
+            return new BufferedDataTable[] {};
+        }
+        final ConnectionInformationPortObject connInfo = (ConnectionInformationPortObject) inObjects[0];
+        final RowInput rowInput = new DataTableRowInput(input);
+        writeRowInput(exec, rowInput, connInfo);
+
+        return new BufferedDataTable[] {};
+    }
+
+    @Override
+    public InputPortRole[] getInputPortRoles() {
+        return new InputPortRole[] { InputPortRole.NONDISTRIBUTED_NONSTREAMABLE,
+                InputPortRole.NONDISTRIBUTED_STREAMABLE };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadInternals(final File internDir, final ExecutionMonitor exec)
+            throws IOException, CanceledExecutionException {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.loadSettingsFrom(settings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void reset() {
+        m_rowCountWritten = 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveInternals(final File internDir, final ExecutionMonitor exec)
+            throws IOException, CanceledExecutionException {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+        m_settings.saveSettingsTo(settings);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+        m_settings.validateSettings(settings);
     }
 
     private void writeRowInput(final ExecutionContext exec, final RowInput input,
@@ -211,7 +354,8 @@ public class FileFormatWriterNodeModel extends NodeModel {
             final RemoteFile<Connection> remoteFile, final boolean writeChunks) throws Exception {
 
         exec.setMessage("Starting to write File.");
-        try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile)) {
+        try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile,
+                m_settings.getMappingModel().getDataTypeMappingConfiguration())) {
 
             for (DataRow row; (row = input.poll()) != null;) {
 
@@ -246,148 +390,4 @@ public class FileFormatWriterNodeModel extends NodeModel {
             throw cee;
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        m_rowCountWritten = 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-        final DataTableSpec tableSpec = (DataTableSpec) inSpecs[1];
-        final String[] unsupportedTypes = m_settings.getFormatFactory().getUnsupportedTypes(tableSpec);
-        if (unsupportedTypes.length != 0) {
-            final String format = String.format("Not all types are supported: %s", Arrays.toString(unsupportedTypes));
-            throw new InvalidSettingsException(format);
-        }
-        final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
-        if (connSpec != null &&
-        		!connSpec.getConnectionInformation().getProtocol()
-        		.equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
-        	
-            final ConnectionInformation connInfo = connSpec.getConnectionInformation();
-
-            // Check if the port object has connection information
-            if (connInfo == null) {
-                throw new InvalidSettingsException("No connection information available.");
-            }
-            final String fileName = m_settings.getFileName();
-            
-        	if(m_settings.getFileOverwritePolicy()) {
-        		checkDirContent(connInfo, fileName);
-        	}
-        	
-            if (fileName.endsWith("/")) {
-                m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
-            }
-            try {
-                final URI uri = new URI(m_settings.getFileName());
-                if (uri.getScheme() != null) {
-                    connInfo.fitsToURI(uri);
-                }
-            } catch (final Exception e) {
-                LOGGER.debug("Could not configure node.", e);
-                throw new InvalidSettingsException(e.getMessage());
-            }
-
-        } else {
-
-            // Check file access
-            CheckUtils.checkDestinationFile(m_settings.getFileNameWithSuffix(), m_settings.getFileOverwritePolicy());
-        }
-        return new DataTableSpec[] {};
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_settings.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_settings.validateSettings(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
-        // nothing to do
-    }
-
-    @Override
-    public InputPortRole[] getInputPortRoles() {
-        return new InputPortRole[] { InputPortRole.NONDISTRIBUTED_NONSTREAMABLE,
-                InputPortRole.NONDISTRIBUTED_STREAMABLE };
-    }
-
-    private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile)
-            throws IOException {
-        final DataTableSpec dataSpec = input.getDataTableSpec();
-        final int chunkSize = m_settings.getChunkSize();
-        final String compression = m_settings.getCompression();
-        return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression);
-
-    }
-    /**
-     * Checks if the dir contains files, that do not end with the right suffix and gives a warning if it does.
-     * @param connInfo
-     * @param fileName
-     */
-	private void checkDirContent(final ConnectionInformation connInfo, final String fileName) {
-		try {
-			ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
-			URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
-			RemoteFile<Connection> remotefile = 
-					RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
-			if(remotefile.isDirectory()) {
-				RemoteFile<Connection>[] fileList = remotefile.listFiles();
-				for(RemoteFile<Connection> file : fileList) {
-					String name = file.getName();
-					//ignore known Spark and HDFS metafiles
-					if(!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc") ) {
-							String suffix = m_settings.getFilenameSuffix();
-							if(!name.endsWith(suffix)) {
-						setWarningMessage(String.format("The directory contains files without '%s' suffix. "
-								+ "The directory will be overwritten with the current settings.", m_settings.getFilenameSuffix()));
-							}
-					}
-				}
-			}	
-		} catch (Exception e) {
-			LOGGER.debug(e.getMessage(), e);
-		}
-	}
 }
