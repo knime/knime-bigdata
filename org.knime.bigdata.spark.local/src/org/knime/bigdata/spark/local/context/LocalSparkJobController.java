@@ -4,6 +4,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.knime.bigdata.spark.core.context.JobController;
@@ -25,7 +32,13 @@ import org.knime.core.node.ExecutionMonitor;
  */
 class LocalSparkJobController implements JobController {
 
-	private LocalSparkWrapper m_wrapper;
+    /**
+     * Spark jobs in local Spark run synchronously, therefore we need to put them into a thread-pool,
+     * otherwise we cannot detect whether the execution monitor has been canceled. 
+     */
+    private final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+    
+    private LocalSparkWrapper m_wrapper;
 
     /**
      * Constructor.
@@ -53,16 +66,21 @@ class LocalSparkJobController implements JobController {
 
 		exec.setMessage("Running Spark job");
 
-		LocalSparkJobInput input = LocalSparkJobInput.createFromSparkJobInput(job.getInput(),
+		final LocalSparkJobInput input = LocalSparkJobInput.createFromSparkJobInput(job.getInput(),
 				job.getJobClass().getName());
 
 		if (!inputFilesOnServer.isEmpty()) {
 			input.withFiles(inputFilesOnServer);
 		}
 		
-		final Map<String, Object> serializedInput = LocalSparkSerializationUtil.serializeToPlainJavaTypes(input.getInternalMap());
-		final Map<String, Object> serializedOutput = m_wrapper.runJob(serializedInput);
+		
+        final Map<String, Object> serializedInput =
+            LocalSparkSerializationUtil.serializeToPlainJavaTypes(input.getInternalMap());
+        final String jobGroupId = UUID.randomUUID().toString();
 
+        final Map<String, Object> serializedOutput =
+            waitForFuture(THREAD_POOL.submit(() -> m_wrapper.runJob(serializedInput, jobGroupId)), jobGroupId, exec);
+		
 		LocalSparkJobOutput out;
 		try {
 			out = LocalSparkJobOutput.fromMap(LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(serializedOutput, job.getJobOutputClassLoader()));
@@ -82,6 +100,39 @@ class LocalSparkJobController implements JobController {
 			}
 		}
 	}
+	
+    private <O> O waitForFuture(final Future<O> future, final String jobGroupId, final ExecutionMonitor exec)
+        throws KNIMESparkException, CanceledExecutionException {
+
+        while (true) {
+            try {
+                return future.get(200, TimeUnit.MILLISECONDS);
+            } catch (final TimeoutException | InterruptedException e) {
+                checkForCancelation(future, jobGroupId, exec);
+            } catch (final ExecutionException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof InterruptedException) {
+                    throw new CanceledExecutionException();
+                } else {
+                    // this should normally not happen and is actually more a sign of a bug
+                    throw new KNIMESparkException(cause);
+                }
+            }
+        }
+    }
+
+    private void checkForCancelation(Future<?> future, String jobGroupId, ExecutionMonitor exec) throws CanceledExecutionException {
+        if (exec != null) {
+            try {
+                exec.checkCanceled();
+            } catch (final CanceledExecutionException canceledInKNIME) {
+                future.cancel(true);
+                m_wrapper.cancelJob(jobGroupId);
+                throw canceledInKNIME;
+            }
+        }
+    }
+
     
 	@Override
 	public <O extends JobOutput> O startJobAndWaitForResult(JobRun<?, O> job, ExecutionMonitor exec)

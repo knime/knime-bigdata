@@ -74,7 +74,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Map<String, Object> runJob(Map<String, Object> localSparkInputMap) {
+    public Map<String, Object> runJob(final Map<String, Object> localSparkInputMap, final String jobGroupId)
+        throws InterruptedException {
+	    
 		// we need to replace the current context class loader (which comes from OSGI)
 		// with the spark class loader, otherwise Java's ServiceLoader frame does not
 		// work properly which breaks Spark's DataSource API
@@ -86,6 +88,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 					.deserializeFromPlainJavaTypes(localSparkInputMap, getClass().getClassLoader()));
 			final JobInput jobInput = localSparkInput.getSparkJobInput();
 
+			Object sparkJob = getClass().getClassLoader().loadClass(localSparkInput.getSparkJobClass()).newInstance();
+
+			markJobGroupId(jobGroupId, sparkJob.getClass().getSimpleName());
+			
 			ensureNamedInputObjectsExist(jobInput);
 			ensureNamedOutputObjectsDoNotExist(jobInput);
 
@@ -94,8 +100,6 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			// in local Spark, we ensure that Spark works on independent copies
 			// of the input files.
 			List<File> inputFileCopies = copyInputFiles(localSparkInput);
-
-			Object sparkJob = getClass().getClassLoader().loadClass(localSparkInput.getSparkJobClass()).newInstance();
 
 			if (sparkJob instanceof SparkJob) {
 				toReturn = LocalSparkJobOutput
@@ -107,6 +111,10 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				((SimpleSparkJob) sparkJob).runJob(m_sparkSession.sparkContext(), jobInput, this);
 				toReturn = LocalSparkJobOutput.success();
 			}
+		} catch (InterruptedException e) {
+		    // catch and rethrow to prevent the InterruptedExceptions from being wrapped
+		    // into the job output, as it is thrown during cancellation
+		    throw e;
 		} catch (KNIMESparkException e) {
 			toReturn = LocalSparkJobOutput.failure(e);
 		} catch (Throwable t) {
@@ -118,7 +126,27 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		return LocalSparkSerializationUtil.serializeToPlainJavaTypes(toReturn.getInternalMap());
 	}
 
-	private List<File> copyInputFiles(final LocalSparkJobInput jsInput) throws KNIMESparkException, IOException {
+    /**
+     * Thread-safe method (against {@link #cancelJob(String)} to check for cancellation and set the current job group id
+     * if not cancelled.
+     * 
+     * @param jobGroupId
+     * @param jobDescription
+     * @throws InterruptedException
+     */
+	private synchronized void markJobGroupId(final String jobGroupId, final String jobDescription) throws InterruptedException {
+	    if (Thread.interrupted()) {
+	        throw new InterruptedException();
+	    }
+        m_sparkSession.sparkContext().setJobGroup(jobGroupId, jobDescription, true);
+    }
+	
+    @Override
+    public synchronized void cancelJob(String jobGroupId) {
+        m_sparkSession.sparkContext().cancelJobGroup(jobGroupId);
+    }
+
+    private List<File> copyInputFiles(final LocalSparkJobInput jsInput) throws KNIMESparkException, IOException {
 		List<File> inputFileCopies = new LinkedList<>();
 
 		for (String pathToFile : jsInput.getFiles()) {

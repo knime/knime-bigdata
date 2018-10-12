@@ -46,9 +46,11 @@ public interface LocalSparkWrapper {
      * of {@link LocalSparkSerializationUtil#serializeToPlainJavaTypes(Map)}.
      * 
      * @param localSparkInputMap The serialized job input.
+     * @param jobGroupId The job group id to be used when canceling the Spark job.
      * @return The serialized job output.
+     * @throws InterruptedException When the Spark job was canceled
      */
-    Map<String, Object> runJob(Map<String, Object> localSparkInputMap);
+    Map<String, Object> runJob(Map<String, Object> localSparkInputMap, String jobGroupId) throws InterruptedException;
 
 	/**
 	 * @return a set of IDs of all named objects currently held in the local Spark context.
@@ -74,4 +76,11 @@ public interface LocalSparkWrapper {
      *         started.
      */
 	int getHiveserverPort();
+
+	/**
+	 * Cancels the job group with the given ID.
+	 * 
+	 * @param jobGroupId The ID of the job group to cancel, which is expected to have been passed as part of {@link #runJob(Map, String)}
+	 */
+    void cancelJob(String jobGroupId);
 }

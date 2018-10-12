@@ -72,6 +72,9 @@ class LivyJobController implements JobController {
                 "File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
         }
 
+        // check for cancelation before we do any I/O
+        exec.checkCanceled();
+
         final List<String> serverFilenames;
         if (job.useInputFileCopyCache()) {
             serverFilenames = uploadInputFilesCached(job, exec);
@@ -138,6 +141,7 @@ class LivyJobController implements JobController {
         final List<String> inputFilesOnServer, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
 
+        exec.checkCanceled();
         exec.setMessage("Running Spark job");
 
         JobHandle<LivyJobOutput> jobHandle = startJobAsynchronously(job, inputFilesOnServer);
