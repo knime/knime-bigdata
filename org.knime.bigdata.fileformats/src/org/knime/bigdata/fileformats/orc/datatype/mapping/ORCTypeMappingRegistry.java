@@ -193,7 +193,11 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
 
     }
 
-    private void addConsumptionPath(final ConsumerRegistry<TypeDescription, ORCDestination> consumerRegistry,
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void addConsumptionPath(final ConsumerRegistry<TypeDescription, ORCDestination> consumerRegistry,
             final Map<Pair<DataType, TypeDescription>, ConsumptionPath> defaultConsumptionPaths,
             final DataType knimeType, final TypeDescription externalType) {
         final Optional<ConsumptionPath> path = findPath(consumerRegistry, knimeType, externalType);
@@ -213,7 +217,11 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
 
     }
 
-    private void addProductionPath(final ProducerRegistry<TypeDescription, ORCSource> producerRegistry,
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void addProductionPath(final ProducerRegistry<TypeDescription, ORCSource> producerRegistry,
             final Map<Pair<TypeDescription, DataType>, ProductionPath> defaultProductionPaths,
             final TypeDescription externalType, final DataType knimeType) {
         final Optional<ProductionPath> path = findPath(producerRegistry, externalType, knimeType);
@@ -246,7 +254,7 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
     }
 
     @Override
-    public Collection<? extends ConverterFactory<Class<?>, TypeDescription>> getExternalMappings() {
+    public Collection<ConverterFactory<Class<?>, TypeDescription>> getExternalMappings() {
         return Collections.unmodifiableCollection(m_consumerFactories);
     }
 
@@ -256,7 +264,7 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
     }
 
     @Override
-    public Collection<? extends ConverterFactory<Class<?>, DataType>> getKnimeMappings() {
+    public Collection<ConverterFactory<Class<?>, DataType>> getKnimeMappings() {
         return Collections.unmodifiableCollection(m_converterFactories);
     }
 
