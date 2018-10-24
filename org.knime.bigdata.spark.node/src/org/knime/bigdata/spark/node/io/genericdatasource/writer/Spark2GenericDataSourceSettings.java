@@ -233,8 +233,8 @@ public class Spark2GenericDataSourceSettings {
     public void loadDefault(final DataTableSpec spec) {
         if (m_partitionBy == null) {
             m_partitionBy = new DataColumnSpecFilterConfiguration(CFG_PARTITION_BY);
-            m_partitionBy.loadDefault(spec, null, false);
         }
+        m_partitionBy.loadDefaults(spec, false);
     }
 
     /**
