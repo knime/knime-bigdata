@@ -283,17 +283,19 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             }
 
             exec.setProgress(0.7, "Uploading Spark jobs");
-            uploadJobJar();
+            uploadJobJar(exec);
 
             exec.setProgress(0.9, "Running job to prepare context");
             validateAndPrepareContext();
             exec.setProgress(1);
         } catch (final Exception e) {
             // make sure we don't leave a broken context behind
-            try {
-                destroy();
-            } catch (final KNIMESparkException toIgnore) {
-                // ignore
+            if (contextWasCreated) {
+                try {
+                    destroy();
+                } catch (final KNIMESparkException toIgnore) {
+                    // ignore
+                }
             }
 
             setStatus(SparkContextStatus.CONFIGURED);
@@ -368,15 +370,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private void uploadJobJar() throws KNIMESparkException {
-        try {
-            final File jobJarFile = getJobJar().getJarFile();
-            LOGGER.debug(String.format("Uploading job jar: %s", jobJarFile.getAbsolutePath()));
-            final Future<?> uploadFuture = m_livyClient.uploadJar(jobJarFile);
-            waitForFuture(uploadFuture, null);
-        } catch (final Exception e) {
-            handleLivyException(e);
-        }
+    private void uploadJobJar(final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
+        final File jobJarFile = getJobJar().getJarFile();
+        LOGGER.debug(String.format("Uploading job jar: %s", jobJarFile.getAbsolutePath()));
+        final Future<?> uploadFuture = m_livyClient.uploadJar(jobJarFile);
+        waitForFuture(uploadFuture, exec);
     }
 
     private void createRemoteSparkContext(ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
@@ -416,12 +414,13 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private static void checkForCancelation(Future<?> future, ExecutionMonitor exec) {
+    private static void checkForCancelation(Future<?> future, ExecutionMonitor exec) throws CanceledExecutionException {
         if (exec != null) {
             try {
                 exec.checkCanceled();
             } catch (final CanceledExecutionException canceledInKNIME) {
                 future.cancel(true);
+                throw canceledInKNIME;
             }
         }
     }
