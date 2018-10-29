@@ -740,6 +740,7 @@ propagated with or for interoperation with KNIME.
       
       <import feature="com.knime.features.bigdata.knosp"/>
       <import feature="org.knime.features.ext.perl"/>
+      <import feature="org.knime.features.ext.libsvm"/>
    </requires>
 
    <plugin
