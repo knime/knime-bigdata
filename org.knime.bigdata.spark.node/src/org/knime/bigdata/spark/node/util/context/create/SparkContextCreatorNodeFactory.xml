@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Spark Context</name>
+    <name>Create Spark Context (Jobserver)</name>
     
-    <shortDescription>Creates a new Spark context.</shortDescription>
+    <shortDescription>Creates a new Spark context via Spark Jobserver.</shortDescription>
     
     <fullDescription>
         <intro>
-            Creates a new Spark context. The settings affect all connected Spark nodes and 
-            their successors.
-            <p>The default values of the node are taken from the Spark preference page which
-            you can open via <i>File->Preferences->KNIME->Spark</i>.</p>
+            Creates a new Spark context via Spark Jobserver. 
+
+            <p>The default settings of the node are taken from the Spark preference page which
+            you can open via <i>File->Preferences->KNIME->Big Data->Spark</i>.</p>
         </intro>
         <tab name="Context Settings">
         <option name="Spark version">
-        	The Spark version used on Spark Jobserver.
+        	The Spark version used by Spark Jobserver.
         </option>
         <option name="Context name">The unique name of the context.</option>
         <option name="Destroy Spark context on dispose">If selected, the Spark context will be destroyed when the workflow or

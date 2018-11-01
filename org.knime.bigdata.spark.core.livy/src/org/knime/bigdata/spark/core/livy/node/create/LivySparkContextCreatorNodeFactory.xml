@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Spark Context via Livy (preview)</name>
+    <name>Create Spark Context (Livy)</name>
     
     <shortDescription>Creates a new Spark context via Apache Livy.</shortDescription>
     
@@ -22,7 +22,7 @@
         </intro>
         <tab name="General">
             <option name="Spark version">
-                The version of the Spark context.
+                The Spark version used by Livy. If this is set incorrectly, creating the Spark context will fail.
             </option>
             <option name="Livy URL">
                 The URL of Livy including protocol and port e.g. http://localhost:8998.
