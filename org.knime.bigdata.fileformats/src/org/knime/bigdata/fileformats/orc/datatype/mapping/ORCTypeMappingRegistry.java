@@ -86,17 +86,17 @@ import org.knime.core.data.time.localdate.LocalDateCellFactory;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
+import org.knime.datatype.mapping.AbstractDataTypeMappingRegistry;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
-import org.knime.datatype.mapping.DataTypeMappingRegistry;
 
 /**
  * ORC Type Mapping Registry
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescription, ORCSource, ORCDestination> {
+public class ORCTypeMappingRegistry extends AbstractDataTypeMappingRegistry<TypeDescription, ORCSource, ORCDestination> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ORCTypeMappingRegistry.class);
 
@@ -247,7 +247,7 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
     }
 
     @Override
-    public Collection<ConsumptionPath> getConsumptionPathsFor(DataType knimeType) {
+    public Collection<ConsumptionPath> getConsumptionPathsFor(final DataType knimeType) {
         final List<ConsumptionPath> consumptionPaths = m_consumerRegistry.getAvailableConsumptionPaths(knimeType);
         final Set<ConsumptionPath> uniqueConsumptionPaths = new LinkedHashSet<>(consumptionPaths);
         return Collections.unmodifiableCollection(uniqueConsumptionPaths);
@@ -295,7 +295,7 @@ public class ORCTypeMappingRegistry extends DataTypeMappingRegistry<TypeDescript
     }
 
     @Override
-    public Collection<ProductionPath> getProductionPathsFor(TypeDescription externalType) {
+    public Collection<ProductionPath> getProductionPathsFor(final TypeDescription externalType) {
         final List<ProductionPath> productionPaths = m_producerRegistry.getAvailableProductionPaths(externalType);
         final Set<ProductionPath> uniqueProductionPaths = new LinkedHashSet<>(productionPaths);
         return Collections.unmodifiableCollection(uniqueProductionPaths);
