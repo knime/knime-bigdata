@@ -141,7 +141,10 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
             sqlStatement.append(String.format(" STORED AS %s", fileFormat));
         }
         if (format == FileFormat.ORC) {
-            sqlStatement.append(String.format(" TBLPROPERTIES (\"orc.compress\"=\"%s\" )", compression));
+            sqlStatement.append(
+                String.format(" TBLPROPERTIES (\"transactional\"=\"false\", \"orc.compress\"=\"%s\" )", compression));
+        } else {
+            sqlStatement.append(" TBLPROPERTIES (\"transactional\"=\"false\")");
         }
         sqlStatement.append(String.format(" AS SELECT * FROM %s", tmpTable));
 
