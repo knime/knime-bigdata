@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.externals"
       label="Feature with all external plugins for KNIME Big Data Extensions."
-      version="2.3.1.qualifier"
+      version="2.3.2.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <copyright>
