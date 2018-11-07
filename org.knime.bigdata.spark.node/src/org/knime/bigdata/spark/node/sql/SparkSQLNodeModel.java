@@ -35,6 +35,7 @@ import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateCon
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -76,14 +77,28 @@ public class SparkSQLNodeModel extends SparkNodeModel implements FlowVariablePro
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-        exec.setMessage("Starting spark job");
-
-        final SparkDataPortObject inputRdd = (SparkDataPortObject) inData[0];
-        final SparkContextID contextID = inputRdd.getContextID();
-        final String namedInputObject = inputRdd.getData().getID();
-        final IntermediateSpec inputSchema = SparkDataTableUtil.toIntermediateSpec(inputRdd.getTableSpec());
-        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final String query = FlowVariableResolver.parse(m_settings.getQuery(), this);
+        return executeSQLQuery((SparkDataPortObject) inData[0], exec, query);
+    }
+
+    /**
+     * Execute a Spark SQL job with given query.
+     * @param inputData input port
+     * @param exec execution monitor
+     * @param query SQL query
+     * @return output port
+     * @throws CanceledExecutionException
+     * @throws KNIMESparkException
+     */
+    public static PortObject[] executeSQLQuery(final SparkDataPortObject inputData, final ExecutionContext exec,
+            final String query) throws KNIMESparkException, CanceledExecutionException {
+
+        exec.setMessage("Starting Spark SQL job");
+
+        final SparkContextID contextID = inputData.getContextID();
+        final String namedInputObject = inputData.getData().getID();
+        final IntermediateSpec inputSchema = SparkDataTableUtil.toIntermediateSpec(inputData.getTableSpec());
+        final String namedOutputObject = SparkIDs.createSparkDataObjectID();
         final SparkSQLJobInput input = new SparkSQLJobInput(namedInputObject, inputSchema, namedOutputObject, query);
 
         LOGGER.debug("Executing SQL query: " + query);
