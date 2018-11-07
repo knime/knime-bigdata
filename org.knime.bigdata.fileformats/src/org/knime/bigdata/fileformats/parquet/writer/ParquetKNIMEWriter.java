@@ -53,69 +53,22 @@ import org.apache.parquet.hadoop.ParquetFileWriter.Mode;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.api.WriteSupport;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.apache.parquet.schema.Type;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.parquet.ParquetTableStoreFormat;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 
 /**
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
-
-    private final ParquetWriter<DataRow> m_writer;
-
-    /**
-     * Constructs a writer for writing a KNIME table to a binary file on the
-     * local disk using an instance of {@link ParquetWriter}.
-     *
-     * @param file the local file to which to write
-     * @param spec the specification of the KNIME table to write to disk
-     * @param compression The compression codec to use for writing
-     * @param rowGroupSize Parquet horizontally divides tables into row groups.
-     *        A row group is a logical horizontal partitioning of the data into
-     *        rows. This parameter determines the size of a row group (in
-     *        Bytes). Row groups are flushed to the file when the current size
-     *        of the buffer (held in memory) approaches the specified size.
-     * @throws IOException an exception that is thrown if something goes wrong
-     *         during the initialization of the {@link ParquetWriter}
-     */
-    public ParquetKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final String compression, final int rowGroupSize) throws IOException {
-        super(file, rowGroupSize, spec);
-        final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
-        m_writer = new DataRowParquetWriterBuilder(new File(file.getURI()),
-                new DataRowWriteSupport(spec.getName(), ParquetTableStoreFormat.parquetTypesFromSpec(spec))).withCompressionCodec(codec)
-                                .withDictionaryEncoding(ParquetTableStoreFormat.DEFAULT_PARQUET_IS_DICTIONARY_ENABLED)
-                                .withRowGroupSize(rowGroupSize).withWriteMode(Mode.OVERWRITE).build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeRow(final DataRow row) throws IOException {
-        m_writer.write(row);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeMetaInfoAfterWrite(final NodeSettingsWO settings) {
-        // no metadata to write
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws IOException {
-        m_writer.close();
-    }
 
     /**
      * A class for building instances of {@link ParquetWriter} that are able to
@@ -133,16 +86,89 @@ public class ParquetKNIMEWriter extends AbstractFileFormatWriter {
          * {@inheritDoc}
          */
         @Override
-        protected DataRowParquetWriterBuilder self() {
-            return this;
+        protected WriteSupport<DataRow> getWriteSupport(final Configuration conf) {
+            return m_writeSupport;
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        protected WriteSupport<DataRow> getWriteSupport(final Configuration conf) {
-            return m_writeSupport;
+        protected DataRowParquetWriterBuilder self() {
+            return this;
         }
+    }
+
+    private final ParquetWriter<DataRow> m_writer;
+
+    DataTypeMappingConfiguration<Type> m_mappingConfig;
+
+    private final ParquetParameter[] m_params;
+
+    /**
+     * Constructs a writer for writing a KNIME table to a binary file on the
+     * local disk using an instance of {@link ParquetWriter}.
+     *
+     * @param file the local file to which to write
+     * @param spec the specification of the KNIME table to write to disk
+     * @param compression The compression codec to use for writing
+     * @param rowGroupSize Parquet horizontally divides tables into row groups.
+     *        A row group is a logical horizontal partitioning of the data into
+     *        rows. This parameter determines the size of a row group (in
+     *        Bytes). Row groups are flushed to the file when the current size
+     *        of the buffer (held in memory) approaches the specified size.
+     * @param inputputDataTypeMappingConfiguration the type mapping configuration
+     * @throws IOException an exception that is thrown if something goes wrong
+     *         during the initialization of the {@link ParquetWriter}
+     */
+    @SuppressWarnings("unchecked")
+    public ParquetKNIMEWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+            final String compression, final int rowGroupSize, 
+            DataTypeMappingConfiguration<?> inputputDataTypeMappingConfiguration) 
+                    throws IOException {
+        super(file, rowGroupSize, spec);
+        final CompressionCodecName codec = CompressionCodecName.fromConf(compression);
+        m_mappingConfig = (DataTypeMappingConfiguration<Type>) inputputDataTypeMappingConfiguration;
+        m_params = new ParquetParameter[spec.getNumColumns()];
+        for (int i = 0; i < spec.getNumColumns(); i++) {
+            m_params[i] = new ParquetParameter(i);
+        }
+
+
+        try {
+
+            m_writer = new DataRowParquetWriterBuilder(new File(file.getURI()),
+                    new DataRowWriteSupport(spec.getName(), spec, 
+                            m_mappingConfig.getConsumptionPathsFor(spec), m_params))
+                    .withCompressionCodec(codec)
+                    .withDictionaryEncoding(true)
+                    .withRowGroupSize(rowGroupSize).withWriteMode(Mode.OVERWRITE).build();
+        } catch (final InvalidSettingsException e) {
+            throw new BigDataFileFormatException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        m_writer.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeMetaInfoAfterWrite(final NodeSettingsWO settings) {
+        // no metadata to write
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeRow(final DataRow row) throws IOException {
+        m_writer.write(row);
     }
 }

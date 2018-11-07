@@ -53,8 +53,10 @@ import org.apache.parquet.hadoop.api.ReadSupport;
 import org.apache.parquet.io.api.GroupConverter;
 import org.apache.parquet.io.api.RecordMaterializer;
 import org.apache.parquet.schema.MessageType;
-import org.knime.bigdata.fileformats.parquet.type.ParquetType;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.core.data.DataRow;
+import org.knime.core.data.convert.map.ProductionPath;
+import org.knime.core.data.convert.map.Source.ProducerParameters;
 
 /**
  * A class that specifies how instances of {@link DataRow} are materialized from
@@ -64,34 +66,6 @@ import org.knime.core.data.DataRow;
  * @author Marc Bux, KNIME AG, Zurich, Switzerland
  */
 public final class DataRowReadSupport extends ReadSupport<DataRow> {
-    private final RecordMaterializer<DataRow> m_materializer;
-
-    /**
-     * Read support for KNIME data rows
-     *
-     * @param columnTypes the columns types
-     */
-    public DataRowReadSupport(final ParquetType[] columnTypes) {
-        m_materializer = new DataRowMaterializer(columnTypes);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public RecordMaterializer<DataRow> prepareForRead(final Configuration configuration,
-            final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
-        return m_materializer;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ReadContext init(final InitContext context) {
-        return new ReadContext(context.getFileSchema());
-    }
-
     /**
      * A class that specifies how to materialize instances of {@link DataRow}
      * from a Parquet file by means of a {@link DataRowConverter}.
@@ -99,8 +73,8 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
     static final class DataRowMaterializer extends RecordMaterializer<DataRow> {
         private final DataRowConverter m_rowConverter;
 
-        DataRowMaterializer(final ParquetType[] columnTypes) {
-            m_rowConverter = new DataRowConverter(columnTypes);
+        DataRowMaterializer(final ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
+            m_rowConverter = new DataRowConverter(paths, params);
         }
 
         /**
@@ -118,5 +92,34 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
         public GroupConverter getRootConverter() {
             return m_rowConverter;
         }
+    }
+
+    private final RecordMaterializer<DataRow> m_materializer;
+
+
+    /**
+     * Read support for KNIME data rows
+     * @param paths the production paths to use
+     * @param params the parameters for reading
+     */
+    public DataRowReadSupport(ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
+        m_materializer = new DataRowMaterializer(paths, params);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReadContext init(final InitContext context) {
+        return new ReadContext(context.getFileSchema());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RecordMaterializer<DataRow> prepareForRead(final Configuration configuration,
+            final Map<String, String> keyValueMetaData, final MessageType fileSchema, final ReadContext readContext) {
+        return m_materializer;
     }
 }

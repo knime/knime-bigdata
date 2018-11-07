@@ -54,6 +54,8 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
  * Interface for reader factories.
@@ -96,6 +98,16 @@ public interface FileFormatFactory {
      */
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
             DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration);
+
+    /**
+     * Returns the type mapping settings model for the file format
+     * @param cfkeyTypeMapping the key to use for the type mapping configuration
+     * @param mappingDirection the direction to map
+     * @return the settings model
+     */
+    public SettingsModelDataTypeMapping<?> getTypeMappingModel(String cfkeyTypeMapping,
+            DataTypeMappingDirection mappingDirection);
+
 
     /**
      * Returns a writer that writes KNIME {@link DataRow}s to an specific file

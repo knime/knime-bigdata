@@ -52,12 +52,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
-import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
 import org.knime.bigdata.filehandling.local.HDFSLocalConnectionInformation;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.core.node.InvalidSettingsException;
@@ -87,7 +85,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
 
-    private final DialogComponentDataTypeMapping<TypeDescription> m_inputTypeMappingComponent;
+    private final DialogComponentDataTypeMapping<?> m_inputTypeMappingComponent;
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
@@ -143,9 +141,8 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel());
         typeMappingBox.add(m_inputTypeMappingComponent.getComponentPanel());
         typeMappingBox.add(Box.createHorizontalGlue());
-        if (m_settings.getFormatFactory() instanceof OrcFormatFactory) {
-            addTab("Type Mapping", typeMappingBox);
-        }
+        addTab("Type Mapping", typeMappingBox);
+
 
     }
 

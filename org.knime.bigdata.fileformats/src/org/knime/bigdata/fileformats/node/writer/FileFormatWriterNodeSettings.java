@@ -44,7 +44,6 @@
  */
 package org.knime.bigdata.fileformats.node.writer;
 
-import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -54,6 +53,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
  * Settings for generic BigData file format writer.
@@ -83,8 +83,7 @@ public class FileFormatWriterNodeSettings {
 
     private final FileFormatFactory m_formatFactory;
 
-    private final SettingsModelORCDataTypeMapping m_mappingModel = new SettingsModelORCDataTypeMapping(
-            CFKEY_TYPE_MAPPING, DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+    private final SettingsModelDataTypeMapping<?> m_mappingModel;
 
     /**
      * Constructor for FileFormatWriterNodeSettings with a specific Format.,
@@ -94,6 +93,8 @@ public class FileFormatWriterNodeSettings {
      */
     public FileFormatWriterNodeSettings(final FileFormatFactory factory) {
         m_formatFactory = factory;
+        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING, 
+                DataTypeMappingDirection.KNIME_TO_EXTERNAL);
     }
 
     /**
@@ -198,7 +199,7 @@ public class FileFormatWriterNodeSettings {
     /**
      * @return the m_mappingModel
      */
-    public SettingsModelORCDataTypeMapping getMappingModel() {
+    public SettingsModelDataTypeMapping<?> getMappingModel() {
         return m_mappingModel;
     }
 

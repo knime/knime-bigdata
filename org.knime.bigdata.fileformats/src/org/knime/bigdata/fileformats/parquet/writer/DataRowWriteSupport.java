@@ -45,6 +45,7 @@
  */
 package org.knime.bigdata.fileformats.parquet.writer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +56,15 @@ import org.apache.parquet.hadoop.api.WriteSupport;
 import org.apache.parquet.io.api.RecordConsumer;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Type;
-import org.knime.bigdata.fileformats.parquet.type.ParquetType;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetDestination;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.convert.map.CellValueConsumerFactory;
+import org.knime.core.data.convert.map.ConsumptionPath;
+import org.knime.core.data.convert.map.MappingFramework;
 
 /**
  * A class that specifies how instances of {@link DataRow} are converted and
@@ -68,19 +76,30 @@ import org.knime.core.data.DataRow;
 public final class DataRowWriteSupport extends WriteSupport<DataRow> {
     private final String m_name;
 
-    private final ParquetType[] m_columnTypes;
-
     private RecordConsumer m_recordConsumer;
 
+    private final ConsumptionPath[] m_paths;
+
+    private final ParquetParameter[] m_params;
+
+    private ParquetDestination m_destination;
+
+    private final DataTableSpec m_spec;
+
     /**
-     * Constructs a Write Support instance with the given name and column types
-     *
-     * @param name name of the table
-     * @param columnTypes the column types
+     * Write Support for KNIME DataRow
+     * 
+     * @param name the name of table
+     * @param spec the table spec
+     * @param consumptionPaths the type mapping consumption paths
+     * @param params the parameters for writing
      */
-    public DataRowWriteSupport(final String name, final ParquetType[] columnTypes) {
+    public DataRowWriteSupport(String name, DataTableSpec spec, 
+            ConsumptionPath[] consumptionPaths, ParquetParameter[] params) {
         m_name = name;
-        m_columnTypes = columnTypes.clone();
+        m_paths = consumptionPaths.clone();
+        m_spec = spec;
+        m_params = params.clone();
     }
 
     /**
@@ -88,8 +107,18 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
      */
     @Override
     public WriteContext init(final Configuration configuration) {
-        final List<Type> fields = Arrays.stream(m_columnTypes).map(ParquetType::getParquetType)
-                .collect(Collectors.toList());
+        @SuppressWarnings("unchecked")
+        final List<ParquetType> types = (List<ParquetType>) Arrays.stream(m_paths)
+        .map(ConsumptionPath::getConsumerFactory)
+        .map(CellValueConsumerFactory::getDestinationType)
+        .collect(Collectors.toList());
+
+        
+        final List<Type> fields = new ArrayList<>();
+        for (int i = 0; i < m_spec.getNumColumns() ; i++) {
+            final Type type = types.get(i).constructParquetType(m_spec.getColumnSpec(i).getName());
+            fields.add(type);
+        }
         return new WriteContext(new MessageType(m_name, fields), new HashMap<>());
     }
 
@@ -98,6 +127,7 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
      */
     @Override
     public void prepareForWrite(final RecordConsumer recordConsumer) {
+        m_destination = new ParquetDestination(recordConsumer);
         m_recordConsumer = recordConsumer;
     }
 
@@ -108,10 +138,11 @@ public final class DataRowWriteSupport extends WriteSupport<DataRow> {
     public void write(final DataRow record) {
         m_recordConsumer.startMessage();
 
-        int i = 0;
         // write column values
-        for (; i < m_columnTypes.length; i++) {
-            m_columnTypes[i].writeValue(m_recordConsumer, record.getCell(i), i);
+        try {
+            MappingFramework.map(record, m_destination, m_paths, m_params);
+        } catch (final Exception e) {
+            throw new BigDataFileFormatException(e);
         }
         m_recordConsumer.endMessage();
     }

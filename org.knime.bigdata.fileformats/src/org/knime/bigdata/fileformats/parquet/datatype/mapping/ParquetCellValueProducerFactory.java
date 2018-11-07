@@ -44,23 +44,87 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   25 Apr 2018 (Marc Bux, KNIME AG, Zurich, Switzerland): created
+ *   09.10.2018 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.fileformats.parquet.type;
+
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
+
+import org.apache.parquet.io.api.Converter;
+import org.knime.core.data.convert.map.SimpleCellValueProducerFactory;
 
 /**
- * An interface for factory classes that can be used to create new Parquet type instances.
+ * Factory for Parquet cell value producer.
+ * 
+ * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
- * @author Marc Bux, KNIME AG, Zurich, Switzerland
+ * @param <T> the type to produce
  */
-public interface ParquetTypeFactory {
+public class ParquetCellValueProducerFactory<T> 
+extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetParameter> {
+
+    private final ParquetCellValueProducer<T> m_parquetProducer;
+
+
     /**
-     * Creates a new Parquet type instance that can be used to convert data back and forth between a column in KNIME and
-     * a column in Parquet.
-     *
-     * @param columnName the name of the column of this type
-     *
-     * @return a new Parquet type instance
+     * COnstructs a producer factory 
+     * @param externalType the external type to produce from
+     * @param destType the destination type
+     * @param producer the cell value producer
      */
-    ParquetType create(String columnName);
+    public ParquetCellValueProducerFactory(ParquetType externalType, Class<?> destType,
+            ParquetCellValueProducer<T> producer) {
+        super(externalType, destType, (c, p) -> producer.getConverter(p.getIndex()).readObject());
+        m_parquetProducer = producer;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final  ParquetCellValueProducerFactory<T> other = ( ParquetCellValueProducerFactory<T> ) obj;
+        if (!(other.m_parquetProducer.equals(m_parquetProducer))) {
+            return false;
+        }
+        return super.equals(obj);
+    }
+
+    /**
+     * Returns the converter for the given column index
+     * @param colIndex the index of the column
+     * @return the converter
+     */
+    public Converter getConverter(int colIndex) {
+        return (Converter) m_parquetProducer.getConverter(colIndex);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((m_parquetProducer == null) ? 0 : m_parquetProducer.hashCode());
+        return result;
+    }
+
+    /**
+     * Resets the producer convertes
+     */
+    public void resetConvertes() {
+        m_parquetProducer.resetConverters();
+    }
+    
+    /**
+     * @return the m_parquetProducer
+     */
+    protected ParquetCellValueProducer<T> parquetProducer() {
+        return m_parquetProducer;
+    }
+
 }

@@ -51,7 +51,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.orc.TypeDescription;
 import org.eclipse.core.runtime.URIUtil;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
@@ -214,7 +213,7 @@ public class FileFormatWriterNodeModel extends NodeModel {
     }
 
     private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
-            DataTypeMappingConfiguration<TypeDescription> dataTypeMappingConfiguration) throws IOException {
+            DataTypeMappingConfiguration<?> dataTypeMappingConfiguration) throws IOException {
         final DataTableSpec dataSpec = input.getDataTableSpec();
         final int chunkSize = m_settings.getChunkSize();
         final String compression = m_settings.getCompression();

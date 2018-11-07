@@ -51,12 +51,14 @@ import java.util.stream.Stream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.orc.CompressionKind;
+import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.orc.reader.OrcKNIMEReader;
 import org.knime.bigdata.fileformats.orc.writer.OrcKNIMEWriter;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
@@ -64,6 +66,8 @@ import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
  * Factory for ORC format
@@ -123,10 +127,15 @@ public class OrcFormatFactory implements FileFormatFactory {
     }
 
     @Override
+    public SettingsModelDataTypeMapping<TypeDescription> getTypeMappingModel
+    (String key, DataTypeMappingDirection mappingDirection) {
+        return new SettingsModelORCDataTypeMapping(key, mappingDirection);
+    }
+
+    @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final int chunkSize, final String compression,
             DataTypeMappingConfiguration<?> typeMappingConf) throws IOException {
         return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
     }
-
 }

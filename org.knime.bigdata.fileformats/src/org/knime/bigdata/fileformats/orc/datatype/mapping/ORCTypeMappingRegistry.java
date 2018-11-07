@@ -49,17 +49,12 @@
 
 package org.knime.bigdata.fileformats.orc.datatype.mapping;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.orc.TypeDescription;
@@ -67,10 +62,7 @@ import org.apache.orc.TypeDescription.Category;
 import org.knime.core.data.DataType;
 import org.knime.core.data.blob.BinaryObjectDataCell;
 import org.knime.core.data.collection.ListCell;
-import org.knime.core.data.convert.ConverterFactory;
-import org.knime.core.data.convert.datacell.JavaToDataCellConverterFactory;
 import org.knime.core.data.convert.datacell.JavaToDataCellConverterRegistry;
-import org.knime.core.data.convert.map.CellValueConsumerFactory;
 import org.knime.core.data.convert.map.CellValueProducerFactory;
 import org.knime.core.data.convert.map.ConsumerRegistry;
 import org.knime.core.data.convert.map.ConsumptionPath;
@@ -109,89 +101,78 @@ public class ORCTypeMappingRegistry extends AbstractDataTypeMappingRegistry<Type
         return INSTANCE;
     }
 
-    private final Collection<CellValueConsumerFactory<ORCDestination, ?, TypeDescription, ?>> m_consumerFactories;
-
-    private final ConsumerRegistry<TypeDescription, ORCDestination> m_consumerRegistry;
-
-    private final Collection<JavaToDataCellConverterFactory<?>> m_converterFactories;
-
-    private final Map<Pair<DataType, TypeDescription>, ConsumptionPath> m_defaultConsumptionPaths;
-
-    private final Map<Pair<TypeDescription, DataType>, ProductionPath> m_defaultProductionPaths;
-
-    private final Collection<TypeDescription> m_externalSourceTypes;
-
-    private final ProducerRegistry<TypeDescription, ORCSource> m_producerRegistry;
-
-    private volatile Collection<DataType> m_knimeDestinationTypes;
-
     private ORCTypeMappingRegistry() {
 
-        m_consumerRegistry = MappingFramework.forDestinationType(ORCDestination.class);
-        m_producerRegistry = MappingFramework.forSourceType(ORCSource.class);
+        final ConsumerRegistry<TypeDescription, ORCDestination> consumerRegistry =
+                MappingFramework.forDestinationType(ORCDestination.class);
+        setConsumerRegistry(consumerRegistry);
+        final ProducerRegistry<TypeDescription, ORCSource> producerRegistry =
+                MappingFramework.forSourceType(ORCSource.class);
+        setProducerRegistry(producerRegistry);
         // External source types
-        m_externalSourceTypes = m_producerRegistry.getAllSourceTypes();
+        setExternalSourceTypes(producerRegistry.getAllSourceTypes());
         // KNIME source types are lazily prepared. See getKnimeSourceTypes()
         // External destination type consumer factories
-        m_consumerFactories = Collections.unmodifiableCollection(m_consumerRegistry.getAllConverterFactories());
+        setConsumerFactories(Collections.unmodifiableCollection(consumerRegistry.getAllConverterFactories()));
         // KNIME destination type converter factories
         final JavaToDataCellConverterRegistry javaToKnimeTypeConverterRegistry = JavaToDataCellConverterRegistry
                 .getInstance();
-        m_converterFactories = Collections.unmodifiableCollection(
-                m_producerRegistry.getAllConverterFactories().stream().map(CellValueProducerFactory::getDestinationType)
+        setConverterFactories(Collections.unmodifiableCollection(
+                producerRegistry.getAllConverterFactories().stream().map(CellValueProducerFactory::getDestinationType)
                 .map(javaToKnimeTypeConverterRegistry::getFactoriesForSourceType).flatMap(Collection::stream)
-                .collect(Collectors.toCollection(LinkedHashSet::new)));
+                .collect(Collectors.toCollection(LinkedHashSet::new))));
         // Default consumption paths
         final Map<Pair<DataType, TypeDescription>, ConsumptionPath> defaultConsumptionPaths = new LinkedHashMap<>();
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, StringCell.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, StringCell.TYPE,
                 TypeDescription.createString());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, DoubleCell.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, DoubleCell.TYPE,
                 TypeDescription.createDouble());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, LongCell.TYPE, TypeDescription.createLong());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, LocalDateTimeCellFactory.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LongCell.TYPE, TypeDescription.createLong());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalDateTimeCellFactory.TYPE,
                 TypeDescription.createTimestamp());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, LocalDateCellFactory.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalDateCellFactory.TYPE,
                 TypeDescription.createDate());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, BooleanCell.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, BooleanCell.TYPE,
                 TypeDescription.createBoolean());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, IntCell.TYPE, TypeDescription.createInt());
-        addConsumptionPath(m_consumerRegistry, defaultConsumptionPaths, BinaryObjectDataCell.TYPE,
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, IntCell.TYPE, TypeDescription.createInt());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, BinaryObjectDataCell.TYPE,
                 TypeDescription.createBinary());
 
-        m_defaultConsumptionPaths = Collections.unmodifiableMap(defaultConsumptionPaths);
+        setDefaultConsumptionPaths(Collections.unmodifiableMap(defaultConsumptionPaths));
 
         // Default production paths
         final Map<Pair<TypeDescription, DataType>, ProductionPath> defaultProductionPaths = new LinkedHashMap<>();
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createBoolean(),
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createBoolean(),
                 BooleanCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createByte(), IntCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createShort(), IntCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createInt(), IntCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createLong(), LongCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createFloat(), DoubleCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createDouble(), DoubleCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createDate(),
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createByte(), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createShort(), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createInt(), IntCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createLong(), LongCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createFloat(), DoubleCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createDouble(), DoubleCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createDate(),
                 LocalDateCellFactory.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createTimestamp(),
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createTimestamp(),
                 LocalDateTimeCellFactory.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createBinary(),
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createBinary(),
                 BinaryObjectDataCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createDecimal(), StringCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createVarchar(), StringCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createChar(), StringCell.TYPE);
-        addProductionPath(m_producerRegistry, defaultProductionPaths, TypeDescription.createString(), StringCell.TYPE);
-        m_defaultProductionPaths = Collections.unmodifiableMap(defaultProductionPaths);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createDecimal(), StringCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createVarchar(), StringCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createChar(), StringCell.TYPE);
+        addProductionPath(producerRegistry, defaultProductionPaths, TypeDescription.createString(), StringCell.TYPE);
+        setDefaultProductionPaths(Collections.unmodifiableMap(defaultProductionPaths));
 
         final DataTypeMappingConfiguration<TypeDescription> configuration = createMappingConfiguration(
                 DataTypeMappingDirection.EXTERNAL_TO_KNIME);
-        m_defaultProductionPaths.values().forEach(configuration::addRule);
+        defaultProductionPaths.values().forEach(configuration::addRule);
         final DataType stringDataType = StringCell.TYPE;
         for (final Category orcType : Category.values()) {
-            findPath(m_producerRegistry, new TypeDescription(orcType), stringDataType)
+            findPath(producerRegistry, new TypeDescription(orcType), stringDataType)
             .ifPresent(configuration::addRule);
         }
 
     }
+
 
     /**
      * {@inheritDoc}
@@ -239,85 +220,6 @@ public class ORCTypeMappingRegistry extends AbstractDataTypeMappingRegistry<Type
             LOGGER.error("Default production path is not available: " + listORCType + " -> " + knimelisttype);
         }
 
-    }
-
-    @Override
-    public ConsumerRegistry<TypeDescription, ORCDestination> getConsumerRegistry() {
-        return m_consumerRegistry;
-    }
-
-    @Override
-    public Collection<ConsumptionPath> getConsumptionPathsFor(final DataType knimeType) {
-        final List<ConsumptionPath> consumptionPaths = m_consumerRegistry.getAvailableConsumptionPaths(knimeType);
-        final Set<ConsumptionPath> uniqueConsumptionPaths = new LinkedHashSet<>(consumptionPaths);
-        return Collections.unmodifiableCollection(uniqueConsumptionPaths);
-    }
-
-    @Override
-    public Collection<ConverterFactory<Class<?>, TypeDescription>> getExternalMappings() {
-        return Collections.unmodifiableCollection(m_consumerFactories);
-    }
-
-    @Override
-    public Collection<TypeDescription> getExternalSourceTypes() {
-        return Collections.unmodifiableCollection(m_externalSourceTypes);
-    }
-
-    @Override
-    public Collection<ConverterFactory<Class<?>, DataType>> getKnimeMappings() {
-        return Collections.unmodifiableCollection(m_converterFactories);
-    }
-
-    @Override
-    public Collection<DataType> getKnimeSourceTypes() {
-        Collection<DataType> knimeDestinationTypes = m_knimeDestinationTypes;
-        if (knimeDestinationTypes == null) {
-            synchronized (this) {
-                knimeDestinationTypes = m_knimeDestinationTypes;
-                if (knimeDestinationTypes == null) {
-                    final Set<DataType> uniqueKnimeDestinationTypes = new HashSet<>();
-                    m_externalSourceTypes.stream().map(this::getProductionPathsFor).flatMap(Collection::stream)
-                    .map(productionPath -> productionPath.m_converterFactory)
-                    .map(ConverterFactory::getDestinationType).forEach(uniqueKnimeDestinationTypes::add);
-                    final List<DataType> destinationTypes = new ArrayList<>(uniqueKnimeDestinationTypes);
-                    Collections.sort(destinationTypes, Comparator.comparing(DataType::getName));
-                    knimeDestinationTypes = Collections.unmodifiableCollection(destinationTypes);
-                    m_knimeDestinationTypes = knimeDestinationTypes;
-                }
-            }
-        }
-        return knimeDestinationTypes;
-    }
-
-    @Override
-    public ProducerRegistry<TypeDescription, ORCSource> getProducerRegistry() {
-        return m_producerRegistry;
-    }
-
-    @Override
-    public Collection<ProductionPath> getProductionPathsFor(final TypeDescription externalType) {
-        final List<ProductionPath> productionPaths = m_producerRegistry.getAvailableProductionPaths(externalType);
-        final Set<ProductionPath> uniqueProductionPaths = new LinkedHashSet<>(productionPaths);
-        return Collections.unmodifiableCollection(uniqueProductionPaths);
-    }
-
-    @Override
-    public DataTypeMappingConfiguration<TypeDescription> newDefaultExternalToKnimeMappingConfiguration() {
-        final DataTypeMappingConfiguration<TypeDescription> configuration = createMappingConfiguration(
-                DataTypeMappingDirection.EXTERNAL_TO_KNIME);
-        m_defaultProductionPaths.values().forEach(configuration::addRule);
-        return configuration;
-    }
-
-    @Override
-    public DataTypeMappingConfiguration<TypeDescription> newDefaultKnimeToExternalMappingConfiguration() {
-        final DataTypeMappingConfiguration<TypeDescription> configuration = createMappingConfiguration(
-                DataTypeMappingDirection.KNIME_TO_EXTERNAL);
-        for (final Map.Entry<Pair<DataType, TypeDescription>, ConsumptionPath> entry : m_defaultConsumptionPaths
-                .entrySet()) {
-            configuration.addRule(entry.getKey().getFirst(), entry.getValue());
-        }
-        return configuration;
     }
 
 }

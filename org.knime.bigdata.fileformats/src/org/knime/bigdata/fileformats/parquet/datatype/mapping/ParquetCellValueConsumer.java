@@ -44,29 +44,27 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 11, 2018 (Mareike Höger): created
+ *   Oct 9, 2018 (Mareike Höger): created
  */
 
-package org.knime.bigdata.fileformats;
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.eclipse.core.runtime.Plugin;
-import org.osgi.framework.BundleContext;
+import org.apache.parquet.io.api.RecordConsumer;
 
 /**
- * Plugin for the File Format nodes
+ * Interface for Parquet cell value consumers
  * 
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
+ * @param <T> the type to consume
  */
-public class FileFormatPlugin extends Plugin {
+public interface ParquetCellValueConsumer<T> {
 
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        ORCRegistrationHelper.registerORCProducers();
-        ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
-    }
-
+    /**
+     * Writes a non null Value to the {@link RecordConsumer} 
+     * @param consumer the  {@link RecordConsumer} 
+     * @param v the value to write
+     */
+    void writeNonNullValue(RecordConsumer consumer, T v);
 }

@@ -105,7 +105,8 @@ public class SettingsModelORCDataTypeMapping extends SettingsModelDataTypeMappin
 
     @SuppressWarnings("unchecked")
     @Override
-    protected <D extends Destination<TypeDescription>> DataTypeMappingRegistry<TypeDescription, ?, D> getDataTypeMappingRegistry() {
+    protected <D extends Destination<TypeDescription>> DataTypeMappingRegistry<TypeDescription, ?, D> 
+    getDataTypeMappingRegistry() {
         return (DataTypeMappingRegistry<TypeDescription, ?, D>) ORCTypeMappingRegistry.getInstance();
     }
 

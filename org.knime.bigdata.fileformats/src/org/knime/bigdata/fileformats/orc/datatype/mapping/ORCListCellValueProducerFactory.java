@@ -73,7 +73,8 @@ import org.knime.core.data.convert.map.MappingException;
 public class ORCListCellValueProducerFactory<T, F, CV extends ColumnVector>
 implements CellValueProducerFactory<ORCSource, TypeDescription, T, ORCParameter> {
 
-    private static class ToCollectionProducer<E, CCV extends ColumnVector> implements CellValueProducer<ORCSource, E[], ORCParameter> {
+    private static class ToCollectionProducer<E, CCV extends ColumnVector> 
+    implements CellValueProducer<ORCSource, E[], ORCParameter> {
 
         final ORCCellValueProducer<E, CCV> m_elementConverter;
 

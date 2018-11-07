@@ -44,13 +44,13 @@
  */
 package org.knime.bigdata.fileformats.node.reader;
 
-import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.utility.FileFormatFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
  * Settings for generic file format reader.
@@ -58,19 +58,19 @@ import org.knime.datatype.mapping.DataTypeMappingDirection;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class FileFormatReaderNodeSettings {
-    private static final String CFKEY_TYPE_MAPPING = "output_type_mapping";
 
     /**
      * Configuration key for the filename
      */
     public static final String CFGKEY_FILE = "filename";
 
+    private static final String CFKEY_TYPE_MAPPING = "input_type_mapping";
+
     private final SettingsModelString m_fileName = new SettingsModelString(CFGKEY_FILE, "");
 
     private final FileFormatFactory m_formatFactory;
 
-    private final SettingsModelORCDataTypeMapping m_mappingModel = new SettingsModelORCDataTypeMapping(
-            CFKEY_TYPE_MAPPING, DataTypeMappingDirection.EXTERNAL_TO_KNIME);
+    private final SettingsModelDataTypeMapping<?> m_mappingModel;
 
     /**
      * Creates initial settings for the given file format.
@@ -80,6 +80,8 @@ public class FileFormatReaderNodeSettings {
      */
     public FileFormatReaderNodeSettings(final FileFormatFactory formatFactory) {
         m_formatFactory = formatFactory;
+        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING, 
+                DataTypeMappingDirection.EXTERNAL_TO_KNIME);
     }
 
     /**
@@ -106,7 +108,7 @@ public class FileFormatReaderNodeSettings {
     /**
      * @return the m_mappingModel
      */
-    public SettingsModelORCDataTypeMapping getMappingModel() {
+    public SettingsModelDataTypeMapping<?> getMappingModel() {
         return m_mappingModel;
     }
 

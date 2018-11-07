@@ -44,29 +44,44 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 11, 2018 (Mareike Höger): created
+ *   09.10.2018 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
 
-package org.knime.bigdata.fileformats;
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.eclipse.core.runtime.Plugin;
-import org.osgi.framework.BundleContext;
+import org.knime.core.data.convert.map.Destination;
+import org.knime.core.data.convert.map.Source;
 
 /**
- * Plugin for the File Format nodes
+ * Parameters for Parquet type mapping
  * 
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class FileFormatPlugin extends Plugin {
+public class ParquetParameter 
+implements Destination.ConsumerParameters<ParquetDestination>, Source.ProducerParameters<ParquetSource> {
+    private final int m_index;
 
+    /**
+     * Constructs a {@link ParquetParameter}.
+     *
+     * @param index
+     *            the index of the column to read from or write to
+     */
+    public ParquetParameter(final int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Column index must be greater or equal to zero");
+        }
+        m_index = index;
+    }
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        ORCRegistrationHelper.registerORCProducers();
-        ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
+    /**
+     * Gets the index of the column to read from or write to.
+     *
+     * @return the columnIndex
+     */
+    public int getIndex() {
+        return m_index;
     }
 
 }

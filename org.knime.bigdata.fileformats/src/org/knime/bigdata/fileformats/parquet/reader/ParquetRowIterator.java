@@ -69,20 +69,6 @@ class ParquetRowIterator extends FileFormatRowIterator {
         m_index = index;
         m_reader = reader;
         m_nextRow = internalNext();
-
-    }
-
-    private DataRow internalNext() {
-        try {
-            return m_reader.read();
-        } catch (final IOException e) {
-            throw new BigDataFileFormatException(e);
-        }
-    }
-
-    @Override
-    public long getIndex() {
-        return m_index;
     }
 
     @Override
@@ -95,8 +81,21 @@ class ParquetRowIterator extends FileFormatRowIterator {
     }
 
     @Override
+    public long getIndex() {
+        return m_index;
+    }
+
+    @Override
     public boolean hasNext() {
         return m_nextRow != null;
+    }
+
+    private DataRow internalNext() {
+        try {
+            return m_reader.read();
+        } catch (final IOException e) {
+            throw new BigDataFileFormatException(e);
+        }
     }
 
     @Override

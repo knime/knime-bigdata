@@ -45,7 +45,6 @@
 package org.knime.bigdata.fileformats.parquet.reader;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -53,9 +52,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -66,27 +62,27 @@ import org.apache.parquet.hadoop.metadata.FileMetaData;
 import org.apache.parquet.hadoop.metadata.ParquetMetadata;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
-import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
 import org.apache.parquet.schema.Type;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
-import org.knime.bigdata.fileformats.parquet.ParquetTableStoreFormat;
-import org.knime.bigdata.fileformats.parquet.type.ParquetType;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.cloud.aws.s3.filehandler.S3Connection;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
-import org.knime.core.data.blob.BinaryObjectDataCell;
-import org.knime.core.data.def.BooleanCell;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.LongCell;
+import org.knime.core.data.convert.map.ProductionPath;
+import org.knime.core.data.convert.map.Source.ProducerParameters;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.ExternalDataColumnSpec;
+import org.knime.datatype.mapping.ExternalDataTableSpec;
 
 /**
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
@@ -95,18 +91,13 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
 
     private final Queue<ParquetReader<DataRow>> m_readers;
 
-    // Use a map for now, this will be changed once the type conversion
-    // framework is used
-    private final Map<PrimitiveTypeName, DataType> m_types = new EnumMap<>(PrimitiveTypeName.class);
-
-    {
-        m_types.put(PrimitiveTypeName.INT64, LongCell.TYPE);
-        m_types.put(PrimitiveTypeName.INT32, IntCell.TYPE);
-        m_types.put(PrimitiveTypeName.DOUBLE, DoubleCell.TYPE);
-        m_types.put(PrimitiveTypeName.BOOLEAN, BooleanCell.TYPE);
-        m_types.put(PrimitiveTypeName.BINARY, BinaryObjectDataCell.TYPE);
-    }
     private final Map<OriginalType, DataType> m_orgTypes = new EnumMap<>(OriginalType.class);
+
+    private final DataTypeMappingConfiguration<ParquetType> m_outputTypeMappingConf;
+
+    private ProductionPath[] m_paths;
+
+    private ProducerParameters<ParquetSource>[] m_params;
 
     {
         m_orgTypes.put(OriginalType.UTF8, StringCell.TYPE);
@@ -117,16 +108,28 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      *
      * @param file the file or directory to read from
      * @param exec the execution context
+     * @param outputDataTypeMappingConfiguration the type mapping configuration
      * @throws Exception thrown if files can not be listed, if reader can not be
      *         created, or schemas of files in a directory do not match.
      */
-    public ParquetKNIMEReader(final RemoteFile<Connection> file, final ExecutionContext exec) throws Exception {
+    @SuppressWarnings("unchecked")
+    public ParquetKNIMEReader(final RemoteFile<Connection> file, final ExecutionContext exec,
+            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) throws Exception {
         super(file, exec);
+        m_outputTypeMappingConf = (DataTypeMappingConfiguration<ParquetType>) outputDataTypeMappingConfiguration;
         m_readers = new ArrayDeque<>();
         init();
         if (m_readers.isEmpty()) {
             throw new BigDataFileFormatException("Could not create reader");
         }
+    }
+
+    private ProducerParameters<ParquetSource>[] createDefault(ExternalDataTableSpec<ParquetType> exTableSpec) {
+        final ParquetParameter[] params = new ParquetParameter[exTableSpec.getColumns().size()];
+        for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
+            params[i] = new ParquetParameter(i);
+        }
+        return params;
     }
 
     /* (non-Javadoc)
@@ -146,11 +149,10 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             }
             final DataTableSpec tableSpec = createTableSpec(path, conf);
             schemas.add(tableSpec);
-            final ParquetType[] columnTypes = ParquetTableStoreFormat.parquetTypesFromSpec(tableSpec);
 
             @SuppressWarnings("resource")
-            final ParquetReader<DataRow> reader = ParquetReader.builder(new DataRowReadSupport(columnTypes), path)
-                    .withConf(conf).build();
+            final ParquetReader<DataRow> reader = ParquetReader.builder(new DataRowReadSupport(m_paths, m_params), path)
+            .withConf(conf).build();
             m_readers.add(reader);
         } catch (final IOException ioe) {
             if (ioe.getMessage().contains("No FileSystem for scheme")) {
@@ -158,41 +160,45 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
                         "Protocol " + remoteFile.getConnectionInformation().getProtocol() + " is not supported.");
             }
             throw new BigDataFileFormatException(ioe);
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+        } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
     }
-
-    private DataTableSpec createTableSpec(final Path path, final Configuration conf) throws IOException {
+    private DataTableSpec createTableSpec(final Path path, final Configuration conf) 
+            throws Exception {
         final ParquetMetadata footer = ParquetFileReader.readFooter(conf, path, ParquetMetadataConverter.NO_FILTER);
         final FileMetaData fileMetaData = footer.getFileMetaData();
         final MessageType schema = fileMetaData.getSchema();
-        final String tableName = schema.getName();
-        final ArrayList<String> columnNames = new ArrayList<>();
-        final ArrayList<DataType> columnTypes = new ArrayList<>();
+        final List<ExternalDataColumnSpec<ParquetType>> columns = new ArrayList<>(schema.getFields().size());
         for (final Type field : schema.getFields()) {
-            if (!field.isPrimitive()) {
-                throw new BigDataFileFormatException(
-                        String.format("Non Primitve type %s is not yet supported.", field.getOriginalType()));
+            
+            if(field.isPrimitive()) {
+            columns.add(new ExternalDataColumnSpec<>(field.getName(), 
+                    new ParquetType(field.asPrimitiveType().getPrimitiveTypeName(), field.getOriginalType())));
+            }else {
+                if(field.getOriginalType() == OriginalType.LIST) {
+                    Type subtype = field.asGroupType().getType(0).asGroupType().getType(0);
+                    ParquetType element = new ParquetType(subtype.asPrimitiveType().getPrimitiveTypeName(), 
+                            subtype.getOriginalType());
+                    columns.add(new ExternalDataColumnSpec<>(field.getName(), ParquetType.createListType(element)));
+                }
+                else { 
+                    throw new BigDataFileFormatException("Only Supported GroupType is LIST");
+                }
             }
-            DataType type = null;
-            String parquettype;
-            if (field.getOriginalType() != null) {
-                type = m_orgTypes.get(field.getOriginalType());
-                parquettype = field.getOriginalType().name();
-            } else {
-                type = m_types.get(field.asPrimitiveType().getPrimitiveTypeName());
-                parquettype = field.asPrimitiveType().getName();
-            }
-            if (type == null) {
-                throw new BigDataFileFormatException(String.format("Type %s is not yet supported.", parquettype));
-            }
-            columnNames.add(field.getName());
-            columnTypes.add(type);
-
         }
-        return new DataTableSpec(tableName, columnNames.toArray(new String[columnNames.size()]),
-                columnTypes.toArray(new DataType[columnTypes.size()]));
+        final ExternalDataTableSpec<ParquetType> exTableSpec = new ExternalDataTableSpec<>(columns);
+        setexternalTableSpec(exTableSpec);
+        m_paths = m_outputTypeMappingConf.getProductionPathsFor(exTableSpec);
+        m_params = createDefault(exTableSpec);
+        final ArrayList<DataType> colTypes = new ArrayList<>();
+        for (final ProductionPath prodPath : m_paths) {
+            final DataType dataType = prodPath.getConverterFactory().getDestinationType();
+            colTypes.add(dataType);
+        }
+
+        final String[] fieldNames = schema.getFields().stream().map(Type::getName).toArray(String[]::new);
+        return new DataTableSpec(getFile().getName(), fieldNames,colTypes.toArray(new DataType[colTypes.size()]));
     }
 
     @SuppressWarnings("resource")

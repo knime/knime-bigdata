@@ -45,15 +45,16 @@
  */
 package org.knime.bigdata.fileformats.parquet.reader;
 
-import java.util.Arrays;
-
 import org.apache.parquet.io.api.Converter;
 import org.apache.parquet.io.api.GroupConverter;
-import org.knime.bigdata.fileformats.parquet.type.ParquetType;
-import org.knime.core.data.DataCell;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueProducerFactory;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowKey;
-import org.knime.core.data.container.BlobSupportDataRow;
+import org.knime.core.data.convert.map.MappingFramework;
+import org.knime.core.data.convert.map.ProductionPath;
+import org.knime.core.data.convert.map.Source.ProducerParameters;
 
 /**
  * A class that converts Parquet records to {@link DataRow} instances.
@@ -63,14 +64,50 @@ import org.knime.core.data.container.BlobSupportDataRow;
  */
 final class DataRowConverter extends GroupConverter {
 
-    private final ParquetType[] m_columnTypes;
+    private final ProductionPath[] m_paths;
 
     private DataRow m_dataRow;
 
     private long m_rowCount = 0l;
 
-    DataRowConverter(final ParquetType[] columnTypes) {
-        m_columnTypes = columnTypes.clone();
+    private final ParquetSource m_source;
+
+    private final ProducerParameters<ParquetSource>[] m_parameters;
+
+    DataRowConverter(final ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
+        m_paths = paths.clone();
+        m_parameters = params.clone();
+        m_source = new ParquetSource();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void end() {
+        m_rowCount++;
+        try {
+            m_dataRow = MappingFramework.map(RowKey.createRowKey(m_rowCount), m_source, m_paths, m_parameters, null);
+        } catch (final Exception e) {
+            throw new BigDataFileFormatException(e);
+        }
+        for(final ProductionPath path: m_paths) {
+            ((ParquetCellValueProducerFactory<?>) path.getProducerFactory()).resetConvertes();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Converter getConverter(final int fieldIndex) {
+        final ParquetCellValueProducerFactory<?> factory = 
+                (ParquetCellValueProducerFactory<?>) m_paths[fieldIndex].getProducerFactory();
+        return factory.getConverter(fieldIndex);
+    }
+
+    DataRow getRow() {
+        return m_dataRow;
     }
 
     /**
@@ -79,29 +116,6 @@ final class DataRowConverter extends GroupConverter {
     @Override
     public void start() {
         // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Converter getConverter(final int fieldIndex) {
-        return m_columnTypes[fieldIndex].getConverter();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void end() {
-        final DataCell[] dataCells = Arrays.stream(m_columnTypes).map(ParquetType::readValue).toArray(DataCell[]::new);
-        final RowKey rowKey = RowKey.createRowKey(m_rowCount);
-        m_rowCount++;
-        m_dataRow = new BlobSupportDataRow(rowKey, dataCells);
-    }
-
-    DataRow getRow() {
-        return m_dataRow;
     }
 
 }

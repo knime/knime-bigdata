@@ -72,7 +72,8 @@ import org.knime.core.data.convert.map.MappingException;
 public class ORCListCellValueConsumerFactory<T, E, CV extends ColumnVector>
 extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORCParameter> {
 
-    private class ListConsumer<CCV extends ColumnVector> implements CellValueConsumer<ORCDestination, E[], ORCParameter> {
+    private class ListConsumer<CCV extends ColumnVector> 
+    implements CellValueConsumer<ORCDestination, E[], ORCParameter> {
 
         ORCCellValueConsumer<E, CCV> m_elementconsumer;
 

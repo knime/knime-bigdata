@@ -44,29 +44,70 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 11, 2018 (Mareike Höger): created
+ *   Oct 9, 2018 (Mareike Höger): created
  */
 
-package org.knime.bigdata.fileformats;
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.eclipse.core.runtime.Plugin;
-import org.osgi.framework.BundleContext;
+import org.knime.core.data.convert.map.Destination;
+import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.datatype.mapping.DataTypeMappingRegistry;
+import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
- * Plugin for the File Format nodes
+ * 
+ * Settings model for PArquet type mapping
  * 
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class FileFormatPlugin extends Plugin {
+public class SettingsModelParquetDataTypeMapping extends SettingsModelDataTypeMapping<ParquetType> {
 
+    private static final String COLUMN_NAME_EXTERNAL_TYPE = "Parquet Type";
+    /**
+     * Constructs a settings model for Parquet type mapping from a given model
+     * 
+     * @param model
+     *            the model to create from
+     */
+    public SettingsModelParquetDataTypeMapping(SettingsModelParquetDataTypeMapping model) {
+        super(model);
+    }
+
+    /**
+     * Constructs a settings model for Parquet type mapping
+     * 
+     * @param cfkKey
+     *            the key for the configuration
+     * @param mappingDirection
+     *            the direction of the mapping
+     */
+    public SettingsModelParquetDataTypeMapping(String cfkKey, DataTypeMappingDirection mappingDirection) {
+        super(cfkKey, COLUMN_NAME_EXTERNAL_TYPE, mappingDirection);
+    }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        ORCRegistrationHelper.registerORCProducers();
-        ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
+    protected String convertExternalTypeToString(ParquetType externalType) {  
+       return externalType.toString();
+    }
+
+    @Override
+    protected ParquetType convertStringToExternalType(String string) {
+        return ParquetType.fromString(string);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <T extends SettingsModel> T createClone() {
+        return (T) new SettingsModelParquetDataTypeMapping(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <D extends Destination<ParquetType>> DataTypeMappingRegistry<ParquetType, ?, D> 
+    getDataTypeMappingRegistry() {
+        return (DataTypeMappingRegistry<ParquetType, ?, D>) ParquetTypeMappingRegistry.getInstance();
     }
 
 }

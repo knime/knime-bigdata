@@ -44,29 +44,47 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 11, 2018 (Mareike Höger): created
+ *   09.10.2018 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
 
-package org.knime.bigdata.fileformats;
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.eclipse.core.runtime.Plugin;
-import org.osgi.framework.BundleContext;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Plugin for the File Format nodes
+ * Cell value producer for Parquet
  * 
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
+ * @param <T> the type to produce
  */
-public class FileFormatPlugin extends Plugin {
+public abstract class ParquetCellValueProducer<T> {
 
+    protected Map<Integer, ParquetConverter<T>> m_converters = new HashMap<>();
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        ORCRegistrationHelper.registerORCProducers();
-        ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
+    protected abstract ParquetConverter<T> createConverter();
+
+    /**
+     * Returns the converter for the column with the given index
+     * @param colIndex the index of the column
+     * @return the converter for this column
+     */
+    public ParquetConverter<T> getConverter(int colIndex) {
+        ParquetConverter<T> converter = m_converters.get(colIndex);
+        if(converter == null) {
+            converter = createConverter();
+            m_converters.put(colIndex, converter);
+        }
+        return converter;
     }
 
+    /**
+     * Resets all converters.
+     */
+    public void resetConverters() {
+        for(final ParquetConverter<T> converter : m_converters.values()) {
+            converter.resetValue();
+        }
+    }
 }

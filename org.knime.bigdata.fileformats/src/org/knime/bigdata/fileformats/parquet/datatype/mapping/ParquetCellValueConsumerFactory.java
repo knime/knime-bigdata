@@ -44,29 +44,83 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Sep 11, 2018 (Mareike Höger): created
+ *   Oct 9, 2018 (Mareike Höger): created
  */
 
-package org.knime.bigdata.fileformats;
+package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.eclipse.core.runtime.Plugin;
-import org.osgi.framework.BundleContext;
+import org.apache.parquet.io.api.RecordConsumer;
+import org.knime.core.data.convert.map.SimpleCellValueConsumerFactory;
 
 /**
- * Plugin for the File Format nodes
- * 
+ * Parquet call value consumer factory
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * 
+ * @param <T> the input type for the consumer
  *
  */
-public class FileFormatPlugin extends Plugin {
+public class ParquetCellValueConsumerFactory<T>
+        extends SimpleCellValueConsumerFactory<ParquetDestination, T, ParquetType, ParquetParameter> {
 
+    private final ParquetCellValueConsumer<T> m_parquetConsumer;
+
+    /**
+     * Constructs a Parquet call value consumer factory
+     * 
+     * @param sourceType
+     *            the source type to consume
+     * @param externalType
+     *            the external type to produce
+     * @param consumer
+     *            the consumer to use
+     */
+    public ParquetCellValueConsumerFactory(Class<?> sourceType, ParquetType externalType,
+            ParquetCellValueConsumer<T> consumer) {
+        super(sourceType, externalType, (c, v, p) -> {
+
+            final RecordConsumer recordConsumer = c.getRecordConsumer();
+            final int index = p.getIndex();
+
+            if (v != null) {
+                recordConsumer.startField(externalType.getName(), index);
+                consumer.writeNonNullValue(recordConsumer, v);
+                recordConsumer.endField(externalType.getName(), index);
+            }
+        });
+        m_parquetConsumer = consumer;
+    }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        ORCRegistrationHelper.registerORCProducers();
-        ORCRegistrationHelper.registerORCConsumers();
-        ParquetRegistrationHelper.registerParquetProducers();
-        ParquetRegistrationHelper.registerParquetConsumers();
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ParquetCellValueConsumerFactory<?> other = (ParquetCellValueConsumerFactory<?>) obj;
+        if (!(other.m_parquetConsumer.equals(m_parquetConsumer))) {
+            return false;
+        }
+        return super.equals(obj);
+    }
+
+    /**
+     * @return the Parquet consumer for this factory
+     */
+    public ParquetCellValueConsumer<T> getParquetConsumer() {
+        return m_parquetConsumer;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((m_parquetConsumer == null) ? 0 : m_parquetConsumer.hashCode());
+        return result;
     }
 
 }
