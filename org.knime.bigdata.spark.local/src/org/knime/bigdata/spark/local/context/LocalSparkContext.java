@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapperFactory;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
+import org.knime.python2.PythonPreferencePage;
 
 /**
  * Implementation of {@link SparkContext} for local Spark. This class uses the
@@ -124,7 +125,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 	@Override
 	protected boolean open(final boolean createRemoteContext, final ExecutionMonitor exec)
 			throws KNIMESparkException, SparkContextNotFoundException {
-		
+
 		if (m_wrapper == null && !createRemoteContext) {
 			throw new SparkContextNotFoundException(getID());
 		}
@@ -134,6 +135,13 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			exec.setProgress(0, "Opening local Spark context");
 			final LocalSparkContextConfig config = getConfiguration();
 			final Map<String, String> sparkConf = new HashMap<>();
+
+	        final String defaultPythonVersion = PythonPreferencePage.getDefaultPythonOption();
+	        if (defaultPythonVersion.contentEquals("python3")) {
+	            sparkConf.put("spark.pyspark.python", PythonPreferencePage.getPython3Path());
+	        } else if (defaultPythonVersion.contentEquals("python2")) {
+	            sparkConf.put("spark.pyspark.python", PythonPreferencePage.getPython2Path());
+	        }
 
 			// reduce the shuffle default (200 partitions) to something smaller in local mode
 			sparkConf.put("spark.sql.shuffle.partitions", "" + (3 * config.getNumberOfThreads()));

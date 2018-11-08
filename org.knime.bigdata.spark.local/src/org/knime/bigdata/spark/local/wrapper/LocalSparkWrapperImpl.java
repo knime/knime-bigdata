@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -17,11 +18,13 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.hive.thriftserver.HiveThriftServer2;
+import org.apache.spark.util.Utils;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -30,6 +33,8 @@ import org.knime.bigdata.spark2_3.api.NamedObjects;
 import org.knime.bigdata.spark2_3.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_3.api.SparkJob;
 import org.knime.bigdata.spark2_3.api.SparkJobWithFiles;
+
+import scala.Option;
 
 /**
  * Implementation of {@link LocalSparkWrapper} and {@link NamedObjects}. Objects of this class hold and manage an actual
@@ -247,7 +252,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		try {
 			
 			final SparkConf sparkConf = new SparkConf(false);
-			
+			final String pythonPath = getPythonPath(sparkConf);
 			final Map<String, String> filteredUserSparkConf = filterUserSparkConfMap(userSparkConf);
 			
 			initSparkTmpDir();
@@ -274,13 +279,15 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 				.appName(String.format("Local Spark (%s)", name))
 				.master(String.format("local[%d]", workerThreads))
 				.config("spark.knime.knosp.localBigDataEnv", "true")
+				.config("spark.knime.pythonpath", pythonPath)
 				.config("spark.logConf", "true")
 				.config("spark.kryo.unsafe", "true")
 				.config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 				.config(SPARK_DRIVER_HOST, "localhost")
+				.config("spark.executorEnv.PYTHONPATH", pythonPath.replace(',', File.pathSeparatorChar))
 				.config(sparkConf)
 				.getOrCreate();
-			
+
 			if (startThriftserver) {
 				HiveThriftServer2.startWithContext(m_sparkSession.sqlContext());
 			}
@@ -291,6 +298,21 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
+    private static String getPythonPath(SparkConf conf) throws IOException {
+        String path = "";
+        final Option<String> jar = SparkContext.jarOfObject(conf);
+        if (jar.isDefined()) {
+            String jarpath = Utils.isWindows() ? jar.get().replaceFirst("/", "") : jar.get();
+            path = String.join(",",
+                Files.list(Paths.get(jarpath).getParent())
+                    .map(p -> p.toString())
+                    .filter(p -> p.endsWith(".zip"))
+                    .toArray(String[]::new));
+        }
+
+        return path;
+    }
+	
 	private void initJobInputFileCopyDir() throws IOException {
 		m_jobInputFileCopyDir = new File(m_sparkTmpDir, "spark_filecopy_dir");
 		if (!m_jobInputFileCopyDir.mkdir()) {

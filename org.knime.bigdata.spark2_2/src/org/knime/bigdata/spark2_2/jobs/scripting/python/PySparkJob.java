@@ -85,7 +85,11 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
         PrintStream console = System.out;
         ByteArrayOutputStream outStream = redirectOutput();
 
-        String[] arg = {pyFile.getAbsolutePath(), "", "pythonlaunch"};
+        // pythonPath is only embedded into SparkConf when using local big data environment, otherwise PythonRunner
+        // can construct it from Spark_HOME or PYTHONPATH env variables
+        final String pythonPath = sparkContext.getConf().get("spark.knime.pythonpath", "");
+
+        final String[] arg = {pyFile.getAbsolutePath(), pythonPath, "pythonlaunch"};
         try {
             PythonRunner.main(arg);
         } catch (Exception ex) {

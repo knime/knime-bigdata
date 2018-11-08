@@ -233,7 +233,7 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
         StringBuilder sb = new StringBuilder();
         sb.append("# System imports \n");
         sb.append("import sys\n" + "from pyspark.mllib.common import _py2java, _java2py\n"
-            + "from pyspark import SparkContext, SparkFiles\n" + "from pyspark.sql import SQLContext\n"
+            + "from pyspark import SparkContext, SparkConf, SparkFiles\n" + "from pyspark.sql import SQLContext\n"
             + "from pyspark.serializers import PickleSerializer\n" + "from pyspark.sql import SparkSession\n"
             + "from pyspark.sql.types import *\n" + "from pyspark.java_gateway import launch_gateway\n"
             + "from pyspark.profiler import BasicProfiler\n"
@@ -286,8 +286,12 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
              + "_jvm."+ m_exchangerPackage +".SINGLETON_INSTANCE\n"
              + "\t\tjcontext = self._jexchange.getContext()\n"
              + "\t\tjsession = self._jexchange.getSession()\n"
-             + "\t\tsparkCon = SparkContext(None, None, None, None, None, 0, "
-                 + "PickleSerializer(), None, _gateway, jcontext, BasicProfiler)\n"
+             + "\t\tjconf = jcontext.getConf()\n"
+             + "\t\tconf = SparkConf(loadDefaults=False, _jvm=_jvm, _jconf=jconf)\n");
+
+         sb.append(
+              "\t\tsparkCon = SparkContext(None, None, None, None, None, 0, "
+                 + "PickleSerializer(), conf, _gateway, jcontext, BasicProfiler)\n"
              + "\t\tself._spark = SparkSession(sparkCon,jsession)\n");
 
          sb.append("\tdef getDataFrame(self, name):\n"
