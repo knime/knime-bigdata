@@ -62,14 +62,20 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
  */
 public class FileFormatWriterNodeSettings {
 
+
+
     /**
      * Configuration key for the filename
      */
     public static final String CFGKEY_FILE = "filename";
 
     private static final String CFKEY_TYPE_MAPPING = "input_type_mapping";
+    
+    private static final String CHECK_DIR = "checkDir";
 
     private final SettingsModelBoolean m_fileOverwritePolicy = new SettingsModelBoolean("overwrite", false);
+    
+    private final SettingsModelBoolean m_checkDirContent = new SettingsModelBoolean(CHECK_DIR, false);
 
     private final SettingsModelString m_fileName = new SettingsModelString(CFGKEY_FILE, "");
 
@@ -188,6 +194,20 @@ public class FileFormatWriterNodeSettings {
     SettingsModelBoolean getfileOverwritePolicyModel() {
         return m_fileOverwritePolicy;
     }
+    
+    /**
+     * @return the m_checkDirContent
+     */
+    public boolean getcheckDirContent() {
+        return m_checkDirContent.getBooleanValue();
+    }
+
+    /**
+     * @return the m_checkDirContent
+     */
+    public SettingsModelBoolean getcheckDirContentModel() {
+        return m_checkDirContent;
+    }
 
     /**
      * @return the m_formatFactory
@@ -234,6 +254,9 @@ public class FileFormatWriterNodeSettings {
         if (settings.containsKey(CFKEY_TYPE_MAPPING)) {
             m_mappingModel.loadSettingsFrom(settings);
         }
+        if(settings.containsKey(CHECK_DIR)) {
+            m_checkDirContent.loadSettingsFrom(settings);
+        }
     }
 
     /**
@@ -249,6 +272,7 @@ public class FileFormatWriterNodeSettings {
         m_chunkSize.saveSettingsTo(settings);
         m_numOflocalChunks.saveSettingsTo(settings);
         m_mappingModel.saveSettingsTo(settings);
+        m_checkDirContent.saveSettingsTo(settings);
     }
 
     /**
@@ -307,6 +331,9 @@ public class FileFormatWriterNodeSettings {
         m_numOflocalChunks.validateSettings(settings);
         if(settings.containsKey(CFKEY_TYPE_MAPPING)) {
             m_mappingModel.validateSettings(settings);
+        }
+        if(settings.containsKey(CHECK_DIR)) {
+            m_checkDirContent.validateSettings(settings);
         }
     }
 }

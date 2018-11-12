@@ -50,7 +50,11 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -76,9 +80,14 @@ import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatWriterNodeDialog extends NodeDialogPane {
+public class FileFormatWriterNodeDialog extends NodeDialogPane implements ChangeListener {
+
+    private static final String WARNING_MESSAGE = "<html>The remote writing creates/overwrites a "
+            + "<u>folder</u> with the given name.</html>";
 
     private static final String CHUNK_UPLOAD = "Chunk Upload";
+    
+    private boolean m_chunkUpload = false;
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatWriterNodeDialog.class);
     private final FileFormatWriterNodeSettings m_settings;
@@ -86,6 +95,8 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
     private final RemoteFileChooserPanel m_filePanel;
 
     private final DialogComponentDataTypeMapping<?> m_inputTypeMappingComponent;
+
+    private JLabel m_warningLable;
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
@@ -106,6 +117,10 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Output location:"));
         filePanel.add(m_filePanel.getPanel());
         filePanel.add(Box.createHorizontalGlue());
+        
+        m_warningLable = new JLabel(WARNING_MESSAGE);      
+        m_warningLable.setIcon(UIManager.getIcon("OptionPane.warningIcon"));
+        m_warningLable.setVisible(false);
 
         final JPanel gridPanel = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = new GridBagConstraints();
@@ -118,10 +133,19 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         gridPanel.add(filePanel, gbc);
 
         ++gbc.gridy;
-        gridPanel.add(
-                new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel(),
-                gbc);
-
+        gridPanel.add(m_warningLable, gbc);
+        ++gbc.gridy;
+        gbc.fill = GridBagConstraints.NONE;
+        m_settings.getfileOverwritePolicyModel().addChangeListener(this);
+        JPanel overwritePanel = new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel();       
+        gridPanel.add(overwritePanel, gbc);
+        
+        ++gbc.gridy;
+        m_settings.getcheckDirContentModel().setEnabled(false);
+        m_settings.getcheckDirContentModel().addChangeListener(this);
+        JPanel check_panel = new DialogComponentBoolean(m_settings.getcheckDirContentModel(), "Check directory content").getComponentPanel();
+        gridPanel.add(check_panel, gbc);
+        
         ++gbc.gridy;
         gridPanel.add(new DialogComponentStringSelection(m_settings.getCompressionModel(), "File Compression: ",
                 m_settings.getCompressionList()).getComponentPanel(), gbc);
@@ -134,7 +158,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         ++gbc.gridy;
         chunkUploadPanel.add(numOfLocalChunks.getComponentPanel(), gbc);
         addTab(CHUNK_UPLOAD, chunkUploadPanel);
-        setEnabled(false, CHUNK_UPLOAD);
+        setEnabled(m_chunkUpload, CHUNK_UPLOAD);
 
         final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
         typeMappingBox.add(Box.createHorizontalGlue());
@@ -152,6 +176,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
+       m_warningLable.setVisible(false);
         try {
             m_settings.loadSettingsFrom(settings);
         } catch (final InvalidSettingsException e) {
@@ -167,10 +192,16 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
             // Enable advanced options for remote connections
             final boolean isHDFSLocal = connInfo.getProtocol()
                     .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName());
-            setEnabled(!isHDFSLocal, CHUNK_UPLOAD);
+            m_chunkUpload = !isHDFSLocal;
+            setEnabled(m_chunkUpload, CHUNK_UPLOAD);
 
+            if(m_settings.getFileOverwritePolicy()) {
+                m_warningLable.setVisible(true);
+                m_settings.getcheckDirContentModel().setEnabled(true);
+            }
         } else {
-            setEnabled(false, CHUNK_UPLOAD);
+            m_chunkUpload = false;
+            setEnabled(m_chunkUpload, CHUNK_UPLOAD);
             // No connection set, create local HDFS Connection
             m_filePanel.setConnectionInformation(HDFSLocalConnectionInformation.getInstance());
         }
@@ -188,4 +219,18 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane {
         m_settings.setFileName(m_filePanel.getSelection().trim());
         m_settings.saveSettingsTo(settings);
     }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (m_settings.getfileOverwritePolicyModel().getBooleanValue()
+                && m_chunkUpload) {
+            m_warningLable.setVisible(true);
+            m_settings.getcheckDirContentModel().setEnabled(true);
+        }else {
+            m_warningLable.setVisible(false);
+            m_settings.getcheckDirContentModel().setEnabled(false);
+        }
+    }
+
+    
 }

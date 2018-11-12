@@ -8,9 +8,8 @@
     
     <fullDescription>
         <intro>This node writes the KNIME data table into an ORC file. The ORC file can be written locally or on a remote file system.
-        It convert int, double, boolean, timestamp, long in the corresponding ORC primitives, and can handle lists of those types.
         <p>
-        For remote connections, the writer stores chunks locally and uploads them in parallel.
+        For remote connections, the writer stores chunks locally and uploads them in parallel into a folder with the given name.
         The chunks size and the number of chunks that are allowed on local disc, are configurable in the "Chunk Upload" 
         tab which is only enabled for remote file systems.
         </p>
@@ -20,6 +19,8 @@
         <tab name="Options">
        	 <option name="Output location">A path on the local machine or remote server where the file is written.</option>
        	 <option name="Overwrite">If this option is selected the file will be overwritten if it exists</option>
+       	 <option name="Check directory content">Enabled when using a remote connection and enabling the overwrite option. 
+       	 With this option enabled the node will fail if the content of the directory contains files that do not fit the file format suffix</option>
        	 <option name="File Compression">The compression codec used to write the ORC file.</option>
         </tab>
         <tab name="Chunk Upload">

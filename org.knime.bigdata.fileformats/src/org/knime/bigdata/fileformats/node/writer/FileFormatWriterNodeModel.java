@@ -59,6 +59,7 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.base.filehandling.remote.files.RemoteFileFactory;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.bigdata.fileformats.utility.FileUploader;
 import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
@@ -119,9 +120,10 @@ public class FileFormatWriterNodeModel extends NodeModel {
      * 
      * @param connInfo
      * @param fileName
+     * @throws Exception 
      */
-    private void checkDirContent(final ConnectionInformation connInfo, final String fileName) {
-        try {
+    private void checkDirContent(final ConnectionInformation connInfo, final String fileName) throws Exception {
+
             final ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
             final URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
             final RemoteFile<Connection> remotefile = RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
@@ -133,17 +135,14 @@ public class FileFormatWriterNodeModel extends NodeModel {
                     if (!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc")) {
                         final String suffix = m_settings.getFilenameSuffix();
                         if (!name.endsWith(suffix)) {
-                            setWarningMessage(String.format(
+                            throw new BigDataFileFormatException(String.format(
                                     "The directory contains files without '%s' suffix. "
-                                            + "The directory will be overwritten with the current settings.",
+                                            + "The directory will be lost with the current settings.",
                                             m_settings.getFilenameSuffix()));
                         }
                     }
                 }
             }
-        } catch (final Exception e) {
-            LOGGER.debug(e.getMessage(), e);
-        }
     }
 
     /**
@@ -163,10 +162,6 @@ public class FileFormatWriterNodeModel extends NodeModel {
                 throw new InvalidSettingsException("No connection information available.");
             }
             final String fileName = m_settings.getFileName();
-
-            if (m_settings.getFileOverwritePolicy()) {
-                checkDirContent(connInfo, fileName);
-            }
 
             if (fileName.endsWith("/")) {
                 m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
@@ -236,6 +231,9 @@ public class FileFormatWriterNodeModel extends NodeModel {
             return new BufferedDataTable[] {};
         }
         final ConnectionInformationPortObject connInfo = (ConnectionInformationPortObject) inObjects[0];
+        if(m_settings.getcheckDirContent()) {
+            checkDirContent(connInfo.getConnectionInformation(), m_settings.getFileName());
+        }
         final RowInput rowInput = new DataTableRowInput(input);
         writeRowInput(exec, rowInput, connInfo);
 
