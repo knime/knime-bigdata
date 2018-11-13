@@ -138,9 +138,9 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
 	        final String defaultPythonVersion = PythonPreferencePage.getDefaultPythonOption();
 	        if (defaultPythonVersion.contentEquals("python3")) {
-	            sparkConf.put("spark.pyspark.python", PythonPreferencePage.getPython3Path());
+	            System.setProperty("spark.pyspark.python", PythonPreferencePage.getPython3Path());
 	        } else if (defaultPythonVersion.contentEquals("python2")) {
-	            sparkConf.put("spark.pyspark.python", PythonPreferencePage.getPython2Path());
+	            System.setProperty("spark.pyspark.python", PythonPreferencePage.getPython2Path());
 	        }
 
 			// reduce the shuffle default (200 partitions) to something smaller in local mode
