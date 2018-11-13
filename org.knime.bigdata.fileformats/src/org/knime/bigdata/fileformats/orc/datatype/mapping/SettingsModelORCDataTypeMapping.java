@@ -53,12 +53,12 @@ import org.apache.orc.TypeDescription;
 import org.knime.core.data.convert.map.Destination;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
-import org.knime.datatype.mapping.DataTypeMappingRegistry;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
  * Settings model for the ORC type mapping
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
@@ -67,33 +67,33 @@ public class SettingsModelORCDataTypeMapping extends SettingsModelDataTypeMappin
 
     /**
      * Constructs a settings model for ORC type mapping from a given model
-     * 
+     *
      * @param model
      *            the model to create from
      */
-    public SettingsModelORCDataTypeMapping(SettingsModelORCDataTypeMapping model) {
+    public SettingsModelORCDataTypeMapping(final SettingsModelORCDataTypeMapping model) {
         super(model);
     }
 
     /**
      * Constructs a settings model for ORC type mapping
-     * 
+     *
      * @param configName
      *            the name for the configuration
      * @param mappingDirection
      *            the direction of the mapping
      */
-    public SettingsModelORCDataTypeMapping(String configName, DataTypeMappingDirection mappingDirection) {
+    public SettingsModelORCDataTypeMapping(final String configName, final DataTypeMappingDirection mappingDirection) {
         super(configName, COLUMN_NAME_EXTERNAL_TYPE, mappingDirection);
     }
 
     @Override
-    protected String convertExternalTypeToString(TypeDescription externalType) {
+    protected String convertExternalTypeToString(final TypeDescription externalType) {
         return externalType.toString();
     }
 
     @Override
-    protected TypeDescription convertStringToExternalType(String string) {
+    protected TypeDescription convertStringToExternalType(final String string) {
         return TypeDescription.fromString(string);
     }
 
@@ -105,9 +105,9 @@ public class SettingsModelORCDataTypeMapping extends SettingsModelDataTypeMappin
 
     @SuppressWarnings("unchecked")
     @Override
-    protected <D extends Destination<TypeDescription>> DataTypeMappingRegistry<TypeDescription, ?, D> 
-    getDataTypeMappingRegistry() {
-        return (DataTypeMappingRegistry<TypeDescription, ?, D>) ORCTypeMappingRegistry.getInstance();
+    protected <D extends Destination<TypeDescription>> DataTypeMappingService<TypeDescription, ?, D>
+    getDataTypeMappingService() {
+        return (DataTypeMappingService<TypeDescription, ?, D>) ORCTypeMappingService.getInstance();
     }
 
 }

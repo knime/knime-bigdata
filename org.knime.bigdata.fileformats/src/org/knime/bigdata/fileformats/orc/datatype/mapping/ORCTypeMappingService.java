@@ -78,7 +78,7 @@ import org.knime.core.data.time.localdate.LocalDateCellFactory;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
-import org.knime.datatype.mapping.AbstractDataTypeMappingRegistry;
+import org.knime.datatype.mapping.AbstractDataTypeMappingService;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 
@@ -88,20 +88,20 @@ import org.knime.datatype.mapping.DataTypeMappingDirection;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class ORCTypeMappingRegistry extends AbstractDataTypeMappingRegistry<TypeDescription, ORCSource, ORCDestination> {
+public class ORCTypeMappingService extends AbstractDataTypeMappingService<TypeDescription, ORCSource, ORCDestination> {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(ORCTypeMappingRegistry.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(ORCTypeMappingService.class);
 
-    private static final ORCTypeMappingRegistry INSTANCE = new ORCTypeMappingRegistry();
+    private static final ORCTypeMappingService INSTANCE = new ORCTypeMappingService();
 
     /**
      * @return a singleton instance of the registry
      */
-    public static ORCTypeMappingRegistry getInstance() {
+    public static ORCTypeMappingService getInstance() {
         return INSTANCE;
     }
 
-    private ORCTypeMappingRegistry() {
+    private ORCTypeMappingService() {
 
         final ConsumerRegistry<TypeDescription, ORCDestination> consumerRegistry =
                 MappingFramework.forDestinationType(ORCDestination.class);

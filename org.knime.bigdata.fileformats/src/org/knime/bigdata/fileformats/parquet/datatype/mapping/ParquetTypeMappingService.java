@@ -82,34 +82,34 @@ import org.knime.core.data.time.period.PeriodCellFactory;
 import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
-import org.knime.datatype.mapping.AbstractDataTypeMappingRegistry;
+import org.knime.datatype.mapping.AbstractDataTypeMappingService;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 
 /**
  * Type mapping registry for Parquet types
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
-public class ParquetTypeMappingRegistry
-        extends AbstractDataTypeMappingRegistry<ParquetType, ParquetSource, ParquetDestination> {
+public class ParquetTypeMappingService
+        extends AbstractDataTypeMappingService<ParquetType, ParquetSource, ParquetDestination> {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(ParquetTypeMappingRegistry.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(ParquetTypeMappingService.class);
 
-    private static final ParquetTypeMappingRegistry INSTANCE = new ParquetTypeMappingRegistry();
+    private static final ParquetTypeMappingService INSTANCE = new ParquetTypeMappingService();
 
     /**
      * @return a singleton instance of the registry
      */
-    public static ParquetTypeMappingRegistry getInstance() {
+    public static ParquetTypeMappingService getInstance() {
         return INSTANCE;
     }
 
     /**
      * Creates a Type Mapping Registry for Parquet
      */
-    private ParquetTypeMappingRegistry() {
+    private ParquetTypeMappingService() {
         final ConsumerRegistry<ParquetType, ParquetDestination> consumerRegistry = MappingFramework
                 .forDestinationType(ParquetDestination.class);
         setConsumerRegistry(consumerRegistry);

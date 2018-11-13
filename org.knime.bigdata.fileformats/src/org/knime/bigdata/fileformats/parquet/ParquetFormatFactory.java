@@ -53,6 +53,7 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetTypeMappingService;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.SettingsModelParquetDataTypeMapping;
 import org.knime.bigdata.fileformats.parquet.reader.ParquetKNIMEReader;
 import org.knime.bigdata.fileformats.parquet.writer.ParquetKNIMEWriter;
@@ -62,6 +63,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -101,7 +103,7 @@ public class ParquetFormatFactory implements FileFormatFactory {
 
     @Override
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file,
-            final ExecutionContext exec, DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
+            final ExecutionContext exec, final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
         try {
             return new ParquetKNIMEReader(file, exec, outputDataTypeMappingConfiguration);
         } catch (final Exception e) {
@@ -110,14 +112,19 @@ public class ParquetFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public SettingsModelDataTypeMapping<ParquetType> getTypeMappingModel(String key, 
-            DataTypeMappingDirection mappingDirection) {
+    public SettingsModelDataTypeMapping<ParquetType> getTypeMappingModel(final String key,
+            final DataTypeMappingDirection mappingDirection) {
         return new SettingsModelParquetDataTypeMapping(key, mappingDirection);
     }
 
     @Override
+    public DataTypeMappingService<?, ?, ?> getTypeMappingService() {
+    	return ParquetTypeMappingService.getInstance();
+    }
+
+    @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int chunkSize, final String compression, DataTypeMappingConfiguration<?> typeMappingConf)
+            final int chunkSize, final String compression, final DataTypeMappingConfiguration<?> typeMappingConf)
                     throws IOException {
         return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE, typeMappingConf);
     }

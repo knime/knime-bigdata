@@ -55,6 +55,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -108,6 +109,10 @@ public interface FileFormatFactory {
     public SettingsModelDataTypeMapping<?> getTypeMappingModel(String cfkeyTypeMapping,
             DataTypeMappingDirection mappingDirection);
 
+    /**
+     * @return the {@link DataTypeMappingService} for this file format.
+     */
+    public DataTypeMappingService<?, ?, ?> getTypeMappingService();
 
     /**
      * Returns a writer that writes KNIME {@link DataRow}s to an specific file

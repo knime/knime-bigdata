@@ -73,6 +73,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
@@ -86,7 +87,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
             + "<u>folder</u> with the given name.</html>";
 
     private static final String CHUNK_UPLOAD = "Chunk Upload";
-    
+
     private boolean m_chunkUpload = false;
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatWriterNodeDialog.class);
@@ -96,7 +97,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
 
     private final DialogComponentDataTypeMapping<?> m_inputTypeMappingComponent;
 
-    private JLabel m_warningLable;
+    private final JLabel m_warningLable;
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
@@ -117,8 +118,8 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Output location:"));
         filePanel.add(m_filePanel.getPanel());
         filePanel.add(Box.createHorizontalGlue());
-        
-        m_warningLable = new JLabel(WARNING_MESSAGE);      
+
+        m_warningLable = new JLabel(WARNING_MESSAGE);
         m_warningLable.setIcon(UIManager.getIcon("OptionPane.warningIcon"));
         m_warningLable.setVisible(false);
 
@@ -137,15 +138,15 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
         ++gbc.gridy;
         gbc.fill = GridBagConstraints.NONE;
         m_settings.getfileOverwritePolicyModel().addChangeListener(this);
-        JPanel overwritePanel = new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel();       
+        final JPanel overwritePanel = new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel();
         gridPanel.add(overwritePanel, gbc);
-        
+
         ++gbc.gridy;
         m_settings.getcheckDirContentModel().setEnabled(false);
         m_settings.getcheckDirContentModel().addChangeListener(this);
-        JPanel check_panel = new DialogComponentBoolean(m_settings.getcheckDirContentModel(), "Check directory content").getComponentPanel();
+        final JPanel check_panel = new DialogComponentBoolean(m_settings.getcheckDirContentModel(), "Check directory content").getComponentPanel();
         gridPanel.add(check_panel, gbc);
-        
+
         ++gbc.gridy;
         gridPanel.add(new DialogComponentStringSelection(m_settings.getCompressionModel(), "File Compression: ",
                 m_settings.getCompressionList()).getComponentPanel(), gbc);
@@ -208,6 +209,11 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
         m_filePanel.setSelection(m_settings.getFileNameWithSuffix());
 
         m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
+
+        m_inputTypeMappingComponent.setInputDataTypeMappingConfiguration(
+        		(DataTypeMappingConfiguration) m_settings.getFormatFactory().getTypeMappingService()
+        		.newDefaultKnimeToExternalMappingConfiguration());
+        m_inputTypeMappingComponent.updateComponent();
     }
 
     /**
@@ -221,7 +227,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
+    public void stateChanged(final ChangeEvent e) {
         if (m_settings.getfileOverwritePolicyModel().getBooleanValue()
                 && m_chunkUpload) {
             m_warningLable.setVisible(true);
@@ -232,5 +238,5 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
         }
     }
 
-    
+
 }

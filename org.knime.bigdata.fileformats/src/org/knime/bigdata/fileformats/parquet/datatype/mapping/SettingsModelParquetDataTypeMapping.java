@@ -52,13 +52,13 @@ package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 import org.knime.core.data.convert.map.Destination;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
-import org.knime.datatype.mapping.DataTypeMappingRegistry;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
- * 
+ *
  * Settings model for PArquet type mapping
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  */
@@ -67,33 +67,33 @@ public class SettingsModelParquetDataTypeMapping extends SettingsModelDataTypeMa
     private static final String COLUMN_NAME_EXTERNAL_TYPE = "Parquet Type";
     /**
      * Constructs a settings model for Parquet type mapping from a given model
-     * 
+     *
      * @param model
      *            the model to create from
      */
-    public SettingsModelParquetDataTypeMapping(SettingsModelParquetDataTypeMapping model) {
+    public SettingsModelParquetDataTypeMapping(final SettingsModelParquetDataTypeMapping model) {
         super(model);
     }
 
     /**
      * Constructs a settings model for Parquet type mapping
-     * 
+     *
      * @param cfkKey
      *            the key for the configuration
      * @param mappingDirection
      *            the direction of the mapping
      */
-    public SettingsModelParquetDataTypeMapping(String cfkKey, DataTypeMappingDirection mappingDirection) {
+    public SettingsModelParquetDataTypeMapping(final String cfkKey, final DataTypeMappingDirection mappingDirection) {
         super(cfkKey, COLUMN_NAME_EXTERNAL_TYPE, mappingDirection);
     }
 
     @Override
-    protected String convertExternalTypeToString(ParquetType externalType) {  
+    protected String convertExternalTypeToString(final ParquetType externalType) {
        return externalType.toString();
     }
 
     @Override
-    protected ParquetType convertStringToExternalType(String string) {
+    protected ParquetType convertStringToExternalType(final String string) {
         return ParquetType.fromString(string);
     }
 
@@ -105,9 +105,9 @@ public class SettingsModelParquetDataTypeMapping extends SettingsModelDataTypeMa
 
     @SuppressWarnings("unchecked")
     @Override
-    protected <D extends Destination<ParquetType>> DataTypeMappingRegistry<ParquetType, ?, D> 
-    getDataTypeMappingRegistry() {
-        return (DataTypeMappingRegistry<ParquetType, ?, D>) ParquetTypeMappingRegistry.getInstance();
+    protected <D extends Destination<ParquetType>> DataTypeMappingService<ParquetType, ?, D>
+    getDataTypeMappingService() {
+        return (DataTypeMappingService<ParquetType, ?, D>) ParquetTypeMappingService.getInstance();
     }
 
 }

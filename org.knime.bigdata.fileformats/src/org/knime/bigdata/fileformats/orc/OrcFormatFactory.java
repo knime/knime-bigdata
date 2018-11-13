@@ -58,6 +58,7 @@ import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
+import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.SettingsModelORCDataTypeMapping;
 import org.knime.bigdata.fileformats.orc.reader.OrcKNIMEReader;
 import org.knime.bigdata.fileformats.orc.writer.OrcKNIMEWriter;
@@ -105,7 +106,7 @@ public class OrcFormatFactory implements FileFormatFactory {
 
     @Override
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
+            final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
         try {
             AbstractFileFormatReader reader;
             if (file.getConnectionInformation() != null && file.getConnectionInformation().useKerberos()) {
@@ -128,14 +129,19 @@ public class OrcFormatFactory implements FileFormatFactory {
 
     @Override
     public SettingsModelDataTypeMapping<TypeDescription> getTypeMappingModel
-    (String key, DataTypeMappingDirection mappingDirection) {
+    (final String key, final DataTypeMappingDirection mappingDirection) {
         return new SettingsModelORCDataTypeMapping(key, mappingDirection);
+    }
+
+    @Override
+	public ORCTypeMappingService getTypeMappingService() {
+    	return ORCTypeMappingService.getInstance();
     }
 
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final int chunkSize, final String compression,
-            DataTypeMappingConfiguration<?> typeMappingConf) throws IOException {
+            final DataTypeMappingConfiguration<?> typeMappingConf) throws IOException {
         return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
     }
 }

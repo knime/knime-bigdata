@@ -65,6 +65,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
@@ -139,6 +140,10 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
         }
         m_filePanel.setSelection(m_settings.getFileName());
         m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);
+        m_outputTypeMappingComponent.setInputDataTypeMappingConfiguration(
+        		(DataTypeMappingConfiguration) m_settings.getFormatFactory().getTypeMappingService()
+        		.newDefaultExternalToKnimeMappingConfiguration());
+        m_outputTypeMappingComponent.updateComponent();
     }
 
     /**
