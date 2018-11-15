@@ -51,22 +51,24 @@ import org.knime.core.node.NodeView;
 /**
  * Node factory for generic file format reader.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public abstract class FileFormatReaderNodeFactory extends NodeFactory<FileFormatReaderNodeModel> {
+public abstract class FileFormatReaderNodeFactory<X> extends NodeFactory<FileFormatReaderNodeModel<X>> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public FileFormatReaderNodeModel createNodeModel() {
-        return new FileFormatReaderNodeModel(getSettings());
+    public FileFormatReaderNodeModel<X> createNodeModel() {
+        return new FileFormatReaderNodeModel<>(getSettings());
     }
 
     /**
      * @return the initial setting object
      */
 
-    public abstract FileFormatReaderNodeSettings getSettings();
+    public abstract FileFormatReaderNodeSettings<X> getSettings();
 
     /**
      * {@inheritDoc}
@@ -80,8 +82,8 @@ public abstract class FileFormatReaderNodeFactory extends NodeFactory<FileFormat
      * {@inheritDoc}
      */
     @Override
-    public NodeView<FileFormatReaderNodeModel> createNodeView(final int viewIndex,
-            final FileFormatReaderNodeModel nodeModel) {
+    public NodeView<FileFormatReaderNodeModel<X>> createNodeView(final int viewIndex,
+            final FileFormatReaderNodeModel<X> nodeModel) {
         return null;
     }
 
@@ -98,6 +100,6 @@ public abstract class FileFormatReaderNodeFactory extends NodeFactory<FileFormat
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new FileFormatReaderNodeDialog(getSettings());
+        return new FileFormatReaderNodeDialog<>(getSettings());
     }
 }

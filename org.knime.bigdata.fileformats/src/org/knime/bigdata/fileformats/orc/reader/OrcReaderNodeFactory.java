@@ -44,6 +44,7 @@
 
 package org.knime.bigdata.fileformats.orc.reader;
 
+import org.apache.orc.TypeDescription;
 import org.knime.bigdata.fileformats.node.reader.FileFormatReaderNodeFactory;
 import org.knime.bigdata.fileformats.node.reader.FileFormatReaderNodeSettings;
 import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
@@ -53,11 +54,11 @@ import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class OrcReaderNodeFactory extends FileFormatReaderNodeFactory {
+public class OrcReaderNodeFactory extends FileFormatReaderNodeFactory<TypeDescription> {
 
     @Override
-    public FileFormatReaderNodeSettings getSettings() {
-        return new FileFormatReaderNodeSettings(new OrcFormatFactory());
+    public FileFormatReaderNodeSettings<TypeDescription> getSettings() {
+        return new FileFormatReaderNodeSettings<>(new OrcFormatFactory());
     }
 
 }

@@ -44,6 +44,7 @@
  */
 package org.knime.bigdata.fileformats.orc.writer;
 
+import org.apache.orc.TypeDescription;
 import org.knime.bigdata.fileformats.node.writer.FileFormatWriterNodeFactory;
 import org.knime.bigdata.fileformats.node.writer.FileFormatWriterNodeSettings;
 import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
@@ -51,11 +52,11 @@ import org.knime.bigdata.fileformats.orc.OrcFormatFactory;
 /**
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class OrcWriterNodeFactory extends FileFormatWriterNodeFactory {
+public class OrcWriterNodeFactory extends FileFormatWriterNodeFactory<TypeDescription> {
 
     @Override
-    public FileFormatWriterNodeSettings getSettings() {
-        return new FileFormatWriterNodeSettings(new OrcFormatFactory());
+    public FileFormatWriterNodeSettings<TypeDescription> getSettings() {
+        return new FileFormatWriterNodeSettings<>(new OrcFormatFactory());
     }
 
 }

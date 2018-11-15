@@ -71,7 +71,7 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class ParquetFormatFactory implements FileFormatFactory {
+public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     private static final String SUFFIX = ".parquet";
     private static final String NAME = "Parquet";
@@ -103,7 +103,8 @@ public class ParquetFormatFactory implements FileFormatFactory {
 
     @Override
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file,
-            final ExecutionContext exec, final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
+            final ExecutionContext exec,
+            final DataTypeMappingConfiguration<ParquetType> outputDataTypeMappingConfiguration) {
         try {
             return new ParquetKNIMEReader(file, exec, outputDataTypeMappingConfiguration);
         } catch (final Exception e) {
@@ -118,13 +119,14 @@ public class ParquetFormatFactory implements FileFormatFactory {
     }
 
     @Override
-    public DataTypeMappingService<?, ?, ?> getTypeMappingService() {
+    public DataTypeMappingService<ParquetType, ?, ?> getTypeMappingService() {
     	return ParquetTypeMappingService.getInstance();
     }
 
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int chunkSize, final String compression, final DataTypeMappingConfiguration<?> typeMappingConf)
+            final int chunkSize, final String compression,
+            final DataTypeMappingConfiguration<ParquetType> typeMappingConf)
                     throws IOException {
         return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE, typeMappingConf);
     }

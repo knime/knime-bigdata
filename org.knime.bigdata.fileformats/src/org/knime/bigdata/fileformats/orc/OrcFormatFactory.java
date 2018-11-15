@@ -75,7 +75,7 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class OrcFormatFactory implements FileFormatFactory {
+public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
     private static final String SUFFIX = ".orc";
 
@@ -106,7 +106,7 @@ public class OrcFormatFactory implements FileFormatFactory {
 
     @Override
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) {
+            final DataTypeMappingConfiguration<TypeDescription> outputDataTypeMappingConfiguration) {
         try {
             AbstractFileFormatReader reader;
             if (file.getConnectionInformation() != null && file.getConnectionInformation().useKerberos()) {
@@ -141,7 +141,7 @@ public class OrcFormatFactory implements FileFormatFactory {
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final int chunkSize, final String compression,
-            final DataTypeMappingConfiguration<?> typeMappingConf) throws IOException {
+            final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
         return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
     }
 }

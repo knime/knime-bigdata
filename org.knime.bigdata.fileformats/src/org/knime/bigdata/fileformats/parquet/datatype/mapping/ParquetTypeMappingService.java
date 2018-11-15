@@ -246,4 +246,15 @@ public class ParquetTypeMappingService
             LOGGER.error("Default production path is not available: " + listType + " -> " + knimeListType);
         }
     }
+
+
+    @Override
+    public String convertExternalTypeToString(final ParquetType externalType) {
+       return externalType.toString();
+    }
+
+    @Override
+    public ParquetType convertStringToExternalType(final String string) {
+        return ParquetType.fromString(string);
+    }
 }

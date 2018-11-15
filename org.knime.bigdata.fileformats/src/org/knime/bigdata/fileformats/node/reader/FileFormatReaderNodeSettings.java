@@ -55,9 +55,11 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 /**
  * Settings for generic file format reader.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatReaderNodeSettings {
+public class FileFormatReaderNodeSettings<X> {
 
     /**
      * Configuration key for the filename
@@ -68,9 +70,9 @@ public class FileFormatReaderNodeSettings {
 
     private final SettingsModelString m_fileName = new SettingsModelString(CFGKEY_FILE, "");
 
-    private final FileFormatFactory m_formatFactory;
+    private final FileFormatFactory<X> m_formatFactory;
 
-    private final SettingsModelDataTypeMapping<?> m_mappingModel;
+    private final SettingsModelDataTypeMapping<X> m_mappingModel;
 
     /**
      * Creates initial settings for the given file format.
@@ -78,9 +80,9 @@ public class FileFormatReaderNodeSettings {
      * @param formatFactory
      *            the file format
      */
-    public FileFormatReaderNodeSettings(final FileFormatFactory formatFactory) {
+    public FileFormatReaderNodeSettings(final FileFormatFactory<X> formatFactory) {
         m_formatFactory = formatFactory;
-        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING, 
+        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING,
                 DataTypeMappingDirection.EXTERNAL_TO_KNIME);
     }
 
@@ -101,14 +103,14 @@ public class FileFormatReaderNodeSettings {
     /**
      * @return the m_formatFactory
      */
-    public FileFormatFactory getFormatFactory() {
+    public FileFormatFactory<X> getFormatFactory() {
         return m_formatFactory;
     }
 
     /**
      * @return the m_mappingModel
      */
-    public SettingsModelDataTypeMapping<?> getMappingModel() {
+    public SettingsModelDataTypeMapping<X> getMappingModel() {
         return m_mappingModel;
     }
 

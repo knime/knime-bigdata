@@ -47,17 +47,18 @@ package org.knime.bigdata.fileformats.parquet.writer;
 import org.knime.bigdata.fileformats.node.writer.FileFormatWriterNodeFactory;
 import org.knime.bigdata.fileformats.node.writer.FileFormatWriterNodeSettings;
 import org.knime.bigdata.fileformats.parquet.ParquetFormatFactory;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 
 /**
  * <code>NodeFactory</code> for the "ParquetWriter" Node.
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class ParquetWriterNodeFactory extends FileFormatWriterNodeFactory {
+public class ParquetWriterNodeFactory extends FileFormatWriterNodeFactory<ParquetType> {
 
     @Override
-    public FileFormatWriterNodeSettings getSettings() {
-        return new FileFormatWriterNodeSettings(new ParquetFormatFactory());
+    public FileFormatWriterNodeSettings<ParquetType> getSettings() {
+        return new FileFormatWriterNodeSettings<>(new ParquetFormatFactory());
     }
 
 }

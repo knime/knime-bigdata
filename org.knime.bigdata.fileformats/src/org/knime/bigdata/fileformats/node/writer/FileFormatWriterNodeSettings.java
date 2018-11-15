@@ -58,9 +58,11 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 /**
  * Settings for generic BigData file format writer.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatWriterNodeSettings {
+public class FileFormatWriterNodeSettings<X> {
 
 
 
@@ -70,11 +72,11 @@ public class FileFormatWriterNodeSettings {
     public static final String CFGKEY_FILE = "filename";
 
     private static final String CFKEY_TYPE_MAPPING = "input_type_mapping";
-    
+
     private static final String CHECK_DIR = "checkDir";
 
     private final SettingsModelBoolean m_fileOverwritePolicy = new SettingsModelBoolean("overwrite", false);
-    
+
     private final SettingsModelBoolean m_checkDirContent = new SettingsModelBoolean(CHECK_DIR, false);
 
     private final SettingsModelString m_fileName = new SettingsModelString(CFGKEY_FILE, "");
@@ -87,9 +89,9 @@ public class FileFormatWriterNodeSettings {
     private final SettingsModelIntegerBounded m_numOflocalChunks = new SettingsModelIntegerBounded("numChunks", 4, 1,
             20);
 
-    private final FileFormatFactory m_formatFactory;
+    private final FileFormatFactory<X> m_formatFactory;
 
-    private final SettingsModelDataTypeMapping<?> m_mappingModel;
+    private final SettingsModelDataTypeMapping<X> m_mappingModel;
 
     /**
      * Constructor for FileFormatWriterNodeSettings with a specific Format.,
@@ -97,9 +99,9 @@ public class FileFormatWriterNodeSettings {
      * @param factory
      *            the factory for the file format
      */
-    public FileFormatWriterNodeSettings(final FileFormatFactory factory) {
+    public FileFormatWriterNodeSettings(final FileFormatFactory<X> factory) {
         m_formatFactory = factory;
-        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING, 
+        m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING,
                 DataTypeMappingDirection.KNIME_TO_EXTERNAL);
     }
 
@@ -194,7 +196,7 @@ public class FileFormatWriterNodeSettings {
     SettingsModelBoolean getfileOverwritePolicyModel() {
         return m_fileOverwritePolicy;
     }
-    
+
     /**
      * @return the m_checkDirContent
      */
@@ -212,14 +214,14 @@ public class FileFormatWriterNodeSettings {
     /**
      * @return the m_formatFactory
      */
-    public FileFormatFactory getFormatFactory() {
+    public FileFormatFactory<X> getFormatFactory() {
         return m_formatFactory;
     }
 
     /**
      * @return the m_mappingModel
      */
-    public SettingsModelDataTypeMapping<?> getMappingModel() {
+    public SettingsModelDataTypeMapping<X> getMappingModel() {
         return m_mappingModel;
     }
 

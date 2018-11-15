@@ -49,10 +49,8 @@
 
 package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
-import org.knime.core.data.convert.map.Destination;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
-import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -87,27 +85,9 @@ public class SettingsModelParquetDataTypeMapping extends SettingsModelDataTypeMa
         super(cfkKey, COLUMN_NAME_EXTERNAL_TYPE, mappingDirection);
     }
 
-    @Override
-    protected String convertExternalTypeToString(final ParquetType externalType) {
-       return externalType.toString();
-    }
-
-    @Override
-    protected ParquetType convertStringToExternalType(final String string) {
-        return ParquetType.fromString(string);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     protected <T extends SettingsModel> T createClone() {
         return (T) new SettingsModelParquetDataTypeMapping(this);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected <D extends Destination<ParquetType>> DataTypeMappingService<ParquetType, ?, D>
-    getDataTypeMappingService() {
-        return (DataTypeMappingService<ParquetType, ?, D>) ParquetTypeMappingService.getInstance();
-    }
-
 }

@@ -61,9 +61,11 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 /**
  * Interface for reader factories.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public interface FileFormatFactory {
+public interface FileFormatFactory<X> {
 
     /**
      * @return String containing the chunksizeUnit
@@ -98,7 +100,7 @@ public interface FileFormatFactory {
      * @return the reader
      */
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration);
+            DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration);
 
     /**
      * Returns the type mapping settings model for the file format
@@ -106,13 +108,13 @@ public interface FileFormatFactory {
      * @param mappingDirection the direction to map
      * @return the settings model
      */
-    public SettingsModelDataTypeMapping<?> getTypeMappingModel(String cfkeyTypeMapping,
+    public SettingsModelDataTypeMapping<X> getTypeMappingModel(String cfkeyTypeMapping,
             DataTypeMappingDirection mappingDirection);
 
     /**
      * @return the {@link DataTypeMappingService} for this file format.
      */
-    public DataTypeMappingService<?, ?, ?> getTypeMappingService();
+    public DataTypeMappingService<X, ?, ?> getTypeMappingService();
 
     /**
      * Returns a writer that writes KNIME {@link DataRow}s to an specific file
@@ -134,6 +136,6 @@ public interface FileFormatFactory {
      */
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
             final int batchSize, final String compression,
-            DataTypeMappingConfiguration<?> typeMappingConf) throws IOException;
+            DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
 
 }

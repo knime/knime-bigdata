@@ -65,26 +65,28 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
-import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
  * Node dialog for generic file format reader.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatReaderNodeDialog extends NodeDialogPane {
+public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatReaderNodeDialog.class);
-    private final FileFormatReaderNodeSettings m_settings;
+    private final FileFormatReaderNodeSettings<X> m_settings;
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
-    private final DialogComponentDataTypeMapping<?> m_outputTypeMappingComponent;
+    private final DialogComponentDataTypeMapping<X> m_outputTypeMappingComponent;
 
     /**
      * New pane for configuring the OrcWriter node.
      */
-    protected FileFormatReaderNodeDialog(final FileFormatReaderNodeSettings settings) {
+    protected FileFormatReaderNodeDialog(final FileFormatReaderNodeSettings<X> settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
                 RemoteFileChooser.SELECT_FILE_OR_DIR,
@@ -121,7 +123,7 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
     /**
      * {@inheritDoc}
      */
-    @Override
+	@Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
         try {
@@ -138,12 +140,12 @@ public class FileFormatReaderNodeDialog extends NodeDialogPane {
             // No connection set, create local HDFS Connection
             m_filePanel.setConnectionInformation(HDFSLocalConnectionInformation.getInstance());
         }
-        m_filePanel.setSelection(m_settings.getFileName());
-        m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);
+        final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         m_outputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		(DataTypeMappingConfiguration) m_settings.getFormatFactory().getTypeMappingService()
-        		.newDefaultExternalToKnimeMappingConfiguration());
-        m_outputTypeMappingComponent.updateComponent();
+        		mappingService.newDefaultExternalToKnimeMappingConfiguration());
+        m_filePanel.setSelection(m_settings.getFileName());
+        m_outputTypeMappingComponent.setMappingService(mappingService);
+        m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);
     }
 
     /**

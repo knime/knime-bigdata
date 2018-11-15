@@ -78,18 +78,21 @@ import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableOperator;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingService;
 
 /**
  * Node model for generic file format reader.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatReaderNodeModel extends NodeModel {
-    private final FileFormatReaderNodeSettings m_settings;
+public class FileFormatReaderNodeModel<X> extends NodeModel {
+    private final FileFormatReaderNodeSettings<X> m_settings;
 	/**
      * Constructor for the node model.
      */
-    protected FileFormatReaderNodeModel(final FileFormatReaderNodeSettings settings) {
+    protected FileFormatReaderNodeModel(final FileFormatReaderNodeSettings<X> settings) {
         super(new PortType[] { ConnectionInformationPortObject.TYPE_OPTIONAL },
                 new PortType[] { BufferedDataTable.TYPE });
         m_settings = settings;
@@ -116,8 +119,11 @@ public class FileFormatReaderNodeModel extends NodeModel {
         }
         final RemoteFile<Connection> sourceFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                 connInfo);
-		final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getMappingModel()
-				.getDataTypeMappingConfiguration();
+        final DataTypeMappingService<X, ?, ?> mappingService =
+    			m_settings.getFormatFactory().getTypeMappingService();
+        	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
+            		mappingService.newDefaultExternalToKnimeMappingConfiguration().with(
+            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
 		final AbstractFileFormatReader reader = getReader(sourceFile, exec, outputDataTypeMappingConfiguration);
         return new BigDataFileFormatTable(reader);
     }
@@ -153,8 +159,11 @@ public class FileFormatReaderNodeModel extends NodeModel {
             }
         }
         try {
-			final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration = m_settings.getMappingModel()
-					.getDataTypeMappingConfiguration();
+    		final DataTypeMappingService<X, ?, ?> mappingService =
+    			m_settings.getFormatFactory().getTypeMappingService();
+        	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
+            		mappingService.newDefaultExternalToKnimeMappingConfiguration().with(
+            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
             // Create a reader to get the generated TableSpec
             final RemoteFile<Connection> remoteFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                     connInfo);
@@ -184,14 +193,14 @@ public class FileFormatReaderNodeModel extends NodeModel {
 	 *             thrown if doAs user does not work
 	 */
 	private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context,
-			DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration)
+			final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration)
             throws Exception {
         final AbstractFileFormatReader reader;
 		if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
             final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
             final UserGroupInformation user = UserGroupUtil.getKerberosUser(conf);
             reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
-                @Override
+				@Override
                 public AbstractFileFormatReader run() throws Exception {
 
 					return m_settings.getFormatFactory().getReader(remoteFile, context,

@@ -47,15 +47,16 @@ package org.knime.bigdata.fileformats.parquet.reader;
 import org.knime.bigdata.fileformats.node.reader.FileFormatReaderNodeFactory;
 import org.knime.bigdata.fileformats.node.reader.FileFormatReaderNodeSettings;
 import org.knime.bigdata.fileformats.parquet.ParquetFormatFactory;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
 
 /**
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class ParquetReaderNodeFactory extends FileFormatReaderNodeFactory {
+public class ParquetReaderNodeFactory extends FileFormatReaderNodeFactory<ParquetType> {
 
     @Override
-    public FileFormatReaderNodeSettings getSettings() {
-        return new FileFormatReaderNodeSettings(new ParquetFormatFactory());
+    public FileFormatReaderNodeSettings<ParquetType> getSettings() {
+        return new FileFormatReaderNodeSettings<>(new ParquetFormatFactory());
     }
 
 }

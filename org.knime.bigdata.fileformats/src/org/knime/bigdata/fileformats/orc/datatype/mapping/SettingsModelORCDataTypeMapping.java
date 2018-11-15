@@ -50,10 +50,8 @@
 package org.knime.bigdata.fileformats.orc.datatype.mapping;
 
 import org.apache.orc.TypeDescription;
-import org.knime.core.data.convert.map.Destination;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
-import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 
 /**
@@ -87,27 +85,9 @@ public class SettingsModelORCDataTypeMapping extends SettingsModelDataTypeMappin
         super(configName, COLUMN_NAME_EXTERNAL_TYPE, mappingDirection);
     }
 
-    @Override
-    protected String convertExternalTypeToString(final TypeDescription externalType) {
-        return externalType.toString();
-    }
-
-    @Override
-    protected TypeDescription convertStringToExternalType(final String string) {
-        return TypeDescription.fromString(string);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     protected <T extends SettingsModel> T createClone() {
         return (T) new SettingsModelORCDataTypeMapping(this);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected <D extends Destination<TypeDescription>> DataTypeMappingService<TypeDescription, ?, D>
-    getDataTypeMappingService() {
-        return (DataTypeMappingService<TypeDescription, ?, D>) ORCTypeMappingService.getInstance();
-    }
-
 }

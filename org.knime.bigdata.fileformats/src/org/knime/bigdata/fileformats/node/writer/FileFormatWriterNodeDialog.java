@@ -73,15 +73,17 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
-import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
 /**
  * Node Dialog for generic BigData file format writer.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatWriterNodeDialog extends NodeDialogPane implements ChangeListener {
+public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements ChangeListener {
 
     private static final String WARNING_MESSAGE = "<html>The remote writing creates/overwrites a "
             + "<u>folder</u> with the given name.</html>";
@@ -91,18 +93,18 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
     private boolean m_chunkUpload = false;
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatWriterNodeDialog.class);
-    private final FileFormatWriterNodeSettings m_settings;
+    private final FileFormatWriterNodeSettings<X> m_settings;
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
 
-    private final DialogComponentDataTypeMapping<?> m_inputTypeMappingComponent;
+    private final DialogComponentDataTypeMapping<X> m_inputTypeMappingComponent;
 
     private final JLabel m_warningLable;
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
      */
-    protected FileFormatWriterNodeDialog(final FileFormatWriterNodeSettings settings) {
+    protected FileFormatWriterNodeDialog(final FileFormatWriterNodeSettings<X> settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
                 RemoteFileChooser.SELECT_FILE_OR_DIR,
@@ -174,7 +176,7 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
     /**
      * {@inheritDoc}
      */
-    @Override
+	@Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
        m_warningLable.setVisible(false);
@@ -208,12 +210,11 @@ public class FileFormatWriterNodeDialog extends NodeDialogPane implements Change
         }
         m_filePanel.setSelection(m_settings.getFileNameWithSuffix());
 
-        m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
-
+        final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+        m_inputTypeMappingComponent.setMappingService(mappingService);
         m_inputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		(DataTypeMappingConfiguration) m_settings.getFormatFactory().getTypeMappingService()
-        		.newDefaultKnimeToExternalMappingConfiguration());
-        m_inputTypeMappingComponent.updateComponent();
+        		mappingService.newDefaultKnimeToExternalMappingConfiguration());
+        m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
     }
 
     /**

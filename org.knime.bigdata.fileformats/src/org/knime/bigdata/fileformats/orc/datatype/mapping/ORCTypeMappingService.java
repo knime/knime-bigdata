@@ -222,4 +222,14 @@ public class ORCTypeMappingService extends AbstractDataTypeMappingService<TypeDe
 
     }
 
+    @Override
+    public String convertExternalTypeToString(final TypeDescription externalType) {
+        return externalType.toString();
+    }
+
+    @Override
+    public TypeDescription convertStringToExternalType(final String string) {
+        return TypeDescription.fromString(string);
+    }
+
 }

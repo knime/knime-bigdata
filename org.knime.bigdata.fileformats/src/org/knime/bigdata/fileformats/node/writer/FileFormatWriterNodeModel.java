@@ -88,27 +88,30 @@ import org.knime.core.node.streamable.StreamableOperator;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
+import org.knime.datatype.mapping.DataTypeMappingService;
 
 /**
  * Generic node model for BigData file format writer.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class FileFormatWriterNodeModel extends NodeModel {
+public class FileFormatWriterNodeModel<X> extends NodeModel {
 
     private static final int PROGRESS_UPDATE_ROW_COUNT = 100;
 
     // the logger instance
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatWriterNodeModel.class);
 
-    private final FileFormatWriterNodeSettings m_settings;
+    private final FileFormatWriterNodeSettings<X> m_settings;
 
     private int m_rowCountWritten = 1;
 
     /**
      * Constructor for the node model.
      */
-    protected FileFormatWriterNodeModel(final FileFormatWriterNodeSettings settings) {
+    protected FileFormatWriterNodeModel(final FileFormatWriterNodeSettings<X> settings) {
         super(new PortType[] { ConnectionInformationPortObject.TYPE_OPTIONAL, BufferedDataTable.TYPE }, null);
         m_settings = settings;
 
@@ -117,10 +120,10 @@ public class FileFormatWriterNodeModel extends NodeModel {
     /**
      * Checks if the dir contains files, that do not end with the right suffix and
      * gives a warning if it does.
-     * 
+     *
      * @param connInfo
      * @param fileName
-     * @throws Exception 
+     * @throws Exception
      */
     private void checkDirContent(final ConnectionInformation connInfo, final String fileName) throws Exception {
 
@@ -207,13 +210,14 @@ public class FileFormatWriterNodeModel extends NodeModel {
         };
     }
 
-    private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
-            DataTypeMappingConfiguration<?> dataTypeMappingConfiguration) throws IOException {
+	private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
+    		final DataTypeMappingConfiguration<X> mappingConfiguration)
+    		throws IOException {
         final DataTableSpec dataSpec = input.getDataTableSpec();
         final int chunkSize = m_settings.getChunkSize();
         final String compression = m_settings.getCompression();
         return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression,
-                dataTypeMappingConfiguration);
+        		mappingConfiguration);
 
     }
 
@@ -299,8 +303,8 @@ public class FileFormatWriterNodeModel extends NodeModel {
     private void writeRowInput(final ExecutionContext exec, final RowInput input,
             final ConnectionInformationPortObject connInfo) throws Exception {
 
-        if (connInfo != null && !(connInfo.getConnectionInformation().getProtocol()
-                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName()))) {
+        if (connInfo != null && !connInfo.getConnectionInformation().getProtocol()
+                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
             final RemoteFile<Connection> remoteDir = FileHandlingUtility.createRemoteDir(connInfo,
                     m_settings.getFileName());
             FileHandlingUtility.checkOverwrite(remoteDir, m_settings.getFileOverwritePolicy());
@@ -351,8 +355,11 @@ public class FileFormatWriterNodeModel extends NodeModel {
             final RemoteFile<Connection> remoteFile, final boolean writeChunks) throws Exception {
 
         exec.setMessage("Starting to write File.");
-        try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile,
-                m_settings.getMappingModel().getDataTypeMappingConfiguration())) {
+		final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+        final DataTypeMappingConfiguration<X> mappingConfiguration =
+        		mappingService.newDefaultKnimeToExternalMappingConfiguration().with(
+        				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
+        try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile, mappingConfiguration)) {
 
             for (DataRow row; (row = input.poll()) != null;) {
 

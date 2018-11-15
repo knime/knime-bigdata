@@ -51,16 +51,18 @@ import org.knime.core.node.NodeView;
 /**
  * <code>NodeFactory</code> for generic BigData file format writer.
  *
+ * @param <X> the type whose instances describe the external data types
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public abstract class FileFormatWriterNodeFactory extends NodeFactory<FileFormatWriterNodeModel> {
+public abstract class FileFormatWriterNodeFactory<X> extends NodeFactory<FileFormatWriterNodeModel<X>> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public FileFormatWriterNodeModel createNodeModel() {
-        return new FileFormatWriterNodeModel(getSettings());
+    public FileFormatWriterNodeModel<X> createNodeModel() {
+        return new FileFormatWriterNodeModel<>(getSettings());
     }
 
     /**
@@ -75,8 +77,8 @@ public abstract class FileFormatWriterNodeFactory extends NodeFactory<FileFormat
      * {@inheritDoc}
      */
     @Override
-    public NodeView<FileFormatWriterNodeModel> createNodeView(final int viewIndex,
-            final FileFormatWriterNodeModel nodeModel) {
+    public NodeView<FileFormatWriterNodeModel<X>> createNodeView(final int viewIndex,
+            final FileFormatWriterNodeModel<X> nodeModel) {
         return null;
     }
 
@@ -93,11 +95,11 @@ public abstract class FileFormatWriterNodeFactory extends NodeFactory<FileFormat
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new FileFormatWriterNodeDialog(getSettings());
+        return new FileFormatWriterNodeDialog<>(getSettings());
     }
 
     /**
      * @return the initial setting object
      */
-    public abstract FileFormatWriterNodeSettings getSettings();
+    public abstract FileFormatWriterNodeSettings<X> getSettings();
 }
