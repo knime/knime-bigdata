@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
 import java.util.Objects;
 
+import org.knime.core.data.DataType;
 import org.knime.core.node.rowfilter.OperatorParameters;
 
 /**
@@ -29,8 +30,8 @@ import org.knime.core.node.rowfilter.OperatorParameters;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class SparkOneParameterOperatorFunction implements SparkOperatorFunction {
-    private static final String FORMAT = "`%s` %s '%s'";
+class SparkOneParameterOperatorFunction extends AbstractSparkParameterOperatorFunction {
+    private static final String FORMAT = "`%s` %s %s";
     private final String m_operator;
 
     public SparkOneParameterOperatorFunction(final String operator) {
@@ -41,7 +42,8 @@ class SparkOneParameterOperatorFunction implements SparkOperatorFunction {
     public String apply(final OperatorParameters parameters) {
         Objects.requireNonNull(parameters, "parameters");
         final String column = parameters.getColumnSpec().getName();
-        final String value = parameters.getValues()[0];
+        final DataType dataType = parameters.getColumnSpec().getType();
+        final String value = convertInputValue(parameters.getValues()[0], dataType);
         return String.format(FORMAT, column, m_operator, value);
     }
 }

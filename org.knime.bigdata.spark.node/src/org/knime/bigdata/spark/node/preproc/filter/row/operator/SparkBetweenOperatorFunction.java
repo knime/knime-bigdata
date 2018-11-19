@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
 import java.util.Objects;
 
+import org.knime.core.data.DataType;
 import org.knime.core.node.rowfilter.OperatorParameters;
 
 /**
@@ -29,14 +30,17 @@ import org.knime.core.node.rowfilter.OperatorParameters;
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-class SparkBetweenOperatorFunction implements SparkOperatorFunction {
-    private static final String FORMAT = "`%s` BETWEEN '%s' AND '%s'";
+class SparkBetweenOperatorFunction extends AbstractSparkParameterOperatorFunction {
+    private static final String FORMAT = "`%s` BETWEEN %s AND %s";
 
     @Override
     public String apply(final OperatorParameters parameters) {
         Objects.requireNonNull(parameters, "parameters");
         final String column = parameters.getColumnSpec().getName();
+        final DataType dataType = parameters.getColumnSpec().getType();
         final String[] values = parameters.getValues();
-        return String.format(FORMAT, column, values[0], values[1]);
+        final String firstValue = convertInputValue(values[0], dataType);
+        final String secondValue = convertInputValue(values[1], dataType);
+        return String.format(FORMAT, column, firstValue, secondValue);
     }
 }
