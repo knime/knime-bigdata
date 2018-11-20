@@ -82,8 +82,9 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
         String[] resultFrames = getResultFrames(input);
 
         //Grab the System.out to get Error messages from the pySpark script
-        PrintStream console = System.out;
-        ByteArrayOutputStream outStream = redirectOutput();
+        final PrintStream console = System.out;
+        final ByteArrayOutputStream outStream = redirectOutput();
+        final String consoleOut;
 
         // pythonPath is only embedded into SparkConf when using local big data environment, otherwise PythonRunner
         // can construct it from Spark_HOME or PYTHONPATH env variables
@@ -99,14 +100,14 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
             if(out.isEmpty()) {
                 out = ex.getMessage();
             }
-            throw new KNIMESparkException(outStream.toString(ENCODING));
+            throw new KNIMESparkException(out);
         } finally {
             //Everything went fine reset the output
-            resetOutput(console, outStream);
+            consoleOut = resetOutput(console, outStream);
         }
         if (input.getNumRows() != -1) {
             //We are running a validation script. Create a preview of the output for the user
-            throw new PySparkOutRedirectException(createOutputforConsole(input, resultFrames));
+            throw new PySparkOutRedirectException(createOutputforConsole(consoleOut, input, resultFrames));
         }
         IntermediateSpec[] outSpecs = createOutputSpecs(input, namedObjects, resultFrames);
 
@@ -116,8 +117,16 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
     /**
      * Creates a String with the first lines of the result dataframes
      */
-    private static String createOutputforConsole(final PySparkJobInput input, final String[] resultFrames) {
+    private static String createOutputforConsole(final String consoleOutput, final PySparkJobInput input,
+            final String[] resultFrames) {
+
         StringBuilder sb = new StringBuilder();
+
+        if (!consoleOutput.isEmpty()) {
+            sb.append(consoleOutput);
+            sb.append("\n");
+        }
+
         sb.append("Execution finished.\n\n");
         for (int i = 0; i < resultFrames.length; i++) {
 
@@ -172,15 +181,17 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
         return outSpecs;
     }
 
-    private static void resetOutput(final PrintStream console, final ByteArrayOutputStream outStream)
+    private static String resetOutput(final PrintStream console, final ByteArrayOutputStream outStream)
         throws UnsupportedEncodingException {
         System.setOut(console);
-        System.out.print(outStream.toString(ENCODING));
+        final String consoleOutput = outStream.toString(ENCODING);
+        System.out.print(consoleOutput);
         try {
             outStream.close();
         } catch (IOException e) {
             LOGGER.info("Could not close stream.", e);
         }
+        return consoleOutput;
     }
 
     private static ByteArrayOutputStream redirectOutput() throws UnsupportedEncodingException {
@@ -203,7 +214,7 @@ public class PySparkJob implements SparkJob<PySparkJobInput, PySparkJobOutput> {
 
         File pyFile;
         try {
-            pyFile = File.createTempFile("pyhtonScript_" + UUID.randomUUID().toString().replace('-', '_'), ".py");
+            pyFile = File.createTempFile("pythonScript_" + UUID.randomUUID().toString().replace('-', '_'), ".py");
             writeCodetoFile(input, pyFile);
         } catch (IOException e1) {
             throw new KNIMESparkException("Could not create tempfile for python code", e1);
