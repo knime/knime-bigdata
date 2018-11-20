@@ -51,6 +51,7 @@ package org.knime.bigdata.fileformats.orc.datatype.mapping;
 
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.orc.TypeDescription;
+import org.knime.core.data.convert.map.MappingException;
 import org.knime.core.data.convert.map.SimpleCellValueConsumerFactory;
 
 /**
@@ -90,7 +91,11 @@ extends SimpleCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORCPa
                 columnVector.noNulls = false;
                 columnVector.isNull[rowIndex] = true;
             } else {
-                consumer.writeNonNullValue(columnVector, rowIndex, v);
+                try {
+                    consumer.writeNonNullValue(columnVector, rowIndex, v);
+                } catch (Exception e) {
+                    throw new MappingException(e);
+                }
             }
 
         });

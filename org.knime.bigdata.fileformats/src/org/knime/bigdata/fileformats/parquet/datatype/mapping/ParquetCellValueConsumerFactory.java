@@ -50,6 +50,7 @@
 package org.knime.bigdata.fileformats.parquet.datatype.mapping;
 
 import org.apache.parquet.io.api.RecordConsumer;
+import org.knime.core.data.convert.map.MappingException;
 import org.knime.core.data.convert.map.SimpleCellValueConsumerFactory;
 
 /**
@@ -82,9 +83,15 @@ public class ParquetCellValueConsumerFactory<T>
             final int index = p.getIndex();
 
             if (v != null) {
-                recordConsumer.startField(externalType.getName(), index);
-                consumer.writeNonNullValue(recordConsumer, v);
-                recordConsumer.endField(externalType.getName(), index);
+                try {
+                    recordConsumer.startField(externalType.getName(), index);
+
+                    consumer.writeNonNullValue(recordConsumer, v);
+
+                    recordConsumer.endField(externalType.getName(), index);
+                } catch (Exception e) {
+                    throw new MappingException(e);
+                }
             }
         });
         m_parquetConsumer = consumer;

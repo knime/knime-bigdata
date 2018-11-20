@@ -65,6 +65,7 @@ public interface ParquetCellValueConsumer<T> {
      * Writes a non null Value to the {@link RecordConsumer} 
      * @param consumer the  {@link RecordConsumer} 
      * @param v the value to write
+     * @throws Exception if convertion issue occurs
      */
-    void writeNonNullValue(RecordConsumer consumer, T v);
+    void writeNonNullValue(RecordConsumer consumer, T v) throws Exception;
 }

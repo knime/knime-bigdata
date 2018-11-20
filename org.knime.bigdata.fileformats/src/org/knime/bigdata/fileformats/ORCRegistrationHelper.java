@@ -49,6 +49,8 @@
 
 package org.knime.bigdata.fileformats;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -57,6 +59,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DecimalColumnVector;
 import org.apache.hadoop.hive.ql.exec.vector.DoubleColumnVector;
@@ -123,9 +126,10 @@ public class ORCRegistrationHelper {
             primitiveConsumers.add(doubleDoubleConsumer);
         }
 
-        final ORCCellValueConsumerFactory<byte[], BytesColumnVector> byteArrayBinaryConsumer = 
+        final ORCCellValueConsumerFactory<InputStream, BytesColumnVector> byteArrayBinaryConsumer = 
                 new ORCCellValueConsumerFactory<>(
-                        byte[].class, TypeDescription.createBinary(), (cv, rowindex, v) -> cv.vector[rowindex] = v);
+                        InputStream.class, TypeDescription.createBinary(), (cv, rowindex, v) -> 
+                        cv.vector[rowindex] = IOUtils.toByteArray(v));
         primitiveConsumers.add(byteArrayBinaryConsumer);
 
         final ORCCellValueConsumerFactory<Boolean, LongColumnVector> booleanBooleanConsumer =
@@ -140,6 +144,11 @@ public class ORCRegistrationHelper {
                         cv.set(rowindex, Timestamp.valueOf(v)));
         primitiveConsumers.add(dateTimeTimestampConsumer);
 
+        final ORCCellValueConsumerFactory<LocalDate, LongColumnVector> localDateTimestampConsumer = 
+                new ORCCellValueConsumerFactory<>(
+                        LocalDate.class, TypeDescription.createDate(), (cv, rowindex, v) -> 
+                        cv.vector[rowindex] = v.toEpochDay());
+        primitiveConsumers.add(localDateTimestampConsumer);
 
         final ORCCellValueConsumerFactory<String, DecimalColumnVector> stringBigDecimalConsumer = 
                 new ORCCellValueConsumerFactory<>(
@@ -257,10 +266,10 @@ public class ORCRegistrationHelper {
                         });
         primitiveProducers.add(intShortProducer);
 
-        final ORCCellValueProducerFactory<byte[], BytesColumnVector> binaryBinaryProducer = 
+        final ORCCellValueProducerFactory<InputStream, BytesColumnVector> binaryBinaryProducer = 
                 new ORCCellValueProducerFactory<>(
-                        TypeDescription.createBinary(), byte[].class, (columnVector, rowInBatchOrZero) ->
-                        columnVector.vector[rowInBatchOrZero]);
+                        TypeDescription.createBinary(), InputStream.class, (columnVector, rowInBatchOrZero) ->
+                        new ByteArrayInputStream(columnVector.vector[rowInBatchOrZero]));
         primitiveProducers.add(binaryBinaryProducer);
 
         final ORCCellValueProducerFactory<String, DecimalColumnVector> bigDecimalDecimalProducer = 

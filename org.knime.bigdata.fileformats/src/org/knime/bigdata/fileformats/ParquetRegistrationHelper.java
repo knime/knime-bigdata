@@ -49,6 +49,8 @@
 
 package org.knime.bigdata.fileformats;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -61,6 +63,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.parquet.io.api.Binary;
 import org.apache.parquet.schema.OriginalType;
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName;
@@ -90,10 +93,10 @@ public class ParquetRegistrationHelper {
     public static void registerParquetConsumers() {
 
         final List<ParquetCellValueConsumerFactory<?>> primitiveConsumers = new ArrayList<>();
-
-        final ParquetCellValueConsumerFactory<byte[]> binaryConsumer = new ParquetCellValueConsumerFactory<>(
-                byte[].class, new ParquetType(PrimitiveTypeName.BINARY), 
-                (c, v) -> c.addBinary(Binary.fromConstantByteArray(v)));
+        
+        final ParquetCellValueConsumerFactory<InputStream> binaryConsumer = new ParquetCellValueConsumerFactory<>(
+                InputStream.class, new ParquetType(PrimitiveTypeName.BINARY), 
+                (c, v) -> c.addBinary(Binary.fromConstantByteArray(IOUtils.toByteArray(v))));
         primitiveConsumers.add(binaryConsumer);
 
         final ParquetCellValueConsumerFactory<String> stringStringKindConsumer = new ParquetCellValueConsumerFactory<>(
@@ -146,9 +149,9 @@ public class ParquetRegistrationHelper {
         primitiveConsumers.add(localdatetimeConsumer);
         
 
-        final ParquetCellValueConsumerFactory<byte[]> bytearrayConsumer = new ParquetCellValueConsumerFactory<>(
-                byte[].class, new ParquetType(PrimitiveTypeName.FIXED_LEN_BYTE_ARRAY), 
-                (c, v) -> c.addBinary(Binary.fromConstantByteArray(v, 0, v.length)));
+        final ParquetCellValueConsumerFactory<InputStream> bytearrayConsumer = new ParquetCellValueConsumerFactory<>(
+                InputStream.class, new ParquetType(PrimitiveTypeName.FIXED_LEN_BYTE_ARRAY), 
+                (c, v) -> c.addBinary(Binary.fromConstantByteArray(IOUtils.toByteArray(v))));
         primitiveConsumers.add(bytearrayConsumer);
 
 
@@ -189,17 +192,17 @@ public class ParquetRegistrationHelper {
                         });
         primitiveProducers.add(booleanBooleanProducer);
 
-        final ParquetCellValueProducerFactory<byte[]> binaryProducer = 
+        final ParquetCellValueProducerFactory<InputStream> binaryProducer = 
                 new ParquetCellValueProducerFactory<>(
-                        new ParquetType(PrimitiveTypeName.BINARY), byte[].class, 
-                        new ParquetCellValueProducer<byte[]>() {
+                        new ParquetType(PrimitiveTypeName.BINARY), InputStream.class, 
+                        new ParquetCellValueProducer<InputStream>() {
                             @Override
-                            public ParquetPrimitiveConverter<byte[]> createConverter(){
-                                return new ParquetPrimitiveConverter<byte[]>() {
+                            public ParquetPrimitiveConverter<InputStream> createConverter(){
+                                return new ParquetPrimitiveConverter<InputStream>() {
 
                                     @Override
                                     public void addBinary(final Binary value) {
-                                        m_value = value.getBytes();
+                                        m_value =  new ByteArrayInputStream(value.getBytes());
                                     }
                                 };
                             }

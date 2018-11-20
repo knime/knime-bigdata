@@ -71,7 +71,8 @@ public interface ORCCellValueConsumer<T, CV extends ColumnVector> {
      *            the row index to write
      * @param v
      *            the value to write
+     * @throws Exception if conversion issues occur
      */
-    void writeNonNullValue(CV columnVector, int rowIndex, T v);
+    void writeNonNullValue(CV columnVector, int rowIndex, T v) throws Exception;
 
 }

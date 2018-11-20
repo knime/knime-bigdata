@@ -56,14 +56,19 @@ extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORC
 
                 for (final Map.Entry<K, V> entry : value.entrySet()) {
 
-                    m_keyConsumer.writeNonNullValue((KCV) columnVector.keys, (int) offset, entry.getKey());
-                    final V val = entry.getValue();
-                    if (val == null) {
-                        columnVector.values.noNulls = false;
-                        columnVector.values.isNull[(int) offset] = true;
-                    } else {
-                        m_valueConsumer.writeNonNullValue((VCV) columnVector.values, (int) offset, val);
-                        offset++;
+                    try {
+                        m_keyConsumer.writeNonNullValue((KCV) columnVector.keys, (int) offset, entry.getKey());
+
+                        final V val = entry.getValue();
+                        if (val == null) {
+                            columnVector.values.noNulls = false;
+                            columnVector.values.isNull[(int) offset] = true;
+                        } else {
+                            m_valueConsumer.writeNonNullValue((VCV) columnVector.values, (int) offset, val);
+                            offset++;
+                        }
+                    } catch (Exception e) {
+                        throw new MappingException(e);
                     }
                 }
                 columnVector.lengths[rowIndex] = value.keySet().size();

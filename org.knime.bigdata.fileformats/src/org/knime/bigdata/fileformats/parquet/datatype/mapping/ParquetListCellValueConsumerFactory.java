@@ -55,9 +55,13 @@ public class ParquetListCellValueConsumerFactory<T, E>
                     consumer.startGroup();
 
                     if (value[i] != null) {
-                        consumer.startField(ELEMENT, 0);
-                        m_elementConsumer.writeNonNullValue(consumer, value[i]);
-                        consumer.endField(ELEMENT, 0);
+                        try {
+                            consumer.startField(ELEMENT, 0);
+                            m_elementConsumer.writeNonNullValue(consumer, value[i]);
+                            consumer.endField(ELEMENT, 0);
+                        }catch (Exception e){
+                            throw new MappingException(e);
+                        }
                     }
 
                     consumer.endGroup();

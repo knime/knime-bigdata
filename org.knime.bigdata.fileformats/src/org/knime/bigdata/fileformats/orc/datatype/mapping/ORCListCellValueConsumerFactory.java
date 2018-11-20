@@ -107,7 +107,11 @@ extends AbstractCellValueConsumerFactory<ORCDestination, T, TypeDescription, ORC
                         columnVector.child.noNulls = false;
                         columnVector.child.isNull[(int) offset] = true;
                     } else {
-                        m_elementconsumer.writeNonNullValue((CCV) columnVector.child, (int) offset, val);
+                        try {
+                            m_elementconsumer.writeNonNullValue((CCV) columnVector.child, (int) offset, val);
+                        } catch (Exception e) {
+                            throw new MappingException(e);
+                        }
 
                     }
                     offset++;
