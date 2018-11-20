@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
 <knimeNode icon="icon.png" type="Manipulator">
-	<name>Spark Row Filter</name>
+    <name>Spark Row Filter</name>
 
-	<shortDescription>
-		The Spark Row Filter allows rows to be excluded from the input Spark DataFrame/RDD.
-	</shortDescription>
+    <shortDescription>
+        The Spark Row Filter allows rows to be excluded from the input Spark DataFrame/RDD.
+    </shortDescription>
 
-	<fullDescription>
+    <fullDescription>
         <intro>
             This node allows rows to be filtered from the input Spark DataFrame/RDD
-            by adding and grouping conditions.
+            by adding and grouping conditions. Rows that match the conditions are included in 
+            the output DataFrame/RDD.
 
             <p><i>This node requires at least Apache Spark 2.0.</i></p>
         </intro>
@@ -24,6 +25,7 @@
             operator is selected it will be added to that, if a
             condition is selected it will be added to the parent logical
             operator.
+            All rows that match the conditions are included in the output DataFame/RDD.
         </option>
 
         <option name="Group">
@@ -39,14 +41,14 @@
         <option name="Delete">
             Delete the selected element from the list.
         </option>
-	</fullDescription>
+    </fullDescription>
 
-	<ports>
-		<inPort index="0" name="Spark DataFrame/RDD to be filtered">
-			Spark DataFrame/RDD from which rows are to be excluded.
-		</inPort>
-		<outPort index="0" name="Filtered Spark DataFrame/RDD">
-			Spark DataFrame/RDD excluding selected rows.
-		</outPort>
-	</ports>
+    <ports>
+        <inPort index="0" name="Spark DataFrame/RDD to be filtered">
+            Spark DataFrame/RDD from which rows are to be excluded.
+        </inPort>
+        <outPort index="0" name="Filtered Spark DataFrame/RDD">
+            Spark DataFrame/RDD including rows that match the defined conditions.
+        </outPort>
+    </ports>
 </knimeNode>
