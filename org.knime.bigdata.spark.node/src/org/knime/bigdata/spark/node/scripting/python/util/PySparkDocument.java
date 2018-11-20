@@ -54,11 +54,11 @@ public class PySparkDocument extends GuardedDocument {
         super(SyntaxConstants.SYNTAX_STYLE_PYTHON);
         try {
             addGuardedSection(GUARDED_IMPORTS, getLength());
-            insertString(getLength(), "#Custom imports \n", null);
+            insertString(getLength(), "# Your custom imports:\n\n", null);
             final GuardedSection flowVariables = addGuardedSection(GUARDED_FLOW_VARIABLES, getLength());
-            flowVariables.setText("#Flowvariables \n");
+            flowVariables.setText("# Flowvariables\n");
 
-            insertString(getLength(), "\n #Custom globals \n", null);
+            insertString(getLength(), "# Your custom global variables:\n\n", null);
             final GuardedSection bodyStart = addGuardedSection(GUARDED_BODY_START, getLength());
             bodyStart.setText("# expression start\n");
 
@@ -77,7 +77,7 @@ public class PySparkDocument extends GuardedDocument {
      */
     public void writeFlowVariables(final FlowVariable[] variables) {
         StringBuilder sb = new StringBuilder();
-        sb.append("#Flowariables \n");
+        sb.append("# Flowvariables\n");
         sb.append("flow_variables = {} \n");
         for(FlowVariable flowVariable : variables) {
            String escapedName = flowVariable.getName().replaceAll("[^A-Za-z0-9_]", "_");
