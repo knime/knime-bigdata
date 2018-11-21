@@ -3,7 +3,9 @@ package org.knime.bigdata.spark.local.wrapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.DriverManager;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
@@ -24,7 +28,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.hive.thriftserver.HiveThriftServer2;
-import org.apache.spark.util.Utils;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -299,18 +302,18 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	}
 
     private static String getPythonPath(SparkConf conf) throws IOException {
-        String path = "";
         final Option<String> jar = SparkContext.jarOfObject(conf);
         if (jar.isDefined()) {
-            String jarpath = Utils.isWindows() ? jar.get().replaceFirst("/", "") : jar.get();
-            path = String.join(",",
-                Files.list(Paths.get(jarpath).getParent())
-                    .map(p -> p.toString())
+            Path jarPath = Paths.get(URI.create("file:" + jar.get()));
+            try(Stream<Path> files = Files.list(jarPath.getParent())) {
+                return files
+                    .map(Path::toString)
                     .filter(p -> p.endsWith(".zip"))
-                    .toArray(String[]::new));
+                    .collect(Collectors.joining(","));
+            }
+        } else {
+            return "";
         }
-
-        return path;
     }
 	
 	private void initJobInputFileCopyDir() throws IOException {
