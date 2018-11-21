@@ -20,16 +20,10 @@
  */
 package org.knime.bigdata.spark.node.util.rdd.persist;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  *
@@ -37,35 +31,19 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class SparkPersistNodeDialog extends DefaultNodeSettingsPane {
 
-    SparkPersistNodeDialog() {
-        final SettingsModelString level = SparkPersistNodeModel.createStorageLevelModel();
-        final SettingsModelBoolean useDisk = SparkPersistNodeModel.createUseDiskModel();
-        final SettingsModelBoolean useMemory = SparkPersistNodeModel.createUseMemoryModel();
-        final SettingsModelBoolean useOffHeap = SparkPersistNodeModel.createUseOffHeapModel();
-        final SettingsModelBoolean deserialized = SparkPersistNodeModel.createDeserializedModel();
-        final SettingsModelInteger replication = SparkPersistNodeModel.createReplicationModel();
-        level.addChangeListener(new ChangeListener() {
+    private final SparkPersistNodeSettings m_settings = new SparkPersistNodeSettings();
 
-            @Override
-            public void stateChanged(final ChangeEvent e) {
-                final boolean custom = PersistenceOption.CUSTOM.getActionCommand().equals(level.getStringValue());
-                useDisk.setEnabled(custom);
-                useMemory.setEnabled(custom);
-                useOffHeap.setEnabled(custom);
-                deserialized.setEnabled(custom);
-                replication.setEnabled(custom);
-            }
-        });
-        addDialogComponent(new DialogComponentButtonGroup(level, "Storage level:", true, PersistenceOption.values()));
+    SparkPersistNodeDialog() {
+        addDialogComponent(new DialogComponentButtonGroup(m_settings.getStorageLevelModel(), "Storage level:", true, PersistenceOption.values()));
         createNewGroup(" Custom Storage Parameter ");
         setHorizontalPlacement(true);
-        addDialogComponent(new DialogComponentBoolean(useDisk, "Use disk"));
-        addDialogComponent(new DialogComponentBoolean(useMemory, "Use memory"));
-        addDialogComponent(new DialogComponentBoolean(useOffHeap, "Use off heap"));
+        addDialogComponent(new DialogComponentBoolean(m_settings.getUseDiskModel(), "Use disk"));
+        addDialogComponent(new DialogComponentBoolean(m_settings.getUseMemoryModel(), "Use memory"));
+        addDialogComponent(new DialogComponentBoolean(m_settings.getUseOffHeapModel(), "Use off heap"));
         setHorizontalPlacement(false);
         setHorizontalPlacement(true);
-        addDialogComponent(new DialogComponentBoolean(deserialized, "Deserialized"));
-        addDialogComponent(new DialogComponentNumber(replication, "Replication:", 1));
+        addDialogComponent(new DialogComponentBoolean(m_settings.getDeserializedModel(), "Deserialized"));
+        addDialogComponent(new DialogComponentNumber(m_settings.getReplicationModel(), "Replication:", 1));
     }
 
 }
