@@ -36,6 +36,8 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooser;
 import org.knime.base.filehandling.remote.dialog.RemoteFileChooserPanel;
 import org.knime.base.node.io.database.DBSQLTypesPanel;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
+import org.knime.bigdata.hive.utility.AbstractLoaderNodeModel;
 import org.knime.bigdata.hive.utility.LoaderSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.IntValue;
@@ -67,6 +69,9 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
     private final JTextField m_tableName = new JTextField();
 
     private final JCheckBox m_dropTableIfExists = new JCheckBox("Drop existing table");
+
+    /** Connected to local big data environment with broken Spark Thriftserver (BD-729) */
+    private boolean m_isLocalHDFS = false;
 
     @SuppressWarnings("unchecked")
     private final ColumnFilterPanel m_partitionColumns = new ColumnFilterPanel(false, StringValue.class,
@@ -138,8 +143,10 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
         if (specs.length > 0 && specs[0] != null) {
             ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec) specs[0]).getConnectionInformation();
             m_target.setConnectionInformation(connInfo);
+            m_isLocalHDFS = HDFSLocalRemoteFileHandler.isSupportedConnection(connInfo);
         } else {
             m_target.setConnectionInformation(null);
+            m_isLocalHDFS = false;
         }
 
         m_target.setSelection(m_settings.targetFolder());
@@ -156,6 +163,10 @@ class HiveLoaderNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         if (StringUtils.isBlank(m_target.getSelection())) {
             throw new InvalidSettingsException("Target folder required.");
+        }
+
+        if (m_isLocalHDFS) {
+            AbstractLoaderNodeModel.validateLocalTargetFolder(m_target.getSelection());
         }
 
         if (StringUtils.isBlank(m_tableName.getText())) {

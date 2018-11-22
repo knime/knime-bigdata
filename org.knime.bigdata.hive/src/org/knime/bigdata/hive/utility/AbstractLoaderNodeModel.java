@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.Date;
@@ -41,6 +43,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
 import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -204,6 +207,43 @@ public abstract class AbstractLoaderNodeModel extends NodeModel {
             setWarningMessage("Different HDFS and database user "+ connInfo.getUser() + "/" + dbSettings.getUserName(cp) +" found, this might result in permission problems.");
         }
 
+        if (HDFSLocalRemoteFileHandler.isSupportedConnection(connInfo) && !this.loader.isImpala()) {
+            validateLocalTargetFolder(m_settings.targetFolder());
+        }
+    }
+
+    /**
+     * BD-729: Throws an error if target folder contains characters that needs to be URI encoded, because Spark 2.3
+     * Thriftserver does not support them (bug).
+     *
+     * TODO BD-803: Remove this after upgrade of local big data environment to Spark 2.4.
+     *
+     * @param path
+     * @throws InvalidSettingsException
+     */
+    public static void validateLocalTargetFolder(final String path) throws InvalidSettingsException {
+        final String preMsg = "Local Spark 2.3 Thriftserver (Hive) does not support file import\n"
+                + "from a path with special characters (e.g. space characters).\n";
+
+        try {
+            final URI uri = new URI("file", "", path, null);
+            final int index = StringUtils.indexOfDifference("file://" + path, uri.toString()) - "file://".length();
+
+            if (index >= 0 && index < path.length() && path.charAt(index) == ' ') {
+                throw new InvalidSettingsException(String.format(
+                    preMsg + "Unsupported space character at index %d detected.", index + 1));
+
+            } else if(path.indexOf('%') > -1) {
+                throw new InvalidSettingsException(String.format(
+                    preMsg + "Unsupported percentage character at index %d detected.", path.indexOf('%') + 1));
+
+            } else if (index >= 0) {
+                throw new InvalidSettingsException(String.format(
+                    preMsg + "Unsupported character at index %d detected: %c", index + 1, path.charAt(index)));
+            }
+        } catch (URISyntaxException e) {
+            // never happen
+        }
     }
 
     /**
