@@ -29,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.NodeUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -144,6 +145,14 @@ class ImpalaLoaderNodeDialog extends NodeDialogPane {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        if (StringUtils.isBlank(m_target.getSelection())) {
+            throw new InvalidSettingsException("Target folder required.");
+        }
+
+        if (StringUtils.isBlank(m_tableName.getText())) {
+            throw new InvalidSettingsException("Table name required.");
+        }
+
         m_typeMappingPanel.saveSettingsTo(m_settings.getTypeMapping());
         m_settings.targetFolder(m_target.getSelection());
         m_settings.tableName(m_tableName.getText());

@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
@@ -190,9 +191,10 @@ public abstract class AbstractLoaderNodeModel extends NodeModel {
             throw new InvalidSettingsException("No connection information available");
         }
 
-        if ((m_settings.targetFolder() == null) || m_settings.targetFolder().trim().isEmpty()) {
+        if (StringUtils.isBlank(m_settings.targetFolder())) {
             throw new InvalidSettingsException("No target folder for data upload provided");
         }
+
         if (HDFSRemoteFileHandler.isSupportedConnection(connInfo)
                 && !connInfo.useKerberos()
                 && (connInfo.getUser() != null) && !connInfo.getUser().isEmpty()
