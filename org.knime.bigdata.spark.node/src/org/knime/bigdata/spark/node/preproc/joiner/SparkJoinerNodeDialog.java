@@ -84,11 +84,18 @@ public class SparkJoinerNodeDialog extends Joiner2NodeDialog {
     @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings,
         final PortObjectSpec[] specs) throws NotConfigurableException {
+
         if (specs == null || specs.length < 2 || specs[0] == null || specs[1] == null) {
-            throw new NotConfigurableException("No input specification available");
+            throw new NotConfigurableException("No input specification available.");
         }
+
         final SparkDataPortObjectSpec spec0 = (SparkDataPortObjectSpec)specs[0];
         final SparkDataPortObjectSpec spec1 = (SparkDataPortObjectSpec)specs[1];
+
+        if (spec0.getTableSpec().getNumColumns() == 0 || spec1.getTableSpec().getNumColumns() == 0) {
+            throw new NotConfigurableException("No input columns for join available.");
+        }
+
         super.loadSettingsFrom(settings, new DataTableSpec[] {spec0.getTableSpec(), spec1.getTableSpec()});
     }
 }
