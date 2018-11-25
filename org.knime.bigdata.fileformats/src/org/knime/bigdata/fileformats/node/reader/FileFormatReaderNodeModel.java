@@ -74,6 +74,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.streamable.PartitionInfo;
 import org.knime.core.node.streamable.PortInput;
+import org.knime.core.node.streamable.PortObjectInput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableOperator;
@@ -267,9 +268,9 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
                     throws Exception {
-                final PortObject portObj = (PortObject) inputs[0];
+                final PortObjectInput portObj = (PortObjectInput) inputs[0];
                 final RowOutput out = (RowOutput) outputs[0];
-                final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject) portObj;
+                final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject) portObj.getPortObject();
                 try {
                     final BigDataFileFormatTable table = createTable(connInfoObj, exec);
                     final RowIterator rowIterator = table.iterator();
