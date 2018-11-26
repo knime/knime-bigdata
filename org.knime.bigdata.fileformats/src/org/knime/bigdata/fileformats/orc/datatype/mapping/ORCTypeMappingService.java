@@ -74,8 +74,12 @@ import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.LongCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.time.duration.DurationCellFactory;
 import org.knime.core.data.time.localdate.LocalDateCellFactory;
 import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
+import org.knime.core.data.time.localtime.LocalTimeCellFactory;
+import org.knime.core.data.time.period.PeriodCellFactory;
+import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.Pair;
 import org.knime.datatype.mapping.AbstractDataTypeMappingService;
@@ -130,14 +134,22 @@ public class ORCTypeMappingService extends AbstractDataTypeMappingService<TypeDe
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LongCell.TYPE, TypeDescription.createLong());
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalDateTimeCellFactory.TYPE,
                 TypeDescription.createTimestamp());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalTimeCellFactory.TYPE,
+                TypeDescription.createString());
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalDateCellFactory.TYPE,
                 TypeDescription.createDate());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, ZonedDateTimeCellFactory.TYPE,
+                TypeDescription.createString());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, PeriodCellFactory.TYPE,
+                TypeDescription.createString());
+        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, DurationCellFactory.TYPE,
+                TypeDescription.createString());
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, BooleanCell.TYPE,
                 TypeDescription.createBoolean());
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, IntCell.TYPE, TypeDescription.createInt());
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, BinaryObjectDataCell.TYPE,
                 TypeDescription.createBinary());
-
+        
         setDefaultConsumptionPaths(Collections.unmodifiableMap(defaultConsumptionPaths));
 
         // Default production paths

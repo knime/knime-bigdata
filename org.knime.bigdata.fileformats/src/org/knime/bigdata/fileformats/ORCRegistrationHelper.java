@@ -93,6 +93,9 @@ public class ORCRegistrationHelper {
     static final TypeDescription[] m_intTypes = { TypeDescription.createInt(), TypeDescription.createShort(),
             TypeDescription.createByte() };
     static final TypeDescription[] m_doubleTypes = { TypeDescription.createDouble(), TypeDescription.createFloat() };
+    
+    static final LocalDateTime timestampMax = new Timestamp(Long.MAX_VALUE).toLocalDateTime();
+    static final LocalDateTime timestampMin = LocalDateTime.of(1,1,1,0,0);
     /**
      * Registers the ORC consumers
      */
@@ -141,15 +144,35 @@ public class ORCRegistrationHelper {
         final ORCCellValueConsumerFactory<LocalDateTime, TimestampColumnVector> dateTimeTimestampConsumer = 
                 new ORCCellValueConsumerFactory<>(
                         LocalDateTime.class, TypeDescription.createTimestamp(), (cv, rowindex, v) -> 
-                        cv.set(rowindex, Timestamp.valueOf(v)));
+                        {                            
+                            if(v.isAfter(timestampMax) || v.isBefore(timestampMin)) {
+                                throw new BigDataFileFormatException(
+                                        String.format("Cannot write %s. Timestamp can only handle dates between %s and %s.", 
+                                                v , timestampMin, timestampMax));
+                            }
+                            cv.set(rowindex, Timestamp.valueOf(v));
+                        }
+                        );
+                        
         primitiveConsumers.add(dateTimeTimestampConsumer);
-
+        
         final ORCCellValueConsumerFactory<LocalDate, LongColumnVector> localDateTimestampConsumer = 
                 new ORCCellValueConsumerFactory<>(
-                        LocalDate.class, TypeDescription.createDate(), (cv, rowindex, v) -> 
-                        cv.vector[rowindex] = v.toEpochDay());
-        primitiveConsumers.add(localDateTimestampConsumer);
+                LocalDate.class, TypeDescription.createDate(), (cv, rowindex, v) ->
 
+                {
+                    long valueL = v.toEpochDay();
+                    if (valueL < Integer.MIN_VALUE || valueL > Integer.MAX_VALUE) {
+                        throw new BigDataFileFormatException(
+                                String.format("Cannot write %s as Date. ORC cannot write dates before %s or after %s.",
+                                        v, LocalDate.ofEpochDay(Integer.MIN_VALUE), LocalDate.ofEpochDay(Integer.MAX_VALUE)));
+                    }
+                    cv.vector[rowindex] = valueL;
+
+                });
+        primitiveConsumers.add(localDateTimestampConsumer);
+        
+        
         final ORCCellValueConsumerFactory<String, DecimalColumnVector> stringBigDecimalConsumer = 
                 new ORCCellValueConsumerFactory<>(
                         String.class, TypeDescription.createDecimal(), (cv, rowindex, v) -> {
@@ -247,7 +270,16 @@ public class ORCRegistrationHelper {
 
                         });
         primitiveProducers.add(localDateDateProducer);
+        
+        final ORCCellValueProducerFactory<LocalDate, LongColumnVector> localDateLongProducer =
+                new ORCCellValueProducerFactory<>(
+                        TypeDescription.createLong(), LocalDate.class, (columnVector, rowInBatchOrZero) -> {
+                            final long valueL = columnVector.vector[rowInBatchOrZero];
+                            return LocalDate.ofEpochDay(valueL);
 
+                        });
+        primitiveProducers.add(localDateLongProducer);
+        
         final ORCCellValueProducerFactory<Integer, LongColumnVector> byteByteProducer = 
                 new ORCCellValueProducerFactory<>(
                         TypeDescription.createByte(), Integer.class, (columnVector, rowInBatchOrZero) -> {
