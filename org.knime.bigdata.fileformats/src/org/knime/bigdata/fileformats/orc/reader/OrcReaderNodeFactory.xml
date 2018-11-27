@@ -12,6 +12,20 @@
          <tab name="Options">
      	   <option name="Input">The file or directory to read.</option>
         </tab>
+        
+    	<tab name="Type Mapping">
+            Change the database to KNIME type mapping configuration
+            for subsequent nodes by selecting a KNIME type to the given
+            ORC Type.
+            The dialog allows you to add new or change existing type mapping rules.
+         <option name="Mapping by Name">
+            Columns that match the given name (or regular expression) and ORC type will be mapped
+            to the specified KNIME type.
+         </option>
+         <option name="Mapping by Type">
+            Columns that match the given ORC type will be mapped to the specified KNIME type.
+         </option>
+        </tab>
     </fullDescription>
     
     <ports>

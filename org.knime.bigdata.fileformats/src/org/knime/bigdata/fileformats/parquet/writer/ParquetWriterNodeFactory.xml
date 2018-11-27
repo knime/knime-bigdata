@@ -25,6 +25,19 @@
       	  <option name="Chunk size in MB">The maximum size for an individual chunk.</option>
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
+    	<tab name="Type Mapping">
+            Change the database to KNIME type mapping configuration
+            for subsequent nodes by selecting a KNIME type to the given
+            Parquet Type.
+            The dialog allows you to add new or change existing type mapping rules.
+         <option name="Mapping by Name">
+            Columns that match the given name (or regular expression) and Parquet type will be mapped
+            to the specified KNIME type.
+         </option>
+         <option name="Mapping by Type">
+            Columns that match the given Parquet type will be mapped to the specified KNIME type.
+         </option>
+        </tab>
     </fullDescription>
     
     <ports>
