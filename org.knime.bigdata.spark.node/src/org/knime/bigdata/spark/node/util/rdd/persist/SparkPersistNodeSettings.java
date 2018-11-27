@@ -232,5 +232,19 @@ public class SparkPersistNodeSettings {
         m_useOffHeap.loadSettingsFrom(settings);
         m_deserialized.loadSettingsFrom(settings);
         m_replication.loadSettingsFrom(settings);
+        updateEnabledness();
+    }
+
+    /**
+     * Resets all underlying settings models to their default values.
+     */
+    public void resetToDefaults() {
+        m_storageLevel.setStringValue(PersistenceOption.getDefault().getActionCommand());
+        m_useDisk.setBooleanValue(false);
+        m_useMemory.setBooleanValue(false);
+        m_useOffHeap.setBooleanValue(false);
+        m_deserialized.setBooleanValue(false);
+        m_replication.setIntValue(2);
+        updateEnabledness();
     }
 }

@@ -27,7 +27,7 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
  *
  * @author Tobias Koetter, KNIME.com
  */
-enum PersistenceOption implements ButtonGroupEnumInterface {
+public enum PersistenceOption implements ButtonGroupEnumInterface {
 
     MEMORY_ONLY("Memory only", "Store RDD as deserialized Java objects in the JVM. If the RDD does not fit in memory, "
         + "some partitions will not be cached and will be recomputed on the fly each time they're needed.",
@@ -142,7 +142,7 @@ enum PersistenceOption implements ButtonGroupEnumInterface {
     /**
      * @param actionCommand the action command to get the {@link PersistenceOption} for
      */
-    static PersistenceOption getOption(final String actionCommand) {
+    public static PersistenceOption getOption(final String actionCommand) {
         return valueOf(actionCommand);
     }
 
