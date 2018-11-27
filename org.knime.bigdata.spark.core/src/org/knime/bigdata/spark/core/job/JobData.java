@@ -230,6 +230,46 @@ public class JobData {
     }
 
     /**
+     * Adds all data of the given {@link JobData} into this job data into the internal, under the given key.
+     *
+     * @param key The key under which to store the given {@link JobData}.
+     * @param other The {@link JobData} to add.
+     */
+    public void setJobData(final String key, final JobData other) {
+        for (String otherKey : other.m_internalMap.keySet()) {
+            m_internalMap.put(String.format("%s.%s.%s.%s", INTERNAL_PREFIX, m_keyPrefix, key, otherKey),
+                other.m_internalMap.get(otherKey));
+        }
+    }
+
+    /**
+     * Retrieves a {@link JobData} object that was previously stored with the given key.
+     *
+     * @param key The key from which to restore the {@link JobData} object.
+     * @param jobDataClass The concrete {@link JobData} class to instantiate.
+     * @return a new {@link JobData} of type T.
+     * @throws RuntimeException if jobDataClass could not be instantiated.
+     */
+    public <T extends JobData> T getJobData(final String key, final Class<T> jobDataClass) {
+        try {
+            final HashMap<String, Object> otherInternalMap = new HashMap<>();
+
+            final String prefix = String.format("%s.%s.%s.", INTERNAL_PREFIX, m_keyPrefix, key);
+            for (String internalKey : m_internalMap.keySet()) {
+                if (internalKey.startsWith(prefix)) {
+                    otherInternalMap.put(internalKey.substring(prefix.length()), m_internalMap.get(internalKey));
+                }
+            }
+
+            final T other = jobDataClass.newInstance();
+            other.setInternalMap(otherInternalMap);
+            return other;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Add a {@link IntermediateSpec} to this instance.
      *
      * @param namedObjectId Id of the named object.
