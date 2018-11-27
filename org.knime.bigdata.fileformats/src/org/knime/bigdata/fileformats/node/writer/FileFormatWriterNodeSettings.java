@@ -103,6 +103,7 @@ public class FileFormatWriterNodeSettings<X> {
         m_formatFactory = factory;
         m_mappingModel = m_formatFactory.getTypeMappingModel(CFKEY_TYPE_MAPPING,
                 DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+        m_checkDirContent.setEnabled(false);
     }
 
     /**

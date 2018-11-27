@@ -180,6 +180,7 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
             throws NotConfigurableException {
        m_warningLable.setVisible(false);
+       m_settings.getcheckDirContentModel().setEnabled(false);
         try {
             m_settings.loadSettingsFrom(settings);
         } catch (final InvalidSettingsException e) {
