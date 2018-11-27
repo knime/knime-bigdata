@@ -40,12 +40,13 @@ import org.knime.bigdata.spark2_1.api.TypeConverters;
  */
 @SparkClass
 public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput> {
-    private final static long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(SparkSQLJob.class.getName());
+    private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(SparkSQLJob.class.getName());
 
     @Override
+    @SuppressWarnings("resource")
     public SparkSQLJobOutput runJob(final SparkContext sparkContext, final SparkSQLJobInput input, final NamedObjects namedObjects)
-            throws KNIMESparkException, Exception {
+            throws KNIMESparkException {
 
         try {
             final SparkSession sparkSession = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
@@ -58,7 +59,11 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
             final String namedInputObject = input.getFirstNamedInputObject();
             final Dataset<Row> inputDataFrame = namedObjects.getDataFrame(namedInputObject);
 
-            inputDataFrame.createTempView(tempTable);
+            // BD-778: dropTempView (see below) might change the persistence of the input data frame,
+            // that's why we have to use a dummy here
+            final Dataset<Row> dummyDataFrame = inputDataFrame.select("*");
+
+            dummyDataFrame.createOrReplaceTempView(tempTable);
             try {
                 final Dataset<Row> outputDataFrame = sparkSession.sql(query);
                 final String namedOutputObject = input.getFirstNamedOutputObject();

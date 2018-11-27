@@ -44,12 +44,12 @@ import org.knime.bigdata.spark1_5.hive.HiveContextProvider.HiveContextAction;
  */
 @SparkClass
 public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput> {
-    private final static long serialVersionUID = 1L;
-    private final static Logger LOGGER = Logger.getLogger(SparkSQLJob.class.getName());
+    private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(SparkSQLJob.class.getName());
 
     @Override
     public SparkSQLJobOutput runJob(final SparkContext sparkContext, final SparkSQLJobInput input, final NamedObjects namedObjects)
-            throws KNIMESparkException, Exception {
+            throws KNIMESparkException {
 
         try {
             final String tempTable = "sparkSQLJob_" + UUID.randomUUID().toString().replace('-', '_');
@@ -67,7 +67,12 @@ public class SparkSQLJob implements SparkJob<SparkSQLJobInput, SparkSQLJobOutput
                 public DataFrame runWithHiveContext(final HiveContext hiveContext) {
                     try {
                         final DataFrame inputDataFrame = hiveContext.createDataFrame(rowRdd, sparkSchema);
-                        inputDataFrame.registerTempTable(tempTable);
+
+                        // BD-778: dropTempView (see below) might change the persistence of the input data frame,
+                        // that's why we have to use a dummy here
+                        final DataFrame dummyDataFrame = inputDataFrame.select("*");
+
+                        dummyDataFrame.registerTempTable(tempTable);
                         return hiveContext.sql(query);
                     } finally {
                         hiveContext.dropTempTable(tempTable);
