@@ -12,7 +12,7 @@
      	   <option name="Input">The file or directory to read.</option>
         </tab>
         <tab name="Type Mapping">
-            Change the database to KNIME type mapping configuration
+            Change the Parquet to KNIME type mapping configuration
             for subsequent nodes by selecting a KNIME type to the given
             Parquet Type.
             The dialog allows you to add new or change existing type mapping rules.

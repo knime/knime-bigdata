@@ -28,16 +28,16 @@
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
     	<tab name="Type Mapping">
-            Change the database to KNIME type mapping configuration
-            for subsequent nodes by selecting a KNIME type to the given
-            ORC Type.
+            Change the KNIME to ORC type mapping configuration
+            for subsequent nodes by selecting a ORC type to the given
+            KNIME Type.
             The dialog allows you to add new or change existing type mapping rules.
          <option name="Mapping by Name">
-            Columns that match the given name (or regular expression) and ORC type will be mapped
-            to the specified KNIME type.
+            Columns that match the given name (or regular expression) and KNIME type will be mapped
+            to the specified ORC type.
          </option>
          <option name="Mapping by Type">
-            Columns that match the given ORC type will be mapped to the specified KNIME type.
+            Columns that match the given KNIME type will be mapped to the specified ORC type.
          </option>
         </tab>
     </fullDescription>
