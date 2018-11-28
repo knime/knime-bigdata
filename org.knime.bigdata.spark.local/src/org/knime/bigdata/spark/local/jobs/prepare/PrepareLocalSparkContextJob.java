@@ -25,9 +25,9 @@ import org.apache.spark.sql.types.DataType;
 import org.knime.bigdata.spark.core.context.util.PrepareContextJobInput;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark2_3.api.NamedObjects;
-import org.knime.bigdata.spark2_3.api.SimpleSparkJob;
-import org.knime.bigdata.spark2_3.api.TypeConverters;
+import org.knime.bigdata.spark2_4.api.NamedObjects;
+import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
+import org.knime.bigdata.spark2_4.api.TypeConverters;
 
 /**
  * Spark job to prepare a newly-created local Spark context.
