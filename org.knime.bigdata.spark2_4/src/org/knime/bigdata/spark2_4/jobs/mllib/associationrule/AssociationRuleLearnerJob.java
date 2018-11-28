@@ -23,6 +23,7 @@ package org.knime.bigdata.spark2_4.jobs.mllib.associationrule;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -35,6 +36,9 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.associationrule.AssociationRuleLearnerJobInput;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
+
+import scala.collection.JavaConversions;
+import scala.collection.Map;
 /**
  * Implements a association rules learner using frequent pattern mining in spark.
  *
@@ -58,7 +62,11 @@ public class AssociationRuleLearnerJob implements SimpleSparkJob<AssociationRule
                 .na().drop("any");
         final String modelUid = "fpgrowth_" + UUID.randomUUID();
 
-        final FPGrowthModel model = new FPGrowthModel(modelUid, freqItemsets);
+        // Parameters added in Spark 2.4, that we don't support right now
+        final Map<Object, Object> itemSupport = JavaConversions.mapAsScalaMap(Collections.emptyMap());
+        final long numTrainingRecords = 0L;
+
+        final FPGrowthModel model = new FPGrowthModel(modelUid, freqItemsets, itemSupport, numTrainingRecords);
         model.setMinConfidence(input.getMinConfidence());
         final Dataset<Row> result = model.associationRules().select(
             explode(col("consequent")).as("Consequent"), col("antecedent").as("Antecedent"),
