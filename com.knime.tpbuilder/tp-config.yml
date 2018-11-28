@@ -19,6 +19,7 @@ properties:
   spark2_1: 2.1.1
   spark2_2: 2.2.0
   spark2_3: 2.3.1
+  spark2_4: 2.4.0
   knime_log4j_version: 1.2.15
   knime_slf4j_version: 1.7.2
   # KNIME contains most jackson.core artifacts in 2.8.9, with some exceptions
@@ -835,6 +836,10 @@ licenses:
   - licenseName: 3-Clause BSD License
     licenseUrl: https://raw.githubusercontent.com/paul-hammant/paranamer/4b7e215b9d1117fd4c5c1290aadcbd2e3ec76d20/LICENSE.txt
     id: [ 'com.thoughtworks.paranamer:paranamer:jar:2.6' ]
+
+  - licenseName: 3-Clause BSD License
+    licenseUrl: https://raw.githubusercontent.com/paul-hammant/paranamer/paranamer-parent-2.8/LICENSE.txt
+    id: [ 'com.thoughtworks.paranamer:paranamer:jar:2.8' ]
     
   - licenseName: Apache License, Version 2.0
     licenseUrl: https://github.com/codehaus/jettison/blob/jettison-1.1/src/main/resources/META-INF/LICENSE
@@ -1203,6 +1208,37 @@ artifactGroups:
           - spark-unsafe_2.11
           - spark-tags_2.11
           - spark-launcher_2.11
+
+  # ##############################################################
+  # Spark 2.4
+  # ##############################################################
+  - name: Spark 2.4 (shallow)
+    multiArtifacts:
+      - group: org.apache.spark
+        version: ${spark2_4}
+        transitive: false
+        artifacts:
+          - spark-core_2.11
+          - spark-sql_2.11
+          - spark-catalyst_2.11
+          - spark-mllib_2.11
+          - spark-mllib-local_2.11
+          - spark-sketch_2.11
+          - spark-hive_2.11
+          - spark-graphx_2.11
+          - spark-unsafe_2.11
+          - spark-tags_2.11
+          - spark-launcher_2.11
+
+    singleArtifacts:
+      - id: org.json4s:json4s-jackson_2.11:3.5.3
+        source: false
+
+      # This is only here because we need the sources to shut up buckminster.
+      # This artifact is being pulled in transitively anyway via json4s, but WITHOUT sources,
+      # which causes buckminster to fail, because we also have paranamer 2.3.0
+      # WITH sources.
+      - id: com.thoughtworks.paranamer:paranamer:jar:2.8
 
   # ##############################################################
   # ORC columnar storage format

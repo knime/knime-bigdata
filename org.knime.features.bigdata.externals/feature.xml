@@ -950,6 +950,13 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="com.thoughtworks.paranamer"
+         download-size="0"
+         install-size="0"
+         version="2.8.0"
+         unpack="false"/>
+
+   <plugin
          id="com.thoughtworks.paranamer.source"
          download-size="0"
          install-size="0"
@@ -961,6 +968,13 @@ propagated with or for interoperation with KNIME.
          download-size="0"
          install-size="0"
          version="2.6.0.knimebd-20180820"
+         unpack="false"/>
+
+   <plugin
+         id="com.thoughtworks.paranamer.source"
+         download-size="0"
+         install-size="0"
+         version="2.8.0"
          unpack="false"/>
 
    <plugin
@@ -1524,6 +1538,13 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="org.apache.spark_2.11"
+         download-size="0"
+         install-size="0"
+         version="2.4.0.knimebd-20180820"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.spark_2.11.source"
          download-size="0"
          install-size="0"
@@ -1549,6 +1570,13 @@ propagated with or for interoperation with KNIME.
          download-size="0"
          install-size="0"
          version="2.3.1.knimebd-20180820"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.spark_2.11.source"
+         download-size="0"
+         install-size="0"
+         version="2.4.0.knimebd-20180820"
          unpack="false"/>
 
    <plugin
@@ -1657,6 +1685,13 @@ propagated with or for interoperation with KNIME.
          unpack="false"/>
 
    <plugin
+         id="org.json4s-merged_2.11"
+         download-size="0"
+         install-size="0"
+         version="3.5.3.knimebd-20180820"
+         unpack="false"/>
+
+   <plugin
          id="org.mortbay.jetty.security"
          download-size="0"
          install-size="0"
@@ -1702,7 +1737,7 @@ propagated with or for interoperation with KNIME.
          id="org.scala-lang.modules.scala-xml"
          download-size="0"
          install-size="0"
-         version="1.0.5"
+         version="1.0.6"
          unpack="false"/>
 
    <plugin
