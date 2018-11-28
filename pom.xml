@@ -35,6 +35,7 @@
 		<module>../knime-on-spark/com.knime.bigdata.knosp.node</module>
 		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_2</module>
 		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_3</module>
+		<module>../knime-on-spark/com.knime.bigdata.knosp.spark2_4</module>
 		<module>../knime-on-spark/com.knime.osgiproxy</module>
 		<module>../knime-on-spark/com.knime.features.bigdata.knosp</module>
 		
@@ -45,10 +46,12 @@
 		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark.node</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_2</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_3</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.mojo.spark2_4</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.spark</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.node</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_2</module>
 		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_3</module>
+		<module>../knime-sparkling-water/org.knime.ext.h2o.spark.spark2_4</module>
 		<module>../knime-sparkling-water/org.knime.features.ext.h2o.spark</module>
 		<module>../knime-sparkling-water/org.knime.features.ext.h2o.mojo.spark</module>
 
@@ -75,6 +78,7 @@
 		<module>org.knime.bigdata.spark2_1</module>
 		<module>org.knime.bigdata.spark2_2</module>
 		<module>org.knime.bigdata.spark2_3</module>
+		<module>org.knime.bigdata.spark2_4</module>
 		<module>org.knime.bigdata.testing</module>
 		<module>org.knime.features.bigdata.connectors</module>
 		<module>org.knime.features.bigdata.externals</module>
