@@ -47,7 +47,7 @@ package org.knime.bigdata.fileformats.node.reader;
 
 import java.io.IOException;
 
-import org.knime.bigdata.fileformats.orc.reader.OrcReadException;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowIterator;
 
@@ -88,7 +88,7 @@ public class DirIterator extends RowIterator {
                     return false;
                 }
             } catch (final IOException | InterruptedException ex) {
-                throw new OrcReadException(ex);
+                throw new BigDataFileFormatException(ex);
             }
             return m_currentIterator.hasNext();
 

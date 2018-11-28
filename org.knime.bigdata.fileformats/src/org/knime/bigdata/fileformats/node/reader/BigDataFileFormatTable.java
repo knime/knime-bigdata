@@ -45,7 +45,8 @@
 
 package org.knime.bigdata.fileformats.node.reader;
 
-import org.knime.bigdata.fileformats.orc.reader.OrcReadException;
+import org.apache.parquet.io.ParquetDecodingException;
+import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
@@ -83,8 +84,10 @@ public class BigDataFileFormatTable implements DataTable {
     public RowIterator iterator() {
         try {
             return m_reader.iterator();
-        } catch (final Exception e) {
-            throw new OrcReadException(e);
+        } catch (final ParquetDecodingException e) {
+            throw new BigDataFileFormatException(e.getCause().getMessage(),e);
+        }catch (final Exception e) {
+            throw new BigDataFileFormatException(e.getMessage(),e);
         }
     }
 }

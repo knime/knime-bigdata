@@ -186,13 +186,13 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             try {
                 safeRow = MappingFramework.map(RowKey.createRowKey(m_index), m_source, m_paths, m_parameters, null);
             } catch (final Exception e1) {
-                throw new OrcReadException(e1);
+                throw new BigDataFileFormatException(e1);
             }
             m_index++;
             try {
                 getExec().checkCanceled();
             } catch (final CanceledExecutionException ex) {
-                throw new OrcReadException(ex);
+                throw new BigDataFileFormatException(ex);
             }
             m_source.next();
 
@@ -200,7 +200,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
                 try {
                     internalNext();
                 } catch (final IOException e) {
-                    throw new OrcReadException(e);
+                    throw new BigDataFileFormatException(e);
                 }
             }
             return safeRow;
