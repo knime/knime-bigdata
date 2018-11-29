@@ -132,7 +132,11 @@ public class ORCRegistrationHelper {
         final ORCCellValueConsumerFactory<InputStream, BytesColumnVector> byteArrayBinaryConsumer = 
                 new ORCCellValueConsumerFactory<>(
                         InputStream.class, TypeDescription.createBinary(), (cv, rowindex, v) -> 
-                        cv.vector[rowindex] = IOUtils.toByteArray(v));
+                        {   
+                            byte[] b = IOUtils.toByteArray(v);
+                            cv.ensureSize(b.length, true);
+                            cv.setRef(rowindex, b, 0, b.length);
+                        });
         primitiveConsumers.add(byteArrayBinaryConsumer);
 
         final ORCCellValueConsumerFactory<Boolean, LongColumnVector> booleanBooleanConsumer =
@@ -301,7 +305,8 @@ public class ORCRegistrationHelper {
         final ORCCellValueProducerFactory<InputStream, BytesColumnVector> binaryBinaryProducer = 
                 new ORCCellValueProducerFactory<>(
                         TypeDescription.createBinary(), InputStream.class, (columnVector, rowInBatchOrZero) ->
-                        new ByteArrayInputStream(columnVector.vector[rowInBatchOrZero]));
+                            new ByteArrayInputStream(columnVector.vector[rowInBatchOrZero] , 
+                                    columnVector.start[rowInBatchOrZero], columnVector.length[rowInBatchOrZero]));
         primitiveProducers.add(binaryBinaryProducer);
 
         final ORCCellValueProducerFactory<String, DecimalColumnVector> bigDecimalDecimalProducer = 
