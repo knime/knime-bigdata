@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./orcwriter-icon.png" type="Sink" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<knimeNode icon="./orcwriter-icon.png" type="Sink" 
+xmlns="http://knime.org/node/v3.1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
     <name>ORC Writer</name>
     
       <shortDescription>
@@ -28,10 +31,12 @@
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
     	<tab name="Type Mapping">
-            Change the KNIME to ORC type mapping configuration
+    	   <description>
+    	   Change the KNIME to ORC type mapping configuration
             for subsequent nodes by selecting a ORC type to the given
             KNIME Type.
             The dialog allows you to add new or change existing type mapping rules.
+    	   </description>
          <option name="Mapping by Name">
             Columns that match the given name (or regular expression) and KNIME type will be mapped
             to the specified ORC type.
