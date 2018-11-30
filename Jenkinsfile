@@ -71,7 +71,7 @@ node {
 			withMaven(maven: 'Maven 3.5') {
 				dir("${env.WORKSPACE}/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars") {
 					sh "rm -f ../*.jar"
-					sh "${maven} clean package"
+					sh "${maven} -Denforcer.skip=true clean package"
 				}
 			}
 		} catch (ex) {
