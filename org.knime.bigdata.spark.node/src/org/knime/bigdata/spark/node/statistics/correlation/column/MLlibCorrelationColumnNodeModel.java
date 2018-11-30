@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark.node.statistics.correlation.column;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
@@ -28,11 +31,14 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.node.statistics.correlation.CorrelationColumnJobOutput;
 import org.knime.bigdata.spark.node.statistics.correlation.CorrelationJobInput;
 import org.knime.bigdata.spark.node.statistics.correlation.MLlibCorrelationMethod;
+import org.knime.core.data.DataColumnProperties;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.renderer.DataValueRenderer;
+import org.knime.core.data.renderer.DoubleValueRenderer.FullPrecisionRendererFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
@@ -132,7 +138,12 @@ public class MLlibCorrelationColumnNodeModel extends SparkNodeModel {
      * @return
      */
     private DataTableSpec createResultSpec() {
-        return new DataTableSpec((new DataColumnSpecCreator("Correlation coefficient", DoubleCell.TYPE)).createSpec());
+        final DataColumnSpecCreator creator = new DataColumnSpecCreator("Correlation coefficient", DoubleCell.TYPE);
+        final Map<String, String> properties = new HashMap<>(1);
+        final String descFullPrecision = new FullPrecisionRendererFactory().getDescription();
+        properties.put(DataValueRenderer.PROPERTY_PREFERRED_RENDERER, descFullPrecision);
+        creator.setProperties(new DataColumnProperties(properties));
+        return new DataTableSpec(creator.createSpec());
     }
 
     private int getColIdx(final DataTableSpec tableSpec, final SettingsModelString col) throws InvalidSettingsException {
