@@ -149,8 +149,6 @@ public class ParquetTypeMappingService
                 new ParquetType(PrimitiveTypeName.INT32, OriginalType.TIME_MILLIS));
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, LocalDateTimeCellFactory.TYPE,
                 new ParquetType(PrimitiveTypeName.INT64, OriginalType.TIMESTAMP_MILLIS));
-        addConsumptionPath(consumerRegistry, defaultConsumptionPaths, PeriodCellFactory.TYPE,
-                new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8));
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, DurationCellFactory.TYPE,
                 new ParquetType(PrimitiveTypeName.BINARY, OriginalType.UTF8));
         addConsumptionPath(consumerRegistry, defaultConsumptionPaths, PeriodCellFactory.TYPE,
@@ -192,10 +190,10 @@ public class ParquetTypeMappingService
                 DataTypeMappingDirection.EXTERNAL_TO_KNIME);
 
         defaultProductionPaths.values().forEach(configuration::addRule);
-        final DataType stringDataType = StringCell.TYPE;
-        for (final PrimitiveTypeName parquetType : PrimitiveTypeName.values()) {
-            findPath(producerRegistry, new ParquetType(parquetType), stringDataType).ifPresent(configuration::addRule);
-        }
+//        final DataType stringDataType = StringCell.TYPE;
+//        for (final PrimitiveTypeName parquetType : PrimitiveTypeName.values()) {
+//            findPath(producerRegistry, new ParquetType(parquetType), stringDataType).ifPresent(configuration::addRule);
+//        }
 
     }
 
