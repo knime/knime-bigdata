@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * OSGI Bundle Activator for the Apache Livy connector plugin.
- * 
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LivyPlugin extends AbstractUIPlugin {
@@ -40,7 +40,7 @@ public class LivyPlugin extends AbstractUIPlugin {
      * Compatibility checker for the Spark versions currently supported by the Livy connector plugin.
      */
     public static final CompatibilityChecker LIVY_SPARK_VERSION_CHECKER =
-        new FixedVersionCompatibilityChecker(SparkVersion.V_2_2, SparkVersion.V_2_3);
+        new FixedVersionCompatibilityChecker(SparkVersion.V_2_2, SparkVersion.V_2_3, SparkVersion.V_2_4);
 
     /**
      * Holds the singleton instance of the Apache Livy connector plugin, once it has been created by the OSGI framework.
@@ -60,7 +60,7 @@ public class LivyPlugin extends AbstractUIPlugin {
 
     /**
      * This method is called upon plug-in activation.
-     * 
+     *
      * @param context The bundle context.
      * @throws Exception If cause by super class.
      */
@@ -74,7 +74,7 @@ public class LivyPlugin extends AbstractUIPlugin {
 
     /**
      * This method is called when the plug-in is stopped.
-     * 
+     *
      * @param context The bundle context.
      * @throws Exception If cause by super class.
      */
