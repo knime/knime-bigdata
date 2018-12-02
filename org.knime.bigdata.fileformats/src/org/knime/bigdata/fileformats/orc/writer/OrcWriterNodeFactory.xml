@@ -30,7 +30,7 @@ xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
       	  <option name="Chunk size in rows">The maximum size for an individual chunk.</option>
       	  <option name="Number of local chunks">The number of chunks that can be stored temporarily on disc, while the next chunk is written.</option>
     	</tab>
-    	<tab name="Type Mapping">
+    	<tab name="Output Type Mapping">
     	   <description>
     	   Change the KNIME to ORC type mapping configuration
             for subsequent nodes by selecting a ORC type to the given

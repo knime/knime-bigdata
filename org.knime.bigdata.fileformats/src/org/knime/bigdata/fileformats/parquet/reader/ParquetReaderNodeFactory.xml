@@ -15,7 +15,7 @@ xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
          <tab name="Options">
      	   <option name="Input">The file or directory to read.</option>
         </tab>
-        <tab name="Type Mapping">
+        <tab name="Input Type Mapping">
          <description>
             Change the Parquet to KNIME type mapping configuration
             for subsequent nodes by selecting a KNIME type to the given

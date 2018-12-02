@@ -73,6 +73,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
@@ -165,7 +166,7 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
 
         final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
         typeMappingBox.add(Box.createHorizontalGlue());
-        m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel());
+        m_inputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel(), true);
         typeMappingBox.add(m_inputTypeMappingComponent.getComponentPanel());
         typeMappingBox.add(Box.createHorizontalGlue());
         addTab("Type Mapping", typeMappingBox);
@@ -214,7 +215,7 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
         final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         m_inputTypeMappingComponent.setMappingService(mappingService);
         m_inputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		mappingService.newDefaultKnimeToExternalMappingConfiguration());
+        		mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL));
         m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
     }
 

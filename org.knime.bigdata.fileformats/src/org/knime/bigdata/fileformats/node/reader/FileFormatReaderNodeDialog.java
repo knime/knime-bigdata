@@ -65,6 +65,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.datatype.mapping.DataTypeMappingDirection;
 import org.knime.datatype.mapping.DataTypeMappingService;
 import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 
@@ -112,7 +113,7 @@ public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
 
         final Box typeMappingBox = new Box(BoxLayout.Y_AXIS);
         typeMappingBox.add(Box.createHorizontalGlue());
-        m_outputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel());
+        m_outputTypeMappingComponent = new DialogComponentDataTypeMapping<>(m_settings.getMappingModel(), true);
         typeMappingBox.add(m_outputTypeMappingComponent.getComponentPanel());
         typeMappingBox.add(Box.createHorizontalGlue());
 
@@ -142,7 +143,7 @@ public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
         }
         final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         m_outputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		mappingService.newDefaultExternalToKnimeMappingConfiguration());
+        		mappingService.createMappingConfiguration(DataTypeMappingDirection.EXTERNAL_TO_KNIME));
         m_filePanel.setSelection(m_settings.getFileName());
         m_outputTypeMappingComponent.setMappingService(mappingService);
         m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);

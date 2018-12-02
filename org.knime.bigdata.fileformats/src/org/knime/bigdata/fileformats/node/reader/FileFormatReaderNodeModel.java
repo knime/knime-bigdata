@@ -66,6 +66,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -89,6 +90,9 @@ import org.knime.datatype.mapping.DataTypeMappingService;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class FileFormatReaderNodeModel<X> extends NodeModel {
+
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatReaderNodeModel.class);
+
     private final FileFormatReaderNodeSettings<X> m_settings;
 	/**
      * Constructor for the node model.
@@ -123,8 +127,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
         final DataTypeMappingService<X, ?, ?> mappingService =
     			m_settings.getFormatFactory().getTypeMappingService();
         	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
-            		mappingService.newDefaultExternalToKnimeMappingConfiguration().with(
-            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
+            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
 		final AbstractFileFormatReader reader = getReader(sourceFile, exec, outputDataTypeMappingConfiguration);
         return new BigDataFileFormatTable(reader);
     }
@@ -142,6 +145,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    	initializeTypeMappingIfNecessary();
         ConnectionInformation connInfo = null;
         final ConnectionInformationPortObjectSpec connectionSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
         if (m_settings.getFileName().isEmpty()) {
@@ -163,8 +167,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
     		final DataTypeMappingService<X, ?, ?> mappingService =
     			m_settings.getFormatFactory().getTypeMappingService();
         	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
-            		mappingService.newDefaultExternalToKnimeMappingConfiguration().with(
-            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
+            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
             // Create a reader to get the generated TableSpec
             final RemoteFile<Connection> remoteFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
                     connInfo);
@@ -180,6 +183,27 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
 
         } catch (final Exception e) {
             throw new InvalidSettingsException(e);
+        }
+    }
+
+    /**
+     * This method ensures that the default type mapping of the give {@link DataTypeMappingService} is copied into the
+     * node models {@link DataTypeMappingConfiguration}s if they are empty which is the case when a new node is created.
+     * The node dialog itself prevents the user from removing all type mappings so they can only be empty during
+     * Initialisation.
+     */
+    private void initializeTypeMappingIfNecessary() {
+        try {
+        	final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+            final DataTypeMappingConfiguration<X> origExternalToKnimeConf =
+            		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+            if (origExternalToKnimeConf.getTypeRules().isEmpty() && origExternalToKnimeConf.getNameRules().isEmpty()) {
+                final DataTypeMappingConfiguration<X> combinedConf =
+                        origExternalToKnimeConf.with(mappingService.newDefaultExternalToKnimeMappingConfiguration());
+                m_settings.getMappingModel().setDataTypeMappingConfiguration(combinedConf);
+            }
+        } catch (final InvalidSettingsException e) {
+            LOGGER.warn("Could not initialize type mapping with default rules.", e);
         }
     }
 

@@ -154,6 +154,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
 
+    	initializeTypeMappingIfNecessary();
         final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
         if (connSpec != null && !connSpec.getConnectionInformation().getProtocol()
                 .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
@@ -185,6 +186,27 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
             CheckUtils.checkDestinationFile(m_settings.getFileNameWithSuffix(), m_settings.getFileOverwritePolicy());
         }
         return new DataTableSpec[] {};
+    }
+
+    /**
+     * This method ensures that the default type mapping of the give {@link DataTypeMappingService} is copied into the
+     * node models {@link DataTypeMappingConfiguration}s if they are empty which is the case when a new node is created.
+     * The node dialog itself prevents the user from removing all type mappings so they can only be empty during
+     * Initialisation.
+     */
+    private void initializeTypeMappingIfNecessary() {
+        try {
+        	final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+            final DataTypeMappingConfiguration<X> origExternalToKnimeConf =
+            		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+            if (origExternalToKnimeConf.getTypeRules().isEmpty() && origExternalToKnimeConf.getNameRules().isEmpty()) {
+                final DataTypeMappingConfiguration<X> combinedConf =
+                        origExternalToKnimeConf.with(mappingService.newDefaultKnimeToExternalMappingConfiguration());
+                m_settings.getMappingModel().setDataTypeMappingConfiguration(combinedConf);
+            }
+        } catch (final InvalidSettingsException e) {
+            LOGGER.warn("Could not initialize type mapping with default rules.", e);
+        }
     }
 
     /**
@@ -297,7 +319,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        if ((settings.getString(FileFormatWriterNodeSettings.CFGKEY_FILE) == null) || 
+        if (settings.getString(FileFormatWriterNodeSettings.CFGKEY_FILE) == null ||
                 settings.getString(FileFormatWriterNodeSettings.CFGKEY_FILE).isEmpty()) {
             throw new InvalidSettingsException("No destination location provided! Please enter a valid location.");
         }
@@ -361,8 +383,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
         exec.setMessage("Starting to write File.");
 		final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         final DataTypeMappingConfiguration<X> mappingConfiguration =
-        		mappingService.newDefaultKnimeToExternalMappingConfiguration().with(
-        				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService));
+        		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
         try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile, mappingConfiguration)) {
 
             for (DataRow row; (row = input.poll()) != null;) {
