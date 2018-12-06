@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.bigdata.testing"
       label="KNIME Testing feature for big data extensions"
-      version="2.4.0.qualifier"
+      version="2.5.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
@@ -737,7 +737,6 @@ propagated with or for interoperation with KNIME.
       <import feature="org.knime.features.ext.h2o.mojo.spark"/>
       <import feature="org.knime.features.ext.h2o.spark"/>
       <import feature="org.knime.features.testingapplication"/>
-      
       <import feature="com.knime.features.bigdata.knosp"/>
       <import feature="org.knime.features.ext.perl"/>
       <import feature="org.knime.features.ext.libsvm"/>
