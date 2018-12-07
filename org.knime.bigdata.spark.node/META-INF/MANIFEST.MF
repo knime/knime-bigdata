@@ -70,7 +70,7 @@ Export-Package: org.knime.bigdata.spark.node.io.database.reader,
   org.knime.bigdata.spark.node.util.rdd.persist,
   org.knime.bigdata.spark.node.util.rdd.unpersist
 Require-Bundle: org.knime.base;bundle-version="[3.6.0,4.0.0)",
-  org.knime.bigdata.spark.core;bundle-version="[2.4.0,2.5.0)",
+  org.knime.bigdata.spark.core;bundle-version="[2.5.0,2.6.0)",
   org.knime.workbench.repository;bundle-version="[3.0.0,4.0.0)",
   org.knime.base.filehandling;bundle-version="[3.0.0,4.0.0)",
   org.knime.bigdata.filehandling;bundle-version="3.6.0",
