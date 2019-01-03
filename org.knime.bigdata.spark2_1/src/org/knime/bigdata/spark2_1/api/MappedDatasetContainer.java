@@ -134,7 +134,7 @@ public class MappedDatasetContainer implements Serializable {
                     for (int j = 0; j < numValues; j++) {
                         currentMapping = mappingIter.next();
                         String name = oldFields[i].name() + "_" + currentMapping.m_nominalValue;
-                        fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, false));
+                        fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, true));
                         appendedColumns.add(name);
                     }
                 }
@@ -144,7 +144,7 @@ public class MappedDatasetContainer implements Serializable {
             for (int i = 0; i < oldFields.length; i++) {
                 if (mappings.hasMappingForColumn(i)) {
                     String name = oldFields[i].name() + NominalValueMapping.NUMERIC_COLUMN_NAME_POSTFIX;
-                    fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, false));
+                    fields.add(DataTypes.createStructField(name, DataTypes.DoubleType, true));
                     appendedColumns.add(name);
                 }
             }

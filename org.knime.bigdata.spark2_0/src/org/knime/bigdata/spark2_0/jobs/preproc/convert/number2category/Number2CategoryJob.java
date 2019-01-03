@@ -126,7 +126,7 @@ public class Number2CategoryJob implements SimpleSparkJob<Number2CategoryJobInpu
 
         for (int idx : columnIdsList) {
             String name = oldFields[idx].name() + colSuffix;
-            fields.add(DataTypes.createStructField(name, DataTypes.StringType, false));
+            fields.add(DataTypes.createStructField(name, DataTypes.StringType, true));
         }
 
         return DataTypes.createStructType(fields);
