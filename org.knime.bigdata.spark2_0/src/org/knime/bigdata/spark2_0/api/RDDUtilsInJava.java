@@ -85,7 +85,14 @@ public class RDDUtilsInJava {
                     if (mappings.hasMappingForColumn(ix)) {
                         Object val = row.get(ix);
                         if (val == null) {
-                            builder.add(null);
+                            if (mappings.getType() == MappingType.BINARY) {
+                                int numValues = mappings.getNumberOfValues(ix);
+                                for (int i = 0; i < numValues; i++) {
+                                    builder.add(0.0d);
+                                }
+                            } else {
+                                builder.add(null);
+                            }
                         } else {
                             Integer labelOrIndex = mappings.getNumberForValue(ix, val.toString());
                             if (mappings.getType() == MappingType.BINARY) {
