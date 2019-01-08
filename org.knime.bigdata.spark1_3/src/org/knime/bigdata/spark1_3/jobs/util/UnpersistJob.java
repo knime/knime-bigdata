@@ -31,7 +31,7 @@ import org.knime.bigdata.spark1_3.api.NamedObjects;
 import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
 
 /**
- * Unpersists the given named RDD and remove it from the named objects.
+ * Unpersists the given RDD.
  *
  * @author Tobias Koetter, KNIME.com
  */
@@ -51,7 +51,6 @@ public class UnpersistJob implements SimpleSparkJob<UnpersistJobInput> {
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(name);
         LOGGER.info("Unpersisting: " + name);
         rowRDD.unpersist();
-        namedObjects.deleteNamedObject(name);
         LOGGER.info(name + " successful unpersisted");
     }
 }
