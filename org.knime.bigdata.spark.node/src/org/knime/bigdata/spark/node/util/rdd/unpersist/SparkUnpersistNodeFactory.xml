@@ -9,7 +9,6 @@
             This node unpersists the incoming DataFrame/RDD e.g. removes the DataFrame/RDD from the cache. For details about caching DataFrames/RDDs 
             see the
             <a href="http://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence">Spark documentation</a>.
-            <p><b>Notice:</b> The DataFrame/RDD is no longer available once the node is executed.</p> 
         </intro>
     </fullDescription>
 
