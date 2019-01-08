@@ -292,9 +292,11 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
                     throws Exception {
-                final PortObjectInput portObj = (PortObjectInput) inputs[0];
+                
                 final RowOutput out = (RowOutput) outputs[0];
-                final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject) portObj.getPortObject();
+                final PortObjectInput portObj = (PortObjectInput) inputs[0];
+                final ConnectionInformationPortObject connInfoObj = portObj != null ? 
+                        (ConnectionInformationPortObject) portObj.getPortObject() : null;
                 try {
                     final BigDataFileFormatTable table = createTable(connInfoObj, exec);
                     final RowIterator rowIterator = table.iterator();
