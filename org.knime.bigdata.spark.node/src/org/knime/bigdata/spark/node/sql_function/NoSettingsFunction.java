@@ -64,12 +64,12 @@ public abstract class NoSettingsFunction implements SparkSQLFunction, Aggregatio
 
     @Override
     public String getFuncNameColNameLabel(final String columnName, final DataTableSpec inSpec) {
-        return getId() + "(" + columnName + ")";
+        return getLabel() + "(" + columnName + ")";
     }
 
     @Override
     public String getColNameFuncNameLabel(final String columnName, final DataTableSpec inSpec) {
-        return columnName + "(" + getId() + ")";
+        return columnName + "(" + getLabel() + ")";
     }
 
     /** @return the name of the function used in the column name */

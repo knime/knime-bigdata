@@ -51,6 +51,7 @@ import org.apache.spark.sql.Column;
 import org.apache.spark.sql.catalyst.expressions.Expression;
 import org.apache.spark.sql.catalyst.expressions.Literal;
 import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -83,6 +84,9 @@ public class Spark_2_2_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
         "covar_samp", "first", "kurtosis", "last", "max", "mean", "min", "skewness",
         "stddev_samp", "stddev_pop", "sum", "sum_distinct", "var_samp", "var_pop",
 
+        /* special boolean types, that needs a cast of the input column to integer */
+        "sum_boolean", "sum_distinct_boolean",
+
         "window"
     };
 
@@ -99,10 +103,11 @@ public class Spark_2_2_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
     private Column getFunctionColumn(final SparkSQLFunctionJobInput input, final Column inputColumn) {
         final String name = input.getFunction().toLowerCase();
         final int args = input.getArgCount();
+        final Column doubleColumn = inputColumn.cast(DataTypes.DoubleType);
         final Column column;
 
         if ("avg".equals(name)) {
-            column = avg(inputColumn);
+            column = avg(doubleColumn);
         } else if ("collect_list".equals(name)) {
             column = collect_list(inputColumn);
         } else if ("collect_set".equals(name)) {
@@ -110,41 +115,45 @@ public class Spark_2_2_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
         } else if ("column".equals(name)) {
             column = inputColumn;
         } else if ("corr".equals(name) && args == 2) {
-            column = corr(inputColumn, column((String) getArg(input, 1)));
+            column = corr(doubleColumn, getDoubleCol(input, 1));
         } else if ("count".equals(name)) {
             column = count(inputColumn);
         } else if ("count_distinct".equals(name) && args >= 1) {
             column = countDistinct(inputColumn, getAdditionalColumns(input));
         } else if ("covar_pop".equals(name) && args == 2) {
-            column = covar_pop(inputColumn, column((String) getArg(input, 1)));
+            column = covar_pop(doubleColumn, getDoubleCol(input, 1));
         } else if ("covar_samp".equals(name) && args == 2) {
-            column = covar_samp(inputColumn, column((String) getArg(input, 1)));
+            column = covar_samp(doubleColumn, getDoubleCol(input, 1));
         } else if ("first".equals(name) && args == 2) {
             column = first(inputColumn, (boolean) getArg(input, 1));
         } else if ("kurtosis".equals(name)) {
-            column = kurtosis(inputColumn);
+            column = kurtosis(doubleColumn);
         } else if ("last".equals(name) && args == 2) {
             column = last(inputColumn, (boolean) getArg(input, 1));
         } else if ("max".equals(name)) {
             column = max(inputColumn);
         } else if ("mean".equals(name)) {
-            column = mean(inputColumn);
+            column = mean(doubleColumn);
         } else if ("min".equals(name)) {
             column = min(inputColumn);
         } else if ("skewness".equals(name)) {
-            column = skewness(inputColumn);
+            column = skewness(doubleColumn);
         } else if ("stddev_samp".equals(name)) { // alias: stddev
-            column = stddev_samp(inputColumn);
+            column = stddev_samp(doubleColumn);
         } else if ("stddev_pop".equals(name)) {
-            column = stddev_pop(inputColumn);
+            column = stddev_pop(doubleColumn);
         } else if ("sum".equals(name)) {
             column = sum(inputColumn);
+        } else if ("sum_boolean".equals(name)) {
+            column = sum(inputColumn.cast(DataTypes.IntegerType));
         } else if ("sum_distinct".equals(name)) {
             column = sumDistinct(inputColumn);
+        } else if ("sum_distinct_boolean".equals(name)) {
+            column = sumDistinct(inputColumn.cast(DataTypes.IntegerType));
         } else if ("var_samp".equals(name)) { // alias: variance
-            column = var_samp(inputColumn);
+            column = var_samp(doubleColumn);
         } else if ("var_pop".equals(name)) {
-            column = var_pop(inputColumn);
+            column = var_pop(doubleColumn);
         } else if ("window".equals(name) && args == 2) {
             column = window(inputColumn, (String) getArg(input, 1));
         } else if ("window".equals(name) && args == 3) {
@@ -205,7 +214,7 @@ public class Spark_2_2_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
     }
 
     /** @return converted function argument */
-    private Object getArg(final SparkSQLFunctionJobInput agg, final int i) {
+    private static Object getArg(final SparkSQLFunctionJobInput agg, final int i) {
         final IntermediateToSparkConverter<? extends DataType> converter = TypeConverters.getConverter(agg.getArgType(i));
         return converter.convert(agg.getArg(i));
     }
@@ -218,5 +227,14 @@ public class Spark_2_2_SQLFunctionFactory implements SparkSQLFunctionFactory<Col
             result.add(column((String) getArg(agg, i)));
         }
         return asScalaBuffer(result);
+    }
+
+    /**
+     * @param input function job input
+     * @param i argument index containing the column name
+     * @return input column casted to double
+     */
+    private static Column getDoubleCol(final SparkSQLFunctionJobInput input, final int i) {
+        return column((String) getArg(input, i)).cast(DataTypes.DoubleType);
     }
 }
