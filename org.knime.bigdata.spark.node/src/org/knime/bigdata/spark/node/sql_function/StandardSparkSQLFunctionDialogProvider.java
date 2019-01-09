@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.node.sql_function.agg.MultiColumnAggregation;
 import org.knime.bigdata.spark.node.sql_function.agg.SetAggregation;
 import org.knime.bigdata.spark.node.sql_function.agg.SimpleAggregation;
 import org.knime.bigdata.spark.node.sql_function.agg.SumAggregation;
+import org.knime.bigdata.spark.node.sql_function.agg.SumBooleanAggregation;
 import org.knime.bigdata.spark.node.sql_function.agg.TwoColumnAggregation;
 import org.knime.core.data.DoubleValue;
 
@@ -73,8 +74,12 @@ public class StandardSparkSQLFunctionDialogProvider extends SparkSQLFunctionDial
                 "stddev_pop", "Returns the population standard deviation of values in a group", DoubleValue.class),
             new SumAggregation.Factory(
                 "sum", "Returns the sum of all values in the given column"),
+            new SumBooleanAggregation.Factory(
+                "sum_boolean", "sum", "Returns the sum of all values in the given column"),
             new SumAggregation.Factory(
                 "sum_distinct", "Returns the sum of distinct values in the given column"),
+            new SumBooleanAggregation.Factory(
+                "sum_distinct_boolean", "sum_distinct", "Returns the sum of distinct values in the given column"),
             new SimpleAggregation.Factory(
                 "var_samp", "Returns the unbiased variance of the values in a group", DoubleValue.class),
             new SimpleAggregation.Factory(

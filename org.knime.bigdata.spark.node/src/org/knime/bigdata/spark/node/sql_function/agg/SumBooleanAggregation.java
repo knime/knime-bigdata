@@ -25,15 +25,16 @@ import org.knime.bigdata.spark.node.sql_function.SparkSQLAggregationFunction;
 import org.knime.bigdata.spark.node.sql_function.SparkSQLFunctionDialogFactory;
 import org.knime.core.data.BooleanValue;
 import org.knime.core.data.DataType;
-import org.knime.core.data.DoubleValue;
 
 /**
- * Returns the sum calculated from values of a group aggregation function. This version is compatible numeric values,
- * but not to boolean values. See {@link SumBooleanAggregation} for booleans.
+ * Returns the sum calculated from values of a group aggregation function. This version is only compatible to boolean
+ * values. It has an ID and a label to present it in the dialog like the normal {@link SumAggregation} function for
+ * other numerics.
  *
  * @author Sascha Wolke, KNIME GmbH
  */
-public class SumAggregation extends NoSettingsFunction implements SparkSQLAggregationFunction {
+public class SumBooleanAggregation extends NoSettingsFunction implements SparkSQLAggregationFunction {
+    private final String m_label;
 
     /** Function factory */
     public static class Factory implements SparkSQLFunctionDialogFactory<SparkSQLAggregationFunction> {
@@ -41,10 +42,11 @@ public class SumAggregation extends NoSettingsFunction implements SparkSQLAggreg
 
         /**
          * @param id the name of the function
+         * @param label the label of the function shown in the dialog
          * @param description the description
          */
-        public Factory(final String id, final String description) {
-            m_instance = new SumAggregation(id, description);
+        public Factory(final String id, final String label, final String description) {
+            m_instance = new SumBooleanAggregation(id, label, description);
         }
 
         @Override
@@ -56,14 +58,21 @@ public class SumAggregation extends NoSettingsFunction implements SparkSQLAggreg
 
     /**
      * @param id the name of the function
+     * @param label the name of the function shown in the dialog
      * @param description the description
      */
-    public SumAggregation(final String id, final String description) {
+    public SumBooleanAggregation(final String id, final String label, final String description) {
         super(id, description);
+        m_label = label;
+    }
+
+    @Override
+    public String getLabel() {
+        return m_label;
     }
 
     @Override
     public boolean isCompatible(final DataType type) {
-        return type.isCompatible(DoubleValue.class) && !type.isCompatible(BooleanValue.class);
+        return type.isCompatible(BooleanValue.class);
     }
 }

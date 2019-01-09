@@ -46,7 +46,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class TwoColumnAggregation implements SparkSQLAggregationFunction {
     private final String m_id;
-    private final String m_label;
     private final String m_description;
     private final Class<DataValue> m_compatibleClass;
 
@@ -97,7 +96,6 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
     @SuppressWarnings("unchecked")
     public TwoColumnAggregation(final String name, final String description, final Class<? extends DataValue> compatibleClass) {
         m_id = name;
-        m_label = name;
         m_description = description;
         m_compatibleClass = (Class<DataValue>)compatibleClass;
 
@@ -131,7 +129,7 @@ public class TwoColumnAggregation implements SparkSQLAggregationFunction {
 
     @Override
     public String getLabel() {
-        return m_label;
+        return m_id;
     }
 
     @Override
