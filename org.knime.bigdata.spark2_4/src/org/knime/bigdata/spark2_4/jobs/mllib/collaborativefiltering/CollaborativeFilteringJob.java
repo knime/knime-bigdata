@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark2_4.jobs.mllib.collaborativefiltering;
 
+import static org.apache.spark.sql.functions.col;
+
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -29,6 +31,7 @@ import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataTypes;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.mllib.collaborativefiltering.CollaborativeFilteringJobInput;
@@ -184,11 +187,15 @@ public class CollaborativeFilteringJob implements SparkJob<CollaborativeFilterin
      * Configure and train model.
      *
      * @param input job configuration
-     * @param aInputData training data set with ratings
+     * @param inputDataset training data set with ratings
      * @return model trained model
      */
-    private ALSModel execute(final CollaborativeFilteringJobInput input, final Dataset<Row> dataset,
+    private ALSModel execute(final CollaborativeFilteringJobInput input, final Dataset<Row> inputDataset,
             final String userColumn, final String itemColumn, final String ratingColumn, final String predicColumn) {
+
+        // ensure that rating contains floats
+        final Dataset<Row> dataset = inputDataset.select(
+            col(userColumn), col(itemColumn), col(ratingColumn).cast(DataTypes.FloatType));
 
         ALS solver = new ALS()
             .setUserCol(userColumn)

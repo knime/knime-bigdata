@@ -18,13 +18,15 @@
 		</intro>
 
 		<option name="User column">
-			The user column. Supports only integer columns.
+			The user column. Supports long and integer columns, however the node will fail, if the actual values are outside of the integer range,
+			due to limitations of Spark MLlib.
 		</option>
 		<option name="Product column">
-		  The product column. Supports only integer columns.
+		  The product column. Supports long and integer columns, however the node will fail, if the actual values are outside of the integer range,
+		  due to limitations of Spark MLlib.
 		</option>
 		<option name="Rating column">
-		  The rating column that contains the rating of the user for the given product. Supports only double columns.
+		  The rating column that contains the rating of the user for the given product. Supports numeric columns.
 		</option>
 		<option name="Lambda">Specifies the regularization parameter in ALS.</option>
 		<option name="Alpha">Is a parameter applicable to the implicit feedback variant of ALS that governs the 

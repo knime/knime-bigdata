@@ -33,7 +33,6 @@ import javax.swing.JPanel;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.data.IntValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -51,12 +50,10 @@ import org.knime.core.node.port.PortObjectSpec;
  * @author koetter
  */
 public class MLlibCollaborativeFilteringNodeDialog extends NodeDialogPane {
-    @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_userCol = new DialogComponentColumnNameSelection(
-        MLlibCollaborativeFilteringNodeModel.createUserColModel(), "User column: ", 0, IntValue.class);
-    @SuppressWarnings("unchecked")
+        MLlibCollaborativeFilteringNodeModel.createUserColModel(), "User column: ", 0, new ProductOrUserColumnFilter());
     private final DialogComponentColumnNameSelection m_productCol = new DialogComponentColumnNameSelection(
-        MLlibCollaborativeFilteringNodeModel.createProductColModel(), "Product column: ", 0, IntValue.class);
+        MLlibCollaborativeFilteringNodeModel.createProductColModel(), "Product column: ", 0, new ProductOrUserColumnFilter());
     @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_ratingCol = new DialogComponentColumnNameSelection(
         MLlibCollaborativeFilteringNodeModel.createRatingColModel(), "Rating column: ", 0, DoubleValue.class);
