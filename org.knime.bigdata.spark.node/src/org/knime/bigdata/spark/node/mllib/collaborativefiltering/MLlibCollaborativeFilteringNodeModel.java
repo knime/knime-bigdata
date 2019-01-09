@@ -67,6 +67,8 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
 
     private static final String OUTPUT_COL_NAME = "Rating";
 
+    private static final String SAME_INPUT_COLS_ERROR = "Different input columns for user, product and rating required.";
+
     private final SettingsModelString m_userCol = createUserColModel();
     private final SettingsModelString m_productCol = createProductColModel();
     private final SettingsModelString m_ratingCol = createRatingColModel();
@@ -227,12 +229,10 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         Set<String> colNames = new HashSet<>(3);
         final String[] featureColNames = new String[2];
         featureColNames [CollaborativeFilteringJobInput.MLLIB_SETTINGS_USER_COL_IDX] = m_userCol.getStringValue();
-        if (!colNames.add(m_userCol.getStringValue())) {
-            throw new InvalidSettingsException("Duplicate column name found");
-        }
+        colNames.add(m_userCol.getStringValue());
         featureColNames [CollaborativeFilteringJobInput.MLLIB_SETTINGS_PRODUCT_COL_IDX] = m_productCol.getStringValue();
         if (!colNames.add(m_productCol.getStringValue())) {
-            throw new InvalidSettingsException("Duplicate column name found");
+            throw new InvalidSettingsException(SAME_INPUT_COLS_ERROR);
         }
         final Integer[] featureColIdxs = new Integer[2];
         featureColIdxs[CollaborativeFilteringJobInput.MLLIB_SETTINGS_USER_COL_IDX] =
@@ -240,7 +240,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
         featureColIdxs[CollaborativeFilteringJobInput.MLLIB_SETTINGS_PRODUCT_COL_IDX] =
                 getColumnIndex(tableSpec, m_productCol, "Product");
         if (!colNames.add(m_ratingCol.getStringValue())) {
-            throw new InvalidSettingsException("Duplicate column name found");
+            throw new InvalidSettingsException(SAME_INPUT_COLS_ERROR);
         }
         return new MLlibSettings(tableSpec, m_ratingCol.getStringValue(),
             getColumnIndex(tableSpec, m_ratingCol, "Ratings"), null, Arrays.asList(featureColNames), featureColIdxs,
