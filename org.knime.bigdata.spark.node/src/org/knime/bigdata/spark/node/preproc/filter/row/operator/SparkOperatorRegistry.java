@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
+import java.util.function.Supplier;
+
 import org.knime.core.node.rowfilter.OperatorPanel;
 import org.knime.core.node.rowfilter.OperatorValidation;
 import org.knime.core.node.rowfilter.panel.SingleFieldPanel;
@@ -44,8 +46,18 @@ public class SparkOperatorRegistry extends AbstractOperatorRegistry<SparkOperato
         final OperatorValidation oneOperandValidation = new SingleOperandValidation();
         final OperatorValidation twoOperandsValidation = new TwoOperandsValidation();
 
-        final OperatorPanel singleFieldPanel = new SingleFieldPanel();
-        final OperatorPanel twoFieldsPanel = new TwoFieldsPanel();
+        final Supplier<OperatorPanel> singleFieldPanel = new Supplier<OperatorPanel>() {
+            @Override
+            public OperatorPanel get() {
+                return new SingleFieldPanel();
+            }
+        };
+        final Supplier<OperatorPanel> twoFieldsPanel = new Supplier<OperatorPanel>() {
+            @Override
+            public OperatorPanel get() {
+                return new TwoFieldsPanel();
+            }
+        };
 
         // EQUAL
         final SparkOperatorFunction equalFunction = new SparkOneParameterOperatorFunction("==");
