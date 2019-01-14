@@ -209,7 +209,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
 
         final JobRunFactory<ScorerJobInput, AccuracyScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final ScorerJobInput jobInput = new ScorerJobInput(inPort.getTableName(), tableSpec.findColumnIndex(m_firstCompareColumn),
-            tableSpec.findColumnIndex(m_secondCompareColumn));
+            tableSpec.findColumnIndex(m_secondCompareColumn), false /* TODO missing values */);
         final AccuracyScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
         if (jobOutput.getRowCount() == 0) {

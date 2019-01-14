@@ -60,7 +60,7 @@ public class NumericScorerJob extends AbstractScorerJob {
      */
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) throws KNIMESparkException {
-        final Integer classCol = input.getActualColIdx();
+        final Integer classCol = input.getRefColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
 
         final JavaRDD<Row> filtered = rowRDD.filter(new Function<Row, Boolean>() {
@@ -121,7 +121,7 @@ public class NumericScorerJob extends AbstractScorerJob {
         LOGGER.info("root mean squared deviation: "+ Math.sqrt(squaredError));
         LOGGER.info("mean signed difference: "+ signedDiff);
 
-        return new NumericScorerJobOutput(nRows, (1 - squaredError / ssErrorNullModel),
-            absError, squaredError, Math.sqrt(squaredError), signedDiff, classCol, predictionCol);
+        return new NumericScorerJobOutput((1 - squaredError / ssErrorNullModel),
+            absError, squaredError, Math.sqrt(squaredError), signedDiff, 0 /* TODO missing values */);
     }
 }

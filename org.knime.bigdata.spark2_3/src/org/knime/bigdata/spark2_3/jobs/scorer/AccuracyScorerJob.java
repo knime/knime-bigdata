@@ -49,7 +49,7 @@ public class AccuracyScorerJob extends AbstractScorerJob {
 
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) {
-        final Integer classCol = input.getActualColIdx();
+        final Integer classCol = input.getRefColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
         final JavaRDD<Row> rowRDD = dataset.javaRDD();
 
@@ -82,8 +82,8 @@ public class AccuracyScorerJob extends AbstractScorerJob {
             i++;
         }
 
-        return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
-            labels);
+        return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount,
+            labels, 0 /* TODO missing values */);
     }
 
     @Override

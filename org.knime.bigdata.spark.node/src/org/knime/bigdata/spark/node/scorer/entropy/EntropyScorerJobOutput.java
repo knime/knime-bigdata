@@ -22,8 +22,8 @@ package org.knime.bigdata.spark.node.scorer.entropy;
 
 import java.util.List;
 
-import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.scorer.ScorerJobOutput;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
 
 /**
@@ -31,7 +31,7 @@ import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScor
  * @author Ole Ostergaard
  */
 @SparkClass
-public class EntropyScorerJobOutput extends JobOutput {
+public class EntropyScorerJobOutput extends ScorerJobOutput {
 
     private static final String CLUSTER_SCORES = "clusterScores";
     private static final String OVERALL_ENTROPY = "overallEntropy";
@@ -54,10 +54,12 @@ public class EntropyScorerJobOutput extends JobOutput {
      * @param overallSize
      * @param nrClusters
      * @param nrReferenceClusters
+     * @param missingValueRowCount count of rows with missing values
      */
     public EntropyScorerJobOutput(final List<ClusterScore> clusterScores, final double overallEntropy,
         final double overallNormalizedEntropy, final double overallQuality, final int overallSize, final int nrClusters,
-        final int nrReferenceClusters) {
+        final int nrReferenceClusters, final long missingValueRowCount) {
+        super(missingValueRowCount);
         set(CLUSTER_SCORES, clusterScores);
         set(OVERALL_ENTROPY, overallEntropy);
         set(OVERALL_NORM_ENTROPY, overallNormalizedEntropy);

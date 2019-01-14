@@ -50,7 +50,7 @@ public class NumericScorerJob extends AbstractScorerJob {
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) throws KNIMESparkException {
 
-        final String refCol = dataset.columns()[input.getActualColIdx()]; // ignore rows with missing values
+        final String refCol = dataset.columns()[input.getRefColIdx()]; // ignore rows with missing values
         final String predictionCol = dataset.columns()[input.getPredictionColIdx()]; // fail on missing values
 
         final Dataset<Row> filtered = dataset
@@ -80,8 +80,8 @@ public class NumericScorerJob extends AbstractScorerJob {
         final double signedDiff = stats.getDouble(3) / count;
         final double ssErrorNullModel = filtered.select(pow(col(refCol).minus(meanObserved), 2.0).as("ssErr")).agg(mean("ssErr")).first().getDouble(0);
 
-        return new NumericScorerJobOutput(count, (1 - squaredError / ssErrorNullModel),
-            absError, squaredError, Math.sqrt(squaredError), signedDiff, input.getActualColIdx(), input.getPredictionColIdx());
+        return new NumericScorerJobOutput((1 - squaredError / ssErrorNullModel),
+            absError, squaredError, Math.sqrt(squaredError), signedDiff, 0 /* TODO missing values */);
     }
 
     @Override

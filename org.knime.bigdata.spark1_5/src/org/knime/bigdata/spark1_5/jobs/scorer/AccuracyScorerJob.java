@@ -52,7 +52,7 @@ public class AccuracyScorerJob extends AbstractScorerJob {
      */
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
-        final Integer classCol = input.getActualColIdx();
+        final Integer classCol = input.getRefColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
 
         Map<Tuple2<Object, Object>, Integer> counts = RDDUtilsInJava.aggregatePairs(rowRDD, classCol, predictionCol);
@@ -83,7 +83,7 @@ public class AccuracyScorerJob extends AbstractScorerJob {
             }
             i++;
         }
-        return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
-            labels);
+        return new AccuracyScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount,
+            labels, 0 /* TODO missing values */);
     }
 }

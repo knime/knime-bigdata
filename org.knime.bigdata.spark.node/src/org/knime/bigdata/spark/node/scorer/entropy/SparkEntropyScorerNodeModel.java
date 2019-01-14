@@ -120,7 +120,7 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
 
         final JobRunFactory<ScorerJobInput, EntropyScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final ScorerJobInput jobInput = new ScorerJobInput(inPort.getTableName(),
-            tableSpec.findColumnIndex(m_referenceCol), tableSpec.findColumnIndex(m_clusteringCol));
+            tableSpec.findColumnIndex(m_referenceCol), tableSpec.findColumnIndex(m_clusteringCol), false /* TODO missing values */);
         final EntropyScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
         m_viewData = new SparkEntropyScorerViewData(jobOutput, createQualityTable(jobOutput, exec));

@@ -132,7 +132,7 @@ public class SparkNumericScorerNodeModel extends SparkNodeModel {
 
         final JobRunFactory<ScorerJobInput, NumericScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(inPort.getContextID(), JOB_ID);
         final ScorerJobInput jobInput = new ScorerJobInput(inPort.getTableName(), tableSpec.findColumnIndex(m_numericScorerSettings.getReferenceColumnName()),
-            tableSpec.findColumnIndex(m_numericScorerSettings.getPredictionColumnName()));
+            tableSpec.findColumnIndex(m_numericScorerSettings.getPredictionColumnName()), false /* TODO missing values */);
         final NumericScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(inPort.getContextID(), exec);
 
         m_viewData = new SparkNumericScorerViewData(jobOutput.getR2(), jobOutput.getAbsError(),

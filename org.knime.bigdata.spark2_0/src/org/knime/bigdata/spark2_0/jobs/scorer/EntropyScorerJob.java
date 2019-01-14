@@ -32,8 +32,8 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
 import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 import org.knime.bigdata.spark2_0.api.NamedObjects;
 import org.knime.bigdata.spark2_0.api.RDDUtilsInJava;
@@ -82,7 +82,7 @@ public class EntropyScorerJob implements SparkJob<ScorerJobInput, EntropyScorerJ
 
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());
 
-        final Integer referenceCol = input.getActualColIdx();
+        final Integer referenceCol = input.getRefColIdx();
         final Integer clusterCol = input.getPredictionColIdx();
         EntropyScorerJobOutput jobOutput = scoreCluster(rowRDD, referenceCol, clusterCol);
 
@@ -131,7 +131,7 @@ public class EntropyScorerJob implements SparkJob<ScorerJobInput, EntropyScorerJ
         }
 
         return new EntropyScorerJobOutput(clusterScores, overallEntropy, overallNormalizedEntropy, overallQuality,
-            overallSize, nrClusters, nrReferenceClusters);
+            overallSize, nrClusters, nrReferenceClusters, 0 /* TODO missing values */);
     }
 
     private static int computeNrReferenceClusters(final Map<Object, Map<Object, Integer>> counts) {

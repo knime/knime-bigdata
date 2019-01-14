@@ -22,15 +22,16 @@ import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
- * Default scorer job input.
+ * Scorer job input.
  *
  * @author dwk
  */
 @SparkClass
 public class ScorerJobInput extends JobInput {
 
-    private static final String ACTUAL_COL_IDX = "actualColIdx";
+    private static final String REF_COL_IDX = "referenceColIdx";
     private static final String PREDICTION_COL_IDX = "predictionColIdx";
+    private static final String FAIL_ON_MISSING_VALUES = "failOnMissingValues";
 
 
     /**
@@ -39,21 +40,26 @@ public class ScorerJobInput extends JobInput {
     public ScorerJobInput() {}
 
     /**
-     * @param namedInputObject
-     * @param actualColIdx
-     * @param predictionColIdx
+     * @param namedInputObject input object
+     * @param refColIdx reference column index
+     * @param predictionColIdx prediction column index
+     * @param failOnMissingValues <code>true</code> if the job should fail on missing values
      */
-    public ScorerJobInput(final String namedInputObject, final Integer actualColIdx, final Integer predictionColIdx) {
+    public ScorerJobInput(final String namedInputObject, final Integer refColIdx, final Integer predictionColIdx, final boolean failOnMissingValues) {
         addNamedInputObject(namedInputObject);
-        set(ACTUAL_COL_IDX, actualColIdx);
+        set(REF_COL_IDX, refColIdx);
         set(PREDICTION_COL_IDX, predictionColIdx);
+
+        if (failOnMissingValues) {
+            set(FAIL_ON_MISSING_VALUES, true);
+        }
     }
 
     /**
-     * @return the index of the actual value column
+     * @return the index of the reference value column
      */
-    public Integer getActualColIdx() {
-        return getInteger(ACTUAL_COL_IDX);
+    public Integer getRefColIdx() {
+        return getInteger(REF_COL_IDX);
     }
 
     /**
@@ -61,5 +67,12 @@ public class ScorerJobInput extends JobInput {
      */
     public Integer getPredictionColIdx() {
         return getInteger(PREDICTION_COL_IDX);
+    }
+
+    /**
+     * @return <code>true</code> if job should fail on missing values in the reference or prediction column
+     */
+    public boolean failOnMissingValues() {
+        return has(FAIL_ON_MISSING_VALUES);
     }
 }
