@@ -71,7 +71,10 @@ node {
 			withMaven(maven: 'Maven 3.5') {
 				dir("${env.WORKSPACE}/git/knime-bigdata/org.knime.bigdata.spark.local/libs/fetch_jars") {
 					sh "rm -f ../*.jar"
+					sh "rm -f ../*.zip"
 					sh "${maven} -Denforcer.skip=true clean package"
+					//Spark 2.4 pyspark patch
+					sh "unzip ../pyspark.zip && patch --binary pyspark/worker.py BD-878.patch && zip -r pyspark.zip pyspark && mv pyspark.zip ../ && rm -r pyspark"
 				}
 			}
 		} catch (ex) {

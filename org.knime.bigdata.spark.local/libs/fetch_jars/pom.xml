@@ -20,6 +20,7 @@
 	<description>Running the maven goal &quot;package&quot; on this maven project will fetch all jars required for local Spark and put them into the libs/ directory.</description>
 
 	<properties>
+		<!-- Remember to remove the Patching for 2.4.0 (BD-878) in Jenkinsfile if you change this-->
 		<spark.version>2.4.0</spark.version>
 	</properties>
 	
@@ -116,7 +117,7 @@
 					<id>get-pyspark</id>
            			 	<phase>package</phase>  
             				<configuration>  
-			  		<target>  
+			  		<target name="download"> 
 				    		<get src="https://archive.apache.org/dist/spark/spark-${spark.version}/pyspark-${spark.version}.tar.gz" dest="target/tmp"/>
 						<echo message="unpack zips" /> 
 						<untar src="target/tmp/pyspark-${spark.version}.tar.gz" dest="../" compression="gzip">
@@ -124,8 +125,9 @@
 								<include name="**/lib/*.zip"/>
 							</patternset>
 							<mapper type="flatten"/>
-		     				</untar>
-					</target>  
+						</untar>
+					</target>
+	
     					</configuration>  
             				<goals>  
               					<goal>run</goal>  

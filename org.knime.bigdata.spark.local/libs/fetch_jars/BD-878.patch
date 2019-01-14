@@ -1,0 +1,75 @@
+From 9cda9a892d03f60a76cd5d9b4546e72c50962c85 Mon Sep 17 00:00:00 2001
+From: hyukjinkwon <gurwls223@apache.org>
+Date: Sun, 2 Dec 2018 17:41:08 +0800
+Subject: [PATCH] [SPARK-26080][PYTHON] Skips Python resource limit on Windows
+ in Python worker
+
+## What changes were proposed in this pull request?
+
+`resource` package is a Unix specific package. See https://docs.python.org/2/library/resource.html and https://docs.python.org/3/library/resource.html.
+
+Note that we document Windows support:
+
+> Spark runs on both Windows and UNIX-like systems (e.g. Linux, Mac OS).
+
+This should be backported into branch-2.4 to restore Windows support in Spark 2.4.1.
+
+## How was this patch tested?
+
+Manually mocking the changed logics.
+
+Closes #23055 from HyukjinKwon/SPARK-26080.
+
+Lead-authored-by: hyukjinkwon <gurwls223@apache.org>
+Co-authored-by: Hyukjin Kwon <gurwls223@apache.org>
+Signed-off-by: Hyukjin Kwon <gurwls223@apache.org>
+---
+ python/pyspark/worker.py | 19 ++++++++++++-------
+ 2 files changed, 14 insertions(+), 7 deletions(-)
+
+
+diff --git a/python/pyspark/worker.py b/python/pyspark/worker.py
+index 8c59f1f999f18..953b468e96519 100644
+--- a/python/pyspark/worker.py
++++ b/python/pyspark/worker.py
+@@ -22,7 +22,12 @@
+ import os
+ import sys
+ import time
+-import resource
++# 'resource' is a Unix specific module.
++has_resource_module = True
++try:
++    import resource
++except ImportError:
++    has_resource_module = False
+ import socket
+ import traceback
+ 
+@@ -268,9 +273,9 @@ def main(infile, outfile):
+ 
+         # set up memory limits
+         memory_limit_mb = int(os.environ.get('PYSPARK_EXECUTOR_MEMORY_MB', "-1"))
+-        total_memory = resource.RLIMIT_AS
+-        try:
+-            if memory_limit_mb > 0:
++        if memory_limit_mb > 0 and has_resource_module:
++            total_memory = resource.RLIMIT_AS
++            try:
+                 (soft_limit, hard_limit) = resource.getrlimit(total_memory)
+                 msg = "Current mem limits: {0} of max {1}\n".format(soft_limit, hard_limit)
+                 print(msg, file=sys.stderr)
+@@ -283,9 +288,9 @@ def main(infile, outfile):
+                     print(msg, file=sys.stderr)
+                     resource.setrlimit(total_memory, (new_limit, new_limit))
+ 
+-        except (resource.error, OSError, ValueError) as e:
+-            # not all systems support resource limits, so warn instead of failing
+-            print("WARN: Failed to set memory limit: {0}\n".format(e), file=sys.stderr)
++            except (resource.error, OSError, ValueError) as e:
++                # not all systems support resource limits, so warn instead of failing
++                print("WARN: Failed to set memory limit: {0}\n".format(e), file=sys.stderr)
+ 
+         # initialize global state
+         taskContext = None
+
