@@ -21,7 +21,7 @@
 package org.knime.bigdata.spark2_2.jobs.scorer;
 
 import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
-import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 import org.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeModel;
 
@@ -29,7 +29,7 @@ import org.knime.bigdata.spark.node.scorer.entropy.SparkEntropyScorerNodeModel;
  *
  * @author Ole Ostergaard
  */
-public class EntropyScorerJobRunFactory extends DefaultJobRunFactory<EntropyScorerJobInput, EntropyScorerJobOutput> {
+public class EntropyScorerJobRunFactory extends DefaultJobRunFactory<ScorerJobInput, EntropyScorerJobOutput> {
 
     /**
      * Constructor.

@@ -38,6 +38,7 @@ import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -206,10 +207,10 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
         final DataTableSpec tableSpec = inPort.getTableSpec();
         final SparkContextID contextID = inPort.getContextID();
 
-        final JobRunFactory<ScorerJobInput, ScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
+        final JobRunFactory<ScorerJobInput, AccuracyScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
         final ScorerJobInput jobInput = new ScorerJobInput(inPort.getTableName(), tableSpec.findColumnIndex(m_firstCompareColumn),
             tableSpec.findColumnIndex(m_secondCompareColumn));
-        final ScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
+        final AccuracyScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
         if (jobOutput.getRowCount() == 0) {
             throw new IllegalArgumentException("Empty input Spark DataFrame/RDD.");
@@ -223,7 +224,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
             createAccuracyStatisticsTable(m_viewData, exec)};
     }
 
-    private ScorerViewData createViewData(final ScorerJobOutput jobOutput, final DataTableSpec inTableSpec) {
+    private ScorerViewData createViewData(final AccuracyScorerJobOutput jobOutput, final DataTableSpec inTableSpec) {
         // sort target values
         final Object[] sortedTargetValues = jobOutput.getLabels().toArray().clone();
         Arrays.sort(sortedTargetValues, createComparator(inTableSpec));
@@ -236,7 +237,7 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
             toStringArray(sortedTargetValues));
     }
 
-    private int[][] getSortedScorerCounts(final ScorerJobOutput jobOutput, final Object[] sortedTargetValues) {
+    private int[][] getSortedScorerCounts(final AccuracyScorerJobOutput jobOutput, final Object[] sortedTargetValues) {
         // memorize target value indices
         final Object[] origTargetValues = jobOutput.getLabels().toArray();
         final int valueCount = origTargetValues.length;

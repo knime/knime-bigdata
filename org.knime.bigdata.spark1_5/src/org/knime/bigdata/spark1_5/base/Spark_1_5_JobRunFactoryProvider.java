@@ -55,9 +55,9 @@ import org.knime.bigdata.spark1_5.jobs.preproc.partition.PartitionJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.preproc.rename.RenameColumnJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.preproc.sampling.SamplingJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.preproc.sorter.SortJobRunFactory;
-import org.knime.bigdata.spark1_5.jobs.scorer.ClassificationScorerJobRunFactory;
+import org.knime.bigdata.spark1_5.jobs.scorer.AccuracyScorerJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.scorer.EntropyScorerJobRunFactory;
-import org.knime.bigdata.spark1_5.jobs.scorer.ScorerJobRunFactory;
+import org.knime.bigdata.spark1_5.jobs.scorer.NumericScorerJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.scripting.java.JavaSnippetJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.sql.SparkSQLFunctionsJobRunFactory;
 import org.knime.bigdata.spark1_5.jobs.sql.SparkSQLJobRunFactory;
@@ -120,8 +120,8 @@ public class Spark_1_5_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new CorrelationMatrixJobRunFactory(),
             new PMMLPredictionJobRunFactory(),
             new PMMLTransformationJobRunFactory(),
-            new ClassificationScorerJobRunFactory(),
-            new ScorerJobRunFactory(),
+            new AccuracyScorerJobRunFactory(),
+            new NumericScorerJobRunFactory(),
             new EntropyScorerJobRunFactory(),
             new PersistJobRunFactory(),
             new UnpersistJobRunFactory(),

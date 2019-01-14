@@ -33,7 +33,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
-import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerJobOutput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 import org.knime.bigdata.spark2_1.api.RDDUtilsInJava;
@@ -48,7 +48,7 @@ import scala.Tuple2;
  * @author Bjoern Lohrmann, KNIME.com
  */
 @SparkClass
-public class EntropyScorerJob implements SparkJob<EntropyScorerJobInput, EntropyScorerJobOutput> {
+public class EntropyScorerJob implements SparkJob<ScorerJobInput, EntropyScorerJobOutput> {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,7 +77,7 @@ public class EntropyScorerJob implements SparkJob<EntropyScorerJobInput, Entropy
      * {@inheritDoc}
      */
     @Override
-    public EntropyScorerJobOutput  runJob(final SparkContext sparkContext, final EntropyScorerJobInput input, final NamedObjects namedObjects) {
+    public EntropyScorerJobOutput  runJob(final SparkContext sparkContext, final ScorerJobInput input, final NamedObjects namedObjects) {
         getLogger().info("START " + getAlgName() + " job...");
 
         final JavaRDD<Row> rowRDD = namedObjects.getJavaRdd(input.getFirstNamedInputObject());

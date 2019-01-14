@@ -28,7 +28,7 @@ import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
-import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
+import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;

@@ -30,6 +30,7 @@ import org.knime.bigdata.spark.core.job.JobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
+import org.knime.bigdata.spark.node.scorer.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataTableSpec;
@@ -117,8 +118,8 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
         final SparkContextID contextID = inPort.getContextID();
         final DataTableSpec tableSpec = inPort.getTableSpec();
 
-        final JobRunFactory<EntropyScorerJobInput, EntropyScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
-        final EntropyScorerJobInput jobInput = new EntropyScorerJobInput(inPort.getTableName(),
+        final JobRunFactory<ScorerJobInput, EntropyScorerJobOutput> runFactory = SparkContextUtil.getJobRunFactory(contextID, JOB_ID);
+        final ScorerJobInput jobInput = new ScorerJobInput(inPort.getTableName(),
             tableSpec.findColumnIndex(m_referenceCol), tableSpec.findColumnIndex(m_clusteringCol));
         final EntropyScorerJobOutput jobOutput = runFactory.createRun(jobInput).run(contextID, exec);
 
