@@ -132,7 +132,8 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
         BufferedDataContainer container = exec.createDataContainer(EntropyCalculator.getScoreTableSpec());
 
         for (ClusterScore clusterScore : jobOutput.getClusterScores()) {
-            container.addRowToTable(new DefaultRow(new RowKey(clusterScore.getCluster().toString()),
+            final String key = clusterScore.getCluster() != null ? clusterScore.getCluster().toString() : "?";
+            container.addRowToTable(new DefaultRow(new RowKey(key),
                 new DataCell[]{new IntCell(clusterScore.getSize()), // size
                     new DoubleCell(clusterScore.getEntropy()), // entropy
                     new DoubleCell(clusterScore.getNormalizedEntropy()), new MissingCell("?") // normalized entropy
