@@ -20,6 +20,9 @@
  */
 package org.knime.bigdata.spark.node.scorer.entropy;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
 import org.knime.base.node.mine.scorer.entrop.EntropyCalculator;
@@ -31,8 +34,9 @@ import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.node.scorer.entropy.EntropyScorerData.ClusterScore;
-import org.knime.core.data.DataCell;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DoubleValue;
 import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
@@ -130,22 +134,43 @@ public class SparkEntropyScorerNodeModel extends SparkNodeModel {
 
     private BufferedDataTable createQualityTable(final EntropyScorerJobOutput jobOutput, final ExecutionContext exec) {
         BufferedDataContainer container = exec.createDataContainer(EntropyCalculator.getScoreTableSpec());
+        ArrayList<DefaultRow> sortedRows = new ArrayList<>();
 
+        // map cluster to rows
         for (ClusterScore clusterScore : jobOutput.getClusterScores()) {
             final String key = clusterScore.getCluster() != null ? clusterScore.getCluster().toString() : "?";
-            container.addRowToTable(new DefaultRow(new RowKey(key),
-                new DataCell[]{new IntCell(clusterScore.getSize()), // size
-                    new DoubleCell(clusterScore.getEntropy()), // entropy
-                    new DoubleCell(clusterScore.getNormalizedEntropy()), new MissingCell("?") // normalized entropy
-            }));
+            sortedRows.add(new DefaultRow(
+                new RowKey(key),
+                new IntCell(clusterScore.getSize()), // size
+                new DoubleCell(clusterScore.getEntropy()), // entropy
+                new DoubleCell(clusterScore.getNormalizedEntropy()), // normalized entropy
+                new MissingCell("?") // quality
+            ));
         }
 
-        container.addRowToTable(new DefaultRow(new RowKey("Overall"),
-            new DataCell[]{new IntCell(jobOutput.getOverallSize()), // size
-                new DoubleCell(jobOutput.getOverallEntropy()), // entropy
-                new DoubleCell(jobOutput.getOverallNormalizedEntropy()), // normalized entropy
-                new DoubleCell(jobOutput.getOverallQuality()) // quality
-        }));
+        // sort by normalized entropy and row key
+        Collections.sort(sortedRows, new Comparator<DefaultRow>() {
+            @Override
+            public int compare(final DefaultRow o1, final DefaultRow o2) {
+                double e1 = ((DoubleValue)o1.getCell(2)).getDoubleValue();
+                double e2 = ((DoubleValue)o2.getCell(2)).getDoubleValue();
+                int res = Double.compare(e1, e2);
+                return res == 0 ? o1.getKey().getString().compareTo(o2.getKey().getString()) : res;
+            }
+        });
+
+        for (DataRow r : sortedRows) {
+            container.addRowToTable(r);
+        }
+
+        // add summary
+        container.addRowToTable(new DefaultRow(
+            new RowKey("Overall"),
+            new IntCell(jobOutput.getOverallSize()), // size
+            new DoubleCell(jobOutput.getOverallEntropy()), // entropy
+            new DoubleCell(jobOutput.getOverallNormalizedEntropy()), // normalized entropy
+            new DoubleCell(jobOutput.getOverallQuality()) // quality
+        ));
 
         container.close();
         return container.getTable();
