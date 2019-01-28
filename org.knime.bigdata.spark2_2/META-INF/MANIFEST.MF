@@ -2,31 +2,31 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Extension for Apache Spark jobs for Spark 2.2
 Bundle-SymbolicName: org.knime.bigdata.spark2_2;singleton:=true
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.4.1.qualifier
 Bundle-ClassPath: knime.jar,
   lib/job-server-api_2.11-0.7.0.2-KNIME_spark-2.2.jar,
   lib/knime-jobserver-utils-0.7.0.2-KNIME_spark-2.2.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.bigdata.spark2_2.api
 Require-Bundle: org.knime.core;bundle-version="[3.2.0,4.0.0)",
- org.knime.base;bundle-version="[3.2.0,4.0.0)",
- org.knime.bigdata.spark.core;bundle-version="[2.4.0,2.5.0)",
- org.knime.bigdata.spark.node;bundle-version="[2.4.0,2.5.0)",
- org.knime.bigdata.spark.core.sparkjobserver;bundle-version="[2.4.0,2.5.0)",
- org.knime.bigdata.spark.core.livy;bundle-version="[2.4.0,2.5.0)",
- org.apache.livy.api;bundle-version="[0.4.0,0.5.0)",
- org.apache.spark_2.11;bundle-version="[2.2.0,2.3.0)",
- org.apache.hadoop.client;bundle-version="[2.7.6,3.0.0)",
- org.knime.jsnippets;bundle-version="[3.2.0,4.0.0)",
- org.apache.log4j;bundle-version="[1.2.15,2.0.0)",
- org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
- org.scala-lang.scala-library;bundle-version="[2.11.0,2.12.0)",
- org.scala-lang.scala-reflect;bundle-version="[2.11.0,2.12.0)",
- org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)",
- com.databricks.spark-avro_2.11;bundle-version="[4.0.0,5.0.0)",
- com.google.guava;bundle-version="[19.0.0,20.0.0)",
- com.typesafe.config;bundle-version="[1.3.0,2.0.0)",
- org.scalactic_2.11;bundle-version="2.2.6",
- org.scalanlp.breeze-merged_2.11;bundle-version="[0.13.1,0.14.0)"
+  org.knime.base;bundle-version="[3.2.0,4.0.0)",
+  org.knime.bigdata.spark.core;bundle-version="[2.4.0,2.5.0)",
+  org.knime.bigdata.spark.node;bundle-version="[2.4.0,2.5.0)",
+  org.knime.bigdata.spark.core.sparkjobserver;bundle-version="[2.4.0,2.5.0)",
+  org.knime.bigdata.spark.core.livy;bundle-version="[2.4.0,2.5.0)",
+  org.apache.livy.api;bundle-version="[0.4.0,0.5.0)",
+  org.apache.spark_2.11;bundle-version="[2.2.0,2.3.0)",
+  org.apache.hadoop.client;bundle-version="[2.7.6,3.0.0)",
+  org.knime.jsnippets;bundle-version="[3.2.0,4.0.0)",
+  org.apache.log4j;bundle-version="[1.2.15,2.0.0)",
+  org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)",
+  org.scala-lang.scala-library;bundle-version="[2.11.0,2.12.0)",
+  org.scala-lang.scala-reflect;bundle-version="[2.11.0,2.12.0)",
+  org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)",
+  com.databricks.spark-avro_2.11;bundle-version="[4.0.0,5.0.0)",
+  com.google.guava;bundle-version="[19.0.0,20.0.0)",
+  com.typesafe.config;bundle-version="[1.3.0,2.0.0)",
+  org.scalactic_2.11;bundle-version="2.2.6",
+  org.scalanlp.breeze-merged_2.11;bundle-version="[0.13.1,0.14.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
