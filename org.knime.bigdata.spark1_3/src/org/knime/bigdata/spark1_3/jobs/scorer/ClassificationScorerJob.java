@@ -21,11 +21,17 @@
 package org.knime.bigdata.spark1_3.jobs.scorer;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import org.apache.spark.Accumulator;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
@@ -50,14 +56,29 @@ public class ClassificationScorerJob extends AbstractScorerJob {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("resource")
     @Override
     protected JobOutput doScoring(final ScorerJobInput input, final JavaRDD<Row> rowRDD) {
         final Integer classCol = input.getActualColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
 
-        Map<Tuple2<Object, Object>, Integer> counts = RDDUtilsInJava.aggregatePairs(rowRDD, classCol, predictionCol);
+        List<Object> labels =
+                SupervisedLearnerUtils.getDistinctValuesOfColumn(rowRDD.filter(new Function<Row, Boolean>() {
+                    private static final long serialVersionUID = 1L;
 
-        List<Object> labels = SupervisedLearnerUtils.getDistinctValuesOfColumn(rowRDD, classCol).collect();
+                    @Override
+                    public Boolean call(final Row row) {
+                        return !row.isNullAt(classCol);
+                    }
+                }), classCol).collect();
+
+        final Accumulator<Integer> filteredRowCounter = new JavaSparkContext(rowRDD.context()).accumulator(0);
+
+        final JavaRDD<Row> filteredRDD = filterAndCountRowsWithMissingValues(rowRDD, filteredRowCounter, classCol, predictionCol);
+
+        Map<Tuple2<Object, Object>, Integer> counts =
+            RDDUtilsInJava.aggregatePairs(filteredRDD, classCol, predictionCol);
+
         final int[][] confusionMatrix = new int[labels.size()][];
         for (int i = 0; i < confusionMatrix.length; i++) {
             confusionMatrix[i] = new int[labels.size()];
@@ -84,6 +105,60 @@ public class ClassificationScorerJob extends AbstractScorerJob {
             i++;
         }
         return new ScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
-            labels);
+            labels, filteredRowCounter.value());
+    }
+
+    private static JavaRDD<Row> filterAndCountRowsWithMissingValues(final JavaRDD<Row> rowRDD,
+        final Accumulator<Integer> filteredRowCounter, final int classCol, final int predictionCol) {
+
+        return rowRDD.mapPartitions(new FlatMapFunction<Iterator<Row>, Row>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Iterable<Row> call(final Iterator<Row> t) throws Exception {
+                return new Iterable<Row>() {
+                    @Override
+                    public Iterator<Row> iterator() {
+                        return new Iterator<Row>() {
+                            private Row nextRow = null;
+
+                            private boolean done = false;
+
+                            @Override
+                            public boolean hasNext() {
+                                if (done) {
+                                    return false;
+                                }
+
+                                while (nextRow == null && t.hasNext()) {
+                                    nextRow = t.next();
+                                    if (nextRow.get(classCol) == null || nextRow.get(predictionCol) == null) {
+                                        nextRow = null;
+                                        filteredRowCounter.add(1);
+                                    }
+                                }
+
+                                if (nextRow == null) {
+                                    done = true;
+                                }
+
+                                return nextRow != null;
+                            }
+
+                            @Override
+                            public Row next() {
+                                if (!hasNext()) {
+                                    throw new NoSuchElementException();
+                                }
+                                Row toReturn = nextRow;
+                                nextRow = null;
+                                return toReturn;
+                            }
+                        };
+                    }
+                };
+            }
+        }, true);
     }
 }

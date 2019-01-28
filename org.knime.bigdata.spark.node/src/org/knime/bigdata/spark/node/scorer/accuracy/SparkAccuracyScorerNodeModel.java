@@ -219,6 +219,12 @@ public class SparkAccuracyScorerNodeModel extends SparkNodeModel {
 
         pushFlowVars(false);
 
+        final long missingRowCount = jobOutput.getMissingValueRowCount();
+        if (missingRowCount > 0) {
+            setWarningMessage(String.format("Ignored %d row%s with missing values.",
+                jobOutput.getMissingValueRowCount(), missingRowCount == 1 ? "" : "s"));
+        }
+
         return new BufferedDataTable[]{createConfusionMatrixTable(m_viewData, exec),
             createAccuracyStatisticsTable(m_viewData, exec)};
     }

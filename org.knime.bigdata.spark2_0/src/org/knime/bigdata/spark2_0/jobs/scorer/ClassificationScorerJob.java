@@ -20,6 +20,10 @@
  */
 package org.knime.bigdata.spark2_0.jobs.scorer;
 
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.collect_set;
+import static org.apache.spark.sql.functions.not;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +37,10 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobInput;
 import org.knime.bigdata.spark.node.scorer.accuracy.ScorerJobOutput;
 import org.knime.bigdata.spark2_0.api.RDDUtilsInJava;
-import org.knime.bigdata.spark2_0.api.SupervisedLearnerUtils;
 
 import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.Seq;
 
 /**
  *  Scoring for classification
@@ -51,11 +56,25 @@ public class ClassificationScorerJob extends AbstractScorerJob {
     protected JobOutput doScoring(final ScorerJobInput input, final Dataset<Row> dataset) {
         final Integer classCol = input.getActualColIdx();
         final Integer predictionCol = input.getPredictionColIdx();
-        final JavaRDD<Row> rowRDD = dataset.javaRDD();
 
+        final String classColName = dataset.columns()[classCol];
+        final String predictionColName = dataset.columns()[predictionCol];
+
+        // need to determine reference labels before filtering rows with missing values
+        final List<Object> labels = JavaConversions.seqAsJavaList(dataset.where(col(classColName).isNotNull())
+                .select(collect_set(col(classColName)))
+                .first()
+                .<Seq<Object>>getAs(0));
+
+        final long rowsWithMissingValues =
+            dataset.where(col(classColName).isNull().or(col(predictionColName).isNull())).count();
+
+        final Dataset<Row> filtered =
+            dataset.where(not(col(classColName).isNull().or(col(predictionColName).isNull())));
+
+        final JavaRDD<Row> rowRDD = filtered.javaRDD();
         Map<Tuple2<Object, Object>, Integer> counts = RDDUtilsInJava.aggregatePairs(rowRDD, classCol, predictionCol);
 
-        List<Object> labels = SupervisedLearnerUtils.getDistinctValuesOfColumn(rowRDD, classCol).collect();
         final int[][] confusionMatrix = new int[labels.size()][];
         for (int i = 0; i < confusionMatrix.length; i++) {
             confusionMatrix[i] = new int[labels.size()];
@@ -83,7 +102,7 @@ public class ClassificationScorerJob extends AbstractScorerJob {
         }
 
         return new ScorerJobOutput(confusionMatrix, rowRDD.count(), falseCount, correctCount, classCol, predictionCol,
-            labels);
+            labels, rowsWithMissingValues);
     }
 
     @Override

@@ -39,6 +39,7 @@ public class ScorerJobOutput extends JobOutput {
     private static final String CLASS_COL = "classCol";
     private static final String PREDICTION_COL = "predictionCol";
     private static final String LABELS = "labels";
+    private static final String MISSING_VALUE_ROW_COUNT = "missingValueRowCount";
 
 
     /**
@@ -54,9 +55,10 @@ public class ScorerJobOutput extends JobOutput {
      * @param classCol
      * @param predictionCol
      * @param labels
+     * @param rowsWithMissingValues
      */
     public ScorerJobOutput(final int[][] confusionMatrix, final long rowCount, final int falseCount, final int correctCount, final Integer classCol,
-        final Integer predictionCol, final List<Object> labels) {
+        final Integer predictionCol, final List<Object> labels, final long rowsWithMissingValues) {
         set(CONFUSION_MATRIX, confusionMatrix);
         set(ROW_COUNT, rowCount);
         set(FALSE_COUNT, falseCount);
@@ -64,6 +66,7 @@ public class ScorerJobOutput extends JobOutput {
         set(CLASS_COL, classCol);
         set(PREDICTION_COL, predictionCol);
         set(LABELS, labels);
+        set(MISSING_VALUE_ROW_COUNT, rowsWithMissingValues);
     }
 
     /**
@@ -113,5 +116,12 @@ public class ScorerJobOutput extends JobOutput {
      */
     public List<Object> getLabels() {
         return get(LABELS);
+    }
+
+    /**
+     * @return count of rows with missing values
+     */
+    public long getMissingValueRowCount() {
+        return getLong(MISSING_VALUE_ROW_COUNT);
     }
 }
