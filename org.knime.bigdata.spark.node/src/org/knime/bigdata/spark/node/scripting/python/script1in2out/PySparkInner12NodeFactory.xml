@@ -26,6 +26,13 @@
 	          The input <i>Dataset&lt;Row&gt;</i> can be accessed via the method input parameter <i>dataFrame1</i>.
  			  The output <i>Dataset&lt;Row&gt;</i> must be called <i>resultDataFrame1</i> and <i>resultDataFrame2</i>.</p>
 
+              <p>
+              The editor optionally provides autocompletion (CTRL + Space) using the local Python installation, 
+              if the KNIME Python Extension and the Python module <b>jedi</b> is installed. 
+              The path to the Python executable has to be configured in Preferences → KNIME → Python.<br />
+              <b>Note:</b> 
+              The completion suggestions are made based on the local Python environment, which may differ
+              from the Python setup in the cluster!</p>
 	        </option>
 	   </tab>
 	   

@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.node.scripting.python.util;
 
+import java.io.IOException;
+
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
@@ -62,5 +64,12 @@ public interface PySparkHelper extends SparkProvider {
      * @throws InvalidSettingsException thrown if the user code does not contain the result frame names
      */
     void checkUDF(PySparkDocument doc, int outCount) throws InvalidSettingsException;
+
+    /**
+     * Returns the path to the local PySpark libs
+     * @return String with the path
+     * @throws IOException if if an error occurs during the url conversion
+     */
+    String getLocalPySparkPath() throws IOException;
 
 }

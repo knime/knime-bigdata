@@ -20,9 +20,14 @@
  */
 package org.knime.bigdata.spark2_4.base;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.eclipse.core.runtime.FileLocator;
 import org.knime.bigdata.spark.node.scripting.python.util.DefaultPySparkHelper;
 import org.knime.bigdata.spark2_4.api.Spark_2_4_CompatibilityChecker;
 import org.knime.bigdata.spark2_4.jobs.scripting.python.PySparkDataExchanger;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * The PySpark helper class for Spark 2.4
@@ -36,6 +41,16 @@ public class Spark_2_4_PySparkHelper extends DefaultPySparkHelper {
      */
     public Spark_2_4_PySparkHelper() {
         super(Spark_2_4_CompatibilityChecker.INSTANCE, PySparkDataExchanger.class.getCanonicalName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLocalPySparkPath() throws IOException {
+        final File sparkJarDir = new File(FileLocator.getBundleFile(FrameworkUtil.getBundle(PySparkDataExchanger.class)),
+                "/lib");
+        return createPySparkPath(sparkJarDir);
     }
 
 }

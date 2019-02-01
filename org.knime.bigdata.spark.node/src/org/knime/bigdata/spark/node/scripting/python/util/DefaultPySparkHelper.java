@@ -20,6 +20,8 @@
  */
 package org.knime.bigdata.spark.node.scripting.python.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -343,5 +345,36 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
             throw new IllegalStateException(ex.getMessage(), ex);
         }
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLocalPySparkPath() throws IOException {
+        return null;
+    }
+
+    /**
+     * Creates a path for PySpark by filtering the zip files in the given directory.
+     * @param sparkJarDir the directory to search in
+     * @return the path of the PySpark zips
+     */
+    protected String createPySparkPath(final File sparkJarDir) {
+        StringBuilder sb = new StringBuilder();
+        if(sparkJarDir.isDirectory()) {
+            for(File file : sparkJarDir.listFiles()) {
+                String path = file.getAbsolutePath();
+                if(path.endsWith(".zip")) {
+                    if(sb.length() != 0) {
+                        sb.append(File.pathSeparator);
+                    }
+                    sb.append(path);
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("The given file is not a directory.");
+        }
+        return sb.toString();
     }
 }

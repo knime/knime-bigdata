@@ -27,9 +27,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Exchanger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JButton;
 
+import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -43,23 +50,31 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.core.util.ThreadUtils;
+import org.knime.python2.PythonKernelTester;
+import org.knime.python2.PythonKernelTester.PythonKernelTestResult;
 import org.knime.python2.generic.SourceCodeConfig;
 import org.knime.python2.generic.SourceCodePanel;
 import org.knime.python2.generic.VariableNames;
+import org.knime.python2.kernel.PythonKernelManager;
+import org.knime.python2.kernel.PythonKernelOptions;
+import org.knime.python2.kernel.messaging.PythonKernelResponseHandler;
 
 /**
- * Source code panel for pyspark coding.
+ * Source code panel for PySpark coding.
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class PySparkSourceCodePanel extends SourceCodePanel {
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(PySparkSourceCodePanel.class);
     private static final long serialVersionUID = 1821218187292351246L;
     private static final String VALIDATE_ON_CLUSTER = "Validate on Cluster";
     private static final int DEFAULT_VALIADTE_ROW_COUNT = 50;
@@ -68,8 +83,10 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
     private JButton m_cancel = new JButton("Cancel");
     private PortObject[] m_input;
     private SettingsModelInteger m_rowcount = new SettingsModelInteger("RowCount", DEFAULT_VALIADTE_ROW_COUNT);
-
+    private final PythonKernelOptions m_kernelOptions = new PythonKernelOptions();
+    private final Lock m_lock = new ReentrantLock();
     private ExecutionMonitor m_exec;
+    private PythonKernelManager m_kernelManager;
     /**
      * Creates a PySparkSourceCode Panel for the given variables
      *
@@ -180,6 +197,29 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
         }
 
     }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void open() {
+        super.open();
+        if(m_kernelManager == null) {
+            setStatusMessage("Starting local python for autocompletion...");
+            startKernelManagerAsync();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        super.close();
+        if(m_kernelManager != null) {
+            m_kernelManager.close();
+        }
+        m_kernelManager = null;
+    }
 
     /**
      * {@inheritDoc}
@@ -235,9 +275,50 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
     @Override
     protected List<Completion> getCompletionsFor(final CompletionProvider provider, final String sourceCode,
         final int line, final int column) {
+        // This list will be filled from another thread
+        final List<Completion> completions = new ArrayList<>();
+        // If no kernel is running we will simply return the empty list of
+        // completions
 
-        return new ArrayList<>();
+        if (m_kernelManager != null) {
+
+            final Exchanger<List<Completion>> exchanger = new Exchanger<List<Completion>>();
+            final List<Completion> completionsList = new ArrayList<>();
+
+            m_kernelManager.autoComplete(sourceCode, line, column, new PythonKernelResponseHandler<List<Map<String, String>>>(){
+
+                @Override
+                public void handleResponse(final List<Map<String, String>> response, final Exception exception) {
+                    if (exception == null) {
+                        for (final Map<String, String> completion : response) {
+                            String name = completion.get("name");
+                            final String type = completion.get("type");
+                            String doc = completion.get("doc").trim();
+                            if (type.equals("function")) {
+                                name += "()";
+                            }
+                            doc = "<html><body><pre>" + doc.replace("\n", "<br />") + "</pre></body></html>";
+                            completionsList.add(new BasicCompletion(provider, name, type, doc));
+                        }
+                        try {
+                            exchanger.exchange(completionsList, 2, TimeUnit.SECONDS);
+                        } catch (InterruptedException | TimeoutException e) {
+                            // Nothing to do.
+                        }
+                    }
+                }
+            });
+
+            try {
+                return exchanger.exchange(completions, 2, TimeUnit.SECONDS);
+            } catch (InterruptedException | TimeoutException e) {
+                // Nothing to do, we will just return an empty list.
+            }
+        }
+
+        return completions;
     }
+
 
     /**
      * {@inheritDoc}
@@ -319,4 +400,63 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
 
     }
 
+    private void startKernelManagerAsync() {
+        // Start python in another thread, this might take a few seconds
+        ThreadUtils.threadWithContext(new Runnable() {
+
+            @Override
+            public void run() {
+                setInteractive(false);
+                setRunning(false);
+                // Test if local python installation is capable of running
+                // the kernel
+                // This will return immediately if the test result was
+                // positive before
+                final PythonKernelTestResult result = m_kernelOptions.getUsePython3()
+                    ? PythonKernelTester.testPython3Installation(m_kernelOptions.getPython3Command(),
+                        m_kernelOptions.getAdditionalRequiredModules(), false)
+                    : PythonKernelTester.testPython2Installation(m_kernelOptions.getPython2Command(),
+                        m_kernelOptions.getAdditionalRequiredModules(), false);
+                // Display result message (this might just be a warning
+                // about missing optional modules)
+                if (result.hasError()) {
+                    errorToConsole(result.getErrorLog() + "\nPlease refer to the KNIME log file for more details.");
+                    setStopped();
+                    setStatusMessage("Error during python start.");
+                } else {
+                    // Start kernel manager which will start the actual kernel
+                    m_lock.lock();
+                    try {
+                        setStatusMessage("Starting python...");
+                        try {
+                            m_kernelManager = new PythonKernelManager(m_kernelOptions);
+                        } catch (final Exception ex) {
+                            LOGGER.debug("Could not start python kernel.", ex);
+                            errorToConsole("Could not start python kernel. Please refer to the KNIME console"
+                                + " and log file for details.");
+                            setStopped();
+                            setStatusMessage("Error during python start");
+                        }
+                        if (m_kernelManager != null) {
+                            setStatusMessage("Python successfully started");
+                        }
+                    } finally {
+                        m_lock.unlock();
+                    }
+                    if (m_kernelManager != null) {
+                        setInteractive(true);
+
+                    }
+                }
+            }
+        }).start();
+    }
+
+
+    /**
+     * @param pySparkPath the pySpark path to set
+     */
+    public void setPySparkPath(final String pySparkPath) {
+        m_kernelOptions.setExternalCustomPath(pySparkPath);
+    }
 }

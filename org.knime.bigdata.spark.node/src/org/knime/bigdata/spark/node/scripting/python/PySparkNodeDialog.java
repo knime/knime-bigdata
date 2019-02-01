@@ -47,6 +47,8 @@
  */
 package org.knime.bigdata.spark.node.scripting.python;
 
+import java.io.IOException;
+
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.folding.Fold;
@@ -61,6 +63,7 @@ import org.knime.bigdata.spark.node.scripting.python.util.PySparkHelperRegistry;
 import org.knime.bigdata.spark.node.scripting.python.util.PySparkSourceCodePanel;
 import org.knime.core.node.DataAwareNodeDialogPane;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -74,6 +77,8 @@ import org.knime.core.node.workflow.FlowVariable;
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
 public class PySparkNodeDialog extends DataAwareNodeDialogPane{
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(PySparkNodeDialog.class);
 
     private final PySparkSourceCodePanel m_sourceCodePanel;
 
@@ -95,8 +100,14 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         m_inCount = inCount;
         m_outCount = outCount;
         m_sparkVersion = KNIMEConfigContainer.getSparkVersion();
+        PySparkHelper helper = getHelper();
         m_config = new PySparkNodeConfig(m_inCount, m_outCount);
         m_sourceCodePanel = new PySparkSourceCodePanel(m_config.getVariableNames(), (PySparkDocument)m_config.getDoc());
+        try {
+            m_sourceCodePanel.setPySparkPath(helper.getLocalPySparkPath());
+        } catch (IOException e) {
+           LOGGER.error("Could not obtain PySpark Path", e);
+        }
         addTab("Script", m_sourceCodePanel, false);
     }
 
@@ -106,7 +117,7 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_sourceCodePanel.saveSettingsTo(m_config);
-        PySparkHelper helper = PySparkHelperRegistry.getInstance().getHelper(m_sparkVersion);
+        PySparkHelper helper = getHelper();
         helper.checkUDF((PySparkDocument)m_config.getDoc(), m_outCount);
         m_config.saveTo(settings);
 
@@ -128,7 +139,12 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         } else {
             m_sparkVersion = SparkContextUtil.getSparkVersion(((SparkContextProvider)specs[0]).getContextID());
         }
-        PySparkHelper helper = PySparkHelperRegistry.getInstance().getHelper(m_sparkVersion);
+        PySparkHelper helper = getHelper();
+        try {
+            m_sourceCodePanel.setPySparkPath(helper.getLocalPySparkPath());
+        } catch (IOException e) {
+           LOGGER.error("Could not obtain PySpark path.", e);
+        }
         PySparkNodeConfig config = new PySparkNodeConfig(m_inCount, m_outCount, helper);
         config.loadFromInDialog(settings);
         m_sourceCodePanel.loadSettingsFrom(config, specs);
@@ -138,6 +154,10 @@ public class PySparkNodeDialog extends DataAwareNodeDialogPane{
         m_config = config;
         m_sourceCodePanel.updatePortObjects(null);
 
+    }
+
+    private PySparkHelper getHelper() {
+        return PySparkHelperRegistry.getInstance().getHelper(m_sparkVersion);
     }
 
     /**
