@@ -25,8 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +38,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.livy.CreateSessionHandle;
 import org.apache.livy.Job;
 import org.apache.livy.LivyClient;
@@ -68,6 +65,8 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.util.FileUtil;
+import org.knime.kerberos.api.KerberosProvider;
+import org.knime.kerberos.api.KerberosState;
 
 /**
  * Spark context implementation for Apache Livy.
@@ -152,7 +151,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         }
     }
 
-    private void ensureLivyClient() throws KNIMESparkException {
+    private void ensureLivyClient(final ExecutionMonitor exec) throws KNIMESparkException {
         if (m_livyClient == null) {
             final LivySparkContextConfig config = getConfiguration();
             final Properties livyHttpConf = createLivyHttpConf(config);
@@ -160,22 +159,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
             LOGGER.debug("Creating new remote Spark context. Name: " + config.getContextName());
             try {
                 if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
-
-                    final Configuration baseHadoopConf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-
-                    m_livyClient = UserGroupUtil.getKerberosTGTUser(baseHadoopConf)
-                        .doAs(new PrivilegedExceptionAction<LivyClient>() {
-                            @Override
-                            public LivyClient run() throws Exception {
-                                return buildLivyClient(livyHttpConf, config.getLivyUrl());
-                            }
-                        });
+                    m_livyClient = KerberosProvider
+                        .doWithKerberosAuthBlocking(() -> buildLivyClient(livyHttpConf, config.getLivyUrl()), exec); 
                 } else {
                     m_livyClient = buildLivyClient(livyHttpConf, config.getLivyUrl());
                 }
-            } catch (final PrivilegedActionException e) {
-                // just rethrow the original exception thrown in the run() method
-                throw new KNIMESparkException(e.getException());
             } catch (final Exception e) {
                 throw new KNIMESparkException(e);
             }
@@ -272,7 +260,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         try {
             exec.setProgress(0, "Opening remote Spark context on Apache Livy");
 
-            ensureLivyClient();
+            ensureLivyClient(exec);
             setStatus(SparkContextStatus.OPEN);
 
             if (createRemoteContext) {
@@ -491,11 +479,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private String createAuthenticationInfoString() {
         final LivySparkContextConfig config = getConfiguration();
         if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
-            try {
-                return String.format("Kerberos (authenticated as: %s)", UserGroupUtil
-                    .getKerberosTGTUser(ConfigurationFactory.createBaseConfigurationWithKerberosAuth()).getUserName());
-            } catch (final Exception e) {
-                return "Kerberos";
+            final KerberosState krbState = KerberosProvider.getKerberosStateBlocking();
+            if (krbState.isAuthenticated()) {
+                return String.format("Kerberos (authenticated as: %s)", krbState.getPrincipal());
+            } else {
+                return "Kerberos (currently not logged in)";
             }
         } else {
             return "None";
