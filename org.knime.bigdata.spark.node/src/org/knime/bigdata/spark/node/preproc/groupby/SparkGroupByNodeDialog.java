@@ -45,15 +45,20 @@
  */
 package org.knime.bigdata.spark.node.preproc.groupby;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -66,6 +71,7 @@ import org.knime.base.node.preproc.groupby.ColumnNamePolicy;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.version.SparkVersion;
+import org.knime.bigdata.spark.node.preproc.groupby.SparkGroupByNodeModel.TypeMatch;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.PivotPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.column.ColumnAggregationFunctionPanel;
 import org.knime.bigdata.spark.node.preproc.groupby.dialog.pattern.PatternAggregationFunctionPanel;
@@ -135,6 +141,8 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
     private final SettingsModelBoolean m_addCountStar =
             new SettingsModelBoolean(SparkGroupByNodeModel.CFG_ADD_COUNT_STAR, false);
 
+    private final JComboBox<TypeMatch> m_typeMatch = new JComboBox<TypeMatch>(TypeMatch.values());
+
     private final JPanel m_descriptionTab = new JPanel(new GridBagLayout());
 
     /**
@@ -184,7 +192,7 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
         // TODO: m_tabs.addTab(WindowFunctionPanel.DEFAULT_TITLE, m_windowPanel.getComponentPanel());
         m_tabs.addTab(AggregationColumnPanel.DEFAULT_TITLE, m_manualAggPanel.getComponentPanel());
         m_tabs.addTab(PatternAggregationPanel.DEFAULT_TITLE, m_patternAggPanel.getComponentPanel());
-        m_tabs.addTab(DataTypeAggregationPanel.DEFAULT_TITLE, m_typeAggPanel.getComponentPanel());
+        m_tabs.addTab(DataTypeAggregationPanel.DEFAULT_TITLE, createTypeBasedPanel());
 
         //calculate the component size
         int width =
@@ -257,6 +265,40 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
     }
 
     /**
+     * Creates the type based panel.
+     *
+     * @param p the panel to append the type match check box to
+     */
+    private Component createTypeBasedPanel() {
+        final JPanel typeBasedPanel = new JPanel();
+        typeBasedPanel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx= 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridwidth = 3;
+        typeBasedPanel.add(m_typeAggPanel.getComponentPanel(),gbc);
+        ++gbc.gridy;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        typeBasedPanel.add(Box.createHorizontalBox(),gbc);
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        ++gbc.gridx;
+        // AP-7020: add the exact type match checkbox
+        typeBasedPanel.add(new JLabel("Type matching:"),gbc);
+        ++gbc.gridx;
+        gbc.insets = new Insets(0, 10, 0, 3);
+        typeBasedPanel.add(m_typeMatch,gbc);
+        return typeBasedPanel;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -277,6 +319,12 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
             // TODO: m_windowPanel.loadSettingsFrom(settings, functionProvider, spec);
             m_addCountStar.loadSettingsFrom(settings);
             m_countStarColName.loadSettingsFrom(settings);
+            try {
+                // AP-7020: the default value false ensures backwards compatibility (KNIME 3.8)
+                m_typeMatch.setSelectedItem(TypeMatch.loadSettingsFrom(settings));
+            } catch (InvalidSettingsException e1) {
+                m_typeMatch.setSelectedItem(TypeMatch.SUB_TYPE);
+            }
             m_descriptionTab.removeAll();
 
             if (m_pivotNodeDialog && specs.length == 2 && specs[1] != null) {
@@ -304,6 +352,7 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
         } catch (final InvalidSettingsException|IllegalArgumentException e) {
             throw new NotConfigurableException(e.getMessage());
         }
+
         m_groupCol.loadSettingsFrom(settings, new DataTableSpec[]{spec});
         columnsChanged();
     }
@@ -327,8 +376,9 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
         m_aggregationSettings.setManualColumnAggregationFunctionRows(m_manualAggPanel.getManualColumnAggregationFunctions());
         m_aggregationSettings.setPatternAggregationFunctionRows(m_patternAggPanel.getPatternAggregationFunctionRows());
         m_aggregationSettings.setDataTypeColumnAggregationFunctionRows(m_typeAggPanel.getDataTypeAggregationFunctionRows());
-
         m_aggregationSettings.saveSettingsTo(settings);
+
+        m_typeMatch.getItemAt(m_typeMatch.getSelectedIndex()).saveSettingsTo(settings);
     }
 
     private void validateSettings(final NodeSettingsWO settings) throws InvalidSettingsException {
@@ -355,6 +405,6 @@ public final class SparkGroupByNodeDialog extends NodeDialogPane {
         m_patternAggPanel.validate();
         m_typeAggPanel.validate();
 
- 
+
     }
 }

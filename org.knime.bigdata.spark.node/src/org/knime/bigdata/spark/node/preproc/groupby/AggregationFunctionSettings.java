@@ -78,12 +78,13 @@ public class AggregationFunctionSettings {
      * @param functionProvider Used to look up Spark SQL aggregation functions.
      * @param groupByColumns The list of column names already used during grouping.
      * @param invalidColAggrs
+     * @param strictTypeMatch indicates whether strictly the same types are considered compatible, or also super types
      * @return the list of aggregation functions to use for each column.
      * @throws InvalidSettingsException If the settings for aggregation functions are invalid.
      */
     public List<ColumnAggregationFunctionRow> getAggregationFunctions(final DataTableSpec tableSpec,
         final SparkSQLFunctionCombinationProvider functionProvider, final Collection<String> groupByColumns,
-        final List<ColumnAggregationFunctionRow> invalidColAggrs) throws InvalidSettingsException {
+        final List<ColumnAggregationFunctionRow> invalidColAggrs, final boolean strictTypeMatch) throws InvalidSettingsException {
 
         final List<ColumnAggregationFunctionRow> m_aggregationFunction2Use = new LinkedList<>();
         final Set<String> usedColNames = new HashSet<>(groupByColumns);
@@ -144,7 +145,7 @@ public class AggregationFunctionSettings {
                 if (!usedColNames.contains(spec.getName())) {
                     final DataType dataType = spec.getType();
                     for (final DataTypeAggregationFunctionRow typeAggregator : typeFunctions) {
-                        if (typeAggregator.isCompatibleType(dataType)) {
+                        if (typeAggregator.isCompatibleType(dataType, strictTypeMatch)) {
                             final ColumnAggregationFunctionRow row =
                                     new ColumnAggregationFunctionRow(spec, typeAggregator.getFunction());
                             m_aggregationFunction2Use.add(row);
