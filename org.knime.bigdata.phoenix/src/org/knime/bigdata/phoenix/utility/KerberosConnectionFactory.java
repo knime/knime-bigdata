@@ -26,9 +26,6 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.UserGroupInformation;
-import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
@@ -57,28 +54,21 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
     protected Connection createConnection(final String jdbcUrl, final String user, final String pass,
         final boolean useKerberos, final Driver d)
         throws SQLException {
+
         if (!useKerberos) {
             return super.createConnection(jdbcUrl, user, pass, useKerberos, d);
         }
         try {
-            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-            final UserGroupInformation ugi = UserGroupUtil.getKerberosUser(conf);
 
-            final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
-            LOGGER.debug("Create jdbc connection with Kerberos user: " + ugi.toString());
-            final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
-                @Override
-                public Connection run() throws Exception {
-                    try {
-                        return d.connect(jdbcUrl, props);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
+            final Connection con = UserGroupUtil.runWithProxyUserUGIIfNecessary((ugi) -> {
+                final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
+                LOGGER.debug("Create jdbc connection with Kerberos user: " + ugi.toString());
+                return ugi.doAs((PrivilegedExceptionAction<Connection>)() -> d.connect(jdbcUrl, props));
             });
+
             return con;
         } catch (Exception e) {
-            final String errMsg = "Exception creating Kerberos based jdbc connection. Error: " + e.getMessage();
+            final String errMsg = "Exception creating Kerberos based JDBC connection. Error: " + e.getMessage();
             LOGGER.error(errMsg, e);
             throw new SQLException(errMsg, e);
         }

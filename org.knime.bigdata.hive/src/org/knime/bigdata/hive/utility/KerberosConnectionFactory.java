@@ -26,13 +26,12 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil.UserGroupInformationCallback;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.port.database.connection.CachedConnectionFactory;
 import org.knime.core.node.port.database.connection.DBDriverFactory;
@@ -61,38 +60,31 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
     protected Connection createConnection(final String jdbcUrl, final String user, final String pass,
         final boolean useKerberos, final Driver d)
         throws SQLException {
+
         if (!useKerberos) {
             return super.createConnection(jdbcUrl, user, pass, useKerberos, d);
         }
         try {
-            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+            // use AtomicRef to be able to lazily get the jdbc URL inside the ugiCallback
+            final AtomicReference<String> jdcbUrlRef = new AtomicReference<>();
 
-            final UserGroupInformation ugi;
-            final String jdbcImpersonationURL;
+            final UserGroupInformationCallback<Connection> ugiCallback = (ugi) -> {
+                LOGGER.debug("Create JDBC connection with Kerberos user: " + ugi.toString());
+                final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
+                return ugi.doAs((PrivilegedExceptionAction<Connection>)() -> d.connect(jdcbUrlRef.get(), props));
+            };
+
             final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
             if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter() && userToImpersonate.isPresent()) {
                 LOGGER.debug("Using JDBC impersonation parameter instead of proxy user on KNIME Server");
-                jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl, userToImpersonate.get());
-                ugi = UserGroupUtil.getKerberosTGTUser(conf);
+                jdcbUrlRef.set(appendImpersonationParameter(jdbcUrl, userToImpersonate.get()));
+                return UserGroupUtil.runWithKerberosUGI(ugiCallback);
             } else {
-                ugi = UserGroupUtil.getKerberosUser(conf);
-                jdbcImpersonationURL = jdbcUrl;
+                jdcbUrlRef.set(jdbcUrl);
+                return UserGroupUtil.runWithProxyUserUGIIfNecessary(ugiCallback);
             }
-            final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
-            LOGGER.debug("Create jdbc connection with Kerberos user: " + ugi.toString());
-            final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
-                @Override
-                public Connection run() throws Exception {
-                    try {
-                        return d.connect(jdbcImpersonationURL, props);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            });
-            return con;
         } catch (Exception e) {
-            final String errMsg = "Exception creating Kerberos based jdbc connection. Error: " + e.getMessage();
+            final String errMsg = "Exception creating Kerberos based JDBC connection. Error: " + e.getMessage();
             LOGGER.error(errMsg, e);
             throw new SQLException(errMsg, e);
         }
