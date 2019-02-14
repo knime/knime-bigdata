@@ -48,14 +48,11 @@ import java.io.File;
 import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
@@ -177,7 +174,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
             if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
                 throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
             }
-			final AbstractFileFormatReader reader = getReader(remoteFile, null, outputDataTypeMappingConfiguration);
+            final AbstractFileFormatReader reader = getReader(remoteFile, null, outputDataTypeMappingConfiguration);
             final DataTableSpec spec = reader.getTableSpec();
             return new DataTableSpec[] { spec };
 
@@ -220,21 +217,15 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
 	private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context,
 			final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration)
             throws Exception {
-        final AbstractFileFormatReader reader;
-		if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
-            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-            final UserGroupInformation user = UserGroupUtil.getKerberosUser(conf);
-            reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
-				@Override
-                public AbstractFileFormatReader run() throws Exception {
 
-					return m_settings.getFormatFactory().getReader(remoteFile, context,
-							outputDataTypeMappingConfiguration);
-                }
-            });
-            reader.setUser(user);
+        final AbstractFileFormatReader reader;
+
+        if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
+            reader = UserGroupUtil.runWithProxyUserUGIIfNecessary(
+                (ugi) -> ugi.doAs((PrivilegedExceptionAction<AbstractFileFormatReader>)() -> m_settings
+                    .getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration)));
         } else {
-			reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration);
+            reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration);
         }
         return reader;
     }
@@ -292,10 +283,10 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
                     throws Exception {
-                
+
                 final RowOutput out = (RowOutput) outputs[0];
                 final PortObjectInput portObj = (PortObjectInput) inputs[0];
-                final ConnectionInformationPortObject connInfoObj = portObj != null ? 
+                final ConnectionInformationPortObject connInfoObj = portObj != null ?
                         (ConnectionInformationPortObject) portObj.getPortObject() : null;
                 try {
                     final BigDataFileFormatTable table = createTable(connInfoObj, exec);

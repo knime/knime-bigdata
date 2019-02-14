@@ -38,13 +38,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.ssl.SSLFactory;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil.UserGroupInformationCallback;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.MutableInteger;
 
@@ -210,39 +210,34 @@ public class HDFSConnection extends Connection {
     @Override
     public synchronized void open() throws IOException {
         if (m_fs == null) {
+            final UserGroupInformationCallback<FileSystem> fsCallback = (ugi) -> {
+                LOGGER.debug(String.format("Creating %s connection with user: %s", m_connectionInformation.getProtocol(),
+                    ugi.toString()));
+                final String userName =
+                    m_connectionInformation.useKerberos() ? ugi.getShortUserName() : m_connectionInformation.getUser();
+
+                m_connectionInformation.setUser(userName);
+
+                //the hdfs connections are cached in the FileSystem class based on the uri (which is always
+                //the default one in our case) and the user name which we therefore use as the key for the MAP
+                final FileSystem fs = ugi.doAs((PrivilegedExceptionAction<FileSystem>)() -> FileSystem.get(m_conf));
+                final MutableInteger count = CONNECTION_COUNT.get(userName);
+                if (count == null) {
+                    CONNECTION_COUNT.put(userName, new MutableInteger(1));
+                } else {
+                    count.inc();
+                }
+                return fs;
+            };
+
             synchronized (CONNECTION_COUNT) {
                 try {
-                    final String userName;
-                    final UserGroupInformation user;
                     if (m_connectionInformation.useKerberos()) {
-                        //ensure that no user name is used if Kerberos is enabled since the panel also reports the
-                        //user name if the field is disabled
-                        user = UserGroupUtil.getKerberosUser(m_conf);
-                        //use the short Kerberos user name without the real information as user for the
-                        //connection information which is used to create the hdfs path
-                        userName = user.getShortUserName();
-                        m_connectionInformation.setUser(userName);
+                        m_fs = UserGroupUtil.runWithProxyUserUGIIfNecessary(fsCallback);
                     } else {
-                        userName = m_connectionInformation.getUser();
-                        user = UserGroupUtil.getUser(m_conf, userName);
+                        m_fs = UserGroupUtil.runWithRemoteUserUGI(m_connectionInformation.getUser(), fsCallback);
                     }
-                    m_fs = user.doAs(new PrivilegedExceptionAction<FileSystem>() {
-                        @Override
-                        public FileSystem run() throws Exception {
-                        //the hdfs connections are cached in the FileSystem class based on the uri (which is always
-                        //the default one in our case) and the user name which we therefore use as the key for the MAP
-                            final FileSystem fs = FileSystem.get(m_conf);
-                            final MutableInteger count = CONNECTION_COUNT.get(userName);
-                            if (count == null) {
-                                CONNECTION_COUNT.put(userName, new MutableInteger(1));
-                            } else {
-                                count.inc();
-                            }
-                            return fs;
-                        }
-                    });
                 } catch (Exception e) {
-                    LOGGER.debug("Exception while opening HDFS connection: " + e.getMessage(), e);
                     throw new IOException(e.getMessage(), e.getCause());
                 }
             }

@@ -45,17 +45,12 @@
 package org.knime.bigdata.fileformats.orc;
 
 import java.io.IOException;
-import java.security.PrivilegedExceptionAction;
 import java.util.stream.Stream;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.orc.CompressionKind;
 import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
-import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
@@ -108,20 +103,7 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
             final DataTypeMappingConfiguration<TypeDescription> outputDataTypeMappingConfiguration) {
         try {
-            AbstractFileFormatReader reader;
-            if (file.getConnectionInformation() != null && file.getConnectionInformation().useKerberos()) {
-                final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-                final UserGroupInformation user = UserGroupUtil.getKerberosUser(conf);
-                reader = user.doAs(new PrivilegedExceptionAction<AbstractFileFormatReader>() {
-                    @Override
-                    public AbstractFileFormatReader run() throws Exception {
-                        return new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
-                    }
-                });
-            } else {
-                reader = new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
-            }
-            return reader;
+            return new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
