@@ -47,15 +47,12 @@ package org.knime.bigdata.fileformats.orc.reader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -67,6 +64,7 @@ import org.apache.orc.RecordReader;
 import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
 import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCParameter;
@@ -124,8 +122,8 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
          * @throws IOException
          *             if file can not be read
          */
-        OrcRowIterator(final Reader reader, final long index, ProductionPath[] paths,
-                ProducerParameters<ORCSource>[] params) throws IOException {
+        OrcRowIterator(final Reader reader, final long index, final ProductionPath[] paths,
+                final ProducerParameters<ORCSource>[] params) throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
@@ -232,7 +230,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
      */
     @SuppressWarnings("unchecked")
     public OrcKNIMEReader(final RemoteFile<Connection> file,
-            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration, final ExecutionContext exec)
+            final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration, final ExecutionContext exec)
                     throws Exception {
         super(file, exec);
         m_outputTypeMappingConf = (DataTypeMappingConfiguration<TypeDescription>) outputDataTypeMappingConfiguration;
@@ -244,7 +242,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
     }
 
-    private ProducerParameters<ORCSource>[] createDefault(ExternalDataTableSpec<TypeDescription> exTableSpec) {
+    private ProducerParameters<ORCSource>[] createDefault(final ExternalDataTableSpec<TypeDescription> exTableSpec) {
         final ORCParameter[] params = new ORCParameter[exTableSpec.getColumns().size()];
         for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
             params[i] = new ORCParameter(i);
@@ -253,7 +251,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     }
 
     private Reader createORCReader(final RemoteFile<Connection> remotefile)
-            throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
+            throws Exception {
         final Configuration conf = new Configuration();
         createConfig(remotefile, conf);
         Path readPath = new Path(remotefile.getURI());
@@ -263,9 +261,13 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>) remotefile;
             readPath = generateS3nPath(cloudcon);
         }
-
-        reader = OrcFile.createReader(readPath, OrcFile.readerOptions(conf));
-
+        final Path path = readPath;
+        if (remotefile.getConnectionInformation() != null && remotefile.getConnectionInformation().useKerberos()) {
+            reader = UserGroupUtil.runWithProxyUserUGIIfNecessary(
+                (ugi) -> ugi.doAs((PrivilegedExceptionAction<Reader>)() -> OrcFile.createReader(path, OrcFile.readerOptions(conf))));
+        }else {
+                reader = OrcFile.createReader(readPath, OrcFile.readerOptions(conf));
+        }
         return reader;
     }
 

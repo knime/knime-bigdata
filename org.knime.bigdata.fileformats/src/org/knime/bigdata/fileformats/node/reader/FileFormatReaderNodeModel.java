@@ -46,16 +46,13 @@ package org.knime.bigdata.fileformats.node.reader;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.PrivilegedExceptionAction;
 
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
-import org.knime.cloud.core.util.port.CloudConnectionInformation;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
 import org.knime.core.node.BufferedDataTable;
@@ -155,10 +152,8 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
                 throw new InvalidSettingsException("No connection Information avaiable");
             }
 
-            if (connInfo instanceof CloudConnectionInformation) {
+            return new DataTableSpec[] { null };
 
-                return new DataTableSpec[] { null };
-            }
         }
         try {
     		final DataTypeMappingService<X, ?, ?> mappingService =
@@ -220,13 +215,9 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
 
         final AbstractFileFormatReader reader;
 
-        if (remoteFile.getConnectionInformation() != null && remoteFile.getConnectionInformation().useKerberos()) {
-            reader = UserGroupUtil.runWithProxyUserUGIIfNecessary(
-                (ugi) -> ugi.doAs((PrivilegedExceptionAction<AbstractFileFormatReader>)() -> m_settings
-                    .getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration)));
-        } else {
+
             reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration);
-        }
+
         return reader;
     }
 
