@@ -23,6 +23,10 @@ package org.knime.bigdata.spark.node.preproc.filter.row;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.knime.base.data.filter.row.dialog.OperatorPanelParameters;
+import org.knime.base.data.filter.row.dialog.component.DefaultRowFilterElementFactory;
+import org.knime.base.data.filter.row.dialog.component.RowFilterComponent;
+import org.knime.base.data.filter.row.dialog.component.RowFilterElementFactory;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.node.preproc.filter.row.operator.SparkOperatorRegistry;
 import org.knime.core.data.DataTableSpec;
@@ -32,10 +36,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.rowfilter.OperatorPanelParameters;
-import org.knime.core.node.rowfilter.component.DefaultRowFilterElementFactory;
-import org.knime.core.node.rowfilter.component.RowFilterComponent;
-import org.knime.core.node.rowfilter.component.RowFilterElementFactory;
 
 /**
  * Spark row filter node dialog.

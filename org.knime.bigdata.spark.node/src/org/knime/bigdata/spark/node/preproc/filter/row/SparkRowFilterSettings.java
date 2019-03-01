@@ -20,13 +20,13 @@
  */
 package org.knime.bigdata.spark.node.preproc.filter.row;
 
+import org.knime.base.data.filter.row.dialog.component.RowFilterComponent;
+import org.knime.base.data.filter.row.dialog.component.RowFilterConfig;
 import org.knime.bigdata.spark.node.preproc.filter.row.operator.SparkOperatorRegistry;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.rowfilter.component.RowFilterComponent;
-import org.knime.core.node.rowfilter.component.RowFilterConfig;
 
 /**
  * Spark row filter node settings.

@@ -22,8 +22,8 @@ package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
 import java.util.Objects;
 
+import org.knime.base.data.filter.row.dialog.OperatorParameters;
 import org.knime.core.data.DataType;
-import org.knime.core.node.rowfilter.OperatorParameters;
 
 /**
  * Spark SQL operator function with one parameter.

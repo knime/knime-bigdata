@@ -20,8 +20,8 @@
  */
 package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
-import org.knime.core.node.rowfilter.OperatorFunction;
-import org.knime.core.node.rowfilter.OperatorParameters;
+import org.knime.base.data.filter.row.dialog.OperatorFunction;
+import org.knime.base.data.filter.row.dialog.OperatorParameters;
 
 /**
  * Spark based operator function.

@@ -23,6 +23,18 @@ package org.knime.bigdata.spark.node.preproc.filter.row;
 import java.util.Iterator;
 import java.util.Optional;
 
+import org.knime.base.data.filter.row.dialog.OperatorParameters;
+import org.knime.base.data.filter.row.dialog.component.DefaultGroupTypes;
+import org.knime.base.data.filter.row.dialog.model.AbstractElement;
+import org.knime.base.data.filter.row.dialog.model.ColumnSpec;
+import org.knime.base.data.filter.row.dialog.model.Condition;
+import org.knime.base.data.filter.row.dialog.model.Group;
+import org.knime.base.data.filter.row.dialog.model.GroupType;
+import org.knime.base.data.filter.row.dialog.model.Node;
+import org.knime.base.data.filter.row.dialog.model.Operation;
+import org.knime.base.data.filter.row.dialog.model.Operator;
+import org.knime.base.data.filter.row.dialog.registry.OperatorKey;
+import org.knime.base.data.filter.row.dialog.registry.OperatorRegistry;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -40,18 +52,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.rowfilter.OperatorParameters;
-import org.knime.core.node.rowfilter.model.AbstractElement;
-import org.knime.core.node.rowfilter.model.ColumnSpec;
-import org.knime.core.node.rowfilter.model.Condition;
-import org.knime.core.node.rowfilter.model.Group;
-import org.knime.core.node.rowfilter.model.GroupType;
-import org.knime.core.node.rowfilter.model.Node;
-import org.knime.core.node.rowfilter.model.Operation;
-import org.knime.core.node.rowfilter.model.Operator;
-import org.knime.core.node.rowfilter.registry.OperatorKey;
-import org.knime.core.node.rowfilter.registry.OperatorRegistry;
-import org.knime.database.agent.rowfilter.DBGroupTypes;
 import org.knime.database.agent.rowfilter.impl.DefaultDBRowFilter;
 
 /**
@@ -62,7 +62,7 @@ import org.knime.database.agent.rowfilter.impl.DefaultDBRowFilter;
 public class SparkRowFilterNodeModel extends  SparkNodeModel {
 
     /** Supported condition group types */
-    static final GroupType[] GROUP_TYPES = new GroupType[]{DBGroupTypes.AND, DBGroupTypes.OR};
+    static final GroupType[] GROUP_TYPES = new GroupType[]{DefaultGroupTypes.AND, DefaultGroupTypes.OR};
 
     /** Settings model */
     private final SparkRowFilterSettings m_settings = new SparkRowFilterSettings();

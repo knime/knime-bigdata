@@ -22,14 +22,14 @@ package org.knime.bigdata.spark.node.preproc.filter.row.operator;
 
 import java.util.function.Supplier;
 
-import org.knime.core.node.rowfilter.OperatorPanel;
-import org.knime.core.node.rowfilter.OperatorValidation;
-import org.knime.core.node.rowfilter.panel.SingleFieldPanel;
-import org.knime.core.node.rowfilter.panel.TwoFieldsPanel;
-import org.knime.core.node.rowfilter.registry.AbstractOperatorRegistry;
-import org.knime.core.node.rowfilter.registry.OperatorValue;
-import org.knime.core.node.rowfilter.validation.SingleOperandValidation;
-import org.knime.core.node.rowfilter.validation.TwoOperandsValidation;
+import org.knime.base.data.filter.row.dialog.OperatorPanel;
+import org.knime.base.data.filter.row.dialog.OperatorValidation;
+import org.knime.base.data.filter.row.dialog.panel.SingleFieldPanel;
+import org.knime.base.data.filter.row.dialog.panel.TwoFieldsPanel;
+import org.knime.base.data.filter.row.dialog.registry.AbstractOperatorRegistry;
+import org.knime.base.data.filter.row.dialog.registry.OperatorValue;
+import org.knime.base.data.filter.row.dialog.validation.SingleOperandValidation;
+import org.knime.base.data.filter.row.dialog.validation.TwoOperandsValidation;
 import org.knime.database.agent.rowfilter.DBOperators;
 
 /**
