@@ -286,6 +286,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        initializeTypeMappingIfNecessary();
         m_settings.loadSettingsFrom(settings);
     }
 
@@ -319,10 +320,6 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        if (settings.getString(FileFormatWriterNodeSettings.CFGKEY_FILE) == null ||
-                settings.getString(FileFormatWriterNodeSettings.CFGKEY_FILE).isEmpty()) {
-            throw new InvalidSettingsException("No destination location provided! Please enter a valid location.");
-        }
         m_settings.validateSettings(settings);
     }
 

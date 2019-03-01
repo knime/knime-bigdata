@@ -234,6 +234,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+        initializeTypeMappingIfNecessary();
         m_settings.loadSettingsFrom(settings);
     }
 
