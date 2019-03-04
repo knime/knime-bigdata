@@ -55,6 +55,7 @@ import org.knime.core.data.RowKey;
 import org.knime.core.data.convert.map.MappingFramework;
 import org.knime.core.data.convert.map.ProductionPath;
 import org.knime.core.data.convert.map.Source.ProducerParameters;
+import org.knime.core.data.filestore.FileStoreFactory;
 
 /**
  * A class that converts Parquet records to {@link DataRow} instances.
@@ -74,7 +75,11 @@ final class DataRowConverter extends GroupConverter {
 
     private final ProducerParameters<ParquetSource>[] m_parameters;
 
-    DataRowConverter(final ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
+    private final FileStoreFactory m_fileStoreFactory;
+
+    DataRowConverter(final FileStoreFactory fileStoreFactory, final ProductionPath[] paths,
+        final ProducerParameters<ParquetSource>[] params) {
+        m_fileStoreFactory = fileStoreFactory;
         m_paths = paths.clone();
         m_parameters = params.clone();
         m_source = new ParquetSource();
@@ -87,7 +92,8 @@ final class DataRowConverter extends GroupConverter {
     public void end() {
         m_rowCount++;
         try {
-            m_dataRow = MappingFramework.map(RowKey.createRowKey(m_rowCount), m_source, m_paths, m_parameters, null);
+            m_dataRow = MappingFramework.map(RowKey.createRowKey(m_rowCount), m_fileStoreFactory, m_source, m_paths,
+                m_parameters);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
@@ -101,7 +107,7 @@ final class DataRowConverter extends GroupConverter {
      */
     @Override
     public Converter getConverter(final int fieldIndex) {
-        final ParquetCellValueProducerFactory<?> factory = 
+        final ParquetCellValueProducerFactory<?> factory =
                 (ParquetCellValueProducerFactory<?>) m_paths[fieldIndex].getProducerFactory();
         return factory.getConverter(fieldIndex);
     }

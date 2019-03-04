@@ -66,8 +66,10 @@ import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.cloud.aws.s3.filehandler.S3RemoteFileHandler;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowIterator;
+import org.knime.core.data.filestore.FileStoreFactory;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.util.KnimeEncryption;
 import org.knime.datatype.mapping.ExternalDataTableSpec;
@@ -148,6 +150,8 @@ public abstract class AbstractFileFormatReader {
 
     private final ExecutionContext m_exec;
 
+    private final FileStoreFactory m_fileStoreFactory;
+
     private ExternalDataTableSpec<?> m_externalTableSpec;
 
     /**
@@ -162,26 +166,30 @@ public abstract class AbstractFileFormatReader {
 
         m_exec = exec;
         m_file = file;
+        m_fileStoreFactory = FileStoreFactory.createFileStoreFactory(exec);
     }
 
     /**
      * Creates a reader instance
-     *
-     * @param exec
-     *            the execution context
      * @param schemas
      *            the list to store the table spec
      * @param remotefile
      *            the remote file to read
      */
-    protected abstract void createReader(ExecutionContext exec, List<DataTableSpec> schemas,
-            RemoteFile<Connection> remotefile);
+    protected abstract void createReader(List<DataTableSpec> schemas, RemoteFile<Connection> remotefile);
 
     /**
      * @return the execution context
      */
     public ExecutionContext getExec() {
         return m_exec;
+    }
+
+    /**
+     * @return the {@link FileStoreFactory} for {@link DataCell} creation
+     */
+    public FileStoreFactory getFileStoreFactory() {
+        return m_fileStoreFactory;
     }
 
     /**
@@ -242,7 +250,7 @@ public abstract class AbstractFileFormatReader {
                 for (final RemoteFile<Connection> remotefile : fileList) {
                     if (remotefile.getSize() > 0 && !remotefile.getName().endsWith(".crc")) {
 
-                        createReader(m_exec, schemas, remotefile);
+                        createReader(schemas, remotefile);
 
                     }
                 }
@@ -251,7 +259,7 @@ public abstract class AbstractFileFormatReader {
 
                 }
             } else {
-                createReader(m_exec, schemas, getFile());
+                createReader(schemas, getFile());
             }
             setTableSpec(schemas.get(0));
         } finally {
@@ -276,11 +284,11 @@ public abstract class AbstractFileFormatReader {
 
     /**
      * Sets the external table spec
-     * 
+     *
      * @param externalTableSpec
      *            the externalTableSpec to set
      */
-    public void setexternalTableSpec(ExternalDataTableSpec<?> externalTableSpec) {
+    public void setexternalTableSpec(final ExternalDataTableSpec<?> externalTableSpec) {
         this.m_externalTableSpec = externalTableSpec;
     }
 

@@ -114,7 +114,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      */
     @SuppressWarnings("unchecked")
     public ParquetKNIMEReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) throws Exception {
+            final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration) throws Exception {
         super(file, exec);
         m_outputTypeMappingConf = (DataTypeMappingConfiguration<ParquetType>) outputDataTypeMappingConfiguration;
         m_readers = new ArrayDeque<>();
@@ -124,7 +124,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
         }
     }
 
-    private ProducerParameters<ParquetSource>[] createDefault(ExternalDataTableSpec<ParquetType> exTableSpec) {
+    private ProducerParameters<ParquetSource>[] createDefault(final ExternalDataTableSpec<ParquetType> exTableSpec) {
         final ParquetParameter[] params = new ParquetParameter[exTableSpec.getColumns().size()];
         for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
             params[i] = new ParquetParameter(i);
@@ -136,8 +136,7 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
      * @see org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader#createReader(org.knime.core.node.ExecutionContext, java.util.List, org.knime.base.filehandling.remote.files.RemoteFile)
      */
     @Override
-    protected void createReader(final ExecutionContext exec, final List<DataTableSpec> schemas,
-            final RemoteFile<Connection> remoteFile) {
+    protected void createReader(final List<DataTableSpec> schemas, final RemoteFile<Connection> remoteFile) {
 
         final Configuration conf = new Configuration();
         try {
@@ -151,8 +150,9 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             schemas.add(tableSpec);
 
             @SuppressWarnings("resource")
-            final ParquetReader<DataRow> reader = ParquetReader.builder(new DataRowReadSupport(m_paths, m_params), path)
-            .withConf(conf).build();
+            final ParquetReader<DataRow> reader =
+            ParquetReader.builder(
+                new DataRowReadSupport(getFileStoreFactory(), m_paths, m_params), path).withConf(conf).build();
             m_readers.add(reader);
         } catch (final IOException ioe) {
             if (ioe.getMessage().contains("No FileSystem for scheme")) {
@@ -164,25 +164,25 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             throw new BigDataFileFormatException(e);
         }
     }
-    private DataTableSpec createTableSpec(final Path path, final Configuration conf) 
+    private DataTableSpec createTableSpec(final Path path, final Configuration conf)
             throws Exception {
         final ParquetMetadata footer = ParquetFileReader.readFooter(conf, path, ParquetMetadataConverter.NO_FILTER);
         final FileMetaData fileMetaData = footer.getFileMetaData();
         final MessageType schema = fileMetaData.getSchema();
         final List<ExternalDataColumnSpec<ParquetType>> columns = new ArrayList<>(schema.getFields().size());
         for (final Type field : schema.getFields()) {
-            
+
             if(field.isPrimitive()) {
-            columns.add(new ExternalDataColumnSpec<>(field.getName(), 
+            columns.add(new ExternalDataColumnSpec<>(field.getName(),
                     new ParquetType(field.asPrimitiveType().getPrimitiveTypeName(), field.getOriginalType())));
             }else {
                 if(field.getOriginalType() == OriginalType.LIST) {
                     Type subtype = field.asGroupType().getType(0).asGroupType().getType(0);
-                    ParquetType element = new ParquetType(subtype.asPrimitiveType().getPrimitiveTypeName(), 
+                    ParquetType element = new ParquetType(subtype.asPrimitiveType().getPrimitiveTypeName(),
                             subtype.getOriginalType());
                     columns.add(new ExternalDataColumnSpec<>(field.getName(), ParquetType.createListType(element)));
                 }
-                else { 
+                else {
                     throw new BigDataFileFormatException("Only Supported GroupType is LIST");
                 }
             }

@@ -55,8 +55,10 @@ import org.apache.parquet.io.api.RecordMaterializer;
 import org.apache.parquet.schema.MessageType;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.core.data.DataRow;
+import org.knime.core.data.container.CellFactory;
 import org.knime.core.data.convert.map.ProductionPath;
 import org.knime.core.data.convert.map.Source.ProducerParameters;
+import org.knime.core.data.filestore.FileStoreFactory;
 
 /**
  * A class that specifies how instances of {@link DataRow} are materialized from
@@ -73,8 +75,9 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
     static final class DataRowMaterializer extends RecordMaterializer<DataRow> {
         private final DataRowConverter m_rowConverter;
 
-        DataRowMaterializer(final ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
-            m_rowConverter = new DataRowConverter(paths, params);
+        DataRowMaterializer(final FileStoreFactory fileStoreFactory, final ProductionPath[] paths,
+            final ProducerParameters<ParquetSource>[] params) {
+            m_rowConverter = new DataRowConverter(fileStoreFactory, paths, params);
         }
 
         /**
@@ -99,11 +102,13 @@ public final class DataRowReadSupport extends ReadSupport<DataRow> {
 
     /**
      * Read support for KNIME data rows
+     * @param fileStoreFactory {@link FileStoreFactory} which may be used for creating {@link CellFactory}s.
      * @param paths the production paths to use
      * @param params the parameters for reading
      */
-    public DataRowReadSupport(ProductionPath[] paths, ProducerParameters<ParquetSource>[] params) {
-        m_materializer = new DataRowMaterializer(paths, params);
+    public DataRowReadSupport(final FileStoreFactory fileStoreFactory, final ProductionPath[] paths,
+        final ProducerParameters<ParquetSource>[] params) {
+        m_materializer = new DataRowMaterializer(fileStoreFactory, paths, params);
     }
 
     /**

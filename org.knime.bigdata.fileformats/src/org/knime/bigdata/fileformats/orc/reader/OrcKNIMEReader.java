@@ -182,7 +182,8 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
             DataRow safeRow;
             try {
-                safeRow = MappingFramework.map(RowKey.createRowKey(m_index), m_source, m_paths, m_parameters, null);
+                safeRow = MappingFramework.map(RowKey.createRowKey(m_index), getFileStoreFactory(), m_source, m_paths,
+                    m_parameters);
             } catch (final Exception e1) {
                 throw new BigDataFileFormatException(e1);
             }
@@ -242,7 +243,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
     }
 
-    private ProducerParameters<ORCSource>[] createDefault(final ExternalDataTableSpec<TypeDescription> exTableSpec) {
+    private static ProducerParameters<ORCSource>[] createDefault(final ExternalDataTableSpec<TypeDescription> exTableSpec) {
         final ORCParameter[] params = new ORCParameter[exTableSpec.getColumns().size()];
         for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
             params[i] = new ORCParameter(i);
@@ -272,11 +273,11 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     }
 
     @Override
-    protected void createReader(final ExecutionContext exec, final List<DataTableSpec> schemas,
-            final RemoteFile<Connection> remotefile) {
+    protected void createReader(final List<DataTableSpec> schemas, final RemoteFile<Connection> remotefile) {
         try {
             final Reader reader = createORCReader(remotefile);
             m_readers.add(reader);
+            final ExecutionContext exec = getExec();
             if (exec != null) {
                 exec.setProgress("Retrieving schema for file " + remotefile.getName());
                 exec.checkCanceled();
