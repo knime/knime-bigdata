@@ -45,6 +45,9 @@ import org.knime.core.node.port.database.connection.DBDriverFactory;
  */
 public class KerberosConnectionFactory extends CachedConnectionFactory {
 
+    private static final String FALLBACK_IMPERSONATION_PARAMETER =
+        String.format("hive.server2.proxy.user=%s", CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER);
+
     private static final NodeLogger LOGGER = NodeLogger.getLogger(KerberosConnectionFactory.class);
 
     /**
@@ -64,27 +67,26 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
         if (!useKerberos) {
             return super.createConnection(jdbcUrl, user, pass, useKerberos, d);
         }
-        try {
-            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
 
-            final UserGroupInformation ugi;
-            final String jdbcImpersonationURL;
+        try {
+            final String effectiveJdcbUrl;
             final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
-            if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter() && userToImpersonate.isPresent()) {
-                LOGGER.debug("Using JDBC impersonation parameter instead of proxy user on KNIME Server");
-                jdbcImpersonationURL = appendImpersonationParameter(jdbcUrl, userToImpersonate.get());
-                ugi = UserGroupUtil.getKerberosTGTUser(conf);
+            if (userToImpersonate.isPresent()) {
+                effectiveJdcbUrl = appendImpersonationParameter(jdbcUrl, userToImpersonate.get());
             } else {
-                ugi = UserGroupUtil.getKerberosUser(conf);
-                jdbcImpersonationURL = jdbcUrl;
+                effectiveJdcbUrl = jdbcUrl;
             }
+
+            final Configuration conf = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+            final UserGroupInformation ugi = UserGroupUtil.getKerberosTGTUser(conf);
             final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
-            LOGGER.debug("Create jdbc connection with Kerberos user: " + ugi.toString());
+
+            LOGGER.debug("Create JDBC connection with Kerberos user: " + ugi.toString());
             final Connection con = ugi.doAs(new PrivilegedExceptionAction<Connection>() {
                 @Override
                 public Connection run() throws Exception {
                     try {
-                        return d.connect(jdbcImpersonationURL, props);
+                        return d.connect(effectiveJdcbUrl, props);
                     } catch (Exception e) {
                         throw e;
                     }
@@ -99,18 +101,21 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
     }
 
     private static String appendImpersonationParameter(final String jdbcUrl, final String userToImpersonate) {
-        final String param = CommonConfigContainer.getInstance().getJDBCImpersonationParameter();
-        LOGGER.debug("JDBC impersonation parameter: " + param);
-        LOGGER.debug("Original JDBC URL: " + jdbcUrl);
 
-        //this checks that the user does not maliciously uses the impersonation parameter
+        String param = FALLBACK_IMPERSONATION_PARAMETER;
+        if (CommonConfigContainer.getInstance().useJDBCImpersonationParameter()) {
+            param = CommonConfigContainer.getInstance().getJDBCImpersonationParameter();
+        }
+
+        // this checks that the user does not maliciously uses the impersonation parameter
         final String searchString = param.replace(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER, "");
         if (jdbcUrl.contains(searchString)) {
-            throw new IllegalArgumentException("JDBC URL must not contain Kerberos impersonation parameter");
+            throw new IllegalArgumentException("JDBC URL must not contain user impersonation parameter");
         }
 
         final String replacedParam = param.replaceAll(
             Pattern.quote(CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER), userToImpersonate);
+
         final StringBuilder buf = new StringBuilder(jdbcUrl);
         if (!jdbcUrl.endsWith(";")) {
             buf.append(";");

@@ -150,7 +150,7 @@ public class CommonConfigContainer {
         }
     }
 
-    private void addSSLConfig(final Configuration conf, final String inputKey, final String outputKey) {
+    private static void addSSLConfig(final Configuration conf, final String inputKey, final String outputKey) {
         conf.set(FileBasedKeyStoresFactory.resolvePropertyName(Mode.CLIENT, outputKey), PREFERENCE_STORE.getString(inputKey));
     }
 
@@ -176,21 +176,45 @@ public class CommonConfigContainer {
     }
 
     /**
-     * This method returns the login of the workflow user if Kerberos impersonation is enabled, the workflow is
-     * executed on the KNIME Server and a workflow user is present in the {@link NodeContext}.
-     * On the KNIME Analytics Platform this method always returns an empty optional.
+     * DEBUG/TESTING SETTING ONLY! Returns a user to impersonate, so that impersonation can be tested without running
+     * KNIME Server. This is intended for testing/debugging purposes only, should not be used in production setups, and
+     * can change at any time.
      *
-     * @return the optional login of the workflow user
+     * @return optional user to impersonate
+     */
+    private static Optional<String> getUserToImpersonateForTesting() {
+        final String userToImpersonate =
+            PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_USER_TO_IMPERSONATE);
+        if (userToImpersonate == null || userToImpersonate.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(userToImpersonate);
+        }
+    }
+
+    /**
+     * This method returns the login of the workflow user to impersonate, if (a) impersonation is enabled and (b) the
+     * workflow is executed on KNIME Server with a workflow user present in the {@link NodeContext}, or if
+     * {@link #getUserToImpersonateForTesting()} returns a user.
      *
+     * @return the optional login of the workflow user to impersonate
      * @see #enableKerberosImpersonation()
+     * @see CommonPreferenceInitializer#PREF_USER_TO_IMPERSONATE
      */
     public Optional<String> getUserToImpersonate() {
         Optional<String> wfUser = Optional.empty();
-        if (KNIMERuntimeContext.INSTANCE.runningInServerContext()) {
+
+        if (KNIMERuntimeContext.INSTANCE.runningInServerContext() || getUserToImpersonateForTesting().isPresent()) {
             if (enableKerberosImpersonation()) {
-                wfUser = NodeContext.getWorkflowUser();
+
+                wfUser = getUserToImpersonateForTesting();
                 if (!wfUser.isPresent()) {
-                    LOGGER.warn("Kerberos impersonation disabled on KNIME Server because no workflow user is present in node context.");
+                    wfUser = NodeContext.getWorkflowUser();
+                }
+
+                if (!wfUser.isPresent()) {
+                    LOGGER.warn(
+                        "Kerberos impersonation disabled on KNIME Server because no workflow user is present in node context.");
                 }
             } else {
                 LOGGER.info("Kerberos impersonation disabled on KNIME Server");
