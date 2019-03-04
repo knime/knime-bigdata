@@ -104,6 +104,13 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM =
             "org.knime.bigdata.config.kerberos.jdbc.impersonation.param";
 
+    /**
+     * DEBUG/TESTING SETTING ONLY! Preference key to trigger user impersonation of a specific user without having to run
+     * KNIME Server. This is intended for testing/debugging purposes only, should not be used in production setups, and
+     * can change at any time.
+     */
+    public static final String PREF_USER_TO_IMPERSONATE = "org.knime.bigdata.userToImpersonate";
+
     @Override
     public void initializeDefaultPreferences() {
         final IPreferenceStore store = CommonsPlugin.getDefault().getPreferenceStore();
@@ -135,5 +142,7 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG, false);
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER);
         store.setDefault(PREF_KERBEROS_IMPERSONATION_PARAM, true);
+
+        store.setDefault(PREF_USER_TO_IMPERSONATE, "");
     }
 }
