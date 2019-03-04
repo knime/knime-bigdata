@@ -28,7 +28,8 @@ import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapperFactory;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
-import org.knime.python2.PythonPreferencePage;
+import org.knime.python2.PythonVersion;
+import org.knime.python2.prefs.PythonPreferences;
 
 /**
  * Implementation of {@link SparkContext} for local Spark. This class uses the
@@ -136,12 +137,12 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 			final LocalSparkContextConfig config = getConfiguration();
 			final Map<String, String> sparkConf = new HashMap<>();
 
-	        final String defaultPythonVersion = PythonPreferencePage.getDefaultPythonOption();
-	        if (defaultPythonVersion.contentEquals("python3")) {
-	            System.setProperty("spark.pyspark.python", PythonPreferencePage.getPython3Path());
-	        } else if (defaultPythonVersion.contentEquals("python2")) {
-	            System.setProperty("spark.pyspark.python", PythonPreferencePage.getPython2Path());
-	        }
+			final PythonVersion defaultPythonVersion = PythonPreferences.getPythonVersionPreference();
+			if (defaultPythonVersion.equals(PythonVersion.PYTHON3)) {
+				System.setProperty("spark.pyspark.python", PythonPreferences.getPython3CommandPreference().toString());
+			} else if (defaultPythonVersion.equals(PythonVersion.PYTHON2)) {
+				System.setProperty("spark.pyspark.python", PythonPreferences.getPython2CommandPreference().toString());
+			}
 
 			// reduce the shuffle default (200 partitions) to something smaller in local mode
 			sparkConf.put("spark.sql.shuffle.partitions", "" + (3 * config.getNumberOfThreads()));
