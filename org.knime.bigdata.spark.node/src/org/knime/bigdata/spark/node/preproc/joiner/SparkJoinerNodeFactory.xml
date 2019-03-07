@@ -39,11 +39,11 @@
         <tab name="Column selection">
             <option name="Column Selection (Top Input ('left' table) and Bottom Input ('right' table))">
                 <br/>
-                <b>Include:</b> This list contains the names of the columns in the input Spark
-                DataFrame/RDD that are included.
+                <b>Include:</b> This list contains the names of those columns in the input Spark
+                DataFrame/RDD to be included.
                 <br/>
                 <b>Exclude:</b> This list contains the names of the columns in the input Spark
-                DataFrame/RDD that are excluded.
+                DataFrame/RDD to be excluded.
                 <br/>
 				<b>Filter:</b> Use one of these fields to filter either the Include or Exclude
                 list for certain column names or name substrings.
