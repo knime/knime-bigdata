@@ -122,8 +122,8 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ViewUtils;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
 
 /**
  * The dialog that is used in all Spark java snippet nodes.

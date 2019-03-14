@@ -23,9 +23,9 @@ package org.knime.bigdata.spark.node.scripting.python.util;
 import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedSection;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.rsyntaxtextarea.guarded.GuardedSection;
 
 /**
  * PySpark Document with guarded sections

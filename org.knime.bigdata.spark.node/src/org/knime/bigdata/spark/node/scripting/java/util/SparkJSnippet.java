@@ -51,8 +51,8 @@ import org.knime.bigdata.spark.node.scripting.java.util.helper.JavaSnippetHelper
 import org.knime.bigdata.spark.node.scripting.java.util.template.SparkJavaSnippetTemplate;
 import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 import org.knime.core.util.FileUtil;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
 
 /**
  * {@link JSnippet} implementation for the Spark Java Snippet nodes. This class links the GUI components to the node

@@ -41,8 +41,8 @@ import org.knime.base.node.jsnippet.util.field.OutVar;
 import org.knime.bigdata.spark.node.scripting.java.util.helper.DefaultJavaSnippetHelper;
 import org.knime.bigdata.spark2_2.api.Spark_2_2_CompatibilityChecker;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedSection;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.rsyntaxtextarea.guarded.GuardedSection;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com

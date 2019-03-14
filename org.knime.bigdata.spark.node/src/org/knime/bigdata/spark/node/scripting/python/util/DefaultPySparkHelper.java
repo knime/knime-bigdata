@@ -30,8 +30,8 @@ import javax.swing.text.BadLocationException;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedSection;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.rsyntaxtextarea.guarded.GuardedSection;
 
 /**
  * Default PySpark helper implementation

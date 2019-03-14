@@ -47,8 +47,8 @@ import org.knime.bigdata.spark1_3.jobs.scripting.java.AbstractSparkJavaSnippet;
 import org.knime.bigdata.spark1_3.jobs.scripting.java.AbstractSparkJavaSnippetSink;
 import org.knime.bigdata.spark1_3.jobs.scripting.java.AbstractSparkJavaSnippetSource;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedSection;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.rsyntaxtextarea.guarded.GuardedSection;
 
 /**
  * @author Bjoern Lohrmann, KNIME.com
