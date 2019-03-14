@@ -83,7 +83,7 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
     private JButton m_cancel = new JButton("Cancel");
     private PortObject[] m_input;
     private SettingsModelInteger m_rowcount = new SettingsModelInteger("RowCount", DEFAULT_VALIADTE_ROW_COUNT);
-    private final PythonKernelOptions m_kernelOptions = new PythonKernelOptions();
+    private PythonKernelOptions m_kernelOptions = new PythonKernelOptions();
     private final Lock m_lock = new ReentrantLock();
     private ExecutionMonitor m_exec;
     private PythonKernelManager m_kernelManager;
@@ -457,6 +457,6 @@ public class PySparkSourceCodePanel extends SourceCodePanel {
      * @param pySparkPath the pySpark path to set
      */
     public void setPySparkPath(final String pySparkPath) {
-        m_kernelOptions.setExternalCustomPath(pySparkPath);
+        m_kernelOptions = m_kernelOptions.forExternalCustomPath(pySparkPath);
     }
 }
