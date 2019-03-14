@@ -65,12 +65,12 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Type;
 import org.knime.core.util.FileUtil;
 import org.knime.core.util.Pair;
 import org.knime.ext.sun.nodes.script.compile.CompilationFailedException;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
 
 /**
  *

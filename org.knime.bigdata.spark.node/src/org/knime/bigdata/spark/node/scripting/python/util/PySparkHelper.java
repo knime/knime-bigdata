@@ -22,7 +22,7 @@ package org.knime.bigdata.spark.node.scripting.python.util;
 
 import org.knime.bigdata.spark.core.version.SparkProvider;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.util.rsyntaxtextarea.guarded.GuardedDocument;
+import org.knime.rsyntaxtextarea.guarded.GuardedDocument;
 
 /**
  *
