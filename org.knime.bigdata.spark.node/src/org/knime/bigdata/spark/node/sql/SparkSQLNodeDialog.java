@@ -41,7 +41,6 @@ import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.knime.base.node.util.KnimeSyntaxTextArea;
 import org.knime.base.util.flowvariable.FlowVariableResolver;
 import org.knime.bigdata.spark.core.exception.MissingJobException;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
@@ -56,6 +55,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.DataColumnSpecListCellRenderer;
 import org.knime.core.node.util.FlowVariableListCellRenderer;
 import org.knime.core.node.workflow.FlowVariable;
+import org.knime.rsyntaxtextarea.KnimeSyntaxTextArea;
 
 /**
  * Dialog for the Spark SQL Executor node.
