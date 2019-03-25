@@ -74,7 +74,9 @@ import org.knime.node.datatype.mapping.SettingsModelDataTypeMapping;
 public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     private static final String SUFFIX = ".parquet";
+
     private static final String NAME = "Parquet";
+
     private static final int TO_BYTE = 1024 * 1024;
 
     /**
@@ -88,7 +90,7 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     @Override
     public String[] getCompressionList() {
         return Stream.of(CompressionCodecName.values()).filter(i -> i != CompressionCodecName.LZO).map(Enum::name)
-                .toArray(String[]::new);
+            .toArray(String[]::new);
     }
 
     @Override
@@ -102,11 +104,10 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
     }
 
     @Override
-    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file,
-            final ExecutionContext exec,
-            final DataTypeMappingConfiguration<ParquetType> outputDataTypeMappingConfiguration) {
+    public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
+        final DataTypeMappingConfiguration<ParquetType> outputDataTypeMappingConfiguration, final boolean useKerberos) {
         try {
-            return new ParquetKNIMEReader(file, exec, outputDataTypeMappingConfiguration);
+            return new ParquetKNIMEReader(file, exec, outputDataTypeMappingConfiguration, useKerberos);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
@@ -114,20 +115,19 @@ public class ParquetFormatFactory implements FileFormatFactory<ParquetType> {
 
     @Override
     public SettingsModelDataTypeMapping<ParquetType> getTypeMappingModel(final String key,
-            final DataTypeMappingDirection mappingDirection) {
+        final DataTypeMappingDirection mappingDirection) {
         return new SettingsModelParquetDataTypeMapping(key, mappingDirection);
     }
 
     @Override
     public DataTypeMappingService<ParquetType, ?, ?> getTypeMappingService() {
-    	return ParquetTypeMappingService.getInstance();
+        return ParquetTypeMappingService.getInstance();
     }
 
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int chunkSize, final String compression,
-            final DataTypeMappingConfiguration<ParquetType> typeMappingConf)
-                    throws IOException {
+        final int chunkSize, final String compression, final DataTypeMappingConfiguration<ParquetType> typeMappingConf)
+        throws IOException {
         return new ParquetKNIMEWriter(file, spec, compression, chunkSize * TO_BYTE, typeMappingConf);
     }
 }

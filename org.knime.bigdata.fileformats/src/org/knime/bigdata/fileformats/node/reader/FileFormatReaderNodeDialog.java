@@ -79,20 +79,25 @@ import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
 public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatReaderNodeDialog.class);
+
     private final FileFormatReaderNodeSettings<X> m_settings;
+
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
+
     private final DialogComponentDataTypeMapping<X> m_outputTypeMappingComponent;
 
     /**
      * New pane for configuring the OrcWriter node.
+     *
+     * @param settings the settings for the node dialog
      */
     protected FileFormatReaderNodeDialog(final FileFormatReaderNodeSettings<X> settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
-                RemoteFileChooser.SELECT_FILE_OR_DIR,
-                createFlowVariableModel(FileFormatReaderNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
-                HDFSLocalConnectionInformation.getInstance());
+            RemoteFileChooser.SELECT_FILE_OR_DIR,
+            createFlowVariableModel(FileFormatReaderNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
+            HDFSLocalConnectionInformation.getInstance());
         final JPanel filePanel = new JPanel();
         filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.X_AXIS));
         filePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Input:"));
@@ -124,9 +129,9 @@ public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
     /**
      * {@inheritDoc}
      */
-	@Override
+    @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
-            throws NotConfigurableException {
+        throws NotConfigurableException {
         try {
             m_settings.loadSettingsFrom(settings);
         } catch (final InvalidSettingsException e) {
@@ -134,8 +139,8 @@ public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
             throw new NotConfigurableException(e.getMessage());
         }
         if (specs.length > 0 && specs[0] != null) {
-            final ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec) specs[0])
-                    .getConnectionInformation();
+            final ConnectionInformation connInfo =
+                ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
             m_filePanel.setConnectionInformation(connInfo);
         } else {
             // No connection set, create local HDFS Connection
@@ -143,7 +148,7 @@ public class FileFormatReaderNodeDialog<X> extends NodeDialogPane {
         }
         final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         m_outputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		mappingService.createMappingConfiguration(DataTypeMappingDirection.EXTERNAL_TO_KNIME));
+            mappingService.createMappingConfiguration(DataTypeMappingDirection.EXTERNAL_TO_KNIME));
         m_filePanel.setSelection(m_settings.getFileName());
         m_outputTypeMappingComponent.setMappingService(mappingService);
         m_outputTypeMappingComponent.loadSettingsFrom(settings, specs);

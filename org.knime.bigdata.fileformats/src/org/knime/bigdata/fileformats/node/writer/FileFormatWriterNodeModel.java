@@ -110,16 +110,17 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
 
     /**
      * Constructor for the node model.
+     *
+     * @param settings the settings for the node model
      */
     protected FileFormatWriterNodeModel(final FileFormatWriterNodeSettings<X> settings) {
-        super(new PortType[] { ConnectionInformationPortObject.TYPE_OPTIONAL, BufferedDataTable.TYPE }, null);
+        super(new PortType[]{ConnectionInformationPortObject.TYPE_OPTIONAL, BufferedDataTable.TYPE}, null);
         m_settings = settings;
 
     }
 
     /**
-     * Checks if the dir contains files, that do not end with the right suffix and
-     * gives a warning if it does.
+     * Checks if the dir contains files, that do not end with the right suffix and gives a warning if it does.
      *
      * @param connInfo
      * @param fileName
@@ -127,25 +128,25 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     private void checkDirContent(final ConnectionInformation connInfo, final String fileName) throws Exception {
 
-            final ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
-            final URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
-            final RemoteFile<Connection> remotefile = RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
-            if (remotefile.isDirectory()) {
-                final RemoteFile<Connection>[] fileList = remotefile.listFiles();
-                for (final RemoteFile<Connection> file : fileList) {
-                    final String name = file.getName();
-                    // ignore known Spark and HDFS metafiles
-                    if (!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc")) {
-                        final String suffix = m_settings.getFilenameSuffix();
-                        if (!name.endsWith(suffix)) {
-                            throw new BigDataFileFormatException(String.format(
-                                    "The directory contains files without '%s' suffix. "
-                                            + "The directory will be lost with the current settings.",
-                                            m_settings.getFilenameSuffix()));
-                        }
+        final ConnectionMonitor<Connection> conMonitor = new ConnectionMonitor<>();
+        final URI fileURI = connInfo.toURI().resolve(URIUtil.fromString(fileName));
+        final RemoteFile<Connection> remotefile = RemoteFileFactory.createRemoteFile(fileURI, connInfo, conMonitor);
+        if (remotefile.isDirectory()) {
+            final RemoteFile<Connection>[] fileList = remotefile.listFiles();
+            for (final RemoteFile<Connection> file : fileList) {
+                final String name = file.getName();
+                // ignore known Spark and HDFS metafiles
+                if (!name.equalsIgnoreCase("_SUCCESS") && !name.endsWith("crc")) {
+                    final String suffix = m_settings.getFilenameSuffix();
+                    if (!name.endsWith(suffix)) {
+                        throw new BigDataFileFormatException(String.format(
+                            "The directory contains files without '%s' suffix. "
+                                + "The directory will be lost with the current settings.",
+                            m_settings.getFilenameSuffix()));
                     }
                 }
             }
+        }
     }
 
     /**
@@ -154,10 +155,10 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
 
-    	initializeTypeMappingIfNecessary();
-        final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        initializeTypeMappingIfNecessary();
+        final ConnectionInformationPortObjectSpec connSpec = (ConnectionInformationPortObjectSpec)inSpecs[0];
         if (connSpec != null && !connSpec.getConnectionInformation().getProtocol()
-                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
+            .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
 
             final ConnectionInformation connInfo = connSpec.getConnectionInformation();
 
@@ -185,7 +186,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
             // Check file access
             CheckUtils.checkDestinationFile(m_settings.getFileNameWithSuffix(), m_settings.getFileOverwritePolicy());
         }
-        return new DataTableSpec[] {};
+        return new DataTableSpec[]{};
     }
 
     /**
@@ -196,12 +197,13 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     private void initializeTypeMappingIfNecessary() {
         try {
-        	final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+            final DataTypeMappingService<X, ?, ?> mappingService =
+                m_settings.getFormatFactory().getTypeMappingService();
             final DataTypeMappingConfiguration<X> origExternalToKnimeConf =
-            		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+                m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
             if (origExternalToKnimeConf.getTypeRules().isEmpty() && origExternalToKnimeConf.getNameRules().isEmpty()) {
                 final DataTypeMappingConfiguration<X> combinedConf =
-                        origExternalToKnimeConf.with(mappingService.newDefaultKnimeToExternalMappingConfiguration());
+                    origExternalToKnimeConf.with(mappingService.newDefaultKnimeToExternalMappingConfiguration());
                 m_settings.getMappingModel().setDataTypeMappingConfiguration(combinedConf);
             }
         } catch (final InvalidSettingsException e) {
@@ -214,32 +216,36 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
-            final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         return new StreamableOperator() {
 
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
-                    throws Exception {
-                ConnectionInformationPortObject connPortObject = null;
-                final PortObjectInput portObject = (PortObjectInput) inputs[0];
-                if (portObject != null) {
-                    connPortObject = (ConnectionInformationPortObject) portObject.getPortObject();
-                }
+                throws Exception {
+                final ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
+                try {
+                    ConnectionInformationPortObject connPortObject = null;
+                    final PortObjectInput portObject = (PortObjectInput)inputs[0];
+                    if (portObject != null) {
+                        connPortObject = (ConnectionInformationPortObject)portObject.getPortObject();
+                    }
 
-                final RowInput input = (RowInput) inputs[1];
-                writeRowInput(exec, input, connPortObject);
+                    final RowInput input = (RowInput)inputs[1];
+                    writeRowInput(exec, input, connPortObject, connMonitor);
+                } finally {
+                    connMonitor.closeAll();
+                }
             }
         };
     }
 
-	private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
-    		final DataTypeMappingConfiguration<X> mappingConfiguration)
-    		throws IOException {
+    private AbstractFileFormatWriter createWriter(final RowInput input, final RemoteFile<Connection> remoteFile,
+        final DataTypeMappingConfiguration<X> mappingConfiguration) throws IOException {
         final DataTableSpec dataSpec = input.getDataTableSpec();
         final int chunkSize = m_settings.getChunkSize();
         final String compression = m_settings.getCompression();
         return m_settings.getFormatFactory().getWriter(remoteFile, dataSpec, chunkSize, compression,
-        		mappingConfiguration);
+            mappingConfiguration);
 
     }
 
@@ -248,28 +254,31 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected BufferedDataTable[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final BufferedDataTable input = (BufferedDataTable) inObjects[1];
+        final BufferedDataTable input = (BufferedDataTable)inObjects[1];
+        final ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
+        try {
+            if (input.size() == 0) {
 
-        if (input.size() == 0) {
+                // empty table nothing to do.
+                LOGGER.debug("Input empty, no file is written.");
+                return new BufferedDataTable[]{};
+            }
+            final ConnectionInformationPortObject connInfo = (ConnectionInformationPortObject)inObjects[0];
+            if (m_settings.getcheckDirContent()) {
+                checkDirContent(connInfo.getConnectionInformation(), m_settings.getFileName());
+            }
+            final RowInput rowInput = new DataTableRowInput(input);
+            writeRowInput(exec, rowInput, connInfo, connMonitor);
 
-            // empty table nothing to do.
-            LOGGER.debug("Input empty, no file is written.");
-            return new BufferedDataTable[] {};
+            return new BufferedDataTable[]{};
+        } finally {
+            connMonitor.closeAll();
         }
-        final ConnectionInformationPortObject connInfo = (ConnectionInformationPortObject) inObjects[0];
-        if(m_settings.getcheckDirContent()) {
-            checkDirContent(connInfo.getConnectionInformation(), m_settings.getFileName());
-        }
-        final RowInput rowInput = new DataTableRowInput(input);
-        writeRowInput(exec, rowInput, connInfo);
-
-        return new BufferedDataTable[] {};
     }
 
     @Override
     public InputPortRole[] getInputPortRoles() {
-        return new InputPortRole[] { InputPortRole.NONDISTRIBUTED_NONSTREAMABLE,
-                InputPortRole.NONDISTRIBUTED_STREAMABLE };
+        return new InputPortRole[]{InputPortRole.NONDISTRIBUTED_NONSTREAMABLE, InputPortRole.NONDISTRIBUTED_STREAMABLE};
     }
 
     /**
@@ -277,7 +286,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected void loadInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
+        throws IOException, CanceledExecutionException {
         // nothing to do
     }
 
@@ -303,7 +312,7 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
      */
     @Override
     protected void saveInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
+        throws IOException, CanceledExecutionException {
         // nothing to do
     }
 
@@ -324,19 +333,19 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
     }
 
     private void writeRowInput(final ExecutionContext exec, final RowInput input,
-            final ConnectionInformationPortObject connInfo) throws Exception {
+        final ConnectionInformationPortObject connInfo, final ConnectionMonitor<?> connMonitor) throws Exception {
 
         if (connInfo != null && !connInfo.getConnectionInformation().getProtocol()
-                .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
-            final RemoteFile<Connection> remoteDir = FileHandlingUtility.createRemoteDir(connInfo,
-                    m_settings.getFileName());
+            .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName())) {
+            final RemoteFile<Connection> remoteDir =
+                FileHandlingUtility.createRemoteDir(connInfo, connMonitor, m_settings.getFileName());
             FileHandlingUtility.checkOverwrite(remoteDir, m_settings.getFileOverwritePolicy());
             // For remote connections, write data to temporary file and upload
             // the file afterwards.
             writeTempFilesAndUpload(exec, input, remoteDir);
         } else {
-            final RemoteFile<Connection> remoteFile = FileHandlingUtility
-                    .createLocalFile(m_settings.getFileNameWithSuffix());
+            final RemoteFile<Connection> remoteFile =
+                FileHandlingUtility.createLocalFile(m_settings.getFileNameWithSuffix());
             FileHandlingUtility.checkOverwrite(remoteFile, m_settings.getFileOverwritePolicy());
 
             // For local or HDFS_local connection write directly.
@@ -345,14 +354,14 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
     }
 
     private void writeTempFilesAndUpload(final ExecutionContext exec, final RowInput input,
-            final RemoteFile<Connection> remoteFile) throws Exception {
+        final RemoteFile<Connection> remoteFile) throws Exception {
         final File path = FileUtil.createTempDir("cloudupload");
 
         boolean createNewFile = true;
         int filecount = 0;
 
         final FileUploader fileUploader = new FileUploader(m_settings.getNumOfLocalChunks(), remoteFile,
-                exec.createSubExecutionContext(0.5), m_settings.getFilenameSuffix());
+            exec.createSubExecutionContext(0.5), m_settings.getFilenameSuffix());
         final ExecutorService uploadExecutor = Executors.newSingleThreadExecutor();
         final Future<String> resultString = uploadExecutor.submit(fileUploader);
 
@@ -375,12 +384,12 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
     }
 
     private boolean writeToFile(final ExecutionContext exec, final RowInput input,
-            final RemoteFile<Connection> remoteFile, final boolean writeChunks) throws Exception {
+        final RemoteFile<Connection> remoteFile, final boolean writeChunks) throws Exception {
 
         exec.setMessage("Starting to write File.");
-		final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+        final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         final DataTypeMappingConfiguration<X> mappingConfiguration =
-        		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+            m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
         try (final AbstractFileFormatWriter writer = createWriter(input, remoteFile, mappingConfiguration)) {
 
             for (DataRow row; (row = input.poll()) != null;) {
@@ -407,11 +416,11 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
         } catch (final CanceledExecutionException cee) {
             try {
                 remoteFile.delete();
-                LOGGER.debug(
-                        String.format("File '%s' deleted after node has been canceled.", m_settings.getFileName()));
+                LOGGER
+                    .debug(String.format("File '%s' deleted after node has been canceled.", m_settings.getFileName()));
             } catch (final IOException ex) {
                 LOGGER.warn(String.format("Unable to delete file '%s' after cancellation: %s.",
-                        m_settings.getFileName(), ex.getMessage()), ex);
+                    m_settings.getFileName(), ex.getMessage()), ex);
             }
             throw cee;
         }

@@ -101,29 +101,30 @@ public class OrcFormatFactory implements FileFormatFactory<TypeDescription> {
 
     @Override
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            final DataTypeMappingConfiguration<TypeDescription> outputDataTypeMappingConfiguration) {
+        final DataTypeMappingConfiguration<TypeDescription> outputDataTypeMappingConfiguration,
+        final boolean useKerberos) {
         try {
-            return new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec);
+            return new OrcKNIMEReader(file, outputDataTypeMappingConfiguration, exec, useKerberos);
         } catch (final Exception e) {
             throw new BigDataFileFormatException(e);
         }
     }
 
     @Override
-    public SettingsModelDataTypeMapping<TypeDescription> getTypeMappingModel
-    (final String key, final DataTypeMappingDirection mappingDirection) {
+    public SettingsModelDataTypeMapping<TypeDescription> getTypeMappingModel(final String key,
+        final DataTypeMappingDirection mappingDirection) {
         return new SettingsModelORCDataTypeMapping(key, mappingDirection);
     }
 
     @Override
-	public ORCTypeMappingService getTypeMappingService() {
-    	return ORCTypeMappingService.getInstance();
+    public ORCTypeMappingService getTypeMappingService() {
+        return ORCTypeMappingService.getInstance();
     }
 
     @Override
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int chunkSize, final String compression,
-            final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
+        final int chunkSize, final String compression,
+        final DataTypeMappingConfiguration<TypeDescription> typeMappingConf) throws IOException {
         return new OrcKNIMEWriter(file, spec, chunkSize, compression, typeMappingConf);
     }
 }

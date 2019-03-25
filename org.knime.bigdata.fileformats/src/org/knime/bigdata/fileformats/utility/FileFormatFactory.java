@@ -73,8 +73,7 @@ public interface FileFormatFactory<X> {
     public String getChunkSizeUnit();
 
     /**
-     * Returns a list of Strings containing all compressionCodecs supported by the
-     * specified file format.
+     * Returns a list of Strings containing all compressionCodecs supported by the specified file format.
      *
      * @return the list of available compressions
      */
@@ -91,25 +90,24 @@ public interface FileFormatFactory<X> {
     /**
      * Creates a file reader for the given file.
      *
-     * @param file
-     *            the file or directory to read from
-     * @param exec
-     *            the execution context
-     * @param outputDataTypeMappingConfiguration
-     *            the type mapping configuration
+     * @param file the file or directory to read from
+     * @param exec the execution context
+     * @param outputDataTypeMappingConfiguration the type mapping configuration
+     * @param useKerberos
      * @return the reader
      */
     public AbstractFileFormatReader getReader(final RemoteFile<Connection> file, final ExecutionContext exec,
-            DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration);
+        DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration, boolean useKerberos);
 
     /**
      * Returns the type mapping settings model for the file format
+     *
      * @param cfkeyTypeMapping the key to use for the type mapping configuration
      * @param mappingDirection the direction to map
      * @return the settings model
      */
     public SettingsModelDataTypeMapping<X> getTypeMappingModel(String cfkeyTypeMapping,
-            DataTypeMappingDirection mappingDirection);
+        DataTypeMappingDirection mappingDirection);
 
     /**
      * @return the {@link DataTypeMappingService} for this file format.
@@ -117,25 +115,18 @@ public interface FileFormatFactory<X> {
     public DataTypeMappingService<X, ?, ?> getTypeMappingService();
 
     /**
-     * Returns a writer that writes KNIME {@link DataRow}s to an specific file
-     * format
+     * Returns a writer that writes KNIME {@link DataRow}s to an specific file format
      *
-     * @param file
-     *            the target file
-     * @param spec
-     *            the data table spec
-     * @param batchSize
-     *            size of the batch
-     * @param compression
-     *            the compression to use for writing
-     * @param typeMappingConf
-     *            the type mapping configuration
+     * @param file the target file
+     * @param spec the data table spec
+     * @param batchSize size of the batch
+     * @param compression the compression to use for writing
+     * @param typeMappingConf the type mapping configuration
      * @return the writer
-     * @throws IOException
-     *             throw if writer cannot be created
+     * @throws IOException throw if writer cannot be created
      */
     public AbstractFileFormatWriter getWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
-            final int batchSize, final String compression,
-            DataTypeMappingConfiguration<X> typeMappingConf) throws IOException;
+        final int batchSize, final String compression, DataTypeMappingConfiguration<X> typeMappingConf)
+        throws IOException;
 
 }

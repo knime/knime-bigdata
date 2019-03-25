@@ -56,7 +56,6 @@ import javax.crypto.IllegalBlockSizeException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.SnappyCodec;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.xmlbeans.impl.piccolo.io.FileFormatException;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformation;
 import org.knime.base.filehandling.remote.files.Connection;
@@ -100,17 +99,25 @@ public abstract class AbstractFileFormatReader {
         }
     }
 
+    /**
+     * Adapts a given HDFS configuration based on the remote connection
+     * @param remotefile the remote file to access
+     * @param conf Configuration to adapt
+     * @throws InvalidKeyException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws IOException
+     */
     protected static void createConfig(final RemoteFile<Connection> remotefile, final Configuration conf)
             throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
 
         if (remotefile.getConnectionInformation() == null) {
             return;
         }
-        if (remotefile.getConnectionInformation().useKerberos()) {
-            conf.addResource(ConfigurationFactory.createBaseConfigurationWithKerberosAuth());
-        }
         final ConnectionInformation conInfo = remotefile.getConnectionInformation();
-        if (conInfo instanceof CloudConnectionInformation) {
+        if (conInfo.useKerberos()) {
+            conf.addResource(ConfigurationFactory.createBaseConfigurationWithKerberosAuth());
+        } else if (conInfo instanceof CloudConnectionInformation) {
             final String protocol = conInfo.getProtocol();
             if (S3RemoteFileHandler.PROTOCOL.getName().equals(protocol)) {
                 String accessID;
@@ -131,9 +138,16 @@ public abstract class AbstractFileFormatReader {
             } else {
                 throw new IOException(protocol + " protocol not supported");
             }
+        } else {
+            conf.addResource(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
         }
     }
 
+    /**
+     * Generates a S3n path for a S3 remote cloud file
+     * @param cloudcon the cloud remote file
+     * @return returns the Path wit s3n protocol
+     */
     protected static Path generateS3nPath(final CloudRemoteFile<Connection> cloudcon) {
         try {
             return new Path(new URI("s3n", cloudcon.getContainerName(), "/" + cloudcon.getBlobName(), null));
@@ -141,8 +155,6 @@ public abstract class AbstractFileFormatReader {
             throw new BigDataFileFormatException(e);
         }
     }
-
-    protected UserGroupInformation m_user = null;
 
     private final RemoteFile<Connection> m_file;
 
@@ -154,6 +166,8 @@ public abstract class AbstractFileFormatReader {
 
     private ExternalDataTableSpec<?> m_externalTableSpec;
 
+    private final boolean m_useKerberos;
+
     /**
      * Constructor for FileFormatReader
      *
@@ -161,12 +175,15 @@ public abstract class AbstractFileFormatReader {
      *            the file or directory to read from
      * @param exec
      *            the execution context
+     * @param useKerberos
      */
-    public AbstractFileFormatReader(final RemoteFile<Connection> file, final ExecutionContext exec) {
+    public AbstractFileFormatReader(final RemoteFile<Connection> file, final ExecutionContext exec, final boolean useKerberos) {
 
         m_exec = exec;
         m_file = file;
         m_fileStoreFactory = FileStoreFactory.createFileStoreFactory(exec);
+        m_useKerberos = useKerberos;
+
     }
 
     /**
@@ -217,8 +234,9 @@ public abstract class AbstractFileFormatReader {
      *             thrown if files can not be read
      * @throws InterruptedException
      *             if file iterator throws Interrupted Exception
+     * @throws Exception if files can not be read, if file iterator throws Interrupted Exception, if
      */
-    public abstract FileFormatRowIterator getNextIterator(long index) throws IOException, InterruptedException;
+    public abstract FileFormatRowIterator getNextIterator(long index) throws Exception;
 
     /**
      * Get the table spec that was generated from the files informations.
@@ -230,12 +248,9 @@ public abstract class AbstractFileFormatReader {
     }
 
     /**
-     * @return the user to use probably null
+     * Initializes the file format reader. Checking the file schemas, setting a table spec and creating a reader.
+     * @throws Exception
      */
-    public UserGroupInformation getUser() {
-        return m_user;
-    }
-
     protected void init() throws Exception {
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
@@ -272,12 +287,10 @@ public abstract class AbstractFileFormatReader {
      * Returns a RowIterator that iterates over the read DataRows.
      *
      * @return the RowIterator
-     * @throws IOException
+     * @throws Exception
      *             thrown if reading errors occur
-     * @throws InterruptedException
-     *             if underlying iterator throws Interrupted exception
      */
-    public RowIterator iterator() throws IOException, InterruptedException {
+    public RowIterator iterator() throws Exception {
 
         return new DirIterator(this);
     }
@@ -301,12 +314,10 @@ public abstract class AbstractFileFormatReader {
     }
 
     /**
-     * Sets the user that is used in HDFS context
-     *
-     * @param user
-     *            the user
+     * @return the useKerberos
      */
-    public void setUser(final UserGroupInformation user) {
-        m_user = user;
+    public boolean useKerberos() {
+        return m_useKerberos;
     }
+
 }

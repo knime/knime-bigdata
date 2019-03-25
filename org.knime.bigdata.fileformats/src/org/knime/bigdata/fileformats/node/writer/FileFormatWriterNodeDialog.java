@@ -86,15 +86,17 @@ import org.knime.node.datatype.mapping.DialogComponentDataTypeMapping;
  */
 public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements ChangeListener {
 
-    private static final String WARNING_MESSAGE = "<html>The remote writing creates/overwrites a "
-            + "<u>folder</u> with the given name.</html>";
+    private static final String WARNING_MESSAGE =
+        "<html>The remote writing creates/overwrites a " + "<u>folder</u> with the given name.</html>";
 
     private static final String CHUNK_UPLOAD = "Chunk Upload";
 
     private boolean m_chunkUpload = false;
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatWriterNodeDialog.class);
+
     private final FileFormatWriterNodeSettings<X> m_settings;
+
     /** textfield to enter file name. */
     private final RemoteFileChooserPanel m_filePanel;
 
@@ -104,17 +106,19 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
 
     /**
      * New pane for configuring the generic BigData file format Writer node.
+     *
+     * @param settings the settings for the node dialog
      */
     protected FileFormatWriterNodeDialog(final FileFormatWriterNodeSettings<X> settings) {
         m_settings = settings;
         m_filePanel = new RemoteFileChooserPanel(this.getPanel(), "", false, "targetHistory",
-                RemoteFileChooser.SELECT_FILE_OR_DIR,
-                createFlowVariableModel(FileFormatWriterNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
-                HDFSLocalConnectionInformation.getInstance());
+            RemoteFileChooser.SELECT_FILE_OR_DIR,
+            createFlowVariableModel(FileFormatWriterNodeSettings.CFGKEY_FILE, FlowVariable.Type.STRING),
+            HDFSLocalConnectionInformation.getInstance());
         final DialogComponentNumberEdit chunkSize = new DialogComponentNumberEdit(m_settings.getChunkSizeModel(),
-                "Chunk size in " + m_settings.getChunksizeUnit() + ":");
-        final DialogComponentNumberEdit numOfLocalChunks = new DialogComponentNumberEdit(
-                m_settings.getNumOfLocalChunksModel(), "Number of local chunks:");
+            "Chunk size in " + m_settings.getChunksizeUnit() + ":");
+        final DialogComponentNumberEdit numOfLocalChunks =
+            new DialogComponentNumberEdit(m_settings.getNumOfLocalChunksModel(), "Number of local chunks:");
 
         final JPanel filePanel = new JPanel();
         filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.X_AXIS));
@@ -141,18 +145,21 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
         ++gbc.gridy;
         gbc.fill = GridBagConstraints.NONE;
         m_settings.getfileOverwritePolicyModel().addChangeListener(this);
-        final JPanel overwritePanel = new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel();
+        final JPanel overwritePanel =
+            new DialogComponentBoolean(m_settings.getfileOverwritePolicyModel(), "Overwrite").getComponentPanel();
         gridPanel.add(overwritePanel, gbc);
 
         ++gbc.gridy;
         m_settings.getcheckDirContentModel().setEnabled(false);
         m_settings.getcheckDirContentModel().addChangeListener(this);
-        final JPanel check_panel = new DialogComponentBoolean(m_settings.getcheckDirContentModel(), "Check directory content").getComponentPanel();
+        final JPanel check_panel =
+            new DialogComponentBoolean(m_settings.getcheckDirContentModel(), "Check directory content")
+                .getComponentPanel();
         gridPanel.add(check_panel, gbc);
 
         ++gbc.gridy;
         gridPanel.add(new DialogComponentStringSelection(m_settings.getCompressionModel(), "File Compression: ",
-                m_settings.getCompressionList()).getComponentPanel(), gbc);
+            m_settings.getCompressionList()).getComponentPanel(), gbc);
 
         addTab("Options", gridPanel);
 
@@ -171,17 +178,16 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
         typeMappingBox.add(Box.createHorizontalGlue());
         addTab("Type Mapping", typeMappingBox);
 
-
     }
 
     /**
      * {@inheritDoc}
      */
-	@Override
+    @Override
     protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
-            throws NotConfigurableException {
-       m_warningLable.setVisible(false);
-       m_settings.getcheckDirContentModel().setEnabled(false);
+        throws NotConfigurableException {
+        m_warningLable.setVisible(false);
+        m_settings.getcheckDirContentModel().setEnabled(false);
         try {
             m_settings.loadSettingsFrom(settings);
         } catch (final InvalidSettingsException e) {
@@ -190,17 +196,17 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
         }
 
         if (specs.length > 0 && specs[0] != null) {
-            final ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec) specs[0])
-                    .getConnectionInformation();
+            final ConnectionInformation connInfo =
+                ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
             m_filePanel.setConnectionInformation(connInfo);
 
             // Enable advanced options for remote connections
-            final boolean isHDFSLocal = connInfo.getProtocol()
-                    .equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName());
+            final boolean isHDFSLocal =
+                connInfo.getProtocol().equalsIgnoreCase(HDFSLocalRemoteFileHandler.HDFS_LOCAL_PROTOCOL.getName());
             m_chunkUpload = !isHDFSLocal;
             setEnabled(m_chunkUpload, CHUNK_UPLOAD);
 
-            if(m_settings.getFileOverwritePolicy()) {
+            if (m_settings.getFileOverwritePolicy()) {
                 m_warningLable.setVisible(true);
                 m_settings.getcheckDirContentModel().setEnabled(true);
             }
@@ -215,7 +221,7 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
         final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
         m_inputTypeMappingComponent.setMappingService(mappingService);
         m_inputTypeMappingComponent.setInputDataTypeMappingConfiguration(
-        		mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL));
+            mappingService.createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL));
         m_inputTypeMappingComponent.loadSettingsFrom(settings, specs);
     }
 
@@ -231,15 +237,13 @@ public class FileFormatWriterNodeDialog<X> extends NodeDialogPane implements Cha
 
     @Override
     public void stateChanged(final ChangeEvent e) {
-        if (m_settings.getfileOverwritePolicyModel().getBooleanValue()
-                && m_chunkUpload) {
+        if (m_settings.getfileOverwritePolicyModel().getBooleanValue() && m_chunkUpload) {
             m_warningLable.setVisible(true);
             m_settings.getcheckDirContentModel().setEnabled(true);
-        }else {
+        } else {
             m_warningLable.setVisible(false);
             m_settings.getcheckDirContentModel().setEnabled(false);
         }
     }
-
 
 }

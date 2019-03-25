@@ -78,26 +78,26 @@ public class FileHandlingUtility {
      *
      * @param connInfo the connection information
      * @param fileName the name
+     * @param connectionMonitor
      * @return a remote file, representing the directory
      * @throws Exception If file can not be created.
      */
-    public static RemoteFile<Connection> createRemoteFile(final String fileName, final ConnectionInformation connInfo)
-            throws Exception {
-        final ConnectionMonitor<Connection> connectionMonitor = new ConnectionMonitor<>();
+    public static RemoteFile<Connection> createRemoteFile(final String fileName, final ConnectionInformation connInfo,
+        final ConnectionMonitor<Connection> connectionMonitor) throws Exception {
+
         RemoteFile<Connection> remoteFile;
         if (connInfo == null || connInfo.getProtocol().equalsIgnoreCase("hdfs-local")) {
             remoteFile = createLocalFile(fileName);
         } else {
 
             remoteFile = RemoteFileFactory.createRemoteFile(new URI(connInfo.toURI().toString() + fileName), connInfo,
-                    connectionMonitor);
+                connectionMonitor);
         }
         return remoteFile;
     }
 
     /**
-     * Creates a local file using the {@link FileRemoteFile} with the given
-     * Name.
+     * Creates a local file using the {@link FileRemoteFile} with the given Name.
      *
      * @param fileName the name
      * @return a remote file, representing the directory
@@ -124,39 +124,37 @@ public class FileHandlingUtility {
      * Creates a remote directory with the given Name.
      *
      * @param connObj the connection information
+     * @param connMonitor
      * @param fileName the name
      * @return a remote file, representing the directory
      * @throws Exception If file can not be created.
      */
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     public static RemoteFile<Connection> createRemoteDir(final ConnectionInformationPortObject connObj,
-            final String fileName) throws Exception {
+        final ConnectionMonitor<?> connMonitor, final String fileName) throws Exception {
 
-        final ConnectionMonitor<?> connMonitor = new ConnectionMonitor<>();
         final ConnectionInformation connInfo = connObj.getConnectionInformation();
         final URI targetURI = new URI(connInfo.toURI().toString() + NodeUtils.encodePath(fileName) + "/");
         LOGGER.info("Creating remote File " + targetURI + " from name " + fileName);
-        return (RemoteFile<Connection>) RemoteFileFactory.createRemoteFile(targetURI, connInfo, connMonitor);
+        return (RemoteFile<Connection>)RemoteFileFactory.createRemoteFile(targetURI, connInfo, connMonitor);
     }
 
     /**
-     * Checks if file exists. If the file exists and it should be overwritten
-     * tries to remove it.
+     * Checks if file exists. If the file exists and it should be overwritten tries to remove it.
      *
      * @param remoteFile the remote file to check.
      * @param overwrite whether the file should be overwritten
-     * @throws Exception if the file exists, and should not be overwritten. Or
-     *         if the file can not be deleted.
+     * @throws Exception if the file exists, and should not be overwritten. Or if the file can not be deleted.
      */
     public static void checkOverwrite(final RemoteFile<Connection> remoteFile, final boolean overwrite)
-            throws Exception {
+        throws Exception {
         if (remoteFile.exists()) {
             if (overwrite) {
                 LOGGER.debug(String.format("File %s already exists. Deleting it.", remoteFile.getFullName()));
                 if (!remoteFile.delete()) {
                     throw new IOException(
-                            String.format("File %s already exists and could not be deleted.", remoteFile.getPath()));
+                        String.format("File %s already exists and could not be deleted.", remoteFile.getPath()));
                 }
             } else {
                 throw new IOException(String.format("File %s already exists.", remoteFile.getPath()));
@@ -165,8 +163,7 @@ public class FileHandlingUtility {
     }
 
     /**
-     * Creates a temporary file with a counter suffix in the directory given in
-     * path.
+     * Creates a temporary file with a counter suffix in the directory given in path.
      *
      * @param path file that represents the target directory
      * @param filecount the counter for the suffix
@@ -174,8 +171,8 @@ public class FileHandlingUtility {
      * @throws Exception if file creation fails
      */
     public static RemoteFile<Connection> createTempFile(final File path, final int filecount) throws Exception {
-        final String fileNameEnding = String.format("%s_%05d", UUID.randomUUID().toString().replace('-', '_'),
-                filecount);
+        final String fileNameEnding =
+            String.format("%s_%05d", UUID.randomUUID().toString().replace('-', '_'), filecount);
         final File file = new File(path, fileNameEnding);
         return RemoteFileFactory.createRemoteFile(file.toURI(), null, null);
     }

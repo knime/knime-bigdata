@@ -51,6 +51,7 @@ import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionI
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObject;
 import org.knime.base.filehandling.remote.connectioninformation.port.ConnectionInformationPortObjectSpec;
 import org.knime.base.filehandling.remote.files.Connection;
+import org.knime.base.filehandling.remote.files.ConnectionMonitor;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.fileformats.utility.FileHandlingUtility;
 import org.knime.core.data.DataTableSpec;
@@ -85,15 +86,17 @@ import org.knime.datatype.mapping.DataTypeMappingService;
  */
 public class FileFormatReaderNodeModel<X> extends NodeModel {
 
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatReaderNodeModel.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(FileFormatReaderNodeModel.class);
 
     private final FileFormatReaderNodeSettings<X> m_settings;
-	/**
+
+    /**
      * Constructor for the node model.
+     *
+     * @param settings the settings for the node model
      */
     protected FileFormatReaderNodeModel(final FileFormatReaderNodeSettings<X> settings) {
-        super(new PortType[] { ConnectionInformationPortObject.TYPE_OPTIONAL },
-                new PortType[] { BufferedDataTable.TYPE });
+        super(new PortType[]{ConnectionInformationPortObject.TYPE_OPTIONAL}, new PortType[]{BufferedDataTable.TYPE});
         m_settings = settings;
     }
 
@@ -102,27 +105,32 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected BufferedDataTable[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject) inObjects[0];
+        final ConnectionInformationPortObject connInfoObj = (ConnectionInformationPortObject)inObjects[0];
+        final ConnectionMonitor<Connection> connectionMonitor = new ConnectionMonitor<>();
+        try {
+            final BigDataFileFormatTable table = createTable(connInfoObj, connectionMonitor, exec);
+            final BufferedDataTable out = exec.createBufferedDataTable(table, exec);
 
-        final BigDataFileFormatTable table = createTable(connInfoObj, exec);
-        final BufferedDataTable out = exec.createBufferedDataTable(table, exec);
-
-        return new BufferedDataTable[] { out };
+            return new BufferedDataTable[]{out};
+        } finally {
+            connectionMonitor.closeAll();
+        }
     }
 
     private BigDataFileFormatTable createTable(final ConnectionInformationPortObject connInfoObj,
-            final ExecutionContext exec) throws Exception {
+        final ConnectionMonitor<Connection> connectionMonitor, final ExecutionContext exec) throws Exception {
         ConnectionInformation connInfo = null;
         if (connInfoObj != null) {
             connInfo = connInfoObj.getConnectionInformation();
         }
-        final RemoteFile<Connection> sourceFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
-                connInfo);
-        final DataTypeMappingService<X, ?, ?> mappingService =
-    			m_settings.getFormatFactory().getTypeMappingService();
-        	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
-            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
-		final AbstractFileFormatReader reader = getReader(sourceFile, exec, outputDataTypeMappingConfiguration);
+        final RemoteFile<Connection> sourceFile =
+            FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo, connectionMonitor);
+        final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+        final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
+            m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+        boolean useKerberos = connInfo != null && connInfo.useKerberos();
+        final AbstractFileFormatReader reader =
+            getReader(sourceFile, exec, outputDataTypeMappingConfiguration, useKerberos);
         return new BigDataFileFormatTable(reader);
     }
 
@@ -139,9 +147,10 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
-    	initializeTypeMappingIfNecessary();
+        initializeTypeMappingIfNecessary();
         ConnectionInformation connInfo = null;
-        final ConnectionInformationPortObjectSpec connectionSpec = (ConnectionInformationPortObjectSpec) inSpecs[0];
+        final ConnectionMonitor<Connection> connectionMonitor = new ConnectionMonitor<>();
+        final ConnectionInformationPortObjectSpec connectionSpec = (ConnectionInformationPortObjectSpec)inSpecs[0];
         if (m_settings.getFileName().isEmpty()) {
             throw new InvalidSettingsException("No source location provided! Please enter a valid location.");
         }
@@ -152,29 +161,33 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
                 throw new InvalidSettingsException("No connection Information avaiable");
             }
 
-            return new DataTableSpec[] { null };
+            return new DataTableSpec[]{null};
 
         }
         try {
-    		final DataTypeMappingService<X, ?, ?> mappingService =
-    			m_settings.getFormatFactory().getTypeMappingService();
-        	final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
-            				m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+            final DataTypeMappingService<X, ?, ?> mappingService =
+                m_settings.getFormatFactory().getTypeMappingService();
+            final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
+                m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
             // Create a reader to get the generated TableSpec
-            final RemoteFile<Connection> remoteFile = FileHandlingUtility.createRemoteFile(m_settings.getFileName(),
-                    connInfo);
+
+            final RemoteFile<Connection> remoteFile =
+                FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo, connectionMonitor);
             if (!remoteFile.exists()) {
                 throw new InvalidSettingsException("Input file '" + remoteFile.getPath() + "' does not exist");
             }
             if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
                 throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
             }
-            final AbstractFileFormatReader reader = getReader(remoteFile, null, outputDataTypeMappingConfiguration);
+            final AbstractFileFormatReader reader =
+                getReader(remoteFile, null, outputDataTypeMappingConfiguration, false);
             final DataTableSpec spec = reader.getTableSpec();
-            return new DataTableSpec[] { spec };
+            return new DataTableSpec[]{spec};
 
         } catch (final Exception e) {
             throw new InvalidSettingsException(e);
+        } finally {
+            connectionMonitor.closeAll();
         }
     }
 
@@ -186,12 +199,13 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     private void initializeTypeMappingIfNecessary() {
         try {
-        	final DataTypeMappingService<X, ?, ?> mappingService = m_settings.getFormatFactory().getTypeMappingService();
+            final DataTypeMappingService<X, ?, ?> mappingService =
+                m_settings.getFormatFactory().getTypeMappingService();
             final DataTypeMappingConfiguration<X> origExternalToKnimeConf =
-            		m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+                m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
             if (origExternalToKnimeConf.getTypeRules().isEmpty() && origExternalToKnimeConf.getNameRules().isEmpty()) {
                 final DataTypeMappingConfiguration<X> combinedConf =
-                        origExternalToKnimeConf.with(mappingService.newDefaultExternalToKnimeMappingConfiguration());
+                    origExternalToKnimeConf.with(mappingService.newDefaultExternalToKnimeMappingConfiguration());
                 m_settings.getMappingModel().setDataTypeMappingConfiguration(combinedConf);
             }
         } catch (final InvalidSettingsException e) {
@@ -200,23 +214,21 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
     }
 
     /**
-	 * @param remoteFile
-	 *            the file to read
-	 * @param context
-	 *            the execution context
-	 * @param outputDataTypeMappingConfiguration
-	 * @return the reader object
-	 * @throws Exception
-	 *             thrown if doAs user does not work
-	 */
-	private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context,
-			final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration)
-            throws Exception {
+     * @param remoteFile the file to read
+     * @param context the execution context
+     * @param outputDataTypeMappingConfiguration
+     * @param useKerberos
+     * @return the reader object
+     * @throws Exception thrown if doAs user does not work
+     */
+    private AbstractFileFormatReader getReader(final RemoteFile<Connection> remoteFile, final ExecutionContext context,
+        final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration, final boolean useKerberos)
+        throws Exception {
 
         final AbstractFileFormatReader reader;
 
-
-            reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration);
+        reader = m_settings.getFormatFactory().getReader(remoteFile, context, outputDataTypeMappingConfiguration,
+            useKerberos);
 
         return reader;
     }
@@ -251,7 +263,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected void loadInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
+        throws IOException, CanceledExecutionException {
         // Nothing to do
     }
 
@@ -260,7 +272,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     protected void saveInternals(final File internDir, final ExecutionMonitor exec)
-            throws IOException, CanceledExecutionException {
+        throws IOException, CanceledExecutionException {
         // Nothing to do
     }
 
@@ -269,19 +281,19 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
      */
     @Override
     public StreamableOperator createStreamableOperator(final PartitionInfo partitionInfo,
-            final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         return new StreamableOperator() {
 
             @Override
             public void runFinal(final PortInput[] inputs, final PortOutput[] outputs, final ExecutionContext exec)
-                    throws Exception {
-
-                final RowOutput out = (RowOutput) outputs[0];
-                final PortObjectInput portObj = (PortObjectInput) inputs[0];
-                final ConnectionInformationPortObject connInfoObj = portObj != null ?
-                        (ConnectionInformationPortObject) portObj.getPortObject() : null;
+                throws Exception {
+                final ConnectionMonitor<Connection> connectionMonitor = new ConnectionMonitor<>();
+                final RowOutput out = (RowOutput)outputs[0];
+                final PortObjectInput portObj = (PortObjectInput)inputs[0];
+                final ConnectionInformationPortObject connInfoObj =
+                    portObj != null ? (ConnectionInformationPortObject)portObj.getPortObject() : null;
                 try {
-                    final BigDataFileFormatTable table = createTable(connInfoObj, exec);
+                    final BigDataFileFormatTable table = createTable(connInfoObj, connectionMonitor, exec);
                     final RowIterator rowIterator = table.iterator();
                     while (rowIterator.hasNext()) {
                         out.push(rowIterator.next());
@@ -289,6 +301,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
                     }
                 } finally {
                     out.close();
+                    connectionMonitor.closeAll();
                 }
             }
         };

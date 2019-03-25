@@ -45,8 +45,6 @@
 
 package org.knime.bigdata.fileformats.node.reader;
 
-import java.io.IOException;
-
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowIterator;
@@ -58,17 +56,16 @@ import org.knime.core.data.RowIterator;
  */
 public class DirIterator extends RowIterator {
     final AbstractFileFormatReader m_reader;
+
     FileFormatRowIterator m_currentIterator;
 
     /**
      * Creates an iterator that iterates over all files in a directory
      *
      * @param reader the reader that provides the file iterators
-     * @throws IOException if files can not be read
-     * @throws InterruptedException if underlining iterator throws
-     *         InterruptedException
+     * @throws Exception
      */
-    public DirIterator(AbstractFileFormatReader reader) throws IOException, InterruptedException {
+    public DirIterator(final AbstractFileFormatReader reader) throws Exception {
         super();
         m_reader = reader;
         m_currentIterator = m_reader.getNextIterator(0);
@@ -87,7 +84,7 @@ public class DirIterator extends RowIterator {
                 if (m_currentIterator == null) {
                     return false;
                 }
-            } catch (final IOException | InterruptedException ex) {
+            } catch (final Exception ex) {
                 throw new BigDataFileFormatException(ex);
             }
             return m_currentIterator.hasNext();

@@ -108,29 +108,26 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
         private ORCSource m_source;
 
-        private final ProductionPath[] m_paths;
+        private final ProductionPath[] m_iterationPaths;
 
         private final ProducerParameters<ORCSource>[] m_parameters;
 
         /**
          * Row iterator for DataRows read from a ORC file.
          *
-         * @param reader
-         *            the ORC Reader
-         * @param batchSize
-         *            the batch size for reading
-         * @throws IOException
-         *             if file can not be read
+         * @param reader the ORC Reader
+         * @param batchSize the batch size for reading
+         * @throws IOException if file can not be read
          */
         OrcRowIterator(final Reader reader, final long index, final ProductionPath[] paths,
-                final ProducerParameters<ORCSource>[] params) throws IOException {
+            final ProducerParameters<ORCSource>[] params) throws IOException {
             m_orcReader = reader;
             final Options options = m_orcReader.options();
             m_rows = m_orcReader.rows(options);
             m_rowBatch = m_orcReader.getSchema().createRowBatch();
             m_source = new ORCSource(m_rowBatch);
             m_index = index;
-            m_paths = paths.clone();
+            m_iterationPaths = paths.clone();
             m_parameters = params.clone();
             internalNext();
         }
@@ -184,6 +181,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             try {
                 safeRow = MappingFramework.map(RowKey.createRowKey(m_index), getFileStoreFactory(), m_source, m_paths,
                     m_parameters);
+
             } catch (final Exception e1) {
                 throw new BigDataFileFormatException(e1);
             }
@@ -219,22 +217,19 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     /**
      * KNIME Reader, that reads ORC Files into DataRows.
      *
-     * @param file
-     *            the file or directory to read from
-     * @param outputDataTypeMappingConfiguration
-     *            the type mapping configuration
-     * @param exec
-     *            the execution context
-     * @throws Exception
-     *             thrown if files can not be listed, if reader can not be created,
-     *             or schemas of files in a directory do not match.
+     * @param file the file or directory to read from
+     * @param outputDataTypeMappingConfiguration the type mapping configuration
+     * @param exec the execution context
+     * @param useKerberos
+     * @throws Exception thrown if files can not be listed, if reader can not be created, or schemas of files in a
+     *             directory do not match.
      */
     @SuppressWarnings("unchecked")
     public OrcKNIMEReader(final RemoteFile<Connection> file,
-            final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration, final ExecutionContext exec)
-                    throws Exception {
-        super(file, exec);
-        m_outputTypeMappingConf = (DataTypeMappingConfiguration<TypeDescription>) outputDataTypeMappingConfiguration;
+        final DataTypeMappingConfiguration<?> outputDataTypeMappingConfiguration, final ExecutionContext exec,
+        final boolean useKerberos) throws Exception {
+        super(file, exec, useKerberos);
+        m_outputTypeMappingConf = (DataTypeMappingConfiguration<TypeDescription>)outputDataTypeMappingConfiguration;
         m_readers = new ArrayDeque<>();
         init();
         if (m_readers.isEmpty()) {
@@ -243,7 +238,8 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
 
     }
 
-    private static ProducerParameters<ORCSource>[] createDefault(final ExternalDataTableSpec<TypeDescription> exTableSpec) {
+    private static ProducerParameters<ORCSource>[]
+        createDefault(final ExternalDataTableSpec<TypeDescription> exTableSpec) {
         final ORCParameter[] params = new ORCParameter[exTableSpec.getColumns().size()];
         for (int i = 0; i < exTableSpec.getColumns().size(); i++) {
             params[i] = new ORCParameter(i);
@@ -251,23 +247,22 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         return params;
     }
 
-    private Reader createORCReader(final RemoteFile<Connection> remotefile)
-            throws Exception {
+    private Reader createORCReader(final RemoteFile<Connection> remotefile) throws Exception {
         final Configuration conf = new Configuration();
         createConfig(remotefile, conf);
         Path readPath = new Path(remotefile.getURI());
         Reader reader = null;
 
         if (getFile().getConnection() instanceof S3Connection) {
-            final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>) remotefile;
+            final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>)remotefile;
             readPath = generateS3nPath(cloudcon);
         }
         final Path path = readPath;
-        if (remotefile.getConnectionInformation() != null && remotefile.getConnectionInformation().useKerberos()) {
-            reader = UserGroupUtil.runWithProxyUserUGIIfNecessary(
-                (ugi) -> ugi.doAs((PrivilegedExceptionAction<Reader>)() -> OrcFile.createReader(path, OrcFile.readerOptions(conf))));
-        }else {
-                reader = OrcFile.createReader(readPath, OrcFile.readerOptions(conf));
+        if (useKerberos()) {
+            reader = UserGroupUtil.runWithProxyUserUGIIfNecessary((ugi) -> ugi.doAs(
+                (PrivilegedExceptionAction<Reader>)() -> OrcFile.createReader(path, OrcFile.readerOptions(conf))));
+        } else {
+            reader = OrcFile.createReader(readPath, OrcFile.readerOptions(conf));
         }
         return reader;
     }
@@ -287,7 +282,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         } catch (final IOException ioe) {
             if (ioe.getMessage().contains("No FileSystem for scheme")) {
                 throw new BigDataFileFormatException(
-                        "Protocol " + remotefile.getConnectionInformation().getProtocol() + " is not supported.");
+                    "Protocol " + remotefile.getConnectionInformation().getProtocol() + " is not supported.");
             }
             throw new BigDataFileFormatException(ioe);
         } catch (final Exception e) {
@@ -312,7 +307,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
         }
         final List<String> fieldNames = orcSchema.getFieldNames();
         return new DataTableSpec(getFile().getName(), fieldNames.toArray(new String[fieldNames.size()]),
-                colTypes.toArray(new DataType[colTypes.size()]));
+            colTypes.toArray(new DataType[colTypes.size()]));
     }
 
     /**
@@ -331,10 +326,8 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     /**
      * Loads metadata including the tableSpec from the file before reading starts.
      *
-     * @param reader
-     *            the ORC reader
-     * @throws Exception
-     *             thrown if types cannot be detected
+     * @param reader the ORC reader
+     * @throws Exception thrown if types cannot be detected
      */
     public void loadMetaInfoBeforeRead(final Reader reader) throws Exception {
         final TypeDescription orcSchema = reader.getSchema();
@@ -346,7 +339,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     }
 
     private boolean tyrCreateFromAdditonalMetadata(final TypeDescription orcSchema, final Reader reader)
-            throws Exception {
+        throws Exception {
         final ArrayList<String> columnNames = new ArrayList<>();
         final ArrayList<DataType> columnTypes = new ArrayList<>();
         final List<String> keys = reader.getMetadataKeys();
@@ -361,13 +354,13 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
                 final ByteBuffer columntype = reader.getMetadataValue(key);
                 final String typeClassString = String.valueOf(columntype.asCharBuffer());
                 @SuppressWarnings("unchecked")
-                final DataType type = DataType.getType((Class<? extends DataCell>) Class.forName(typeClassString));
+                final DataType type = DataType.getType((Class<? extends DataCell>)Class.forName(typeClassString));
                 columnTypes.add(type);
             }
         }
         if (columnNames.size() == orcSchema.getFieldNames().size()) {
             setTableSpec(
-                    new DataTableSpec(name, columnNames.toArray(new String[0]), columnTypes.toArray(new DataType[0])));
+                new DataTableSpec(name, columnNames.toArray(new String[0]), columnTypes.toArray(new DataType[0])));
             return true;
         }
         return false;
