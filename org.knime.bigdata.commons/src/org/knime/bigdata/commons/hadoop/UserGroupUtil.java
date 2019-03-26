@@ -52,6 +52,32 @@ public class UserGroupUtil {
     private static final NodeLogger LOGGER = NodeLogger.getLogger(UserGroupUtil.class);
 
     /**
+     * Sets up the global Hadoop configuration according to preferences and sets a basic UGI. This method must only be
+     * called during KNIME startup, when KNIME perferences are being changed, or when the global Hadoop configuration
+     * needs to be "upgraded" from SIMPLE auth to KERBEROS auth. You should never have to call this method directly when
+     * writing nodes.
+     *
+     * @param initSecureConfiguration Whether to init a Hadoop configuration that requires Kerberos, or not.
+     */
+    public static synchronized void initHadoopConfigurationAndUGI(final boolean initSecureConfiguration) {
+        UserGroupInformation.reset();
+
+        if (initSecureConfiguration) {
+            UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
+        } else {
+            UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithKerberosAuth());
+        }
+        UserGroupInformation
+            .setLoginUser(UserGroupInformation.createRemoteUser(System.getProperty("user.name", "knime")));
+    }
+
+    private static void ensureSecureHadoopConfiguration() {
+        if (!UserGroupInformation.isSecurityEnabled()) {
+            initHadoopConfigurationAndUGI(true);
+        }
+    }
+
+    /**
      * Callback interface for operations that require a Hadoop {@link UserGroupInformation} object.
      *
      * @author Bjoern Lohrmann, KNIME GmbH
@@ -80,19 +106,18 @@ public class UserGroupUtil {
      */
     public static <T> T runWithRemoteUserUGI(final String username,
         final UserGroupInformationCallback<T> callback) throws Exception {
-
-        synchronized (UserGroupUtil.class) {
-            final Configuration confWithKerberos = ConfigurationFactory.createBaseConfigurationWithSimpleAuth();
-            UserGroupInformation.reset();
-            UserGroupInformation.setConfiguration(confWithKerberos);
-            return callback.runWithUGI(UserGroupInformation.createRemoteUser(username));
-        }
+        return callback.runWithUGI(UserGroupInformation.createRemoteUser(username));
     }
 
     /**
      * This method runs the given callback with a {@link UserGroupInformation} that wraps a Kerberos TGT and possibly a
      * Hadoop proxy-user on top. Specifically, if we are running on KNIME server and user impersonation is enabled, then
      * this will impersonate the current workflow user, by means of Hadoop impersonation ("proxy user").
+     *
+     * <p>
+     * NOTE: This method does not set any Hadoop {@link Configuration}. It is up to the caller to ensure that a correct
+     * {@link Configuration} is being used.
+     * </p>
      *
      * <p>
      * This method uses the KNIME Kerberos authentication framework to handle the Kerberos login.
@@ -111,29 +136,24 @@ public class UserGroupUtil {
         throws Exception {
 
         return KerberosProvider.doWithKerberosAuthBlocking(() -> {
-            synchronized (UserGroupUtil.class) {
-                final Configuration confWithKerberos = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-                UserGroupInformation.reset();
-                UserGroupInformation.setConfiguration(confWithKerberos);
+            UserGroupInformation ugi =
+                UserGroupInformation.getUGIFromSubject(Subject.getSubject(AccessController.getContext()));
 
-                UserGroupInformation ugi =
-                    UserGroupInformation.getUGIFromSubject(Subject.getSubject(AccessController.getContext()));
-
-                final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
-                if (userToImpersonate.isPresent()) {
-                    if (!ugi.getUserName().equals(userToImpersonate.get())
-                        && !ugi.getShortUserName().equals(userToImpersonate.get())) {
-                        // the Kerberos user differs from the workflow user so we have to impersonate it
-                        ugi = UserGroupInformation.createProxyUser(userToImpersonate.get(), ugi);
-                        LOGGER.debug("Impersonating workflow user " + userToImpersonate.get());
-                    } else {
-                        LOGGER.debug("Not impersonating workflow user, as it is the same as the Kerberos TGT user.");
-                    }
+            final Optional<String> userToImpersonate = CommonConfigContainer.getInstance().getUserToImpersonate();
+            if (userToImpersonate.isPresent()) {
+                if (!ugi.getUserName().equals(userToImpersonate.get())
+                    && !ugi.getShortUserName().equals(userToImpersonate.get())) {
+                    // the Kerberos user differs from the workflow user so we have to impersonate it
+                    ugi = UserGroupInformation.createProxyUser(userToImpersonate.get(), ugi);
+                    LOGGER.debug("Impersonating workflow user " + userToImpersonate.get());
+                } else {
+                    LOGGER.debug("Not impersonating workflow user, as it is the same as the Kerberos TGT user.");
                 }
-                return callback.runWithUGI(ugi);
             }
-        }, null);
 
+            ensureSecureHadoopConfiguration();
+            return callback.runWithUGI(ugi);
+        }, null);
     }
 
     /**
@@ -162,20 +182,15 @@ public class UserGroupUtil {
     public static <T> T runWithKerberosUGI(final UserGroupInformationCallback<T> callback) throws Exception {
 
         return KerberosProvider.doWithKerberosAuthBlocking(() -> {
-            synchronized (UserGroupUtil.class) {
-                final Configuration confWithKerberos = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
-                UserGroupInformation.reset();
-                UserGroupInformation.setConfiguration(confWithKerberos);
+            final UserGroupInformation ugi =
+                UserGroupInformation.getUGIFromSubject(Subject.getSubject(AccessController.getContext()));
 
-                final UserGroupInformation ugi =
-                    UserGroupInformation.getUGIFromSubject(Subject.getSubject(AccessController.getContext()));
-
-                if (!ugi.hasKerberosCredentials()) {
-                    throw new IllegalStateException("Hadoop UGI has no Kerberos TGT for " + ugi.toString());
-                }
-                LOGGER.debug("Kerberos TGT user found: " + ugi.getUserName());
-                return callback.runWithUGI(ugi);
+            if (!ugi.hasKerberosCredentials()) {
+                throw new IllegalStateException("Hadoop UGI has no Kerberos TGT for " + ugi.toString());
             }
+            LOGGER.debug("Kerberos TGT user found: " + ugi.getUserName());
+            ensureSecureHadoopConfiguration();
+            return callback.runWithUGI(ugi);
         }, null);
     }
 }

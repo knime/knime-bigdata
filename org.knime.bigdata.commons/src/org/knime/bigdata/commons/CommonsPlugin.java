@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
 import org.osgi.framework.BundleContext;
 
@@ -62,6 +63,7 @@ public class CommonsPlugin extends AbstractUIPlugin {
         m_pluginRootPath = tmpFile.getAbsolutePath();
         EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
         checkConfiguration();
+        UserGroupUtil.initHadoopConfigurationAndUGI(false);
     }
 
     /**

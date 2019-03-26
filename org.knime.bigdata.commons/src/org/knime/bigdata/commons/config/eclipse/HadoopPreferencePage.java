@@ -44,6 +44,7 @@
  */
 package org.knime.bigdata.commons.config.eclipse;
 
+import org.apache.hadoop.security.UserGroupInformation;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -56,6 +57,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -238,6 +240,17 @@ public class HadoopPreferencePage extends FieldEditorPreferencePage implements I
         addField(m_keystoreType);
 
         setKeystoreEnabled(CommonConfigContainer.getInstance().hasSSLKeystoreConfig());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean performOk() {
+        final boolean result = super.performOk();
+        // technically, this is not very threadsafe
+        UserGroupUtil.initHadoopConfigurationAndUGI(UserGroupInformation.isSecurityEnabled());
+        return result;
     }
 }
 
