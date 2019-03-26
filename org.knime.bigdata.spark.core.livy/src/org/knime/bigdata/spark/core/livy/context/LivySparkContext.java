@@ -43,8 +43,6 @@ import org.apache.livy.Job;
 import org.apache.livy.LivyClient;
 import org.apache.livy.LivyClientBuilder;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
-import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContext;
 import org.knime.bigdata.spark.core.context.SparkContextID;
@@ -479,7 +477,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     private String createAuthenticationInfoString() {
         final LivySparkContextConfig config = getConfiguration();
         if (config.getAuthenticationType() == AuthenticationType.KERBEROS) {
-            final KerberosState krbState = KerberosProvider.getKerberosStateBlocking();
+            final KerberosState krbState = KerberosProvider.getKerberosState();
             if (krbState.isAuthenticated()) {
                 return String.format("Kerberos (authenticated as: %s)", krbState.getPrincipal());
             } else {
