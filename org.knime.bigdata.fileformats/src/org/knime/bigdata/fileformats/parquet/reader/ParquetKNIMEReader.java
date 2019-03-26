@@ -143,9 +143,8 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
     @Override
     protected void createReader(final List<DataTableSpec> schemas, final RemoteFile<Connection> remoteFile) {
 
-        final Configuration conf = new Configuration();
         try {
-            createConfig(remoteFile, conf);
+            final Configuration conf = createConfig(remoteFile);
             Path path = new Path(remoteFile.getURI());
             if (getFile().getConnection() instanceof S3Connection) {
                 final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>)remoteFile;

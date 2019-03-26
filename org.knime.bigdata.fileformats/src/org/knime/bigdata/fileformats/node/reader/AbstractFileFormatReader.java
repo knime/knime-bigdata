@@ -62,6 +62,8 @@ import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.ConfigurationFactory;
 import org.knime.bigdata.fileformats.utility.BigDataFileFormatException;
+import org.knime.bigdata.filehandling.local.HDFSLocalRemoteFileHandler;
+import org.knime.bigdata.hdfs.filehandler.HDFSRemoteFileHandler;
 import org.knime.cloud.aws.s3.filehandler.S3RemoteFileHandler;
 import org.knime.cloud.core.file.CloudRemoteFile;
 import org.knime.cloud.core.util.port.CloudConnectionInformation;
@@ -102,27 +104,37 @@ public abstract class AbstractFileFormatReader {
     /**
      * Adapts a given HDFS configuration based on the remote connection
      * @param remotefile the remote file to access
-     * @param conf Configuration to adapt
+     * @return a Hadoop config
      * @throws InvalidKeyException
      * @throws BadPaddingException
      * @throws IllegalBlockSizeException
      * @throws IOException
      */
-    protected static void createConfig(final RemoteFile<Connection> remotefile, final Configuration conf)
-            throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
+    protected static Configuration createConfig(final RemoteFile<Connection> remotefile)
+        throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
 
-        if (remotefile.getConnectionInformation() == null) {
-            return;
-        }
         final ConnectionInformation conInfo = remotefile.getConnectionInformation();
-        if (conInfo.useKerberos()) {
-            conf.addResource(ConfigurationFactory.createBaseConfigurationWithKerberosAuth());
-        } else if (conInfo instanceof CloudConnectionInformation) {
-            final String protocol = conInfo.getProtocol();
-            if (S3RemoteFileHandler.PROTOCOL.getName().equals(protocol)) {
-                String accessID;
-                String secretKey;
-                if (((CloudConnectionInformation) remotefile.getConnectionInformation()).useKeyChain()) {
+        // this works for: local HDFS, HDFS with simple auth
+        Configuration toReturn = ConfigurationFactory.createBaseConfigurationWithSimpleAuth();
+
+        if (conInfo != null) {
+
+            if (HDFSRemoteFileHandler.isSupportedConnection(conInfo)
+                || HDFSLocalRemoteFileHandler.isSupportedConnection(conInfo)) {
+
+                if (conInfo.useKerberos()) {
+                    toReturn = ConfigurationFactory.createBaseConfigurationWithKerberosAuth();
+                }
+            } else if (S3RemoteFileHandler.PROTOCOL.getName().equals(conInfo.getProtocol())) {
+                if (!(conInfo instanceof CloudConnectionInformation)) {
+                    throw new IllegalStateException("Please reset and execute the preceding S3 Connection node.");
+                }
+                final CloudConnectionInformation cloudConInfo =
+                    (CloudConnectionInformation)remotefile.getConnectionInformation();
+
+                final String accessID;
+                final String secretKey;
+                if (cloudConInfo.useKeyChain()) {
                     final DefaultAWSCredentialsProviderChain chain = new DefaultAWSCredentialsProviderChain();
                     chain.getCredentials().getAWSSecretKey();
                     accessID = chain.getCredentials().getAWSAccessKeyId();
@@ -131,16 +143,17 @@ public abstract class AbstractFileFormatReader {
                     accessID = remotefile.getConnectionInformation().getUser();
                     secretKey = KnimeEncryption.decrypt(remotefile.getConnectionInformation().getPassword());
                 }
-                conf.set("fs.s3n.awsAccessKeyId", accessID);
-                conf.set("fs.s3n.awsSecretAccessKey", secretKey);
-                conf.set("fs.s3.awsAccessKeyId", accessID);
-                conf.set("fs.s3.awsSecretAccessKey", secretKey);
+
+                toReturn.set("fs.s3n.awsAccessKeyId", accessID);
+                toReturn.set("fs.s3n.awsSecretAccessKey", secretKey);
+                toReturn.set("fs.s3.awsAccessKeyId", accessID);
+                toReturn.set("fs.s3.awsSecretAccessKey", secretKey);
             } else {
-                throw new IOException(protocol + " protocol not supported");
+                throw new IOException(conInfo.getProtocol() + " protocol not supported");
             }
-        } else {
-            conf.addResource(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
         }
+
+        return toReturn;
     }
 
     /**

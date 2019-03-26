@@ -248,8 +248,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
     }
 
     private Reader createORCReader(final RemoteFile<Connection> remotefile) throws Exception {
-        final Configuration conf = new Configuration();
-        createConfig(remotefile, conf);
+        final Configuration conf = createConfig(remotefile);
         Path readPath = new Path(remotefile.getURI());
         Reader reader = null;
 

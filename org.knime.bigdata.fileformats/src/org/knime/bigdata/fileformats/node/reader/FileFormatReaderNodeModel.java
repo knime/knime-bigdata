@@ -158,7 +158,7 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
 
             connInfo = connectionSpec.getConnectionInformation();
             if (connInfo == null) {
-                throw new InvalidSettingsException("No connection Information avaiable");
+                throw new InvalidSettingsException("No connection information available");
             }
 
             return new DataTableSpec[]{null};
