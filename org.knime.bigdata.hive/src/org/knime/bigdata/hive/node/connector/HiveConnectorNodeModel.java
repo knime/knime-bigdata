@@ -135,7 +135,7 @@ public class HiveConnectorNodeModel extends NodeModel {
                 cause = ex;
             }
 
-            throw new SQLException("Could not create connection to database: " + cause.getMessage(), ex);
+            throw new SQLException(cause.getMessage(), ex);
         }
 
         return new PortObject[]{new DatabaseConnectionPortObject(spec)};

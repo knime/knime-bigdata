@@ -93,10 +93,11 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
                 }
             });
             return con;
+        } catch (SQLException e) {
+            // don't rewrap SQLException
+            throw e;
         } catch (Exception e) {
-            final String errMsg = "Exception creating Kerberos based jdbc connection. Error: " + e.getMessage();
-            LOGGER.error(errMsg, e);
-            throw new SQLException(errMsg, e);
+            throw new SQLException(e.getMessage(), e);
         }
     }
 
