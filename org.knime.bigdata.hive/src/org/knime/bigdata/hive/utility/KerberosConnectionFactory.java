@@ -81,11 +81,11 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
                 final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
                 return ugi.doAs((PrivilegedExceptionAction<Connection>)() -> d.connect(effectiveJdcbUrl, props));
             });
-
+        } catch (SQLException e) {
+            // don't rewrap SQLException
+            throw e;
         } catch (Exception e) {
-            final String errMsg = "Exception creating Kerberos based JDBC connection. Error: " + e.getMessage();
-            LOGGER.error(errMsg, e);
-            throw new SQLException(errMsg, e);
+            throw new SQLException(e.getMessage(), e);
         }
     }
 
