@@ -63,9 +63,9 @@ public class UserGroupUtil {
         UserGroupInformation.reset();
 
         if (initSecureConfiguration) {
-            UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
-        } else {
             UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithKerberosAuth());
+        } else {
+            UserGroupInformation.setConfiguration(ConfigurationFactory.createBaseConfigurationWithSimpleAuth());
         }
         UserGroupInformation
             .setLoginUser(UserGroupInformation.createRemoteUser(System.getProperty("user.name", "knime")));
