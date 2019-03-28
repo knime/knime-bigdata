@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
+import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.filehandling.util.HadoopWinutilsInitializer;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
@@ -86,6 +87,7 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
         }
 
         HadoopWinutilsInitializer.ensureInitialized();
+        UserGroupUtil.initHadoopConfigurationAndUGI(false);
     }
 
     /**
