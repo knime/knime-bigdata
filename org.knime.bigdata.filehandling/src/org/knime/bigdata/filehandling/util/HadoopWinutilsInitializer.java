@@ -20,42 +20,24 @@
  */
 package org.knime.bigdata.filehandling.util;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.knime.bigdata.hdfs.FileHandlingPlugin;
-import org.knime.core.node.NodeLogger;
+import org.knime.bigdata.commons.hadoop.HadoopInitializer;
 
 /**
- * Utility class to initialize the hadoop.home.dir system property, which is used by the Hadoop library for local file
- * system access on Windows. This is a band-aid for AP-9585 until we upgrade to Parquet 1.10 which is expected to work
- * without the Hadoop library when only writing to the local file system.
+ * TO BE REMOVED SOON, replaced by org.knime.bigdata.commons.hadoop.HadoopInitializer
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class HadoopWinutilsInitializer {
 
-    private static final NodeLogger LOG = NodeLogger.getLogger(HadoopWinutilsInitializer.class);
-
-    private static final String HADOOP_HOME_SYSPROPERTY = "hadoop.home.dir";
-
     /**
-     * Initializes the hadoop.home.dir system property so that the Hadoop library can find winutils.exe, which is
-     * required for local file system access via the HDFS API on Windows.
+     * TO BE REMOVED SOON, replaced by org.knime.bigdata.commons.hadoop.HadoopInitializer
      *
      * @throws IOException
      */
     public synchronized static void ensureInitialized() throws IOException {
-        final String hadoopHome =
-            new File(FileHandlingPlugin.getDefault().getPluginRootPath(), "hadoop_home").getCanonicalPath();
-        if (System.getProperty(HADOOP_HOME_SYSPROPERTY) == null) {
-            LOG.debug(String.format("Setting system property %s to %s (for Hadoop winutils).", HADOOP_HOME_SYSPROPERTY,
-                hadoopHome));
-            System.setProperty(HADOOP_HOME_SYSPROPERTY, hadoopHome);
-        } else {
-            LOG.debug(String.format("System property %s is already set to %s. Doing nothing (not overwriting).",
-                HADOOP_HOME_SYSPROPERTY, System.getProperty(HADOOP_HOME_SYSPROPERTY)));
-        }
+        HadoopInitializer.ensureInitialized();
     }
 
 }
