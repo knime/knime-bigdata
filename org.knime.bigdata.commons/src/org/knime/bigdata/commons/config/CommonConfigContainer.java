@@ -85,7 +85,8 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a core-site.xml is available
      */
     public boolean hasCoreSiteConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_CORE_SITE_FILE);
+        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_CORE_SITE_FILE) == null
+            || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_CORE_SITE_FILE).isEmpty());
     }
 
     /**
@@ -103,7 +104,8 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a hdfs-site.xml is available
      */
     public boolean hasHdfsSiteConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE);
+        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE) == null
+                || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_HDFS_SITE_FILE).isEmpty());
     }
 
     /** @return <code>true</code> if trust store configuration is available */
@@ -165,7 +167,8 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a kerberos keytab file is available
      */
     public boolean hasKerberosUserConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_KERBEROS_USER);
+        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER) == null
+            || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER).isEmpty());
     }
 
     /**
@@ -234,7 +237,8 @@ public class CommonConfigContainer {
      * @return <code>true</code> if a kerberos keytab file is available
      */
     public boolean hasKerberosKeytabConfig() {
-        return !PREFERENCE_STORE.isDefault(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE);
+        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE) == null
+            || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE).isEmpty());
     }
 
     /**
