@@ -15,6 +15,10 @@ node {
 		cleanWorkspace()
 		try {
 			sh 'rm -rf git/knime-bigdata/com.knime.tpbuilder/target org.knime.update.bigdata.externals'
+			
+			// 2019-04-08: some build slaves have an old checkout of knime-kerberos that causes build failures.
+			// at some point in the future (when knime-kerberos has been purged from all build-slaves) we can remove this line
+			sh 'rm -rf git/knime-kerberos'
 		} catch (ex) {
 			currentBuild.result = 'FAILED'
 			emailext (
