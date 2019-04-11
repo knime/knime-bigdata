@@ -189,7 +189,9 @@ public abstract class DefaultPySparkHelper implements PySparkHelper{
                 "#Custom imports \n ");
 
             GuardedSection guardedFLow = doc.getGuardedSection(PySparkDocument.GUARDED_FLOW_VARIABLES);
-            guardedFLow.setText("#Flowvariables \n");
+            // For some reason the document implementation cannot handle replacement of only empty lines so we put some
+            // extra line here to fix BD-901
+            guardedFLow.setText("# Flowvariables\n # This section is reserved for flowvariables.\n");
 
             doc.replaceBetween(PySparkDocument.GUARDED_FLOW_VARIABLES, PySparkDocument.GUARDED_BODY_START,
                 "#Custom globals \n");
