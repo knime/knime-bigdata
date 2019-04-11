@@ -56,7 +56,9 @@ public class PySparkDocument extends GuardedDocument {
             addGuardedSection(GUARDED_IMPORTS, getLength());
             insertString(getLength(), "# Your custom imports:\n\n", null);
             final GuardedSection flowVariables = addGuardedSection(GUARDED_FLOW_VARIABLES, getLength());
-            flowVariables.setText("# Flowvariables\n");
+            // For some reason the document implementation cannot handle replacement of only empty lines so we put some
+            // extra line here to fix BD-901
+            flowVariables.setText("# Flowvariables\n # This section is reserved for flowvariables.\n");
 
             insertString(getLength(), "# Your custom global variables:\n\n", null);
             final GuardedSection bodyStart = addGuardedSection(GUARDED_BODY_START, getLength());
@@ -77,7 +79,7 @@ public class PySparkDocument extends GuardedDocument {
      */
     public void writeFlowVariables(final FlowVariable[] variables) {
         StringBuilder sb = new StringBuilder();
-        sb.append("# Flowvariables\n");
+        sb.append("# Flowvariables\n\n");
         sb.append("flow_variables = {} \n");
         for(FlowVariable flowVariable : variables) {
            String escapedName = flowVariable.getName().replaceAll("[^A-Za-z0-9_]", "_");
