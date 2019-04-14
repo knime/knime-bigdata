@@ -58,7 +58,6 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         throws Exception {
 
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
-        ensureHiveSupport(spark);
 
         final String namedObject = input.getFirstNamedInputObject();
         final Dataset<Row> dataset = namedObjects.getDataFrame(namedObject);
@@ -66,7 +65,21 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         final String fileFormat = input.getFileFormat();
         final String compression = input.getCompression();
 
-        LOGGER.info(String.format("Writing hive table: %s stored as %s", hiveTableName, fileFormat));
+        if (Hive2SparkJob.shouldUseHiveWarehouseConnector(sparkContext)) {
+            HiveWarehouseSessionUtil.writeToHive(sparkContext, dataset, input);
+        } else {
+            LOGGER.info(
+                String.format("Writing hive table using Hive session: %s stored as %s", hiveTableName, fileFormat));
+            writeUsingHiveSession(spark, dataset, hiveTableName, fileFormat, compression);
+        }
+
+        LOGGER.info("Hive table: " + hiveTableName + " created");
+    }
+
+    private void writeUsingHiveSession(final SparkSession spark, final Dataset<Row> dataset, final String hiveTableName,
+        final String fileFormat, final String compression) throws Exception {
+
+        ensureHiveSupport(spark);
 
         // DataFrame.saveAsTable() creates a table in the Hive Metastore, which is /only/ readable by Spark,
         // but not Hive itself, due to being parquet-encoded in a way that is incompatible with Hive.
@@ -82,7 +95,6 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
         } else {
             spark.sql(sqlStatement);
         }
-        LOGGER.info("Hive table: " + hiveTableName + " created");
     }
 
     /**
@@ -154,7 +166,7 @@ public class Spark2HiveJob implements SimpleSparkJob<Spark2HiveJobInput> {
     private void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {
         if (!spark.conf().get("spark.sql.catalogImplementation", "in-memory").equals("hive")) {
             throw new KNIMESparkException("Spark session does not support hive!"
-                + " Please set spark.sql.catalogImplementation = \"hive\" in environment.conf.");
+                + " Please set spark.sql.catalogImplementation = \"hive\".");
         }
     }
 }

@@ -35,21 +35,30 @@ import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
 /**
  * Executes given SQL statement and puts result into a (named) data frame.
  *
- * @author dwk, jfr
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
 public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
     private static final long serialVersionUID = 1L;
+
     private static final Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
+    /**
+     * SparkConf setting to switch the usage of Hive Warehouse Connector to on/off/auto.
+     */
+    public static final String USE_HIVE_WAREHOUSE_CONNECTOR = "spark.knime.useHiveWarehouseConnector";
+
     @Override
-    public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
-        final NamedObjects namedObjects) throws KNIMESparkException {
+    public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input, final NamedObjects namedObjects)
+        throws KNIMESparkException {
 
-        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
-        ensureHiveSupport(spark);
+        final Dataset<Row> dataFrame;
 
-        final Dataset<Row> dataFrame = spark.sql(input.getQuery());
+        if (shouldUseHiveWarehouseConnector(sparkContext)) {
+            dataFrame = HiveWarehouseSessionUtil.queryHive(sparkContext, input);
+        } else {
+            dataFrame = runQueryInHiveSession(sparkContext, input);
+        }
 
         for (final StructField field : dataFrame.schema().fields()) {
             LOGGER.debug("Field '" + field.name() + "' of type '" + field.dataType() + "'");
@@ -60,10 +69,46 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
         namedObjects.addDataFrame(key, dataFrame);
     }
 
-    private void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {
+    @SuppressWarnings("resource")
+    private static Dataset<Row> runQueryInHiveSession(final SparkContext sparkContext, final Hive2SparkJobInput input)
+        throws KNIMESparkException {
+
+        final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
+        ensureHiveSupport(spark);
+        return spark.sql(input.getQuery());
+    }
+
+    private static void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {
         if (!spark.conf().get("spark.sql.catalogImplementation", "in-memory").equals("hive")) {
             throw new KNIMESparkException("Spark session does not support hive!"
-                + " Please set spark.sql.catalogImplementation = \"hive\" in environment.conf.");
+                + " Please set spark.sql.catalogImplementation = \"hive\".");
+        }
+    }
+
+    /**
+     * Checks SparConf, whether Hortonwork's Hive Warehouse Connector shall be used for the Hive2Spark and Spark2Hive
+     * jobs.
+     *
+     * @param sparkContext The current Spark context.
+     * @return true, if Hive Warehouse Connector shall be used, false otherwise.
+     */
+    public static boolean shouldUseHiveWarehouseConnector(final SparkContext sparkContext) {
+        final String useHwc = sparkContext.conf().get(USE_HIVE_WAREHOUSE_CONNECTOR, "auto");
+
+        if (useHwc.equalsIgnoreCase("auto")) {
+            if (sparkContext.conf().contains("spark.datasource.hive.warehouse.metastoreUri")) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (useHwc.equalsIgnoreCase("true") || useHwc.equalsIgnoreCase("on") || useHwc.equalsIgnoreCase("yes")) {
+            return true;
+        } else if (useHwc.equalsIgnoreCase("false") || useHwc.equalsIgnoreCase("off")
+            || useHwc.equalsIgnoreCase("no")) {
+            return false;
+        } else {
+            LOGGER.warn(String.format("Invalid SparkConf setting %s=%s", USE_HIVE_WAREHOUSE_CONNECTOR, useHwc));
+            return false;
         }
     }
 }
