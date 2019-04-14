@@ -7,6 +7,12 @@
 	<fullDescription>
 		<intro>
 			Converts an incoming Spark DataFrame/RDD into a Hive table
+			
+			<p><b>Notice:</b> On clusters with Hortonworks HDP 3.x, this node requires <i>Hive Warehouse Connector</i>
+			to be part of the Spark classpath and correctly configured. Please consult the
+			<a href="https://docs.hortonworks.com/HDPDocuments/HDP3/HDP-3.1.0/integrating-hive/content/hive_hivewarehouseconnector_for_handling_apache_spark_data.html">
+			HDP documentation</a>.
+			</p>
 		</intro>
 		<option name="Table name">The name of the table to create</option>
 		<option name="Drop existing table">Select this option to drop an existing table</option>

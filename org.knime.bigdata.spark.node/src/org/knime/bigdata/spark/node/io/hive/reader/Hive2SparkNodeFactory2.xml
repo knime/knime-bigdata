@@ -6,7 +6,13 @@
 	<shortDescription>Converts an incoming Hive query into a Spark DataFrame/RDD</shortDescription>
 	<fullDescription>
 		<intro>
-			Converts an incoming Hive query into a Spark DataFrame/RDD.
+			Converts an incoming Hive query into a Spark DataFrame/RDD by executing the query in Spark.
+			
+			<p><b>Notice:</b> On clusters with Hortonworks HDP 3.x, this node requires <i>Hive Warehouse Connector</i>
+			to be part of the Spark classpath and correctly configured. Please consult the
+			<a href="https://docs.hortonworks.com/HDPDocuments/HDP3/HDP-3.1.0/integrating-hive/content/hive_hivewarehouseconnector_for_handling_apache_spark_data.html">
+			HDP documentation</a>.
+			</p>
 		</intro>
 	</fullDescription>
 
