@@ -109,7 +109,8 @@ mavenBlacklist:
   - com\.amazonaws:.*
   - javax\.mail:mail:.*
   - org\.bouncycastle:bcprov-jdk15on:.*
-  
+  - org\.xerial\.snappy:snappy-java:jar:1\.1\..*
+
   # javax.annotation packages from jsr305  are never required at runtime
   - com\.google\.code\.findbugs:jsr305:jar:.*
   
@@ -363,7 +364,10 @@ requireBundleOverrides:
     
   - coordPattern: org\.bouncycastle:bcprov-jdk15on:.*
     replacement: bcprov;bundle-version="[1,2)"
-    
+
+  - coordPattern: org\.xerial\.snappy:snappy-java:jar:1\.1\..*
+    replacement: org.xerial.snappy.java;bundle-version="[1.1,1.2)"
+
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
   - coordPattern: io\.airlift:slice:jar:.*
     replacement: io.airlift.slice;resolution:=optional
@@ -521,11 +525,6 @@ mavenDependencyOverrides:
   - coordPattern: com\.facebook\.presto\.hadoop:hadoop-apache2:jar:.*
     replacement: org.apache.hadoop:hadoop-client:jar:${hadoop_version}
   
-  # snappy 1.1.x is a dependency of parquet (and spark, but here we don't make use of it).
-  # This updates all snappy 1.1 dependencies to 1.1.7, which improves performance
-  - coordPattern: org\.xerial\.snappy:snappy-java:jar:1\.1\..*
-    replacement: org.xerial.snappy:snappy-java:jar:1.1.7
-    
 # Prevents artifacts that only differ in their micro version from undergoing duplicate removal
 duplicateRemovalBlacklist:
   # (only required for full spark):
