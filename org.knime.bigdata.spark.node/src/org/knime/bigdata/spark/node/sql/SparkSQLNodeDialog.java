@@ -71,6 +71,7 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
     private final SparkSQLSettings m_settings = new SparkSQLSettings();
 
     private final RSyntaxTextArea m_query;
+    private AutoCompletion m_autoCompletion;
 
     private final JScrollPane m_columnsPanel;
     private final DefaultListModel<DataColumnSpec> m_columnsModel;
@@ -217,8 +218,11 @@ class SparkSQLNodeDialog extends NodeDialogPane implements MouseListener {
             SparkSQLJobInput.TABLE_PLACEHOLDER, " Table placeholder (" + SparkSQLJobInput.TABLE_PLACEHOLDER + ")"));
 
         queryCompletition.addCompletions(completions);
-        final AutoCompletion queryAc = new AutoCompletion(queryCompletition);
-        queryAc.install(m_query);
+        if (m_autoCompletion != null) {
+            m_autoCompletion.uninstall();
+        }
+        m_autoCompletion = new AutoCompletion(queryCompletition);
+        m_autoCompletion.install(m_query);
     }
 
     @Override
