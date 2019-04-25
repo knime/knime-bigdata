@@ -7,6 +7,7 @@ hdfs.webhdfs.port,50070
 
 hive.databasename,default
 hive.parameter,principal=hive/ip-10-0-0-60.eu-west-1.compute.internal@HADOOP
+hive.port,10000
 hive.useKerberos,true
 
 impala.databasename,default

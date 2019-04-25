@@ -45,6 +45,10 @@ public class TestingSparkContextConfigFactory {
      */
     public synchronized static SparkContextConfig create(final Map<String, FlowVariable> flowVars) {
 
+        if (!flowVars.containsKey(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName())) {
+            throw new IllegalArgumentException("No Spark context provider settings found in flow variables");
+        }
+
         final String idSchemeString = flowVars.get(TestflowVariable.SPARK_CONTEXTIDSCHEME.getName()).getStringValue();
         final SparkContextIDScheme idScheme = SparkContextIDScheme.fromString(idSchemeString);
 

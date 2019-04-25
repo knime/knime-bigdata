@@ -83,6 +83,11 @@ public enum TestflowVariable {
         HIVE_PARAMETER("hive.parameter", Type.STRING, true),
 
         /**
+         * Flow variable for the "port" setting of the Hive Connection.
+         */
+        HIVE_PORT("hive.port", Type.INT),
+
+        /**
          * Flow variable for the "kerberos" setting of the Hive connection node. Possible values: true, false.
          *
          * <p>
