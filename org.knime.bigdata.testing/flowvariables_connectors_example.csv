@@ -19,15 +19,3 @@ ssh.username,ec2-user
 ssh.password,
 ssh.keyfile,/home/user/.ssh/id_rsa
 
-spark.contextIdScheme,jobserver
-spark.version,2.2
-spark.settingsOverride,false
-spark.settingsCustom,
-
-spark.sjs.url,http://ip-10-0-0-60.eu-west-1.compute.internal:8091
-spark.sjs.contextName,testflowContext
-spark.sjs.authMethod,CREDENTIALS
-spark.sjs.username,bjoern
-spark.sjs.password,bjoern
-spark.sjs.receiveTimeout,120
-

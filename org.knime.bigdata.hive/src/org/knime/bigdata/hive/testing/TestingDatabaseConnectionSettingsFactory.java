@@ -49,6 +49,7 @@ public class TestingDatabaseConnectionSettingsFactory {
 
         settings.setDriver(HiveDriverDetector.getDriverName());
         settings.setHost(TestflowVariable.getString(TestflowVariable.HOSTNAME, flowVars));
+        settings.setPort(TestflowVariable.getInt(TestflowVariable.HIVE_PORT, flowVars));
         settings.setParameter(TestflowVariable.getString(TestflowVariable.HIVE_PARAMETER, flowVars));
         settings.setDatabaseName(TestflowVariable.getString(TestflowVariable.HIVE_DATABASENAME, flowVars));
 

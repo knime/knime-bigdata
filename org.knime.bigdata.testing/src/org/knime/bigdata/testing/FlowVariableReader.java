@@ -144,6 +144,7 @@ public class FlowVariableReader {
             // Hive is mandatory
             ensureHas(TestflowVariable.HIVE_DATABASENAME, flowVariables);
             ensureHas(TestflowVariable.HIVE_PARAMETER, flowVariables);
+            ensureHas(TestflowVariable.HIVE_PORT, flowVariables);
             ensureHas(TestflowVariable.HIVE_USE_KERBEROS, flowVariables);
             if (!TestflowVariable.isTrue(TestflowVariable.HIVE_USE_KERBEROS, flowVariables)) {
                 ensureHas(TestflowVariable.HIVE_USERNAME, flowVariables);
@@ -174,47 +175,50 @@ public class FlowVariableReader {
             }
         }
         
-        ensureHas(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables);
-        ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
-        ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
+        // Spark is optional, but if Spark scheme is defined, everything must be defined.
+        if (has(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables)) {
+            ensureHas(TestflowVariable.SPARK_CONTEXTIDSCHEME, flowVariables);
+            ensureHas(TestflowVariable.SPARK_SETTINGSOVERRIDE, flowVariables);
+            ensureHas(TestflowVariable.SPARK_SETTINGSCUSTOM, flowVariables);
+        
+            if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+                SparkContextIDScheme.SPARK_LOCAL.toString(), flowVariables)) {
 
-        if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
-            SparkContextIDScheme.SPARK_LOCAL.toString(), flowVariables)) {
-            
-            ensureHas(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LOCAL_THREADS, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, flowVariables);
-            if (TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, "HIVEQL_WITH_JDBC", flowVariables)) {
-                ensureHas(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LOCAL_CONTEXTNAME, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LOCAL_THREADS, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, flowVariables);
+                if (TestflowVariable.stringEquals(TestflowVariable.SPARK_LOCAL_SQLSUPPORT, "HIVEQL_WITH_JDBC", flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_LOCAL_THRIFTSERVERPORT, flowVariables);
+                }
+                ensureHas(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables);
+                if (TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
+                }
+            } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+                SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
+                
+                ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SJS_URL, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SJS_CONTEXTNAME, flowVariables);
+                ensureHas(TestflowVariable.SPARK_SJS_AUTHMETHOD, flowVariables);
+                if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_SJS_AUTHMETHOD, "CREDENTIALS", flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_SJS_USERNAME, flowVariables);
+                    ensureHas(TestflowVariable.SPARK_SJS_PASSWORD, flowVariables);
+                    ensureHas(TestflowVariable.SPARK_SJS_RECEIVETIMEOUT, flowVariables);
+                }
+            } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
+                SparkContextIDScheme.SPARK_LIVY.toString(), flowVariables)) {
+                
+                ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LIVY_URL, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LIVY_AUTHMETHOD, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables);
+                if (TestflowVariable.isTrue(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables)) {
+                    ensureHas(TestflowVariable.SPARK_LIVY_STAGINGAREAFOLDER, flowVariables);
+                }
+                ensureHas(TestflowVariable.SPARK_LIVY_CONNECTTIMEOUT, flowVariables);
+                ensureHas(TestflowVariable.SPARK_LIVY_RESPONSETIMEOUT, flowVariables);
             }
-            ensureHas(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables);
-            if (TestflowVariable.isTrue(TestflowVariable.SPARK_LOCAL_USEHIVEDATAFOLDER, flowVariables)) {
-                ensureHas(TestflowVariable.SPARK_LOCAL_HIVEDATAFOLDER, flowVariables);
-            }
-        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
-            SparkContextIDScheme.SPARK_JOBSERVER.toString(), flowVariables)) {
-            
-            ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
-            ensureHas(TestflowVariable.SPARK_SJS_URL, flowVariables);
-            ensureHas(TestflowVariable.SPARK_SJS_CONTEXTNAME, flowVariables);
-            ensureHas(TestflowVariable.SPARK_SJS_AUTHMETHOD, flowVariables);
-            if (TestflowVariable.stringEqualsIgnoreCase(TestflowVariable.SPARK_SJS_AUTHMETHOD, "CREDENTIALS", flowVariables)) {
-                ensureHas(TestflowVariable.SPARK_SJS_USERNAME, flowVariables);
-                ensureHas(TestflowVariable.SPARK_SJS_PASSWORD, flowVariables);
-                ensureHas(TestflowVariable.SPARK_SJS_RECEIVETIMEOUT, flowVariables);
-            }
-        } else if (TestflowVariable.stringEquals(TestflowVariable.SPARK_CONTEXTIDSCHEME,
-            SparkContextIDScheme.SPARK_LIVY.toString(), flowVariables)) {
-            
-            ensureHas(TestflowVariable.SPARK_VERSION, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LIVY_URL, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LIVY_AUTHMETHOD, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables);
-            if (TestflowVariable.isTrue(TestflowVariable.SPARK_LIVY_SETSTAGINGAREAFOLDER, flowVariables)) {
-                ensureHas(TestflowVariable.SPARK_LIVY_STAGINGAREAFOLDER, flowVariables);
-            }
-            ensureHas(TestflowVariable.SPARK_LIVY_CONNECTTIMEOUT, flowVariables);
-            ensureHas(TestflowVariable.SPARK_LIVY_RESPONSETIMEOUT, flowVariables);
         }
 
     }
