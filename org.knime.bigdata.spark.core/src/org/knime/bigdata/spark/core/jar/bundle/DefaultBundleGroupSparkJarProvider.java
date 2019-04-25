@@ -83,7 +83,7 @@ public class DefaultBundleGroupSparkJarProvider extends DefaultSparkProvider<Bun
         if (bundles != null && bundles.length > 0) {
             return bundles[0];
         } else {
-            throw new RuntimeException("Unable to findle bundle " + name + " with min version " + inMinVersion);
+            throw new RuntimeException("Unable to find bundle " + name + " with min version " + inMinVersion);
         }
     }
 
@@ -104,6 +104,6 @@ public class DefaultBundleGroupSparkJarProvider extends DefaultSparkProvider<Bun
             }
         }
 
-        throw new RuntimeException("Unable to findle bundle " + name + " with min version " + inMinVersion + " and max version " + exMaxVersion);
+        throw new RuntimeException("Unable to find bundle " + name + " with min version " + inMinVersion + " and max version " + exMaxVersion);
     }
 }
