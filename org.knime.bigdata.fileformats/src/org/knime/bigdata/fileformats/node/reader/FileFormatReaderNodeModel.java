@@ -74,6 +74,7 @@ import org.knime.core.node.streamable.PortObjectInput;
 import org.knime.core.node.streamable.PortOutput;
 import org.knime.core.node.streamable.RowOutput;
 import org.knime.core.node.streamable.StreamableOperator;
+import org.knime.core.node.streamable.StreamableOperatorInternals;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingService;
 
@@ -165,30 +166,35 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
 
         }
         try {
-            final DataTypeMappingService<X, ?, ?> mappingService =
-                m_settings.getFormatFactory().getTypeMappingService();
-            final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
-                m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
-            // Create a reader to get the generated TableSpec
-
-            final RemoteFile<Connection> remoteFile =
-                FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo, connectionMonitor);
-            if (!remoteFile.exists()) {
-                throw new InvalidSettingsException("Input file '" + remoteFile.getPath() + "' does not exist");
-            }
-            if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
-                throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
-            }
-            final AbstractFileFormatReader reader =
-                getReader(remoteFile, null, outputDataTypeMappingConfiguration, false);
-            final DataTableSpec spec = reader.getTableSpec();
-            return new DataTableSpec[]{spec};
+            return createDataTableSpec(connInfo, connectionMonitor);
 
         } catch (final Exception e) {
             throw new InvalidSettingsException(e);
         } finally {
             connectionMonitor.closeAll();
         }
+    }
+
+    private PortObjectSpec[] createDataTableSpec(final ConnectionInformation connInfo,
+        final ConnectionMonitor<Connection> connectionMonitor) throws InvalidSettingsException, Exception {
+        final DataTypeMappingService<X, ?, ?> mappingService =
+            m_settings.getFormatFactory().getTypeMappingService();
+        final DataTypeMappingConfiguration<X> outputDataTypeMappingConfiguration =
+            m_settings.getMappingModel().getDataTypeMappingConfiguration(mappingService);
+        // Create a reader to get the generated TableSpec
+
+        final RemoteFile<Connection> remoteFile =
+            FileHandlingUtility.createRemoteFile(m_settings.getFileName(), connInfo, connectionMonitor);
+        if (!remoteFile.exists()) {
+            throw new InvalidSettingsException("Input file '" + remoteFile.getPath() + "' does not exist");
+        }
+        if (remoteFile.isDirectory() && remoteFile.listFiles().length == 0) {
+            throw new InvalidSettingsException(String.format("Empty directory %s.", m_settings.getFileName()));
+        }
+        final AbstractFileFormatReader reader =
+            getReader(remoteFile, null, outputDataTypeMappingConfiguration, false);
+        final DataTableSpec spec = reader.getTableSpec();
+        return new DataTableSpec[]{spec};
     }
 
     /**
@@ -274,6 +280,35 @@ public class FileFormatReaderNodeModel<X> extends NodeModel {
     protected void saveInternals(final File internDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
         // Nothing to do
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PortObjectSpec[] computeFinalOutputSpecs(final StreamableOperatorInternals internals,
+        final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+
+        final ConnectionMonitor<Connection> connectionMonitor = new ConnectionMonitor<>();
+        final ConnectionInformationPortObjectSpec connectionSpec = (ConnectionInformationPortObjectSpec)inSpecs[0];
+        ConnectionInformation connInfo = null;
+        if (m_settings.getFileName().isEmpty()) {
+            throw new InvalidSettingsException("No source location provided! Please enter a valid location.");
+        }
+        if (connectionSpec != null) {
+
+            connInfo = connectionSpec.getConnectionInformation();
+            if (connInfo == null) {
+                throw new InvalidSettingsException("No connection information available");
+            }
+        }
+        try {
+            return createDataTableSpec(connInfo, connectionMonitor);
+        } catch (final Exception e) {
+            throw new InvalidSettingsException(e);
+        } finally {
+            connectionMonitor.closeAll();
+        }
     }
 
     /**
