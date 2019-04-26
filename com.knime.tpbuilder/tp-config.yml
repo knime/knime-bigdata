@@ -2,7 +2,7 @@
 # generated bundles, where either 
 #  (1) a new bundle was created (including merged bundles)
 #  (2) an existing bundling was changed
-version: knimebd-20180820
+version: knimebd-20190426
 
 # Global switch to control whether source bundles will be created.
 # Defaults to true.
@@ -366,7 +366,7 @@ requireBundleOverrides:
     replacement: bcprov;bundle-version="[1,2)"
 
   - coordPattern: org\.xerial\.snappy:snappy-java:jar:1\.1\..*
-    replacement: org.xerial.snappy.java;bundle-version="[1.1,1.2)"
+    replacement: org.xerial.snappy.snappy-java;bundle-version="[1.1,1.2)"
 
   # slice is an optional dependency of aircompressor (only required for zstd compression, which we currently don't use)
   - coordPattern: io\.airlift:slice:jar:.*
