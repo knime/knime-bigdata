@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Hive to Spark (Labs)</name>
+	<shortDescription>Imports the result of an incoming Hive query into Spark as a DataFrame/RDD.</shortDescription>
+	<fullDescription>
+		<intro>
+			Imports the result of an incoming Hive query into Spark as a DataFrame/RDD. The query is
+			executed using Spark SQL, which supports a subset of Hive's own SQL dialect. The limitations of Spark SQL are
+			described in the <a href="https://spark.apache.org/docs/latest/sql-migration-guide-hive-compatibility.html">
+			Spark documentation</a>.
+		</intro>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Hive query">Hive query</inPort>
+		<inPort index="1" name="Spark context">Spark context</inPort>
+		<outPort index="0" name="Spark data">Spark DataFrame/RDD which contains the result of the Hive query</outPort>
+	</ports>
+</knimeNode>

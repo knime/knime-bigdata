@@ -28,9 +28,11 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructField;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobOutput;
 import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
-import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
+import org.knime.bigdata.spark2_1.api.SparkJob;
+import org.knime.bigdata.spark2_1.api.TypeConverters;
 
 /**
  * Executes given SQL statement and puts result into a (named) data frame.
@@ -38,12 +40,12 @@ import org.knime.bigdata.spark2_1.api.SimpleSparkJob;
  * @author dwk, jfr
  */
 @SparkClass
-public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
+public class Hive2SparkJob implements SparkJob<Hive2SparkJobInput, Hive2SparkJobOutput> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
     @Override
-    public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
+    public Hive2SparkJobOutput runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException {
 
         final SparkSession spark = SparkSession.builder().sparkContext(sparkContext).getOrCreate();
@@ -58,6 +60,7 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
         final String key = input.getFirstNamedOutputObject();
         LOGGER.info("Storing Hive query result under key: " + key);
         namedObjects.addDataFrame(key, dataFrame);
+        return new Hive2SparkJobOutput(key, TypeConverters.convertSpec(dataFrame.schema()));
     }
 
     private void ensureHiveSupport(final SparkSession spark) throws KNIMESparkException {

@@ -20,7 +20,8 @@
  */
 package org.knime.bigdata.spark1_2.jobs.hive;
 
-import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.core.job.DefaultJobRunFactory;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobOutput;
 import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
 import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
 
@@ -28,12 +29,12 @@ import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkNodeModel;
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Hive2SparkJobRunFactory extends DefaultSimpleJobRunFactory<Hive2SparkJobInput> {
+public class Hive2SparkJobRunFactory extends DefaultJobRunFactory<Hive2SparkJobInput, Hive2SparkJobOutput> {
 
     /**
      * Constructor.
      */
     public Hive2SparkJobRunFactory() {
-        super(Hive2SparkNodeModel.JOB_ID, Hive2SparkJob.class);
+        super(Hive2SparkNodeModel.JOB_ID, Hive2SparkJob.class, Hive2SparkJobOutput.class);
     }
 }

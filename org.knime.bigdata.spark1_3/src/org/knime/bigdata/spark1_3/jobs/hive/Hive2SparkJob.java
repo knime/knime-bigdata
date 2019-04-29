@@ -32,9 +32,11 @@ import org.apache.spark.sql.hive.HiveContext;
 import org.apache.spark.sql.types.StructField;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobOutput;
 import org.knime.bigdata.spark.node.io.hive.reader.Hive2SparkJobInput;
 import org.knime.bigdata.spark1_3.api.NamedObjects;
-import org.knime.bigdata.spark1_3.api.SimpleSparkJob;
+import org.knime.bigdata.spark1_3.api.SparkJob;
+import org.knime.bigdata.spark1_3.api.TypeConverters;
 import org.knime.bigdata.spark1_3.hive.HiveContextProvider;
 import org.knime.bigdata.spark1_3.hive.HiveContextProvider.HiveContextAction;
 
@@ -44,14 +46,13 @@ import org.knime.bigdata.spark1_3.hive.HiveContextProvider.HiveContextAction;
  * @author dwk, jfr
  */
 @SparkClass
-public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
-
+public class Hive2SparkJob implements SparkJob<Hive2SparkJobInput, Hive2SparkJobOutput> {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = Logger.getLogger(Hive2SparkJob.class.getName());
 
     @Override
-    public void runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
+    public Hive2SparkJobOutput runJob(final SparkContext sparkContext, final Hive2SparkJobInput input,
         final NamedObjects namedObjects) throws KNIMESparkException {
 
         LOGGER.log(Level.INFO, "reading hive table...");
@@ -76,5 +77,6 @@ public class Hive2SparkJob implements SimpleSparkJob<Hive2SparkJobInput> {
         LOGGER.log(Level.INFO, "Storing Hive query result under key: {0}" ,key);
         namedObjects.addJavaRdd(key, javaRDD);
         LOGGER.log(Level.INFO, "done");
+        return new Hive2SparkJobOutput(key, TypeConverters.convertSpec(dataFrame.schema()));
     }
 }

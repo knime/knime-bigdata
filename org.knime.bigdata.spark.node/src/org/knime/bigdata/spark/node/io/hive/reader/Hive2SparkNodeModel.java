@@ -23,8 +23,6 @@ package org.knime.bigdata.spark.node.io.hive.reader;
 import org.knime.bigdata.hive.utility.HiveUtility;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
-import org.knime.bigdata.spark.core.job.JobInput;
-import org.knime.bigdata.spark.core.job.SimpleJobRunFactory;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
@@ -108,7 +106,6 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
             ensureContextIsOpen(contextID, exec.createSubProgress(0.1));
         }
 
-        final SimpleJobRunFactory<JobInput> runFactory = SparkContextUtil.getSimpleRunFactory(contextID, JOB_ID);
         final DatabasePortObject db = (DatabasePortObject)inData[0];
         final DatabaseQueryConnectionSettings settings = db.getConnectionSettings(getCredentialsProvider());
         final DataTableSpec resultTableSpec = db.getSpec().getDataTableSpec();
@@ -117,7 +114,7 @@ public class Hive2SparkNodeModel extends SparkSourceNodeModel {
         LOGGER.debug("Original sql: " + hiveQuery);
         final Hive2SparkJobInput jobInput = new Hive2SparkJobInput(resultTable.getID(), hiveQuery);
         LOGGER.debug("Cleaned sql: " + jobInput.getQuery());
-        runFactory.createRun(jobInput).run(contextID, exec);
+        SparkContextUtil.getJobRunFactory(contextID, JOB_ID).createRun(jobInput).run(contextID, exec);
         final SparkDataPortObject sparkObject = new SparkDataPortObject(resultTable);
         return new PortObject[] {sparkObject};
     }
