@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<!--************************** DB Extensions **************************-->
+
+   <extension point="org.knime.database.DBType">
+      <DBType
+            description="Hive"
+            id="hive"
+            name="Hive"/>
+   </extension>
+   <extension point="org.knime.database.SQLDialect">
+      <SQLDialect
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.dialect.HiveSQLDialect$Factory"/>
+   </extension>
+  	<extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            factory-class="org.knime.bigdata.database.hive.node.HiveConnectorNodeFactory"
+            category-path="/labs/db/connector"/>
+    </extension>
+   <extension
+         point="org.knime.database.Driver">
+      <Driver
+            locator="org.knime.bigdata.database.hive.HiveDriverLocator">
+      </Driver>
+   </extension>
+   <extension
+         point="org.knime.database.Agent">
+      <Agent
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.sampling.DBSampling">
+      </Agent>
+            <Agent
+            dbTypes="hive"
+            factory="org.knime.bigdata.database.hive.HiveAgentFactory"
+            interface="org.knime.database.agent.binning.DBBinner">
+      </Agent>
+   </extension>
+   <!-- ********************************** DB Aggregation Functions ********************************** -->
+   
+   <extension point="org.knime.database.AggregationFunction">
+   
+   <!-- ************************** Common ************************** -->
+   
+
+            
+      <!-- CountDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CountDistinctDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+   
+      <!-- CorrDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CorrDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+   
+      <!-- CovarSampDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CovarSampDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- CovarPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.CovarPopDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- MaxDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.MaxDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+
+      <!-- MinDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.MinDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+	  <!-- VarPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.VarPopDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+   
+      <!--VarSampDBAggregationFunction  -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.VarSampDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- SumDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.SumDistinctDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- StdDevSampDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.StdDevSampDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- StdDevPopDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.StdDevPopDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- ************************** Hive ************************** -->
+      
+      <!-- PercentileDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.PercentileDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- PercentileApproxDBAggregationFunction -->     
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.PercentileApproxDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+      <!-- CollectSetDBAggregationFunction -->       
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.CollectSetDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+            
+       <!-- CollectListDBAggregationFunction -->      
+      <AggregationFunction
+            factory="org.knime.bigdata.database.hive.functions.CollectListDBAggregationFunction$Factory"
+            dbTypes="hive"/>
+      
+    </extension>
+    
+     <extension
+         point="org.knime.database.DBTypeMappingService">
+      <DBTypeMappingService
+            dbTypeId="hive"
+            supplier="org.knime.bigdata.database.hive.HiveTypeMappingServiceSupplier">
+      </DBTypeMappingService>
+   </extension>
+</plugin>

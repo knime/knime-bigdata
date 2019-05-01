@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: KNIME Big Data Database nodes
+Bundle-SymbolicName: org.knime.bigdata.database;singleton:=true
+Bundle-Version: 3.8.0.qualifier
+Bundle-Vendor: KNIME AG
+Require-Bundle: org.knime.core;bundle-version="[3.8.0,4.0.0)",
+ org.knime.workbench.repository;bundle-version="[3.8.0,4.0.0)",
+ org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",
+ org.apache.hive.jdbc;bundle-version="[1.1.0.cdh5_13_0-knimebd-20180816,2.0.0)",
+ org.knime.database;bundle-version="[3.8.0,4.0.0)",
+ org.knime.database.nodes;bundle-version="3.8.0",
+ org.knime.time;bundle-version="[3.8.0,4.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

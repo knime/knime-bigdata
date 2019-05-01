@@ -79,7 +79,8 @@ public class KerberosConnectionFactory extends CachedConnectionFactory {
             return UserGroupUtil.runWithKerberosUGI((ugi) -> {
                 LOGGER.debug("Create JDBC connection with Kerberos user: " + ugi.toString());
                 final Properties props = createConnectionProperties(ugi.getShortUserName(), null);
-                return ugi.doAs((PrivilegedExceptionAction<Connection>)() -> d.connect(effectiveJdcbUrl, props));
+                return ugi.doAs((PrivilegedExceptionAction<Connection>)() ->
+                d.connect(effectiveJdcbUrl, props));
             });
         } catch (SQLException e) {
             // don't rewrap SQLException
