@@ -55,7 +55,6 @@ import java.util.Collection;
 
 import org.apache.hive.jdbc.HiveDriver;
 import org.knime.database.DBType;
-import org.knime.database.attribute.Attribute;
 import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
 import org.knime.database.connection.impl.DBConnectionManagerAttributes;
@@ -75,11 +74,6 @@ public class HiveDriverLocator extends AbstractDriverLocator {
     public static final String DRIVER_ID = "hive";
 
     /**
-     * Attribute that contains the query for validating that a connection is usable.
-     */
-    public static final Attribute<String> ATTRIBUTE_VALIDATION_QUERY;
-
-    /**
      * The {@link AttributeCollection} {@linkplain #getAttributes() of} Hive drivers.
      */
     public static final AttributeCollection ATTRIBUTES;
@@ -88,8 +82,12 @@ public class HiveDriverLocator extends AbstractDriverLocator {
     static {
         final AttributeCollection.Builder builder =
             AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
-        ATTRIBUTE_VALIDATION_QUERY = builder.add(Accessibility.EDITABLE,
-            DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
+        builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
+        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL, true);
+        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR, ";");
+        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR, ";");
+        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL,
+            false);
         ATTRIBUTES = builder.build();
     }
 
