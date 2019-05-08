@@ -82,12 +82,12 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
             case NEW:
             case CONFIGURED:
             	m_wrapper = null;
-                m_jobController = null;
                 m_namedObjectsController = null;
+                m_jobController = null;
                 break;
             default: // OPEN
-                ensureJobController();
                 ensureNamedObjectsController();
+                ensureJobController();
                 break;
         }
     }
@@ -100,7 +100,7 @@ public class LocalSparkContext extends SparkContext<LocalSparkContextConfig> {
 
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
-            m_jobController = new LocalSparkJobController(m_wrapper);
+            m_jobController = new LocalSparkJobController(m_wrapper, m_namedObjectsController);
         }
     }
     

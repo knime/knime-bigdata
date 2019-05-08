@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.core.context.namedobjects;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.knime.bigdata.spark.core.context.SparkContext;
@@ -40,11 +41,14 @@ public class JobBasedNamedObjectsController implements NamedObjectsController {
 
     private final SparkContextID m_sparkContextID;
 
+    private final HashMap<String, NamedObjectStatistics> m_statistics;
+
     /**
      * @param sparkContextId
      */
     public JobBasedNamedObjectsController(final SparkContextID sparkContextId) {
-        this.m_sparkContextID = sparkContextId;
+        m_sparkContextID = sparkContextId;
+        m_statistics = new HashMap<>();
     }
 
     /**
@@ -75,8 +79,27 @@ public class JobBasedNamedObjectsController implements NamedObjectsController {
             JobRunFactoryRegistry.<NamedObjectsJobInput, NamedObjectsJobOutput>getFactory(SparkContextConstants.NAMED_OBJECTS_JOB_ID, context.getSparkVersion())
                 .createRun(NamedObjectsJobInput.createDeleteOperation(namedObjects))
                 .run(m_sparkContextID, null);
+
+            for (final String namedObject : namedObjects) {
+                m_statistics.remove(namedObject);
+            }
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
         }
+    }
+
+    /**
+     * Add {@link NamedObjectStatistics} of object with given name.
+     * @param objectName name of object
+     * @param statistic statistic of named object
+     */
+    public void addNamedObjectStatistics(final String objectName, final NamedObjectStatistics statistic) {
+        m_statistics.put(objectName, statistic);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends NamedObjectStatistics> T getNamedObjectStatistics(final String objectName) {
+        return (T) m_statistics.get(objectName);
     }
 }

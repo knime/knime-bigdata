@@ -7,21 +7,24 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.json.JsonObject;
 
 import org.knime.bigdata.spark.core.context.JobController;
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsController;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.util.UploadFileCache;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.JobRun;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
-import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.sparkjobserver.request.DeleteDataFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.GetJobStatusRequest;
@@ -66,6 +69,8 @@ class JobserverJobController implements JobController {
 
     private final String m_jobserverAppName;
 
+    private final JobBasedNamedObjectsController m_namedObjectsController;
+
     /**
      * Starting with pull request 469, Spark jobserver has a configuration flag
      * shiro.use-as-proxy-user. If it is on /and/ authentication is on, then
@@ -79,13 +84,14 @@ class JobserverJobController implements JobController {
     private volatile boolean m_prependUserToContextName;
 
     JobserverJobController(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final String jobserverAppName,
-        final RestClient restClient, final String jobserverJobClass) {
+        final RestClient restClient, final String jobserverJobClass, final JobBasedNamedObjectsController namedObjectsController) {
         m_contextId = contextId;
         m_contextConfig = contextConfig;
         m_jobserverAppName = jobserverAppName;
         m_restClient = restClient;
         m_jobserverJobClass = jobserverJobClass;
         m_prependUserToContextName = false;
+        m_namedObjectsController = namedObjectsController;
     }
 
     /**
@@ -201,18 +207,27 @@ class JobserverJobController implements JobController {
 
         String jobId = startJobAsynchronously(job, inputFilesOnServer);
 
-        JobserverJobOutput jobserverOutput = waitForJob(job, jobId, exec);
+        WrapperJobOutput jobOutput = waitForJob(job, jobId, exec);
 
-		if (jobserverOutput.isError()) {
-			throw jobserverOutput.getException();
-		} else if (job instanceof SimpleJobRun) {
-			return null;
-		} else {
-            try {
-                return jobserverOutput.<O> getSparkJobOutput(job.getJobOutputClass());
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOGGER.error("Failed to instantiate Spark job output: " + e.getMessage(), e);
-                throw new KNIMESparkException("Failed to deserialize Spark job output", e);
+		if (jobOutput.isError()) {
+		    throw jobOutput.getException();
+        } else {
+            final Map<String, NamedObjectStatistics> stats = jobOutput.getNamedObjectStatistics();
+            if (stats != null) {
+                for (Entry<String, NamedObjectStatistics> kv : stats.entrySet()) {
+                    m_namedObjectsController.addNamedObjectStatistics(kv.getKey(), kv.getValue());
+                }
+            }
+
+            if (job instanceof SimpleJobRun) {
+                return null;
+            } else {
+                try {
+                    return jobOutput.<O> getSparkJobOutput(job.getJobOutputClass());
+                } catch (InstantiationException | IllegalAccessException e) {
+                    LOGGER.error("Failed to instantiate Spark job output: " + e.getMessage(), e);
+                    throw new KNIMESparkException("Failed to deserialize Spark job output", e);
+                }
             }
         }
     }
@@ -272,7 +287,7 @@ class JobserverJobController implements JobController {
         }
     }
 
-    private JobserverJobOutput waitForJob(final JobRun<?, ?> jobRun, final String jobID,
+    private WrapperJobOutput waitForJob(final JobRun<?, ?> jobRun, final String jobID,
         final ExecutionMonitor exec) throws CanceledExecutionException, KNIMESparkException {
 
         final int aCheckFrequencyInSeconds = m_contextConfig.getJobCheckFrequency();
@@ -312,7 +327,7 @@ class JobserverJobController implements JobController {
 
                     try {
                         final Config typesafeConfig = ConfigFactory.parseString(jobData.getString("result"));
-                        return JobserverJobOutput
+                        return WrapperJobOutput
                             .fromMap(TypesafeConfigSerializationUtils.deserializeFromTypesafeConfig(typesafeConfig,
                                 jobRun.getJobOutputClassLoader()));
                     } catch (ClassNotFoundException | IOException e) {

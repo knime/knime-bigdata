@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.swing.JComponent;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
@@ -106,7 +107,16 @@ public class SparkDataPortObject extends SparkContextPortObject {
      */
     @Override
     public String getSummary() {
-        return String.format("%d columns", getTableSpec().getNumColumns());
+        final int columns = getTableSpec().getNumColumns();
+        final SparkDataObjectStatistic stat = m_data.getStatistics();
+        if (stat != null) {
+            final int partitions = stat.getNumPartitions();
+            return String.format("%d column%s, %d partition%s",
+                columns, columns > 1 ? "s" : "",
+                partitions, partitions > 1 ? "s" : "");
+        } else {
+            return String.format("%d column%s", columns, columns > 1 ? "s" : "");
+        }
     }
 
     /**

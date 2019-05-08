@@ -5,11 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Row;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
-import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark1_5.api.NamedObjects;
 import org.knime.bigdata.spark1_5.api.SimpleSparkJob;
@@ -43,7 +47,7 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
     @Override
     public Object runJob(final Object sparkContext, final Config config) {
 
-        JobserverJobOutput toReturn;
+        WrapperJobOutput toReturn;
 
         try {
             final JobserverJobInput jsInput = JobserverJobInput.createFromMap(TypesafeConfigSerializationUtils
@@ -58,21 +62,45 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
             Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
 
             if (sparkJob instanceof SparkJob) {
-                toReturn = JobserverJobOutput.success(((SparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this));
-            } else if (sparkJob instanceof SparkJobWithFiles){
-                toReturn = JobserverJobOutput.success(((SparkJobWithFiles)sparkJob).runJob((SparkContext)sparkContext, input, inputFiles, this));
+                toReturn = WrapperJobOutput
+                    .success(((SparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this));
+            } else if (sparkJob instanceof SparkJobWithFiles) {
+                toReturn = WrapperJobOutput.success(((SparkJobWithFiles)sparkJob).runJob((SparkContext)sparkContext, input,
+                    inputFiles, this));
             } else {
                 ((SimpleSparkJob)sparkJob).runJob((SparkContext)sparkContext, input, this);
-                toReturn = JobserverJobOutput.success();
+                toReturn = WrapperJobOutput.success();
             }
+
+            addDataFrameNumPartitions(input.getNamedOutputObjects(), toReturn, this);
+
         } catch (KNIMESparkException e) {
-            toReturn = JobserverJobOutput.failure(e);
+            toReturn = WrapperJobOutput.failure(e);
         } catch (Throwable t) {
-            toReturn = JobserverJobOutput.failure(new KNIMESparkException(t));
+            toReturn = WrapperJobOutput.failure(new KNIMESparkException(t));
         }
 
         return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()
             .render(ConfigRenderOptions.concise());
+    }
+
+    /**
+     * Add number of partitions of output objects to job result.
+     */
+    private static void addDataFrameNumPartitions(final List<String> outputObjects, final WrapperJobOutput jobOutput,
+            final NamedObjects namedObjects) {
+
+        if (!outputObjects.isEmpty()) {
+            for (int i = 0; i < outputObjects.size(); i++) {
+                final String key = outputObjects.get(i);
+                final JavaRDD<Row> rdd = namedObjects.getJavaRdd(key);
+
+                if (rdd != null) {
+                    final NamedObjectStatistics stat = new SparkDataObjectStatistic(rdd.partitions().size());
+                    jobOutput.setNamedObjectStatistic(key, stat);
+                }
+            }
+        }
     }
 
     private List<File> validateInputFiles(final JobserverJobInput jsInput) throws KNIMESparkException {

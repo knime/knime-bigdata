@@ -26,6 +26,8 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.SparkContextManager;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
 import org.knime.core.data.util.NonClosableInputStream;
 import org.knime.core.data.util.NonClosableOutputStream;
@@ -141,5 +143,10 @@ public class DefaultSparkData implements SparkData {
     @Override
     public boolean compatible(final SparkData otherSparkDataObject) {
         return m_contextID.equals(otherSparkDataObject.getContextID());
+    }
+
+    @Override
+    public SparkDataObjectStatistic getStatistics() {
+        return SparkContextManager.getOrCreateSparkContext(m_contextID).getNamedObjectStatistics(m_id);
     }
 }

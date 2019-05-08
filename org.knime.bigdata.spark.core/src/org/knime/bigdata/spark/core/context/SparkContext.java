@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.core.context;
 import java.util.Objects;
 import java.util.Set;
 
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
@@ -480,6 +481,11 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
         } catch (CanceledExecutionException e) {
             // never happens
         }
+    }
+
+    @Override
+    public final <NOS extends NamedObjectStatistics> NOS getNamedObjectStatistics(final String namedObject) {
+        return getNamedObjectsController().getNamedObjectStatistics(namedObject);
     }
 
     /**

@@ -28,8 +28,11 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.hive.thriftserver.HiveThriftServer2;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
@@ -89,7 +92,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		// with the spark class loader, otherwise Java's ServiceLoader frame does not
 		// work properly which breaks Spark's DataSource API
 		final ClassLoader origContextClassLoader = swapContextClassLoader();
-		LocalSparkJobOutput toReturn;
+		WrapperJobOutput toReturn;
 
 		try {
 			final LocalSparkJobInput localSparkInput = LocalSparkJobInput.createFromMap(LocalSparkSerializationUtil
@@ -110,29 +113,52 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			List<File> inputFileCopies = copyInputFiles(localSparkInput);
 
 			if (sparkJob instanceof SparkJob) {
-				toReturn = LocalSparkJobOutput
+				toReturn = WrapperJobOutput
 						.success(((SparkJob) sparkJob).runJob(m_sparkSession.sparkContext(), jobInput, this));
 			} else if (sparkJob instanceof SparkJobWithFiles) {
-				toReturn = LocalSparkJobOutput.success(((SparkJobWithFiles) sparkJob)
+				toReturn = WrapperJobOutput.success(((SparkJobWithFiles) sparkJob)
 						.runJob(m_sparkSession.sparkContext(), jobInput, inputFileCopies, this));
 			} else {
 				((SimpleSparkJob) sparkJob).runJob(m_sparkSession.sparkContext(), jobInput, this);
-				toReturn = LocalSparkJobOutput.success();
+				toReturn = WrapperJobOutput.success();
 			}
+
+            addDataFrameNumPartitions(jobInput.getNamedOutputObjects(), toReturn, this);
+
 		} catch (InterruptedException e) {
 		    // catch and rethrow to prevent the InterruptedExceptions from being wrapped
 		    // into the job output, as it is thrown during cancellation
 		    throw e;
 		} catch (KNIMESparkException e) {
-			toReturn = LocalSparkJobOutput.failure(e);
+			toReturn = WrapperJobOutput.failure(e);
 		} catch (Throwable t) {
-			toReturn = LocalSparkJobOutput.failure(new KNIMESparkException(t));
+			toReturn = WrapperJobOutput.failure(new KNIMESparkException(t));
 		} finally {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
 		}
 
 		return LocalSparkSerializationUtil.serializeToPlainJavaTypes(toReturn.getInternalMap());
 	}
+
+    /**
+     * Add number of partitions of output objects to job result.
+     */
+    private static void addDataFrameNumPartitions(final List<String> outputObjects, final WrapperJobOutput jobOutput,
+            final NamedObjects namedObjects) {
+
+        if (!outputObjects.isEmpty()) {
+            for (int i = 0; i < outputObjects.size(); i++) {
+                final String key = outputObjects.get(i);
+                final Dataset<Row> df = namedObjects.getDataFrame(key);
+
+                if (df != null) {
+                    final NamedObjectStatistics stat =
+                        new SparkDataObjectStatistic(((Dataset<?>)df).rdd().getNumPartitions());
+                    jobOutput.setNamedObjectStatistic(key, stat);
+                }
+            }
+        }
+    }
 
     /**
      * Thread-safe method (against {@link #cancelJob(String)} to check for cancellation and set the current job group id

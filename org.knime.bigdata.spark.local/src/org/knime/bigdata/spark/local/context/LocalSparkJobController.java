@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,13 +15,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.knime.bigdata.spark.core.context.JobController;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.JobRun;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkJobInput;
-import org.knime.bigdata.spark.local.wrapper.LocalSparkJobOutput;
 import org.knime.bigdata.spark.local.wrapper.LocalSparkWrapper;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
@@ -38,6 +40,8 @@ class LocalSparkJobController implements JobController {
      */
     private final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     
+    private final LocalSparkNamedObjectsController m_namedObjectsController;
+
     private LocalSparkWrapper m_wrapper;
 
     /**
@@ -45,8 +49,9 @@ class LocalSparkJobController implements JobController {
      * 
      * @param wrapper The wrapper for the Spark instance to run jobs on.
      */
-	LocalSparkJobController(LocalSparkWrapper wrapper) {
+	LocalSparkJobController(LocalSparkWrapper wrapper, final LocalSparkNamedObjectsController namedObjectsController) {
 		m_wrapper = wrapper;
+		m_namedObjectsController = namedObjectsController;
 	}
 
 	@Override
@@ -81,23 +86,32 @@ class LocalSparkJobController implements JobController {
         final Map<String, Object> serializedOutput =
             waitForFuture(THREAD_POOL.submit(() -> m_wrapper.runJob(serializedInput, jobGroupId)), jobGroupId, exec);
 		
-		LocalSparkJobOutput out;
+        WrapperJobOutput toReturn;
 		try {
-			out = LocalSparkJobOutput.fromMap(LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(serializedOutput, job.getJobOutputClassLoader()));
+			toReturn = WrapperJobOutput.fromMap(LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(serializedOutput, job.getJobOutputClassLoader()));
 		} catch (IOException | ClassNotFoundException e) {
 			throw new KNIMESparkException(e);
 		}
 
-		if (out.isError()) {
-			throw out.getException();
-		} else if (job instanceof SimpleJobRun) {
-			return null;
-		} else {
-			try {
-				return out.<O>getSparkJobOutput(job.getJobOutputClass());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new KNIMESparkException(e);
-			}
+		if (toReturn.isError()) {
+		    throw toReturn.getException();
+        } else {
+            final Map<String, NamedObjectStatistics> stats = toReturn.getNamedObjectStatistics();
+            if (stats != null) {
+                for (Entry<String, NamedObjectStatistics> kv : stats.entrySet()) {
+                    m_namedObjectsController.addNamedObjectStatistics(kv.getKey(), kv.getValue());
+                }
+            }
+
+            if (job instanceof SimpleJobRun) {
+                return null;
+            } else {
+                try {
+                    return toReturn.<O> getSparkJobOutput(job.getJobOutputClass());
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new KNIMESparkException(e);
+                }
+            }
 		}
 	}
 	

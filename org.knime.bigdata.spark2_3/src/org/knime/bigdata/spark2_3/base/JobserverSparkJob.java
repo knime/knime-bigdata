@@ -6,12 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.spark.SparkContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
-import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
+import org.knime.bigdata.spark2_3.api.NamedObjects;
 import org.knime.bigdata.spark2_3.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_3.api.SparkJob;
 import org.knime.bigdata.spark2_3.api.SparkJobWithFiles;
@@ -40,7 +45,7 @@ public class JobserverSparkJob extends KNIMESparkJob {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public String runJob(final SparkContext sparkContext, final JobEnvironment runtime, final Config config) {
-        JobserverJobOutput toReturn;
+        WrapperJobOutput toReturn;
 
         try {
             final JobserverJobInput jsInput = JobserverJobInput.createFromMap(TypesafeConfigSerializationUtils
@@ -55,23 +60,46 @@ public class JobserverSparkJob extends KNIMESparkJob {
             Object sparkJob = getClass().getClassLoader().loadClass(jsInput.getSparkJobClass()).newInstance();
 
             if (sparkJob instanceof SparkJob) {
-                toReturn = JobserverJobOutput
+                toReturn = WrapperJobOutput
                     .success(((SparkJob)sparkJob).runJob(sparkContext, input, NamedObjectsImpl.SINGLETON_INSTANCE));
             } else if (sparkJob instanceof SparkJobWithFiles) {
-                toReturn = JobserverJobOutput.success(((SparkJobWithFiles)sparkJob).runJob(sparkContext, input,
+                toReturn = WrapperJobOutput.success(((SparkJobWithFiles)sparkJob).runJob(sparkContext, input,
                     inputFiles, NamedObjectsImpl.SINGLETON_INSTANCE));
             } else {
                 ((SimpleSparkJob)sparkJob).runJob(sparkContext, input, NamedObjectsImpl.SINGLETON_INSTANCE);
-                toReturn = JobserverJobOutput.success();
+                toReturn = WrapperJobOutput.success();
             }
+
+            addDataFrameNumPartitions(input.getNamedOutputObjects(), toReturn, NamedObjectsImpl.SINGLETON_INSTANCE);
+
         } catch (KNIMESparkException e) {
-            toReturn = JobserverJobOutput.failure(e);
+            toReturn = WrapperJobOutput.failure(e);
         } catch (Throwable t) {
-            toReturn = JobserverJobOutput.failure(new KNIMESparkException(t));
+            toReturn = WrapperJobOutput.failure(new KNIMESparkException(t));
         }
 
         return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()
             .render(ConfigRenderOptions.concise());
+    }
+
+    /**
+     * Add number of partitions of output objects to job result.
+     */
+    private static void addDataFrameNumPartitions(final List<String> outputObjects, final WrapperJobOutput jobOutput,
+            final NamedObjects namedObjects) {
+
+        if (!outputObjects.isEmpty()) {
+            for (int i = 0; i < outputObjects.size(); i++) {
+                final String key = outputObjects.get(i);
+                final Dataset<Row> df = namedObjects.getDataFrame(key);
+
+                if (df != null) {
+                    final NamedObjectStatistics stat =
+                        new SparkDataObjectStatistic(((Dataset<?>)df).rdd().getNumPartitions());
+                    jobOutput.setNamedObjectStatistic(key, stat);
+                }
+            }
+        }
     }
 
     private List<File> validateInputFiles(final JobEnvironment runtime, final JobserverJobInput jsInput) throws KNIMESparkException {

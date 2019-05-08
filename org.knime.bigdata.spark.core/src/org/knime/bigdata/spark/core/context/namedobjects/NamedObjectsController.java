@@ -41,4 +41,12 @@ public interface NamedObjectsController {
      * @throws KNIMESparkException if the deletion failed
      */
     public void deleteNamedObjects(Set<String> namedObjects) throws KNIMESparkException;
+
+    /**
+     * Returns statistics for given named object or <code>null</code>.
+     *
+     * @param objectName name of the named object
+     * @return statistic for given named object or <code>null</code>
+     */
+    public <T extends NamedObjectStatistics> T getNamedObjectStatistics(final String objectName);
 }

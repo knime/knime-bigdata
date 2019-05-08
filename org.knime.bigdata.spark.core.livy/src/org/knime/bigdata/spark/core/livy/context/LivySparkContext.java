@@ -52,7 +52,7 @@ import org.knime.bigdata.spark.core.context.namedobjects.JobBasedNamedObjectsCon
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectsController;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
-import org.knime.bigdata.spark.core.livy.jobapi.LivyJobOutput;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
@@ -77,7 +77,7 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
 
     private LivyJobController m_jobController;
 
-    private NamedObjectsController m_namedObjectsController;
+    private JobBasedNamedObjectsController m_namedObjectsController;
 
     private LivyClient m_livyClient;
 
@@ -115,13 +115,13 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                     m_remoteFSController = null;
                 }
                 m_contextAttributes = null;
-                m_jobController = null;
                 m_namedObjectsController = null;
+                m_jobController = null;
                 break;
             default: // OPEN
                 ensureRemoteFSConnection();
-                ensureJobController();
                 ensureNamedObjectsController();
+                ensureJobController();
                 break;
         }
     }
@@ -142,10 +142,10 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
     @SuppressWarnings("unchecked")
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
-            final Class<Job<LivyJobOutput>> jobBindingClass = (Class<Job<LivyJobOutput>>)getJobJar().getDescriptor()
-                .getJobBindingClasses().get(SparkContextIDScheme.SPARK_LIVY);
+            final Class<Job<WrapperJobOutput>> jobBindingClass = (Class<Job<WrapperJobOutput>>)getJobJar().getDescriptor()
+                .getWrapperJobClasses().get(SparkContextIDScheme.SPARK_LIVY);
 
-            m_jobController = new LivyJobController(m_livyClient, m_remoteFSController, jobBindingClass);
+            m_jobController = new LivyJobController(m_livyClient, m_remoteFSController, jobBindingClass, m_namedObjectsController);
         }
     }
 

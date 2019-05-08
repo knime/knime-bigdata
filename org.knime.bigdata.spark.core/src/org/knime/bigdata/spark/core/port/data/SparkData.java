@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.core.port.data;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
+import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 
 /**
  * This class represents a data object within Spark. The object is identified by the Spark context
@@ -47,4 +48,8 @@ public interface SparkData {
      */
     public boolean compatible(final SparkData other);
 
+    /**
+     * @return data frame statistics or <code>null</code>
+     */
+    public SparkDataObjectStatistic getStatistics();
 }

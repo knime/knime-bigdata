@@ -8,6 +8,8 @@ import java.util.Set;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark2_1.api.NamedObjects;
 
@@ -19,7 +21,18 @@ import org.knime.bigdata.spark2_1.api.NamedObjects;
 @SparkClass
 public class NamedObjectsImpl implements NamedObjects {
 
+    /**
+     * Singleton instance of this implementation class for use by Spark job binding classes.
+     */
+    static final NamedObjects SINGLETON_INSTANCE = new NamedObjectsImpl();
+
     private final Map<String, Object> namedObjects = new HashMap<>();
+
+    /**
+     * Private constructor for singleton.
+     */
+    private NamedObjectsImpl() {
+    }
 
     /**
      * {@inheritDoc}
@@ -98,5 +111,24 @@ public class NamedObjectsImpl implements NamedObjects {
     @Override
     public synchronized Set<String> getNamedObjects() {
         return new HashSet<>(namedObjects.keySet());
+    }
+
+    static void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {
+        // validate named output objects do not exist
+        for (String namedOutputObject : input.getNamedOutputObjects()) {
+            if (SINGLETON_INSTANCE.validateNamedObject(namedOutputObject)) {
+                throw new KNIMESparkException(
+                    "Spark RDD/DataFrame to create already exists. Please reset all preceding nodes and reexecute.");
+            }
+        }
+    }
+
+    static void ensureNamedInputObjectsExist(final JobInput input) throws KNIMESparkException {
+        for (String namedInputObject : input.getNamedInputObjects()) {
+            if (!SINGLETON_INSTANCE.validateNamedObject(namedInputObject)) {
+                throw new KNIMESparkException(
+                    "Missing input Spark RDD/DataFrame. Please reset all preceding nodes and reexecute.");
+            }
+        }
     }
 }

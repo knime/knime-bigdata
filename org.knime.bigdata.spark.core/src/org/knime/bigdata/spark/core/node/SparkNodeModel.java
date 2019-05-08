@@ -239,10 +239,16 @@ public abstract class SparkNodeModel extends NodeModel {
             exec.setMessage("Starting node execution...");
             final PortObject[] portObjects = executeInternal(inData, exec);
             exec.setMessage("Node execution finished.");
-            if (m_automaticHandling && portObjects != null && portObjects.length > 0) {
+            if (portObjects != null && portObjects.length > 0) {
                 for (final PortObject portObject : portObjects) {
                     if (portObject instanceof SparkDataPortObject) {
-                        addSparkDataObject(((SparkDataPortObject)portObject).getData());
+                        final SparkData sparkData = ((SparkDataPortObject)portObject).getData();
+
+                        if (m_automaticHandling) {
+                            addSparkDataObject(sparkData);
+                        }
+                        assert sparkData
+                            .getStatistics() != null : "Missing named object statistics for Spark data object found";
                     }
                 }
             }

@@ -59,7 +59,7 @@ public class JobJarDescriptor {
 
     private final String m_sparkVersion;
 
-    final Map<SparkContextIDScheme, Class<?>> m_jobBindingClasses;
+    final Map<SparkContextIDScheme, Class<?>> m_wrapperJobClasses;
 
     /**
      * A set of provider IDs that have contributed
@@ -74,15 +74,15 @@ public class JobJarDescriptor {
      * @param pluginVersion
      * @param sparkVersion
      * @param hash
-     * @param jobBindingClasses
+     * @param wrapperJobClasses
      * @param providerIDs
      */
     public JobJarDescriptor(final String pluginVersion, final String sparkVersion, final String hash,
-        final Map<SparkContextIDScheme, Class<?>> jobBindingClasses, final Set<String> providerIDs) {
+        final Map<SparkContextIDScheme, Class<?>> wrapperJobClasses, final Set<String> providerIDs) {
         m_pluginVersion = pluginVersion;
         m_sparkVersion = sparkVersion;
         m_hash = hash;
-        m_jobBindingClasses = jobBindingClasses;
+        m_wrapperJobClasses = wrapperJobClasses;
         m_providerIDs = providerIDs;
     }
 
@@ -117,10 +117,10 @@ public class JobJarDescriptor {
     }
 
     /**
-     * @return a with the registered job binding class per Spark context ID scheme.
+     * @return a map with the registered wrapper job classes for each Spark context ID scheme.
      */
-    public Map<SparkContextIDScheme, Class<?>> getJobBindingClasses() {
-        return m_jobBindingClasses;
+    public Map<SparkContextIDScheme, Class<?>> getWrapperJobClasses() {
+        return m_wrapperJobClasses;
     }
 
     /**

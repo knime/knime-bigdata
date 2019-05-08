@@ -1,5 +1,7 @@
-<strong>Connection settings</strong>
+<strong>Spark Jobserver Context</strong>
 <hr/>
+<strong>Spark version:</strong>&nbsp;&nbsp;<tt>${spark_version}</tt>
+<br/>
 <strong>URL:</strong>&nbsp;&nbsp;<tt>${url}</tt>
 <br/>
 <strong>Use authentication:</strong>&nbsp;&nbsp;<tt>${use_authentication}</tt>
@@ -8,11 +10,11 @@
 <br/>
 <strong>Job check frequency (seconds):</strong>&nbsp;&nbsp;<tt>${job_check_frequency}</tt>
 <br/>
+<strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
+<br/>
 <br/>
 <strong>Context settings</strong>
 <hr/>
-<strong>Spark version:</strong>&nbsp;&nbsp;<tt>${spark_version}</tt>
-<br/>
 <strong>Context name:</strong>&nbsp;&nbsp;<tt>${context_name}</tt>
 <br/><strong>Delete DataFrames/RDDs on dispose:</strong>&nbsp;&nbsp;<tt>${delete_data_on_dispose}</tt>
 <br/>
@@ -23,5 +25,3 @@
 <pre>
 ${custom_settings}
 </pre>
-<strong>Context state: </strong>&nbsp;&nbsp;<tt>${context_state}</tt>
-<hr/>

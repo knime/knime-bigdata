@@ -81,7 +81,7 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
 
     private JobserverJobController m_jobController;
 
-    private NamedObjectsController m_namedObjectsController;
+    private JobBasedNamedObjectsController m_namedObjectsController;
 
 
     /**
@@ -105,14 +105,14 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
             case CONFIGURED:
                 m_restClient = null;
                 m_jobserverAppName = null;
-                m_jobController = null;
                 m_namedObjectsController = null;
+                m_jobController = null;
                 break;
             default: // OPEN
                 ensureRestClient();
                 ensureJobserverAppname();
-                ensureJobController();
                 ensureNamedObjectsController();
+                ensureJobController();
                 break;
         }
     }
@@ -125,7 +125,7 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
 
     private void ensureJobController() throws KNIMESparkException {
         if (m_jobController == null) {
-        	final Class<?> jobBindingClass = getJobJar().getDescriptor().getJobBindingClasses().get(SparkContextIDScheme.SPARK_JOBSERVER);
+        	final Class<?> jobBindingClass = getJobJar().getDescriptor().getWrapperJobClasses().get(SparkContextIDScheme.SPARK_JOBSERVER);
         	if (jobBindingClass == null) {
         		throw new KNIMESparkException("Missing Spark job binding class for Spark Jobserver.");
         	}
@@ -134,7 +134,8 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
                 getConfiguration(),
                 m_jobserverAppName,
                 m_restClient,
-                jobBindingClass.getName());
+                jobBindingClass.getName(),
+                m_namedObjectsController);
         }
     }
 
