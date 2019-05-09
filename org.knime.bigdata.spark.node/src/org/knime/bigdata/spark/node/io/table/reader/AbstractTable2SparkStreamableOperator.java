@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
+import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.context.SparkContextPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
@@ -78,11 +79,20 @@ public abstract class AbstractTable2SparkStreamableOperator extends StreamableOp
         // and Table2SparkNodeModel#executeInternal()
         final DataTableSpec outputSpec = Table2SparkNodeModel.createSparkDataTableSpec(rowInput.getDataTableSpec());
 
-        final SparkDataPortObject outPortObject = new SparkDataPortObject(
-            new SparkDataTable(contextPortObject.getContextID(), getNamedOutputObjectId(), outputSpec));
+        final SparkDataPortObject outPortObject =
+            new SparkDataPortObject(createSparkDataTable(contextPortObject.getContextID(), outputSpec));
 
         ((PortObjectOutput)outputs[0]).setPortObject(outPortObject);
     }
+
+    /**
+     * Creates the output {@link SparkDataTable} instance.
+     *
+     * @param contextID The ID of context the Spark data table lives in.
+     * @param spec The {@link DataTableSpec} of the Spark data table.
+     * @return Output {@link SparkDataTable} instance.
+     */
+    protected abstract SparkDataTable createSparkDataTable(final SparkContextID contextID, final DataTableSpec spec);
 
     /**
      * Used by {@link #runWithRowInput(RowInput, ExecutionContext)} to obtain a queue for writing rows.

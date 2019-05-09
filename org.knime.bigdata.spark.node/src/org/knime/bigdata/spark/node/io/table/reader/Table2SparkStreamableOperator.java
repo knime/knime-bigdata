@@ -33,6 +33,7 @@ import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.EmptyJobOutput;
 import org.knime.bigdata.spark.core.job.JobWithFilesRunFactory;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
+import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
@@ -117,5 +118,10 @@ public class Table2SparkStreamableOperator extends AbstractTable2SparkStreamable
         }
 
         return new FileSerializingQueue(m_tmpFile, rowInput.getDataTableSpec().getNumColumns(), noOfRows);
+    }
+
+    @Override
+    protected SparkDataTable createSparkDataTable(final SparkContextID contextID, final DataTableSpec spec) {
+        return new SparkDataTable(contextID, getNamedOutputObjectId(), spec);
     }
 }

@@ -114,8 +114,8 @@ public class Table2SparkNodeModel extends SparkSourceNodeModel {
         streamableOp.runWithRowInput(new DataTableRowInput(inputTable), exec);
 
         // if you change the spec behavior, you also need to change the behavior in the streamable operator implementation and in configureInternal()
-        return new PortObject[]{new SparkDataPortObject(new SparkDataTable(contextID,
-            streamableOp.getNamedOutputObjectId(), createSparkDataTableSpec(inputTable.getDataTableSpec())))};
+        return new PortObject[]{new SparkDataPortObject(
+            streamableOp.createSparkDataTable(contextID, createSparkDataTableSpec(inputTable.getDataTableSpec())))};
     }
 
 
