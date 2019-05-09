@@ -93,9 +93,9 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         if (!outputObjects.isEmpty()) {
             for (int i = 0; i < outputObjects.size(); i++) {
                 final String key = outputObjects.get(i);
-                final JavaRDD<Row> rdd = namedObjects.getJavaRdd(key);
 
-                if (rdd != null) {
+                if (namedObjects.validateNamedObject(key)) {
+                    final JavaRDD<Row> rdd = namedObjects.getJavaRdd(key);
                     final NamedObjectStatistics stat = new SparkDataObjectStatistic(rdd.partitions().size());
                     jobOutput.setNamedObjectStatistic(key, stat);
                 }

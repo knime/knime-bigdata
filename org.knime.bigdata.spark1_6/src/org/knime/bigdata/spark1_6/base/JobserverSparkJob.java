@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.spark.SparkContext;
-import org.apache.spark.rdd.RDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
-import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark1_6.api.NamedObjects;
@@ -93,9 +93,9 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         if (!outputObjects.isEmpty()) {
             for (int i = 0; i < outputObjects.size(); i++) {
                 final String key = outputObjects.get(i);
-                final RDD<Row> rdd = namedObjects.getRdd(key);
 
-                if (rdd != null) {
+                if (namedObjects.validateNamedObject(key)) {
+                    final JavaRDD<Row> rdd = namedObjects.getJavaRdd(key);
                     final NamedObjectStatistics stat = new SparkDataObjectStatistic(rdd.getNumPartitions());
                     jobOutput.setNamedObjectStatistic(key, stat);
                 }
