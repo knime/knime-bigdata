@@ -43,7 +43,8 @@ public interface NamedObjectsController {
     public void deleteNamedObjects(Set<String> namedObjects) throws KNIMESparkException;
 
     /**
-     * Returns statistics for given named object or <code>null</code>.
+     * Returns statistics for given named object or <code>null</code>, if the object name is unknown or the Spark
+     * context is not open.
      *
      * @param objectName name of the named object
      * @return statistic for given named object or <code>null</code>

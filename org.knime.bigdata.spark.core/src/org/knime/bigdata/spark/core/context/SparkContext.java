@@ -485,7 +485,12 @@ public abstract class SparkContext<T extends SparkContextConfig> implements JobC
 
     @Override
     public final <NOS extends NamedObjectStatistics> NOS getNamedObjectStatistics(final String namedObject) {
-        return getNamedObjectsController().getNamedObjectStatistics(namedObject);
+        final NamedObjectsController namedObjectsController = getNamedObjectsController();
+        if (namedObjectsController != null) {
+            return namedObjectsController.getNamedObjectStatistics(namedObject);
+        } else {
+            return null;
+        }
     }
 
     /**
