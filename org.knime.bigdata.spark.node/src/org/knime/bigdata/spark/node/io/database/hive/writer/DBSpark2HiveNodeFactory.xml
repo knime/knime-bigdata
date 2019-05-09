@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Other" icon="icon.png">
+	<name>Spark to Hive (Labs)</name>
+	<shortDescription>Writes an incoming Spark DataFrame/RDD into a Hive table.</shortDescription>
+	<fullDescription>
+		<intro>
+			Writes an incoming Spark DataFrame/RDD into a Hive table.
+		</intro>
+		<option name="Schema"> The optional database schema name. </option>
+		<option name="Table">The name of the table to create.</option>
+		<option name="Drop existing table">Select this option to drop an existing table.</option>
+		<option name="File Format">Choose the file format in which to store the table. Default is ORC.</option>
+		<option name="Compression">Choose the compression codec for the file format.</option>
+	</fullDescription>
+
+	<ports>
+		<!-- inPort index="0" name="Hive query">Hive query</inPort -->
+		<inPort index="0" name="DB Connection">DB Connection</inPort>
+		<inPort index="1" name="Spark DataFrame/RDD">Spark DataFrame/RDD</inPort>
+		<outPort index="0" name="Hive table">DB data referencing the written Hive table</outPort>
+	</ports>
+</knimeNode>
