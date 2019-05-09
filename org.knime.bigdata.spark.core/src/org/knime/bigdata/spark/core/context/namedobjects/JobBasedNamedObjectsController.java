@@ -80,8 +80,10 @@ public class JobBasedNamedObjectsController implements NamedObjectsController {
                 .createRun(NamedObjectsJobInput.createDeleteOperation(namedObjects))
                 .run(m_sparkContextID, null);
 
-            for (final String namedObject : namedObjects) {
-                m_statistics.remove(namedObject);
+            synchronized (m_statistics) {
+                for (final String namedObject : namedObjects) {
+                    m_statistics.remove(namedObject);
+                }
             }
         } catch (CanceledExecutionException e) {
             // impossible with null execution context
@@ -94,12 +96,16 @@ public class JobBasedNamedObjectsController implements NamedObjectsController {
      * @param statistic statistic of named object
      */
     public void addNamedObjectStatistics(final String objectName, final NamedObjectStatistics statistic) {
-        m_statistics.put(objectName, statistic);
+        synchronized (m_statistics) {
+            m_statistics.put(objectName, statistic);
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends NamedObjectStatistics> T getNamedObjectStatistics(final String objectName) {
-        return (T) m_statistics.get(objectName);
+        synchronized (m_statistics) {
+            return (T) m_statistics.get(objectName);
+        }
     }
 }

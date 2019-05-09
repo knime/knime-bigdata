@@ -44,8 +44,10 @@ class LocalSparkNamedObjectsController implements NamedObjectsController {
 	@Override
     public void deleteNamedObjects(Set<String> namedObjects) throws KNIMESparkException {
         m_wrapper.deleteNamedObjects(namedObjects);
-        for (final String namedObject : namedObjects) {
-            m_statistics.remove(namedObject);
+        synchronized (m_statistics) {
+            for (final String namedObject : namedObjects) {
+                m_statistics.remove(namedObject);
+            }
         }
     }
 
@@ -55,12 +57,16 @@ class LocalSparkNamedObjectsController implements NamedObjectsController {
      * @param statistic statistic of named object
      */
     public void addNamedObjectStatistics(final String objectName, final NamedObjectStatistics statistic) {
-        m_statistics.put(objectName, statistic);
+        synchronized (m_statistics) {
+            m_statistics.put(objectName, statistic);
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends NamedObjectStatistics> T getNamedObjectStatistics(final String objectName) {
-        return (T) m_statistics.get(objectName);
+        synchronized (m_statistics) {
+            return (T) m_statistics.get(objectName);
+        }
     }
 }
