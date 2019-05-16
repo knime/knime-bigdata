@@ -87,14 +87,14 @@ public final class TableToSparkNodeMigrationRule extends NodeMigrationRule {
 			throws MigrationException {
 
 		final MigrationSubWorkflowBuilder builder = getSubWorkflowBuilder(migrationNode);
-		MigrationNode parquetWriter = builder.addNode(ParquetWriterNodeFactory.class, 200, 150).getMigrationNode();
+		final MigrationNode parquetWriter = builder.addNode(ParquetWriterNodeFactory.class, 200, 150).getMigrationNode();
 		NodeSettingsWO settings = getNewNodeModelSettings(parquetWriter);
 		settings.addString("filename", "/Users/knime/t2s.parquet");
 		settings.addBoolean("overwrite", true);
 
 		builder.addNode(LocalEnvironmentCreatorNodeFactory.class, 350, 150);
 
-		MigrationNode parquet2Spark = builder.addNode(Parquet2SparkNodeFactory2.class, 500, 300).getMigrationNode();
+		final MigrationNode parquet2Spark = builder.addNode(Parquet2SparkNodeFactory2.class, 500, 300).getMigrationNode();
 		settings = getNewNodeModelSettings(parquet2Spark);
 		settings.addString("inputPath", "/Users/knime/t2s.parquet");
 		builder.connect(1, 0, 3, 0);
@@ -105,6 +105,11 @@ public final class TableToSparkNodeMigrationRule extends NodeMigrationRule {
 		associateOriginalInputPortWithNew(migrationNode, 1, 0);
 		associateOriginalInputPortWithNew(migrationNode, 2, 1);
 		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
+	}
+	
+	@Override
+	public String getMigrationType() {
+		return "Performance optimization";
 	}
 
 }

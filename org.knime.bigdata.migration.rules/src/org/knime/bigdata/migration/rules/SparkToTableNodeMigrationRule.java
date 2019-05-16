@@ -47,7 +47,6 @@ package org.knime.bigdata.migration.rules;
  */
 
 import static java.util.Arrays.asList;
-import static org.knime.node.workflow.migration.IndexPair.indexPair;
 
 import org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory;
@@ -56,13 +55,10 @@ import org.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2Pa
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.config.base.ConfigStringEntry;
 import org.knime.node.workflow.migration.MigrationException;
 import org.knime.node.workflow.migration.MigrationNodeMatchResult;
 import org.knime.node.workflow.migration.NodeMigrationAction;
 import org.knime.node.workflow.migration.NodeMigrationRule;
-import org.knime.node.workflow.migration.NodeSettingsMigrationManager;
-import org.knime.node.workflow.migration.model.BuiltMigrationSubNode;
 import org.knime.node.workflow.migration.model.MigrationNode;
 import org.knime.node.workflow.migration.model.MigrationSubWorkflowBuilder;
 
@@ -94,14 +90,14 @@ public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 		final MigrationSubWorkflowBuilder builder = getSubWorkflowBuilder(migrationNode);
 		builder.addNode(LocalEnvironmentCreatorNodeFactory.class, 200, 150);
 
-		MigrationNode spark2Parquet = builder.addNode(Spark2ParquetNodeFactory.class, 350, 300).getMigrationNode();
+		final MigrationNode spark2Parquet = builder.addNode(Spark2ParquetNodeFactory.class, 350, 300).getMigrationNode();
 		NodeSettingsWO settings = getNewNodeModelSettings(spark2Parquet);
 		settings.addString("outputDirectory", "/Users/knime");
 		settings.addString("outputName", "s2t.parquet");
 		settings.addString("saveMode", "Overwrite");
 		builder.connect(1, 2, 2, 1);
 
-		MigrationNode parquetReader = builder.addNode(ParquetReaderNodeFactory.class, 500, 300).getMigrationNode();
+		final MigrationNode parquetReader = builder.addNode(ParquetReaderNodeFactory.class, 500, 300).getMigrationNode();
 		builder.connect(2, 0, 3, 0);
 		settings = getNewNodeModelSettings(parquetReader);
 		settings.addString("filename", "/Users/knime/s2t.parquet");
@@ -112,4 +108,9 @@ public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
 	}
 
+	@Override
+	public String getMigrationType() {
+		return "Performance optimization";
+	}
+	
 }
