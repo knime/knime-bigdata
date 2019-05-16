@@ -140,4 +140,9 @@ public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
 	}
 
+	@Override
+	public String getMigrationType() {
+		return "Performance optimization";
+	}
+	
 }
