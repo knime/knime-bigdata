@@ -48,8 +48,10 @@ package org.knime.bigdata.migration.rules;
 
 import static java.util.Arrays.asList;
 
+import org.knime.bigdata.fileformats.orc.writer.OrcWriterNodeFactory;
 import org.knime.bigdata.fileformats.parquet.writer.ParquetWriterNodeFactory;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory;
+import org.knime.bigdata.spark.node.io.genericdatasource.reader.orc.Orc2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.parquet.Parquet2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import org.knime.core.node.NodeFactory;
@@ -73,6 +75,12 @@ public final class TableToSparkNodeMigrationRule extends NodeMigrationRule {
 			final MigrationNodeMatchResult matchResult) {
 		return Parquet2SparkNodeFactory2.class;
 	}
+
+//	@Override
+//	protected Class<? extends NodeFactory<?>> getReplacementNodeFactoryClass(final MigrationNode migrationNode,
+//			final MigrationNodeMatchResult matchResult) {
+//		return Orc2SparkNodeFactory2.class;
+//	}
 
 	@Override
 	protected MigrationNodeMatchResult match(final MigrationNode migrationNode) {
@@ -106,5 +114,30 @@ public final class TableToSparkNodeMigrationRule extends NodeMigrationRule {
 		associateOriginalInputPortWithNew(migrationNode, 2, 1);
 		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
 	}
+
+//	@Override
+//	protected void migrate(final MigrationNode migrationNode, final MigrationNodeMatchResult matchResult)
+//			throws MigrationException {
+//
+//		final MigrationSubWorkflowBuilder builder = getSubWorkflowBuilder(migrationNode);
+//		MigrationNode orcWriter = builder.addNode(OrcWriterNodeFactory.class, 200, 150).getMigrationNode();
+//		NodeSettingsWO settings = getNewNodeModelSettings(orcWriter);
+//		settings.addString("filename", "/Users/knime/t2s.orc");
+//		settings.addBoolean("overwrite", true);
+//
+//		builder.addNode(LocalEnvironmentCreatorNodeFactory.class, 350, 150);
+//
+//		MigrationNode orc2Spark = builder.addNode(Orc2SparkNodeFactory2.class, 500, 300).getMigrationNode();
+//		settings = getNewNodeModelSettings(orc2Spark);
+//		settings.addString("inputPath", "/Users/knime/t2s.orc");
+//		builder.connect(1, 0, 3, 0);
+//		builder.connect(2, 2, 3, 1);
+//
+//		builder.setMetaports(asList(orcWriter.getNewInputPorts().get(2), orc2Spark.getNewInputPorts().get(2)),
+//				asList(orc2Spark.getNewOutputPorts().get(1)));
+//		associateOriginalInputPortWithNew(migrationNode, 1, 0);
+//		associateOriginalInputPortWithNew(migrationNode, 2, 1);
+//		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
+//	}
 
 }

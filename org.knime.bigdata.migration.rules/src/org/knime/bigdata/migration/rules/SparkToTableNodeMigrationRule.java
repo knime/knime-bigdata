@@ -47,22 +47,20 @@ package org.knime.bigdata.migration.rules;
  */
 
 import static java.util.Arrays.asList;
-import static org.knime.node.workflow.migration.IndexPair.indexPair;
 
+import org.knime.bigdata.fileformats.orc.reader.OrcReaderNodeFactory;
 import org.knime.bigdata.fileformats.parquet.reader.ParquetReaderNodeFactory;
+import org.knime.bigdata.fileformats.orc.reader.OrcReaderNodeFactory;
 import org.knime.bigdata.spark.local.node.create.LocalEnvironmentCreatorNodeFactory;
-//import org.knime.bigdata.filefo
+import org.knime.bigdata.spark.node.io.genericdatasource.writer.orc.Spark2OrcNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.writer.parquet.Spark2ParquetNodeFactory;
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.config.base.ConfigStringEntry;
 import org.knime.node.workflow.migration.MigrationException;
 import org.knime.node.workflow.migration.MigrationNodeMatchResult;
 import org.knime.node.workflow.migration.NodeMigrationAction;
 import org.knime.node.workflow.migration.NodeMigrationRule;
-import org.knime.node.workflow.migration.NodeSettingsMigrationManager;
-import org.knime.node.workflow.migration.model.BuiltMigrationSubNode;
 import org.knime.node.workflow.migration.model.MigrationNode;
 import org.knime.node.workflow.migration.model.MigrationSubWorkflowBuilder;
 
@@ -73,10 +71,16 @@ import org.knime.node.workflow.migration.model.MigrationSubWorkflowBuilder;
  */
 public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 
+//	@Override
+//	protected Class<? extends NodeFactory<?>> getReplacementNodeFactoryClass(final MigrationNode migrationNode,
+//			final MigrationNodeMatchResult matchResult) {
+//		return Spark2ParquetNodeFactory.class;
+//	}
+
 	@Override
 	protected Class<? extends NodeFactory<?>> getReplacementNodeFactoryClass(final MigrationNode migrationNode,
 			final MigrationNodeMatchResult matchResult) {
-		return Spark2ParquetNodeFactory.class;
+		return Spark2OrcNodeFactory.class;
 	}
 
 	@Override
@@ -87,6 +91,31 @@ public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 						: null);
 	}
 
+//	@Override
+//	protected void migrate(final MigrationNode migrationNode, final MigrationNodeMatchResult matchResult)
+//			throws MigrationException {
+//
+//		final MigrationSubWorkflowBuilder builder = getSubWorkflowBuilder(migrationNode);
+//		builder.addNode(LocalEnvironmentCreatorNodeFactory.class, 200, 150);
+//
+//		MigrationNode spark2Parquet = builder.addNode(Spark2ParquetNodeFactory.class, 350, 300).getMigrationNode();
+//		NodeSettingsWO settings = getNewNodeModelSettings(spark2Parquet);
+//		settings.addString("outputDirectory", "/Users/knime");
+//		settings.addString("outputName", "s2t.parquet");
+//		settings.addString("saveMode", "Overwrite");
+//		builder.connect(1, 2, 2, 1);
+//
+//		MigrationNode parquetReader = builder.addNode(ParquetReaderNodeFactory.class, 500, 300).getMigrationNode();
+//		builder.connect(2, 0, 3, 0);
+//		settings = getNewNodeModelSettings(parquetReader);
+//		settings.addString("filename", "/Users/knime/s2t.parquet");
+//
+//		builder.setMetaports(asList(spark2Parquet.getNewInputPorts().get(2)),
+//				asList(parquetReader.getNewOutputPorts().get(1)));
+//		associateOriginalInputPortWithNew(migrationNode, 1, 0);
+//		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
+//	}
+
 	@Override
 	protected void migrate(final MigrationNode migrationNode, final MigrationNodeMatchResult matchResult)
 			throws MigrationException {
@@ -94,20 +123,19 @@ public final class SparkToTableNodeMigrationRule extends NodeMigrationRule {
 		final MigrationSubWorkflowBuilder builder = getSubWorkflowBuilder(migrationNode);
 		builder.addNode(LocalEnvironmentCreatorNodeFactory.class, 200, 150);
 
-		MigrationNode spark2Parquet = builder.addNode(Spark2ParquetNodeFactory.class, 350, 300).getMigrationNode();
-		NodeSettingsWO settings = getNewNodeModelSettings(spark2Parquet);
+		MigrationNode spark2Orc = builder.addNode(Spark2OrcNodeFactory.class, 350, 300).getMigrationNode();
+		NodeSettingsWO settings = getNewNodeModelSettings(spark2Orc);
 		settings.addString("outputDirectory", "/Users/knime");
-		settings.addString("outputName", "s2t.parquet");
+		settings.addString("outputName", "s2t.orc");
 		settings.addString("saveMode", "Overwrite");
 		builder.connect(1, 2, 2, 1);
 
-		MigrationNode parquetReader = builder.addNode(ParquetReaderNodeFactory.class, 500, 300).getMigrationNode();
+		MigrationNode orcReader = builder.addNode(OrcReaderNodeFactory.class, 500, 300).getMigrationNode();
 		builder.connect(2, 0, 3, 0);
-		settings = getNewNodeModelSettings(parquetReader);
-		settings.addString("filename", "/Users/knime/s2t.parquet");
+		settings = getNewNodeModelSettings(orcReader);
+		settings.addString("filename", "/Users/knime/s2t.orc");
 
-		builder.setMetaports(asList(spark2Parquet.getNewInputPorts().get(2)),
-				asList(parquetReader.getNewOutputPorts().get(1)));
+		builder.setMetaports(asList(spark2Orc.getNewInputPorts().get(2)), asList(orcReader.getNewOutputPorts().get(1)));
 		associateOriginalInputPortWithNew(migrationNode, 1, 0);
 		associateOriginalOutputPortWithNew(migrationNode, 1, 0);
 	}

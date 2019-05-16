@@ -9,5 +9,6 @@ Require-Bundle: org.knime.database.node.workflow.migration;bundle-version="3.8.0
  org.knime.bigdata.fileformats;bundle-version="[3.8.0,4.0.0)",
  org.knime.bigdata.spark.node;bundle-version="2.5.0",
  org.knime.bigdata.spark.core;bundle-version="2.5.0",
+ org.apache.orc.core;bundle-version="[1.4.1,2.0.0)",
  org.knime.bigdata.spark.local;bundle-version="2.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
