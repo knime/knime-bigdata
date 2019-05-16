@@ -6,7 +6,8 @@ Bundle-Version: 2.5.0.qualifier
 Bundle-ClassPath: knime.jar,
   libs/spark-hive-thriftserver_2.11-2.4.0.jar
 Bundle-Activator: org.knime.bigdata.spark.local.SparkLocalPlugin
-Export-Package: org.knime.bigdata.spark.local.testing
+Export-Package: org.knime.bigdata.spark.local.testing,
+  org.knime.bigdata.spark.local.node.create
 Require-Bundle: org.knime.bigdata.spark.core;bundle-version="[2.5.0,2.6.0)",
   org.knime.bigdata.spark.node;bundle-version="[2.5.0,2.6.0)",
   org.knime.bigdata.spark2_4;bundle-version="[2.5.0,2.6.0)",

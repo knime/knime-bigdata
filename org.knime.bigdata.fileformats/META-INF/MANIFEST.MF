@@ -23,3 +23,5 @@ Require-Bundle: org.knime.workbench.core;bundle-version="[3.6.0,4.0.0)",
   org.knime.database.nodes
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Export-Package: org.knime.bigdata.fileformats.parquet.reader,
+ org.knime.bigdata.fileformats.parquet.writer

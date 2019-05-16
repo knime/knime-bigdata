@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   
+   <extension point="org.knime.database.node.workflow.migration.NodeMigrationRule">
+      <Rule class="org.knime.bigdata.migration.rules.SparkToTableNodeMigrationRule"/>
+      <Rule class="org.knime.bigdata.migration.rules.TableToSparkNodeMigrationRule"/>
+   </extension>
+</plugin>
