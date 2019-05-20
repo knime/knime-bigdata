@@ -35,6 +35,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkUtil;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
+import org.knime.core.data.NominalValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -49,15 +50,14 @@ import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 /**
  * Settings class that contains commonly used settings required to learn a Spark MLlib model such as
  * class column and feature columns. It also provides helper method to be used in the NodeModel and NodeDialog.
+ *
  * @author Tobias Koetter, KNIME.com
  * @author Ole Ostergaard, KNIME.com
  */
 public class MLlibNodeSettings {
     private final SettingsModelString m_classColModel = new SettingsModelString("classColumn", null);
 
-    @SuppressWarnings("unchecked")
-    private final SettingsModelColumnFilter2 m_featureColsModel =
-            new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
+    private final SettingsModelColumnFilter2 m_featureColsModel;
 
     private boolean m_requiresClassCol;
 
@@ -66,7 +66,22 @@ public class MLlibNodeSettings {
      *
      */
     public MLlibNodeSettings(final boolean requiresClassCol) {
+        this(requiresClassCol, false);
+    }
+
+    /**
+     * @param requiresClassCol <code>true</code> if the class column name is mandatory
+     * @param allowNominalFeatures <code>true</code> if nominal features should be allowed (together with numeric)
+     *
+     */
+    public MLlibNodeSettings(final boolean requiresClassCol, final boolean allowNominalFeatures) {
         m_requiresClassCol = requiresClassCol;
+        if (allowNominalFeatures) {
+            m_featureColsModel =
+                new SettingsModelColumnFilter2("featureColumns", DoubleValue.class, NominalValue.class);
+        } else {
+            m_featureColsModel = new SettingsModelColumnFilter2("featureColumns", DoubleValue.class);
+        }
     }
 
     /**

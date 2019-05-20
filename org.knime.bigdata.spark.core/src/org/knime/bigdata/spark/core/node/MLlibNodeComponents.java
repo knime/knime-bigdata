@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.node;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
+import org.knime.core.data.NominalValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -46,14 +47,29 @@ public class MLlibNodeComponents<T extends MLlibNodeSettings> {
      * to prevent NullPointerExceptions in loadSettingsFrom method due to change listener and missing table spec.*/
     private DialogComponent m_featureColsComponent;
 
+
     /**
      * @param nodeSettings the extended {@link MLlibNodeSettings}
      */
     @SuppressWarnings("unchecked")
     public MLlibNodeComponents(final T nodeSettings) {
+        this(nodeSettings, false);
+    }
+
+
+    /**
+     * @param nodeSettings the extended {@link MLlibNodeSettings}
+     */
+    @SuppressWarnings("unchecked")
+    public MLlibNodeComponents(final T nodeSettings, final boolean requireNominalTargetCol) {
         m_nodeSettings = nodeSettings;
-        m_classColComponent = new DialogComponentColumnNameSelection(m_nodeSettings.getClassColModel(),
-            "Class column ", 0, DoubleValue.class);
+        if (requireNominalTargetCol) {
+            m_classColComponent = new DialogComponentColumnNameSelection(m_nodeSettings.getClassColModel(),
+                "Class column ", 0, NominalValue.class);
+        } else {
+            m_classColComponent = new DialogComponentColumnNameSelection(m_nodeSettings.getClassColModel(),
+                "Class column ", 0, DoubleValue.class);
+        }
     }
 
     /**

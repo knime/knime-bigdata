@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -37,17 +37,24 @@ import org.knime.core.node.port.PortObjectSpec;
 
 /**
  *
- * @author koetter
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
+public class DecisionTreeNodeDialog extends NodeDialogPane {
 
-    private final DecisionTreeSettings m_settings = new DecisionTreeSettings();
-    private final DecisionTreeComponents<DecisionTreeSettings> m_components = new DecisionTreeComponents<>(m_settings);
+    private final DecisionTreeLearnerMode m_mode;
+
+    private final DecisionTreeSettings m_settings;
+
+    private final DecisionTreeComponents<DecisionTreeSettings> m_components;
 
     /**
-     *
+     * @param mode Whether this is a node dialog for the (deprecated) MLlib learner, or the new ML learner nodes
      */
-    public MLlibDecisionTreeNodeDialog() {
+    public DecisionTreeNodeDialog(final DecisionTreeLearnerMode mode) {
+        m_mode = mode;
+        m_settings = new DecisionTreeSettings(mode);
+        m_components = new DecisionTreeComponents<>(mode, m_settings);
+
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.NONE;
@@ -57,10 +64,22 @@ public class MLlibDecisionTreeNodeDialog extends NodeDialogPane {
         panel.add(m_components.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
         gbc.gridx++;
         panel.add(m_components.getMaxDepthComponent().getComponentPanel(), gbc);
-        gbc.gridx++;
-        panel.add(m_components.getIsClassificationComponent().getComponentPanel(), gbc);
-        gbc.gridx++;
-        panel.add(m_components.getQualityMeasureComponent().getComponentPanel(), gbc);
+
+        if (m_mode == DecisionTreeLearnerMode.DEPRECATED) {
+            gbc.gridx++;
+            panel.add(m_components.getIsClassificationComponent().getComponentPanel(), gbc);
+        }
+
+        if (m_mode == DecisionTreeLearnerMode.DEPRECATED || m_mode == DecisionTreeLearnerMode.CLASSIFICATION) {
+            gbc.gridx++;
+            panel.add(m_components.getQualityMeasureComponent().getComponentPanel(), gbc);
+        }
+
+        if (m_mode != DecisionTreeLearnerMode.DEPRECATED) {
+            gbc.gridx++;
+            panel.add(m_components.getMinRowsPerChildComponent().getComponentPanel(), gbc);
+        }
+
         gbc.gridx++;
         gbc.weightx = 1;
         gbc.weighty = 0;

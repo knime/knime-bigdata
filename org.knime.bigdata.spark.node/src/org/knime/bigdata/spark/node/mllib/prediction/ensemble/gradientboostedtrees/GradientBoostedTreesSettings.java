@@ -23,7 +23,8 @@ package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtr
 import org.knime.bigdata.spark.core.job.util.EnumContainer;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -50,6 +51,10 @@ public class GradientBoostedTreesSettings extends DecisionTreeSettings {
 
     private final SettingsModel[] m_models =  new SettingsModel[] {m_noOfIterations, m_lossFunction, m_learningRate};
 
+
+    public GradientBoostedTreesSettings() {
+        super(DecisionTreeLearnerMode.DEPRECATED);
+    }
 
     /**
      * {@inheritDoc}

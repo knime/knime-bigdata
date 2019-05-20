@@ -18,7 +18,7 @@
  * History
  *   Created on 12.02.2015 by koetter
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -29,13 +29,12 @@ import org.knime.core.node.NodeDialogPane;
  *
  * @author koetter
  */
-@Deprecated
-public class MLlibDecisionTreeNodeFactory extends DefaultSparkNodeFactory<MLlibDecisionTreeNodeModel> {
+public class MLDecisionTreeClassificationLearnerNodeFactory extends DefaultSparkNodeFactory<MLDecisionTreeClassificationLearnerNodeModel> {
 
     /**
      * Constructor.
      */
-    public MLlibDecisionTreeNodeFactory() {
+    public MLDecisionTreeClassificationLearnerNodeFactory() {
         super("mining/prediction");
     }
 
@@ -43,8 +42,8 @@ public class MLlibDecisionTreeNodeFactory extends DefaultSparkNodeFactory<MLlibD
      * {@inheritDoc}
      */
     @Override
-    public MLlibDecisionTreeNodeModel createNodeModel() {
-        return new MLlibDecisionTreeNodeModel();
+    public MLDecisionTreeClassificationLearnerNodeModel createNodeModel() {
+        return new MLDecisionTreeClassificationLearnerNodeModel();
     }
 
     /**
@@ -60,7 +59,7 @@ public class MLlibDecisionTreeNodeFactory extends DefaultSparkNodeFactory<MLlibD
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new DecisionTreeNodeDialog(DecisionTreeLearnerMode.DEPRECATED);
+        return new DecisionTreeNodeDialog(DecisionTreeLearnerMode.CLASSIFICATION);
     }
 
 }

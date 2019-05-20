@@ -18,20 +18,23 @@
  * History
  *   Created on May 27, 2019 by bjoern
  */
-package org.knime.bigdata.spark2_4.api;
+package org.knime.bigdata.spark2_4.base;
 
-import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
+import org.knime.bigdata.spark.core.model.DefaultModelHelperProvider;
+import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark2_4.api.Spark_2_4_CompatibilityChecker;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public abstract class Spark_2_4_MLModelHelper extends DefaultMLModelHelper {
+public class Spark_2_4_MLModelHelperProvider extends DefaultModelHelperProvider<MLModel> {
 
     /**
-     * @param modelName the unique name of the model
+     * Constructor.
      */
-    public Spark_2_4_MLModelHelper(final String modelName) {
-        super(modelName);
+    public Spark_2_4_MLModelHelperProvider() {
+        super(Spark_2_4_CompatibilityChecker.INSTANCE, new MLDecisionTreeClassificationModelHelper());
     }
 }

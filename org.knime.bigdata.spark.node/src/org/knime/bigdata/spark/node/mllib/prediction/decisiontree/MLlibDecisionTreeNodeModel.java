@@ -22,12 +22,15 @@ package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  * @author Ole Ostergaard
  */
+@Deprecated
 public class MLlibDecisionTreeNodeModel extends AbstractMLlibTreeNodeModel<DecisionTreeJobInput, DecisionTreeSettings> {
 
     /**Unique model name.*/
@@ -39,8 +42,8 @@ public class MLlibDecisionTreeNodeModel extends AbstractMLlibTreeNodeModel<Decis
      * Constructor.
      */
     public MLlibDecisionTreeNodeModel() {
-        super(MODEL_NAME, JOB_ID, new DecisionTreeSettings());
-     }
+        super(MODEL_NAME, JOB_ID, new DecisionTreeSettings(DecisionTreeLearnerMode.DEPRECATED));
+    }
 
     /**
      * {@inheritDoc}

@@ -16,22 +16,20 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on May 27, 2019 by bjoern
+ *   Created on May 20, 2019 by bjoern
  */
-package org.knime.bigdata.spark2_4.api;
-
-import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public abstract class Spark_2_4_MLModelHelper extends DefaultMLModelHelper {
+public enum DecisionTreeLearnerMode {
 
-    /**
-     * @param modelName the unique name of the model
-     */
-    public Spark_2_4_MLModelHelper(final String modelName) {
-        super(modelName);
-    }
+    DEPRECATED,
+
+    CLASSIFICATION,
+
+    REGRESSION;
+
 }

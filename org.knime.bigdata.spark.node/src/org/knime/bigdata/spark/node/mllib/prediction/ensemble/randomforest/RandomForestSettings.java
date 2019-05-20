@@ -24,7 +24,8 @@ import java.util.Random;
 
 import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeSettings;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -54,6 +55,9 @@ public class RandomForestSettings extends DecisionTreeSettings {
         m_seedModel};
 
 
+    public RandomForestSettings() {
+        super(DecisionTreeLearnerMode.DEPRECATED);
+    }
 
     /**
      * {@inheritDoc}

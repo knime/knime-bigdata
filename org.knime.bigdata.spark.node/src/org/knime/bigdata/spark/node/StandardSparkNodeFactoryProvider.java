@@ -44,6 +44,7 @@ import org.knime.bigdata.spark.node.io.impala.reader.Impala2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleApplyNodeFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleLearnerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
@@ -156,9 +157,6 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibCollaborativeFilteringNodeFactory(),
             new SparkFrequentItemSetNodeFactory(),
             new MLlibNaiveBayesNodeFactory(),
-            new MLlibDecisionTreeNodeFactory(),
-            new MLlibGradientBoostedTreeNodeFactory(),
-            new MLlibRandomForestNodeFactory(),
             new MLlibLogisticRegressionNodeFactory(),
             new MLlibLinearRegressionNodeFactory(),
             new MLlibSVMNodeFactory(),
@@ -215,12 +213,16 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new PySparkInner21NodeFactory(),
             new PySparkInner12NodeFactory(),
             new PySparkSourceNodeFactory(),
+            new MLDecisionTreeClassificationLearnerNodeFactory(),
             // deprecated
             new Avro2SparkNodeFactory(),
             new CSV2SparkNodeFactory(),
             new Database2SparkNodeFactory(),
             new Hive2SparkNodeFactory(),
             new Json2SparkNodeFactory(),
+            new MLlibDecisionTreeNodeFactory(),
+            new MLlibGradientBoostedTreeNodeFactory(),
+            new MLlibRandomForestNodeFactory(),
             new Table2SparkNodeFactory(),
             new Text2SparkNodeFactory(),
             new Orc2SparkNodeFactory(),

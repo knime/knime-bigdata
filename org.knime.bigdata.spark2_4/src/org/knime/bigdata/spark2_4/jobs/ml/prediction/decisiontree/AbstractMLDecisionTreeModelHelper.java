@@ -16,22 +16,24 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on May 27, 2019 by bjoern
+ *   Created on May 30, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_4.api;
+package org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree;
 
-import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
+import org.knime.bigdata.spark2_4.api.Spark_2_4_MLModelHelper;
 
 /**
+ * Abstract super class for decision tree model helpers, that handles metadata loading/saving.
  *
- * @author Bjoern Lohrmann, KNIME GmbH
+ * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class Spark_2_4_MLModelHelper extends DefaultMLModelHelper {
+public abstract class AbstractMLDecisionTreeModelHelper extends Spark_2_4_MLModelHelper {
 
     /**
-     * @param modelName the unique name of the model
+     * @param modelName
      */
-    public Spark_2_4_MLModelHelper(final String modelName) {
+    public AbstractMLDecisionTreeModelHelper(final String modelName) {
         super(modelName);
     }
+
 }

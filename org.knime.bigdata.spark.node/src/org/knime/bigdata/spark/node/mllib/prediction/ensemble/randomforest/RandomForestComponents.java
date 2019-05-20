@@ -22,7 +22,8 @@ package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import org.knime.bigdata.spark.core.job.util.EnumContainer;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeComponents;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeComponents;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -57,7 +58,7 @@ public class RandomForestComponents extends DecisionTreeComponents<RandomForestS
      * @param settings the {@link RandomForestSettings}.
      */
     public RandomForestComponents(final RandomForestSettings settings) {
-        super(settings);
+        super(DecisionTreeLearnerMode.DEPRECATED, settings);
     }
 
     /**

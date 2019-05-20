@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 15, 2016 by oole
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.job.util.EnumContainer;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
@@ -40,25 +40,34 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
  */
 public class DecisionTreeComponents<D extends DecisionTreeSettings> extends MLlibNodeComponents<DecisionTreeSettings> {
 
-    private final DialogComponentNumber m_maxDepthComponent =
-            new DialogComponentNumber(getSettings().getMaxDepthModel(), "Max depth: ", 5, 5);
-    private final DialogComponentNumber m_maxNoOfBinsComponent = new DialogComponentNumber(getSettings().getMaxNoOfBinsModel(),
-        "Max number of bins: ", 5, 5);
-    private final DialogComponentStringSelection m_qualityMeasureComponent = new DialogComponentStringSelection(
-        getSettings().getQualityMeasureModel(), "Quality measure: ",
-        EnumContainer.getNames(InformationGain.gini, InformationGain.entropy));
-    private final DialogComponent m_isClassificationComponent = new DialogComponentBoolean(getSettings().getIsClassificationModel(),
-            "Is classification");
-    private final DialogComponent[] m_components =  new DialogComponent[] {m_maxDepthComponent,
-        m_maxNoOfBinsComponent, m_qualityMeasureComponent, m_isClassificationComponent};
+    private final DecisionTreeLearnerMode m_mode;
 
+    private final DialogComponentNumber m_maxDepthComponent =
+        new DialogComponentNumber(getSettings().getMaxDepthModel(), "Max depth: ", 5, 5);
+
+    private final DialogComponentNumber m_maxNoOfBinsComponent =
+        new DialogComponentNumber(getSettings().getMaxNoOfBinsModel(), "Max number of bins: ", 5, 5);
+
+    private final DialogComponentStringSelection m_qualityMeasureComponent =
+        new DialogComponentStringSelection(getSettings().getQualityMeasureModel(), "Quality measure: ",
+            EnumContainer.getNames(InformationGain.gini, InformationGain.entropy));
+
+    private final DialogComponent m_isClassificationComponent =
+        new DialogComponentBoolean(getSettings().getIsClassificationModel(), "Is classification");
+
+    private final DialogComponent m_minRowsPerChildComponent =
+        new DialogComponentNumber(getSettings().getMinRowsPerNodeChildModel(), "Min rows per child: ", 1, 5);
+
+    private final DialogComponent[] m_components = new DialogComponent[]{m_maxDepthComponent, m_maxNoOfBinsComponent};
 
     /**
      * Constructor.
+     *
      * @param settings The extended {@link DecisionTreeSettings}
      */
-    public DecisionTreeComponents(final D settings) {
-        super(settings);
+    public DecisionTreeComponents(final DecisionTreeLearnerMode mode, final D settings) {
+        super(settings, mode == DecisionTreeLearnerMode.CLASSIFICATION);
+        m_mode = mode;
     }
 
     /**
@@ -68,10 +77,24 @@ public class DecisionTreeComponents<D extends DecisionTreeSettings> extends MLli
      */
     @Override
     public void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec tableSpecs)
-            throws NotConfigurableException {
+        throws NotConfigurableException {
         super.loadSettingsFrom(settings, tableSpecs);
         for (DialogComponent c : m_components) {
-            c.loadSettingsFrom(settings, new DataTableSpec[] {tableSpecs});
+            c.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+        }
+
+        switch (m_mode) {
+            case DEPRECATED:
+                m_isClassificationComponent.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+                m_qualityMeasureComponent.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+                break;
+            case CLASSIFICATION:
+                m_qualityMeasureComponent.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+                m_minRowsPerChildComponent.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+                break;
+            case REGRESSION:
+                m_minRowsPerChildComponent.loadSettingsFrom(settings, new DataTableSpec[]{tableSpecs});
+                break;
         }
     }
 
@@ -81,8 +104,22 @@ public class DecisionTreeComponents<D extends DecisionTreeSettings> extends MLli
     @Override
     public void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         super.saveSettingsTo(settings);
-        for (DialogComponent c: m_components) {
+        for (DialogComponent c : m_components) {
             c.saveSettingsTo(settings);
+        }
+
+        switch (m_mode) {
+            case DEPRECATED:
+                m_isClassificationComponent.saveSettingsTo(settings);
+                m_qualityMeasureComponent.saveSettingsTo(settings);
+                break;
+            case CLASSIFICATION:
+                m_qualityMeasureComponent.saveSettingsTo(settings);
+                m_minRowsPerChildComponent.saveSettingsTo(settings);
+                break;
+            case REGRESSION:
+                m_minRowsPerChildComponent.saveSettingsTo(settings);
+                break;
         }
     }
 
@@ -112,6 +149,13 @@ public class DecisionTreeComponents<D extends DecisionTreeSettings> extends MLli
      */
     public DialogComponent getIsClassificationComponent() {
         return m_isClassificationComponent;
+    }
+
+    /**
+     * @return the minRowsPerChildComponent
+     */
+    public DialogComponent getMinRowsPerChildComponent() {
+        return m_minRowsPerChildComponent;
     }
 
     @SuppressWarnings("unchecked")

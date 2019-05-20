@@ -31,10 +31,13 @@ import org.knime.bigdata.spark.core.job.ModelJobOutput;
 import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObject;
+import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObjectSpec;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.filestore.FileStore;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -65,7 +68,8 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
      */
     protected SparkMLModelLearnerNodeModel(final String modelName, final String jobId,
         final boolean requireTargetCol) {
-        super(modelName, jobId, requireTargetCol);
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelName,
+            jobId, requireTargetCol);
     }
 
     /**
@@ -101,6 +105,25 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
     public SparkMLModelLearnerNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
         final String modelName, final String jobId, final S settings) {
         super(inPortTypes, outPortTypes, modelName, jobId, settings);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     * Expects a {@link SparkDataPortObjectSpec} as first input
+     */
+    @Override
+    protected PortObjectSpec[] configureInternal(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+        if (inSpecs == null || inSpecs.length < 1 || inSpecs[0] == null) {
+            throw new InvalidSettingsException("No input found");
+        }
+        final SparkDataPortObjectSpec spec = (SparkDataPortObjectSpec)inSpecs[0];
+        final DataTableSpec tableSpec = spec.getTableSpec();
+        getSettings().check(tableSpec);
+        return new PortObjectSpec[]{new SparkMLModelPortObjectSpec(getSparkVersion(spec),
+            getModelName(),
+            getSettings().getSettings(tableSpec).getLearningTableSpec(),
+            getSettings().getClassCol())};
     }
 
     /**
