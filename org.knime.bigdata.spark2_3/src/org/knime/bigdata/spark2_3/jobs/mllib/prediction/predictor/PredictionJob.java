@@ -88,7 +88,7 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
         LOGGER.info("Prediction done");
         namedObjects.addDataFrame(outputKey, outputDataset);
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 
 

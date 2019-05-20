@@ -110,6 +110,6 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
 
         LOGGER.info("Writing rdd " + namedObject + " into " + outputPath +  " done.");
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

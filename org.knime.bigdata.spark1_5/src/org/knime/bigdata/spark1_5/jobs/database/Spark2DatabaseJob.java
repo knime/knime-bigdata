@@ -77,6 +77,6 @@ public class Spark2DatabaseJob implements SparkJobWithFiles<Spark2DatabaseJobInp
             throw new KNIMESparkException("Failed to load JDBC data: " + e.getMessage(), e);
         }
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

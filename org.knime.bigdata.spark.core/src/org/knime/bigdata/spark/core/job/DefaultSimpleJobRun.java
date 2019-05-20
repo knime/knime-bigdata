@@ -49,6 +49,6 @@ public class DefaultSimpleJobRun<I extends JobInput> extends DefaultJobRun<I, Em
         throws KNIMESparkException, CanceledExecutionException {
 
         SparkContextManager.getOrCreateSparkContext(contextID).startJobAndWaitForResult(this, exec);
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

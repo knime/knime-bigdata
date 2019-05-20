@@ -91,6 +91,6 @@ public class Table2SparkJob implements SparkJobWithFiles<Table2SparkJobInput, Em
         LOGGER.log(Level.INFO, "Storing data rdd under key: " + outputRdd);
         namedObjects.addJavaRdd(outputRdd, rdd);
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

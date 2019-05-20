@@ -78,7 +78,7 @@ public abstract class PMMLAssignJob<I extends PMMLAssignJobInput> implements Spa
         namedObjects.addDataFrame(namedOutputObject, resultDF);
 
         LOGGER.info("PMML assigment done");
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 
     /**

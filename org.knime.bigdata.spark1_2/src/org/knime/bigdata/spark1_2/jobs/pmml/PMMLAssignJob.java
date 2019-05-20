@@ -74,7 +74,7 @@ public abstract class PMMLAssignJob<I extends PMMLAssignJobInput> implements Spa
         namedObjects.addJavaRdd(namedOutputObject, resultRDD);
 
         LOGGER.info("PMML assigment done");
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 
     /**

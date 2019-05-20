@@ -20,41 +20,12 @@
  */
 package org.knime.bigdata.spark.core.job;
 
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-
 /**
- * This class is a immutable {@link JobOutput} for jobs that do not produce any output.
+ * This class is a {@link JobOutput} for jobs that do not produce any output.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 @SparkClass
 public final class EmptyJobOutput extends JobOutput {
 
-    private static final String IMMUTABLE_ERROR = "EmptyJobOutput is immutable.";
-
-    private static final EmptyJobOutput SINGLETON_INSTANCE = new EmptyJobOutput();
-
-    /**
-     * Zero parameter constructor for serialization purposes.
-     */
-    public EmptyJobOutput() {
-        // empty output, no need to initialize internal map
-    }
-
-    /**
-     * @return the only instance
-     */
-    public static EmptyJobOutput getInstance() {
-        return SINGLETON_INSTANCE;
-    }
-
-    @Override
-    protected <T> T set(final String key, final T value) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    public <T extends JobData> T withSpec(final String namedObjectId, final IntermediateSpec spec) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
 }

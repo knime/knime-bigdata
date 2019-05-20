@@ -92,6 +92,6 @@ public class Table2SparkJob implements SparkJobWithFiles<Table2SparkJobInput, Em
         LOGGER.info("Storing data frame under key: " + outputObjectName);
         namedObjects.addDataFrame(outputObjectName, dataset);
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

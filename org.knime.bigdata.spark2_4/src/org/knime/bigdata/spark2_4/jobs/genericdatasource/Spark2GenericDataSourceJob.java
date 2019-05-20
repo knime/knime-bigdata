@@ -82,6 +82,6 @@ public class Spark2GenericDataSourceJob implements SparkJobWithFiles<Spark2Gener
         writer.save(outputPath);
 
         LOGGER.info("Writing data frame " + namedObject + " into " + outputPath +  " done.");
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

@@ -73,6 +73,6 @@ public class PredictionJob implements SparkJobWithFiles<PredictionJobInput, Empt
         LOGGER.log(Level.INFO, "Prediction done");
         namedObjects.addJavaRdd(input.getNamedOutputObjects().get(0), predictedData);
 
-        return EmptyJobOutput.getInstance();
+        return new EmptyJobOutput();
     }
 }

@@ -63,7 +63,7 @@ public class Spark2DatabaseJob implements SparkJobWithFiles<Spark2DatabaseJobInp
                 .jdbc(input.getUrl(), input.getTable(), input.getConnectionProperties());
 
             LOGGER.info("Writing data frame " + namedInputObject + " into JDBC table done.");
-            return EmptyJobOutput.getInstance();
+            return new EmptyJobOutput();
 
         } catch(Exception e) {
             throw new KNIMESparkException("Failed to load JDBC data: " + e.getMessage(), e);
