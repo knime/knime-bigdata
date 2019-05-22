@@ -106,6 +106,7 @@ import org.knime.bigdata.spark.node.util.context.destroy.SparkDestroyContextNode
 import org.knime.bigdata.spark.node.util.rdd.list.SparkListRDDNodeFactory;
 import org.knime.bigdata.spark.node.util.rdd.persist.SparkPersistNodeFactory;
 import org.knime.bigdata.spark.node.util.rdd.unpersist.SparkUnpersistNodeFactory;
+import org.knime.bigdata.spark.node.util.repartition.SparkRepartitionNodeFactory;
 
 import com.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory;
 import com.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory;
@@ -193,6 +194,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLlibCorrelationFilterNodeFactory(),
             new SparkPersistNodeFactory(),
             new SparkUnpersistNodeFactory(),
+            new SparkRepartitionNodeFactory(),
             new SparkDestroyContextNodeFactory(),
             new SparkMissingValueNodeFactory(),
             new SparkMissingValueApplyNodeFactory(),

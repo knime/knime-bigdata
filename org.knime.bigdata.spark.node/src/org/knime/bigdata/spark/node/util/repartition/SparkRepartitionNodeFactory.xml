@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v3.6 http://knime.org/node/v3.6.xsd"
+    type="Other" icon="icon.png">
+    <name>Spark Repartition</name>
+    <shortDescription>Repartitions a Spark DataFrame.</shortDescription>
+    <fullDescription>
+        <intro>
+        	<p>
+        		This node returns a Spark DataFrame with increased or decreased partition count. This id useful to
+				deal with performance issues in the following situations:
+			</p>
+			<p>
+				<ul>
+					<li>An uneven distribution of rows over partitions, which causes "straggler" tasks that delay the completion of a stage. A
+					 straggler task is a task that takes much longer than other tasks of the same stage.</li>
+					<li>A too low number of partitions, which prevents Spark from parallelizing computation.</li>
+					<li>A too high number of partitions with very little data in them, which causes unnecessary overhead.</li>
+					<li>Spark executors that crash or are very slow, because they run out of memory.</li>
+				</ul>
+        	</p>
+			
+			<p>
+				The following guidelines apply when repartitioning a DataFrame:
+			</p>
+			<p>
+				<ul>
+					<li>Before performing computation on a DataFrame (e.g. preprocessing or learning a model), the partition count should
+					be at least a low multiple of the number of available executor cores in the Spark cluster (see option
+					"multiply available executor cores by"). This ensures that Spark can properly parallelize computation. For extremely large
+					data sets it may even make sense to choose a high multiple of the available executor cores, in order to avoid memory problems
+					on the Spark executors during computation.</li>
+					<li>Before writing a DataFrame to storage (HDFS, S3, ...) it is beneficial to aim for a partition count where partitions have a reasonable size
+					e.g. 50M - 100M. This ensures fast writing and reading of the DataFrame.</li>
+                </ul>
+			</p>
+			
+			<b>Notes:</b>
+        	<p>
+        		<ul>
+        			<li>This node shuffles data which might be expensive. See the "Advanced" tab to avoid shuffling if possible.</li>
+					<li>This node requires at least Apache Spark 2.0.</li>
+				</ul>
+        	</p>
+        </intro>
+	
+		<tab name="Settings">
+			<option name="fixed value">
+				Set partition count to a fixed value. Must be greater than zero.
+			</option>
+			<option name="multiply current partitions by">
+				Multiply the current partition count by a factor. Must be greater than zero. 
+			</option>
+			<option name="divide current partitions by">
+				Divide the current partition count by a factor. Must be greater than zero.
+			</option>
+			<option name="multiply available executor cores by">
+				Multiply the number of all available executor cores in the cluster by a given factor.
+				Must be greater than zero.
+			</option>
+		</tab>
+
+		<tab name="Advanced">
+			<option name="avoid shuffling">
+				If option is selected and the partition count decreases, then <a href="http://spark.apache.org/docs/2.4.0/api/java/org/apache/spark/sql/Dataset.html#coalesce-int-">coalesce</a> will be used to avoid shuffling.
+				If option is not selected or partition count increases, <a href="http://spark.apache.org/docs/2.4.0/api/java/org/apache/spark/sql/Dataset.html#repartition-int-">repartition</a> with shuffling will be used.
+			</option>
+		</tab>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark data table to repartition">Spark DataFrame to repartition.</inPort>
+        <outPort index="0" name="Repartitioned Spark data table">Repartitioned Spark DataFrame.</outPort>
+    </ports>
+</knimeNode>

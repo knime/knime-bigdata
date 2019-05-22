@@ -74,6 +74,7 @@ import org.knime.bigdata.spark2_1.jobs.statistics.correlation.CorrelationMatrixJ
 import org.knime.bigdata.spark2_1.jobs.table2spark.Table2SparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.util.CheckJarPresenceJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.util.PersistJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.util.RepartitionJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.util.UnpersistJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.util.UploadJarJobRunFactory;
 
@@ -138,6 +139,7 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new EntropyScorerJobRunFactory(),
             new PersistJobRunFactory(),
             new UnpersistJobRunFactory(),
+            new RepartitionJobRunFactory(),
             new SparkSQLJobRunFactory(),
             new SparkSQLFunctionsJobRunFactory(),
             new CheckJarPresenceJobRunFactory(),
