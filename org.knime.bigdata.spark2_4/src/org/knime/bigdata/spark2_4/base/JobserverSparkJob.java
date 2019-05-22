@@ -2,6 +2,8 @@ package org.knime.bigdata.spark2_4.base;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,8 +14,8 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
-import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
@@ -48,8 +50,7 @@ public class JobserverSparkJob extends KNIMESparkJob {
         WrapperJobOutput toReturn;
 
         try {
-            final JobserverJobInput jsInput = JobserverJobInput.createFromMap(TypesafeConfigSerializationUtils
-                .deserializeFromTypesafeConfig(config, this.getClass().getClassLoader()));
+            final JobserverJobInput jsInput = TypesafeConfigSerializationUtils.deserializeJobserverJobInput(config);
 
             final JobInput input = jsInput.getSparkJobInput();
 
@@ -78,7 +79,7 @@ public class JobserverSparkJob extends KNIMESparkJob {
             toReturn = WrapperJobOutput.failure(new KNIMESparkException(t));
         }
 
-        return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()
+        return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn).root()
             .render(ConfigRenderOptions.concise());
     }
 
@@ -102,15 +103,15 @@ public class JobserverSparkJob extends KNIMESparkJob {
         }
     }
 
-    private List<File> validateInputFiles(final JobEnvironment runtime, final JobserverJobInput jsInput) throws KNIMESparkException {
+    private static List<File> validateInputFiles(final JobEnvironment runtime, final JobserverJobInput jsInput) throws KNIMESparkException {
         List<File> inputFiles = new LinkedList<>();
 
         if (runtime instanceof DataFileCache) {
             final DataFileCache fileCache = (DataFileCache) runtime;
 
-            for (String pathToFile : jsInput.getFiles()) {
+            for (Path pathToFile : jsInput.getFiles()) {
                 try {
-                    File inputFile = fileCache.getDataFile(pathToFile);
+                    File inputFile = fileCache.getDataFile(pathToFile.toString());
 
                     if (inputFile.canRead()) {
                         inputFiles.add(inputFile);
@@ -124,10 +125,9 @@ public class JobserverSparkJob extends KNIMESparkJob {
             }
 
         } else {
-            for (String pathToFile : jsInput.getFiles()) {
-                File inputFile = new File(pathToFile);
-                if (inputFile.canRead()) {
-                    inputFiles.add(inputFile);
+            for (Path pathToFile : jsInput.getFiles()) {
+                if (Files.isReadable(pathToFile)) {
+                    inputFiles.add(pathToFile.toFile());
                 } else {
                     throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
                 }

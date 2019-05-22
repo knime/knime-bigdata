@@ -22,14 +22,11 @@ package org.knime.bigdata.spark2_3.jobs.prepare.livy;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,8 +37,8 @@ import org.knime.bigdata.spark.core.jar.JobJarDescriptor;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingArea;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
+import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
+import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
 import org.knime.bigdata.spark2_3.api.NamedObjects;
 import org.knime.bigdata.spark2_3.api.SparkJob;
 import org.knime.bigdata.spark2_3.api.TypeConverters;
@@ -66,7 +63,7 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
     public LivyPrepareContextJobOutput runJob(final SparkContext sparkContext, final LivyPrepareContextJobInput input,
         final NamedObjects namedObjects) throws Exception {
 
-        StagingArea.ensureInitialized(input.getStagingArea(), input.stagingAreaIsPath(),
+        SparkSideStagingArea.ensureInitialized(input.getStagingArea(), input.stagingAreaIsPath(),
             determineSparkLocalDir(sparkContext), sparkContext.hadoopConfiguration());
 
         sparkContext.addSparkListener(new KNIMELivySparkListener());
@@ -95,21 +92,12 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
 
     private static String validateStagingAreaAccess(final String testfileName) throws KNIMESparkException {
         try {
-            // first we read the provided testfile
-            try (final InputStream in = StagingArea.createDownloadStream(testfileName)) {
-                StagingAreaUtil.validateTestfileContent(in);
-            } finally {
-                StagingArea.delete(testfileName);
-            }
-
-            Entry<String, OutputStream> upload = StagingArea.createUploadStream();
-            try (final OutputStream out = upload.getValue()) {
-                StagingAreaUtil.writeTestfileContent(out);
-            }
-            return upload.getKey();
-
+            StagingAreaTester.validateTestfileContent(SparkSideStagingArea.SINGLETON_INSTANCE, testfileName);
+            return StagingAreaTester.writeTestfileContent(SparkSideStagingArea.SINGLETON_INSTANCE);
         } catch (Exception e) {
             throw new KNIMESparkException("Staging area access from inside Spark failed: " + e.getMessage(), e);
+        } finally {
+            SparkSideStagingArea.SINGLETON_INSTANCE.deleteSafely(testfileName);
         }
     }
 

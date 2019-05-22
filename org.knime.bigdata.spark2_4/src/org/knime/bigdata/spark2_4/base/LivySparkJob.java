@@ -21,9 +21,8 @@
 package org.knime.bigdata.spark2_4.base;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.livy.Job;
 import org.apache.livy.JobContext;
@@ -38,8 +37,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingArea;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
+import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_4.api.SparkJob;
@@ -73,14 +71,15 @@ public class LivySparkJob implements Job<WrapperJobOutput> {
     public WrapperJobOutput call(final JobContext ctx) throws Exception {
         WrapperJobOutput toReturn;
 
+        LivyJobSerializationUtils.postKryoDeserialize(m_livyInput, getClass().getClassLoader(),
+            SparkSideStagingArea.SINGLETON_INSTANCE);
+
         try {
-            m_livyInput.setInternalMap(LivyJobSerializationUtils.postKryoDeserialize(m_livyInput.getInternalMap(),
-                getClass().getClassLoader()));
+
             final JobInput jobInput = m_livyInput.getSparkJobInput();
 
             NamedObjectsImpl.ensureNamedInputObjectsExist(jobInput);
             NamedObjectsImpl.ensureNamedOutputObjectsDoNotExist(jobInput);
-            List<File> inputFiles = downloadInputFiles();
 
             Object sparkJob = getClass().getClassLoader().loadClass(m_livyInput.getSparkJobClass()).newInstance();
 
@@ -90,6 +89,8 @@ public class LivySparkJob implements Job<WrapperJobOutput> {
                 toReturn = WrapperJobOutput
                     .success(((SparkJob)sparkJob).runJob(sc, jobInput, NamedObjectsImpl.SINGLETON_INSTANCE));
             } else if (sparkJob instanceof SparkJobWithFiles) {
+                final List<File> inputFiles =
+                    jobInput.getFiles().stream().map(p -> p.toFile()).collect(Collectors.toList());
                 toReturn = WrapperJobOutput.success(((SparkJobWithFiles)sparkJob).runJob(sc, jobInput, inputFiles,
                     NamedObjectsImpl.SINGLETON_INSTANCE));
             } else {
@@ -107,12 +108,14 @@ public class LivySparkJob implements Job<WrapperJobOutput> {
 
         try {
             // this call to StagingAreaUtil.toSerializedMap() may involve I/O to HDFS/S3/... and can thus fail
-            return WrapperJobOutput.fromMap(StagingAreaUtil.toSerializedMap(toReturn.getInternalMap()));
+            return LivyJobSerializationUtils.preKryoSerialize(toReturn, SparkSideStagingArea.SINGLETON_INSTANCE,
+                new WrapperJobOutput());
         } catch (Throwable e) {
             // this call to StagingAreaUtil.toSerializedMap () will NOT fail, because Throwables receive
             // special treatment
-            return WrapperJobOutput.fromMap(
-                StagingAreaUtil.toSerializedMap(WrapperJobOutput.failure(new KNIMESparkException(e)).getInternalMap()));
+            final WrapperJobOutput failure = WrapperJobOutput.failure(new KNIMESparkException(e));
+            return LivyJobSerializationUtils.preKryoSerialize(failure, SparkSideStagingArea.SINGLETON_INSTANCE,
+                new WrapperJobOutput());
         }
     }
 
@@ -134,24 +137,5 @@ public class LivySparkJob implements Job<WrapperJobOutput> {
                 }
             }
         }
-    }
-
-    private List<File> downloadInputFiles() throws KNIMESparkException {
-        final List<File> inputFiles = new LinkedList<>();
-
-        try {
-            for (String stagingAreaFilename : m_livyInput.getFiles()) {
-                final File inputFile = StagingArea.downloadToFileCached(stagingAreaFilename);
-                if (inputFile.canRead()) {
-                    inputFiles.add(inputFile);
-                } else {
-                    throw new KNIMESparkException("Cannot read job input file on driver: " + stagingAreaFilename);
-                }
-            }
-        } catch (IOException e) {
-            throw new KNIMESparkException("Failed to download input file to driver: " + e.getMessage(), e);
-        }
-
-        return inputFiles;
     }
 }

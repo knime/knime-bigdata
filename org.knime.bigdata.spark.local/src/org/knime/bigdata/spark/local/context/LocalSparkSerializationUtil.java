@@ -25,12 +25,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.knime.bigdata.spark.core.job.JobData;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
@@ -44,13 +46,16 @@ public class LocalSparkSerializationUtil {
 
     private static final String KEY_SERIALIZED_FIELDS = "serializedFields";
 
+    private static final String KEY_FILES = "files";
+
     /**
      * Serializes all values of the given map into byte arrays, which are not null, boolean, a number or a String.
      * 
-     * @param mapToSerialize The map whose values are checked and potentially serialized.
+     * @param jobData JobData whose values are checked and potentially serialized.
      * @return a new map that contains serialized values in place of the original ones.
      */
-    public static Map<String, Object> serializeToPlainJavaTypes(final Map<String, Object> mapToSerialize) {
+    public static Map<String, Object> serializeToPlainJavaTypes(final JobData jobData) {
+        final Map<String, Object> mapToSerialize = jobData.getInternalMap();
         final List<String> serializedFields = new LinkedList<>();
 
         final Map<String, Object> toReturn = new HashMap<>();
@@ -68,6 +73,7 @@ public class LocalSparkSerializationUtil {
         }
 
         toReturn.put(KEY_SERIALIZED_FIELDS, serializedFields);
+        toReturn.put(KEY_FILES, jobData.getFiles());
         return toReturn;
     }
     
@@ -90,27 +96,31 @@ public class LocalSparkSerializationUtil {
     }
 
     /**
-     * Reverses the effects of the {@link #serializeToPlainJavaTypes(Map)} method.
+     * Reverses the effects of the {@link #serializeToPlainJavaTypes(JobData)} method.
      * 
      * @param toDeserialize Map with values to deserialize.
-     * @param classLoader A classload with which to load the deserialized objects.
-     * @return a new map with deserialized objects.
-     * @throws ClassNotFoundException f the serialized data contained objects that the given classloader could not
-     *             load.
+     * @param classLoader A classloader with which to load the deserialized objects.
+     * @param jobDataToFill An instance of {@link JobData} that will be filled with the deserialized values (this is an
+     *            empty parameter).
+     * @throws ClassNotFoundException f the serialized data contained objects that the given classloader could not load.
      * @throws IOException if something went wrong during derserialization.
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> deserializeFromPlainJavaTypes(Map<String, Object>  toDeserialize, 
-    		final ClassLoader classLoader) throws ClassNotFoundException, IOException {
-    	
+    public static void deserializeFromPlainJavaTypes(Map<String, Object>  toDeserialize, 
+        final ClassLoader classLoader, final JobData jobDataToFill) throws ClassNotFoundException, IOException {
+
         final Map<String, Object> deserialized = new HashMap<>(toDeserialize);
 
-        final List<String> serializedFields = (List<String>) deserialized.remove(KEY_SERIALIZED_FIELDS);
+        final List<String> serializedFields = (List<String>)deserialized.remove(KEY_SERIALIZED_FIELDS);
 
         for (String serializedField : serializedFields) {
-            deserialized.put(serializedField, deserialize((byte[]) deserialized.get(serializedField), classLoader));
+            deserialized.put(serializedField, deserialize((byte[])deserialized.get(serializedField), classLoader));
         }
 
-        return deserialized;
+        jobDataToFill.setInternalMap(deserialized);
+
+        for (Path file : (List<Path>)toDeserialize.get(KEY_FILES)) {
+            jobDataToFill.withFile(file);
+        }
     }
 }

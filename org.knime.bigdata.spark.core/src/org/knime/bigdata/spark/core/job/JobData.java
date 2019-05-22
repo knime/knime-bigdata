@@ -20,8 +20,10 @@
  */
 package org.knime.bigdata.spark.core.job;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,10 +31,10 @@ import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 
 /**
  *
- * This class is a thin wrapper around a map (the "internal map") and meant to simplify data exchange between the KNIME
- * Extension for Apache Spark and Spark jobs running in a Spark environment (possibly on a remote server). Do not use this
- * class directly, please make a subclass of {@link JobInput} to ship parameters to your Spark job, and one of
- * {@link JobOutput} to ship output back into KNIME.
+ * This class is a thin wrapper around a map (the "internal map") and a list of files. It is meant to simplify data
+ * exchange between the KNIME Extension for Apache Spark and Spark jobs running in a Spark environment (possibly on a
+ * remote server). Do not use this class directly, please make a subclass of {@link JobInput} to ship parameters and
+ * files to your Spark job, and one of {@link JobOutput} to ship output back into KNIME.
  *
  * The internal map associates String keys with values. The {@link #set(String, Object)}, {@link #get(String)} and
  * {@link #getOrDefault(String, Object)} methods provide access to the internal map. All keys will be automatically
@@ -72,6 +74,8 @@ public class JobData {
     private final static String INTERNAL_PREFIX = "x";
 
     private Map<String, Object> m_internalMap;
+
+    private List<Path> m_files;
 
     private final String m_keyPrefix;
 
@@ -286,6 +290,41 @@ public class JobData {
 
         specs.put(namedObjectId, spec);
         return (T)this;
+    }
+
+    /**
+     * Adds the given path -- which must point to a local file -- to this instance. Local files added this way will be
+     * transferred transparently between Spark and KNIME.
+     *
+     * @param path A local file to transfer
+     * @return this object, with the given file added
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends JobData> T withFile(final Path path) {
+        if (m_files == null) {
+            m_files = new LinkedList<>();
+        }
+
+        m_files.add(path);
+        return (T)this;
+    }
+
+    /**
+     * @return a list of local files transferred between KNIME and Spark.
+     */
+    public List<Path> getFiles() {
+        if (m_files != null) {
+            return Collections.unmodifiableList(m_files);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * @return whether there are local files (to be) transferred between KNIME and Spark
+     */
+    public boolean hasFiles() {
+        return (m_files != null) ? !m_files.isEmpty() : false;
     }
 
     /**

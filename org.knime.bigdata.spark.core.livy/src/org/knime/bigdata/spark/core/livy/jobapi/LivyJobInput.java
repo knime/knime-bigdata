@@ -20,9 +20,7 @@
  */
 package org.knime.bigdata.spark.core.livy.jobapi;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Path;
 
 import org.knime.bigdata.spark.core.job.JobData;
 import org.knime.bigdata.spark.core.job.JobInput;
@@ -42,14 +40,20 @@ public class LivyJobInput extends JobData {
 
     private static final String KEY_JOB_CLASS = "jobClass";
 
-    private static final String KEY_FILES = "inputFiles";
-
-    LivyJobInput() {
+    /**
+     * Empty constructor for (de)serialization.
+     */
+    public LivyJobInput() {
         super(LIVY_PREFIX);
     }
 
-    LivyJobInput(final Map<String, Object> internalMap) {
-        super(LIVY_PREFIX, internalMap);
+    LivyJobInput(final JobInput jobInput, final String sparkJobClass) {
+        super(LIVY_PREFIX, jobInput.getInternalMap());
+        set(KEY_JOBINPUT_CLASS, jobInput.getClass().getCanonicalName());
+        set(KEY_JOB_CLASS, sparkJobClass);
+        for (Path inputFile : jobInput.getFiles()) {
+            withFile(inputFile);
+        }
     }
 
     /**
@@ -73,25 +77,13 @@ public class LivyJobInput extends JobData {
         throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final String jobInputClassName = get(KEY_JOBINPUT_CLASS);
         final T jobInput = (T)getClass().getClassLoader().loadClass(jobInputClassName).newInstance();
+
         jobInput.setInternalMap(getInternalMap());
+        for (Path inputFile : getFiles()) {
+            jobInput.withFile(inputFile);
+        }
 
         return jobInput;
-    }
-
-    /**
-     * @return <code>true</code> if the job input contains files
-     * @see #getFiles()
-     */
-    public boolean isJobWithFiles() {
-        return has(KEY_FILES);
-    }
-
-    /**
-     * @return gets the names of files in the staging area for the job.
-     * @see #isJobWithFiles()
-     */
-    public List<String> getFiles() {
-        return getOrDefault(KEY_FILES, Collections.<String>emptyList());
     }
 
     /**
@@ -103,31 +95,6 @@ public class LivyJobInput extends JobData {
      */
     public static LivyJobInput createFromSparkJobInput(final JobInput jobInput,
         final String sparkJobClass) {
-    	LivyJobInput jsInput = new LivyJobInput(jobInput.getInternalMap());
-        jsInput.set(KEY_JOBINPUT_CLASS, jobInput.getClass().getName());
-        jsInput.set(KEY_JOB_CLASS, sparkJobClass);
-        return jsInput;
-    }
-
-    /**
-     * Creates a new {@link LivyJobInput} backed by the given map.
-     * 
-     * @param internalMap of parameters
-     * @return the {@link LivyJobInput}
-     */
-    public static LivyJobInput createFromMap(final Map<String, Object> internalMap) {
-    	LivyJobInput jsInput = new LivyJobInput(internalMap);
-        return jsInput;
-    }
-
-    /**
-     * Adds a list of files to be used by the job.
-     * 
-     * @param serverFilenames the path to the files.
-     * @return the {@link LivyJobInput} itself
-     */
-    public LivyJobInput withFiles(final List<String> serverFilenames) {
-        set(KEY_FILES, serverFilenames);
-        return this;
+        return new LivyJobInput(jobInput, sparkJobClass);
     }
 }

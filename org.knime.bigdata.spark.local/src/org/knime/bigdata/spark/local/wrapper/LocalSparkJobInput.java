@@ -20,8 +20,7 @@
  */
 package org.knime.bigdata.spark.local.wrapper;
 
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.job.JobData;
@@ -41,8 +40,6 @@ public class LocalSparkJobInput extends JobData {
     private static final String KEY_JOBINPUT_CLASS = "jobInputClass";
 
     private static final String KEY_JOB_CLASS = "jobClass";
-
-    private static final String KEY_FILES = "inputFiles";
 
     LocalSparkJobInput() {
         super(PREFIX);
@@ -79,22 +76,6 @@ public class LocalSparkJobInput extends JobData {
     }
 
     /**
-     * @return <code>true</code> if the job input contains files
-     * @see #getFiles()
-     */
-    public boolean isJobWithFiles() {
-        return has(KEY_FILES);
-    }
-
-    /**
-     * @return gets the file paths for the jobs
-     * @see #isJobWithFiles()
-     */
-    public List<String> getFiles() {
-        return getOrDefault(KEY_FILES, Collections.<String>emptyList());
-    }
-
-    /**
      * @param jobInput the {@link JobInput}
      * @param sparkJobClass the Spark job class to use
      * @return the {@link LocalSparkJobInput}
@@ -104,6 +85,9 @@ public class LocalSparkJobInput extends JobData {
         LocalSparkJobInput jsInput = new LocalSparkJobInput(jobInput.getInternalMap());
         jsInput.set(KEY_JOBINPUT_CLASS, jobInput.getClass().getName());
         jsInput.set(KEY_JOB_CLASS, sparkJobClass);
+        for (Path inputFile : jobInput.getFiles()) {
+            jsInput.withFile(inputFile);
+        }
         return jsInput;
     }
 
@@ -114,14 +98,5 @@ public class LocalSparkJobInput extends JobData {
     public static LocalSparkJobInput createFromMap(final Map<String, Object> internalMap) {
         LocalSparkJobInput jsInput = new LocalSparkJobInput(internalMap);
         return jsInput;
-    }
-
-    /**
-     * @param serverFilenames the path to the files
-     * @return the {@link LocalSparkJobInput} itself
-     */
-    public LocalSparkJobInput withFiles(final List<String> serverFilenames) {
-        set(KEY_FILES, serverFilenames);
-        return this;
     }
 }

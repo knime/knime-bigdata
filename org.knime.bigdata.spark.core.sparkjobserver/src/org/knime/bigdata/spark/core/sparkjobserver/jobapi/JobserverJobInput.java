@@ -20,8 +20,6 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.jobapi;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.job.JobData;
@@ -42,8 +40,6 @@ public class JobserverJobInput extends JobData {
     private static final String KEY_JOB_CLASS = "jobClass";
 
     private static final String KEY_LOG4JLOG_LEVEL = "loglevel";
-
-    private static final String KEY_FILES = "inputFiles";
 
     JobserverJobInput() {
         super(JOBSERVER_PREFIX);
@@ -87,22 +83,6 @@ public class JobserverJobInput extends JobData {
     }
 
     /**
-     * @return <code>true</code> if the job input contains files
-     * @see #getFiles()
-     */
-    public boolean isJobWithFiles() {
-        return has(KEY_FILES);
-    }
-
-    /**
-     * @return gets the file paths for the jobs
-     * @see #isJobWithFiles()
-     */
-    public List<String> getFiles() {
-        return getOrDefault(KEY_FILES, Collections.<String>emptyList());
-    }
-
-    /**
      * @param jobInput the {@link JobInput}
      * @param sparkJobClass the Spark job class to use
      * @return the {@link JobserverJobInput}
@@ -130,15 +110,6 @@ public class JobserverJobInput extends JobData {
      */
     public JobserverJobInput withLog4jLogLevel(final int log4jLogLevel) {
         set(KEY_LOG4JLOG_LEVEL, log4jLogLevel);
-        return this;
-    }
-
-    /**
-     * @param serverFilenames the path to the files
-     * @return the {@link JobserverJobInput} itself
-     */
-    public JobserverJobInput withFiles(final List<String> serverFilenames) {
-        set(KEY_FILES, serverFilenames);
         return this;
     }
 }

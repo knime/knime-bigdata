@@ -2,6 +2,8 @@ package org.knime.bigdata.spark.core.sparkjobserver.context;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -18,6 +20,7 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.util.UploadFileCache;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
+import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.JobOutput;
 import org.knime.bigdata.spark.core.job.JobRun;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
@@ -25,6 +28,7 @@ import org.knime.bigdata.spark.core.job.JobWithFilesRun;
 import org.knime.bigdata.spark.core.job.JobWithFilesRun.FileLifetime;
 import org.knime.bigdata.spark.core.job.SimpleJobRun;
 import org.knime.bigdata.spark.core.port.context.JobServerSparkContextConfig;
+import org.knime.bigdata.spark.core.sparkjobserver.jobapi.JobserverJobInput;
 import org.knime.bigdata.spark.core.sparkjobserver.jobapi.TypesafeConfigSerializationUtils;
 import org.knime.bigdata.spark.core.sparkjobserver.request.DeleteDataFileRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.GetJobStatusRequest;
@@ -32,6 +36,7 @@ import org.knime.bigdata.spark.core.sparkjobserver.request.JobAlreadyFinishedExc
 import org.knime.bigdata.spark.core.sparkjobserver.request.KillJobRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.request.StartJobRequest;
 import org.knime.bigdata.spark.core.sparkjobserver.rest.RestClient;
+import org.knime.bigdata.spark.core.util.KNIMETempFileSupplier;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
@@ -100,7 +105,7 @@ class JobserverJobController implements JobController {
     @Override
     public void startJobAndWaitForResult(final SimpleJobRun<?> job, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
-        startJobAndWaitForResult(job, null, exec);
+        startJobAndWaitForResult((JobRun<?,?>)job, exec);
     }
 
     /**
@@ -110,27 +115,26 @@ class JobserverJobController implements JobController {
     public <O extends JobOutput> O startJobAndWaitForResult(final JobWithFilesRun<?, O> job,
         final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
 
-        exec.setMessage("Uploading data to Spark jobserver");
+        final JobInput input = job.getInput();
+        
+        if (input.hasFiles()) {
+            throw new IllegalArgumentException(
+                "JobWithFilesRun does not support a JobInput with additional input files. Please use either one, but not both.");
+        }
+
         if (job.useInputFileCopyCache() && job.getInputFilesLifetime() != FileLifetime.CONTEXT) {
             throw new IllegalArgumentException(
                 "File copy cache can only be used for files with lifetime " + FileLifetime.CONTEXT);
         }
 
-        if (job.useInputFileCopyCache()) {
-            final List<String> serverFilePaths = uploadInputFilesCached(job);
-            return startJobAndWaitForResult(job, serverFilePaths, exec);
-        } else {
-            UploadUtil uploadUtil = uploadInputFiles(job.getInputFiles(), job.getInputFilesLifetime());
-            try {
-                return startJobAndWaitForResult(job, uploadUtil.getServerFileNames(), exec);
-            } finally {
-                uploadUtil.cleanup();
-            }
+        for (File inputFile : job.getInputFiles()) {
+            input.withFile(inputFile.toPath());
         }
-
+        
+        return startJobAndWaitForResult((JobRun<?, O>)job, exec);
     }
 
-    private UploadUtil uploadInputFiles(final List<File> filesToUplad, final FileLifetime fileLifetime)
+    private UploadUtil uploadInputFiles(final List<Path> filesToUplad, final FileLifetime fileLifetime)
         throws KNIMESparkException {
 
         // FIXME implement support for cleanup of files with FileLifetime.CONTEXT
@@ -146,19 +150,19 @@ class JobserverJobController implements JobController {
      * @param exec
      * @throws KNIMESparkException
      */
-    private List<String> uploadInputFilesCached(final JobWithFilesRun<?, ?> job) throws KNIMESparkException {
+    private List<Path> uploadInputFilesCached(final JobInput job) throws KNIMESparkException {
 
-        final Map<String, String> serverFilenamesToReturn = new LinkedHashMap<>();
+        final Map<String, Path> serverFilenamesToReturn = new LinkedHashMap<>();
 
         // first we determine the files we have to upload
-        final List<File> filesToUpload = new LinkedList<>();
-        for (File inputFile : job.getInputFiles()) {
-            String cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
+        final List<Path> filesToUpload = new LinkedList<>();
+        for (Path inputFile : job.getFiles()) {
+            final Path cachedServerFile = m_uploadFileCache.tryToGetServerFileFromCache(inputFile);
             if (cachedServerFile != null) {
-                serverFilenamesToReturn.put(inputFile.getPath(), cachedServerFile);
+                serverFilenamesToReturn.put(inputFile.toString(), cachedServerFile);
             } else {
                 // add null as dummy value to ensure the order of the files stay the same
-                serverFilenamesToReturn.put(inputFile.getPath(), null);
+                serverFilenamesToReturn.put(inputFile.toString(), null);
                 filesToUpload.add(inputFile);
             }
         }
@@ -168,25 +172,25 @@ class JobserverJobController implements JobController {
         uploadUtil.upload();
 
         // now we add the uploaded files to the upload file cache
-        Iterator<File> localFileIter = filesToUpload.iterator();
-        Iterator<String> serverFilesIter = uploadUtil.getServerFileNames().iterator();
+        Iterator<Path> localFileIter = filesToUpload.iterator();
+        Iterator<Path> serverFilesIter = uploadUtil.getServerFileNames().iterator();
 
         while (localFileIter.hasNext()) {
-            final File localFile = localFileIter.next();
-            final String serverFile = serverFilesIter.next();
+            final Path localFile = localFileIter.next();
+            final Path serverFile = serverFilesIter.next();
 
             if (m_uploadFileCache.addFilesToCache(localFile, serverFile)) {
-                serverFilenamesToReturn.put(localFile.getPath(), serverFile);
+                serverFilenamesToReturn.put(localFile.toString(), serverFile);
             } else {
                 // in the meantime someone else has uploaded the same file or a newer version of it
                 // this means we can discard our file
-                serverFilenamesToReturn.put(localFile.getPath(),
+                serverFilenamesToReturn.put(localFile.toString(),
                     m_uploadFileCache.tryToGetServerFileFromCache(localFile));
-                new DeleteDataFileRequest(m_contextId, m_contextConfig, m_restClient, serverFile).send();
+                new DeleteDataFileRequest(m_contextId, m_contextConfig, m_restClient, serverFile.toString()).send();
             }
         }
 
-        return new LinkedList<String>(serverFilenamesToReturn.values());
+        return new LinkedList<Path>(serverFilenamesToReturn.values());
     }
 
     /**
@@ -195,17 +199,26 @@ class JobserverJobController implements JobController {
     @Override
     public <O extends JobOutput> O startJobAndWaitForResult(final JobRun<?, O> job, final ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException {
+        
+        final JobInput jobInput = job.getInput();
+        JobserverJobInput jsInput = JobserverJobInput.createFromSparkJobInput(jobInput, job.getJobClass().getCanonicalName());
 
-        return startJobAndWaitForResult(job, null, exec);
-    }
-
-    private <O extends JobOutput> O startJobAndWaitForResult(final JobRun<?, O> job,
-        final List<String> inputFilesOnServer, final ExecutionMonitor exec)
-            throws KNIMESparkException, CanceledExecutionException {
+        if (jobInput.hasFiles()) {
+            exec.setMessage("Uploading input data to Spark");
+            if ((job instanceof JobWithFilesRun) && (((JobWithFilesRun<?, O>)job).useInputFileCopyCache())) {
+                for (Path fileOnServer : uploadInputFilesCached(jobInput)) {
+                    jsInput.withFile(fileOnServer);
+                }
+            } else {
+                for (Path fileOnServer : uploadInputFiles(jobInput.getFiles(), FileLifetime.CONTEXT)
+                    .getServerFileNames()) {
+                    jsInput.withFile(fileOnServer);
+                }
+            }
+        }
 
         exec.setMessage("Running Spark job");
-
-        String jobId = startJobAsynchronously(job, inputFilesOnServer);
+        String jobId = startJobAsynchronously(job, jsInput);
 
         WrapperJobOutput jobOutput = waitForJob(job, jobId, exec);
 
@@ -232,8 +245,9 @@ class JobserverJobController implements JobController {
         }
     }
 
-    private String startJobAsynchronously(final JobRun<?, ?> job, final List<String> inputFilesOnServer)
+    private String startJobAsynchronously(final JobRun<?, ?> job, JobserverJobInput jsInput)
         throws KNIMESparkException {
+        
         final String jobClassName = job.getJobClass().getCanonicalName();
 
         LOGGER.debug("Submitting Spark job: " + jobClassName);
@@ -252,8 +266,7 @@ class JobserverJobController implements JobController {
                     m_restClient,
                     m_jobserverJobClass,
                     jobClassName,
-                    job.getInput(),
-                    inputFilesOnServer).send();
+                    jsInput).send();
         } catch (SparkContextNotFoundException e) {
             if (!m_contextConfig.useAuthentication()) {
                 throw e;
@@ -268,8 +281,7 @@ class JobserverJobController implements JobController {
                     m_restClient,
                     m_jobserverJobClass,
                     jobClassName,
-                    job.getInput(),
-                    inputFilesOnServer).send();
+                    jsInput).send();
 
                 // if we are here, toggling m_prependUserToContextName worked, so we memorize that
                 m_prependUserToContextName = !prependUserToContextName;
@@ -327,9 +339,10 @@ class JobserverJobController implements JobController {
 
                     try {
                         final Config typesafeConfig = ConfigFactory.parseString(jobData.getString("result"));
-                        return WrapperJobOutput
-                            .fromMap(TypesafeConfigSerializationUtils.deserializeFromTypesafeConfig(typesafeConfig,
-                                jobRun.getJobOutputClassLoader()));
+                        
+                        return TypesafeConfigSerializationUtils.deserializeWrapperJobOutput(typesafeConfig,
+                            jobRun.getJobOutputClassLoader(), KNIMETempFileSupplier.getInstance());
+                        
                     } catch (ClassNotFoundException | IOException e) {
                         throw new KNIMESparkException(e);
                     }

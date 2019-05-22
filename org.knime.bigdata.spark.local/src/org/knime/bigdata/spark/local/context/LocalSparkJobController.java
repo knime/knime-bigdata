@@ -1,6 +1,7 @@
 package org.knime.bigdata.spark.local.context;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,11 @@ class LocalSparkJobController implements JobController {
 	@Override
 	public <O extends JobOutput> O startJobAndWaitForResult(JobWithFilesRun<?, O> fileJob, ExecutionMonitor exec)
 			throws KNIMESparkException, CanceledExecutionException {
+	    
+	    if (fileJob.getInput().hasFiles()) {
+            throw new IllegalArgumentException(
+                "JobWithFilesRun does not support a JobInput with additional input files. Please use either one, but not both.");
+	    }
 		
 		final List<String> files = fileJob.getInputFiles()
 			.stream()
@@ -66,29 +72,28 @@ class LocalSparkJobController implements JobController {
 		return runInternal(fileJob, files, exec);
 	}
 	
-	private <O extends JobOutput> O runInternal(final JobRun<?, O> job, final List<String> inputFilesOnServer,
+	private <O extends JobOutput> O runInternal(final JobRun<?, O> job, final List<String> inputFiles,
 			final ExecutionMonitor exec) throws KNIMESparkException, CanceledExecutionException {
 
 		exec.setMessage("Running Spark job");
 
 		final LocalSparkJobInput input = LocalSparkJobInput.createFromSparkJobInput(job.getInput(),
 				job.getJobClass().getName());
-
-		if (!inputFilesOnServer.isEmpty()) {
-			input.withFiles(inputFilesOnServer);
+		
+		for (String inputFile : inputFiles) {
+		    input.withFile(Paths.get(inputFile));
 		}
 		
-		
         final Map<String, Object> serializedInput =
-            LocalSparkSerializationUtil.serializeToPlainJavaTypes(input.getInternalMap());
+            LocalSparkSerializationUtil.serializeToPlainJavaTypes(input);
         final String jobGroupId = UUID.randomUUID().toString();
 
         final Map<String, Object> serializedOutput =
             waitForFuture(THREAD_POOL.submit(() -> m_wrapper.runJob(serializedInput, jobGroupId)), jobGroupId, exec);
 		
-        WrapperJobOutput toReturn;
+        WrapperJobOutput toReturn = new WrapperJobOutput();
 		try {
-			toReturn = WrapperJobOutput.fromMap(LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(serializedOutput, job.getJobOutputClassLoader()));
+			LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(serializedOutput, job.getJobOutputClassLoader(), toReturn);
 		} catch (IOException | ClassNotFoundException e) {
 			throw new KNIMESparkException(e);
 		}

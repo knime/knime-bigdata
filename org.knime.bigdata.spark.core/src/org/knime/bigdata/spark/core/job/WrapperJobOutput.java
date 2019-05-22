@@ -20,7 +20,9 @@
  */
 package org.knime.bigdata.spark.core.job;
 
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
@@ -44,9 +46,9 @@ public class WrapperJobOutput extends JobData {
     private static final String KEY_STAT = "statistics";
 
     /**
-     * Creates an empty instance of this class that holds the results of a successful Spark job execution.
+     * Creates an empty instance of this class.
      */
-    private WrapperJobOutput() {
+    public WrapperJobOutput() {
         super(PREFIX);
     }
 
@@ -56,8 +58,11 @@ public class WrapperJobOutput extends JobData {
      *
      * @param internalMap map with job result values
      */
-    private WrapperJobOutput(final Map<String, Object> internalMap) {
+    private WrapperJobOutput(final Map<String, Object> internalMap, final List<Path> files) {
         super(PREFIX, internalMap);
+        for (Path file : files) {
+            withFile(file);
+        }
     }
 
     /**
@@ -99,6 +104,9 @@ public class WrapperJobOutput extends JobData {
 
         final T jobOutput = outputClass.newInstance();
         jobOutput.setInternalMap(getInternalMap());
+        for (Path file : getFiles()) {
+            jobOutput.withFile(file);
+        }
 
         return jobOutput;
     }
@@ -134,7 +142,7 @@ public class WrapperJobOutput extends JobData {
      *         the given job output
      */
     public static WrapperJobOutput success(final JobOutput jobOutput) {
-        return new WrapperJobOutput(jobOutput.getInternalMap());
+        return new WrapperJobOutput(jobOutput.getInternalMap(), jobOutput.getFiles());
     }
 
     /**
@@ -148,6 +156,15 @@ public class WrapperJobOutput extends JobData {
     }
 
     /**
+     * Create an empty {@link WrapperJobOutput}.
+     *
+     * @return an empty job result
+     */
+    public static WrapperJobOutput empty() {
+        return new WrapperJobOutput();
+    }
+
+    /**
      * Creates a {@link WrapperJobOutput} indicating a failed job execution and which contains the given {@link Throwable}.
      *
      * @param throwable The exception to report back to the client
@@ -155,15 +172,5 @@ public class WrapperJobOutput extends JobData {
      */
     public static WrapperJobOutput failure(final KNIMESparkException throwable) {
         return new WrapperJobOutput(throwable);
-    }
-
-    /**
-     * Creates a new {@link WrapperJobOutput} backed by the given map.
-     *
-     * @param internalMap
-     * @return a {@link WrapperJobOutput} backed by the given internal map.
-     */
-    public static WrapperJobOutput fromMap(final Map<String, Object> internalMap) {
-        return new WrapperJobOutput(internalMap);
     }
 }

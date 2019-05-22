@@ -21,30 +21,28 @@
 package org.knime.bigdata.spark.core.livy.jobapi;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.livy.jobapi.LivyJobSerializationUtils.StagingAreaAccess;
 
 /**
  * Spark-side utility class to access to staging area.
@@ -52,74 +50,77 @@ import org.knime.bigdata.spark.core.job.SparkClass;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class StagingArea {
-
-    private static final Logger LOG = Logger.getLogger(StagingArea.class);
-
-    private static volatile URI stagingAreaURI;
-
-    private static volatile Configuration hadoopConf;
-
-    private static volatile File localTmpDir;
+public class SparkSideStagingArea implements StagingAreaAccess {
+    
+    public static final SparkSideStagingArea SINGLETON_INSTANCE = new SparkSideStagingArea();
+    
+    private static final Logger LOG = Logger.getLogger(SparkSideStagingArea.class);
 
     private static final Pattern STAGING_FILENAME_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
+
+    private volatile URI stagingAreaURI;
+
+    private volatile Configuration hadoopConf;
+
+    private volatile java.nio.file.Path localTmpDir;
 
     public synchronized static void ensureInitialized(final String stagingArea, final boolean stagingAreaIsPath,
         final File localTmpDir, final Configuration hadoopConf) throws URISyntaxException {
 
-        if (stagingAreaURI == null) {
+        if (SINGLETON_INSTANCE.stagingAreaURI == null) {
             if (stagingAreaIsPath) {
-                stagingAreaURI = FileSystem.getDefaultUri(new Configuration()).resolve(stagingArea);
+                SINGLETON_INSTANCE.stagingAreaURI = FileSystem.getDefaultUri(new Configuration()).resolve(stagingArea);
             } else {
-                stagingAreaURI = URI.create(stagingArea);
+                SINGLETON_INSTANCE.stagingAreaURI = URI.create(stagingArea);
             }
-            StagingArea.hadoopConf = hadoopConf;
-            StagingArea.localTmpDir = localTmpDir;
-            LOG.info("Staging area for KNIME Spark jobs is at " + stagingAreaURI.toString());
+            SINGLETON_INSTANCE.hadoopConf = hadoopConf;
+            SINGLETON_INSTANCE.localTmpDir = localTmpDir.toPath();
+
+            LOG.info("Staging area for KNIME Spark jobs is at " + SINGLETON_INSTANCE.stagingAreaURI.toString());
             LOG.info("Local temp file directory for KNIME Spark jobs is at " + localTmpDir.getAbsolutePath());
         }
     }
 
-    public static File downloadToFileCached(final String stagingFileName) throws IOException {
-        final File outFile = new File(localTmpDir, stagingFileName);
-        if (outFile.exists()) {
-            return outFile;
-        }
+    /**
+     * Downloads the contents of the given input stream to a new local file. The input stream will always be closed. It
+     * is up the caller to clean up the temp file when it is not needed anymore.
+     * 
+     * @param in The input stream to read from.
+     * @return a new created local file that contains the contents of the input stream.
+     * @throws IOException
+     */
+    public java.nio.file.Path downloadToFile(final InputStream in) throws IOException {
+        final java.nio.file.Path outFile = Paths.get(localTmpDir.toString(), UUID.randomUUID().toString().replaceAll("-", ""));
 
-        try (final OutputStream out = new BufferedOutputStream(new FileOutputStream(outFile))) {
-            try (final InputStream in = createDownloadStream(stagingFileName)) {
-                final byte[] buffer = new byte[8192];
-                int read;
-                while ((read = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, read);
-                }
-            }
+        try {
+            Files.copy(in, outFile);
+        } finally {
+            in.close();
         }
         return outFile;
     }
 
     @SuppressWarnings("resource")
-    public static InputStream createDownloadStream(final String stagingFileName) throws IOException {
+    public InputStream newDownloadStream(final String stagingFileName) throws IOException {
         validateStagingFileName(stagingFileName);
 
         final FileSystem fs = FileSystem.get(stagingAreaURI, hadoopConf);
-        final Path copySource = new Path(new Path(stagingAreaURI), stagingFileName);
-        return new GZIPInputStream(fs.open(copySource));
+        return fs.open(new Path(new Path(stagingAreaURI), stagingFileName));
     }
 
-    public static String uploadFromFile(final File localFile) throws IOException {
+    public String uploadFromFile(final File localFile) throws IOException {
         try (final InputStream in = new BufferedInputStream(new FileInputStream(localFile))) {
             return uploadFromStream(in);
         }
     }
 
     @SuppressWarnings("resource")
-    public static Entry<String, OutputStream> createUploadStream() throws IOException {
-        final String stagingFileName = UUID.randomUUID().toString();
+    public Entry<String, OutputStream> newUploadStream() throws IOException {
+        final String stagingFileName = UUID.randomUUID().toString().replaceAll("-", "");
         final FileSystem fs = FileSystem.get(stagingAreaURI, hadoopConf);
 
         final Path copyDestiation = new Path(new Path(stagingAreaURI), stagingFileName);
-        final OutputStream out = new GZIPOutputStream(fs.create(copyDestiation));
+        final OutputStream out = fs.create(copyDestiation);
 
         return new Entry<String, OutputStream>() {
             @Override
@@ -139,8 +140,8 @@ public class StagingArea {
         };
     }
 
-    public static String uploadFromStream(final InputStream in) throws IOException {
-        final Entry<String, OutputStream> outEntry = createUploadStream();
+    public String uploadFromStream(final InputStream in) throws IOException {
+        final Entry<String, OutputStream> outEntry = newUploadStream();
 
         final byte[] buffer = new byte[8192];
         try (final OutputStream out = outEntry.getValue()) {
@@ -152,9 +153,19 @@ public class StagingArea {
 
         return outEntry.getKey();
     }
+    
+    @Override
+    public void deleteSafely(final String stagingFilename) {
+        try {
+            delete(stagingFilename);
+        } catch (IOException e) {
+            LOG.warn(
+                String.format("Failed to delete staging file %s (Reason: %s)", stagingFilename, e.getMessage()));
+        }
+    }
 
     @SuppressWarnings("resource")
-    public static void delete(String stagingFileName) throws IOException {
+    public void delete(String stagingFileName) throws IOException {
         validateStagingFileName(stagingFileName);
 
         final FileSystem fs = FileSystem.get(stagingAreaURI, hadoopConf);
@@ -164,14 +175,14 @@ public class StagingArea {
         }
     }
 
-    private static void validateStagingFileName(String stagingFileName) {
+    private void validateStagingFileName(String stagingFileName) {
         if (!STAGING_FILENAME_PATTERN.matcher(stagingFileName).matches()) {
             throw new IllegalArgumentException("Illegal name for staging file: " + stagingFileName);
         }
     }
 
     @SuppressWarnings("resource")
-    public static void cleanUp() {
+    public void cleanUp() {
         LOG.info("Cleaning up staging area for KNIME Spark jobs");
         try {
             final FileSystem fs = FileSystem.get(stagingAreaURI, hadoopConf);
@@ -184,15 +195,20 @@ public class StagingArea {
 
         LOG.info("Cleaning up local temp file directory for KNIME Spark jobs");
         try {
-            if (localTmpDir.exists()) {
-                final List<java.nio.file.Path> files =
-                    Files.walk(localTmpDir.toPath()).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-                for (java.nio.file.Path toDelete : files) {
-                    Files.deleteIfExists(toDelete);
-                }
+            if (Files.exists(localTmpDir)) {
+                deleteRecursively(localTmpDir);
             }
         } catch (IOException e) {
             LOG.error("Error while deleting local temp file directory of KNIME Spark jobs: " + e.getMessage(), e);
         }
     }
+    
+    private static void deleteRecursively(java.nio.file.Path toDelete) throws IOException {
+        final List<java.nio.file.Path> filesToDelete =
+            Files.walk(toDelete).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        for (java.nio.file.Path fileToDelete : filesToDelete) {
+            Files.deleteIfExists(fileToDelete);
+        }
+    }
+
 }

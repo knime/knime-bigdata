@@ -28,8 +28,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -39,7 +44,7 @@ import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
 
 /**
  * Utility class that (de)serializes objects from/to base64 encoded Strings.
- *  
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
@@ -63,6 +68,40 @@ public class Base64SerializationUtils {
         }
 
         return DatatypeConverter.printBase64Binary(baos.toByteArray());
+    }
+
+    /**
+     * Serializes the contents of the given file to a gzip-compressed Base64 string.
+     *
+     * @param file file that is supposed to be serialized to a Base64 string.
+     * @return gzip-compressed Base64 representation of given file contents.
+     *
+     */
+    public static String serializeToBase64Compressed(final Path file) {
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (GZIPOutputStream out = new GZIPOutputStream(baos)) {
+            Files.copy(file, out);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return DatatypeConverter.printBase64Binary(baos.toByteArray());
+    }
+
+    /**
+     * Deserializes the given gzip-compressed Base64 string into a file.
+     *
+     * @param base64String Gzip-compressed Base64 representation of desired file content.
+     * @param destFile File to write to.
+     */
+    public static void deserializeFromBase64Compressed(final String base64String, final Path destFile) {
+        try (InputStream in =
+            new GZIPInputStream(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64String)))) {
+            Files.copy(in, destFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

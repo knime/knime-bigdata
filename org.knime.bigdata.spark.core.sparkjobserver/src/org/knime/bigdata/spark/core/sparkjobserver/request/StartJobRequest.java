@@ -50,9 +50,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
 
     private final String m_jobserverJobClass;
 
-    private final JobInput m_jobInput;
-
-    private final List<String> m_inputFilesOnServer;
+    private final JobserverJobInput m_jsInput;
 
     private final String m_sparkJobClass;
 
@@ -66,7 +64,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
      * @param restClient
      * @param jobserverJobClass
      * @param sparkJobClass
-     * @param jobInput Job configuration rendered as HOCON
+     * @param jsInput Job configuration rendered as HOCON
      * @param inputFilesOnServer
      */
     public StartJobRequest(final SparkContextID contextId,
@@ -76,9 +74,9 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
         final RestClient restClient,
         final String jobserverJobClass,
         final String sparkJobClass,
-        final JobInput jobInput) {
+        final JobserverJobInput jsInput) {
 
-        this(contextId, contextConfig, jobserverAppName, prependUserToContextName, restClient, jobserverJobClass, sparkJobClass, jobInput, null);
+        this(contextId, contextConfig, jobserverAppName, prependUserToContextName, restClient, jobserverJobClass, sparkJobClass, jsInput, null);
     }
 
     /**
@@ -89,7 +87,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
      * @param restClient
      * @param jobserverJobClass
      * @param sparkJobClass
-     * @param jobInput Job configuration rendered as HOCON
+     * @param jsInput Job configuration rendered as HOCON
      * @param inputFilesOnServer
      */
     public StartJobRequest(final SparkContextID contextId,
@@ -99,7 +97,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
         final RestClient restClient,
         final String jobserverJobClass,
         final String sparkJobClass,
-        final JobInput jobInput,
+        final JobserverJobInput jsInput,
         final List<String> inputFilesOnServer) {
 
         super(contextId, contextConfig, restClient, JobserverConstants.MAX_REQUEST_ATTEMTPS);
@@ -107,8 +105,7 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
         m_prependUserToContextName = prependUserToContextName;
         m_jobserverJobClass = jobserverJobClass;
         m_sparkJobClass = sparkJobClass;
-        m_jobInput = jobInput;
-        m_inputFilesOnServer = inputFilesOnServer;
+        m_jsInput = jsInput;
     }
 
     /**
@@ -117,15 +114,8 @@ public class StartJobRequest extends AbstractJobserverRequest<JsonObject> {
     @Override
     protected JsonObject sendInternal() throws KNIMESparkException {
 
-        JobserverJobInput jsInput =
-            JobserverJobInput.createFromSparkJobInput(m_jobInput, m_sparkJobClass);
-
-        if (m_inputFilesOnServer != null) {
-            jsInput = jsInput.withFiles(m_inputFilesOnServer);
-        }
-
         final String serializedjsInput = TypesafeConfigSerializationUtils
-            .serializeToTypesafeConfig(jsInput.getInternalMap()).root().render(ConfigRenderOptions.concise());
+            .serializeToTypesafeConfig(m_jsInput).root().render(ConfigRenderOptions.concise());
 
         String contextName = m_config.getContextName();
         if (m_prependUserToContextName) {

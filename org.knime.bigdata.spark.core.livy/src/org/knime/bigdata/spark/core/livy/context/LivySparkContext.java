@@ -19,10 +19,8 @@
 package org.knime.bigdata.spark.core.livy.context;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -55,14 +53,13 @@ import org.knime.bigdata.spark.core.exception.SparkContextNotFoundException;
 import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobInput;
 import org.knime.bigdata.spark.core.livy.jobapi.LivyPrepareContextJobOutput;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaUtil;
+import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
 import org.knime.bigdata.spark.core.types.converter.spark.IntermediateToSparkConverterRegistry;
 import org.knime.bigdata.spark.core.util.TextTemplateUtil;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
-import org.knime.core.util.FileUtil;
 import org.knime.kerberos.api.KerberosProvider;
 import org.knime.kerberos.api.KerberosState;
 
@@ -268,11 +265,9 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
                 throw new SparkContextNotFoundException(getID());
             }
 
-            exec.setProgress(0.7, "Uploading Spark jobs");
+            exec.setProgress(0.6, "Uploading Spark jobs");
             uploadJobJar(exec);
-
-            exec.setProgress(0.9, "Running job to prepare context");
-            validateAndPrepareContext();
+            validateAndPrepareContext(exec);
             exec.setProgress(1);
         } catch (final Exception e) {
             // make sure we don't leave a broken context behind
@@ -291,9 +286,11 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         return contextWasCreated;
     }
 
-    private void validateAndPrepareContext() throws KNIMESparkException {
+    private void validateAndPrepareContext(final ExecutionMonitor exec) throws KNIMESparkException {
+        exec.setProgress(0.7, "Testing file upload on file system connection");
         final String stagingTestfileName = uploadStagingTestfile();
 
+        exec.setProgress(0.8, "Running job to prepare Spark context");
         final LivyPrepareContextJobInput prepInput = new LivyPrepareContextJobInput(getJobJar().getDescriptor().getHash(),
             getSparkVersion().toString(), getJobJar().getDescriptor().getPluginVersion(),
             IntermediateToSparkConverterRegistry.getConverters(getSparkVersion()),
@@ -308,36 +305,26 @@ public class LivySparkContext extends SparkContext<LivySparkContextConfig> {
         m_contextAttributes.sparkWebUI = output.getSparkWebUI();
         m_contextAttributes.sparkConf = output.getSparkConf();
 
+        exec.setProgress(0.9, "Testing file download on file system connection");
         downloadStagingTestfile(output.getTestfileName());
-
     }
 
     private void downloadStagingTestfile(final String testfileName) throws KNIMESparkException {
         try {
-            try (final InputStream in = m_remoteFSController.download(testfileName)) {
-                StagingAreaUtil.validateTestfileContent(in);
-            } finally {
-                m_remoteFSController.delete(testfileName);
-            }
+            StagingAreaTester.validateTestfileContent(m_remoteFSController, testfileName);
         } catch (final Exception e) {
             throw new KNIMESparkException("Remote file system download test failed: " + e.getMessage(), e);
+        } finally {
+            m_remoteFSController.deleteSafely(testfileName);
         }
+
     }
 
     private String uploadStagingTestfile() throws KNIMESparkException {
-        File tmpFile = null;
         try {
-            tmpFile = FileUtil.createTempFile("uploadtest", "livy");
-            try (final OutputStream out = new FileOutputStream(tmpFile)) {
-                StagingAreaUtil.writeTestfileContent(out);
-            }
-            return m_remoteFSController.upload(tmpFile);
+            return StagingAreaTester.writeTestfileContent(m_remoteFSController);
         } catch (final Exception e) {
             throw new KNIMESparkException("Remote file system upload test failed: " + e.getMessage(), e);
-        } finally {
-            if (tmpFile != null) {
-                tmpFile.delete();
-            }
         }
     }
 

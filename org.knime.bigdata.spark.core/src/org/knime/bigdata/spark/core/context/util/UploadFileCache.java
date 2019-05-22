@@ -20,7 +20,7 @@ w * This source code, its documentation and all appendant files
  */
 package org.knime.bigdata.spark.core.context.util;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +35,7 @@ import org.knime.core.util.Pair;
  */
 public class UploadFileCache {
 
-    private final Map<String, Pair<Long, String>> m_inputFileCopyCache = new HashMap<>();
+    private final Map<String, Pair<Long, Path>> m_inputFileCopyCache = new HashMap<>();
 
     /**
      * Adds cache entries for the given local/server files. If there is an existing cache entry for a local file, the
@@ -45,15 +45,17 @@ public class UploadFileCache {
      * @param serverFile
      * @return true if a cache entry was added or an existing one replaced, false otherwise. In this case the
      *         server-side file can be deleted and the existing (fresher) mapping can be queried with
-     *         {@link #tryToGetServerFileFromCache(File)}.
+     *         {@link #tryToGetServerFileFromCache(Path)}.
      */
-    public synchronized boolean addFilesToCache(final File localFile, final String serverFile) {
+    public synchronized boolean addFilesToCache(final Path localFile, final Path serverFile) {
 
-        Pair<Long, String> newCacheEntry = new Pair<Long, String>(localFile.lastModified(), serverFile);
-        Pair<Long, String> existingCacheEntry = m_inputFileCopyCache.get(localFile.getAbsolutePath());
+        final String normalizedLocalFile = localFile.normalize().toAbsolutePath().toString();
+
+        Pair<Long, Path> newCacheEntry = new Pair<Long, Path>(localFile.toFile().lastModified(), serverFile);
+        Pair<Long, Path> existingCacheEntry = m_inputFileCopyCache.get(normalizedLocalFile);
 
         if (existingCacheEntry == null || newCacheEntry.getFirst() > existingCacheEntry.getFirst()) {
-            m_inputFileCopyCache.put(localFile.getAbsolutePath(), newCacheEntry);
+            m_inputFileCopyCache.put(normalizedLocalFile, newCacheEntry);
             return true;
         } else {
             return false;
@@ -66,13 +68,13 @@ public class UploadFileCache {
      * @param file
      * @return true if a matching cache entry was found, false otherwise.
      */
-    public String tryToGetServerFileFromCache(final File file) {
-        String inputFilePath = file.getAbsolutePath();
+    public Path tryToGetServerFileFromCache(final Path file) {
+        String inputFilePath = file.normalize().toAbsolutePath().toString();
         if (m_inputFileCopyCache.containsKey(inputFilePath)) {
-            Pair<Long, String> mtimeAndServerPath = m_inputFileCopyCache.get(inputFilePath);
+            Pair<Long, Path> mtimeAndServerPath = m_inputFileCopyCache.get(inputFilePath);
 
             final long cachedModificationTime = mtimeAndServerPath.getFirst();
-            if (file.lastModified() == cachedModificationTime) {
+            if (file.toFile().lastModified() == cachedModificationTime) {
                 return mtimeAndServerPath.getSecond();
             }
         }

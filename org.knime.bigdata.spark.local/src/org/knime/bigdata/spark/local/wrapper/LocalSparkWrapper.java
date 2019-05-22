@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.JobData;
 import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 
@@ -43,7 +44,7 @@ public interface LocalSparkWrapper {
 
     /**
      * Runs a job described by the given map. Both the ingoing as well as the resulting map are assumed to be the output
-     * of {@link LocalSparkSerializationUtil#serializeToPlainJavaTypes(Map)}.
+     * of {@link LocalSparkSerializationUtil#serializeToPlainJavaTypes(JobData)}.
      * 
      * @param localSparkInputMap The serialized job input.
      * @param jobGroupId The job group id to be used when canceling the Spark job.

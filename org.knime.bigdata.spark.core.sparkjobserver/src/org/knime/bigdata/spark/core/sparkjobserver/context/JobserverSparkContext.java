@@ -151,14 +151,14 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
     }
 
     private void ensureJobserverAppname() throws KNIMESparkException {
-        m_jobserverAppName = createJobserverAppname(getSparkVersion(), getJobJar().getDescriptor().getHash());
+        m_jobserverAppName = createJobserverAppname(getJobJar().getDescriptor().getHash());
     }
 
     /**
      * @return the "app name" for the jobserver, which is an identifier for the uploaded job jar, that has to be
      *         specified with each job.
      */
-    private String createJobserverAppname(final SparkVersion sparkVersion, final String jobJarHash) {
+    private String createJobserverAppname(final String jobJarHash) {
         final String knimeInstanceID = KNIMEConstants.getKNIMEInstanceID();
         return String.format("knimeJobs_%s_%s_spark-%s", knimeInstanceID.substring(knimeInstanceID.indexOf('-') + 1),
             jobJarHash, getSparkVersion().toString());
@@ -321,7 +321,7 @@ public class JobserverSparkContext extends SparkContext<JobServerSparkContextCon
     private void uploadJobJar() throws KNIMESparkException {
         LOGGER.debug(String.format("Uploading job jar: %s", getJobJar().getJarFile().getAbsolutePath()));
         // uploads or overwrites any existing jar file uploaded from this workspace
-        new UploadFileRequest(getID(), getConfiguration(), m_restClient, getJobJar().getJarFile(),
+        new UploadFileRequest(getID(), getConfiguration(), m_restClient, getJobJar().getJarFile().toPath(),
             JobserverConstants.buildJarPath(m_jobserverAppName)).send();
     }
 

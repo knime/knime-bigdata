@@ -1,6 +1,8 @@
 package org.knime.bigdata.spark1_2.base;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,8 +52,7 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         WrapperJobOutput toReturn;
 
         try {
-            final JobserverJobInput jsInput = JobserverJobInput.createFromMap(TypesafeConfigSerializationUtils
-                .deserializeFromTypesafeConfig(config, this.getClass().getClassLoader()));
+            final JobserverJobInput jsInput = TypesafeConfigSerializationUtils.deserializeJobserverJobInput(config);
 
             final JobInput input = jsInput.getSparkJobInput();
 
@@ -80,8 +81,8 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
             toReturn = WrapperJobOutput.failure(new KNIMESparkException(t));
         }
 
-        return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn.getInternalMap()).root()
-            .render(ConfigRenderOptions.concise());
+        return TypesafeConfigSerializationUtils.serializeToTypesafeConfig(toReturn).root()
+                .render(ConfigRenderOptions.concise());
     }
 
     /**
@@ -103,13 +104,12 @@ public class JobserverSparkJob extends KnimeSparkJobWithNamedRDD implements Name
         }
     }
 
-    private List<File> validateInputFiles(final JobserverJobInput jsInput) throws KNIMESparkException {
+    private static List<File> validateInputFiles(final JobserverJobInput jsInput) throws KNIMESparkException {
         List<File> inputFiles = new LinkedList<File>();
 
-        for (String pathToFile : jsInput.getFiles()) {
-            File inputFile = new File(pathToFile);
-            if (inputFile.canRead()) {
-                inputFiles.add(inputFile);
+        for (Path pathToFile : jsInput.getFiles()) {
+            if (Files.isReadable(pathToFile)) {
+                inputFiles.add(pathToFile.toFile());
             } else {
                 throw new KNIMESparkException("Cannot read input file on jobserver: " + pathToFile);
             }

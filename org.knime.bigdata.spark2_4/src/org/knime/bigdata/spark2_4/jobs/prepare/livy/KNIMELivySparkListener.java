@@ -47,7 +47,7 @@ import org.apache.spark.scheduler.SparkListenerTaskGettingResult;
 import org.apache.spark.scheduler.SparkListenerTaskStart;
 import org.apache.spark.scheduler.SparkListenerUnpersistRDD;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.livy.jobapi.StagingArea;
+import org.knime.bigdata.spark.core.livy.jobapi.SparkSideStagingArea;
 
 /**
  * Spark listener that cleans up the staging area and local temp files when the Spark context ends.
@@ -62,7 +62,7 @@ public class KNIMELivySparkListener implements SparkListenerInterface {
      */
     @Override
     public void onApplicationEnd(final SparkListenerApplicationEnd endEvent) {
-        StagingArea.cleanUp();
+        SparkSideStagingArea.SINGLETON_INSTANCE.cleanUp();
     }
 
     /**

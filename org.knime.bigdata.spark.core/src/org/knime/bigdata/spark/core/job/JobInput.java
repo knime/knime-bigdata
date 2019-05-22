@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.core.job;
 
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -292,5 +293,22 @@ public abstract class JobInput extends JobData {
     public <T extends JobInput> T withNamedOutputObjects(final Collection<String> names) {
         addNamedOutputObjects(names);
         return (T) this;
+    }
+
+    /**
+     * Adds the given path -- which must point to a regular file -- to this job output. Files added this way will be
+     * transferred transparently from Spark to KNIME.
+     *
+     * <p>
+     * IMPORTANT: Local files added with this method will be deleted automatically on the Spark-side once they have been
+     * transferred to KNIME. Hence do not add files you want to keep until after the job.
+     * </p>
+     *
+     * @param path The file to transfer.
+     * @return this object, with the given file added
+     */
+    @Override
+    public <T extends JobData> T withFile(final Path path) {
+        return super.withFile(path);
     }
 }

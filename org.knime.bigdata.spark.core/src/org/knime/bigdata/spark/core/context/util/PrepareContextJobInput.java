@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark.core.context.util;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.knime.bigdata.spark.core.job.JobInput;
@@ -60,7 +61,10 @@ public class PrepareContextJobInput extends JobInput {
         set(KEY_JOB_JAR_HASH, jobJarHash);
         set(KEY_SPARK_VERSION, sparkVersion);
         set(KEY_KNIME_PLUGIN_VERSION, pluginVersion);
-        set(KEY_TYPE_CONVERTERS, typeConverters);
+        // we have to base64 encode the converters because in the case of Livy,
+        // some initialization is necessary (staging area), before complex objects
+        // can be deserialized.
+        set(KEY_TYPE_CONVERTERS, Base64SerializationUtils.serializeToBase64(typeConverters));
     }
 
     /**
@@ -89,7 +93,13 @@ public class PrepareContextJobInput extends JobInput {
      */
     @SuppressWarnings("unchecked")
     public <T> List<IntermediateToSparkConverter<T>> getTypeConverters() {
-        return (List<IntermediateToSparkConverter<T>>) get(KEY_TYPE_CONVERTERS);
+        final String base64 = get(KEY_TYPE_CONVERTERS);
+        try {
+            return (List<IntermediateToSparkConverter<T>>)Base64SerializationUtils.deserializeFromBase64(base64,
+                getClass().getClassLoader());
+        } catch (ClassNotFoundException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static PrepareContextJobInput create() {

@@ -20,7 +20,7 @@
  */
 package org.knime.bigdata.spark.core.sparkjobserver.request;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -42,17 +42,18 @@ public class UploadFileRequest extends AbstractJobserverRequest<String> {
 
     private final static NodeLogger LOGGER = NodeLogger.getLogger(GetJarsRequest.class);
 
-    private final File m_localFile;
+    private final Path m_localFile;
 
     private final String m_remotePath;
 
     /**
+     * @param contextId 
      * @param contextConfig
      * @param restClient
      * @param localFile
      * @param remotePath
      */
-    public UploadFileRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final File localFile,
+    public UploadFileRequest(final SparkContextID contextId, final JobServerSparkContextConfig contextConfig, final RestClient restClient, final Path localFile,
         final String remotePath) {
         super(contextId, contextConfig, restClient);
 
@@ -65,7 +66,7 @@ public class UploadFileRequest extends AbstractJobserverRequest<String> {
      */
     @Override
     protected String sendInternal() throws KNIMESparkException {
-        Response response = m_client.post(m_remotePath, null, Entity.entity(m_localFile, MediaType.APPLICATION_OCTET_STREAM));
+        Response response = m_client.post(m_remotePath, null, Entity.entity(m_localFile.toFile(), MediaType.APPLICATION_OCTET_STREAM));
 
         final ParsedResponse parsedResponse =
                 JobserverResponseParser.parseResponse(response.getStatus(), readResponseAsString(response));
@@ -106,7 +107,7 @@ public class UploadFileRequest extends AbstractJobserverRequest<String> {
 
         switch (parsedResponse.getFailureReason()) {
             case JAR_INVALID:
-                return new KNIMESparkException("Spark jobserver rejected jar file to be uploaded: " + m_localFile.getAbsolutePath());
+                return new KNIMESparkException("Spark jobserver rejected jar file to be uploaded: " + m_localFile.toAbsolutePath().toString());
             case DATAFILE_STORING_FAILED:
                 return new KNIMESparkException("Spark jobserver refused to store an uploaded file. Details can be found in the server-side Spark jobserver log.");
             default:

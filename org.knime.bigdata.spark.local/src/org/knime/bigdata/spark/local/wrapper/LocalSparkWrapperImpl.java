@@ -95,8 +95,9 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		WrapperJobOutput toReturn;
 
 		try {
-			final LocalSparkJobInput localSparkInput = LocalSparkJobInput.createFromMap(LocalSparkSerializationUtil
-					.deserializeFromPlainJavaTypes(localSparkInputMap, getClass().getClassLoader()));
+			final LocalSparkJobInput localSparkInput = new LocalSparkJobInput(); 
+			LocalSparkSerializationUtil.deserializeFromPlainJavaTypes(localSparkInputMap, getClass().getClassLoader(), localSparkInput);
+			
 			final JobInput jobInput = localSparkInput.getSparkJobInput();
 
 			Object sparkJob = getClass().getClassLoader().loadClass(localSparkInput.getSparkJobClass()).newInstance();
@@ -137,7 +138,7 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 			Thread.currentThread().setContextClassLoader(origContextClassLoader);
 		}
 
-		return LocalSparkSerializationUtil.serializeToPlainJavaTypes(toReturn.getInternalMap());
+		return LocalSparkSerializationUtil.serializeToPlainJavaTypes(toReturn);
 	}
 
     /**
@@ -180,26 +181,25 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
         m_sparkSession.sparkContext().cancelJobGroup(jobGroupId);
     }
 
-    private List<File> copyInputFiles(final LocalSparkJobInput jsInput) throws KNIMESparkException, IOException {
+    private List<File> copyInputFiles(final LocalSparkJobInput localSparkInput) throws KNIMESparkException, IOException {
 		List<File> inputFileCopies = new LinkedList<>();
 
-		for (String pathToFile : jsInput.getFiles()) {
-			final File inputFile = new File(pathToFile);
-			if (inputFile.canRead()) {
+		for (Path inputFile : localSparkInput.getFiles()) {
+			if (Files.isReadable(inputFile)) {
 				inputFileCopies.add(copyJobInputFile(inputFile));
 			} else {
-				throw new KNIMESparkException("Cannot read job input file: " + pathToFile);
+				throw new KNIMESparkException("Cannot read job input file: " + inputFile.toString() );
 			}
 		}
 
 		return inputFileCopies;
 	}
 
-	private File copyJobInputFile(File inputFile) throws IOException {
-		final File inputFileCopy = Files.createTempFile(m_jobInputFileCopyDir.toPath(), null, inputFile.getName()).toFile();
-		Files.copy(inputFile.toPath(), inputFileCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
+	private File copyJobInputFile(Path inputFile) throws IOException {
+		final Path inputFileCopy = Files.createTempFile(m_jobInputFileCopyDir.toPath(), null, inputFile.getFileName().toString());
+		Files.copy(inputFile, inputFileCopy, StandardCopyOption.REPLACE_EXISTING);
 		
-		return inputFileCopy;
+		return inputFileCopy.toFile();
 	}
 
 	private void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {
