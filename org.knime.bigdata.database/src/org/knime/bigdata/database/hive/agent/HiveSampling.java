@@ -51,7 +51,7 @@ package org.knime.bigdata.database.hive.agent;
 import org.knime.database.SQLQuery;
 import org.knime.database.agent.sampling.DBSampling;
 import org.knime.database.agent.sampling.impl.DefaultDBSampling;
-import org.knime.database.session.DBSession;
+import org.knime.database.session.DBSessionReference;
 
 /**
  * Hive specific implementation of {@link DBSampling}.
@@ -63,9 +63,9 @@ public class HiveSampling extends DefaultDBSampling {
     /**
      * Constructs a HiveSampling object.
      *
-     * @param session the {@link DBSession} object
+     * @param session the {@link DBSessionReference} object
      */
-    public HiveSampling(final DBSession session) {
+    public HiveSampling(final DBSessionReference session) {
         super(session);
     }
 

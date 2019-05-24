@@ -80,9 +80,9 @@ public class HiveAgentFactory extends AbstractDBAgentFactory {
     */
    public HiveAgentFactory() {
         putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
-        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSession()));
+        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
         putCreator(DBBinner.class, parameters -> {
-            return new HiveCaseSupportedBinner(parameters.getSession());
+            return new HiveCaseSupportedBinner(parameters.getSessionReference());
         });
    }
 

@@ -48,19 +48,19 @@
  */
 package org.knime.bigdata.database.hive.agent;
 
-import org.knime.database.agent.binning.impl.CaseSupportedDBBinner;
-import org.knime.database.session.DBSession;
+import org.knime.database.agent.binning.impl.DefaultDBBinner;
+import org.knime.database.session.DBSessionReference;
 
 /**
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveCaseSupportedBinner extends CaseSupportedDBBinner {
+public class HiveCaseSupportedBinner extends DefaultDBBinner {
 
     /**
-     * @param session
+     * @param session the {@link DBSessionReference}
      */
-    public HiveCaseSupportedBinner(final DBSession session) {
+    public HiveCaseSupportedBinner(final DBSessionReference session) {
         super(session);
     }
 
