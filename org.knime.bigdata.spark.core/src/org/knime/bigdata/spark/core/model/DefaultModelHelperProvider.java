@@ -31,7 +31,7 @@ public class DefaultModelHelperProvider extends DefaultSparkProvider<ModelHelper
 
     /**
      * @param checker the {@link CompatibilityChecker}
-     * @param helper the {@link ModelHelper}
+     * @param helper the {@link MLlibModelHelper}
      */
     public DefaultModelHelperProvider(final CompatibilityChecker checker, final ModelHelper... helper) {
         super(checker, helper);

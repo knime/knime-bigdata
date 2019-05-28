@@ -33,14 +33,14 @@ import org.knime.bigdata.spark.core.util.CustomClassLoadingObjectInputStream;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class DefaultModelHelper implements ModelHelper {
+public abstract class DefaultMLlibModelHelper implements MLlibModelHelper {
 
     private final String m_modelName;
 
     /**
      * @param modelName the unique name of the model
      */
-    public DefaultModelHelper(final String modelName) {
+    public DefaultMLlibModelHelper(final String modelName) {
         m_modelName = modelName;
     }
 

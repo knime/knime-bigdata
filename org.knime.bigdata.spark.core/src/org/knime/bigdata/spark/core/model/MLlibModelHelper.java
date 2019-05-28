@@ -18,20 +18,33 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_4.api;
+package org.knime.bigdata.spark.core.model;
 
-import org.knime.bigdata.spark.core.model.DefaultModelHelper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class Spark_2_4_ModelHelper extends DefaultModelHelper {
+public interface MLlibModelHelper extends ModelHelper<MLlibModel> {
 
     /**
-     * @param modelName
+     * @param inputStream {@link InputStream} to read from
+     * @return the serializable model
+     * @throws IOException
      */
-    public Spark_2_4_ModelHelper(final String modelName) {
-        super(modelName);
-    }
+    public Serializable loadModel(final InputStream inputStream) throws IOException;
+
+    /**
+     * @param outputStream {@link OutputStream} to write to
+     * @param model the model to write to the {@link OutputStream}
+     * @throws IOException
+     */
+    public void saveModel(final OutputStream outputStream, final Serializable model) throws IOException;
+
 }

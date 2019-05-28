@@ -16,7 +16,7 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on Apr 13, 2016 by bjoern
+ *   Created on May 25, 2019 by bjoern
  */
 package org.knime.bigdata.spark.core.model;
 
@@ -26,31 +26,19 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.SparkModel;
 
 /**
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author bjoern
+ * @param <T> The concrete subtype of Spark model.
  */
-public interface ModelHelper {
+public interface ModelHelper<T extends SparkModel> {
 
     /**
      * @return the unique name of the model
      */
     public String getModelName();
-
-    /**
-     * @param inputStream {@link InputStream} to read from
-     * @return the serializable model
-     * @throws IOException
-     */
-    public Serializable loadModel(final InputStream inputStream) throws IOException;
-
-    /**
-     * @param outputStream {@link OutputStream} to write to
-     * @param model the model to write to the {@link OutputStream}
-     * @throws IOException
-     */
-    public void saveModel(final OutputStream outputStream, final Serializable model) throws IOException;
 
     /**
      * @param inputStream {@link InputStream} to read from
@@ -60,7 +48,7 @@ public interface ModelHelper {
     public Serializable loadMetaData(final InputStream inputStream) throws IOException;
 
     /**
-     * @param outputStream {@link OutputStream} to wrtie to
+     * @param outputStream {@link OutputStream} to write to
      * @param modelMetadata the model meta data to write
      * @throws IOException
      */
@@ -70,5 +58,6 @@ public interface ModelHelper {
      * @return the {@link ModelInterpreter} for this model type with the given nane
      * @see #getModelName()
      */
-    public ModelInterpreter getModelInterpreter();
+    public ModelInterpreter<T> getModelInterpreter();
+
 }

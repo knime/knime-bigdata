@@ -25,11 +25,12 @@ import java.io.Serializable;
 import javax.swing.JComponent;
 
 /**
- * Interface that describes a {@link SparkModel} interpreter.
+ * Interface that describes a {@link MLlibModel} interpreter.
  *
  * @author Tobias Koetter, KNIME.com
+ * @param <T> The concrete subtype of Spark model.
  */
-public interface ModelInterpreter extends Serializable {
+public interface ModelInterpreter<T extends SparkModel> extends Serializable {
 
     /**
      * @return the unique name of the model
@@ -37,14 +38,14 @@ public interface ModelInterpreter extends Serializable {
     public String getModelName();
 
     /**
-     * @param sparkModel the {@link SparkModel}
+     * @param sparkModel the {@link MLlibModel}
      * @return the {@link JComponent} views of the model
      */
-    public JComponent[] getViews(SparkModel sparkModel);
+    public JComponent[] getViews(T sparkModel);
 
     /**
-     * @param sparkModel the {@link SparkModel}
+     * @param sparkModel the {@link MLlibModel}
      * @return summary of the model to show in the port tooltip
      */
-    public String getSummary(SparkModel sparkModel);
+    public String getSummary(T sparkModel);
 }

@@ -20,7 +20,7 @@
  */
 package org.knime.bigdata.spark.node.pmml.converter;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -59,7 +59,7 @@ public class PMMLPortObjectFactoryProviderRegistry
      * @throws InvalidSettingsException
      */
     public static final PMMLPortObject create(final SparkModelPortObject port) throws InvalidSettingsException {
-        final SparkModel model = port.getModel();
+        final MLlibModel model = port.getModel();
         final PMMLPortObjectFactory converter = getConverter(model.getSparkVersion(), model.getModelName());
         if (converter == null) {
             throw new UnsupportedOperationException("No PMML converter found for model: " + model.getModelName());

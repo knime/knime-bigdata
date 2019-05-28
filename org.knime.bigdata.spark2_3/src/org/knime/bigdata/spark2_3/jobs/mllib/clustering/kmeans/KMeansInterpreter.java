@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.spark.ml.clustering.KMeansModel;
 import org.apache.spark.ml.linalg.Vector;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 
@@ -33,7 +33,7 @@ import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class KMeansInterpreter extends HTMLModelInterpreter {
+public class KMeansInterpreter extends HTMLModelInterpreter<MLlibModel> {
 
     private static final long serialVersionUID = 1L;
 
@@ -71,7 +71,7 @@ public class KMeansInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel model) {
+    public String getSummary(final MLlibModel model) {
         final Vector[] clusterCenters = ((KMeansModel)model.getModel()).clusterCenters();
         return "No of cluster centers: " + clusterCenters.length;
     }
@@ -80,7 +80,7 @@ public class KMeansInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getHTMLDescription(final SparkModel model) {
+    public String getHTMLDescription(final MLlibModel model) {
         final Vector[] clusterCenters = ((KMeansModel)model.getModel()).clusterCenters();
         final NumberFormat nf = getNumberFormat();
         final StringBuilder buf = new StringBuilder();

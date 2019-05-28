@@ -26,7 +26,7 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.knime.base.node.mine.cluster.PMMLClusterTranslator;
 import org.knime.base.node.mine.cluster.PMMLClusterTranslator.ComparisonMeasure;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
 import org.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
 import org.knime.core.data.DataTableSpec;
@@ -41,7 +41,7 @@ import org.knime.core.node.port.pmml.PMMLPortObjectSpecCreator;
 public class KMeansModelPMMLPortObjectFactory implements PMMLPortObjectFactory {
 
     @Override
-    public PMMLPortObject convert(final SparkModel knimeModel) throws InvalidSettingsException {
+    public PMMLPortObject convert(final MLlibModel knimeModel) throws InvalidSettingsException {
         final DataTableSpec learnerSpec = knimeModel.getTableSpec();
         PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(learnerSpec);
         creator.setLearningCols(learnerSpec);

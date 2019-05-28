@@ -22,13 +22,13 @@ package org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
-import org.knime.bigdata.spark2_1.api.Spark_2_1_ModelHelper;
+import org.knime.bigdata.spark2_1.api.Spark_2_1_MLlibModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class SVMModelHelper extends Spark_2_1_ModelHelper {
+public class SVMModelHelper extends Spark_2_1_MLlibModelHelper {
 
     /**
      * Constructor.

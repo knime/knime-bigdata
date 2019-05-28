@@ -22,13 +22,13 @@ package org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.collaborativefiltering;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
-import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
+import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_MLlibModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class CollaborativeFilteringModelHelper extends Spark_1_6_CDH5_9_ModelHelper {
+public class CollaborativeFilteringModelHelper extends Spark_1_6_CDH5_9_MLlibModelHelper {
 
     /**Constructor.*/
     public CollaborativeFilteringModelHelper() {

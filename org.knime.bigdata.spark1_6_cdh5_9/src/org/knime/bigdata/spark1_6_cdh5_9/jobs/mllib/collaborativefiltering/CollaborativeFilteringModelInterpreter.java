@@ -20,7 +20,7 @@
  */
 package org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.collaborativefiltering;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.collaborativefiltering.MLlibCollaborativeFilteringNodeModel;
 import org.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering.CollaborativeFilteringModel;
@@ -29,7 +29,7 @@ import org.knime.bigdata.spark1_6.jobs.mllib.collaborativefiltering.Collaborativ
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter {
+public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter<MLlibModel> {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,7 +66,7 @@ public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel sparkModel) {
+    public String getSummary(final MLlibModel sparkModel) {
         final CollaborativeFilteringModel model = (CollaborativeFilteringModel)sparkModel.getModel();
         return "Rank: " + model.rank(); //TODO - what is this? + " Log name: " + model.logName();
     }
@@ -75,7 +75,7 @@ public class CollaborativeFilteringModelInterpreter extends HTMLModelInterpreter
      * {@inheritDoc}
      */
     @Override
-    protected String getHTMLDescription(final SparkModel sparkModel) {
+    protected String getHTMLDescription(final MLlibModel sparkModel) {
         final CollaborativeFilteringModel model = (CollaborativeFilteringModel)sparkModel.getModel();
 //        StringBuilder buf = new StringBuilder();
 //        RDD<Tuple2<Object, double[]>> userFeatures = model.userFeatures();

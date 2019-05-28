@@ -22,7 +22,7 @@ package org.knime.bigdata.spark1_2.jobs.mllib.prediction.linear.regression;
 
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
 import org.knime.bigdata.spark1_2.jobs.mllib.prediction.linear.GeneralizedLinearModelPMMLPortObjectFactory;
 import org.knime.core.data.DataTableSpec;
@@ -49,9 +49,9 @@ public class LinearRegressionModelPMMLPortObjectFactory extends GeneralizedLinea
      * {@inheritDoc}
      */
     @Override
-    public PMMLPortObject convert(final SparkModel knimeModel) throws InvalidSettingsException {
+    public PMMLPortObject convert(final MLlibModel knimeModel) throws InvalidSettingsException {
         final DataTableSpec learnerSpec = knimeModel.getTableSpec();
-        final String targetField = knimeModel.getClassColumnName();
+        final String targetField = knimeModel.getTargetColumnName();
         PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(learnerSpec);
         creator.setLearningCols(learnerSpec);
         creator.setTargetColName(targetField);

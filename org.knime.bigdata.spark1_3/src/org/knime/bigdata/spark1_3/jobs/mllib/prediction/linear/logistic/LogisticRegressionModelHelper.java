@@ -22,13 +22,13 @@ package org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.logistic;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
-import org.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
+import org.knime.bigdata.spark1_3.api.Spark_1_3_MLlibModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LogisticRegressionModelHelper extends Spark_1_3_ModelHelper {
+public class LogisticRegressionModelHelper extends Spark_1_3_MLlibModelHelper {
 
     /**
      * Constructor.

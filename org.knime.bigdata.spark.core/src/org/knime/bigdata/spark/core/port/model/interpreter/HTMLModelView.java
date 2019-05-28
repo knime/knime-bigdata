@@ -28,11 +28,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 
 /**
- * HTML panel that describes the given {@link SparkModel}.
+ * HTML panel that describes the given {@link MLlibModel}.
  * @author Tobias Koetter, KNIME.com
  */
 class HTMLModelView extends JPanel {
@@ -51,9 +52,9 @@ class HTMLModelView extends JPanel {
         buf.append("<tt>" + model.getModelName() + "</tt>");
 //        buf.append("<strong>Learning columns:</strong>&nbsp;&nbsp;");
 //        buf.append(model.getLearningColumnNames());
-        if (model.getClassColumnName() != null) {
+        if (model.getTargetColumnName() != null) {
             buf.append("&nbsp;&nbsp;<strong>Class Column:</strong>&nbsp;&nbsp;");
-            buf.append(model.getClassColumnName());
+            buf.append(model.getTargetColumnName());
         }
         buf.append("<br/><hr>");
 //        buf.append("<strong>Details:</strong>&nbsp;&nbsp;<br><hr>");

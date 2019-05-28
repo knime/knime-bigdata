@@ -20,7 +20,7 @@
  */
 package org.knime.bigdata.spark.node.pmml.converter;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.pmml.PMMLPortObject;
 
@@ -37,9 +37,9 @@ public interface PMMLPortObjectFactory {
     public String getModelName();
 
     /**
-     * @param sparkModel {@link SparkModel} to convert
+     * @param sparkModel {@link MLlibModel} to convert
      * @return {@link PMMLPortObject}
      * @throws InvalidSettingsException if the model is invalid
      */
-    public PMMLPortObject convert(final SparkModel sparkModel) throws InvalidSettingsException;
+    public PMMLPortObject convert(final MLlibModel sparkModel) throws InvalidSettingsException;
 }

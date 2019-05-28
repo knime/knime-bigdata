@@ -31,7 +31,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
@@ -108,7 +108,7 @@ public class MLlibClusterAssignerNodeModel extends SparkNodeModel {
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-        final SparkModel model = ((SparkModelPortObject)inObjects[0]).getModel();
+        final MLlibModel model = ((SparkModelPortObject)inObjects[0]).getModel();
         final SparkDataPortObject data = (SparkDataPortObject)inObjects[1];
         final JobWithFilesRunFactory<PredictionJobInput, EmptyJobOutput> jobProvider =
                 SparkContextUtil.getJobWithFilesRunFactory(data.getContextID(), MLlibPredictorNodeModel.JOB_ID);

@@ -18,20 +18,20 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_2.api;
+package org.knime.bigdata.spark2_4.api;
 
-import org.knime.bigdata.spark.core.model.DefaultModelHelper;
+import org.knime.bigdata.spark.core.model.DefaultMLlibModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public abstract class Spark_2_2_ModelHelper extends DefaultModelHelper {
+public abstract class Spark_2_4_MLlibModelHelper extends DefaultMLlibModelHelper {
 
     /**
      * @param modelName
      */
-    public Spark_2_2_ModelHelper(final String modelName) {
+    public Spark_2_4_MLlibModelHelper(final String modelName) {
         super(modelName);
     }
 }

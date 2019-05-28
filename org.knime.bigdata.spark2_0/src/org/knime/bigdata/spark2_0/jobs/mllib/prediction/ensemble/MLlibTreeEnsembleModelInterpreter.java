@@ -39,8 +39,8 @@ import org.apache.spark.mllib.tree.configuration.Algo;
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.decisiontree.TreeNode2_0;
@@ -56,7 +56,7 @@ import scala.Enumeration.Value;
  * @param <M> {@link TreeEnsembleModel} implementation
  */
 public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleModel> implements
-    ModelInterpreter {
+    ModelInterpreter<MLlibModel> {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,7 +66,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel model) {
+    public String getSummary(final MLlibModel model) {
         @SuppressWarnings("unchecked")
         final M treeModel = (M)model.getModel();
         return "Number of trees: " + treeModel.numTrees() + " / Total number of nodes: " + treeModel.totalNumNodes();
@@ -76,12 +76,12 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
      * {@inheritDoc}
      */
     @Override
-    public JComponent[] getViews(final SparkModel decisionTreeModel) {
+    public JComponent[] getViews(final MLlibModel decisionTreeModel) {
 
         return new JComponent[]{getTreePanel(decisionTreeModel)};
     }
 
-    private JComponent getTreePanel(final SparkModel decisionTreeModel) {
+    private JComponent getTreePanel(final MLlibModel decisionTreeModel) {
         @SuppressWarnings("unchecked")
         final M ensembleModel = (M)decisionTreeModel.getModel();
         Value algo = ensembleModel.algo();
@@ -89,7 +89,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
         final DecisionTreeModel[] treeModel = ensembleModel.trees();
         final List<String> colNames = decisionTreeModel.getLearningColumnNames();
         final ColumnBasedValueMapping metaData = (ColumnBasedValueMapping)decisionTreeModel.getMetaData();
-        final String classColName = decisionTreeModel.getClassColumnName();
+        final String classColName = decisionTreeModel.getTargetColumnName();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());

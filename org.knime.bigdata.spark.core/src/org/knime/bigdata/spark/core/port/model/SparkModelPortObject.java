@@ -55,13 +55,13 @@ public class SparkModelPortObject implements PortObject {
      */
     private final SparkModelPortObjectSpec m_spec;
 
-    private final SparkModel m_model;
+    private final MLlibModel m_model;
 
     /**
      * Creates a new database port object.
      * @param model
      */
-    public SparkModelPortObject(final SparkModel model) {
+    public SparkModelPortObject(final MLlibModel model) {
         m_model = model;
         m_spec = model.getSpec();
     }
@@ -77,7 +77,7 @@ public class SparkModelPortObject implements PortObject {
     /**
      * @return the model
      */
-    public SparkModel getModel() {
+    public MLlibModel getModel() {
         return m_model;
     }
 
@@ -92,7 +92,7 @@ public class SparkModelPortObject implements PortObject {
         public void savePortObject(final SparkModelPortObject portObject,
             final PortObjectZipOutputStream out, final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-            SparkModel model = portObject.getModel();
+            MLlibModel model = portObject.getModel();
             model.write(exec, out);
         }
 
@@ -102,7 +102,7 @@ public class SparkModelPortObject implements PortObject {
         @Override
         public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in,
             final PortObjectSpec spec, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-            SparkModel model = SparkModel.load(exec, in);
+            MLlibModel model = MLlibModel.load(exec, in);
             return new SparkModelPortObject(model);
         }
     }

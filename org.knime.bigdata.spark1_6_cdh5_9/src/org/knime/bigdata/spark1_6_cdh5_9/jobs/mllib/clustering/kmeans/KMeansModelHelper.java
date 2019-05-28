@@ -22,13 +22,13 @@ package org.knime.bigdata.spark1_6_cdh5_9.jobs.mllib.clustering.kmeans;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
-import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_ModelHelper;
+import org.knime.bigdata.spark1_6_cdh5_9.api.Spark_1_6_CDH5_9_MLlibModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class KMeansModelHelper extends Spark_1_6_CDH5_9_ModelHelper {
+public class KMeansModelHelper extends Spark_1_6_CDH5_9_MLlibModelHelper {
 
     /**Constructor.*/
     public KMeansModelHelper() {

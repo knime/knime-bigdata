@@ -28,13 +28,13 @@ import java.io.ObjectInputStream;
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public interface LegacyModelHelper extends ModelHelper {
+public interface LegacyModelHelper extends MLlibModelHelper {
 
     /***/
     public final static String LEGACY_MODEL_NAME = "legacy";
 
     /**
-     * Inspects the given model instance and tries to guess the unique model name under which a real {@link ModelHelper}
+     * Inspects the given model instance and tries to guess the unique model name under which a real {@link MLlibModelHelper}
      * is available. This is used when loading old workflows that did not save the model name, just the model instance.
      *
      * @param modelInstance

@@ -32,7 +32,7 @@ import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
 import org.knime.bigdata.spark.node.mllib.prediction.predictor.MLlibPredictorNodeModel;
@@ -216,7 +216,7 @@ public class MLlibCollaborativeFilteringNodeModel extends SparkNodeModel {
                 resultCol, lambda, alpha, iterations, rank, implicitPrefs, noOfBlocks, seed);
         exec.setMessage("Running Collaborative filtering job");
         final CollaborativeFilteringJobOutput output = runFactory.createRun(jobInput).run(data.getContextID());
-        final SparkModel sparkModel = new SparkModel(
+        final MLlibModel sparkModel = new MLlibModel(
             SparkContextManager.getOrCreateSparkContext(data.getContextID()).getSparkVersion(), MODEL_NAME,
             output.getModel(), settings);
         //add the model RDDs to the list of RDDs to delete on reset

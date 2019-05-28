@@ -24,7 +24,7 @@ import java.text.NumberFormat;
 import java.util.List;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
 
@@ -32,7 +32,7 @@ import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayes
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class NaiveBayesInterpreter extends HTMLModelInterpreter {
+public class NaiveBayesInterpreter extends HTMLModelInterpreter<MLlibModel> {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +69,7 @@ public class NaiveBayesInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel model) {
+    public String getSummary(final MLlibModel model) {
         final NaiveBayesModel naiveBayesModel = (NaiveBayesModel)model.getModel();
         return "No of labels: " + naiveBayesModel.labels().length;
     }
@@ -78,7 +78,7 @@ public class NaiveBayesInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getHTMLDescription(final SparkModel model) {
+    public String getHTMLDescription(final MLlibModel model) {
         final NaiveBayesModel naiveBayesModel = (NaiveBayesModel)model.getModel();
         double[][] theta = naiveBayesModel.theta();
         List<String> featureColumnNames = model.getLearningColumnNames();

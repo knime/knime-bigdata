@@ -22,13 +22,13 @@ package org.knime.bigdata.spark1_5.jobs.mllib.prediction.linear.regression;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
-import org.knime.bigdata.spark1_5.api.Spark_1_5_ModelHelper;
+import org.knime.bigdata.spark1_5.api.Spark_1_5_MLlibModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class LinearRegressionModelHelper extends Spark_1_5_ModelHelper {
+public class LinearRegressionModelHelper extends Spark_1_5_MLlibModelHelper {
 
     /**
      * Constructor.

@@ -21,13 +21,14 @@
 package org.knime.bigdata.spark.core.port.model;
 
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
+import org.knime.bigdata.spark.core.model.MLlibModelHelper;
 import org.knime.bigdata.spark.core.model.ModelHelper;
 import org.knime.bigdata.spark.core.model.ModelHelperProvider;
 import org.knime.bigdata.spark.core.version.DefaultSparkProviderRegistry;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 
 /**
- * Registry for {@link ModelHelper} that allow the interpretation of Spark models.
+ * Registry for {@link MLlibModelHelper} that allow the interpretation of Spark models.
  *
  * @author Tobias Koetter, KNIME.com
  */
@@ -64,10 +65,10 @@ public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, Mo
     /**
      * @param modelName the unique model name
      * @param sparkVersion Spark version
-     * @return the corresponding {@link ModelHelper}
+     * @return the corresponding {@link MLlibModelHelper}
      * @throws MissingSparkModelHelperException if no compatible Spark model helper could be found
      */
-    public static ModelHelper getModelHelper(final String modelName, final SparkVersion sparkVersion)
+    public static <T extends ModelHelper> T getModelHelper(final String modelName, final SparkVersion sparkVersion)
         throws MissingSparkModelHelperException {
         final ModelHelper modelHelper = getInstance().get(modelName, sparkVersion);
         if (modelHelper == null) {
@@ -75,7 +76,7 @@ public class ModelHelperRegistry extends DefaultSparkProviderRegistry<String, Mo
                 String.format("No Spark model helper found for model type \"%s\" and Spark version %s", modelName,
                     sparkVersion.getLabel()));
         } else {
-            return modelHelper;
+            return (T)modelHelper;
         }
     }
 }

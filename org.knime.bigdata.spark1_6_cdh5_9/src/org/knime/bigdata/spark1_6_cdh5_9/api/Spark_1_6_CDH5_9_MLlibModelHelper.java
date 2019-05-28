@@ -18,28 +18,20 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_4.jobs.mllib.clustering.kmeans;
+package org.knime.bigdata.spark1_6_cdh5_9.api;
 
-import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.node.mllib.clustering.kmeans.MLlibKMeansNodeModel;
-import org.knime.bigdata.spark2_4.api.Spark_2_4_MLlibModelHelper;
+import org.knime.bigdata.spark.core.model.DefaultMLlibModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class KMeansModelHelper extends Spark_2_4_MLlibModelHelper {
-
-    /**Constructor.*/
-    public KMeansModelHelper() {
-        super(MLlibKMeansNodeModel.MODEL_NAME);
-    }
+public abstract class Spark_1_6_CDH5_9_MLlibModelHelper extends DefaultMLlibModelHelper {
 
     /**
-     * {@inheritDoc}
+     * @param modelName
      */
-    @Override
-    public ModelInterpreter getModelInterpreter() {
-        return KMeansInterpreter.getInstance();
+    public Spark_1_6_CDH5_9_MLlibModelHelper(final String modelName) {
+        super(modelName);
     }
 }

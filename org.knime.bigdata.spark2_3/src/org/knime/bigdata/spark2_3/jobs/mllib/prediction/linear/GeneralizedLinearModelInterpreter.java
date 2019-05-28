@@ -25,14 +25,14 @@ import java.util.List;
 
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.GeneralizedLinearModel;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.interpreter.HTMLModelInterpreter;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
+public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter<MLlibModel> {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,7 +58,7 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel sparkModel) {
+    public String getSummary(final MLlibModel sparkModel) {
         final GeneralizedLinearModel regressionModel = (GeneralizedLinearModel)sparkModel.getModel();
         final Vector weightsVec = regressionModel.weights();
         final NumberFormat nf = getNumberFormat();
@@ -70,7 +70,7 @@ public class GeneralizedLinearModelInterpreter extends HTMLModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    protected String getHTMLDescription(final SparkModel sparkModel) {
+    protected String getHTMLDescription(final MLlibModel sparkModel) {
         final GeneralizedLinearModel model = (GeneralizedLinearModel)sparkModel.getModel();
         final List<String> columnNames = sparkModel.getLearningColumnNames();
         final NumberFormat nf = getNumberFormat();

@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.spark.mllib.regression.GeneralizedLinearModel;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.NumericPredictor;
 import org.knime.base.node.mine.regression.PMMLRegressionTranslator.RegressionTable;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.node.pmml.converter.PMMLPortObjectFactory;
 import org.knime.core.node.InvalidSettingsException;
 
@@ -40,7 +40,7 @@ public abstract class GeneralizedLinearModelPMMLPortObjectFactory implements PMM
      * @return The regression table extrapolated from the model's intercept and weights
      * @throws InvalidSettingsException
      */
-    protected RegressionTable regressionTableFromModel(final SparkModel knimeModel) throws InvalidSettingsException {
+    protected RegressionTable regressionTableFromModel(final MLlibModel knimeModel) throws InvalidSettingsException {
         final GeneralizedLinearModel model = (GeneralizedLinearModel) knimeModel.getModel();
         final double intercept = model.intercept();
         final double[] weights = model.weights().toArray();

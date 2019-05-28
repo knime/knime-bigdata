@@ -22,7 +22,7 @@ package com.knime.bigdata.spark.port.model;
 
 import java.io.IOException;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortObjectSpec;
@@ -59,7 +59,7 @@ public class SparkModelPortObject extends org.knime.bigdata.spark.core.port.mode
         @Override
         public SparkModelPortObject loadPortObject(final PortObjectZipInputStream in, final PortObjectSpec spec,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-            SparkModel model = SparkModel.load(exec, in);
+            MLlibModel model = MLlibModel.load(exec, in);
             return new SparkModelPortObject(model);
         }
     }
@@ -67,7 +67,7 @@ public class SparkModelPortObject extends org.knime.bigdata.spark.core.port.mode
     /**
      * @param model
      */
-    public SparkModelPortObject(final SparkModel model) {
+    public SparkModelPortObject(final MLlibModel model) {
         super(model);
     }
 }

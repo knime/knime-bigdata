@@ -31,7 +31,7 @@ import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.bigdata.spark.core.node.SparkModelLearnerNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
@@ -98,7 +98,7 @@ public abstract class AbstractMLlibTreeNodeModel<I extends DecisionTreeJobInput,
         } else {
             metaData = null;
         }
-        return new SparkModelPortObject(new SparkModel(getSparkVersion(data), getModelName(), result.getModel(),
+        return new SparkModelPortObject(new MLlibModel(getSparkVersion(data), getModelName(), result.getModel(),
             settings.getSettings(data), metaData));
     }
 

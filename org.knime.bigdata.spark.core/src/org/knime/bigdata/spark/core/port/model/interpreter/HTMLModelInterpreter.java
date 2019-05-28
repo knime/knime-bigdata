@@ -25,15 +25,18 @@ import java.util.Locale;
 
 import javax.swing.JComponent;
 
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 
 /**
  * {@link ModelInterpreter} implementation that returns a single HTML panel with the
- * description of the {@link SparkModel}.
+ * description of the model.
+ *
  * @author Tobias Koetter, KNIME.com
+ * @param <T> The type of Spark model to interpret.
  */
-public abstract class HTMLModelInterpreter implements ModelInterpreter {
+public abstract class HTMLModelInterpreter<T extends SparkModel> implements ModelInterpreter<T> {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,14 +49,14 @@ public abstract class HTMLModelInterpreter implements ModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public JComponent[] getViews(final SparkModel sparkModel) {
+    public JComponent[] getViews(final T sparkModel) {
         final String htmlDesc = getHTMLDescription(sparkModel);
         return new JComponent[] {new HTMLModelView(sparkModel, htmlDesc)};
     }
 
     /**
-     * @param sparkModel the {@link SparkModel}
+     * @param sparkModel the {@link MLlibModel}
      * @return the HTML description of the model
      */
-    protected abstract String getHTMLDescription(SparkModel sparkModel);
+    protected abstract String getHTMLDescription(T sparkModel);
 }

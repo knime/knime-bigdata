@@ -22,13 +22,13 @@ package org.knime.bigdata.spark2_3.jobs.mllib.prediction.bayes.naive;
 
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.node.mllib.prediction.bayes.naive.MLlibNaiveBayesNodeModel;
-import org.knime.bigdata.spark2_3.api.Spark_2_3_ModelHelper;
+import org.knime.bigdata.spark2_3.api.Spark_2_3_MLlibModelHelper;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
-public class NaiveBayesModelHelper extends Spark_2_3_ModelHelper {
+public class NaiveBayesModelHelper extends Spark_2_3_MLlibModelHelper {
 
     /**Constructor.*/
     public NaiveBayesModelHelper() {

@@ -49,7 +49,7 @@ import org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest.MLlib
 import org.knime.bigdata.spark.node.mllib.prediction.linear.logisticregression.MLlibLogisticRegressionNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.regression.MLlibLinearRegressionNodeFactory;
 import org.knime.bigdata.spark.node.mllib.prediction.linear.svm.MLlibSVMNodeFactory;
-import org.knime.bigdata.spark1_3.api.Spark_1_3_ModelHelper;
+import org.knime.bigdata.spark1_3.api.Spark_1_3_MLlibModelHelper;
 import org.osgi.framework.FrameworkUtil;
 
 import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
@@ -59,7 +59,7 @@ import com.knime.bigdata.spark.jobserver.server.CollaborativeFilteringModel;
  * @author Bjoern Lohrmann, KNIME.com
  */
 @SuppressWarnings("deprecation")
-public class Spark_1_3_LegacyModelHelper extends Spark_1_3_ModelHelper implements LegacyModelHelper {
+public class Spark_1_3_LegacyModelHelper extends Spark_1_3_MLlibModelHelper implements LegacyModelHelper {
 
     private static final String LEGACY_KNIME_SPARK_JAR = "legacy-knime-spark-1.3.jar";
 

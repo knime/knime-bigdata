@@ -34,8 +34,8 @@ import javax.swing.SwingWorker;
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
@@ -46,7 +46,7 @@ import org.knime.core.node.NodeView;
 /**
  * @author Ole Ostergaard
  */
-public class DecisionTreeInterpreter implements ModelInterpreter {
+public class DecisionTreeInterpreter implements ModelInterpreter<MLlibModel> {
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(DecisionTreeInterpreter.class);
 
@@ -86,7 +86,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public String getSummary(final SparkModel model) {
+    public String getSummary(final MLlibModel model) {
         final DecisionTreeModel treeModel = (DecisionTreeModel)model.getModel();
         return String.format("Tree depth: %d / Number of nodes: %d", treeModel.depth(), treeModel.numNodes());
     }
@@ -95,7 +95,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
      * {@inheritDoc}
      */
     @Override
-    public JComponent[] getViews(final SparkModel aDecisionTreeModel) {
+    public JComponent[] getViews(final MLlibModel aDecisionTreeModel) {
         return new JComponent[]{getTreePanel(aDecisionTreeModel)};
     }
 
@@ -123,11 +123,11 @@ public class DecisionTreeInterpreter implements ModelInterpreter {
         return view;
     }
 
-    private JComponent getTreePanel(final SparkModel aDecisionTreeModel) {
+    private JComponent getTreePanel(final MLlibModel aDecisionTreeModel) {
         final DecisionTreeModel treeModel = (DecisionTreeModel) aDecisionTreeModel.getModel();
         final ColumnBasedValueMapping metaData = (ColumnBasedValueMapping)aDecisionTreeModel.getMetaData();
         final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
-        final String classColName = aDecisionTreeModel.getClassColumnName();
+        final String classColName = aDecisionTreeModel.getTargetColumnName();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());
