@@ -176,7 +176,6 @@ public class MLlibModel extends SparkModel {
      * @param classColName the name of the class column if appropriate otherwise <code>null</code>
      * @throws MissingSparkModelHelperException
      */
-    @SuppressWarnings("unchecked")
     public MLlibModel(final SparkVersion sparkVersion, final String modelName, final Serializable model,
         final DataTableSpec spec, final String classColName, final Serializable metaData)
             throws MissingSparkModelHelperException {
@@ -247,7 +246,7 @@ public class MLlibModel extends SparkModel {
         }
 
         final LegacyModelHelper legacySparkModelHelper =
-            (LegacyModelHelper)ModelHelperRegistry.getModelHelper(LegacyModelHelper.LEGACY_MODEL_NAME, sparkVersion);
+            ModelHelperRegistry.getModelHelper(LegacyModelHelper.LEGACY_MODEL_NAME, sparkVersion);
 
         try (final ObjectInputStream os = legacySparkModelHelper.getObjectInputStream(in)) {
             final String classColumnName = (String)os.readObject();

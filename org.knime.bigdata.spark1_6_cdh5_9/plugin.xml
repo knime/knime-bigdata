@@ -4,7 +4,7 @@
    <extension
          point="org.knime.bigdata.spark.core.ModelHelperProvider">
       <ModelHelperProvider
-            ProviderClass="org.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_ModelHelperProvider">
+            ProviderClass="org.knime.bigdata.spark1_6_cdh5_9.base.Spark_1_6_CDH5_9_MLlibModelHelperProvider">
       </ModelHelperProvider>
    </extension>
    <extension point="org.knime.bigdata.spark.node.PMMLPortObjectFactoryProvider">

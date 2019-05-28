@@ -38,7 +38,7 @@ import org.knime.core.node.port.PortTypeRegistry;
  * @author Tobias Koetter, KNIME.com
  */
 public class SparkModelPortObject implements PortObject {
-    //TODO: Should extendSparkContextPortObject
+
     /**
      * Spark model port type.
      */

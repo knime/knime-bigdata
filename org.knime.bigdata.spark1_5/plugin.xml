@@ -15,7 +15,7 @@
    <extension
          point="org.knime.bigdata.spark.core.ModelHelperProvider">
       <ModelHelperProvider
-            ProviderClass="org.knime.bigdata.spark1_5.base.Spark_1_5_ModelHelperProvider">
+            ProviderClass="org.knime.bigdata.spark1_5.base.Spark_1_5_MLlibModelHelperProvider">
       </ModelHelperProvider>
    </extension>
    <extension

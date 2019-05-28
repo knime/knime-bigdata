@@ -67,7 +67,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
          * @throws IOException if an I/O error occurs
          */
         @SuppressWarnings("resource")
-        protected ModelContentRO loadModelContent(final PortObjectSpecZipInputStream in) throws IOException {
+        public static ModelContentRO loadModelContent(final PortObjectSpecZipInputStream in) throws IOException {
             ZipEntry ze = in.getNextEntry();
             if (!ze.getName().equals(SPARK_MODEL)) {
                 throw new IOException("Key \"" + ze.getName() + "\" does not " + " match expected zip entry name \""
@@ -83,7 +83,7 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
          * @throws IOException if an I/O error occurs
          */
         @SuppressWarnings("resource")
-        protected void saveModelContent(final PortObjectSpecZipOutputStream os,
+        public static void saveModelContent(final PortObjectSpecZipOutputStream os,
             final SparkModelPortObjectSpec portObjectSpec) throws IOException {
             os.putNextEntry(new ZipEntry(SPARK_MODEL));
             portObjectSpec.m_model.saveToXML(new NonClosableOutputStream.Zip(os));
@@ -119,15 +119,6 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
      */
     public SparkModelPortObjectSpec(final ModelContentRO model) {
         m_model = model;
-    }
-
-    /**
-     * returns the actual model content
-     *
-     * @return a model content
-     */
-    protected ModelContentRO getConnectionModel() {
-        return m_model;
     }
 
     /**

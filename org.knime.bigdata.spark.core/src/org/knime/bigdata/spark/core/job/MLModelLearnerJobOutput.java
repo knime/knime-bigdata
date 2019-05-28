@@ -16,18 +16,38 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.04.2016 by koetter
+ *   Created on May 27, 2019 by bjoern
  */
-package org.knime.bigdata.spark.core.model;
+package org.knime.bigdata.spark.core.job;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import java.nio.file.Path;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
- * @param <T> A type of Spark model.
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public interface ModelHelperProvider<T extends SparkModel> extends SparkProviderWithElements<ModelHelper<T>> {
+@SparkClass
+public class MLModelLearnerJobOutput extends JobOutput {
 
+    /**
+     * Empty constructor required by deserialization.
+     */
+    public MLModelLearnerJobOutput() {
+    }
+
+    /**
+     * Creates a job output with a MLLib model.
+     *
+     * @param zippedPipelineModel the ML model as a saved and then zipped pipeline model
+     */
+    public MLModelLearnerJobOutput(final Path zippedPipelineModel) {
+        withFile(zippedPipelineModel);
+    }
+
+    /**
+     * @return the generated Spark MLlib model
+     */
+    public Path getZippedPipelineModel() {
+        return getFiles().get(0);
+    }
 }

@@ -16,18 +16,36 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.04.2016 by koetter
+ *   Created on May 27, 2019 by bjoern
  */
 package org.knime.bigdata.spark.core.model;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
- * @param <T> A type of Spark model.
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public interface ModelHelperProvider<T extends SparkModel> extends SparkProviderWithElements<ModelHelper<T>> {
+@SparkClass
+public class MissingNamedModelException extends KNIMESparkException {
 
+    private static final long serialVersionUID = -2109768361843474755L;
+
+    private final String m_namedModelId;
+
+    /**
+     * @param namedModelId The key/ID of the named model that is missing in the Spark context.
+     */
+    public MissingNamedModelException(final String namedModelId) {
+        super("Missing named model with ID " + namedModelId);
+        m_namedModelId = namedModelId;
+    }
+
+    /**
+     * @return the namedModelId
+     */
+    public String getNamedModelId() {
+        return m_namedModelId;
+    }
 }

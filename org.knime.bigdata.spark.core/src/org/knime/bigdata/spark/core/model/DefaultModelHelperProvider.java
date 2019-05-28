@@ -20,20 +20,23 @@
  */
 package org.knime.bigdata.spark.core.model;
 
+import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.version.CompatibilityChecker;
 import org.knime.bigdata.spark.core.version.DefaultSparkProvider;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
+ * @param <T> The concrete subtype of Spark model.
  */
-public class DefaultModelHelperProvider extends DefaultSparkProvider<ModelHelper> implements ModelHelperProvider {
+public class DefaultModelHelperProvider<T extends SparkModel> extends DefaultSparkProvider<ModelHelper<T>> implements ModelHelperProvider<T> {
 
     /**
      * @param checker the {@link CompatibilityChecker}
      * @param helper the {@link MLlibModelHelper}
      */
-    public DefaultModelHelperProvider(final CompatibilityChecker checker, final ModelHelper... helper) {
+    @SafeVarargs
+    public DefaultModelHelperProvider(final CompatibilityChecker checker, final ModelHelper<T>... helper) {
         super(checker, helper);
     }
 }

@@ -16,18 +16,25 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.04.2016 by koetter
+ *   Created on 29.01.2016 by koetter
  */
-package org.knime.bigdata.spark.core.model;
+package org.knime.bigdata.spark2_4.jobs.namedmodels;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
+import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
+import org.knime.bigdata.spark.core.model.NamedModelCheckerJobInput;
+import org.knime.bigdata.spark.core.model.NamedModelUploaderJobInput;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
- * @param <T> A type of Spark model.
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public interface ModelHelperProvider<T extends SparkModel> extends SparkProviderWithElements<ModelHelper<T>> {
+public class NamedModelUploaderJobRunFactory extends DefaultSimpleJobRunFactory<NamedModelCheckerJobInput> {
 
+    /**
+     * Constructor.
+     */
+    public NamedModelUploaderJobRunFactory() {
+        super(DefaultMLModelHelper.NAMED_MODEL_UPLOADER_JOB_ID, NamedModelUploaderJobInput.class);
+    }
 }

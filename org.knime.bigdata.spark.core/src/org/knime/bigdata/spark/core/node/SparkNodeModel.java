@@ -79,7 +79,7 @@ import org.knime.bigdata.spark.core.port.context.SparkContextConfig;
 import org.knime.bigdata.spark.core.port.data.SparkData;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
-import org.knime.bigdata.spark.core.port.model.SparkModel;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.util.BackgroundTasks;
 import org.knime.bigdata.spark.core.version.SparkVersion;
@@ -571,6 +571,8 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     /**
+     * Creates a {@link SparkModelPortObject} for an unnamed Spark model.
+     *
      * @param data the input {@link SparkDataPortObject} to get the {@link SparkVersion}
      * @param modelName the unique name of the model
      * @param settings {@link MLlibSettings}
@@ -581,7 +583,26 @@ public abstract class SparkNodeModel extends NodeModel {
     public static SparkModelPortObject createSparkModelPortObject(final SparkDataPortObject data,
         final String modelName, final MLlibSettings settings, final ModelJobOutput model)
         throws MissingSparkModelHelperException {
-        return new SparkModelPortObject(new SparkModel(getSparkVersion(data), modelName, model.getModel(), settings));
+        return new SparkModelPortObject(new MLlibModel(getSparkVersion(data), modelName, model.getModel(), settings));
+    }
+
+    /**
+     * Creates a {@link SparkModelPortObject} for an unnamed Spark model.
+     *
+     * @param data the input {@link SparkDataPortObject} to get the {@link SparkVersion}
+     * @param modelName the unique name of the model
+     * @param settings {@link MLlibSettings}
+     * @param model the {@link ModelJobOutput} to get the model
+     * @return the {@link SparkModelPortObject}
+     * @throws MissingSparkModelHelperException
+     */
+    public static SparkModelPortObject createSparkModelPortObject(final SparkDataPortObject data,
+        final String modelName,
+        final String namedOutputModel,
+        final MLlibSettings settings, final ModelJobOutput model)
+        throws MissingSparkModelHelperException {
+
+        return new SparkModelPortObject(new MLlibModel(getSparkVersion(data), modelName, model.getModel(), settings));
     }
 
     /**

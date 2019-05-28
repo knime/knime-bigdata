@@ -18,32 +18,32 @@
  * History
  *   Created on 27.04.2016 by koetter
  */
-package org.knime.bigdata.spark1_3.base;
+package org.knime.bigdata.spark2_1.base;
 
 import org.knime.bigdata.spark.core.model.DefaultModelHelperProvider;
-import org.knime.bigdata.spark1_3.api.Spark_1_3_CompatibilityChecker;
-import org.knime.bigdata.spark1_3.jobs.mllib.clustering.kmeans.KMeansModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.collaborativefiltering.CollaborativeFilteringModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.bayes.naive.NaiveBayesModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.decisiontree.DecisionTreeModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.ensemble.randomforest.RandomForestModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.logistic.LogisticRegressionModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.regression.LinearRegressionModelHelper;
-import org.knime.bigdata.spark1_3.jobs.mllib.prediction.linear.svm.SVMModelHelper;
+import org.knime.bigdata.spark.core.port.model.MLlibModel;
+import org.knime.bigdata.spark2_1.api.Spark_2_1_CompatibilityChecker;
+import org.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.collaborativefiltering.CollaborativeFilteringModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.bayes.naive.NaiveBayesModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.decisiontree.DecisionTreeModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.gradientboostedtrees.GradientBoostedTreesModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.ensemble.randomforest.RandomForestModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.logistic.LogisticRegressionModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.regression.LinearRegressionModelHelper;
+import org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm.SVMModelHelper;
 
 /**
  *
  * @author Tobias Koetter, KNIME.com
  */
-public class Spark_1_3_ModelHelperProvider extends DefaultModelHelperProvider {
+public class Spark_2_1_MLlibModelHelperProvider extends DefaultModelHelperProvider<MLlibModel> {
 
     /**
      * Constructor.
      */
-    public Spark_1_3_ModelHelperProvider() {
-        super(Spark_1_3_CompatibilityChecker.INSTANCE,
-            new Spark_1_3_LegacyModelHelper(),
+    public Spark_2_1_MLlibModelHelperProvider() {
+        super(Spark_2_1_CompatibilityChecker.INSTANCE,
             new KMeansModelHelper(),
             new CollaborativeFilteringModelHelper(),
             new LinearRegressionModelHelper(),

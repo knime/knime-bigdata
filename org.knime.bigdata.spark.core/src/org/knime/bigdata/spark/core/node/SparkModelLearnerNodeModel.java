@@ -22,7 +22,6 @@ package org.knime.bigdata.spark.core.node;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.exception.MissingJobException;
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.JobRunFactory;
@@ -33,7 +32,6 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec;
-import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -201,20 +199,9 @@ public abstract class SparkModelLearnerNodeModel<I extends JobInput, S extends M
         final S settings) throws KNIMESparkException, CanceledExecutionException, InvalidSettingsException {
         final I jobInput = createJobInput(inData, settings);
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
-        final JobRunFactory<I, ModelJobOutput> jobProvider = getJobRunFactory(data);
+        final JobRunFactory<I, ModelJobOutput> jobProvider = SparkContextUtil.getJobRunFactory(data.getContextID(), getJobId());
         final ModelJobOutput result = jobProvider.createRun(jobInput).run(data.getContextID(), exec);
         return result;
-    }
-
-    /**
-     * @param data input {@link SparkDataPortObject}
-     * @return the {@link JobRunFactory}
-     * @throws MissingJobException if no job is available for the {@link SparkVersion} given by the input
-     * {@link SparkDataPortObject}
-     */
-    protected JobRunFactory<I, ModelJobOutput> getJobRunFactory(final SparkDataPortObject data)
-        throws MissingJobException {
-        return SparkContextUtil.getJobRunFactory(data.getContextID(), getJobId());
     }
 
     /**

@@ -47,11 +47,20 @@
       <portType
             color="#7DBDFF"
             hidden="false"
-            name="Spark Model"
+            name="Spark MLlib Model"
             objectClass="org.knime.bigdata.spark.core.port.model.SparkModelPortObject"
             objectSerializer="org.knime.bigdata.spark.core.port.model.SparkModelPortObject$Serializer"
             specClass="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec"
             specSerializer="org.knime.bigdata.spark.core.port.model.SparkModelPortObjectSpec$Serializer">
+      </portType>
+      <portType
+            color="#cce6ff"
+            hidden="false"
+            name="Spark ML Model"
+            objectClass="org.knime.bigdata.spark.core.port.model.SparkMLModelPortObject"
+            objectSerializer="org.knime.bigdata.spark.core.port.model.SparkMLModelPortObject$Serializer"
+            specClass="org.knime.bigdata.spark.core.port.model.SparkMLModelPortObjectSpec"
+            specSerializer="org.knime.bigdata.spark.core.port.model.SparkMLModelPortObjectSpec$Serializer">
       </portType>
       <portType
             hidden="false"

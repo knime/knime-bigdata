@@ -16,18 +16,41 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on 27.04.2016 by koetter
+ *   Created on May 27, 2019 by bjoern
  */
 package org.knime.bigdata.spark.core.model;
 
-import org.knime.bigdata.spark.core.port.model.SparkModel;
-import org.knime.bigdata.spark.core.version.SparkProviderWithElements;
+import org.knime.bigdata.spark.core.job.JobInput;
+import org.knime.bigdata.spark.core.job.SparkClass;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
- * @param <T> A type of Spark model.
+ * @author Bjoern Lohrmann
  */
-public interface ModelHelperProvider<T extends SparkModel> extends SparkProviderWithElements<ModelHelper<T>> {
+@SparkClass
+public class NamedModelCheckerJobInput extends JobInput {
 
+    private static final String KEY_NAMED_MODEL_ID = "namedModelId";
+
+    /**
+     * Empty constructor for (de)serialization.
+     */
+    public NamedModelCheckerJobInput() {
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param namedModelId Key/ID of the named model.
+     */
+    public NamedModelCheckerJobInput(final String namedModelId) {
+        set(KEY_NAMED_MODEL_ID, namedModelId);
+    }
+
+    /**
+     * @return The Key/ID of the named model.
+     */
+    public String getNamedModelId() {
+        return get(KEY_NAMED_MODEL_ID);
+    }
 }
