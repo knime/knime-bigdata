@@ -47,10 +47,10 @@ public class SparkRepartitionNodeSettings {
         new SettingsModelIntegerBounded("fixedValue", 20, 1, Integer.MAX_VALUE);
 
     private final SettingsModelDoubleBounded m_multiplyPartitionFactor =
-        new SettingsModelDoubleBounded("multiplyByPartitionFactor", 2.0, 0.000001, Integer.MAX_VALUE);
+        new SettingsModelDoubleBounded("multiplyByPartitionFactor", 2.0, 1.0, Integer.MAX_VALUE);
 
     private final SettingsModelDoubleBounded m_dividePartitionFactor =
-        new SettingsModelDoubleBounded("divideByPartitionFactor", 2.0, 0.000001, Integer.MAX_VALUE);
+        new SettingsModelDoubleBounded("divideByPartitionFactor", 2.0, 1.0, Integer.MAX_VALUE);
 
     private final SettingsModelDoubleBounded m_multiplyCoresFactor =
         new SettingsModelDoubleBounded("multiplyByCoresFactor", 2.0, 0.000001, Integer.MAX_VALUE);

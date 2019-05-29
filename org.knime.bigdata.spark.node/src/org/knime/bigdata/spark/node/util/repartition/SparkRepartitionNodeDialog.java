@@ -91,7 +91,7 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
         gbc.weightx = 1.0;
 
         m_calcModeButtonGroup = new ButtonGroup();
-        m_fixedValueButton = createCalcModeLine(calcModePanel, gbc, m_settings.getFixedValueModel(), "fixed value", 100);
+        m_fixedValueButton = createCalcModeLine(calcModePanel, gbc, m_settings.getFixedValueModel(), "fixed value", 1);
         m_multiplyByPartButton = createCalcModeLine(calcModePanel, gbc, m_settings.getMultiplyPartitionFactorModel(),
             "multiply current partitions by", 1);
         m_divideByPartButton = createCalcModeLine(calcModePanel, gbc, m_settings.getDividePartitionFactorModel(),
@@ -109,11 +109,13 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
         m_prevNewPartitions.setFont(m_prevNewPartitions.getFont().deriveFont(Font.PLAIN));
         m_prev = createPreviewPanel(m_prevCurrentPartitions, m_prevNewPartitions);
         m_prevCardPanel.add(m_prev, "prev");
-        m_prevNotAvailable = createPreviewErrorPanel("Not available (input port does not contain partition statistics)");
+        m_prevNotAvailable =
+            createPreviewErrorPanel("Not available (Spark Context does not exist anymore or DataFrame is missing)");
         m_prevCardPanel.add(m_prevNotAvailable, "prevNotAvailable");
         m_prevPredNotExecuted = createPreviewErrorPanel("Not available (please execute the predecessor node first)");
         m_prevCardPanel.add(m_prevPredNotExecuted, "prevPredNotExecuted");
-        m_prevExecutorCalculation = createPreviewErrorPanel("Not available (number of executor cores is only known during execution)");
+        m_prevExecutorCalculation =
+            createPreviewErrorPanel("Not available (number of executor cores is only known during node execution)");
         m_prevCardPanel.add(m_prevExecutorCalculation, "prevExecutorCalculation");
 
         final Box settingsPanel = Box.createVerticalBox();
@@ -245,7 +247,7 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
             int currParts = m_inputPort.getData().getStatistics().getNumPartitions();
             int newParts = -1;
             if (mode == CalculationMode.FIXED_VALUE) {
-                newParts = currParts * m_settings.getFixedValue();
+                newParts = m_settings.getFixedValue();
             } else if (mode == CalculationMode.MULTIPLY_PART_COUNT) {
                 newParts = Math.max(1, (int)(currParts * m_settings.getMultiplyPartitionFactor()));
             } else if (mode == CalculationMode.DIVIDE_PART_COUNT) {
@@ -309,4 +311,9 @@ public class SparkRepartitionNodeDialog extends DataAwareNodeDialogPane implemen
         m_settings.saveSettingsTo(settings);
     }
 
+    @Override
+    public void onOpen() {
+        updateInputEnabled();
+        updatePreview();
+    }
 }
