@@ -18,7 +18,7 @@
          point="org.knime.workbench.repository.nodes">
       <node
             factory-class="org.knime.bigdata.database.hive.node.HiveConnectorNodeFactory"
-            category-path="/labs/db/connector"/>
+            category-path="/db/connector"/>
     </extension>
    <extension
          point="org.knime.database.Driver">

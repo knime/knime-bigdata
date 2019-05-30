@@ -5,9 +5,9 @@
          point="org.knime.workbench.repository.nodes">
       <node
             factory-class="org.knime.bigdata.hive.node.connector.HiveConnectorNodeFactory"
-            category-path="/database/database-connector"/>
+            category-path="/db/database_legacy/database-connector"/>
       <node
-            category-path="/database/database-io"
+            category-path="/db/database_legacy/database-io"
             factory-class="org.knime.bigdata.hive.node.loader.HiveLoaderNodeFactory">
       </node>
     </extension>

@@ -4,7 +4,7 @@
      <extension
          point="org.knime.workbench.repository.nodes">
         <node
-              category-path="/database/database-connector"
+              category-path="/db/database_legacy/database-connector"
               factory-class="org.knime.bigdata.phoenix.node.connector.PhoenixConnectorNodeFactory">
         </node>
     </extension>
