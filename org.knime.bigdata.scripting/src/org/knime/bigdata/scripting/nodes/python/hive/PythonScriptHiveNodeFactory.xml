@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
 <knimeNode icon="./pythonscript.png" type="Manipulator">
-	<name>Python Script (Hive)</name>
+	<name>Python Script (Hive) (legacy)</name>
 
 	<shortDescription>
 		Allows execution of a Python script in a local Python installation. 
@@ -9,18 +9,27 @@
 
 	<fullDescription>
 		<intro>
+            <p>
+            <b>This node is part of the legacy database framework.</b>
+            For more information on how to migrate to the new database framework see the
+            <a href="!@!TOBIS_DB_MIGRATION_DOCUMENTATION_LINK!@!">migration section</a> of the 
+            <a href="!@!TOBIS_DB_DOCUMENTATION_LINK!@!">database documentation</a>.
+            </p>
+            <p>
 			Allows execution of a Python script in a local Python
 			installation.
 			The path to the Python executable has to be configured
 			in Preferences
 			→ KNIME → Python.
-		<br /><br />
-		<b>NOTICE:</b>
-          The nodes uses the <a href="https://pypi.python.org/pypi/JayDeBeApi/">JayDeBeApi</a> library 
-          to establish a connection to the database via a JDBC connection which his included. However to use JayDeBeApi
-          <a href="http://jpype.sourceforge.net/">JPype</a> needs to be installed. For Windows precompiled
-          libraries can be download from 
-          <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#jpype">Unofficial Windows Binaries for Python Extension Packages</a>.
+			</p>
+		    <p>
+			  <b>NOTICE:</b>
+	          The nodes uses the <a href="https://pypi.python.org/pypi/JayDeBeApi/">JayDeBeApi</a> library 
+	          to establish a connection to the database via a JDBC connection which his included. However to use JayDeBeApi
+	          <a href="http://jpype.sourceforge.net/">JPype</a> needs to be installed. For Windows precompiled
+	          libraries can be download from 
+	          <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#jpype">Unofficial Windows Binaries for Python Extension Packages</a>.
+          </p>
 		</intro>
 		<tab name="Script">
 		    <option name="Target folder">

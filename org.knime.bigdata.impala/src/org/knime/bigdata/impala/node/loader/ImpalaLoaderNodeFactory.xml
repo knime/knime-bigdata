@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10" type="Source" icon="icon.png">
-    <name>Impala Loader</name>
+    <name>Impala Loader (legacy)</name>
     <shortDescription>Loads data from KNIME into Impala</shortDescription>
     <fullDescription>
         <intro>
+            <p>
+            <b>This node is part of the legacy database framework.</b>
+            For more information on how to migrate to the new database framework see the
+            <a href="!@!TOBIS_DB_MIGRATION_DOCUMENTATION_LINK!@!">migration section</a> of the 
+            <a href="!@!TOBIS_DB_DOCUMENTATION_LINK!@!">database documentation</a>.
+            </p>
+            <p>
             This node loads a KNIME data table into Impala. Impala requires imported data to be present in the 
             HDFS file system on the Impala server, therefore this node first copies the data onto the Impala server. 
             You can use the HDFS Connection node to establish a connection to the HDFS file system. 
             The data is then loaded into a Impala table and the uploaded file is deleted.
-            <br />
+            </p>
+            <p>
             Additionally the data can be partitioned by selecting one or more compatible columns (e.g. integer or
             string). The node relies on Impala's dynamic partitioning.
+            </p>
         </intro>
 
         <option name="Target folder">
