@@ -3,7 +3,7 @@
     xmlns="http://knime.org/node/v3.1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
-    <name>Hive Connector (Labs)</name>
+    <name>Hive Connector</name>
     <shortDescription>Create a database connection to Hive.</shortDescription>
     <fullDescription>
         <intro>
@@ -21,7 +21,7 @@
             <option name="Driver Name">
                 Choose the registered database driver here.
                 Additional drivers can be registered via KNIME's preference 
-                page "KNIME -> Databases (Labs)".
+                page "KNIME -> Databases".
             </option>
             <option name="Hostname">
                 The hostname (or IP address) of a Hive server.
