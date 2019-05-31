@@ -43,7 +43,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
+import org.knime.database.port.DBDataPortObjectSpec;
 
 /**
  * Dialog for the JDBC to Spark node.
@@ -190,7 +190,7 @@ public class DB2SparkNodeDialog extends NodeDialogPane implements ActionListener
         m_fetchSize.setValue(m_settings.getFetchSize());
         m_fetchSize.setEnabled(!m_settings.useDefaultFetchSize());
 
-        DatabasePortObjectSpec spec = (DatabasePortObjectSpec)specs[0];
+        DBDataPortObjectSpec spec = (DBDataPortObjectSpec)specs[0];
         if (specs[0] == null) {
             throw new NotConfigurableException("No database connection details available. Please execute predecessors first.");
         }

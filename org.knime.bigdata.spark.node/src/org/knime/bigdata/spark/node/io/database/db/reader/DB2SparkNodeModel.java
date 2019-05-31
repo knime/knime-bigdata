@@ -21,9 +21,11 @@
 package org.knime.bigdata.spark.node.io.database.db.reader;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -51,7 +53,6 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.database.DatabasePortObjectSpec;
-import org.knime.core.node.workflow.CredentialsProvider;
 import org.knime.database.SQLQuery;
 import org.knime.database.connection.DBConnectionController;
 import org.knime.database.connection.UrlDBConnectionController;
@@ -138,11 +139,11 @@ public class DB2SparkNodeModel extends SparkSourceNodeModel {
 
         if (m_settings.uploadDriver()) {
 
-            //FIXME get Driver fIles
-
-//            DBDriverFactory dbDriverFactory = dbSettings.getUtility().getConnectionFactory().getDriverFactory();
-//            jarFiles.addAll(dbDriverFactory.getDriverFiles(dbSettings));
-            jobInput.setDriver(dbPort.getDBSession().getDriver().getDriverDefinition().getName());
+            Collection<Path> paths = dbPort.getDBSession().getDriver().getDriverFiles();
+            for(Path p : paths) {
+                jarFiles.add(p.toFile());
+            }
+            jobInput.setDriver(dbPort.getDBSession().getDriver().getDriverDefinition().getDriverClass());
         }
 
         try {
@@ -168,15 +169,17 @@ public class DB2SparkNodeModel extends SparkSourceNodeModel {
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DBDataPortObject dbPort) throws InvalidSettingsException {
         DBConnectionController controller = dbPort.getSessionInformation().getConnectionController();
         String url  = "";
+        Properties conProperties  = new Properties();
         if(controller instanceof UrlDBConnectionController) {
-            url = ((UrlDBConnectionController) controller).getJdbcUrl();
+            url = ((UrlDBConnectionController) controller).getConnectionJdbcUrl();
+            conProperties = ((UrlDBConnectionController) controller).getConnectionJdbcProperties();
+        }else {
+            throw new InvalidSettingsException("DB to Spark only works with URL based database connections");
         }
         SQLQuery sqlQuery = dbPort.getData().getQuery();
-        final CredentialsProvider cp = getCredentialsProvider();
 
         final String query =  String.format("(%s) %s", sqlQuery.getQuery(), getTempTableName(url));
-        //FIXME get properties from Connection
-        final Properties conProperties = new Properties();
+
         final Database2SparkJobInput input = new Database2SparkJobInput(namedOutputObject, url, query, conProperties);
 
 
