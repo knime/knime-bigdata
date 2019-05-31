@@ -173,7 +173,7 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
 
     private void checkTableExistsAndDropIfAllowed(final ExecutionContext exec, final DBSession session, final DefaultDBTable table)
         throws CanceledExecutionException, SQLException, KNIMESparkException {
-        final boolean tableExist = session.getAgent(DBMetadataReader.class).isTableExist(exec, table);
+        final boolean tableExist = session.getAgent(DBMetadataReader.class).isExistingTable(exec, table);
         if (tableExist) {
             if (m_settings.getDropExisting()) {
                 final DBStructureManipulator manipulator = session.getAgent(DBStructureManipulator.class);
