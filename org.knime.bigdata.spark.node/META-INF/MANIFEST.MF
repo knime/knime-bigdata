@@ -73,7 +73,7 @@ Export-Package: org.knime.bigdata.spark.node.io.database.hive.reader,
   org.knime.bigdata.spark.node.util.rdd.unpersist,
   org.knime.bigdata.spark.node.util.repartition
 Require-Bundle: org.knime.base;bundle-version="[4.0.0,5.0.0)",
-  org.knime.bigdata.spark.core;bundle-version="[2.5.0,2.6.0)",
+  org.knime.bigdata.spark.core;bundle-version="[4.0.0,5.0.0)",
   org.knime.workbench.repository;bundle-version="[4.0.0,5.0.0)",
   org.knime.base.filehandling;bundle-version="[4.0.0,5.0.0)",
   org.knime.bigdata.filehandling;bundle-version="3.6.0",
