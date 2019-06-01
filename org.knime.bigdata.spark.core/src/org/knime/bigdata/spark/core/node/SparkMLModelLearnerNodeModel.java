@@ -32,6 +32,7 @@ import org.knime.bigdata.spark.core.job.NamedModelLearnerJobInput;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
+import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObject;
 import org.knime.core.data.filestore.FileStore;
@@ -120,11 +121,14 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
 
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
 
+        final MLMetaData metaData = result.getMetaData(MLMetaData.class);
+
         final MLModel mlModel = new MLModel(getSparkVersion(data),
             getModelName(),
             modelFileStore.getFile(),
             newNamedModelId,
-            settings.getSettings(data));
+            settings.getSettings(data),
+            metaData);
 
         return new PortObject[]{new SparkMLModelPortObject(mlModel, modelFileStore)};
     }

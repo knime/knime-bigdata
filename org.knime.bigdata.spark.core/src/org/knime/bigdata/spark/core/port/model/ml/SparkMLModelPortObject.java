@@ -21,15 +21,13 @@
 package org.knime.bigdata.spark.core.port.model.ml;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
 
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
-import org.knime.bigdata.spark.core.model.MLModelHelper;
-import org.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
@@ -67,7 +65,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
     private static final String ZIP_KEY_ML_MODEL = "MLModel";
 
-    private static final String ZIP_KEY_MODEL_META_DATA = "modelMetaData";
+    private static final String KEY_MODEL_META_DATA = "modelMetaData";
 
     /**
      * Spark ML model port type.
@@ -108,7 +106,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
      * @throws MissingSparkModelHelperException
      */
     public SparkMLModelPortObject(final SparkVersion sparkVersion, final String modelName, final String namedModelId,
-        final DataTableSpec tableSpec, final String targetColumnName, final Serializable metaData)
+        final DataTableSpec tableSpec, final String targetColumnName, final MLMetaData metaData)
         throws MissingSparkModelHelperException {
 
         // we first create a placeholder MLModel with a null zippedModelPipeline, which we will add
@@ -157,22 +155,17 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             modelContent.addString(KEY_MODEL_NAME, model.getModelName());
             modelContent.addString(KEY_NAMED_MODEL_ID, model.getNamedModelId());
             modelContent.addString(KEY_TARGET_COLUMN_NAME, model.getTargetColumnName().orElse(null));
+
             final ModelContentWO tableSpecModel = modelContent.addModelContent(KEY_TABLE_SPEC);
             model.getTableSpec().save(tableSpecModel);
-            modelContent.saveToXML(new NonClosableOutputStream.Zip(out));
 
-            final MLModelHelper modelHelper;
-            try {
-                modelHelper = ModelHelperRegistry.getMLModelHelper(model.getModelName(), model.getSparkVersion());
-            } catch (MissingSparkModelHelperException e) {
-                throw new IOException(e);
+            final Optional<MLMetaData> modelMetaData = model.getModelMetaData(MLMetaData.class);
+            if (modelMetaData.isPresent()) {
+                final ModelContentWO metaDataContent = modelContent.addModelContent(KEY_MODEL_META_DATA);
+                MLMetaDataUtils.saveToModelContent(modelMetaData.get(), metaDataContent);
             }
 
-            // serialize the model meta data using a SparkModelHelper (which comes from a jobs plugin and hence has the classes
-            // required for serialization
-            out.putNextEntry(new ZipEntry(ZIP_KEY_MODEL_META_DATA));
-            modelHelper.saveModelMetadata(new NonClosableOutputStream.Zip(out), model.getMetaData());
-
+            modelContent.saveToXML(new NonClosableOutputStream.Zip(out));
         }
 
         /**
@@ -194,9 +187,10 @@ public class SparkMLModelPortObject extends FileStorePortObject {
                 final String targetColumnName = modelContent.getString(KEY_TARGET_COLUMN_NAME);
                 final DataTableSpec tableSpec = DataTableSpec.load(modelContent.getModelContent(KEY_TABLE_SPEC));
 
-                in.getNextEntry();
-                final MLModelHelper modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
-                final Serializable metaData = modelHelper.loadMetaData(new NonClosableInputStream.Zip(in));
+                MLMetaData metaData = null;
+                if (modelContent.containsKey(KEY_MODEL_META_DATA)) {
+                    metaData = MLMetaDataUtils.loadFromModelContent(modelContent.getModelContent(KEY_MODEL_META_DATA));
+                }
 
                 return new SparkMLModelPortObject(sparkVersion, modelName, namedModelId, tableSpec, targetColumnName,
                     metaData);

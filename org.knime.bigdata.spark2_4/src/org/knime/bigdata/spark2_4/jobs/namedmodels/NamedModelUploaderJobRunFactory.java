@@ -23,7 +23,6 @@ package org.knime.bigdata.spark2_4.jobs.namedmodels;
 import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
 import org.knime.bigdata.spark.core.model.NamedModelCheckerJobInput;
-import org.knime.bigdata.spark.core.model.NamedModelUploaderJobInput;
 
 /**
  *
@@ -35,6 +34,6 @@ public class NamedModelUploaderJobRunFactory extends DefaultSimpleJobRunFactory<
      * Constructor.
      */
     public NamedModelUploaderJobRunFactory() {
-        super(DefaultMLModelHelper.NAMED_MODEL_UPLOADER_JOB_ID, NamedModelUploaderJobInput.class);
+        super(DefaultMLModelHelper.NAMED_MODEL_UPLOADER_JOB_ID, NamedModelUploaderJob.class);
     }
 }
