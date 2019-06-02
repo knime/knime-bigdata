@@ -96,6 +96,9 @@ public class SparkModelPortObjectSpec implements PortObjectSpec {
 
     private static final String SPARK_MODEL = "spark_model";
 
+    /**
+     * Holds all values of the port object spec.
+     */
     private final ModelContentRO m_model;
 
     /**

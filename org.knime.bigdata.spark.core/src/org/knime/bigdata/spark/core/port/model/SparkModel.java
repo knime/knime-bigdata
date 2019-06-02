@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.core.port.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JComponent;
 
@@ -132,17 +133,28 @@ public abstract class SparkModel {
     }
 
     /**
-     * @return the name of the target column or <code>null</code> if not applicable (unsupervised model).
+     * @return the name of the optional target column.
      */
-    public String getTargetColumnName() {
-        return m_targetColumnName;
+    public Optional<String> getTargetColumnName() {
+        return Optional.ofNullable(m_targetColumnName);
+    }
+
+    /**
+     * @return the column spec of the optional target column.
+     */
+    public Optional<DataColumnSpec> getTargetColumnSpec() {
+        if (m_targetColumnName != null) {
+            return Optional.of(m_tableSpec.getColumnSpec(m_targetColumnName));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
      * @return the name of all learning columns in the order they have been used during model training.
      */
     public List<String> getLearningColumnNames() {
-        return getColNames(getTargetColumnName());
+        return getColNames(getTargetColumnName().orElse(null));
     }
 
     /**
@@ -170,9 +182,9 @@ public abstract class SparkModel {
      */
     public Integer[] getLearningColumnIndices(final DataTableSpec inputSpec) throws InvalidSettingsException {
         final DataTableSpec learnerTabel = getTableSpec();
-        final String classColumnName = getTargetColumnName();
+        final String targetColumnName = getTargetColumnName().orElse(null);
         final Integer[] colIdxs;
-        if (classColumnName != null) {
+        if (targetColumnName != null) {
             colIdxs = new Integer[learnerTabel.getNumColumns() - 1];
         } else {
             colIdxs = new Integer[learnerTabel.getNumColumns()];
@@ -180,7 +192,7 @@ public abstract class SparkModel {
         int idx = 0;
         for (DataColumnSpec col : learnerTabel) {
             final String colName = col.getName();
-            if (colName.equals(classColumnName)) {
+            if (colName.equals(targetColumnName)) {
                 //skip the class column name
                 continue;
             }

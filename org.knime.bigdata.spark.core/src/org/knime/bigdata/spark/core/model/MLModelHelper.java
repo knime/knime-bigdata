@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
-import org.knime.bigdata.spark.core.port.model.MLModel;
+import org.knime.bigdata.spark.core.port.model.ml.MLModel;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 

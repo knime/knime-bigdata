@@ -127,7 +127,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter<MLlibModel> {
         final DecisionTreeModel treeModel = (DecisionTreeModel) aDecisionTreeModel.getModel();
         final ColumnBasedValueMapping metaData = (ColumnBasedValueMapping)aDecisionTreeModel.getMetaData();
         final List<String> colNames = aDecisionTreeModel.getLearningColumnNames();
-        final String classColName = aDecisionTreeModel.getTargetColumnName();
+        final String classColName = aDecisionTreeModel.getTargetColumnName().get();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());

@@ -51,7 +51,7 @@ public class LinearRegressionModelPMMLPortObjectFactory extends GeneralizedLinea
     @Override
     public PMMLPortObject convert(final MLlibModel knimeModel) throws InvalidSettingsException {
         final DataTableSpec learnerSpec = knimeModel.getTableSpec();
-        final String targetField = knimeModel.getTargetColumnName();
+        final String targetField = knimeModel.getTargetColumnName().get();
         PMMLPortObjectSpecCreator creator = new PMMLPortObjectSpecCreator(learnerSpec);
         creator.setLearningCols(learnerSpec);
         creator.setTargetColName(targetField);

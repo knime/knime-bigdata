@@ -282,7 +282,7 @@ public class MLlibModel extends SparkModel {
         NodeSettings header = new NodeSettings(ZIP_KEY_MODEL_1_6_HEADER);
         header.addString(KEY_SPARK_VERSION, getSparkVersion().toString());
         header.addString(KEY_MODEL_NAME, getModelName());
-        header.addString(KEY_CLASS_COLUMN_NAME, getTargetColumnName());
+        header.addString(KEY_CLASS_COLUMN_NAME, getTargetColumnName().orElse(null));
         header.saveToXML(new NonClosableOutputStream.Zip(out));
 
         out.putNextEntry(new ZipEntry(ZIP_KEY_TABLE_SPEC));

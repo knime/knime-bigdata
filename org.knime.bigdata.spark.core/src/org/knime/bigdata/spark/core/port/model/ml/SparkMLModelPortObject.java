@@ -18,7 +18,7 @@
  * History
  *   Created on May 26, 2019 by bjoern
  */
-package org.knime.bigdata.spark.core.port.model;
+package org.knime.bigdata.spark.core.port.model.ml;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -29,6 +29,8 @@ import javax.swing.JComponent;
 
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.model.MLModelHelper;
+import org.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
+import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.filestore.FileStore;
@@ -38,8 +40,9 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettings;
-import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.ModelContent;
+import org.knime.core.node.ModelContentRO;
+import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
@@ -54,7 +57,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
     private static final String ZIP_KEY_MODEL_META_DATA = "modelMetaData";
 
-    private static final String ZIP_KEY_TABLE_SPEC = "tableSpec";
+    private static final String KEY_TABLE_SPEC = "tableSpec";
 
     private static final String KEY_TARGET_COLUMN_NAME = "targetColumnName";
 
@@ -64,7 +67,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
     private static final String KEY_SPARK_VERSION = "sparkVersion";
 
-    private static final String ZIP_KEY_ML_PIPELINE_MODEL_2_5_HEADER = "MLPipelineModel2_5";
+    private static final String ZIP_KEY_ML_MODEL = "MLPipelineModel2_5";
 
     /**
      * Spark ML model port type.
@@ -80,7 +83,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
     /**
      * The spec for this port object.
      */
-    private final SparkModelPortObjectSpec m_spec;
+    private final SparkMLModelPortObjectSpec m_spec;
 
     private final MLModel m_model;
 
@@ -91,7 +94,8 @@ public class SparkMLModelPortObject extends FileStorePortObject {
     public SparkMLModelPortObject(final MLModel model, final FileStore zippedPipelineModel) {
         super(Collections.singletonList(zippedPipelineModel));
         m_model = model;
-        m_spec = model.getSpec();
+        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getModelName(), model.getTableSpec(),
+            model.getTargetColumnName().orElse(null));
     }
 
     /**
@@ -109,16 +113,16 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
         // we first create a placeholder MLModel with a null zippedModelPipeline, which we will add
         // later. At this point the file stores are not yet initialized.
-        m_model = new MLModel(sparkVersion, modelName, null, namedModelId, tableSpec,
-            targetColumnName, metaData);
-        m_spec = m_model.getSpec();
+        m_model = new MLModel(sparkVersion, modelName, null, namedModelId, tableSpec, targetColumnName, metaData);
+        m_spec = new SparkMLModelPortObjectSpec(m_model.getSparkVersion(), m_model.getModelName(), tableSpec,
+            m_model.getTargetColumnName().orElse(null));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SparkModelPortObjectSpec getSpec() {
+    public SparkMLModelPortObjectSpec getSpec() {
         return m_spec;
     }
 
@@ -147,19 +151,15 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             MLModel model = portObject.getModel();
 
             // write header
-            out.putNextEntry(new ZipEntry(ZIP_KEY_ML_PIPELINE_MODEL_2_5_HEADER));
-            NodeSettings header = new NodeSettings(ZIP_KEY_ML_PIPELINE_MODEL_2_5_HEADER);
-            header.addString(KEY_SPARK_VERSION, model.getSparkVersion().toString());
-            header.addString(KEY_MODEL_NAME, model.getModelName());
-            header.addString(KEY_NAMED_MODEL_ID, model.getNamedModelId());
-            header.addString(KEY_TARGET_COLUMN_NAME, model.getTargetColumnName());
-            header.saveToXML(new NonClosableOutputStream.Zip(out));
-
-            // write tab
-            out.putNextEntry(new ZipEntry(ZIP_KEY_TABLE_SPEC));
-            final NodeSettings tableSpec = new NodeSettings(ZIP_KEY_TABLE_SPEC);
-            model.getTableSpec().save(tableSpec);
-            tableSpec.saveToXML(new NonClosableOutputStream.Zip(out));
+            out.putNextEntry(new ZipEntry(ZIP_KEY_ML_MODEL));
+            ModelContent modelContent = new ModelContent(ZIP_KEY_ML_MODEL);
+            modelContent.addString(KEY_SPARK_VERSION, model.getSparkVersion().toString());
+            modelContent.addString(KEY_MODEL_NAME, model.getModelName());
+            modelContent.addString(KEY_NAMED_MODEL_ID, model.getNamedModelId());
+            modelContent.addString(KEY_TARGET_COLUMN_NAME, model.getTargetColumnName().orElse(null));
+            final ModelContentWO tableSpecModel = modelContent.addModelContent(KEY_TABLE_SPEC);
+            model.getTableSpec().save(tableSpecModel);
+            modelContent.saveToXML(new NonClosableOutputStream.Zip(out));
 
             final MLModelHelper<?> modelHelper;
             try {
@@ -172,6 +172,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             // required for serialization
             out.putNextEntry(new ZipEntry(ZIP_KEY_MODEL_META_DATA));
             modelHelper.saveModelMetadata(new NonClosableOutputStream.Zip(out), model.getMetaData());
+
         }
 
         /**
@@ -185,20 +186,16 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             try {
                 // read the header
                 in.getNextEntry();
-                final NodeSettingsRO header = NodeSettings.loadFromXML(new NonClosableInputStream.Zip(in));
-                SparkVersion sparkVersion = SparkVersion.fromString(header.getString(KEY_SPARK_VERSION));
-                final String modelName = header.getString(KEY_MODEL_NAME);
-                final String namedModelId = header.getString(KEY_NAMED_MODEL_ID);
-                final String targetColumnName = header.getString(KEY_TARGET_COLUMN_NAME);
+                final ModelContentRO modelContent = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
 
+                final SparkVersion sparkVersion = SparkVersion.fromString(modelContent.getString(KEY_SPARK_VERSION));
+                final String modelName = modelContent.getString(KEY_MODEL_NAME);
+                final String namedModelId = modelContent.getString(KEY_NAMED_MODEL_ID);
+                final String targetColumnName = modelContent.getString(KEY_TARGET_COLUMN_NAME);
+                final DataTableSpec tableSpec = DataTableSpec.load(modelContent.getModelContent(KEY_TABLE_SPEC));
+
+                in.getNextEntry();
                 final MLModelHelper<?> modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
-
-                // read the table spec
-                in.getNextEntry();
-                final DataTableSpec tableSpec =
-                    DataTableSpec.load(NodeSettings.loadFromXML(new NonClosableInputStream.Zip(in)));
-
-                in.getNextEntry();
                 final Serializable metaData = modelHelper.loadMetaData(new NonClosableInputStream.Zip(in));
 
                 return new SparkMLModelPortObject(sparkVersion, modelName, namedModelId, tableSpec, targetColumnName,

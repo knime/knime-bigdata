@@ -89,7 +89,7 @@ public abstract class MLlibTreeEnsembleModelInterpreter<M extends TreeEnsembleMo
         final DecisionTreeModel[] treeModel = ensembleModel.trees();
         final List<String> colNames = decisionTreeModel.getLearningColumnNames();
         final ColumnBasedValueMapping metaData = (ColumnBasedValueMapping)decisionTreeModel.getMetaData();
-        final String classColName = decisionTreeModel.getTargetColumnName();
+        final String classColName = decisionTreeModel.getTargetColumnName().get();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());
