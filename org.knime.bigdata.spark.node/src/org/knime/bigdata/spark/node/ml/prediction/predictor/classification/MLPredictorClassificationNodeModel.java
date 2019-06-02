@@ -107,9 +107,10 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
         if (m_settings.getAppendClassProbabilityColumnsModel().getBooleanValue()) {
             // We do not know the spec at this point, because we do not know the
             // nominal values of the column to predict
-            return new PortObjectSpec[] { null };
+            return new PortObjectSpec[]{null};
         } else {
-            final DataTableSpec resultTableSpec = createSpecWithPredictionCol(inputSparkData.getTableSpec(), modelSpec.getTargetColumnSpec().get());
+            final DataTableSpec resultTableSpec =
+                createSpecWithPredictionCol(inputSparkData.getTableSpec(), modelSpec.getTargetColumnSpec().get());
             return new PortObjectSpec[]{new SparkDataPortObjectSpec(inputSparkData.getContextID(), resultTableSpec)};
         }
     }
@@ -144,7 +145,13 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
             .createRun(input)
             .run(data.getContextID());
 
-        final DataTableSpec resultSpec = createSpecWithProbabilityColumns(data.getTableSpec(), mlModel);
+        final DataTableSpec resultSpec;
+        if (m_settings.getAppendClassProbabilityColumnsModel().getBooleanValue()) {
+            resultSpec = createSpecWithProbabilityColumns(data.getTableSpec(), mlModel);
+        } else {
+            resultSpec = createSpecWithPredictionCol(data.getTableSpec(), mlModel.getTargetColumnSpec().get());
+        }
+
         final SparkDataTable resultSparkData = new SparkDataTable(data.getContextID(), newNamedObject, resultSpec);
 
         return new PortObject[]{new SparkDataPortObject(resultSparkData)};
@@ -152,17 +159,17 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
 
     private DataTableSpec createSpecWithProbabilityColumns(final DataTableSpec tableSpec, final MLModel mlModel) {
 
-        final DataTableSpec withPredictionCol = createSpecWithPredictionCol(tableSpec, mlModel.getTargetColumnSpec().get());
+        final DataTableSpec withPredictionCol =
+            createSpecWithPredictionCol(tableSpec, mlModel.getTargetColumnSpec().get());
 
         final List<DataColumnSpec> columnsToAppend = new ArrayList<>();
         final String suffix = determineProbabilityColumnSuffix();
 
-        final List<String> nominalValuesOfTargetCol = mlModel.getModelMetaData(MLMetaData.class).get().getNominalTargetValueMappings();
+        final List<String> nominalValuesOfTargetCol =
+            mlModel.getModelMetaData(MLMetaData.class).get().getNominalTargetValueMappings();
         for (String nominalValue : nominalValuesOfTargetCol) {
-            final String probabilityColName = String.format("P (%s=%s)%s",
-                mlModel.getTargetColumnName().get(),
-                nominalValue,
-                suffix);
+            final String probabilityColName =
+                String.format("P (%s=%s)%s", mlModel.getTargetColumnName().get(), nominalValue, suffix);
             columnsToAppend.add(new DataColumnSpecCreator(probabilityColName, DoubleCell.TYPE).createSpec());
         }
         return new DataTableSpec(withPredictionCol, new DataTableSpec(columnsToAppend.toArray(new DataColumnSpec[0])));
@@ -187,9 +194,11 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
         return DataTableSpec.getUniqueColumnName(inputSpec, predictionColumnName);
     }
 
-    private DataTableSpec createSpecWithPredictionCol(final DataTableSpec inputSpec, final DataColumnSpec targetColumnSpec) {
+    private DataTableSpec createSpecWithPredictionCol(final DataTableSpec inputSpec,
+        final DataColumnSpec targetColumnSpec) {
         final String predictionColName = determinePredictionColumnName(inputSpec, targetColumnSpec.getName());
-        final DataColumnSpec predictionColSpec = new DataColumnSpecCreator(predictionColName, targetColumnSpec.getType()).createSpec();
+        final DataColumnSpec predictionColSpec =
+            new DataColumnSpecCreator(predictionColName, targetColumnSpec.getType()).createSpec();
         return new DataTableSpec(inputSpec, new DataTableSpec(predictionColSpec));
     }
 
