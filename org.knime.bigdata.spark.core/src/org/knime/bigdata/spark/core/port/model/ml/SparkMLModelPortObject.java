@@ -55,8 +55,6 @@ import org.knime.core.node.port.PortTypeRegistry;
  */
 public class SparkMLModelPortObject extends FileStorePortObject {
 
-    private static final String ZIP_KEY_MODEL_META_DATA = "modelMetaData";
-
     private static final String KEY_TABLE_SPEC = "tableSpec";
 
     private static final String KEY_TARGET_COLUMN_NAME = "targetColumnName";
@@ -67,7 +65,9 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
     private static final String KEY_SPARK_VERSION = "sparkVersion";
 
-    private static final String ZIP_KEY_ML_MODEL = "MLPipelineModel2_5";
+    private static final String ZIP_KEY_ML_MODEL = "MLModel";
+
+    private static final String ZIP_KEY_MODEL_META_DATA = "modelMetaData";
 
     /**
      * Spark ML model port type.
@@ -161,7 +161,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             model.getTableSpec().save(tableSpecModel);
             modelContent.saveToXML(new NonClosableOutputStream.Zip(out));
 
-            final MLModelHelper<?> modelHelper;
+            final MLModelHelper modelHelper;
             try {
                 modelHelper = ModelHelperRegistry.getMLModelHelper(model.getModelName(), model.getSparkVersion());
             } catch (MissingSparkModelHelperException e) {
@@ -195,7 +195,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
                 final DataTableSpec tableSpec = DataTableSpec.load(modelContent.getModelContent(KEY_TABLE_SPEC));
 
                 in.getNextEntry();
-                final MLModelHelper<?> modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
+                final MLModelHelper modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
                 final Serializable metaData = modelHelper.loadMetaData(new NonClosableInputStream.Zip(in));
 
                 return new SparkMLModelPortObject(sparkVersion, modelName, namedModelId, tableSpec, targetColumnName,

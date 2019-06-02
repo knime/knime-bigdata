@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.JComponent;
 
@@ -35,7 +34,6 @@ import org.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.version.SparkVersion;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.util.FileUtil;
 
@@ -55,26 +53,6 @@ import org.knime.core.util.FileUtil;
 public class MLModel extends SparkModel {
 
     /**
-     * The Spark version under which the model was created.
-     */
-    private final SparkVersion m_sparkVersion;
-
-    /**
-     * The name of the model e.g. MLDecisionTree.
-     */
-    private final String m_modelName;
-
-    /**
-     * DataTableSpec of the table used to learn the model, including the target column (if applicable).
-     */
-    private final DataTableSpec m_tableSpec;
-
-    /**
-     * Name of the target column when learning the model. May be null for unsupervised models
-     */
-    private final String m_targetColumn;
-
-    /**
      * A file that contains the zipped Pipeline model.
      */
     private File m_zippedPipelineModel;
@@ -83,11 +61,6 @@ public class MLModel extends SparkModel {
      * Key/ID of the named model in the Spark context where the model was learned. May be null.
      */
     private final String m_namedModelId;
-
-    /**
-     * Metadata object for the model. May be null.
-     */
-    private final Serializable m_metaData;
 
     /**
      * The model interpreter for the model.
@@ -208,13 +181,8 @@ public class MLModel extends SparkModel {
         throws MissingSparkModelHelperException {
 
         super(sparkVersion, modelName, spec, targetColName, metaData);
-        m_sparkVersion = sparkVersion;
-        m_modelName = modelName;
-        m_tableSpec = spec;
-        m_targetColumn = targetColName;
         m_zippedPipelineModel = zippedPipelineModel;
         m_namedModelId = namedModelId;
-        m_metaData = metaData;
         m_interpreter = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion).getModelInterpreter();
     }
 
@@ -234,26 +202,6 @@ public class MLModel extends SparkModel {
      */
     public String getNamedModelId() {
         return m_namedModelId;
-    }
-
-    /**
-     * @return name of the optional target column the model was trained on.
-     */
-    @Override
-    public Optional<String> getTargetColumnName() {
-        return Optional.ofNullable(m_targetColumn);
-    }
-
-    /**
-     * @return spec of the optional target column the model was trained on.
-     */
-    @Override
-    public Optional<DataColumnSpec> getTargetColumnSpec() {
-        if (m_targetColumn != null) {
-            return Optional.of(m_tableSpec.getColumnSpec(m_targetColumn));
-        } else {
-            return Optional.empty();
-        }
     }
 
     /**

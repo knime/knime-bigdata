@@ -91,17 +91,16 @@ public class ModelHelperRegistry
      * @return the corresponding {@link MLlibModelHelper}
      * @throws MissingSparkModelHelperException if no compatible Spark model helper could be found
      */
-    @SuppressWarnings("unchecked")
-    public static <MH extends MLModelHelper<?>> MH getMLModelHelper(final String modelName,
+    public static MLModelHelper getMLModelHelper(final String modelName,
         final SparkVersion sparkVersion) throws MissingSparkModelHelperException {
 
-        final ModelHelper<SparkModel> modelHelper = getInstance().get(modelName, sparkVersion);
+        final ModelHelper<?> modelHelper = getInstance().get(modelName, sparkVersion);
         if (modelHelper == null) {
             throw new MissingSparkModelHelperException(
                 String.format("No Spark model helper found for model type \"%s\" and Spark version %s", modelName,
                     sparkVersion.getLabel()));
         } else {
-            return (MH)(Object)modelHelper;
+            return (MLModelHelper) modelHelper;
         }
     }
 

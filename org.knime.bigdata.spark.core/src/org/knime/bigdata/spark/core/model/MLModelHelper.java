@@ -20,8 +20,6 @@
  */
 package org.knime.bigdata.spark.core.model;
 
-import java.io.IOException;
-
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
@@ -31,10 +29,8 @@ import org.knime.core.node.ExecutionMonitor;
 /**
  *
  * @author Bjoern Lohrmann, KNIME GmbH
- * @param <PIPELINEMODEL> Pipeline model type in Spark.
- *
  */
-public interface MLModelHelper<PIPELINEMODEL> extends ModelHelper<MLModel> {
+public interface MLModelHelper extends ModelHelper<MLModel> {
 
     /**
      * Checks if the provided model is already registered as a named object in the given Spark context. If not, the
@@ -48,14 +44,5 @@ public interface MLModelHelper<PIPELINEMODEL> extends ModelHelper<MLModel> {
      */
     void uploadModelToSparkIfNecessary(SparkContextID sparkContext, MLModel model, ExecutionMonitor exec)
         throws KNIMESparkException, CanceledExecutionException;
-
-    /**
-     * Loads the given model into main memory in KNIME.
-     *
-     * @param model The model to load.
-     * @return the loaded model
-     * @throws IOException When something went wrong while unzipping or loading the model.
-     */
-    PIPELINEMODEL loadModel(final MLModel model)  throws IOException;
 
 }

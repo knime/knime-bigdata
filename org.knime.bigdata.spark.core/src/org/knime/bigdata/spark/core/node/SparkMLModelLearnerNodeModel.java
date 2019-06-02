@@ -115,7 +115,7 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
 
         exec.setMessage(getModelName() + " model learner done.");
 
-        final FileStore modelFileStore = exec.createFileStore("zippelPipelineModel");
+        final FileStore modelFileStore = exec.createFileStore("zippedPipelineModel");
         Files.move(result.getZippedPipelineModel(), modelFileStore.getFile().toPath());
 
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];

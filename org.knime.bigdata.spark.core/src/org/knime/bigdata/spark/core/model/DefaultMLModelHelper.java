@@ -35,9 +35,8 @@ import org.knime.core.node.ExecutionMonitor;
 /**
  *
  * @author Bjoern Lohrmann
- * @param <PIPELINEMODEL> Pipeline model type in Spark.
  */
-public abstract class DefaultMLModelHelper<PIPELINEMODEL> implements MLModelHelper<PIPELINEMODEL> {
+public abstract class DefaultMLModelHelper implements MLModelHelper {
 
     /**
      * Job ID of the job that checks for the presence of a named model.
