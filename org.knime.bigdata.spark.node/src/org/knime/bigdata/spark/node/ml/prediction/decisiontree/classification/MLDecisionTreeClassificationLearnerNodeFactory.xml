@@ -1,45 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
-    type="Learner" icon="icon.png">
-    <name>Spark Decision Tree Learner (ML)</name>
-	<shortDescription>Decision tree induction performed in Spark.</shortDescription>
+<knimeNode xmlns="http://knime.org/node/v2.12"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
+	type="Learner" icon="icon.png">
+	<name>Spark Decision Tree Learner</name>
+	<shortDescription>Trains a decision tree model in Spark.
+	</shortDescription>
 	<fullDescription>
 		<intro>
-			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html">Decision / Regression Tree</a> algorithm.
+			This node uses the
+			<a
+				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#decision-trees">
+				spark.ml
+				decision tree
+			</a>
+			implementation to train a decision tree model in Spark. It supports
+			binary and multiclass
+			classification. The class column must be
+			nominal, whereas the feature columns can be
+			either nominal or
+			numerical.
 			<p>
-            Please note that all data must be numeric, including the label column for classification tasks. 
-            Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
-            </p>
-            <p>
-            Use the Spark Predictor node to apply the learned model to unseen data.
-            </p>
+				Use the
+				<i>Spark Predictor (Classification)</i>
+				node to apply the learned model to unseen data.
+			</p>
+			<p>
+				Please refer to the
+				<a href="http://spark.apache.org/docs/2.4.3/mllib-decision-tree.html">Spark documentation</a>
+				for a full description of the underlying algorithm.
+			</p>
 		</intro>
-    	<option name="Max number of bins">
-			Maximum number of bins used for discretizing continuous features and 
-			for choosing how to split on features at each node.
+		<option name="Max number of bins">
+			Maximum number of bins used for discretizing
+			continuous features and
+			for choosing how to split on features at each
+			node.
 		</option>
 		<option name="Max depth">
 			Maximum depth of the tree (>= 0).
 		</option>
-		<option name="Is classification">
-			Indicates whether this is a classification or a regression task.
-		</option>
 		<option name="Quality measure">
-			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".
-			  For more details on the available methods see the 
-			  <a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
+			Criterion used for information gain calculation. Available methods:
+			"gini" (recommended) or "entropy".
+			For more details on the available
+			methods see the
+			<a
+				href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>
+			.
 		</option>
-		<option name="Class column">The classification column. Must be numeric.</option>
-		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+		<option name="Min rows per child">
+			Minimum number of rows from the training data each child must have after split. If a
+			split causes the left or right child to have fewer rows, the split will be discarded as invalid.
+			Must be >= 1.
+		</option>
+		<option name="Class column">The classification column. Must be nominal.
+		</option>
+		<option name="Feature Columns">The feature columns to learn the model from.
+			Both nominal and numeric columns are supported.
+		</option>
 	</fullDescription>
 
-    <ports>
-		<inPort index="0" name="Input data">Input Spark DataFrame/RDD</inPort>
-		<inPort optional="true" index="1" name="PMML mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
-        <outPort index="0" name="Decision Tree Model">Spark MLlib Decision Tree Model</outPort>
-    </ports>
-    
+	<ports>
+		<inPort index="0" name="Input data">Input Spark DataFrame/RDD with training data.</inPort>
+		<outPort index="0" name="Spark ML Decision Tree Model">Spark ML Decision Tree Model</outPort>
+	</ports>
+
 </knimeNode>

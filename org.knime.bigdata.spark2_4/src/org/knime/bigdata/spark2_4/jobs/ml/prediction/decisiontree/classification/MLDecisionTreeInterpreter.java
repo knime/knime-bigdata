@@ -36,6 +36,7 @@ import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeMetaData;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
@@ -89,10 +90,9 @@ public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
      */
     @Override
     public String getSummary(final MLModel pipelineModel) {
-        //FIXME
-        return "FIXME";
-//        final DecisionTreeModel treeModel = (DecisionTreeModel)model.getModel();
-//        return String.format("Tree depth: %d / Number of nodes: %d", treeModel.depth(), treeModel.numNodes());
+        final MLDecisionTreeMetaData metaData = pipelineModel.getModelMetaData(MLDecisionTreeMetaData.class).get();
+        return String.format("Tree depth: %d / Number of nodes: %d", metaData.getTreeDepth(),
+            metaData.getNumberOfTreeNodes());
     }
 
     /**

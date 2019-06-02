@@ -46,8 +46,8 @@ public class MLDecisionTreeMetaData extends MLMetaData {
      * @param depth Tree depth.
      */
     public MLDecisionTreeMetaData(final int numNodes, final int depth) {
-        set(KEY_NUM_NODES, numNodes);
-        set(KEY_DEPTH, depth);
+        setInteger(KEY_NUM_NODES, numNodes);
+        setInteger(KEY_DEPTH, depth);
     }
 
     /**
