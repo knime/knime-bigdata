@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
+    type="Predictor" icon="icon.png">
+    <name>Spark Predictor (Classification)</name>
+    <shortDescription>Predicts input data based on a previously learned Spark ML model (e.g. decision tree).</shortDescription>
+    <fullDescription>
+        <intro>
+            This node labels new data points using a learned Spark ML model e.g. a decision tree.
+        </intro>
+        <option name="Prediction column">The name of the prediction column.</option>
+    </fullDescription>
+
+    <ports>
+        <inPort index="0" name="Spark ML Model">Spark ML model</inPort>
+        <inPort index="1" name="Input Data">Spark DataFrame containing the input data to predict</inPort>
+        <outPort index="0" name="Labeled Data">Labeled input data</outPort>
+    </ports>
+</knimeNode>

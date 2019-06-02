@@ -8,7 +8,8 @@ Bundle-ClassPath: knime.jar,
   lib/knime-jobserver-utils-0.7.0.2-KNIME_spark-2.2.jar,
   lib/hive-warehouse-connector_2.11-1.0.0.3.1.2.0-4.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
-Export-Package: org.knime.bigdata.spark2_4.api
+Export-Package: org.knime.bigdata.spark2_4.api,
+ org.knime.bigdata.spark2_4.base
 Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
   org.knime.base;bundle-version="[4.0.0,5.0.0)",
   org.knime.bigdata.spark.core;bundle-version="[4.0.0,5.0.0)",

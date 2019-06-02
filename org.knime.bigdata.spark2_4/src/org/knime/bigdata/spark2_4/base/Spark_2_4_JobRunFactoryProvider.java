@@ -30,7 +30,7 @@ import org.knime.bigdata.spark2_4.jobs.genericdatasource.Spark2GenericDataSource
 import org.knime.bigdata.spark2_4.jobs.hive.Hive2SparkJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.hive.Spark2HiveJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerJobRunFactory;
-import org.knime.bigdata.spark2_4.jobs.ml.prediction.predictor.MLPredictorJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.predictor.MLPredictorClassificationJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
@@ -154,6 +154,6 @@ public class Spark_2_4_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new MLDecisionTreeClassificationLearnerJobRunFactory(),
             new NamedModelCheckerJobRunFactory(),
             new NamedModelUploaderJobRunFactory(),
-            new MLPredictorJobRunFactory());
+            new MLPredictorClassificationJobRunFactory());
     }
 }

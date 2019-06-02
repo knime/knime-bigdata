@@ -45,6 +45,7 @@ import org.knime.bigdata.spark.node.io.impala.writer.Spark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.table.reader.Table2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.table.writer.Spark2TableNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.predictor.classification.MLPredictorClassificationNodeFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleApplyNodeFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleLearnerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.clustering.assigner.MLlibClusterAssignerNodeFactory;
@@ -229,8 +230,8 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Parquet2SparkNodeFactory(),
             new Impala2SparkNodeFactory(),
             new SparkJavaSnippetSourceNodeFactory(),
-            new MLlibPCANodeFactory()
-            );
+            new MLlibPCANodeFactory(),
+            new MLPredictorClassificationNodeFactory());
     }
 
 }

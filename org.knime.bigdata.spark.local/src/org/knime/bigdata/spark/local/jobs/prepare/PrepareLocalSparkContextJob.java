@@ -28,6 +28,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_4.api.TypeConverters;
+import org.knime.bigdata.spark2_4.base.Spark_2_4_CustomUDFProvider;
 
 /**
  * Spark job to prepare a newly-created local Spark context.
@@ -47,5 +48,6 @@ public class PrepareLocalSparkContextJob implements SimpleSparkJob<PrepareContex
         final NamedObjects namedObjects) throws KNIMESparkException, Exception {
 
         TypeConverters.ensureConvertersInitialized(input.<DataType>getTypeConverters());
+        Spark_2_4_CustomUDFProvider.registerCustomUDFs(sparkContext);
     }
 }

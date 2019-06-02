@@ -71,6 +71,9 @@ public class LocalSparkJobInput extends JobData {
         final String jobInputClassName = get(KEY_JOBINPUT_CLASS);
         final T jobInput = (T)getClass().getClassLoader().loadClass(jobInputClassName).newInstance();
         jobInput.setInternalMap(getInternalMap());
+        for(Path file : getFiles()) {
+            jobInput.withFile(file);
+        }
 
         return jobInput;
     }
