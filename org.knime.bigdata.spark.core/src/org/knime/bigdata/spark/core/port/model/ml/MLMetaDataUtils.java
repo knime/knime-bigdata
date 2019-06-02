@@ -41,6 +41,8 @@ public class MLMetaDataUtils {
 
     private static final String KEY_ADDITIONAL_VALUES = "additionalValues";
 
+    private static final String KEY_ADDITIONAL_VALUES_TYPES = "additionalValuesTypes";
+
     public static void saveToModelContent(final MLMetaData metaData, final ModelContentWO modelContent) {
 
         final Map<Integer, List<String>> nominalFeatureMappings = metaData.getNominalFeatureValueMappings();
@@ -59,17 +61,18 @@ public class MLMetaDataUtils {
         }
 
         final ModelContentWO additionalValuesContent = modelContent.addModelContent(KEY_ADDITIONAL_VALUES);
+        final ModelContentWO additionalValuesTypes = modelContent.addModelContent(KEY_ADDITIONAL_VALUES_TYPES);
         for (Entry<String, Object> entry : metaData.getAdditionalValues().entrySet()) {
             final Object value = entry.getValue();
             if (value instanceof Integer) {
                 additionalValuesContent.addInt(entry.getKey(), (int)value);
-                additionalValuesContent.addString(entry.getKey() + ".type", "int");
+                additionalValuesTypes.addString(entry.getKey() + ".type", "int");
             } else if (value instanceof Double) {
                 additionalValuesContent.addDouble(entry.getKey(), (double)value);
-                additionalValuesContent.addString(entry.getKey() + ".type", "double");
+                additionalValuesTypes.addString(entry.getKey() + ".type", "double");
             } else if (value instanceof String) {
                 additionalValuesContent.addString(entry.getKey(), (String)value);
-                additionalValuesContent.addString(entry.getKey() + ".type", "string");
+                additionalValuesTypes.addString(entry.getKey() + ".type", "string");
             }
         }
     }
@@ -92,8 +95,10 @@ public class MLMetaDataUtils {
         }
 
         final ModelContentRO additionalValuesContent = modelContent.getModelContent(KEY_ADDITIONAL_VALUES);
+        final ModelContentRO additionalValuesTypes = modelContent.getModelContent(KEY_ADDITIONAL_VALUES_TYPES);
+
         for (String key : additionalValuesContent.keySet()) {
-            final String type = additionalValuesContent.getString(key + ".type");
+            final String type = additionalValuesTypes.getString(key + ".type");
             if (type.equals("int")) {
                 toReturn.setInteger(key, additionalValuesContent.getInt(key));
             } else if (type.equals("double")) {
