@@ -32,6 +32,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
 import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
+import org.knime.bigdata.spark.node.io.database.hive.writer.DBSpark2HiveSettings.TableExistsAction;
 import org.knime.bigdata.spark.node.io.hive.writer.FileFormat;
 import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveJobInput;
 import org.knime.bigdata.spark.node.io.hive.writer.Spark2HiveNodeModel;
@@ -178,7 +179,7 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
         throws CanceledExecutionException, SQLException, KNIMESparkException {
         final boolean tableExist = session.getAgent(DBMetadataReader.class).isExistingTable(exec, table);
         if (tableExist) {
-            if (m_settings.getDropExisting()) {
+            if (m_settings.onExistingTableAction() == TableExistsAction.DROP) {
                 final DBStructureManipulator manipulator = session.getAgent(DBStructureManipulator.class);
                 manipulator.dropTable(exec, new DropTableParameters(table, false));
             } else {

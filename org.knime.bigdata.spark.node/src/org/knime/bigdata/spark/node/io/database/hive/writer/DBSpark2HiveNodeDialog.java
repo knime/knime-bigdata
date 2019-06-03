@@ -32,16 +32,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.bigdata.spark.node.io.database.hive.writer.DBSpark2HiveSettings.TableExistsAction;
 import org.knime.bigdata.spark.node.io.hive.writer.FileFormat;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 
@@ -57,7 +57,7 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
 
     private SettingsModelString m_compressionsModel;
 
-    private SettingsModelBoolean m_dropModel;
+    private SettingsModelString m_tableExistsActionModel;
 
     private SettingsModelString m_schemaModel;
 
@@ -74,15 +74,15 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
         m_schemaModel = settings.getSchemaModel();
         m_tableNameModel = settings.getTableNameModel();
         m_fileFormatModel = settings.getFileFormatModel();
-        m_dropModel = settings.getDropExistingModel();
+        m_tableExistsActionModel = settings.getTableExistsActionModel();
         m_compressionsModel = settings.getCompressionModel();
 
         final DialogComponentString schemaComp = new DialogComponentString(m_schemaModel, "Schema: ");
 
         final DialogComponentString tableNameComp = new DialogComponentString(m_tableNameModel, "Table name: ");
 
-        final DialogComponentBoolean dropComp =
-            new DialogComponentBoolean(settings.getDropExistingModel(), "Drop existing table");
+        final DialogComponentButtonGroup tableExistActions =
+            new DialogComponentButtonGroup(m_tableExistsActionModel, null, false, TableExistsAction.values());
 
         final DialogComponentStringSelection compressionsComp = new DialogComponentStringSelection(m_compressionsModel,
             "Compression: ", settings.getCompressionsForFileformat(m_fileFormatModel.getStringValue()));
@@ -112,7 +112,7 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
         outerPanel.add(tableNameComp.getComponentPanel());
         outerPanel.add(Box.createVerticalGlue());
 
-        outerPanel.add(dropComp.getComponentPanel());
+        outerPanel.add(tableExistActions.getComponentPanel());
         outerPanel.add(fileFormatComp.getComponentPanel());
         outerPanel.add(compressionsComp.getComponentPanel());
 
@@ -133,7 +133,7 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_tableNameModel.saveSettingsTo(settings);
         m_schemaModel.saveSettingsTo(settings);
-        m_dropModel.saveSettingsTo(settings);
+        m_tableExistsActionModel.saveSettingsTo(settings);
         m_fileFormatModel.saveSettingsTo(settings);
         m_compressionsModel.saveSettingsTo(settings);
 
@@ -146,7 +146,7 @@ public class DBSpark2HiveNodeDialog extends NodeDialogPane {
         try {
             m_tableNameModel.loadSettingsFrom(settings);
             m_schemaModel.loadSettingsFrom(settings);
-            m_dropModel.loadSettingsFrom(settings);
+            m_tableExistsActionModel.loadSettingsFrom(settings);
             m_fileFormatModel.loadSettingsFrom(settings);
             m_compressionsModel.loadSettingsFrom(settings);
         } catch (InvalidSettingsException e) {

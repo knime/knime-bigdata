@@ -31,8 +31,8 @@ import org.knime.bigdata.spark.node.io.hive.writer.ParquetCompression;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.ButtonGroupEnumInterface;
 
 /**
  * Settings class for the Spark2Hive/Spark2Impala Node
@@ -45,7 +45,7 @@ public class DBSpark2HiveSettings {
 
     private final SettingsModelString m_tableName;
 
-    private final SettingsModelBoolean m_dropExisting;
+    private final SettingsModelString m_onTableExistsAction;
 
     private final SettingsModelString m_fileFormat;
 
@@ -60,11 +60,53 @@ public class DBSpark2HiveSettings {
     public DBSpark2HiveSettings(final FileFormat defaultFormat) {
         m_schema = new SettingsModelString("schema", "");
         m_tableName = new SettingsModelString("tableName", "");
-        m_dropExisting = new SettingsModelBoolean("dropExistingTable", false);
+        m_onTableExistsAction = new SettingsModelString("existingTable", TableExistsAction.FAIL.getActionCommand());
         m_fileFormat = new SettingsModelString("fileFormat", defaultFormat.toString());
         final Optional<String> compression = getCompressionsForFileformat(m_fileFormat.getStringValue()).stream().findFirst();
         m_compression = new SettingsModelString("compression", compression.orElse("NONE"));
     }
+
+    /**
+     * Enum to model what happens when the table already exists.
+     */
+    public enum TableExistsAction implements ButtonGroupEnumInterface {
+
+        /**
+         * Fail if table exists
+         */
+        FAIL,
+
+        /**
+         * Drop table if exists
+         */
+        DROP;
+
+        @Override
+        public String getText() {
+            switch (this) {
+                case DROP:
+                    return "Remove existing table";
+                default:
+                    return "Fail if table exists";
+            }
+        }
+
+        @Override
+        public String getActionCommand() {
+            return this.toString();
+        }
+
+        @Override
+        public String getToolTip() {
+            return null;
+        }
+
+        @Override
+        public boolean isDefault() {
+            return this == FAIL;
+        }
+    }
+
 
     /**
      * @return settings model for the schema name
@@ -95,17 +137,17 @@ public class DBSpark2HiveSettings {
     }
 
     /**
-     * @return settings model for whether an existing table should be dropped
+     * @return settings model for whether to do if table exists action
      */
-    public SettingsModelBoolean getDropExistingModel() {
-        return m_dropExisting;
+    public SettingsModelString getTableExistsActionModel() {
+        return m_onTableExistsAction;
     }
 
     /**
-     * @return whether existing table should be dropped
+     * @return whether to do if table already exists action
      */
-    public boolean getDropExisting(){
-        return m_dropExisting.getBooleanValue();
+    public TableExistsAction onExistingTableAction(){
+        return TableExistsAction.valueOf(m_onTableExistsAction.getStringValue());
     }
 
     /**
@@ -144,7 +186,7 @@ public class DBSpark2HiveSettings {
     public void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
         m_schema.saveSettingsTo(settings);
         m_tableName.saveSettingsTo(settings);
-        m_dropExisting.saveSettingsTo(settings);
+        m_onTableExistsAction.saveSettingsTo(settings);
         m_fileFormat.saveSettingsTo(settings);
         m_compression.saveSettingsTo(settings);
     }
@@ -157,7 +199,7 @@ public class DBSpark2HiveSettings {
     public void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_schema.validateSettings(settings);
         m_tableName.validateSettings(settings);
-        m_dropExisting.validateSettings(settings);
+        m_onTableExistsAction.validateSettings(settings);
         m_fileFormat.validateSettings(settings);
         m_compression.validateSettings(settings);
     }
@@ -170,7 +212,7 @@ public class DBSpark2HiveSettings {
     public void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_schema.loadSettingsFrom(settings);
         m_tableName.loadSettingsFrom(settings);
-        m_dropExisting.loadSettingsFrom(settings);
+        m_onTableExistsAction.loadSettingsFrom(settings);
         m_fileFormat.loadSettingsFrom(settings);
         m_compression.loadSettingsFrom(settings);
     }
