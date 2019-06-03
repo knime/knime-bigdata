@@ -54,6 +54,7 @@ import org.knime.database.agent.ddl.DropTableParameters;
 import org.knime.database.agent.metadata.DBMetadataReader;
 import org.knime.database.datatype.mapping.DBTypeMappingRegistry;
 import org.knime.database.datatype.mapping.DBTypeMappingService;
+import org.knime.database.model.DBTable;
 import org.knime.database.model.impl.DefaultDBTable;
 import org.knime.database.port.DBDataPortObject;
 import org.knime.database.port.DBSessionPortObject;
@@ -164,6 +165,8 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
             .createRun(jobInput)
             .run(rdd.getContextID());
 
+        postProcessing(session, table, exec);
+
         final DataTypeMappingConfiguration<SQLType> typeMappingConfig = getTypeMappingConfig(sessionObj);
         final DBDataObject resultObject = session.getAgent(DBMetadataReader.class).getDBDataObject(exec,
             table.getSchemaName(), table.getName(), typeMappingConfig);
@@ -177,7 +180,7 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
         if (tableExist) {
             if (m_settings.getDropExisting()) {
                 final DBStructureManipulator manipulator = session.getAgent(DBStructureManipulator.class);
-                manipulator.dropTable(exec, new DropTableParameters(table, true));
+                manipulator.dropTable(exec, new DropTableParameters(table, false));
             } else {
                 throw new KNIMESparkException("Table " + table.getName() + " already exists");
             }
@@ -204,6 +207,20 @@ public class DBSpark2HiveNodeModel extends SparkNodeModel {
             .resolve(mappingService, DataTypeMappingDirection.EXTERNAL_TO_KNIME);
 
         return typeMappingConfig;
+    }
+
+    /**
+     * Do whatever post processing is necessary.
+     *
+     * @param session active database session
+     * @param tableName the name of the created table
+     * @param exec the execution environment
+     * @throws CanceledExecutionException
+     * @throws InvalidSettingsException
+     */
+    protected void postProcessing(final DBSession session, final DBTable tableName, final ExecutionContext exec)
+        throws CanceledExecutionException, InvalidSettingsException {
+        // nothing to do in Hive
     }
 
     /**

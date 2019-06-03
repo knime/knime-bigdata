@@ -48,6 +48,7 @@
  */
 package org.knime.bigdata.spark.node.io.database.hive.reader;
 
+import org.knime.bigdata.database.hive.Hive;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.node.SparkSourceNodeModel;
@@ -111,14 +112,9 @@ public class DBHive2SparkNodeModel extends SparkSourceNodeModel {
      */
     protected void checkDatabaseType(final DBDataPortObjectSpec spec) throws InvalidSettingsException {
         DBType dbType = spec.getDBSession().getDriver().getDriverDefinition().getDBType();
-        //FIXME compare with HIVE Type once connector is merged
-        if (!dbType.getId().equalsIgnoreCase("hive")) {
+        if (Hive.DB_TYPE != dbType) {
             throw new InvalidSettingsException("Input must be a Hive connection");
         }
-
-        //        if(Hive.DB_TYPE != dbType) {
-        //            throw new InvalidSettingsException("Input must be a Hive connection");
-        //        }
     }
 
     /**

@@ -24,6 +24,8 @@ import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactoryProvider;
 import org.knime.bigdata.spark.core.version.AllVersionCompatibilityChecker;
 import org.knime.bigdata.spark.node.io.database.hive.reader.DBHive2SparkNodeFactory;
 import org.knime.bigdata.spark.node.io.database.hive.writer.DBSpark2HiveNodeFactory;
+import org.knime.bigdata.spark.node.io.database.impala.reader.DBImpala2SparkNodeFactory;
+import org.knime.bigdata.spark.node.io.database.impala.writer.DBSpark2ImpalaNodeFactory;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeFactory2;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeFactory;
 import org.knime.bigdata.spark.node.io.genericdatasource.reader.avro.Avro2SparkNodeFactory2;
@@ -141,8 +143,10 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new Spark2DatabaseNodeFactory(),
             new Hive2SparkNodeFactory2(),
             new DBHive2SparkNodeFactory(),
+            new DBImpala2SparkNodeFactory(),
             new Spark2HiveNodeFactory(),
             new DBSpark2HiveNodeFactory(),
+            new DBSpark2ImpalaNodeFactory(),
             new Json2SparkNodeFactory2(),
             new Spark2JsonNodeFactory(),
             new Table2SparkNodeFactory2(),
