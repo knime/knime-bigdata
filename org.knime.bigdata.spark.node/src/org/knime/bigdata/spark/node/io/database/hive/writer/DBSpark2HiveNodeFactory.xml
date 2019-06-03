@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
-	<name>Spark to Hive (Labs)</name>
+	<name>Spark to Hive</name>
 	<shortDescription>Writes an incoming Spark DataFrame/RDD into a Hive table.</shortDescription>
 	<fullDescription>
 		<intro>
