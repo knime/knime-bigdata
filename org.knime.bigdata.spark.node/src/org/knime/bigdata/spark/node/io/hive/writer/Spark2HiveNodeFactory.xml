@@ -2,11 +2,20 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
-	<name>Spark to Hive</name>
+	<name>Spark to Hive (legacy)</name>
 	<shortDescription>Converts an incoming Spark DataFrame/RDD into a Hive table</shortDescription>
 	<fullDescription>
 		<intro>
+      <p>
+      <b>This node is part of the legacy database framework.</b>
+      For more information on how to migrate to the new database framework see the
+      <a href="!@!TOBIS_DB_MIGRATION_DOCUMENTATION_LINK!@!">migration section</a> of the
+      <a href="!@!TOBIS_DB_DOCUMENTATION_LINK!@!">database documentation</a>.
+      </p>
+
+      <p>
 			Converts an incoming Spark DataFrame/RDD into a Hive table
+      </p>
 			
 			<p><b>Notice:</b> On clusters with Hortonworks HDP 3.x, this node requires <i>Hive Warehouse Connector</i>
 			to be part of the Spark classpath and correctly configured. Please consult the
