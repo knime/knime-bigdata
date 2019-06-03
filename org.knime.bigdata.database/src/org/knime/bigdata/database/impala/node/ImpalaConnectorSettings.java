@@ -1,3 +1,9 @@
+package org.knime.bigdata.database.impala.node;
+
+import java.util.Optional;
+
+import org.knime.bigdata.database.impala.Impala;
+
 /*
  * ------------------------------------------------------------------------
  *
@@ -44,94 +50,71 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.knime.database.DBType;
+import org.knime.database.dialect.DBSQLDialectFactory;
+import org.knime.database.dialect.DBSQLDialectRegistry;
+import org.knime.database.driver.DBDriverRegistry;
+import org.knime.database.driver.DBDriverWrapper;
+import org.knime.database.node.connector.server.ServerDBConnectorSettings;
 
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
 
 /**
+ * Settings model for the <em>Impala connector node</em>.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
+public class ImpalaConnectorSettings extends ServerDBConnectorSettings {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
+    private static final DBType DB_TYPE = Impala.DB_TYPE;
 
-    private final String m_name;
+    private static final int DEFAULT_PORT = 21050;
 
-    HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
-    }
+    private static final DBSQLDialectFactory DEFAULT_DIALECT_FACTORY =
+        DBSQLDialectRegistry.getInstance().getDefaultFactoryFor(DB_TYPE);
 
     /**
-     * {@inheritDoc}
+     * Impala Connector settings
      */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
-    }
+    protected ImpalaConnectorSettings() {
+        super("impala-connection");
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
+        setDBType(DB_TYPE.getId());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
+        setDialect(DEFAULT_DIALECT_FACTORY.getId());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
+        final DBDriverWrapper defaultDriver = DBDriverRegistry.getInstance().getLatestDriver(DB_TYPE);
+        setDriver(defaultDriver == null ? null : defaultDriver.getDriverDefinition().getId());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
+        setPort(DEFAULT_PORT);
     }
 
     @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
+    protected String createJdbcUrl() {
+        final Optional<DBDriverWrapper> driver = DBDriverRegistry.getInstance().getDriver(getDriver());
+
+        if (isClouderaDriver(driver.get())) {
+            return "jdbc:impala://" + getHost() + ":" + getPort() + "/" + getDatabaseName();
+        } else {
+            // Use Hive driver
+            return "jdbc:hive2://" + getHost() + ":" + getPort() + "/" + getDatabaseName();
+        }
+    }
+
+    private static boolean isClouderaDriver(final DBDriverWrapper driver) {
+        return driver != null && driver.getDriver().getClass().getName().startsWith("com.cloudera.impala.");
     }
 
     @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
+    protected String getDatabaseTypeId() {
+        return DB_TYPE.getId();
     }
+
+    @Override
+    public boolean isDatabaseNameMandatory() {
+        return false;
+    }
+
 }

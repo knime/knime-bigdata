@@ -44,94 +44,42 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala.node;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Arrays;
 
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.bigdata.database.impala.Impala;
+import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
+import org.knime.database.node.connector.ConfigurationPanel;
+import org.knime.database.node.connector.DBConnectorUIHelper;
+import org.knime.database.node.connector.domain.DBTypeUI;
+import org.knime.database.node.connector.server.DatabaseServerLocationPanel;
+import org.knime.database.node.connector.server.ServerDBConnectorNodeDialog;
 
 /**
+ * Dialog for the Impala Connector node
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
+public class ImpalaConnectorNodeDialog extends ServerDBConnectorNodeDialog<ImpalaConnectorSettings> {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
+    private static final DBTypeUI DB_TYPE = new DBTypeUI(Impala.DB_TYPE);
 
-    private final String m_name;
+    private static final String HISTORY_PREFIX = "impala_connector_node_";
 
-    HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
-    }
 
     /**
-     * {@inheritDoc}
+     * Constructs an {@link ImpalaConnectorNodeDialog}.
      */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
+    protected ImpalaConnectorNodeDialog() {
+        super(new ImpalaConnectorSettings(),
+            new ConfigurationPanel<>(" Configuration ", () -> new DBTypeUI[]{DB_TYPE},
+                DBConnectorUIHelper::getNonDefaultDBDialects, DBConnectorUIHelper::getDBDrivers),
+            new DatabaseServerLocationPanel<>(HISTORY_PREFIX), Arrays.asList(new AuthenticationType[] {
+                AuthenticationType.KERBEROS, AuthenticationType.USER, AuthenticationType.USER_PWD,
+                AuthenticationType.CREDENTIALS}));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
-    }
 }

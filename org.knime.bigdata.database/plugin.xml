@@ -8,22 +8,35 @@
             description="Hive"
             id="hive"
             name="Hive"/>
+      <DBType
+            description="Impala"
+            id="impala"
+            name="Impala"/>
    </extension>
    <extension point="org.knime.database.SQLDialect">
       <SQLDialect
             dbTypes="hive"
             factory="org.knime.bigdata.database.hive.dialect.HiveSQLDialect$Factory"/>
+      <SQLDialect
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.dialect.ImpalaSQLDialect$Factory"/>
    </extension>
   	<extension
          point="org.knime.workbench.repository.nodes">
       <node
             factory-class="org.knime.bigdata.database.hive.node.HiveConnectorNodeFactory"
             category-path="/db/connector"/>
+      <node
+            factory-class="org.knime.bigdata.database.impala.node.ImpalaConnectorNodeFactory"
+            category-path="/db/connector"/>
     </extension>
    <extension
          point="org.knime.database.Driver">
       <Driver
             locator="org.knime.bigdata.database.hive.HiveDriverLocator">
+      </Driver>
+      <Driver
+            locator="org.knime.bigdata.database.impala.ImpalaHiveDriverLocator">
       </Driver>
    </extension>
    <extension
@@ -38,19 +51,32 @@
             factory="org.knime.bigdata.database.hive.HiveAgentFactory"
             interface="org.knime.database.agent.binning.DBBinner">
       </Agent>
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.sampling.DBSampling">
+      </Agent>
+      <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.binning.DBBinner">
+      </Agent>
    </extension>
    <!-- ********************************** DB Aggregation Functions ********************************** -->
    
    <extension point="org.knime.database.AggregationFunction">
    
    <!-- ************************** Common ************************** -->
-   
-
             
+      <!-- AvgDistinctDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.AvgDistinctDBAggregationFunction$Factory"
+            dbTypes="hive,impala"/>
+
       <!-- CountDistinctDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.CountDistinctDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
    
       <!-- CorrDBAggregationFunction -->
       <AggregationFunction
@@ -67,40 +93,45 @@
             factory="org.knime.database.function.aggregation.impl.functions.CovarPopDBAggregationFunction$Factory"
             dbTypes="hive"/>
             
+      <!-- GroupConcatDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.database.function.aggregation.impl.functions.GroupConcatDBAggregationFunction$Factory"
+            dbTypes="impala"/>
+
       <!-- MaxDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.MaxDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
 
       <!-- MinDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.MinDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
             
 	  <!-- VarPopDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.VarPopDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
    
       <!--VarSampDBAggregationFunction  -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.VarSampDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
             
       <!-- SumDistinctDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.SumDistinctDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
             
       <!-- StdDevSampDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.StdDevSampDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
             
       <!-- StdDevPopDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.database.function.aggregation.impl.functions.StdDevPopDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
             
       <!-- ************************** Hive ************************** -->
       
@@ -119,11 +150,18 @@
             factory="org.knime.bigdata.database.hive.functions.CollectSetDBAggregationFunction$Factory"
             dbTypes="hive"/>
             
-       <!-- CollectListDBAggregationFunction -->      
+      <!-- CollectListDBAggregationFunction -->
       <AggregationFunction
             factory="org.knime.bigdata.database.hive.functions.CollectListDBAggregationFunction$Factory"
-            dbTypes="hive"/>
+            dbTypes="hive,impala"/>
       
+      <!-- ************************** Impala ************************** -->
+
+      <!-- NDVDBAggregationFunction -->
+      <AggregationFunction
+            factory="org.knime.bigdata.database.impala.functions.NDVDBAggregationFunction$Factory"
+            dbTypes="impala"/>
+
     </extension>
     
      <extension
@@ -131,6 +169,10 @@
       <DBTypeMappingService
             dbTypeId="hive"
             supplier="org.knime.bigdata.database.hive.HiveTypeMappingServiceSupplier">
+      </DBTypeMappingService>
+      <DBTypeMappingService
+            dbTypeId="impala"
+            supplier="org.knime.bigdata.database.impala.ImpalaTypeMappingServiceSupplier">
       </DBTypeMappingService>
    </extension>
 </plugin>

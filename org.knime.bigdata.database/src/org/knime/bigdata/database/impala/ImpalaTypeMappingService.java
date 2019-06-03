@@ -46,92 +46,55 @@
  * History
  *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.JDBCType;
+import java.sql.SQLType;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.BooleanCell;
+import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
+import org.knime.database.datatype.mapping.AbstractDBDataTypeMappingService;
+import org.knime.database.datatype.mapping.DBDestination;
+import org.knime.database.datatype.mapping.DBSource;
 
 /**
+ * Impala specific data type mappings.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
+public class ImpalaTypeMappingService extends AbstractDBDataTypeMappingService<DBSource, DBDestination> {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
-
-    private final String m_name;
-
-    HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
-    }
+    private static final ImpalaTypeMappingService INSTANCE = new ImpalaTypeMappingService();
 
     /**
-     * {@inheritDoc}
+     * Gets the singleton {@link ImpalaTypeMappingService} instance.
+     *
+     * @return the only {@link ImpalaTypeMappingService} instance.
      */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
+    public static ImpalaTypeMappingService getInstance() {
+        return INSTANCE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
+    private ImpalaTypeMappingService() {
+        super(DBSource.class, DBDestination.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
+        // Default consumption paths
+        final Map<DataType, SQLType> defaultConsumptionMap = new LinkedHashMap<>(getDefaultConsumptionMap());
+        defaultConsumptionMap.put(BooleanCell.TYPE, JDBCType.BOOLEAN);
+        defaultConsumptionMap.put(ZonedDateTimeCellFactory.TYPE, JDBCType.VARCHAR); // not supported in Impala
+        setDefaultConsumptionPathsFrom(defaultConsumptionMap);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
+        // Default production paths
+        setDefaultProductionPathsFrom(getDefaultProductionMap());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
+        // SQL type to database column type mapping
+        addColumnType(JDBCType.DATE, "timestamp");
+        addColumnType(JDBCType.INTEGER, "int");
+        addColumnType(JDBCType.TIME, "timestamp");
+        addColumnType(JDBCType.TIME_WITH_TIMEZONE, "timestamp");
+        addColumnType(JDBCType.VARCHAR, "string");
     }
 }

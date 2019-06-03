@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode type="Source" icon="hive_connector.png"
+<knimeNode type="Source" icon="impala_connector.png"
     xmlns="http://knime.org/node/v3.1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
-    <name>Hive Connector</name>
-    <shortDescription>Create a database connection to Hive.</shortDescription>
+    <name>Impala Connector</name>
+    <shortDescription>Create a database connection to Impala.</shortDescription>
     <fullDescription>
         <intro>
-            This node creates a connection to a Hive server via its JDBC
+            This node creates a connection to a Impala server via its JDBC
             driver. You need to provide the server's
             hostname
             (or IP address), the port, and a database name. Login credentials can
@@ -25,14 +25,14 @@
                 <br/>
                 The node supports the usage of the Apache Hive drivers (already included in KNIME) and
                 Cloudera JDBC drivers which are available for download from the
-                <a href="http://www.cloudera.com/downloads/connectors/hive/jdbc.html">Cloudera homepage</a>.
+                <a href="http://www.cloudera.com/downloads/connectors/impala/jdbc.html">Cloudera homepage</a>.
             </option>
             <option name="Hostname">
-                The hostname (or IP address) of a Hive server.
+                The hostname (or IP address) of a Impala server.
             </option>
             <option name="Port">
-                The port on which the Hive server is listening. The default port
-                is 10,000 and 10,500 for Hive Interactive instances.
+                The port on which the Impala server is listening. The default port
+                is 21,050.
             </option>
             <option name="Database name">
                 The name of the database you want to connect to.
@@ -55,11 +55,11 @@
                 is encrypted before storage and decrypted afterwards for being used internally.
             </option>
             <option name="Use Kerberos">
-            Uses an existing Kerberos ticket for authentication. When connecting to HiveServer2 the principal of the 
-            HiveServer2 user needs to be added in the Parameter tab e.g. <i>principal=hive/hive2_host@YOUR-REALM.COM</i>.
-            The principal must be the same user principal you used when starting the HiveServer2. For details see the 
+            Uses an existing Kerberos ticket for authentication. When connecting to Impala the principal of the 
+            Impala user needs to be added in the Parameter tab e.g. <i>principal=impala/impala_host@YOUR-REALM.COM</i>.
+            The principal must be the same user principal you used when starting the Impala Server. For details see the 
             <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-JDBCClientSetupforaSecureCluster">Hive documentation</a>
-            or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>.
+            or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Impala-Install-Guide.pdf">Cloudera JDBC Driver for Apache Impala Install Guide</a>.
        		</option>
         </tab>
         <tab name="JDBC Parameters">
@@ -68,7 +68,7 @@
                 constant, variable, credential user, credential password or KNIME URL.
                 For more information about the supported driver properties see the 
                 <a href="https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients#HiveServer2Clients-ConnectionURLs">Hive documentation</a>
-                or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Hive-Install-Guide.pdf">Cloudera JDBC Driver for Apache Hive Install Guide</a>.
+                or the <a href="http://www.cloudera.com/documentation/other/connectors/hive-jdbc/latest/Cloudera-JDBC-Driver-for-Apache-Impala-Install-Guide.pdf">Cloudera JDBC Driver for Apache Impala Install Guide</a>.
              </description>
             <option name=""></option>
         </tab>

@@ -44,94 +44,23 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.database.DBType;
+import org.knime.database.DBTypeRegistry;
 
 /**
+ * Constants for the Impala database connector
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
-
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
-
-    private final String m_name;
-
-    HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
-    }
-
+public class Impala {
     /**
-     * {@inheritDoc}
+     * The {@link DBType} object corresponding to the database.
      */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
-    }
+    public static final DBType DB_TYPE = DBTypeRegistry.getInstance().getRegisteredDBType("impala").get();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
-    }
 }

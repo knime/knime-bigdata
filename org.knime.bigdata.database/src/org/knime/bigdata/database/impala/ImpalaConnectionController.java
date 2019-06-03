@@ -46,44 +46,36 @@
  * History
  *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionMonitor;
+import org.knime.bigdata.database.hive.HiveConnectionController;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.defaultnodesettings.SettingsModelAuthentication.AuthenticationType;
 import org.knime.core.node.workflow.CredentialsProvider;
-import org.knime.database.VariableContext;
-import org.knime.database.attribute.AttributeValueRepository;
-import org.knime.database.connection.UserDBConnectionController;
 
 /**
  * Database connection management controller, based on user authentication information defined by the authentication
  * type.
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveConnectionController extends UserDBConnectionController {
+public class ImpalaConnectionController extends HiveConnectionController {
 
     /**
-     * Constructs a {@link HiveConnectionController} object.
+     * Constructs a {@link ImpalaConnectionController} object.
      *
      * @param internalSettings the internal settings to load from.
      * @param credentialsProvider the {@link CredentialsProvider} object for accessing the credential variables of the
      *            workflow.
      * @throws InvalidSettingsException if the settings are not valid.
      */
-    public HiveConnectionController(final NodeSettingsRO internalSettings, final CredentialsProvider credentialsProvider)
+    public ImpalaConnectionController(final NodeSettingsRO internalSettings, final CredentialsProvider credentialsProvider)
         throws InvalidSettingsException {
         super(internalSettings, credentialsProvider);
     }
 
     /**
-     * Constructs a {@link HiveConnectionController} object.
+     * Constructs a {@link ImpalaConnectionController} object.
      *
      * @param jdbcUrl the database connection URL as a {@link String}.
      * @param authenticationType the {@linkplain AuthenticationType authentication type}.
@@ -94,25 +86,14 @@ public class HiveConnectionController extends UserDBConnectionController {
      *            workflow.
      * @throws NullPointerException if {@code jdbcUrl} or {@code authenticationType} is {@code null}.
      */
-    public HiveConnectionController(final String jdbcUrl, final AuthenticationType authenticationType,
+    public ImpalaConnectionController(final String jdbcUrl, final AuthenticationType authenticationType,
         final String user, final String password, final String credential,
         final CredentialsProvider credentialsProvider) {
         super(jdbcUrl, authenticationType, user, password, credential, credentialsProvider);
     }
 
-    /**
-     * Connection name used in error messages (Hive or Impala)
-     * @return connection name
-     */
-    protected String getConnectionName() {
-        return "Hive";
-    }
-
     @Override
-    protected Connection createConnection(final AttributeValueRepository attributeValues, final Driver driver,
-        final VariableContext variableContext, final ExecutionMonitor monitor)
-                throws CanceledExecutionException, SQLException {
-
-        return new HiveWrappedConnection(super.createConnection(attributeValues, driver, variableContext, monitor), getConnectionDescription());
+    protected String getConnectionName() {
+        return "Impala";
     }
 }

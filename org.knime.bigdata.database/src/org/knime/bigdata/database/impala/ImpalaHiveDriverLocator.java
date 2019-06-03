@@ -46,104 +46,37 @@
  * History
  *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala;
 
-import static java.util.Collections.emptySet;
 import static org.knime.database.driver.URLTemplate.NAME_DEFAULT;
 
-import java.util.Collection;
-
-import org.apache.hive.jdbc.HiveDriver;
+import org.knime.bigdata.database.hive.HiveDriverLocator;
 import org.knime.database.DBType;
-import org.knime.database.attribute.AttributeCollection;
-import org.knime.database.attribute.AttributeCollection.Accessibility;
-import org.knime.database.connection.impl.DBConnectionManagerAttributes;
-import org.knime.database.driver.AbstractDriverLocator;
 import org.knime.database.driver.URLTemplate;
 import org.knime.database.driver.URLTemplates;
 
 /**
- * This class contains the Hive driver definition. The definition will be used by Eclipse extensions API to create a
- * database driver instance.
+ * This class contains the Impala driver definition that use the open source hive driver.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class HiveDriverLocator extends AbstractDriverLocator {
+public class ImpalaHiveDriverLocator extends HiveDriverLocator {
 
-    /**Driver id. */
-    public static final String DRIVER_ID = "hive";
+    /** Driver id. */
+    public static final String IMPALA_HIVE_DRIVER_ID = "impalaHive";
 
-    /**
-     * The {@link AttributeCollection} {@linkplain #getAttributes() of} Hive drivers.
-     */
-    public static final AttributeCollection ATTRIBUTES;
-
-
-    static {
-        final AttributeCollection.Builder builder =
-            AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
-        builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL, true);
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR, ";");
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR, ";");
-        builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_USER_AND_PASSWORD_TO_URL,
-            false);
-        ATTRIBUTES = builder.build();
-    }
-
-    /**
-     * Constructs a {@link HiveDriverLocator}
-     */
-    public HiveDriverLocator(){
-        super(ATTRIBUTES);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDriverId() {
-        return DRIVER_ID;
+        return IMPALA_HIVE_DRIVER_ID;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDriverName() {
-        return "Hive";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDriverClassName() {
-        return HiveDriver.class.getName();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DBType getDBType() {
-        return Hive.DB_TYPE;
+        return Impala.DB_TYPE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public URLTemplates getURLTemplates() {
-        return new URLTemplates(new URLTemplate(NAME_DEFAULT, "jdbc:hive2://<host>:10000/<database_name>"));
+        return new URLTemplates(new URLTemplate(NAME_DEFAULT, "jdbc:hive2://<host>:21050/<database_name>"));
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> getDriverPaths() {
-        return emptySet();
-    }
-
 }

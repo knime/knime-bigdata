@@ -56,6 +56,8 @@ import org.knime.database.SQLQuery;
 import org.knime.database.attribute.Attribute;
 import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
+import org.knime.database.dialect.CreateTableParameters;
+import org.knime.database.dialect.DBColumn;
 import org.knime.database.dialect.DBSQLDialect;
 import org.knime.database.dialect.DBSQLDialectFactory;
 import org.knime.database.dialect.DBSQLDialectFactoryParameters;
@@ -263,6 +265,23 @@ public class HiveSQLDialect extends SQL92DBSQLDialect {
         return columnName.replaceFirst("^[^\\.]*\\.", "");
     }
 
+    /**
+     * {@inheritDoc} Throws an error if {@code NOT NULL} option is set.
+     *
+     * @throws UnsupportedOperationException {@code NOT NULL} options is used
+     */
+    @Override
+    protected void appendColumnDefinitions(final StringBuilder statement, final CreateTableParameters parameters) {
+        // validate columns
+        for (final DBColumn column : parameters.getColumns()) {
+            if (column.isNotNull()) {
+                throw new UnsupportedOperationException(getName() + " does not support NOT NULL option");
+            }
+        }
+
+        super.appendColumnDefinitions(statement, parameters);
+    }
+
     @Override
     public SQLCommand[] getCreateTableAsSelectStatement(final DBSchemaObject schemaObject, final SQLQuery sql) {
         return new SQLCommand[] {new SQLCommand("CREATE TABLE " + createFullName(schemaObject) + " AS " + sql.getQuery())};
@@ -275,11 +294,13 @@ public class HiveSQLDialect extends SQL92DBSQLDialect {
         return new SQLCommand(insert);
     }
 
-
     @Override
     public SQLCommand getDropTableStatement(final DBSchemaObject schemaObject, final boolean cascade) {
-        //Hive does not support the cascade option
-        return super.getDropTableStatement(schemaObject, false);
+        if (cascade) {
+            throw new UnsupportedOperationException(getName() + " does not support the cascade option in drop table.");
+        } else {
+            return super.getDropTableStatement(schemaObject, cascade);
+        }
     }
 
     @Override
@@ -289,17 +310,17 @@ public class HiveSQLDialect extends SQL92DBSQLDialect {
 
     @Override
     public SQLCommand createDeleteStatement(final DBSchemaObject schemaObject, final String... whereColumns) {
-        throw new UnsupportedOperationException("DELETE is not supported by Hive.");
+        throw new UnsupportedOperationException("DELETE is not supported by "+ getName() + ".");
     }
 
     @Override
     public SQLCommand createInsertStatement(final DBSchemaObject schemaObject, final String... columnNames) {
-        throw new UnsupportedOperationException("INSERT is not supported by Hive.");
+        throw new UnsupportedOperationException("INSERT is not supported by " + getName() + ".");
     }
 
     @Override
     public SQLCommand createUpdateStatement(final DBSchemaObject schemaObject, final String[] setColumns, final String[] whereColumns) {
-        throw new UnsupportedOperationException("UPDATE is not supported by Hive.");
+        throw new UnsupportedOperationException("UPDATE is not supported by " + getName() + ".");
     }
 
     @Override

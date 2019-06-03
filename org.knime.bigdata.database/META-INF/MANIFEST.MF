@@ -4,7 +4,8 @@ Bundle-Name: KNIME Big Data Database nodes
 Bundle-SymbolicName: org.knime.bigdata.database;singleton:=true
 Bundle-Version: 4.0.0.qualifier
 Bundle-Vendor: KNIME AG
-Export-Package: org.knime.bigdata.database.hive
+Export-Package: org.knime.bigdata.database.hive,
+ org.knime.bigdata.database.impala
 Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
   org.knime.workbench.repository;bundle-version="[4.0.0,5.0.0)",
   org.apache.commons.lang3;bundle-version="[3.3.1,4.0.0)",

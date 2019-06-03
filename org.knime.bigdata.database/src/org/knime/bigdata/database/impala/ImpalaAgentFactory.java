@@ -44,94 +44,46 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   08.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.impala;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.bigdata.database.hive.agent.HiveCaseSupportedBinner;
+import org.knime.bigdata.database.hive.agent.HiveSampling;
+import org.knime.database.agent.AbstractDBAgentFactory;
+import org.knime.database.agent.DBAgentFactory;
+import org.knime.database.agent.binning.DBBinner;
+import org.knime.database.agent.sampling.DBSampling;
+import org.knime.database.agent.sampling.impl.DefaultDBSampling;
+import org.knime.database.attribute.AttributeCollection;
+import org.knime.database.attribute.AttributeCollection.Accessibility;
 
 /**
+ * {@linkplain DBAgentFactory Agent factory} for Impala that does not support random sampling.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
+public class ImpalaAgentFactory extends AbstractDBAgentFactory {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
 
-    private final String m_name;
+    private static final AttributeCollection SAMPLING_ATTRIBUTES;
 
-    HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
+    static {
+        final AttributeCollection.Builder builder = AttributeCollection.builder(DefaultDBSampling.ATTRIBUTES);
+        builder.add(Accessibility.HIDDEN, DefaultDBSampling.ATTRIBUTE_CAPABILITY_RANDOM, false);
+        builder.add(Accessibility.HIDDEN, DefaultDBSampling.ATTRIBUTE_CAPABILITY_RANDOM_SEED, false);
+        SAMPLING_ATTRIBUTES = builder.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
-    }
+   /**
+    * Constructs a {@link ImpalaAgentFactory}.
+    */
+   public ImpalaAgentFactory() {
+        putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
+        putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
+        putCreator(DBBinner.class, parameters -> {
+            return new HiveCaseSupportedBinner(parameters.getSessionReference());
+        });
+   }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
-    }
 }
