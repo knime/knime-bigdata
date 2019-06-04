@@ -499,7 +499,12 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 	@Override
 	public void deleteNamedObjects(Set<String> namedObjects) {
 		for (String namedObjectId : namedObjects) {
-			deleteNamedDataFrame(namedObjectId);
+		    final Object namedObject = m_namedObjects.get(namedObjectId);
+		    if (namedObject != null && namedObject instanceof Dataset) {
+		        deleteNamedDataFrame(namedObjectId);
+		    } else {
+		        m_namedObjects.remove(namedObjectId);
+		    }
 		}
 	}
 
@@ -528,11 +533,17 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T delete(String key) {
-		synchronized (m_namedObjects) {
-			return (T) m_namedObjects.remove(key);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T delete(String namedObjectId) {
+        synchronized (m_namedObjects) {
+            final T namedObject = (T) m_namedObjects.get(namedObjectId);
+            if (namedObject != null && namedObject instanceof Dataset) {
+                deleteNamedDataFrame(namedObjectId);
+            } else {
+                m_namedObjects.remove(namedObjectId);
+            }
+            return namedObject;
+        }
+    }
 }

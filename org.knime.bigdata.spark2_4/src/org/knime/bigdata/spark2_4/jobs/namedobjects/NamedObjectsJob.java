@@ -48,7 +48,7 @@ public class NamedObjectsJob implements SparkJob<NamedObjectsJobInput, NamedObje
 
         switch (input.getOperation()) {
             case DELETE:
-                deleteNamedDataFrames(input.getNamedObjectsToDelete(), namedObjects);
+                deleteNamedObjects(input.getNamedObjectsToDelete(), namedObjects);
                 return NamedObjectsJobOutput.createDeleteObjectsSuccess();
             case LIST:
                 return NamedObjectsJobOutput.createListObjectsSuccess(namedObjects.getNamedObjects());
@@ -57,15 +57,11 @@ public class NamedObjectsJob implements SparkJob<NamedObjectsJobInput, NamedObje
         }
     }
 
-    private void deleteNamedDataFrames(final Set<String> namedObjectsToDelete, final NamedObjects namedObjects) {
+    private void deleteNamedObjects(final Set<String> namedObjectsToDelete, final NamedObjects namedObjects) {
         for (String key : namedObjectsToDelete) {
             if (namedObjects.validateNamedObject(key)) {
                 LOGGER.info("Deleting reference to named data frame " + key);
-                namedObjects.deleteNamedDataFrame(key);
-            }
-
-            if (namedObjects.validateNamedObject(key)) {
-                LOGGER.warn("Failed to delete reference to named data frame " + key);
+                namedObjects.delete(key);
             }
         }
     }

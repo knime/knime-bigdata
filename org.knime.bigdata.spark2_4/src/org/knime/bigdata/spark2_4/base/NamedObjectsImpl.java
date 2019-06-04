@@ -26,7 +26,7 @@ class NamedObjectsImpl implements NamedObjects {
      */
     static final NamedObjects SINGLETON_INSTANCE = new NamedObjectsImpl();
 
-    private final Map<String, Object> namedObjects = new HashMap<>();
+    private final Map<String, Object> m_namedObjects = new HashMap<>();
 
     /**
      * Private constructor for singleton.
@@ -39,7 +39,7 @@ class NamedObjectsImpl implements NamedObjects {
      */
     @Override
     public synchronized void add(final String key, final Object obj) {
-        namedObjects.put(key, obj);
+        m_namedObjects.put(key, obj);
     }
 
     /**
@@ -48,7 +48,7 @@ class NamedObjectsImpl implements NamedObjects {
     @SuppressWarnings("unchecked")
     @Override
     public synchronized <T> T get(final String key) {
-        return (T)namedObjects.get(key);
+        return (T)m_namedObjects.get(key);
     }
 
     /**
@@ -57,7 +57,13 @@ class NamedObjectsImpl implements NamedObjects {
     @SuppressWarnings("unchecked")
     @Override
     public synchronized <T> T delete(final String key) {
-        return (T)namedObjects.remove(key);
+        final T namedObject = (T) m_namedObjects.get(key);
+        if (namedObject != null && namedObject instanceof Dataset) {
+            deleteNamedDataFrame(key);
+        } else {
+            m_namedObjects.remove(key);
+        }
+        return namedObject;
     }
 
     /**
@@ -65,7 +71,7 @@ class NamedObjectsImpl implements NamedObjects {
      */
     @Override
     public synchronized void addDataFrame(final String key, final Dataset<Row> dataset) {
-        namedObjects.put(key, dataset);
+        m_namedObjects.put(key, dataset);
     }
 
     /**
@@ -74,7 +80,7 @@ class NamedObjectsImpl implements NamedObjects {
     @SuppressWarnings("unchecked")
     @Override
     public synchronized Dataset<Row> getDataFrame(final String key) {
-        return (Dataset<Row>)namedObjects.get(key);
+        return (Dataset<Row>)m_namedObjects.get(key);
     }
 
     /**
@@ -90,7 +96,7 @@ class NamedObjectsImpl implements NamedObjects {
      */
     @Override
     public synchronized boolean validateNamedObject(final String key) {
-        return namedObjects.containsKey(key);
+        return m_namedObjects.containsKey(key);
     }
 
     /**
@@ -99,7 +105,7 @@ class NamedObjectsImpl implements NamedObjects {
     @SuppressWarnings("unchecked")
     @Override
     public synchronized void deleteNamedDataFrame(final String key) {
-        final Dataset<Row> frame = (Dataset<Row>) namedObjects.remove(key);
+        final Dataset<Row> frame = (Dataset<Row>) m_namedObjects.remove(key);
         if (frame != null) {
             frame.unpersist();
         }
@@ -110,7 +116,7 @@ class NamedObjectsImpl implements NamedObjects {
      */
     @Override
     public synchronized Set<String> getNamedObjects() {
-        return new HashSet<>(namedObjects.keySet());
+        return new HashSet<>(m_namedObjects.keySet());
     }
 
     static void ensureNamedOutputObjectsDoNotExist(final JobInput input) throws KNIMESparkException {

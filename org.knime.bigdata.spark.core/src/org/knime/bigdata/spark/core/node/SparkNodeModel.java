@@ -135,7 +135,7 @@ public abstract class SparkNodeModel extends NodeModel {
 
     private static final String CFG_DELETE_ON_RESET = "deleteRDDsOnReset";
 
-    private final Map<SparkContextID, List<String>> m_sparkDataObjects = new LinkedHashMap<>();
+    private final Map<SparkContextID, List<String>> m_namedObjects = new LinkedHashMap<>();
 
     private static final boolean DEFAULT_DELETE_ON_RESET = true;
 
@@ -259,14 +259,14 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     private void addSparkDataObject(final SparkData sparkData) {
-        addSparkDataObjects(sparkData.getContextID(), sparkData.getID());
+        addNamedObjects(sparkData.getContextID(), sparkData.getID());
     }
 
-    private void addSparkDataObjects(final SparkContextID context, final String... ids) {
-        List<String> idsInContext = m_sparkDataObjects.get(context);
+    private void addNamedObjects(final SparkContextID context, final String... ids) {
+        List<String> idsInContext = m_namedObjects.get(context);
         if (idsInContext == null) {
             idsInContext = new LinkedList<>();
-            m_sparkDataObjects.put(context, idsInContext);
+            m_namedObjects.put(context, idsInContext);
         }
         for (String id : ids) {
             idsInContext.add(id);
@@ -293,7 +293,16 @@ public abstract class SparkNodeModel extends NodeModel {
      * @since 2.2.0 (renamed from additionalRDDs2Delete)
      */
     protected final void addAdditionalSparkDataObjectsToDelete(final SparkContextID context, final String... ids) {
-        addSparkDataObjects(context, ids);
+        addNamedObjects(context, ids);
+    }
+
+    /**
+     * @param context the ID of the Spark context that the named objects belong to
+     * @param ids the named object IDs to delete when the node is reset or disposed.
+     * @since 4.0.0
+     */
+    protected final void addAdditionalNamedObjectsToDelete(final SparkContextID context, final String... ids) {
+        addNamedObjects(context, ids);
     }
 
     /**
@@ -317,7 +326,7 @@ public abstract class SparkNodeModel extends NodeModel {
             config.addBoolean(CFG_DELETE_ON_RESET, m_deleteOnReset);
             final Config sparkDataObjectsConfig = config.addConfig(CFG_SPARK_DATA_OBJECTS);
             int idx = 0;
-            for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
+            for (Entry<SparkContextID, List<String>> e : m_namedObjects.entrySet()) {
                 final ConfigWO contextConfig = sparkDataObjectsConfig.addConfig(CFG_CONTEXT_ID + idx++);
                 final Config contextSettingsConfig = contextConfig.addConfig(CFG_CONTEXT_ID);
                 e.getKey().saveToConfigWO(contextSettingsConfig);
@@ -351,12 +360,12 @@ public abstract class SparkNodeModel extends NodeModel {
                     final Config contextSettingsConfig = contextConfig.getConfig(CFG_CONTEXT_ID);
                     final SparkContextID contextID = SparkContextID.fromConfigRO(contextSettingsConfig);
                     final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
-                    m_sparkDataObjects.put(contextID, new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
+                    m_namedObjects.put(contextID, new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
                 } else if (sparkDataObjectsConfig.containsKey(CFG_CONTEXT_LEGACY + i)) {
                     // Load legacy workflow (KNIME Extension for Apache Spark <= v1.3)
                     final ConfigRO contextConfig = sparkDataObjectsConfig.getConfig(CFG_CONTEXT_LEGACY + i);
                     final String[] sparkDataObjectIDs = contextConfig.getStringArray(CFG_SPARK_DATA_OBJECT_IDS);
-                    m_sparkDataObjects.put(
+                    m_namedObjects.put(
                         JobServerSparkContextConfig
                             .createSparkContextIDFromLegacyConfig(contextConfig.getConfig(CFG_CONTEXT_LEGACY)),
                         new ArrayList<>(Arrays.asList(sparkDataObjectIDs)));
@@ -510,7 +519,7 @@ public abstract class SparkNodeModel extends NodeModel {
     @Override
     protected final void onDispose() {
         LOGGER.debug("In onDispose() of SparkNodeModel. Calling deleteSparkDataObjects.");
-        deleteSparkDataObjects(true);
+        deleteNamedObjects(true);
 
         onDisposeInternal();
     }
@@ -529,9 +538,9 @@ public abstract class SparkNodeModel extends NodeModel {
     protected final void reset() {
         if (m_deleteOnReset) {
             LOGGER.debug("In reset() of SparkNodeModel. Calling deleteSparkDataObjects.");
-            deleteSparkDataObjects(false);
+            deleteNamedObjects(false);
         }
-        m_sparkDataObjects.clear();
+        m_namedObjects.clear();
         resetInternal();
     }
 
@@ -543,8 +552,8 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
 
-    private void deleteSparkDataObjects(final boolean onDispose) {
-        if (m_deleteOnReset && m_sparkDataObjects != null && !m_sparkDataObjects.isEmpty()) {
+    private void deleteNamedObjects(final boolean onDispose) {
+        if (m_deleteOnReset && m_namedObjects != null && !m_namedObjects.isEmpty()) {
             final Map<SparkContextID, String[]> toDelete = collectNamedObjectsToDelete(onDispose);
 
             if (!toDelete.isEmpty()) {
@@ -554,9 +563,9 @@ public abstract class SparkNodeModel extends NodeModel {
     }
 
     private Map<SparkContextID, String[]> collectNamedObjectsToDelete(final boolean onDispose) {
-        final Map<SparkContextID, String[]> toDelete = new HashMap<>(m_sparkDataObjects.size());
+        final Map<SparkContextID, String[]> toDelete = new HashMap<>(m_namedObjects.size());
 
-        for (Entry<SparkContextID, List<String>> e : m_sparkDataObjects.entrySet()) {
+        for (Entry<SparkContextID, List<String>> e : m_namedObjects.entrySet()) {
             final SparkContextID contextID = e.getKey();
             // mark for deletion if we are either resetting, or disposing and deleteObjectsOnDispose is on
             @SuppressWarnings("rawtypes")
