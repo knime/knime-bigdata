@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.core.port.model.ml;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -89,12 +90,27 @@ public class SparkMLModelPortObject extends FileStorePortObject {
      * @param model
      * @param zippedPipelineModel
      */
-    public SparkMLModelPortObject(final MLModel model, final FileStore zippedPipelineModel) {
+    public SparkMLModelPortObject(final MLModel model,
+        final FileStore zippedPipelineModel) {
         super(Collections.singletonList(zippedPipelineModel));
         m_model = model;
         m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getModelName(), model.getTableSpec(),
             model.getTargetColumnName().orElse(null));
     }
+
+    /**
+     * @param model
+     * @param zippedPipelineModel
+     * @param modelInterpreterFile
+     */
+    public SparkMLModelPortObject(final MLModel model,
+        final FileStore zippedPipelineModel, final FileStore modelInterpreterFile) {
+        super(Arrays.asList(zippedPipelineModel, modelInterpreterFile));
+        m_model = model;
+        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getModelName(), model.getTableSpec(),
+            model.getTargetColumnName().orElse(null));
+    }
+
 
     /**
      * @param sparkVersion
@@ -109,9 +125,9 @@ public class SparkMLModelPortObject extends FileStorePortObject {
         final DataTableSpec tableSpec, final String targetColumnName, final MLMetaData metaData)
         throws MissingSparkModelHelperException {
 
-        // we first create a placeholder MLModel with a null zippedModelPipeline, which we will add
+        // we first create a placeholder MLModel with a null zippedModelPipeline and modelInterpreterFile, which we will add
         // later. At this point the file stores are not yet initialized.
-        m_model = new MLModel(sparkVersion, modelName, null, namedModelId, tableSpec, targetColumnName, metaData);
+        m_model = new MLModel(sparkVersion, modelName, null, namedModelId, tableSpec, targetColumnName, null, metaData);
         m_spec = new SparkMLModelPortObjectSpec(m_model.getSparkVersion(), m_model.getModelName(), tableSpec,
             m_model.getTargetColumnName().orElse(null));
     }
@@ -128,10 +144,18 @@ public class SparkMLModelPortObject extends FileStorePortObject {
      * @return the model
      */
     public MLModel getModel() {
+        ensureFilesInModel();
+        return m_model;
+    }
+
+    private void ensureFilesInModel() {
         if (m_model.getZippedPipelineModel() == null) {
             m_model.setZippedPipelineModel(getFileStore(0).getFile());
         }
-        return m_model;
+
+        if (!m_model.getModelInterpreterFile().isPresent() && getFileStoreCount() > 1) {
+            m_model.setModelInterpreterFile(getFileStore(1).getFile().toPath());
+        }
     }
 
     /**
@@ -215,6 +239,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
      */
     @Override
     public JComponent[] getViews() {
+        ensureFilesInModel();
         return m_model.getViews();
     }
 }

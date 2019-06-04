@@ -22,6 +22,7 @@ package org.knime.bigdata.spark.core.port.model.ml;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import javax.swing.JComponent;
@@ -29,8 +30,8 @@ import javax.swing.JComponent;
 import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
+import org.knime.bigdata.spark.core.model.MLModelHelper;
 import org.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
-import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.SparkModel;
 import org.knime.bigdata.spark.core.version.SparkVersion;
 import org.knime.core.data.DataTableSpec;
@@ -66,15 +67,20 @@ public class MLModel extends SparkModel {
     private final String m_namedModelId;
 
     /**
+     * Optional file intended for consumption by the model interpreter.
+     */
+    private Optional<Path> m_modelInterpreterFile;
+
+    /**
      * Optional meta info about the model, that might be needed in the ModelInterpreter such as nominal value mapping
      * information.
      */
     private final Optional<MLMetaData> m_modelMetaData;
 
     /**
-     * The model interpreter for the model.
+     * The model interpreter for the model name.
      */
-    private final ModelInterpreter<MLModel> m_interpreter;
+    private final MLModelHelper m_modelHelper;
 
     /**
      * @param sparkVersion the Spark version the model was learned with
@@ -82,16 +88,17 @@ public class MLModel extends SparkModel {
      * @param zippedPipelineModel File that contains the zipped PipelineModel.
      * @param namedModelId Key/ID of the named model on the Spark side. May be null.
      * @param settings {@link MLlibSettings} used when learning the model
+     * @param modelInterpreterFile Optional file for the model interpreter. May be null.
      * @param modelMetaData meta info about the model, that might be needed in the ModelInterpreter such as nominal
      *            value mapping information. May be null.
      * @throws MissingSparkModelHelperException
      */
     public MLModel(final SparkVersion sparkVersion, final String modelName, final File zippedPipelineModel,
-        final String namedModelId, final MLlibSettings settings, final MLMetaData modelMetaData)
-        throws MissingSparkModelHelperException {
+        final String namedModelId, final MLlibSettings settings, final Path modelInterpreterFile,
+        final MLMetaData modelMetaData) throws MissingSparkModelHelperException {
 
         this(sparkVersion, modelName, zippedPipelineModel, namedModelId, settings.getLearningTableSpec(),
-            settings.getClassColName(), modelMetaData);
+            settings.getClassColName(), modelInterpreterFile, modelMetaData);
     }
 
     /**
@@ -101,19 +108,21 @@ public class MLModel extends SparkModel {
      * @param namedModelId Key/ID of the named model on the Spark side. May be null.
      * @param spec the DataTableSpec of the table used to learn the model including the class column name
      * @param targetColName the name of the class column if appropriate otherwise <code>null</code>
+     * @param modelInterpreterFile Optional file for the model interpreter. May be null.
      * @param modelMetaData meta info about the model, that might be needed in the ModelInterpreter such as mapping
      *            information. May be null.
      * @throws MissingSparkModelHelperException
      */
     public MLModel(final SparkVersion sparkVersion, final String modelName, final File zippedPipelineModel,
-        final String namedModelId, final DataTableSpec spec, final String targetColName, final MLMetaData modelMetaData)
-        throws MissingSparkModelHelperException {
+        final String namedModelId, final DataTableSpec spec, final String targetColName,
+        final Path modelInterpreterFile, final MLMetaData modelMetaData) throws MissingSparkModelHelperException {
 
         super(sparkVersion, modelName, spec, targetColName, null);
         m_zippedPipelineModel = zippedPipelineModel;
         m_namedModelId = namedModelId;
+        m_modelInterpreterFile = Optional.ofNullable(modelInterpreterFile);
         m_modelMetaData = Optional.ofNullable(modelMetaData);
-        m_interpreter = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion).getModelInterpreter();
+        m_modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
     }
 
     /**
@@ -127,11 +136,22 @@ public class MLModel extends SparkModel {
         m_zippedPipelineModel = zippedPipelineModel;
     }
 
+    void setModelInterpreterFile(final Path path) {
+        m_modelInterpreterFile = Optional.ofNullable(path);
+    }
+
     /**
      * @return key/ID of the named model on the Spark side.
      */
     public String getNamedModelId() {
         return m_namedModelId;
+    }
+
+    /**
+     * @return optional file for the model interpreter.
+     */
+    public Optional<Path> getModelInterpreterFile() {
+        return m_modelInterpreterFile;
     }
 
     /**
@@ -159,19 +179,11 @@ public class MLModel extends SparkModel {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ModelInterpreter<MLModel> getInterpreter() {
-        return m_interpreter;
-    }
-
-    /**
      * @return the summary of this model to use in the port tooltip
      */
     @Override
     public String getSummary() {
-        return m_interpreter.getSummary(this);
+        return m_modelHelper.getModelInterpreter().getSummary(this);
     }
 
     /**
@@ -179,7 +191,6 @@ public class MLModel extends SparkModel {
      */
     @Override
     public JComponent[] getViews() {
-        return getInterpreter().getViews(this);
+        return m_modelHelper.getModelInterpreter().getViews(this);
     }
-
 }

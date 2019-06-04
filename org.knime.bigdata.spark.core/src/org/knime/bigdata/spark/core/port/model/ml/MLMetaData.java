@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark.core.port.model.ml;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,11 @@ public class MLMetaData extends JobOutput {
     }
 
     public Map<Integer, List<String>> getNominalFeatureValueMappings() {
-        return get(KEY_NOMINAL_FEATURE_VALUE_MAP);
+        Map<Integer, List<String>> toReturn = get(KEY_NOMINAL_FEATURE_VALUE_MAP);
+        if (toReturn == null) {
+            toReturn = Collections.emptyMap();
+        }
+        return toReturn;
     }
 
     public List<String> getNominalTargetValueMappings() {

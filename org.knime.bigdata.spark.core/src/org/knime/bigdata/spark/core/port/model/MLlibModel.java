@@ -115,7 +115,7 @@ public class MLlibModel extends SparkModel {
      */
     public MLlibModel(final SparkVersion sparkVersion, final String modelName, final Serializable model,
         final DataTableSpec origSpec, final String classColName, final List<String> featureColNames)
-            throws MissingSparkModelHelperException {
+        throws MissingSparkModelHelperException {
         this(sparkVersion, modelName, model, origSpec, classColName, featureColNames, null);
     }
 
@@ -148,7 +148,7 @@ public class MLlibModel extends SparkModel {
      */
     public MLlibModel(final SparkVersion sparkVersion, final String modelName, final Serializable model,
         final DataTableSpec origSpec, final String classColName, final String... featureColNames)
-            throws MissingSparkModelHelperException {
+        throws MissingSparkModelHelperException {
         this(sparkVersion, modelName, model, MLlibSettings.createLearningSpec(origSpec, classColName, featureColNames),
             classColName);
     }
@@ -178,7 +178,7 @@ public class MLlibModel extends SparkModel {
      */
     public MLlibModel(final SparkVersion sparkVersion, final String modelName, final Serializable model,
         final DataTableSpec spec, final String classColName, final Serializable metaData)
-            throws MissingSparkModelHelperException {
+        throws MissingSparkModelHelperException {
         super(sparkVersion, modelName, spec, classColName, metaData);
         m_model = model;
         m_interpreter = ModelHelperRegistry.getModelHelper(modelName, sparkVersion).getModelInterpreter();
@@ -239,7 +239,8 @@ public class MLlibModel extends SparkModel {
         throws IOException, MissingSparkModelHelperException, ClassNotFoundException, InvalidSettingsException {
 
         final SparkVersion sparkVersion;
-        if (KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_2) || KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_3)) {
+        if (KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_2)
+            || KNIMEConfigContainer.getSparkVersion().equals(SparkVersion.V_1_3)) {
             sparkVersion = KNIMEConfigContainer.getSparkVersion();
         } else {
             sparkVersion = SparkVersion.V_1_2;
@@ -258,14 +259,17 @@ public class MLlibModel extends SparkModel {
 
             final String modelName = legacySparkModelHelper.tryToGuessModelName(legacyModel);
             if (modelName == null) {
-                throw new IOException("Failed to guess model name of model instance: " + legacyModel.getClass().getName());
+                throw new IOException(
+                    "Failed to guess model name of model instance: " + legacyModel.getClass().getName());
             }
 
-            final Serializable convertedModel = (Serializable) legacySparkModelHelper.convertLegacyToNewModel(legacyModel);
+            final Serializable convertedModel =
+                (Serializable)legacySparkModelHelper.convertLegacyToNewModel(legacyModel);
 
             final DataTableSpec tableSpec = DataTableSpec.load((NodeSettings)os.readObject());
 
-            return new MLlibModel(sparkVersion, modelName, convertedModel, tableSpec, classColumnName, (Serializable)null);
+            return new MLlibModel(sparkVersion, modelName, convertedModel, tableSpec, classColumnName,
+                (Serializable)null);
         }
     }
 
@@ -340,9 +344,8 @@ public class MLlibModel extends SparkModel {
     }
 
     /**
-     * {@inheritDoc}
+     * @return The model interpreter for the model.
      */
-    @Override
     public ModelInterpreter<MLlibModel> getInterpreter() {
         return m_interpreter;
     }

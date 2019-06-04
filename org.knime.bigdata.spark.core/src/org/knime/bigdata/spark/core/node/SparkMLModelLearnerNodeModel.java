@@ -142,6 +142,12 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
         final FileStore modelFileStore = exec.createFileStore("zippedPipelineModel");
         Files.move(result.getZippedPipelineModel(), modelFileStore.getFile().toPath());
 
+        FileStore modelInterpreterFileStore = null;
+        if (result.getModelInterpreterFile() != null) {
+            modelInterpreterFileStore = exec.createFileStore("modelInterpreter");
+            Files.move(result.getModelInterpreterFile(), modelInterpreterFileStore.getFile().toPath());
+        }
+
         final SparkDataPortObject data = (SparkDataPortObject)inData[0];
 
         final MLMetaData metaData = result.getMetaData(MLMetaData.class);
@@ -151,9 +157,17 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
             modelFileStore.getFile(),
             newNamedModelId,
             settings.getSettings(data),
+            (modelInterpreterFileStore != null) ? modelInterpreterFileStore.getFile().toPath() : null,
             metaData);
 
-        return new PortObject[]{new SparkMLModelPortObject(mlModel, modelFileStore)};
+        addAdditionalNamedObjectsToDelete(data.getContextID(), newNamedModelId);
+
+        if (modelInterpreterFileStore != null) {
+            return new PortObject[]{
+                new SparkMLModelPortObject(mlModel, modelFileStore, modelInterpreterFileStore)};
+        } else {
+            return new PortObject[]{new SparkMLModelPortObject(mlModel, modelFileStore)};
+        }
     }
 
 

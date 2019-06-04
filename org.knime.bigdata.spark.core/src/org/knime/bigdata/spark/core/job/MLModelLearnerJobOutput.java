@@ -46,12 +46,17 @@ public class MLModelLearnerJobOutput extends JobOutput {
      * Creates a job output with a MLLib model.
      *
      * @param zippedPipelineModel the ML model as a saved and then zipped pipeline model
+     * @param modelInterpreterFile Optional file for the model interpreter. May be null.
      * @param metaData Meta data for the model. May be null.
      */
     public MLModelLearnerJobOutput(final Path zippedPipelineModel,
-        final MLMetaData metaData) {
+        final Path modelInterpreterFile, final MLMetaData metaData) {
 
         withFile(zippedPipelineModel);
+
+        if (modelInterpreterFile != null) {
+            withFile(modelInterpreterFile);
+        }
 
         if (metaData != null) {
             setJobData(KEY_META_DATA, metaData);
@@ -63,6 +68,17 @@ public class MLModelLearnerJobOutput extends JobOutput {
      */
     public Path getZippedPipelineModel() {
         return getFiles().get(0);
+    }
+
+    /**
+     * @return optional data for the model interpreter. May be null.
+     */
+    public Path getModelInterpreterFile() {
+        if (getFiles().size() > 1) {
+            return getFiles().get(1);
+        } else {
+            return null;
+        }
     }
 
     /**

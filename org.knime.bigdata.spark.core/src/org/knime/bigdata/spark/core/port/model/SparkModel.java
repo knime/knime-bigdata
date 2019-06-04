@@ -88,11 +88,6 @@ public abstract class SparkModel {
     }
 
     /**
-     * @return The model interpreter for the model.
-     */
-    public abstract ModelInterpreter<?> getInterpreter();
-
-    /**
      * @return the summary of this model to use in the port tooltip
      */
     public abstract String getSummary();
