@@ -2,14 +2,23 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
-	<name>Database to Spark</name>
+	<name>Database to Spark (legacy)</name>
 	<shortDescription>Reads a database query/table into a Spark RDD/DataFrame</shortDescription>
 	<fullDescription>
 		<intro>
+		<p>
+          <b>This node is part of the legacy database framework.</b>
+          For more information on how to migrate to the new database framework see the
+          <a href="!@!TOBIS_DB_MIGRATION_DOCUMENTATION_LINK!@!">migration section</a> of the
+          <a href="!@!TOBIS_DB_DOCUMENTATION_LINK!@!">database documentation</a>.
+          </p>
+          <p>
 			Reads a database query/table into a Spark RDD/DataFrame.
 			See <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#jdbc-to-other-databases">Spark documentation</a> for more information.
-			
-			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
+	      </p>
+		  <p>
+		    <b>Notice:</b> This feature requires at least Apache Spark 1.5.
+		  </p>
 		</intro>
 		
 		<option name="Driver">
