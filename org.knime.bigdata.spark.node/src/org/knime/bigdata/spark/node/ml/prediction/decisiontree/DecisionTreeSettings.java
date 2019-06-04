@@ -97,7 +97,7 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
      * @return the minimum number of rows required for each child (of a decision tree node)
      */
     public int getMinRowsPerNodeChild() {
-        return m_maxNoOfBinsModel.getIntValue();
+        return m_minRowsPerNodeChild.getIntValue();
     }
 
     /**

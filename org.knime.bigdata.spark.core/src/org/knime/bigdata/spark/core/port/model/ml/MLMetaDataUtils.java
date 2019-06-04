@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
@@ -108,6 +109,30 @@ public class MLMetaDataUtils {
             }
         }
 
+        return toReturn;
+    }
+
+    public static ColumnBasedValueMapping toLegacyColumnBasedValueMapping(final MLModel mlModel) {
+        final ColumnBasedValueMapping toReturn = new ColumnBasedValueMapping();
+
+        final MLMetaData metaData = mlModel.getModelMetaData(MLMetaData.class).get();
+
+        final Map<Integer, List<String>> nominalFeatureMappings = metaData.getNominalFeatureValueMappings();
+
+        for (Entry<Integer, List<String>> entry : nominalFeatureMappings.entrySet()) {
+            int idx = 0;
+            for (String value : entry.getValue()) {
+                toReturn.add(entry.getKey(), (double)idx, value);
+                idx++;
+            }
+        }
+
+        int targetColIdx = mlModel.getLearningColumnNames().size();
+        int idx = 0;
+        for (String value : metaData.getNominalTargetValueMappings()) {
+            toReturn.add(targetColIdx, (double) idx, value);
+            idx++;
+        }
         return toReturn;
     }
 }

@@ -22,10 +22,13 @@ package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
 
 import java.util.List;
 
+import org.knime.bigdata.spark.core.job.SparkClass;
+
 /**
  * A Wrapper for the Node class in spark
  * @author Ole Ostergaard
  */
+@SparkClass
 public interface TreeNode {
 
     /**

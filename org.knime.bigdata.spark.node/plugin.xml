@@ -246,4 +246,10 @@
             ProviderClass="org.knime.bigdata.spark.node.sql_function.StandardSparkSQLFunctionDialogProvider">
       </SparkSQLFunctionDialogProvider>
    </extension>
+   <extension
+         point="org.knime.bigdata.spark.core.ModelHelperProvider">
+      <ModelHelperProvider
+            ProviderClass="org.knime.bigdata.spark.node.MLModelHelperProvider">
+      </ModelHelperProvider>
+   </extension>
 </plugin>

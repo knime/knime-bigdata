@@ -18,10 +18,15 @@ O * This source code, its documentation and all appendant files
  * History
  *   Created on 21.07.2015 by koetter
  */
-package org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +37,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
-import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
+import org.knime.bigdata.spark.core.port.model.ml.MLMetaDataUtils;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
-import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeMetaData;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
-import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.MLTreeNode2_4;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeView;
 
@@ -50,39 +53,18 @@ import org.knime.core.node.NodeView;
  */
 public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
 
+    public static final String JOB_ID = "MLDecisionTreeModelFetcher";
+
     private static final NodeLogger LOGGER = NodeLogger.getLogger(MLDecisionTreeInterpreter.class);
 
     private static final long serialVersionUID = 1L;
-
-    private static final HashMap<String, MLDecisionTreeInterpreter> interpreterInstances = new HashMap<>();
-
-    private final String m_modelName;
-
-    private MLDecisionTreeInterpreter(final String modelName) {
-        m_modelName = modelName;
-    }
-
-    /**
-     * Returns the only instance of this class.
-     *
-     * @param modelName Specific model name we want to get the model interpreter for.
-     * @return the singleton instance for the given model name
-     */
-    public synchronized static MLDecisionTreeInterpreter getInstance(final String modelName) {
-        MLDecisionTreeInterpreter instance = interpreterInstances.get(modelName);
-        if (instance == null) {
-            instance = new MLDecisionTreeInterpreter(modelName);
-            interpreterInstances.put(modelName, instance);
-        }
-        return instance;
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String getModelName() {
-        return m_modelName;
+        return MLDecisionTreeClassificationLearnerNodeModel.MODEL_NAME;
     }
 
     /**
@@ -99,38 +81,14 @@ public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
      * {@inheritDoc}
      */
     @Override
-    public JComponent[] getViews(final MLModel pipelineModel) {
-        return new JComponent[]{getTreePanel(pipelineModel)};
+    public JComponent[] getViews(final MLModel mlModel) {
+        return new JComponent[]{getTreePanel(mlModel)};
     }
 
-    /**
-     * converts the given tree model into PMML and packs it into a JComponent
-     *
-     * @param rootNode
-     * @param aColNames
-     * @param aClassColName
-     * @param metaData
-     * @return displayable component
-     */
-    public static JComponent getTreeView(final TreeNode rootNode, final List<String> aColNames,
-        final String aClassColName, final ColumnBasedValueMapping metaData) {
-        final Map<Integer, String> features = new HashMap<>();
-        int ctr =0;
-        for (String col : aColNames) {
-            features.put(ctr++, col);
-        }
-        features.put(ctr, aClassColName);
+    private JComponent getTreePanel(final MLModel decisionTreeModel) {
 
-        final MLlibDecisionTreeGraphView graph = new MLlibDecisionTreeGraphView(rootNode, features, metaData);
-        final JComponent view = new MLlibDecisionTreeGraphPanel(new MLlibDecisionTreeNodeModel(), graph);
-        view.setName("MLLib TreeView");
-        return view;
-    }
-
-    private JComponent getTreePanel(final MLModel decisionTreePipelineModel) {
-
-        final List<String> colNames = decisionTreePipelineModel.getLearningColumnNames();
-        final String classColName = decisionTreePipelineModel.getTargetColumnName().get();
+        final List<String> colNames = decisionTreeModel.getLearningColumnNames();
+        final String classColName = decisionTreeModel.getTargetColumnName().get();
 
         final JComponent component = new JPanel();
         component.setLayout(new BorderLayout());
@@ -152,10 +110,33 @@ public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
             /** {@inheritDoc} */
             @Override
             protected JComponent doInBackground() throws Exception {
-                throw new UnsupportedOperationException("Viewing Decision Tree models is not yet supported");
-//                return new JLabel(buf.toString());
-//                final TreeNode rootNode = getRootNode(treeModel);
-//                return MLDecisionTreeInterpreter.getTreeView(rootNode, colNames, classColName, metaData);
+
+                final Path serializedTree = decisionTreeModel.getModelInterpreterFile().get();
+                MLDecisionTreeNode rootNode;
+                try (DataInputStream in =
+                    new DataInputStream(new BufferedInputStream(Files.newInputStream(serializedTree)))) {
+
+                    rootNode = new MLDecisionTreeNode(null);
+                    readRecursively(rootNode, in);
+                }
+
+                //                throw new UnsupportedOperationException("Viewing Decision Tree models is not yet supported");
+                return MLDecisionTreeInterpreter.getTreeView(rootNode, colNames, classColName,
+                    decisionTreeModel);
+            }
+
+            private void readRecursively(final MLDecisionTreeNode node, final DataInputStream in) throws IOException {
+                node.read(in);
+
+                if (node.numDescendants() > 0) {
+                    MLDecisionTreeNode leftChild = new MLDecisionTreeNode(node);
+                    node.setLeftNode(leftChild);
+                    readRecursively(leftChild, in);
+
+                    MLDecisionTreeNode rightChild = new MLDecisionTreeNode(node);
+                    node.setRightNode(rightChild);
+                    readRecursively(rightChild, in);
+                }
             }
 
             /** {@inheritDoc} */
@@ -199,11 +180,30 @@ public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
     }
 
     /**
-     * @param treeModel the {@link DecisionTreeModel}
-     * @return the {@link TreeNode} that wraps the root node
+     * converts the given tree model into PMML and packs it into a JComponent
+     *
+     * @param rootNode
+     * @param aColNames
+     * @param aClassColName
+     * @param metaData
+     * @return displayable component
      */
-    protected TreeNode getRootNode(final DecisionTreeModel treeModel) {
-        final TreeNode rootNode = new MLTreeNode2_4(treeModel.topNode());
-        return rootNode;
+    public static JComponent getTreeView(final TreeNode rootNode, final List<String> aColNames,
+        final String aClassColName, final MLModel mlModel) {
+
+        final Map<Integer, String> features = new HashMap<>();
+        int ctr =0;
+        for (String col : aColNames) {
+            features.put(ctr++, col);
+        }
+        features.put(ctr, aClassColName);
+
+        final ColumnBasedValueMapping legacyMapping = MLMetaDataUtils.toLegacyColumnBasedValueMapping(mlModel);
+
+        final MLlibDecisionTreeGraphView graph = new MLlibDecisionTreeGraphView(rootNode, features, legacyMapping);
+        final JComponent view = new MLlibDecisionTreeGraphPanel(new MLlibDecisionTreeNodeModel(), graph);
+        view.setName("Decision Tree View");
+        return view;
     }
+
 }

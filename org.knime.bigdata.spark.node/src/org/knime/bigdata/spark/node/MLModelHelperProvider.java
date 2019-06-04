@@ -16,24 +16,26 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on May 30, 2016 by bjoern
+ *   Created on May 27, 2019 by bjoern
  */
-package org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree;
+package org.knime.bigdata.spark.node;
 
-import org.knime.bigdata.spark2_4.api.Spark_2_4_MLModelHelper;
+import org.knime.bigdata.spark.core.model.DefaultModelHelperProvider;
+import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.core.version.Spark2CompatibilityChecker;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationModelHelper;
 
 /**
- * Abstract super class for decision tree model helpers, that handles metadata loading/saving.
+ * Model helper provider for ML models.
  *
- * @author Bjoern Lohrmann, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public abstract class AbstractMLDecisionTreeModelHelper extends Spark_2_4_MLModelHelper {
+public class MLModelHelperProvider extends DefaultModelHelperProvider<MLModel> {
 
     /**
-     * @param modelName
+     * Constructor.
      */
-    public AbstractMLDecisionTreeModelHelper(final String modelName) {
-        super(modelName);
+    public MLModelHelperProvider() {
+        super(Spark2CompatibilityChecker.INSTANCE, new MLDecisionTreeClassificationModelHelper());
     }
-
 }

@@ -18,17 +18,16 @@
  * History
  *   Created on Apr 13, 2016 by bjoern
  */
-package org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
+import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
-import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerNodeModel;
-import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.AbstractMLDecisionTreeModelHelper;
 
 /**
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class MLDecisionTreeClassificationModelHelper extends AbstractMLDecisionTreeModelHelper {
+public class MLDecisionTreeClassificationModelHelper extends DefaultMLModelHelper {
 
     /** Constructor. */
     public MLDecisionTreeClassificationModelHelper() {
@@ -40,6 +39,6 @@ public class MLDecisionTreeClassificationModelHelper extends AbstractMLDecisionT
      */
     @Override
     public ModelInterpreter<MLModel> getModelInterpreter() {
-        return MLDecisionTreeInterpreter.getInstance(MLDecisionTreeClassificationLearnerNodeModel.MODEL_NAME);
+        return new MLDecisionTreeInterpreter();
     }
 }

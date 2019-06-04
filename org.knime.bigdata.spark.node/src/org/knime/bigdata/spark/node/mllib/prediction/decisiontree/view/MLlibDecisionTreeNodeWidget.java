@@ -57,6 +57,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Paint;
 import java.text.DecimalFormat;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -372,17 +374,21 @@ public final class MLlibDecisionTreeNodeWidget
      * @return
      */
     private String getCategoricalSplitLabel(final TreeNode node) {
-        StringBuilder category = new StringBuilder("{");
-        for(Object categoryValue : node.getCategories()) {
+
+        List<String> categories = new LinkedList<>();
+        for (Object categoryValue : node.getCategories()) {
             if (m_metaData != null) {
-                category.append(m_metaData.map(node.getParentSplitFeature(), categoryValue));
+                final Object nominalValue = m_metaData.map(node.getParentSplitFeature(), categoryValue);
+                if (nominalValue != null) {
+                    categories.add(nominalValue.toString());
+                }
             } else {
-                category.append(categoryValue.toString());
+                categories.add(categoryValue.toString());
             }
-            category.append(", ");
         }
-        category.delete(category.length()-2,category.length()-1);
-        category.append("}");
+
+        final String category = String.format("{%s}", String.join(", ", categories));
+
         if (node.isLeftChild()) {
             return "=" + category.toString();
         } else {
