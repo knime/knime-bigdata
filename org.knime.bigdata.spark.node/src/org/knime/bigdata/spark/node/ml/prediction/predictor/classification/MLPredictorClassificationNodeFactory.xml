@@ -12,6 +12,7 @@
 			This node labels new data points using a learned Spark ML model
 			e.g. a
 			Decision Tree.
+			<p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
 		<option name="Change prediction column name">
 			When set, you can change the name of the

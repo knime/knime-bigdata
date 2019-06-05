@@ -30,6 +30,7 @@
 				<a href="http://spark.apache.org/docs/2.4.3/mllib-decision-tree.html">Spark documentation</a>
 				for a full description of the underlying algorithm.
 			</p>
+			<p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
 		<option name="Max number of bins">
 			Maximum number of bins used for discretizing

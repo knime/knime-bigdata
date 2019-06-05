@@ -29,6 +29,8 @@ import org.knime.bigdata.spark2_1.jobs.genericdatasource.GenericDataSource2Spark
 import org.knime.bigdata.spark2_1.jobs.genericdatasource.Spark2GenericDataSourceJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.hive.Hive2SparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.hive.Spark2HiveJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.ml.prediction.predictor.MLPredictorClassificationJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
@@ -44,6 +46,8 @@ import org.knime.bigdata.spark2_1.jobs.mllib.prediction.linear.svm.SVMJobRunFact
 import org.knime.bigdata.spark2_1.jobs.mllib.prediction.predictor.PredictorSparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.reduction.pca.PCAJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.reduction.svd.SVDJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.namedmodels.NamedModelCheckerJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.namedmodels.NamedModelUploaderJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.namedobjects.NamedObjectsJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.pmml.PMMLPredictionJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.pmml.PMMLTransformationJobRunFactory;
@@ -144,6 +148,10 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new SparkSQLFunctionsJobRunFactory(),
             new CheckJarPresenceJobRunFactory(),
             new UploadJarJobRunFactory(),
-            new PySparkJobRunFactory());
+            new PySparkJobRunFactory(),
+            new MLDecisionTreeClassificationLearnerJobRunFactory(),
+            new NamedModelCheckerJobRunFactory(),
+            new NamedModelUploaderJobRunFactory(),
+            new MLPredictorClassificationJobRunFactory());
     }
 }
