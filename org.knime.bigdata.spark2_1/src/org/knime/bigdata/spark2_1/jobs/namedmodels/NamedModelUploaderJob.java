@@ -52,7 +52,7 @@ public class NamedModelUploaderJob implements SimpleSparkJob<NamedModelUploaderJ
         try {
             unzippedModelDir = FileUtils.createTempDir(sparkContext, "namedmodel");
             FileUtils.unzipToDirectory(zippedModelPipeline, unzippedModelDir);
-            final PipelineModel model = PipelineModel.load(unzippedModelDir.toString());
+            final PipelineModel model = PipelineModel.load(unzippedModelDir.toUri().toString());
             namedObjects.add(input.getNamedModelId(), model);
             LOG.info("Added named model with ID " + input.getNamedModelId());
         } finally {

@@ -124,7 +124,7 @@ public class MLDecisionTreeClassificationLearnerJob
         Path serializedModelZip = null;
         try {
             serializedModelDir = FileUtils.createTempDir(sparkContext, "mlmodel");
-            model.write().overwrite().save(serializedModelDir.toString());
+            model.write().overwrite().save(serializedModelDir.toUri().toString());
 
             serializedModelZip = FileUtils.createTempFile(sparkContext, "mlmodel", ".zip");
             FileUtils.zipDirectory(serializedModelDir, serializedModelZip);
