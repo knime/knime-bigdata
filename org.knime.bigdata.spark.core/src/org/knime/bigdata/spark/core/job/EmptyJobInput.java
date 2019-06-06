@@ -20,63 +20,12 @@
  */
 package org.knime.bigdata.spark.core.job;
 
-import java.util.Collection;
-
-import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
-
 /**
- * This class is a immutable {@link JobInput} for jobs that do not need any input.
+ * This class is {@link JobInput} for jobs that do not need any input.
  *
  * @author Bjoern Lohrmann, KNIME.com
  */
 @SparkClass
 public final class EmptyJobInput extends JobInput {
 
-    private static final String IMMUTABLE_ERROR = "EmptyJobInput is immutable.";
-
-    private static final EmptyJobInput SINGLETON_INSTANCE = new EmptyJobInput();
-
-    /**
-     * Zero parameter constructor for serialization purposes.
-     */
-    public EmptyJobInput() {
-        // empty output, no need to initialize internal map
-    }
-
-    /**
-     * @return the only instance
-     */
-    public static EmptyJobInput getInstance() {
-        return SINGLETON_INSTANCE;
-    }
-
-    @Override
-    public void addNamedInputObject(final String name) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    public void addNamedInputObjects(final Collection<String> names) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    public void addNamedOutputObject(final String name) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    public void addNamedOutputObjects(final Collection<String> names) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    protected <T> T set(final String key, final T value) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
-
-    @Override
-    public <T extends JobData> T withSpec(final String namedObjectId, final IntermediateSpec spec) {
-        throw new IllegalAccessError(IMMUTABLE_ERROR);
-    }
 }

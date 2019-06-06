@@ -76,7 +76,7 @@ public class EnsureJarPresence {
             exec.setMessage("Uploading missing JAR files to Spark.");
             // Upload the jars that are missing according to the classnames returned by the check jar job.
             SparkContextUtil.getJobWithFilesRunFactory(sparkContextID, UPLOAD_JAR_JOB_ID)
-                .createRun(EmptyJobInput.getInstance(), filesToUpload).run(sparkContextID, exec);
+                .createRun(new EmptyJobInput(), filesToUpload).run(sparkContextID, exec);
         }
     }
 }
