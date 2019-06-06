@@ -40,6 +40,7 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 import org.knime.bigdata.spark2_3.api.NamedObjects;
 import org.knime.bigdata.spark2_3.api.SimpleSparkJob;
 import org.knime.bigdata.spark2_3.api.TypeConverters;
+import org.knime.bigdata.spark2_3.base.Spark_2_3_CustomUDFProvider;
 
 /**
  *
@@ -97,6 +98,7 @@ public class PrepareContextJob implements SimpleSparkJob<PrepareContextJobInput>
         }
 
         TypeConverters.ensureConvertersInitialized(input.<DataType>getTypeConverters());
+        Spark_2_3_CustomUDFProvider.registerCustomUDFs(sparkContext);
     }
 
     private void monkeyPatchMetastoreToken(final SparkContext sparkContext)

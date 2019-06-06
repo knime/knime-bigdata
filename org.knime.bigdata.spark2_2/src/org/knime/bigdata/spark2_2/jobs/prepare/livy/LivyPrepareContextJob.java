@@ -42,6 +42,7 @@ import org.knime.bigdata.spark.core.livy.jobapi.StagingAreaTester;
 import org.knime.bigdata.spark2_2.api.NamedObjects;
 import org.knime.bigdata.spark2_2.api.SparkJob;
 import org.knime.bigdata.spark2_2.api.TypeConverters;
+import org.knime.bigdata.spark2_2.base.Spark_2_2_CustomUDFProvider;
 import org.knime.bigdata.spark2_2.jobs.prepare.ValidationUtil;
 
 import scala.Tuple2;
@@ -81,7 +82,7 @@ public class LivyPrepareContextJob implements SparkJob<LivyPrepareContextJobInpu
         }
 
         TypeConverters.ensureConvertersInitialized(input.<DataType> getTypeConverters());
-
+        Spark_2_2_CustomUDFProvider.registerCustomUDFs(sparkContext);
 
         final String testfileName = validateStagingAreaAccess(input.getTestfileName());
         final String sparkWebUI = sparkContext.uiWebUrl().getOrElse(null);
