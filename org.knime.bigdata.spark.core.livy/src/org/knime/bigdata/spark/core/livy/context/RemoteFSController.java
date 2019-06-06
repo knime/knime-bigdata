@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -404,7 +406,7 @@ public class RemoteFSController implements StagingAreaAccess {
     public java.nio.file.Path downloadToFile(InputStream in) throws IOException {
         final java.nio.file.Path toReturn = FileUtil.createTempFile("spark", null, false).toPath();
         try {
-            Files.copy(in, toReturn);
+            Files.copy(in, toReturn, StandardCopyOption.REPLACE_EXISTING);
         } finally {
             in.close();
         }
