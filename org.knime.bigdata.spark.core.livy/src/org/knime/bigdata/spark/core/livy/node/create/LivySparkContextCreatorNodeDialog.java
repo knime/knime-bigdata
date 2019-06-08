@@ -64,7 +64,7 @@ import org.knime.core.node.workflow.FlowVariable;
 
 /**
  * Node dialog of the "Create Spark Context (Livy)" node.
- * 
+ *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements ChangeListener {
@@ -125,7 +125,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     private final DialogComponentNumber m_jobCheckFrequency = new DialogComponentNumber(
         m_settings.getJobCheckFrequencyModel(), "Job status polling interval (seconds): ", 1, 3);
 
-    private final List<DialogComponent> m_dialogComponents = new ArrayList<DialogComponent>();
+    private final List<DialogComponent> m_dialogComponents = new ArrayList<>();
 
     /**
      * Constructor.
@@ -137,8 +137,8 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
 
     private JPanel createAdvancedTab() {
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
@@ -202,8 +202,8 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
     }
 
     private JPanel createGeneralTab() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 0;
@@ -219,6 +219,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
 
         gbc.gridx = 0;
         gbc.gridy++;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         addDialogComponentToPanel(m_authentication, panel, gbc);
 
         gbc.gridx = 0;
@@ -236,7 +237,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
 
     private JPanel createSparkExecutorResourcePanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        final GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.gridwidth = 1;
@@ -287,7 +288,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        for (DialogComponent comp : components) {
+        for (final DialogComponent comp : components) {
             addDialogComponentToPanel(comp, panel, gbc);
             gbc.gridy++;
         }
@@ -296,7 +297,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         return container;
     }
 
-    private void addDialogComponentToPanel(DialogComponent comp, JPanel panel, GridBagConstraints gbc) {
+    private void addDialogComponentToPanel(final DialogComponent comp, final JPanel panel, final GridBagConstraints gbc) {
         m_dialogComponents.add(comp);
         panel.add(comp.getComponentPanel(), gbc);
     }
@@ -334,7 +335,7 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
         // enters an invalid value in the dialog component it will not be put into the settings model.
         // Hence settings model and dialog component go out of sync. If we just save the settings model,
         // it will just save the previous valid value and the dialog will close  with out error
-        for (DialogComponent dialogComponent : m_dialogComponents) {
+        for (final DialogComponent dialogComponent : m_dialogComponents) {
             dialogComponent.saveSettingsTo(settings);
         }
     }
@@ -351,12 +352,12 @@ public class LivySparkContextCreatorNodeDialog extends NodeDialogPane implements
             updateExecutorResourceSummary();
             m_stagingAreaFolder.setSelection(m_settings.getStagingAreaFolder());
             m_stagingAreaFolder.setEnabled(m_settings.isStagingAreaFolderSet());
-        } catch (InvalidSettingsException e) {
+        } catch (final InvalidSettingsException e) {
             throw new NotConfigurableException(e.getMessage());
         }
 
         if (specs.length > 0 && specs[0] != null) {
-            ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
+            final ConnectionInformation connInfo = ((ConnectionInformationPortObjectSpec)specs[0]).getConnectionInformation();
             m_stagingAreaFolder.setConnectionInformation(connInfo);
         } else {
             m_stagingAreaFolder.setConnectionInformation(null);
