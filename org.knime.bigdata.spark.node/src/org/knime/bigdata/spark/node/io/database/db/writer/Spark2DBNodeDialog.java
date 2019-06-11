@@ -1,0 +1,128 @@
+/* ------------------------------------------------------------------
+ * This source code, its documentation and all appendant files
+ * are protected by copyright law. All rights reserved.
+ *
+ * Copyright by KNIME AG, Zurich, Switzerland
+ *
+ * You may not modify, publish, transmit, transfer or sell, reproduce,
+ * create derivative works from, distribute, perform, display, or in
+ * any way exploit any of the content, in whole or in part, except as
+ * otherwise expressly permitted in writing by the copyright owner or
+ * as specified in the license file distributed with this product.
+ *
+ * If you have any questions please contact the copyright holder:
+ * website: www.knime.com
+ * email: contact@knime.com
+ * ---------------------------------------------------------------------
+ *
+ * History
+ *   Created on Sep 05, 2016 by Sascha
+ */
+package org.knime.bigdata.spark.node.io.database.db.writer;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.knime.bigdata.spark.node.SparkSaveMode;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.database.node.component.dbrowser.DBTableSelectorDialogComponent;
+
+/**
+ * Dialog for the Spark to JDBC node.
+ *
+ * @author Sascha Wolke, KNIME.com
+ */
+class Spark2DBNodeDialog extends NodeDialogPane {
+    private final Spark2DBSettings m_settings = new Spark2DBSettings();
+
+    private final DBTableSelectorDialogComponent m_table;
+    private final JCheckBox m_uploadDriver;
+    private final JComboBox<SparkSaveMode> m_saveMode;
+
+    Spark2DBNodeDialog() {
+        m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null, "Select ad table",
+            "Database Metadata Browser");
+        m_uploadDriver = new JCheckBox("Upload local JDBC driver.");
+        m_saveMode = new JComboBox<>(SparkSaveMode.ALL);
+        m_saveMode.setEditable(false);
+
+        addTab("Destination settings", initLayout());
+    }
+
+    private JPanel initLayout() {
+        final JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 6, 5, 5);
+
+        final JPanel tablePanel = m_table.getComponentPanel();
+        final JPanel driverPanel = createTextFieldPanel(gbc, "Driver: ", m_uploadDriver);
+        final JPanel modePanel = createTextFieldPanel(gbc, "Mode: ", m_saveMode);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(tablePanel, gbc);
+        gbc.gridy++;
+        panel.add(driverPanel, gbc);
+        gbc.gridy++;
+        panel.add(modePanel, gbc);
+
+        return panel;
+    }
+
+    private static JPanel createTextFieldPanel(final GridBagConstraints gbc, final String label, final JComponent field) {
+        final JLabel labelForField = new JLabel(label);
+        labelForField.setLabelFor(field);
+
+        final JPanel panel = new JPanel(new GridBagLayout());
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        panel.add(labelForField, gbc);
+        gbc.gridx++;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(field, gbc);
+        return panel;
+    }
+
+    private SparkSaveMode getSaveModeSelection() {
+        return (SparkSaveMode) m_saveMode.getSelectedItem();
+    }
+
+    @Override
+    protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+            throws NotConfigurableException {
+
+        try {
+            m_settings.loadSettings(settings);
+            m_table.loadSettingsFrom(settings, specs);
+            m_uploadDriver.setSelected(m_settings.uploadDriver());
+            m_saveMode.setSelectedItem(m_settings.getSparkSaveMode());
+        } catch (InvalidSettingsException e) {
+            throw new NotConfigurableException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        m_table.saveSettingsTo(settings);
+        m_settings.setUploadDriver(m_uploadDriver.isSelected());
+        m_settings.setSparkSaveMode(getSaveModeSelection());
+
+        m_settings.validateSettings();
+        m_settings.saveSettingsTo(settings);
+    }
+}

@@ -21,16 +21,13 @@
 package org.knime.bigdata.spark.node.io.database.db.reader;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
-import org.knime.bigdata.database.hive.Hive;
 import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
@@ -40,6 +37,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.types.converter.knime.KNIMEToIntermediateConverterRegistry;
 import org.knime.bigdata.spark.core.util.SparkIDs;
+import org.knime.bigdata.spark.node.io.database.db.SparkDBNodeUtils;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkJobInput;
 import org.knime.bigdata.spark.node.io.database.reader.Database2SparkNodeModel;
 import org.knime.core.data.DataTableSpec;
@@ -52,9 +50,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.database.DatabasePortObjectSpec;
 import org.knime.database.SQLQuery;
-import org.knime.database.connection.DBConnectionController;
 import org.knime.database.connection.UrlDBConnectionController;
 import org.knime.database.dialect.DBSQLDialect;
 import org.knime.database.function.aggregation.DBAggregationFunction;
@@ -92,58 +88,29 @@ public class DB2SparkNodeModel extends SparkSourceNodeModel {
         }
 
         final DBDataPortObjectSpec spec = (DBDataPortObjectSpec)inSpecs[0];
-        checkDatabaseIdentifier(spec);
+        SparkDBNodeUtils.checkDBIdentifier(spec.getDBSession(), true);
+        SparkDBNodeUtils.checkJdbcUrlSupport(spec.getSessionInformation());
 
         // Do not use the database spec here! Use the spark dataframe schema at execution instead.
         return new PortObjectSpec[] { null };
-    }
-
-    /**
-     * Checks whether the input Database is compatible.
-     * @param spec the {@link DatabasePortObjectSpec} from the input port
-     * @throws InvalidSettingsException If the wrong database is connected
-     */
-    private static void checkDatabaseIdentifier(final DBDataPortObjectSpec spec) throws InvalidSettingsException {
-        DBConnectionController controller = spec.getSessionInformation().getConnectionController();
-        String jdbcUrl  = "";
-        if(controller instanceof UrlDBConnectionController) {
-            jdbcUrl = ((UrlDBConnectionController) controller).getJdbcUrl();
-        }
-
-        if (StringUtils.isBlank(jdbcUrl) || !jdbcUrl.startsWith("jdbc:")) {
-            throw new InvalidSettingsException("No JDBC URL provided.");
-        }
-
-        if(spec.getDBSession().getDBType().equals(Hive.DB_TYPE)
-                //|| spec.getDBSession().getDBType().equals(Impala.DB_TYPE)
-                ) {
-            throw new InvalidSettingsException("Unsupported connection, use Hive/Impala to Spark node instead.");
-        }
-
-
     }
 
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         exec.setMessage("Starting spark job");
         final DBDataPortObject dbPort = (DBDataPortObject) inData[0];
-
-
-
+        final DBSession dbSession = dbPort.getDBSession();
         final SparkContextID contextID = getContextID(inData);
-
         final String namedOutputObject = SparkIDs.createSparkDataObjectID();
-        final ArrayList<File> jarFiles = new ArrayList<>();
+        final List<File> jarFiles;
         final Database2SparkJobInput jobInput = createJobInput(namedOutputObject, dbPort);
         LOGGER.debug("Using JDBC Url: " + jobInput.getUrl());
 
         if (m_settings.uploadDriver()) {
-
-            Collection<Path> paths = dbPort.getDBSession().getDriver().getDriverFiles();
-            for(Path p : paths) {
-                jarFiles.add(p.toFile());
-            }
-            jobInput.setDriver(dbPort.getDBSession().getDriver().getDriverDefinition().getDriverClass());
+            jarFiles = SparkDBNodeUtils.getDriverFiles(dbSession);
+            jobInput.setDriver(SparkDBNodeUtils.getDriverClass(dbSession));
+        } else {
+            jarFiles = new ArrayList<>();
         }
 
         try {
@@ -156,32 +123,18 @@ public class DB2SparkNodeModel extends SparkSourceNodeModel {
             return new PortObject[]{new SparkDataPortObject(
                 new SparkDataTable(contextID, namedOutputObject, outputSpec))};
         } catch (KNIMESparkException e) {
-            final String message = e.getMessage();
-            if (message != null && message.contains("Failed to load JDBC data: No suitable driver")) {
-                LOGGER.debug("Required JDBC driver not found in cluster. Original error message: " + e.getMessage());
-                throw new InvalidSettingsException("Required JDBC driver not found. Enable the 'Upload local JDBC driver' "
-                    + "option in the node dialog to upload the required driver files to the cluster.");
-            }
-            throw e;
+            SparkDBNodeUtils.detectMissingDriverException(LOGGER, e);
+            throw new InvalidSettingsException(e.getMessage(), e);
         }
     }
 
     private Database2SparkJobInput createJobInput(final String namedOutputObject, final DBDataPortObject dbPort) throws InvalidSettingsException {
-        DBConnectionController controller = dbPort.getSessionInformation().getConnectionController();
-        String url  = "";
-        Properties conProperties  = new Properties();
-        if(controller instanceof UrlDBConnectionController) {
-            url = ((UrlDBConnectionController) controller).getConnectionJdbcUrl();
-            conProperties = ((UrlDBConnectionController) controller).getConnectionJdbcProperties();
-        }else {
-            throw new InvalidSettingsException("DB to Spark only works with URL based database connections");
-        }
-        SQLQuery sqlQuery = dbPort.getData().getQuery();
-
+        final UrlDBConnectionController controller = (UrlDBConnectionController) dbPort.getSessionInformation().getConnectionController();
+        final String url = controller.getConnectionJdbcUrl();
+        final Properties conProperties  = controller.getConnectionJdbcProperties();
+        final SQLQuery sqlQuery = dbPort.getData().getQuery();
         final String query =  String.format("(%s) %s", sqlQuery.getQuery(), getTempTableName(url));
-
         final Database2SparkJobInput input = new Database2SparkJobInput(namedOutputObject, url, query, conProperties);
-
 
         if (!m_settings.useDefaultFetchSize()) {
             conProperties.setProperty("fetchSize", Integer.toString(m_settings.getFetchSize()));

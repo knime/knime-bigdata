@@ -2,28 +2,20 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Other" icon="icon.png">
-	<name>Spark to Database (legacy)</name>
+	<name>Spark to DB</name>
 	<shortDescription>Writes a Spark DataFrame/RDD into a database table</shortDescription>
 	<fullDescription>
 		<intro>
-			<p>
-		    <b>This node is part of the legacy database framework.</b>
-	        For more information on how to migrate to the new database framework see the
-	        <a href="!@!TOBIS_DB_MIGRATION_DOCUMENTATION_LINK!@!">migration section</a> of the
-	        <a href="!@!TOBIS_DB_DOCUMENTATION_LINK!@!">database documentation</a>.
-	        </p>
-			
-			<p>
 			Writes a Spark DataFrame/RDD into a database table.
 			See <a href="http://spark.apache.org/docs/latest/sql-programming-guide.html#jdbc-to-other-databases">Spark documentation</a> for more information.
-			</p>
-			
+
 			<p><b>Notice:</b> This feature requires at least Apache Spark 1.5.</p>
 		</intro>
 
-		<option name="Table name">The table name to write the DataFrame/RDD.</option>
+		<option name="Schema">The optional database schema name.</option>
+		<option name="Table">The table name to write the DataFrame/RDD.</option>
 		<option name="Driver">
-			Upload local driver (used in this KNIME instance) or depend on cluster side provided driver. 
+			Upload local driver (used in this KNIME instance) or depend on cluster side provided driver.
 		</option>
 		<option name="Save mode">How to handle an existing table.</option>
 	</fullDescription>
@@ -31,6 +23,6 @@
 	<ports>
 		<inPort index="0" name="Database connection">Database connection</inPort>
 		<inPort index="1" name="Spark data">Spark DataFrame/RDD</inPort>
-		<outPort index="0" name="Database table">Database table query</outPort>		
+		<outPort index="0" name="Database table">Database table query</outPort>
 	</ports>
 </knimeNode>
