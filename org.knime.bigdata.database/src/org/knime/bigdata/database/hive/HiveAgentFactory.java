@@ -49,10 +49,12 @@
 package org.knime.bigdata.database.hive;
 
 import org.knime.bigdata.database.hive.agent.HiveCaseSupportedBinner;
+import org.knime.bigdata.database.hive.agent.HiveLoader;
 import org.knime.bigdata.database.hive.agent.HiveSampling;
 import org.knime.database.agent.AbstractDBAgentFactory;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.binning.DBBinner;
+import org.knime.database.agent.loader.DBLoader;
 import org.knime.database.agent.sampling.DBSampling;
 import org.knime.database.agent.sampling.impl.DefaultDBSampling;
 import org.knime.database.attribute.AttributeCollection;
@@ -80,7 +82,9 @@ public class HiveAgentFactory extends AbstractDBAgentFactory {
     */
    public HiveAgentFactory() {
         putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
+
         putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
+        putCreator(DBLoader.class, parameters -> new HiveLoader(parameters.getSessionReference()));
         putCreator(DBBinner.class, parameters -> {
             return new HiveCaseSupportedBinner(parameters.getSessionReference());
         });

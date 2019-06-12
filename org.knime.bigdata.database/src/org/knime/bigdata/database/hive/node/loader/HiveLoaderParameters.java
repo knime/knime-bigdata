@@ -44,60 +44,57 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   20.05.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
+package org.knime.bigdata.database.hive.node.loader;
 
-import java.sql.JDBCType;
-import java.sql.SQLType;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
-import org.knime.core.data.DataType;
-import org.knime.core.data.def.BooleanCell;
-import org.knime.core.data.time.localtime.LocalTimeCellFactory;
-import org.knime.core.data.time.zoneddatetime.ZonedDateTimeCellFactory;
-import org.knime.database.datatype.mapping.AbstractDBDataTypeMappingService;
-import org.knime.database.datatype.mapping.DBDestination;
-import org.knime.database.datatype.mapping.DBSource;
+import org.knime.base.filehandling.remote.files.RemoteFile;
+import org.knime.database.dialect.DBColumn;
 
 /**
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveDataTypeMappingService extends AbstractDBDataTypeMappingService<DBSource, DBDestination> {
+public class HiveLoaderParameters {
 
-    private static final HiveDataTypeMappingService INSTANCE = new HiveDataTypeMappingService();
+    private final RemoteFile<?> m_remoteFile;
+    private final List<DBColumn> m_normalColums;
+    private final List<DBColumn> m_partitionColums;
 
     /**
-     * Gets the singleton {@link HiveDataTypeMappingService} instance.
-     *
-     * @return the only {@link HiveDataTypeMappingService} instance.
+     * @param normalColums
+     * @param partitionColums
+     * @param remoteFile
      */
-    public static HiveDataTypeMappingService getInstance() {
-        return INSTANCE;
+    public HiveLoaderParameters(final List<DBColumn> normalColums, final List<DBColumn> partitionColums,
+        final RemoteFile<?> remoteFile) {
+        m_remoteFile = remoteFile;
+        m_normalColums = normalColums;
+        m_partitionColums = partitionColums;
+
     }
+
     /**
-     * @param sourceClass
-     * @param destinationClass
+     * @return the remoteFile
      */
-    private HiveDataTypeMappingService() {
-        super(DBSource.class, DBDestination.class);
+    public RemoteFile<?> getRemoteFile() {
+        return m_remoteFile;
+    }
 
-        // Default consumption paths
-        final Map<DataType, SQLType> defaultConsumptionMap = new LinkedHashMap<>(getDefaultConsumptionMap());
-        defaultConsumptionMap.put(BooleanCell.TYPE, JDBCType.BOOLEAN);
-        defaultConsumptionMap.put(ZonedDateTimeCellFactory.TYPE, JDBCType.VARCHAR);
-        defaultConsumptionMap.put(LocalTimeCellFactory.TYPE, JDBCType.VARCHAR);
-        setDefaultConsumptionPathsFrom(defaultConsumptionMap);
+    /**
+     * @return the normalColums
+     */
+    public List<DBColumn> getNormalColums() {
+        return m_normalColums;
+    }
 
-        // Default production paths
-        setDefaultProductionPathsFrom(getDefaultProductionMap());
-
-        // SQL type to database column type mapping
-        addColumnType(JDBCType.BIT, "boolean");
-        addColumnType(JDBCType.INTEGER, "int");
-        addColumnType(JDBCType.VARCHAR, "string");
+    /**
+     * @return the partitionColums
+     */
+    public List<DBColumn> getPartitionColums() {
+        return m_partitionColums;
     }
 
 }

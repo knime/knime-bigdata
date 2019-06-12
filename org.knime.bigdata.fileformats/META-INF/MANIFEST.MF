@@ -20,6 +20,8 @@ Require-Bundle: org.knime.workbench.core;bundle-version="[4.0.0,5.0.0)",
   org.knime.cloud.aws;bundle-version="[4.0.0,5.0.0)",
   com.amazonaws.aws-java-sdk-core;bundle-version="[1.11.133,2.0.0)",
   org.knime.database;bundle-version="3.7.0",
-  org.knime.database.nodes
+  org.knime.database.nodes;bundle-version="[4.0.0,5.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Export-Package: org.knime.bigdata.fileformats.orc.datatype.mapping,
+ org.knime.bigdata.fileformats.orc.writer
