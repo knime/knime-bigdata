@@ -42,40 +42,36 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
- *
- * History
- *   26.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive.agent;
+package org.knime.bigdata.database.impala.agent;
 
 import org.knime.database.agent.binning.impl.DefaultDBBinner;
 import org.knime.database.session.DBSessionReference;
 
 /**
+ * Case support binner for Impala.
  *
- * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ * @author Sascha Wolke, KNIME GmbH
  */
-public class HiveCaseSupportedBinner extends DefaultDBBinner {
+public class ImpalaCaseSupportedBinner extends DefaultDBBinner {
 
     /**
      * @param session the {@link DBSessionReference}
      */
-    public HiveCaseSupportedBinner(final DBSessionReference session) {
+    public ImpalaCaseSupportedBinner(final DBSessionReference session) {
         super(session);
     }
 
     @Override
     protected String getDoubleString(final double value) {
         if (value == Double.POSITIVE_INFINITY) {
-            return "'Infinity'";
+            return "(CAST ('Infinity' AS DOUBLE))";
         } else if (value == Double.NEGATIVE_INFINITY) {
-            return "'-Infinity'";
+            return "(CAST ('-Infinity' AS DOUBLE))";
         } else if(Double.isNaN(value)) {
-            return "'Nan'";
+            return "(CAST ('Nan' AS DOUBLE))";
         } else {
-            return super.getDoubleString(value);
+            return Double.toString(value);
         }
     }
-
-
 }

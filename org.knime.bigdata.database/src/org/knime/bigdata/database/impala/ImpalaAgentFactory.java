@@ -48,8 +48,8 @@
  */
 package org.knime.bigdata.database.impala;
 
-import org.knime.bigdata.database.hive.agent.HiveCaseSupportedBinner;
 import org.knime.bigdata.database.hive.agent.HiveSampling;
+import org.knime.bigdata.database.impala.agent.ImpalaCaseSupportedBinner;
 import org.knime.database.agent.AbstractDBAgentFactory;
 import org.knime.database.agent.DBAgentFactory;
 import org.knime.database.agent.binning.DBBinner;
@@ -82,7 +82,7 @@ public class ImpalaAgentFactory extends AbstractDBAgentFactory {
         putAttributes(DBSampling.class, SAMPLING_ATTRIBUTES);
         putCreator(DBSampling.class, parameters -> new HiveSampling(parameters.getSessionReference()));
         putCreator(DBBinner.class, parameters -> {
-            return new HiveCaseSupportedBinner(parameters.getSessionReference());
+            return new ImpalaCaseSupportedBinner(parameters.getSessionReference());
         });
    }
 

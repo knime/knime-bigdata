@@ -296,11 +296,7 @@ public class HiveSQLDialect extends SQL92DBSQLDialect {
 
     @Override
     public SQLCommand getDropTableStatement(final DBSchemaObject schemaObject, final boolean cascade) {
-        if (cascade) {
-            throw new UnsupportedOperationException(getName() + " does not support the cascade option in drop table.");
-        } else {
-            return super.getDropTableStatement(schemaObject, cascade);
-        }
+        return super.getDropTableStatement(schemaObject, false);
     }
 
     @Override
