@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="icon.png" type="Source" xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-    <name>Create Local Big Data Environment (Legacy)</name>
+    <name>Create Local Big Data Environment</name>
     
     <shortDescription>Creates a fully functional local big data environment.</shortDescription>
     

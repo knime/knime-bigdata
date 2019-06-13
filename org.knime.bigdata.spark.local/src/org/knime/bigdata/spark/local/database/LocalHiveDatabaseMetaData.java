@@ -25,6 +25,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.hive.jdbc.HiveDatabaseMetaData;
 import org.apache.hive.jdbc.HiveQueryResultSet;
@@ -43,7 +44,11 @@ public class LocalHiveDatabaseMetaData implements DatabaseMetaData {
 
 	private final HiveDatabaseMetaData m_hiveMetadata;
 
-	LocalHiveDatabaseMetaData(HiveDatabaseMetaData hiveMetadata) {
+	/**
+	 * Creates a LocalHiveMetaDataObject that wraps the HiveDataBaseMetData 
+	 * @param hiveMetadata
+	 */
+	public LocalHiveDatabaseMetaData(HiveDatabaseMetaData hiveMetadata) {
 		m_hiveMetadata = hiveMetadata;
 	}
 

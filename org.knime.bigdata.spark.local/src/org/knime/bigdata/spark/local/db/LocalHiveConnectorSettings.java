@@ -1,3 +1,8 @@
+package org.knime.bigdata.spark.local.db;
+
+import org.knime.bigdata.database.hive.Hive;
+import org.knime.bigdata.spark.local.database.LocalHiveUtility;
+
 /*
  * ------------------------------------------------------------------------
  *
@@ -44,101 +49,65 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   05.04.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive;
 
-import java.sql.Array;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import org.knime.core.node.NodeLogger;
-import org.knime.database.connection.impl.AbstractConnectionWrapper;
+import org.knime.database.DBType;
+import org.knime.database.dialect.DBSQLDialectFactory;
+import org.knime.database.dialect.DBSQLDialectRegistry;
+import org.knime.database.driver.DBDriverRegistry;
+import org.knime.database.driver.DBDriverWrapper;
+import org.knime.database.node.connector.server.ServerDBConnectorSettings;
 
 /**
- *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
+ *
  */
-public class HiveWrappedConnection extends AbstractConnectionWrapper {
+public class LocalHiveConnectorSettings extends ServerDBConnectorSettings {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(HiveWrappedConnection.class);
+    private static final DBType DB_TYPE = Hive.DB_TYPE;
 
-    private final String m_name;
-
-    /**
-     *
-     * Constructs an {@link HiveWrappedConnection}.
-     *
-     * @param connection the {@link Connection} object to wrap.
-     * @param name the name of the connection
-     */
-    protected HiveWrappedConnection(final Connection connection, final String name) {
-        super(connection);
-        m_name = name;
-    }
+    private static final DBSQLDialectFactory DEFAULT_DIALECT_FACTORY =
+        DBSQLDialectRegistry.getInstance().getDefaultFactoryFor(DB_TYPE);
 
     /**
-     * {@inheritDoc}
+     * Hive Connector settings
+     * 
+     * @param hiveserverPort The TCP that local Hive (i.e. Spark thriftserver) is listening on.
      */
-    @Override
-    protected Array wrap(final Array array) throws SQLException {
-        return array;
-    }
+    public LocalHiveConnectorSettings(int hiveserverPort) {
+        super("localhive-connection");
+        setDatabaseName(LocalHiveUtility.DATABASE_IDENTIFIER);
+        setPort(hiveserverPort);
+        setHost("localhost");
+        setDatabaseName("");
+        setDBUrl(String.format("jdbc:hive2://localhost:%d/", hiveserverPort));
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DatabaseMetaData wrap(final DatabaseMetaData metadata) throws SQLException {
-        return metadata;
-    }
+        setDBType(DB_TYPE.getId());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CallableStatement wrap(final CallableStatement statement) throws SQLException {
-        return statement;
-    }
+        setDialect(DEFAULT_DIALECT_FACTORY.getId());
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement wrap(final PreparedStatement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Statement wrap(final Statement statement) throws SQLException {
-        return statement;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAutoCommit(final boolean autoCommit) throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("setAutoCommit is not supported by " + m_name);
+        final DBDriverWrapper defaultDriver = DBDriverRegistry.getInstance().getLatestDriver(DB_TYPE);
+        setDriver(defaultDriver == null ? null : defaultDriver.getDriverDefinition().getId());
     }
 
     @Override
-    public void commit() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Commit is not supported by " + m_name);
+    protected String createJdbcUrl() {
+        final String host = getHost();
+        final int port = getPort();
+        final String dbName = getDatabaseName();
+
+        return String.format("jdbc:hive2://%s:%s/%s", host, port, dbName);
     }
 
     @Override
-    public void rollback() throws SQLException {
-        ensureOpenConnectionWrapper();
-        LOGGER.debug("Rollback is not supported by " + m_name);
+    protected String getDatabaseTypeId() {
+        return DB_TYPE.getId();
     }
+
+    @Override
+    public boolean isDatabaseNameMandatory() {
+        return false;
+    }
+
 }

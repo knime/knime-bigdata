@@ -32,8 +32,8 @@ import org.knime.bigdata.spark.core.context.namedobjects.NamedObjectStatistics;
 import org.knime.bigdata.spark.core.context.namedobjects.SparkDataObjectStatistic;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.job.JobInput;
-import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.job.WrapperJobOutput;
 import org.knime.bigdata.spark.local.context.LocalSparkSerializationUtil;
 import org.knime.bigdata.spark2_4.api.NamedObjects;
 import org.knime.bigdata.spark2_4.api.SimpleSparkJob;
@@ -358,8 +358,8 @@ public class LocalSparkWrapperImpl implements LocalSparkWrapper, NamedObjects {
 
         sparkConf.set("hive.server2.thrift.port", Integer.toString(m_hiveserverPort));
         sparkConf.set("hive.server2.thrift.bind.host", "localhost");
-        sparkConf.set("hive.server2.session.check.interval", "30s"); // default: 6h
-        sparkConf.set("hive.server2.idle.session.timeout", "30s"); // default: 7d
+        sparkConf.set("hive.server2.session.check.interval", "2h"); // default: 6h
+        sparkConf.set("hive.server2.idle.session.timeout", "2h");// default: 7d
     }
 
 	private static int findRandomFreePort() throws IOException {
