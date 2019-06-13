@@ -57,7 +57,7 @@ import org.apache.hive.jdbc.HiveDriver;
 import org.knime.database.DBType;
 import org.knime.database.attribute.AttributeCollection;
 import org.knime.database.attribute.AttributeCollection.Accessibility;
-import org.knime.database.connection.impl.DBConnectionManagerAttributes;
+import org.knime.database.connection.DBConnectionManagerAttributes;
 import org.knime.database.driver.AbstractDriverLocator;
 import org.knime.database.driver.URLTemplate;
 import org.knime.database.driver.URLTemplates;
