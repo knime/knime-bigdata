@@ -168,6 +168,10 @@ public class FileFormatWriterNodeModel<X> extends NodeModel {
             }
             final String fileName = m_settings.getFileName();
 
+            if ((fileName== null) || fileName.isEmpty()) {
+                throw new InvalidSettingsException("No destination location provided! Please enter a valid location.");
+            }
+
             if (fileName.endsWith("/")) {
                 m_settings.setFileName(fileName.substring(0, fileName.length() - 1));
             }
