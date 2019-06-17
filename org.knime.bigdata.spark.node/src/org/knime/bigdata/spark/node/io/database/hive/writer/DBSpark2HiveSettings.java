@@ -33,6 +33,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.ButtonGroupEnumInterface;
+import org.knime.database.node.component.dbrowser.SettingsModelDBMetadata;
 
 /**
  * Settings class for the Spark2Hive/Spark2Impala Node
@@ -41,9 +42,7 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
  */
 public class DBSpark2HiveSettings {
 
-    private final SettingsModelString m_schema;
-
-    private final SettingsModelString m_tableName;
+    private final SettingsModelDBMetadata m_table;
 
     private final SettingsModelString m_onTableExistsAction;
 
@@ -58,8 +57,7 @@ public class DBSpark2HiveSettings {
      *
      */
     public DBSpark2HiveSettings(final FileFormat defaultFormat) {
-        m_schema = new SettingsModelString("schema", "");
-        m_tableName = new SettingsModelString("tableName", "");
+        m_table = new SettingsModelDBMetadata("table", false);
         m_onTableExistsAction = new SettingsModelString("existingTable", TableExistsAction.FAIL.getActionCommand());
         m_fileFormat = new SettingsModelString("fileFormat", defaultFormat.toString());
         final Optional<String> compression = getCompressionsForFileformat(m_fileFormat.getStringValue()).stream().findFirst();
@@ -85,9 +83,9 @@ public class DBSpark2HiveSettings {
         public String getText() {
             switch (this) {
                 case DROP:
-                    return "Remove existing table";
+                    return "Remove table";
                 default:
-                    return "Fail if table exists";
+                    return "Fail";
             }
         }
 
@@ -107,33 +105,25 @@ public class DBSpark2HiveSettings {
         }
     }
 
-
     /**
-     * @return settings model for the schema name
+     * @return schema and table model
      */
-    public SettingsModelString getSchemaModel() {
-        return m_schema;
+    public SettingsModelDBMetadata getSchemaAndTableModel() {
+        return m_table;
     }
 
     /**
      * @return table name
      */
     public String getSchema(){
-        return m_schema.getStringValue();
-    }
-
-    /**
-     * @return settings model for the table name
-     */
-    public SettingsModelString getTableNameModel() {
-        return m_tableName;
+        return m_table.getSchema();
     }
 
     /**
      * @return table name
      */
     public String getTableName(){
-        return m_tableName.getStringValue();
+        return m_table.getTable();
     }
 
     /**
@@ -184,8 +174,7 @@ public class DBSpark2HiveSettings {
      * @param settings the NodeSettingsRO to validate.
      */
     public void saveAdditionalSettingsTo(final NodeSettingsWO settings) {
-        m_schema.saveSettingsTo(settings);
-        m_tableName.saveSettingsTo(settings);
+        m_table.saveSettingsTo(settings);
         m_onTableExistsAction.saveSettingsTo(settings);
         m_fileFormat.saveSettingsTo(settings);
         m_compression.saveSettingsTo(settings);
@@ -197,8 +186,7 @@ public class DBSpark2HiveSettings {
      * @throws InvalidSettingsException if the settings are invalid.
      */
     public void validateAdditionalSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_schema.validateSettings(settings);
-        m_tableName.validateSettings(settings);
+        m_table.validateSettings(settings);
         m_onTableExistsAction.validateSettings(settings);
         m_fileFormat.validateSettings(settings);
         m_compression.validateSettings(settings);
@@ -210,8 +198,7 @@ public class DBSpark2HiveSettings {
      * @throws InvalidSettingsException if the settings are invalid.
      */
     public void loadAdditionalValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-        m_schema.loadSettingsFrom(settings);
-        m_tableName.loadSettingsFrom(settings);
+        m_table.loadSettingsFrom(settings);
         m_onTableExistsAction.loadSettingsFrom(settings);
         m_fileFormat.loadSettingsFrom(settings);
         m_compression.loadSettingsFrom(settings);
