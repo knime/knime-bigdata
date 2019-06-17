@@ -26,7 +26,6 @@ import java.awt.Insets;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -52,8 +51,8 @@ class Spark2DBNodeDialog extends NodeDialogPane {
     private final JComboBox<SparkSaveMode> m_saveMode;
 
     Spark2DBNodeDialog() {
-        m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null, "Select ad table",
-            "Database Metadata Browser");
+        m_table = new DBTableSelectorDialogComponent(m_settings.getSchemaAndTableModel(), 0, false, null, "Select a table",
+            "Database Metadata Browser", true);
         m_uploadDriver = new JCheckBox("Upload local JDBC driver.");
         m_saveMode = new JComboBox<>(SparkSaveMode.ALL);
         m_saveMode.setEditable(false);
@@ -64,37 +63,27 @@ class Spark2DBNodeDialog extends NodeDialogPane {
     private JPanel initLayout() {
         final JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 6, 5, 5);
-
-        final JPanel tablePanel = m_table.getComponentPanel();
-        final JPanel driverPanel = createTextFieldPanel(gbc, "Driver: ", m_uploadDriver);
-        final JPanel modePanel = createTextFieldPanel(gbc, "Mode: ", m_saveMode);
-
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(tablePanel, gbc);
-        gbc.gridy++;
-        panel.add(driverPanel, gbc);
-        gbc.gridy++;
-        panel.add(modePanel, gbc);
-
-        return panel;
-    }
-
-    private static JPanel createTextFieldPanel(final GridBagConstraints gbc, final String label, final JComponent field) {
-        final JLabel labelForField = new JLabel(label);
-        labelForField.setLabelFor(field);
-
-        final JPanel panel = new JPanel(new GridBagLayout());
-        gbc.gridy = 0;
-        gbc.gridx = 0;
-        gbc.weightx = 0;
-        panel.add(labelForField, gbc);
-        gbc.gridx++;
+        gbc.gridwidth = 2;
         gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 5, 0, 5);
+        panel.add(m_table.getComponentPanel(), gbc);
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
-        panel.add(field, gbc);
+        gbc.insets = new Insets(0, 10, 10, 0);
+        panel.add(new JLabel("Driver:"), gbc);
+        gbc.gridx++;
+        panel.add(m_uploadDriver, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("Mode:"), gbc);
+        gbc.gridx++;
+        panel.add(m_saveMode, gbc);
+
         return panel;
     }
 
