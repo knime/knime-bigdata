@@ -83,6 +83,7 @@ public class HiveDriverLocator extends AbstractDriverLocator {
         final AttributeCollection.Builder builder =
             AttributeCollection.builder(DBConnectionManagerAttributes.getAttributes());
         builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_VALIDATION_QUERY, "SELECT 1");
+        builder.add(Accessibility.EDITABLE, DBConnectionManagerAttributes.ATTRIBUTE_METADATA_IN_CONFIGURE_ENABLED, false);
         builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_TO_URL, true);
         builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_INITIAL_PARAMETER_SEPARATOR, ";");
         builder.add(Accessibility.HIDDEN, DBConnectionManagerAttributes.ATTRIBUTE_APPEND_JDBC_PARAMETER_SEPARATOR, ";");
