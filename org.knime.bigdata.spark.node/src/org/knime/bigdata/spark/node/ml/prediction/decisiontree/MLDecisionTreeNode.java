@@ -18,7 +18,7 @@
  * History
  *   Created on Jun 3, 2019 by bjoern
  */
-package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -323,6 +323,12 @@ public class MLDecisionTreeNode implements TreeNode {
         m_rightChild = rightNode;
     }
 
+    /**
+     * Writes this tree node (but not its children) to the given {@link DataOutput}.
+     *
+     * @param out
+     * @throws IOException
+     */
     public void write(final DataOutput out) throws IOException {
         out.writeDouble(m_impurity);
         out.writeDouble(m_prediction);
@@ -349,6 +355,12 @@ public class MLDecisionTreeNode implements TreeNode {
         }
     }
 
+    /**
+     * Fills the contents of this tree node (but not its children) using the given {@link DataInput}.
+     *
+     * @param in
+     * @throws IOException
+     */
     public void read(final DataInput in) throws IOException {
         m_impurity = in.readDouble();
         m_prediction = in.readDouble();

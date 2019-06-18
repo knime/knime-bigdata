@@ -44,7 +44,6 @@ import javax.swing.border.EmptyBorder;
 
 import org.knime.base.node.mine.decisiontree2.view.graph.CollapseBranchAction;
 import org.knime.base.node.mine.decisiontree2.view.graph.ExpandBranchAction;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.MLlibDecisionTreeNodeModel;
 import org.knime.core.data.property.ColorAttr;
 import org.knime.core.node.NodeLogger;
 
@@ -56,15 +55,14 @@ import org.knime.core.node.NodeLogger;
  */
 public class MLlibDecisionTreeGraphPanel extends JSplitPane {
     private static final long serialVersionUID = 4229032429584451491L;
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibDecisionTreeNodeModel.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibDecisionTreeGraphPanel.class);
     private MLlibDecisionTreeGraphView m_graph;
     private JPopupMenu m_popup;
 
     /**
-     * @param decisionTreeModel The nodeModel for the {@link NodeLogger}
      * @param graph the graph to be displayed
      */
-    public MLlibDecisionTreeGraphPanel(final MLlibDecisionTreeNodeModel decisionTreeModel, final MLlibDecisionTreeGraphView graph) {
+    public MLlibDecisionTreeGraphPanel(final MLlibDecisionTreeGraphView graph) {
         m_graph = graph;
         JPanel p = new JPanel(new GridLayout());
         p.setBackground(ColorAttr.BACKGROUND);

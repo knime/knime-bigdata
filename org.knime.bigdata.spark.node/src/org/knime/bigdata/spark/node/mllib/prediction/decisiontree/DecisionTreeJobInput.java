@@ -22,7 +22,7 @@ package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.job.ClassificationWithNominalFeatureInfoJobInput;
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
 import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
 /**
  *
@@ -66,7 +66,7 @@ public class DecisionTreeJobInput extends ClassificationWithNominalFeatureInfoJo
     protected DecisionTreeJobInput(final String namedInputObject, final Integer[] featureColIdxs,
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses,
         final boolean isClassificationTask, final int maxDepth,
-        final int maxNoOfBins, final InformationGain qualityMeasure) {
+        final int maxNoOfBins, final QualityMeasure qualityMeasure) {
         super(namedInputObject, nominalFeatureInfo, noOfClasses, classColIdx, featureColIdxs);
         set(MAX_DEPTH, maxDepth);
         set(MAX_BINS, maxNoOfBins);
@@ -88,11 +88,11 @@ public class DecisionTreeJobInput extends ClassificationWithNominalFeatureInfoJo
     }
 
     /**
-     * @return the {@link InformationGain} method to use
+     * @return the {@link QualityMeasure} method to use
      */
-    public InformationGain getQualityMeasure() {
+    public QualityMeasure getQualityMeasure() {
         final String measure = get(QUALITY_MEASURE);
-        return InformationGain.valueOf(measure);
+        return QualityMeasure.valueOf(measure);
     }
 
     /**

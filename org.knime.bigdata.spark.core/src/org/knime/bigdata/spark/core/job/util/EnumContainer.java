@@ -143,9 +143,9 @@ public class EnumContainer {
     }
 
     /**
-     * Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy".
+     * Criterion used for quality measure calculation in decision-tree based model learners.
      */
-    public enum InformationGain {
+    public enum QualityMeasure {
         /***/
         gini,
         /***/

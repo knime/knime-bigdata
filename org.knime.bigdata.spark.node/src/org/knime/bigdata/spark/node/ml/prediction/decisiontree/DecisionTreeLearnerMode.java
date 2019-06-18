@@ -21,15 +21,26 @@
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 /**
+ * Model learner nodes that have been ported from spark.mllib (deprecated) to spark.ml share code (settings, node
+ * dialog) between the mllib (and ml node code. This enum is used in various places where the mllib-specific code
+ * differs from the ml-specific code.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public enum DecisionTreeLearnerMode {
 
+    /**
+     * Indicates deprecated mllib-specific behavior.
+     */
     DEPRECATED,
 
+    /**
+     * Indicates ml-specific behavior for a classification model learner.
+     */
     CLASSIFICATION,
 
+    /**
+     * Indicates ml-specific behavior for a regression model learner.
+     */
     REGRESSION;
-
 }

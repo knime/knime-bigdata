@@ -53,7 +53,7 @@ public class MLDecisionTreeClassificationLearnerNodeModel extends AbstractMLTree
      }
 
     @Override
-    protected MLDecisionTreeJobInput createJobInput(final PortObject[] inData,
+    protected MLDecisionTreeClassificationLearnerJobInput createJobInput(final PortObject[] inData,
         final String newNamedModelId,
         final DecisionTreeSettings settings) throws InvalidSettingsException {
 
@@ -67,6 +67,8 @@ public class MLDecisionTreeClassificationLearnerNodeModel extends AbstractMLTree
             settings.getMaxDepth(),
             settings.getMaxNoOfBins(),
             settings.getMinRowsPerNodeChild(),
+            settings.getMinInformationGain(),
+            getSeed(),
             settings.getQualityMeasure());
     }
 }

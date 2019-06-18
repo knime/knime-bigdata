@@ -21,13 +21,15 @@
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeComponents;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeNodeDialog;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.core.node.NodeDialogPane;
 
 /**
  *
- * @author koetter
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class MLDecisionTreeClassificationLearnerNodeFactory extends DefaultSparkNodeFactory<MLDecisionTreeClassificationLearnerNodeModel> {
 
@@ -59,7 +61,12 @@ public class MLDecisionTreeClassificationLearnerNodeFactory extends DefaultSpark
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new DecisionTreeNodeDialog(DecisionTreeLearnerMode.CLASSIFICATION);
+        final DecisionTreeSettings settings = new DecisionTreeSettings(DecisionTreeLearnerMode.CLASSIFICATION);
+
+        final DecisionTreeComponents<DecisionTreeSettings> components =
+            new DecisionTreeComponents<DecisionTreeSettings>(settings);
+
+        return new DecisionTreeNodeDialog<>(components);
     }
 
 }

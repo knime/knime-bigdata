@@ -73,4 +73,15 @@ public abstract class AbstractMLTreeNodeModel<I extends MLDecisionTreeLearnerJob
         super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelType, jobId,
             settings);
     }
+
+    /**
+     * @return the seed to use during learning.
+     */
+    protected int getSeed() {
+        if (getSettings().useStaticSeed()) {
+            return getSettings().getSeed();
+        } else {
+            return new Random().nextInt();
+        }
+    }
 }

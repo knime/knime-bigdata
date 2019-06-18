@@ -23,6 +23,7 @@ package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 import org.knime.bigdata.spark.core.model.DefaultMLModelHelper;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.MLDecisionTreeInterpreter;
 
 /**
  * @author Bjoern Lohrmann, KNIME GmbH
@@ -31,7 +32,7 @@ public class MLDecisionTreeClassificationModelHelper extends DefaultMLModelHelpe
 
     /** Constructor. */
     public MLDecisionTreeClassificationModelHelper() {
-        super(MLDecisionTreeClassificationLearnerNodeModel.MODEL_NAME);
+        super(MLDecisionTreeClassificationLearnerNodeModel.MODEL_TYPE);
     }
 
     /**
@@ -39,6 +40,6 @@ public class MLDecisionTreeClassificationModelHelper extends DefaultMLModelHelpe
      */
     @Override
     public ModelInterpreter<MLModel> getModelInterpreter() {
-        return new MLDecisionTreeInterpreter();
+        return new MLDecisionTreeInterpreter(MLDecisionTreeClassificationLearnerNodeModel.MODEL_TYPE);
     }
 }

@@ -20,49 +20,57 @@
  */
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
+import java.util.Random;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.bigdata.spark.core.job.util.EnumContainer;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
- * Settings class for both the (deprecated) MLlib as well as the ML decision tree learner nodes.
+ * Settings class for the Spark Decision Tree learner nodes (mllib, ml-classification and ml-regression). Which
+ * settings are saved/loaded/validated depends on the provided {@link DecisionTreeLearnerMode}.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class DecisionTreeSettings extends MLlibNodeSettings {
 
-    private final SettingsModelInteger m_maxDepthModel =
+    private final SettingsModelInteger m_maxTreeDepth =
         new SettingsModelIntegerBounded("maxDepth", 5, 1, Integer.MAX_VALUE);
 
-    private final SettingsModelInteger m_maxNoOfBinsModel =
+    private final SettingsModelInteger m_maxNoOfBins =
         new SettingsModelIntegerBounded("maxNumBins", 32, 1, Integer.MAX_VALUE);
 
     private final SettingsModelString m_qualityMeasure =
-        new SettingsModelString("qualityMeasure", EnumContainer.InformationGain.gini.name());
+        new SettingsModelString("qualityMeasure", EnumContainer.QualityMeasure.gini.name());
 
-    private final SettingsModelInteger m_minRowsPerNodeChild =
-        new SettingsModelIntegerBounded("minRowsPerNodeChild", 1, 1, Integer.MAX_VALUE);
+    private final SettingsModelDoubleBounded m_minInformationGain =
+            new SettingsModelDoubleBounded("minInformationGain", 0, 0, Double.MAX_VALUE);
+
+    private final SettingsModelInteger m_minRowsPerTreeNode =
+        new SettingsModelIntegerBounded("minRowsPerTreeNode", 1, 1, Integer.MAX_VALUE);
+
+    private final SettingsModelBoolean m_useStaticSeed = new SettingsModelBoolean("useStaticSeed", true);
+
+    private final SettingsModelInteger m_seed = new SettingsModelInteger("seed", new Random().nextInt());
 
     @Deprecated
     private final SettingsModelBoolean m_isClassification = new SettingsModelBoolean("isClassification", true);
 
-    private final SettingsModel[] m_models = new SettingsModel[]{m_maxDepthModel, m_maxNoOfBinsModel};
-
     private final DecisionTreeLearnerMode m_mode;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param mode Whether this is a settings model for the (deprecated) MLlib learner, or the new ML learner nodes
      */
@@ -73,9 +81,27 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
             m_isClassification.addChangeListener(new ChangeListener() {
                 @Override
                 public void stateChanged(final ChangeEvent e) {
-                    getQualityMeasureModel().setEnabled(m_isClassification.getBooleanValue());
+                    updateEnabledness();
                 }
             });
+        } else {
+            m_useStaticSeed.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(final ChangeEvent e) {
+                    updateEnabledness();
+                }
+            });
+        }
+    }
+
+    /**
+     * Updates the enabledness of settings that are enabled based on the value of other settings.
+     */
+    protected void updateEnabledness() {
+        if (m_mode == DecisionTreeLearnerMode.DEPRECATED) {
+            getQualityMeasureModel().setEnabled(m_isClassification.getBooleanValue());
+        } else {
+            getSeedModel().setEnabled(m_useStaticSeed.getBooleanValue());
         }
     }
 
@@ -83,21 +109,21 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
      * @return the maxDepth
      */
     public int getMaxDepth() {
-        return m_maxDepthModel.getIntValue();
+        return m_maxTreeDepth.getIntValue();
     }
 
     /**
      * @return the maxNoOfBins
      */
     public int getMaxNoOfBins() {
-        return m_maxNoOfBinsModel.getIntValue();
+        return m_maxNoOfBins.getIntValue();
     }
 
     /**
      * @return the minimum number of rows required for each child (of a decision tree node)
      */
     public int getMinRowsPerNodeChild() {
-        return m_minRowsPerNodeChild.getIntValue();
+        return m_minRowsPerTreeNode.getIntValue();
     }
 
     /**
@@ -109,32 +135,39 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
     }
 
     /**
-     * @return the {@link InformationGain}
+     * @return the {@link QualityMeasure}
      */
-    public InformationGain getQualityMeasure() {
+    public QualityMeasure getQualityMeasure() {
         //        return m_qualityMeasure.getStringValue();
-        return InformationGain.valueOf(m_qualityMeasure.getStringValue());
+        return QualityMeasure.valueOf(m_qualityMeasure.getStringValue());
     }
 
     /**
-     * @return the maxDepthModel
+     * @return the minimum information gain
      */
-    public SettingsModelInteger getMaxDepthModel() {
-        return m_maxDepthModel;
+    public double getMinInformationGain() {
+        return m_minInformationGain.getDoubleValue();
+    }
+
+    /**
+     * @return the maxTreeDepthModel
+     */
+    public SettingsModelInteger getMaxTreeDepthModel() {
+        return m_maxTreeDepth;
     }
 
     /**
      * @return the maxNoOfBinsModel
      */
     public SettingsModelInteger getMaxNoOfBinsModel() {
-        return m_maxNoOfBinsModel;
+        return m_maxNoOfBins;
     }
 
     /**
      * @return the minimum number of rows required for each child (of a decision tree node)
      */
     public SettingsModelInteger getMinRowsPerNodeChildModel() {
-        return m_minRowsPerNodeChild;
+        return m_minRowsPerTreeNode;
     }
 
     /**
@@ -142,6 +175,49 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
      */
     public SettingsModelString getQualityMeasureModel() {
         return m_qualityMeasure;
+    }
+
+    /**
+     * @return the minimum information gain model
+     */
+    public SettingsModelDoubleBounded getMinInformationGainModel() {
+        return m_minInformationGain;
+    }
+
+    /**
+     *
+     * @return whether to use a static seed or not.
+     */
+    public boolean useStaticSeed() {
+        return m_useStaticSeed.getBooleanValue();
+    }
+
+    /**
+     * @return settings model for whether to use a static seed or not.
+     */
+    public SettingsModelBoolean getUseStaticSeedModel() {
+        return m_useStaticSeed;
+    }
+
+    /**
+     * Changes the seed value.
+     */
+    public void nextSeed() {
+        m_seed.setIntValue(new Random().nextInt());
+    }
+
+    /**
+     * @return the seed
+     */
+    public int getSeed() {
+        return m_seed.getIntValue();
+    }
+
+    /**
+     * @return the seedModel
+     */
+    public SettingsModelInteger getSeedModel() {
+        return m_seed;
     }
 
     /**
@@ -158,9 +234,9 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
     @Override
     public void saveSettingsTo(final NodeSettingsWO settings) {
         super.saveSettingsTo(settings);
-        for (SettingsModel m : m_models) {
-            m.saveSettingsTo(settings);
-        }
+
+        m_maxTreeDepth.saveSettingsTo(settings);
+        m_maxNoOfBins.saveSettingsTo(settings);
 
         switch (m_mode) {
             case DEPRECATED:
@@ -169,10 +245,16 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
                 break;
             case CLASSIFICATION:
                 m_qualityMeasure.saveSettingsTo(settings);
-                m_minRowsPerNodeChild.saveSettingsTo(settings);
+                m_minInformationGain.saveSettingsTo(settings);
+                m_minRowsPerTreeNode.saveSettingsTo(settings);
+                m_useStaticSeed.saveSettingsTo(settings);
+                m_seed.saveSettingsTo(settings);
                 break;
             case REGRESSION:
-                m_minRowsPerNodeChild.saveSettingsTo(settings);
+                m_minInformationGain.saveSettingsTo(settings);
+                m_minRowsPerTreeNode.saveSettingsTo(settings);
+                m_useStaticSeed.saveSettingsTo(settings);
+                m_seed.saveSettingsTo(settings);
                 break;
         }
     }
@@ -184,9 +266,10 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
     @Override
     public void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         super.validateSettings(settings);
-        for (SettingsModel m : m_models) {
-            m.validateSettings(settings);
-        }
+
+        m_maxTreeDepth.validateSettings(settings);
+        m_maxNoOfBins.validateSettings(settings);
+
 
         switch (m_mode) {
             case DEPRECATED:
@@ -195,10 +278,16 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
                 break;
             case CLASSIFICATION:
                 m_qualityMeasure.validateSettings(settings);
-                m_minRowsPerNodeChild.validateSettings(settings);
+                m_minInformationGain.validateSettings(settings);
+                m_minRowsPerTreeNode.validateSettings(settings);
+                m_useStaticSeed.validateSettings(settings);
+                m_seed.validateSettings(settings);
                 break;
             case REGRESSION:
-                m_minRowsPerNodeChild.validateSettings(settings);
+                m_minInformationGain.validateSettings(settings);
+                m_minRowsPerTreeNode.validateSettings(settings);
+                m_useStaticSeed.validateSettings(settings);
+                m_seed.validateSettings(settings);
                 break;
         }
     }
@@ -210,9 +299,9 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
     @Override
     public void loadSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         super.loadSettingsFrom(settings);
-        for (SettingsModel m : m_models) {
-            m.loadSettingsFrom(settings);
-        }
+
+        m_maxTreeDepth.loadSettingsFrom(settings);
+        m_maxNoOfBins.loadSettingsFrom(settings);
 
         switch (m_mode) {
             case DEPRECATED:
@@ -221,11 +310,26 @@ public class DecisionTreeSettings extends MLlibNodeSettings {
                 break;
             case CLASSIFICATION:
                 m_qualityMeasure.loadSettingsFrom(settings);
-                m_minRowsPerNodeChild.loadSettingsFrom(settings);
+                m_minInformationGain.loadSettingsFrom(settings);
+                m_minRowsPerTreeNode.loadSettingsFrom(settings);
+                m_useStaticSeed.loadSettingsFrom(settings);
+                m_seed.loadSettingsFrom(settings);
                 break;
             case REGRESSION:
-                m_minRowsPerNodeChild.loadSettingsFrom(settings);
+                m_minInformationGain.loadSettingsFrom(settings);
+                m_minRowsPerTreeNode.loadSettingsFrom(settings);
+                m_useStaticSeed.loadSettingsFrom(settings);
+                m_seed.loadSettingsFrom(settings);
                 break;
         }
+        updateEnabledness();
+    }
+
+    /**
+     *
+     * @return mode of this settings object.
+     */
+    protected DecisionTreeLearnerMode getMode() {
+        return m_mode;
     }
 }

@@ -118,7 +118,7 @@ public class DecisionTreeInterpreter implements ModelInterpreter<MLlibModel> {
         features.put(ctr, aClassColName);
 
         final MLlibDecisionTreeGraphView graph = new MLlibDecisionTreeGraphView(rootNode, features, metaData);
-        final JComponent view = new MLlibDecisionTreeGraphPanel(new MLlibDecisionTreeNodeModel(), graph);
+        final JComponent view = new MLlibDecisionTreeGraphPanel(graph);
         view.setName("MLLib TreeView");
         return view;
     }

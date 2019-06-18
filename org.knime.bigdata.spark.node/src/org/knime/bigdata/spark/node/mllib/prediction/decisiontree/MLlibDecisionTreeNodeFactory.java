@@ -21,8 +21,10 @@
 package org.knime.bigdata.spark.node.mllib.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeComponents;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeNodeDialog;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
 import org.knime.core.node.NodeDialogPane;
 
 /**
@@ -60,7 +62,12 @@ public class MLlibDecisionTreeNodeFactory extends DefaultSparkNodeFactory<MLlibD
      */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new DecisionTreeNodeDialog(DecisionTreeLearnerMode.DEPRECATED);
+        final DecisionTreeSettings settings = new DecisionTreeSettings(DecisionTreeLearnerMode.DEPRECATED);
+
+        final DecisionTreeComponents<DecisionTreeSettings> components =
+            new DecisionTreeComponents<DecisionTreeSettings>(settings);
+
+        return new DecisionTreeNodeDialog<>(components);
     }
 
 }

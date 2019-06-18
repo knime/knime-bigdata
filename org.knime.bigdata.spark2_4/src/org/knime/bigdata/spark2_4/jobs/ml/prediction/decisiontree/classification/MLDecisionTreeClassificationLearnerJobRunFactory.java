@@ -27,7 +27,7 @@ import org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification.ML
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
 public class MLDecisionTreeClassificationLearnerJobRunFactory
     extends DefaultJobRunFactory<MLDecisionTreeClassificationLearnerJobInput, MLModelLearnerJobOutput> {

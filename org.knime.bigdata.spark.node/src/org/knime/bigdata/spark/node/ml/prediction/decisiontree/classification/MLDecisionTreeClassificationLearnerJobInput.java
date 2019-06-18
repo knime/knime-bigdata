@@ -21,15 +21,15 @@
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
-import org.knime.bigdata.spark.node.ml.prediction.decisiontree.MLDecisionTreeJobInput;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.MLDecisionTreeLearnerJobInput;
 
 /**
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class MLDecisionTreeClassificationLearnerJobInput extends MLDecisionTreeJobInput {
+public class MLDecisionTreeClassificationLearnerJobInput extends MLDecisionTreeLearnerJobInput {
 
     /** Criterion used for information gain calculation. Supported values: "gini" (recommended) or "entropy". */
     private static final String QUALITY_MEASURE = "qualityMeasure";
@@ -49,6 +49,8 @@ public class MLDecisionTreeClassificationLearnerJobInput extends MLDecisionTreeJ
      * @param maxDepth
      * @param maxNoOfBins
      * @param minRowsPerNodeChild
+     * @param minInformationGain
+     * @param seed
      * @param qualityMeasure
      */
     protected MLDecisionTreeClassificationLearnerJobInput(final String namedInputObject,
@@ -58,18 +60,20 @@ public class MLDecisionTreeClassificationLearnerJobInput extends MLDecisionTreeJ
         final int maxDepth,
         final int maxNoOfBins,
         final int minRowsPerNodeChild,
-        final InformationGain qualityMeasure) {
+        final double minInformationGain,
+        final long seed,
+        final QualityMeasure qualityMeasure) {
 
         super(namedInputObject, namedOutputModel, targetColIdx, featureColIdxs, maxDepth, maxNoOfBins,
-            minRowsPerNodeChild);
+            minRowsPerNodeChild, minInformationGain, seed);
         set(QUALITY_MEASURE, qualityMeasure.name());
     }
 
     /**
-     * @return the {@link InformationGain} method to use
+     * @return the {@link QualityMeasure} method to use
      */
-    public InformationGain getQualityMeasure() {
+    public QualityMeasure getQualityMeasure() {
         final String measure = get(QUALITY_MEASURE);
-        return InformationGain.valueOf(measure);
+        return QualityMeasure.valueOf(measure);
     }
 }
