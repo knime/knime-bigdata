@@ -29,7 +29,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.apache.spark.ml.classification.Classifier;
+import org.apache.spark.ml.Predictor;
 import org.apache.spark.ml.classification.ProbabilisticClassifier;
 import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
@@ -111,7 +111,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
 
         // add the classifier
         final String predictionCol = "prediction_" + UUID.randomUUID().toString();
-        final Classifier<?, ?, ?> classifier = createClassifier(input);
+        final Predictor<?, ?, ?> classifier = createClassifier(input);
         classifier.setFeaturesCol(featureVectorColumn)
             .setLabelCol(indexedTargetColumn)
             .setPredictionCol(predictionCol);
@@ -163,7 +163,7 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
      * @param input The job input.
      * @return a classifier.
      */
-    protected abstract Classifier<?, ?, ?> createClassifier(final I input);
+    protected abstract Predictor<?, ?, ?> createClassifier(final I input);
 
     /**
      * Subclasses must implement this method to provide some meta data on the learned model.

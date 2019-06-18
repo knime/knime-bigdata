@@ -30,7 +30,13 @@ import org.knime.bigdata.spark2_4.jobs.genericdatasource.Spark2GenericDataSource
 import org.knime.bigdata.spark2_4.jobs.hive.Hive2SparkJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.hive.Spark2HiveJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerJobRunFactory;
-import org.knime.bigdata.spark2_4.jobs.ml.prediction.predictor.MLPredictorClassificationJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.decisiontree.regression.MLDecisionTreeRegressionLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.prediction.randomforest.regression.MLRandomForestRegressionLearnerJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.predictor.classification.MLPredictorClassificationJobRunFactory;
+import org.knime.bigdata.spark2_4.jobs.ml.predictor.regression.MLPredictorRegressionJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
 import org.knime.bigdata.spark2_4.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
@@ -152,8 +158,14 @@ public class Spark_2_4_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new UploadJarJobRunFactory(),
             new PySparkJobRunFactory(),
             new MLDecisionTreeClassificationLearnerJobRunFactory(),
+            new MLDecisionTreeRegressionLearnerJobRunFactory(),
+            new MLGradientBoostedTreesClassificationLearnerJobRunFactory(),
+            new MLGradientBoostedTreesRegressionLearnerJobRunFactory(),
+            new MLRandomForestClassificationLearnerJobRunFactory(),
+            new MLRandomForestRegressionLearnerJobRunFactory(),
             new NamedModelCheckerJobRunFactory(),
             new NamedModelUploaderJobRunFactory(),
-            new MLPredictorClassificationJobRunFactory());
+            new MLPredictorClassificationJobRunFactory(),
+            new MLPredictorRegressionJobRunFactory());
     }
 }

@@ -73,6 +73,10 @@ public class MLMetaData extends JobOutput {
         return get(KEY_NOMINAL_TARGET_VALUES);
     }
 
+    public boolean hasNominalTargetValueMappings() {
+        return has(KEY_NOMINAL_TARGET_VALUES);
+    }
+
     public void setInteger(final String key, final Integer value) {
         getAdditionalValues().put(key, value);
     }
@@ -86,9 +90,17 @@ public class MLMetaData extends JobOutput {
         getAdditionalValues().put(key, value);
     }
 
+    public void setDoubleArray(final String key, final double[] values) {
+        getAdditionalValues().put(key, values);
+    }
+
     @Override
     public Double getDouble(final String key) {
         return (Double) getAdditionalValues().get(key);
+    }
+
+    public double[] getDoubleArray(final String key) {
+        return (double[]) getAdditionalValues().get(key);
     }
 
     public void setString(final String key, final String value) {

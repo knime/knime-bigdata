@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
-    <name>Spark Gradient-Boosted Trees Learner</name>
+    <name>Spark Gradient-Boosted Trees Learner (legacy)</name>
 	<shortDescription>Gradient-Boosted Trees (GBTs) induction performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>

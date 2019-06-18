@@ -71,6 +71,9 @@ public class MLMetaDataUtils {
             } else if (value instanceof Double) {
                 additionalValuesContent.addDouble(entry.getKey(), (double)value);
                 additionalValuesTypes.addString(entry.getKey() + ".type", "double");
+            } else if (value instanceof double[]) {
+                additionalValuesContent.addDoubleArray(entry.getKey(), (double[])value);
+                additionalValuesTypes.addString(entry.getKey() + ".type", "doubleArray");
             } else if (value instanceof String) {
                 additionalValuesContent.addString(entry.getKey(), (String)value);
                 additionalValuesTypes.addString(entry.getKey() + ".type", "string");
@@ -104,6 +107,8 @@ public class MLMetaDataUtils {
                 toReturn.setInteger(key, additionalValuesContent.getInt(key));
             } else if (type.equals("double")) {
                 toReturn.setDouble(key, additionalValuesContent.getDouble(key));
+            } else if (type.equals("doubleArray")) {
+                    toReturn.setDoubleArray(key, additionalValuesContent.getDoubleArray(key));
             } else if (type.equals("string")) {
                 toReturn.setString(key, additionalValuesContent.getString(key));
             }
@@ -127,11 +132,13 @@ public class MLMetaDataUtils {
             }
         }
 
-        int targetColIdx = mlModel.getLearningColumnNames().size();
-        int idx = 0;
-        for (String value : metaData.getNominalTargetValueMappings()) {
-            toReturn.add(targetColIdx, (double) idx, value);
-            idx++;
+        if (metaData.hasNominalTargetValueMappings()) {
+            int targetColIdx = mlModel.getLearningColumnNames().size();
+            int idx = 0;
+            for (String value : metaData.getNominalTargetValueMappings()) {
+                toReturn.add(targetColIdx, (double) idx, value);
+                idx++;
+            }
         }
         return toReturn;
     }

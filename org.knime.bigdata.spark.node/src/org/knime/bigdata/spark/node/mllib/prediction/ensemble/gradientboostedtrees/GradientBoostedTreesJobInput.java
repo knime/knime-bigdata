@@ -21,7 +21,7 @@
 package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
 import org.knime.bigdata.spark.core.job.util.EnumContainer.LossFunction;
 import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
@@ -67,7 +67,7 @@ public class GradientBoostedTreesJobInput extends DecisionTreeJobInput {
     protected GradientBoostedTreesJobInput(final String namedInputObject, final Integer[] featureColIdxs,
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
         final int maxNoOfBins, final int aNumIterations, final double aLearningRate, final boolean aIsClassification,
-        final InformationGain qualityMeasure) {
+        final QualityMeasure qualityMeasure) {
         super(namedInputObject, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, aIsClassification, maxDepth, maxNoOfBins,
             qualityMeasure);
         set(NO_OF_ITERATIONS, aNumIterations);

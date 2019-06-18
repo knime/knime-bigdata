@@ -18,7 +18,7 @@
  * History
  *   Created on 27.09.2015 by koetter
  */
-package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees;
+package org.knime.bigdata.spark.node.ml.prediction.gbt.classification;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -29,22 +29,24 @@ import org.knime.core.node.NodeDialogPane;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class MLlibGradientBoostedTreeNodeFactory extends DefaultSparkNodeFactory<MLlibGradientBoostedTreeNodeModel> {
+public class MLGradientBoostedTreesClassificationLearnerNodeFactory
+    extends DefaultSparkNodeFactory<MLGradientBoostedTreesClassificationLearnerNodeModel> {
 
     /**
      * Constructor.
      */
-    public MLlibGradientBoostedTreeNodeFactory() {
+    public MLGradientBoostedTreesClassificationLearnerNodeFactory() {
         super("mining/prediction");
     }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public MLlibGradientBoostedTreeNodeModel createNodeModel() {
-        return new MLlibGradientBoostedTreeNodeModel();
+    public MLGradientBoostedTreesClassificationLearnerNodeModel createNodeModel() {
+        return new MLGradientBoostedTreesClassificationLearnerNodeModel();
     }
 
     /**
@@ -61,9 +63,10 @@ public class MLlibGradientBoostedTreeNodeFactory extends DefaultSparkNodeFactory
     @Override
     protected NodeDialogPane createNodeDialogPane() {
         final GradientBoostedTreesLearnerSettings settings =
-            new GradientBoostedTreesLearnerSettings(DecisionTreeLearnerMode.DEPRECATED);
+            new GradientBoostedTreesLearnerSettings(DecisionTreeLearnerMode.CLASSIFICATION);
         final GradientBoostedTreesLearnerComponents components = new GradientBoostedTreesLearnerComponents(settings);
 
         return new GradientBoostedTreesLearnerNodeDialog(components);
     }
+
 }

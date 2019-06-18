@@ -22,6 +22,8 @@ package org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtr
 
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
+import org.knime.bigdata.spark.node.ml.prediction.gbt.GradientBoostedTreesLearnerSettings;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.AbstractMLlibTreeNodeModel;
 
 /**
@@ -30,7 +32,7 @@ import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.AbstractMLlibT
  * @author Ole Ostergaard
  */
 public class MLlibGradientBoostedTreeNodeModel
-extends AbstractMLlibTreeNodeModel<GradientBoostedTreesJobInput, GradientBoostedTreesSettings> {
+extends AbstractMLlibTreeNodeModel<GradientBoostedTreesJobInput, GradientBoostedTreesLearnerSettings> {
 
     /**Unique model name.*/
     public static final String MODEL_NAME = "GradientBoostedTree";
@@ -42,18 +44,18 @@ extends AbstractMLlibTreeNodeModel<GradientBoostedTreesJobInput, GradientBoosted
      * Constructor.
      */
     protected MLlibGradientBoostedTreeNodeModel() {
-        super(MODEL_NAME, JOB_ID, new GradientBoostedTreesSettings());
+        super(MODEL_NAME, JOB_ID, new GradientBoostedTreesLearnerSettings(DecisionTreeLearnerMode.DEPRECATED));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected GradientBoostedTreesJobInput getJob(final GradientBoostedTreesSettings settings, final SparkDataPortObject data,
+    protected GradientBoostedTreesJobInput getJob(final GradientBoostedTreesLearnerSettings settings, final SparkDataPortObject data,
         final MLlibSettings mllibSettings) {
         return new GradientBoostedTreesJobInput(data.getTableName(), mllibSettings.getFeatueColIdxs(),
             mllibSettings.getNominalFeatureInfo(), mllibSettings.getClassColIdx(), mllibSettings.getNumberOfClasses(),
-            settings.getMaxDepth(), settings.getMaxNoOfBins(), settings.getNoOfIterations(), settings.getLearningRate(),
+            settings.getMaxDepth(), settings.getMaxNoOfBins(), settings.getMaxNoOfModels(), settings.getLearningRate(),
             settings.isClassification(), settings.getQualityMeasure());
     }
 

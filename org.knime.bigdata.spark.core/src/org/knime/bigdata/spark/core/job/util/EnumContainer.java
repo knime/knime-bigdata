@@ -83,24 +83,6 @@ public class EnumContainer {
     }
 
     /**
-     * see RandomForestJob Number of features to consider for splits at each node. Supported: "auto", "all", "sqrt",
-     * "log2", "onethird". If "auto" is set, parameter is set based on numTrees: if numTrees == 1, set to "all"; if
-     * numTrees > 1 (forest) set to "sqrt".
-     */
-    public enum FeatureSubsetStrategy {
-        /**  */
-        auto,
-        /**  */
-        all,
-        /**  */
-        sqrt,
-        /**  */
-        log2,
-        /**  */
-        onethird;
-    }
-
-    /**
      *
      *
      * @author dwk
@@ -112,6 +94,16 @@ public class EnumContainer {
         LogLoss,
         /**  */
         SquaredError;
+    }
+
+    /**
+     * Loss function for the spark.ml-based GBT learner.
+     *
+     */
+    public enum GBTLossFunction {
+        squared,
+
+        absolute;
     }
 
     /**
