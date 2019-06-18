@@ -48,10 +48,12 @@ import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Stream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -68,6 +70,7 @@ import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.commons.hadoop.UserGroupUtil;
 import org.knime.bigdata.fileformats.node.reader.AbstractFileFormatReader;
 import org.knime.bigdata.fileformats.node.reader.FileFormatRowIterator;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetCellValueProducerFactory;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetParameter;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetSource;
 import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
@@ -81,6 +84,7 @@ import org.knime.core.data.convert.map.ProductionPath;
 import org.knime.core.data.convert.map.Source.ProducerParameters;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.ExternalDataColumnSpec;
 import org.knime.datatype.mapping.ExternalDataTableSpec;
@@ -95,8 +99,6 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
     private final Map<OriginalType, DataType> m_orgTypes = new EnumMap<>(OriginalType.class);
 
     private final DataTypeMappingConfiguration<ParquetType> m_outputTypeMappingConf;
-
-    private ProductionPath[] m_paths;
 
     private ProducerParameters<ParquetSource>[] m_params;
 
@@ -144,13 +146,16 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
     protected void createReader(final List<DataTableSpec> schemas, final RemoteFile<Connection> remoteFile) {
 
         try {
+
             final Configuration conf = createConfig(remoteFile);
             Path path = new Path(remoteFile.getURI());
             if (getFile().getConnection() instanceof S3Connection) {
                 final CloudRemoteFile<Connection> cloudcon = (CloudRemoteFile<Connection>)remoteFile;
                 path = generateS3nPath(cloudcon);
             }
-            final DataTableSpec tableSpec = createTableSpec(path, conf);
+            final MessageType schema = getSchema(path, conf);
+            ProductionPath[] productionPaths = getPaths(schema);
+            final DataTableSpec tableSpec = createTableSpec(schema, productionPaths);
             schemas.add(tableSpec);
 
             final Path readerPath = path;
@@ -160,12 +165,12 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             if (useKerberos()) {
                 reader = UserGroupUtil.runWithProxyUserUGIIfNecessary(
                     (ugi) -> ugi.doAs((PrivilegedExceptionAction<ParquetReader<DataRow>>)() -> ParquetReader
-                        .builder(new DataRowReadSupport(getFileStoreFactory(), m_paths, m_params), readerPath)
+                        .builder(new DataRowReadSupport(getFileStoreFactory(), productionPaths, m_params), readerPath)
                         .withConf(conf).build()));
             } else {
-                reader =
-                    ParquetReader.builder(new DataRowReadSupport(getFileStoreFactory(), m_paths, m_params), readerPath)
-                        .withConf(conf).build();
+                reader = ParquetReader
+                    .builder(new DataRowReadSupport(getFileStoreFactory(), productionPaths, m_params), readerPath)
+                    .withConf(conf).build();
             }
 
             m_readers.add(reader);
@@ -180,7 +185,8 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
         }
     }
 
-    private DataTableSpec createTableSpec(final Path path, final Configuration conf) throws Exception {
+
+    private MessageType getSchema(final Path path, final Configuration conf) throws Exception, IOException {
         ParquetMetadata footer;
         if (useKerberos()) {
             footer = UserGroupUtil.runWithProxyUserUGIIfNecessary(
@@ -191,6 +197,22 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
         }
         final FileMetaData fileMetaData = footer.getFileMetaData();
         final MessageType schema = fileMetaData.getSchema();
+        return schema;
+    }
+
+    private DataTableSpec createTableSpec(final MessageType schema, final ProductionPath[] productionPaths)
+        throws Exception {
+
+        final DataType[] colTypes = Arrays.stream(productionPaths)
+                .map((p) -> p.getConverterFactory().getDestinationType())
+                .toArray(DataType[]::new);
+
+        final String[] fieldNames = schema.getFields().stream().map(Type::getName).toArray(String[]::new);
+        return new DataTableSpec(getFile().getName(), fieldNames, colTypes);
+    }
+
+    private ProductionPath[] getPaths(final MessageType schema)
+        throws InvalidSettingsException, CloneNotSupportedException {
         final List<ExternalDataColumnSpec<ParquetType>> columns = new ArrayList<>(schema.getFields().size());
         for (final Type field : schema.getFields()) {
 
@@ -209,17 +231,24 @@ public class ParquetKNIMEReader extends AbstractFileFormatReader {
             }
         }
         final ExternalDataTableSpec<ParquetType> exTableSpec = new ExternalDataTableSpec<>(columns);
-        setexternalTableSpec(exTableSpec);
-        m_paths = m_outputTypeMappingConf.getProductionPathsFor(exTableSpec);
+        setExternalTableSpec(exTableSpec);
+        final ProductionPath[] productionPaths = m_outputTypeMappingConf.getProductionPathsFor(exTableSpec);
         m_params = createDefault(exTableSpec);
-        final ArrayList<DataType> colTypes = new ArrayList<>();
-        for (final ProductionPath prodPath : m_paths) {
-            final DataType dataType = prodPath.getConverterFactory().getDestinationType();
-            colTypes.add(dataType);
-        }
 
-        final String[] fieldNames = schema.getFields().stream().map(Type::getName).toArray(String[]::new);
-        return new DataTableSpec(getFile().getName(), fieldNames, colTypes.toArray(new DataType[colTypes.size()]));
+        return clonePaths(productionPaths);
+    }
+
+    private static ProductionPath[] clonePaths(final ProductionPath[] paths) throws CloneNotSupportedException {
+
+        //We need to clone the producers to be able to read concurrently
+        return Stream.of(paths).map(prodPath -> {
+            try {
+                return new ProductionPath(((ParquetCellValueProducerFactory<?>)prodPath.getProducerFactory()).clone(),
+                    prodPath.getConverterFactory());
+            } catch (CloneNotSupportedException ex) {
+                throw new BigDataFileFormatException(ex.getMessage());
+            }
+        }).toArray(ProductionPath[]::new);
     }
 
     @SuppressWarnings("resource")

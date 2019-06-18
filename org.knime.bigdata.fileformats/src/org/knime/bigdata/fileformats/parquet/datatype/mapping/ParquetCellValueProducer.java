@@ -54,12 +54,12 @@ import java.util.Map;
 
 /**
  * Cell value producer for Parquet
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  * @param <T> the type to produce
  */
-public abstract class ParquetCellValueProducer<T> {
+public abstract class ParquetCellValueProducer<T> implements Cloneable{
 
     protected Map<Integer, ParquetConverter<T>> m_converters = new HashMap<>();
 
@@ -70,7 +70,7 @@ public abstract class ParquetCellValueProducer<T> {
      * @param colIndex the index of the column
      * @return the converter for this column
      */
-    public ParquetConverter<T> getConverter(int colIndex) {
+    public ParquetConverter<T> getConverter(final int colIndex) {
         ParquetConverter<T> converter = m_converters.get(colIndex);
         if(converter == null) {
             converter = createConverter();
@@ -87,4 +87,10 @@ public abstract class ParquetCellValueProducer<T> {
             converter.resetValue();
         }
     }
+
+    @Override
+    public ParquetCellValueProducer<T> clone() throws CloneNotSupportedException{
+        throw new CloneNotSupportedException();
+    }
+
 }

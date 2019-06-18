@@ -296,7 +296,7 @@ public class OrcKNIMEReader extends AbstractFileFormatReader {
             columns.add(new ExternalDataColumnSpec<>(orcSchema.getFieldNames().get(i), orcSchema.getChildren().get(i)));
         }
         final ExternalDataTableSpec<TypeDescription> exTableSpec = new ExternalDataTableSpec<>(columns);
-        setexternalTableSpec(exTableSpec);
+        setExternalTableSpec(exTableSpec);
         m_paths = m_outputTypeMappingConf.getProductionPathsFor(exTableSpec);
         m_params = createDefault(exTableSpec);
 

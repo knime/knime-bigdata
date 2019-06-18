@@ -7,7 +7,7 @@ import org.knime.core.data.convert.map.MappingException;
 
 /**
  * ListProducer factory for Parquet type mapping.
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  * @param <T>
@@ -21,7 +21,7 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
 
     /**
      * Constructs a CellFactory for Parquet lists
-     * 
+     *
      * @param externalType
      *            the external type of the lists element
      * @param destType
@@ -30,8 +30,8 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
      *            the element producer factory
      */
     @SuppressWarnings("unchecked")
-    public ParquetListCellValueProducerFactory(ParquetType externalType, Class<?> destType,
-            ParquetCellValueProducerFactory<E> elementProducerFactory) {
+    public ParquetListCellValueProducerFactory(final ParquetType externalType, final Class<?> destType,
+            final ParquetCellValueProducerFactory<E> elementProducerFactory) {
         super(externalType, destType,
                 (ParquetCellValueProducer<T>) new ToCollectionProducer<>(elementProducerFactory.parquetProducer()));
         m_elementProducerFactory = elementProducerFactory;
@@ -39,11 +39,11 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
 
     /**
      * Constructs a list producer factory.
-     * 
+     *
      * @param elementProducerFactory
      *            the producer factory for the list elements
      */
-    public void setelementProducerFactory(ParquetCellValueProducerFactory<E> elementProducerFactory) {
+    public void setelementProducerFactory(final ParquetCellValueProducerFactory<E> elementProducerFactory) {
         m_elementProducerFactory = elementProducerFactory;
     }
 
@@ -51,7 +51,7 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
 
         final ParquetCellValueProducer<E> m_elementProducer;
 
-        public ToCollectionProducer(ParquetCellValueProducer<E> elementProducer) {
+        public ToCollectionProducer(final ParquetCellValueProducer<E> elementProducer) {
             m_elementProducer = elementProducer;
         }
 
@@ -84,7 +84,7 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
         return new CellValueProducer<ParquetSource, T, ParquetParameter>() {
 
             @Override
-            public T produceCellValue(ParquetSource source, ParquetParameter params) throws MappingException {
+            public T produceCellValue(final ParquetSource source, final ParquetParameter params) throws MappingException {
                 return parquetProducer().getConverter(params.getIndex()).readObject();
             }
 
@@ -92,7 +92,7 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
 
         if (this == obj) {
             return true;
@@ -119,5 +119,11 @@ public class ParquetListCellValueProducerFactory<T, E> extends ParquetCellValueP
         int result = 1;
         result = prime * result + ((m_elementProducerFactory == null) ? 0 : m_elementProducerFactory.hashCode());
         return result;
+    }
+
+    @Override
+    public ParquetListCellValueProducerFactory<T,E> clone() throws CloneNotSupportedException{
+        ParquetCellValueProducerFactory<E> clonedProducer = m_elementProducerFactory.clone();
+        return new ParquetListCellValueProducerFactory<T, E>(getSourceType(), getDestinationType(), clonedProducer);
     }
 }

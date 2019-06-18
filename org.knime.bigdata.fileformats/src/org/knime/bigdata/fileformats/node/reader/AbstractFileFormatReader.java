@@ -314,7 +314,7 @@ public abstract class AbstractFileFormatReader {
      * @param externalTableSpec
      *            the externalTableSpec to set
      */
-    public void setexternalTableSpec(final ExternalDataTableSpec<?> externalTableSpec) {
+    public void setExternalTableSpec(final ExternalDataTableSpec<?> externalTableSpec) {
         this.m_externalTableSpec = externalTableSpec;
     }
 

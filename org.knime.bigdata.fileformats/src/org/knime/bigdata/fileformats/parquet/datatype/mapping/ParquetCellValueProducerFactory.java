@@ -54,32 +54,32 @@ import org.knime.core.data.convert.map.SimpleCellValueProducerFactory;
 
 /**
  * Factory for Parquet cell value producer.
- * 
+ *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  *
  * @param <T> the type to produce
  */
-public class ParquetCellValueProducerFactory<T> 
-extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetParameter> {
+public class ParquetCellValueProducerFactory<T>
+extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetParameter> implements Cloneable {
 
     private final ParquetCellValueProducer<T> m_parquetProducer;
 
 
     /**
-     * COnstructs a producer factory 
+     * COnstructs a producer factory
      * @param externalType the external type to produce from
      * @param destType the destination type
      * @param producer the cell value producer
      */
-    public ParquetCellValueProducerFactory(ParquetType externalType, Class<?> destType,
-            ParquetCellValueProducer<T> producer) {
+    public ParquetCellValueProducerFactory(final ParquetType externalType, final Class<?> destType,
+            final ParquetCellValueProducer<T> producer) {
         super(externalType, destType, (c, p) -> producer.getConverter(p.getIndex()).readObject());
         m_parquetProducer = producer;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -101,7 +101,7 @@ extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetPar
      * @param colIndex the index of the column
      * @return the converter
      */
-    public Converter getConverter(int colIndex) {
+    public Converter getConverter(final int colIndex) {
         return (Converter) m_parquetProducer.getConverter(colIndex);
     }
 
@@ -119,7 +119,7 @@ extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetPar
     public void resetConvertes() {
         m_parquetProducer.resetConverters();
     }
-    
+
     /**
      * @return the m_parquetProducer
      */
@@ -127,4 +127,10 @@ extends SimpleCellValueProducerFactory<ParquetSource, ParquetType, T, ParquetPar
         return m_parquetProducer;
     }
 
+
+    @Override
+    public ParquetCellValueProducerFactory<T> clone() throws CloneNotSupportedException{
+        ParquetCellValueProducer<T> clonedProducer = m_parquetProducer.clone();
+        return new ParquetCellValueProducerFactory<T>(getSourceType(), getDestinationType(), clonedProducer);
+    }
 }
