@@ -35,6 +35,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataPortObjectSpec;
 import org.knime.bigdata.spark.core.port.model.SparkModelPortObject;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObject;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObjectSpec;
 import org.knime.core.data.DataTableSpec;
@@ -59,17 +60,23 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
     extends SparkModelLearnerNodeModel<I, S> {
 
     /**
+     * The type of the {@link MLModel} learned by this node model.
+     */
+    private final MLModelType m_modelType;
+
+    /**
      * Default constructor with a single {@link SparkDataPortObject} as input and a single {@link SparkModelPortObject}a
      * as output port.
      *
-     * @param modelName the unique model name
-     * @param jobId the unique job id
+     * @param modelType The type of the {@link MLModel} learned by this node model.
+     * @param jobId The unique job id
      * @param requireTargetCol <code>true</code> if this model learner requires a class column
      */
-    protected SparkMLModelLearnerNodeModel(final String modelName, final String jobId,
+    protected SparkMLModelLearnerNodeModel(final MLModelType modelType, final String jobId,
         final boolean requireTargetCol) {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelName,
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelType.getUniqueName(),
             jobId, requireTargetCol);
+        m_modelType = modelType;
     }
 
     /**
@@ -80,14 +87,15 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
      *
      * @param inPortTypes the input {@link PortType}s
      * @param outPortTypes the output {@link PortType}s
-     * @param modelName the unique model name
+     * @param modelType The type of the {@link MLModel} learned by this node model.
      * @param jobId the unique job id
      * @param requireTargetCol <code>true</code> if this model learner requires a class column
      */
     protected SparkMLModelLearnerNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-        final String modelName, final String jobId, final boolean requireTargetCol) {
+        final MLModelType modelType, final String jobId, final boolean requireTargetCol) {
 
-        super(inPortTypes, outPortTypes, modelName, jobId, requireTargetCol);
+        super(inPortTypes, outPortTypes, modelType.getUniqueName(), jobId, requireTargetCol);
+        m_modelType = modelType;
     }
 
     /**
@@ -98,13 +106,14 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
      *
      * @param inPortTypes the input {@link PortType}s
      * @param outPortTypes the output {@link PortType}s
-     * @param modelName the unique model name
+     * @param modelType The type of the {@link MLModel} learned by this node model.
      * @param jobId the unique job id
      * @param settings
      */
     public SparkMLModelLearnerNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-        final String modelName, final String jobId, final S settings) {
-        super(inPortTypes, outPortTypes, modelName, jobId, settings);
+        final MLModelType modelType, final String jobId, final S settings) {
+        super(inPortTypes, outPortTypes, modelType.getUniqueName(), jobId, settings);
+        m_modelType = modelType;
     }
 
 
@@ -121,7 +130,7 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
         final DataTableSpec tableSpec = spec.getTableSpec();
         getSettings().check(tableSpec);
         return new PortObjectSpec[]{new SparkMLModelPortObjectSpec(getSparkVersion(spec),
-            getModelName(),
+            getModelType(),
             getSettings().getSettings(tableSpec).getLearningTableSpec(),
             getSettings().getClassCol())};
     }
@@ -153,7 +162,7 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
         final MLMetaData metaData = result.getMetaData(MLMetaData.class);
 
         final MLModel mlModel = new MLModel(getSparkVersion(data),
-            getModelName(),
+            getModelType(),
             modelFileStore.getFile(),
             newNamedModelId,
             settings.getSettings(data),
@@ -170,6 +179,13 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
         }
     }
 
+
+    /**
+     * @return the type of the {@link MLModel} learned by this node model.
+     */
+    public MLModelType getModelType() {
+        return m_modelType;
+    }
 
     @Override
     protected final ModelJobOutput executeSparkjob(final ExecutionMonitor exec, final PortObject[] inData,

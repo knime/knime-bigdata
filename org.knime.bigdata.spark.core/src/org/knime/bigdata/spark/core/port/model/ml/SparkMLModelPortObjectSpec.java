@@ -36,7 +36,6 @@ import org.knime.core.data.util.NonClosableOutputStream;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContent;
 import org.knime.core.node.ModelContentRO;
-import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
@@ -47,34 +46,35 @@ import org.knime.core.node.port.PortObjectSpecZipOutputStream;
  */
 public class SparkMLModelPortObjectSpec implements PortObjectSpec {
 
-    private static final String SPARK_VERSION = "version";
+    private static final String KEY_SPARK_VERSION = "version";
 
-    private static final String MODEL_NAME = "type";
-
-    private static final String TARGET_COLUMN_NAME = "targetColumnName";
+    private static final String KEY_TARGET_COLUMN_NAME = "targetColumnName";
 
     private final SparkVersion m_sparkVersion;
-
-    private final String m_modelName;
 
     /**
      * Table spec that contains all columns the model was trained on, including the target column (if applicable).
      */
     private final DataTableSpec m_tableSpec;
 
+    /**
+     * The model type.
+     */
+    private final MLModelType m_modelType;
+
     private final String m_targetColumnName;
 
     /**
      * @param sparkVersion
-     * @param modelName
+     * @param modelType
      * @param tableSpec Table spec that contains all columns the model was trained on, including the target column (if
      *            applicable).
      * @param targetColumn
      */
-    public SparkMLModelPortObjectSpec(final SparkVersion sparkVersion, final String modelName,
+    public SparkMLModelPortObjectSpec(final SparkVersion sparkVersion, final MLModelType modelType,
         final DataTableSpec tableSpec, final String targetColumn) {
         m_sparkVersion = sparkVersion;
-        m_modelName = modelName;
+        m_modelType = modelType;
         m_tableSpec = tableSpec;
         m_targetColumnName = targetColumn;
     }
@@ -87,10 +87,10 @@ public class SparkMLModelPortObjectSpec implements PortObjectSpec {
     }
 
     /**
-     * @return the unique name of the model, e.g. "MLDecisionTree"
+     * @return the type of the model-
      */
-    public String getModelName() {
-        return m_modelName;
+    public MLModelType getModelType() {
+        return m_modelType;
     }
 
     /**
@@ -120,6 +120,30 @@ public class SparkMLModelPortObjectSpec implements PortObjectSpec {
     }
 
     /**
+     * @return a table spec that only contains the feature columns that the model was trained on (not the target
+     *         column).
+     */
+    public DataTableSpec getLearningColumnSpec() {
+        final List<DataColumnSpec> learningColumns = new ArrayList<>();
+
+        for (DataColumnSpec columnSpec : m_tableSpec) {
+            if (columnSpec.getName().equals(m_targetColumnName)) {
+                continue;
+            }
+
+            learningColumns.add(columnSpec);
+        }
+        return new DataTableSpec(learningColumns.toArray(new DataColumnSpec[learningColumns.size()]));
+    }
+
+    /**
+     * @return the model type
+     */
+    public MLModelType getType() {
+        return m_modelType;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -138,6 +162,8 @@ public class SparkMLModelPortObjectSpec implements PortObjectSpec {
 
         private static final String KEY_TABLE_SPEC = "tableSpec";
 
+        private static final String KEY_MODEL_TYPE = "modelType";
+
         @SuppressWarnings("resource")
         @Override
         public SparkMLModelPortObjectSpec loadPortObjectSpec(final PortObjectSpecZipInputStream in) throws IOException {
@@ -150,12 +176,12 @@ public class SparkMLModelPortObjectSpec implements PortObjectSpec {
 
             try {
                 final ModelContentRO modelContent = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
-                SparkVersion sparkVersion = SparkVersion.fromString(modelContent.getString(SPARK_VERSION));
-                final String modelName = modelContent.getString(MODEL_NAME);
-                final String targetColumnName = modelContent.getString(TARGET_COLUMN_NAME);
+                SparkVersion sparkVersion = SparkVersion.fromString(modelContent.getString(KEY_SPARK_VERSION));
+                final String targetColumnName = modelContent.getString(KEY_TARGET_COLUMN_NAME);
                 final DataTableSpec tableSpec = DataTableSpec.load(modelContent.getModelContent(KEY_TABLE_SPEC));
+                final MLModelType type = MLModelType.readFromModelContent(modelContent.getModelContent(KEY_MODEL_TYPE));
 
-                return new SparkMLModelPortObjectSpec(sparkVersion, modelName, tableSpec, targetColumnName);
+                return new SparkMLModelPortObjectSpec(sparkVersion, type, tableSpec, targetColumnName);
             } catch (InvalidSettingsException e) {
                 throw new IOException(e);
             }
@@ -167,31 +193,13 @@ public class SparkMLModelPortObjectSpec implements PortObjectSpec {
             final PortObjectSpecZipOutputStream out) throws IOException {
 
             final ModelContent modelContent = new ModelContent(SPARK_ML_MODEL_SPEC);
-            modelContent.addString(SPARK_VERSION, portObjectSpec.getSparkVersion().toString());
-            modelContent.addString(MODEL_NAME, portObjectSpec.getModelName());
-            modelContent.addString(TARGET_COLUMN_NAME, portObjectSpec.getTargetColumnName().orElse(null));
-            final ModelContentWO tableSpecModel = modelContent.addModelContent(KEY_TABLE_SPEC);
-            portObjectSpec.getTableSpec().save(tableSpecModel);
+            modelContent.addString(KEY_SPARK_VERSION, portObjectSpec.getSparkVersion().toString());
+            modelContent.addString(KEY_TARGET_COLUMN_NAME, portObjectSpec.getTargetColumnName().orElse(null));
+            portObjectSpec.getTableSpec().save(modelContent.addModelContent(KEY_TABLE_SPEC));
+            portObjectSpec.getType().saveToModelContent(modelContent.addModelContent(KEY_MODEL_TYPE));
 
             out.putNextEntry(new ZipEntry(SPARK_ML_MODEL_SPEC));
             modelContent.saveToXML(new NonClosableOutputStream.Zip(out));
         }
-    }
-
-    /**
-     * @return a table spec that only contains the feature columns that the model was trained on (not the target
-     *         column).
-     */
-    public DataTableSpec getLearningColumnSpec() {
-        final List<DataColumnSpec> learningColumns = new ArrayList<>();
-
-        for (DataColumnSpec columnSpec : m_tableSpec) {
-            if (columnSpec.getName().equals(m_targetColumnName)) {
-                continue;
-            }
-
-            learningColumns.add(columnSpec);
-        }
-        return new DataTableSpec(learningColumns.toArray(new DataColumnSpec[learningColumns.size()]));
     }
 }

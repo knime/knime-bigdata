@@ -22,10 +22,11 @@ package org.knime.bigdata.spark.node.ml.prediction.decisiontree.classification;
 
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType.Category;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.AbstractMLTreeNodeModel;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeSettings;
-import org.knime.bigdata.spark.node.ml.prediction.decisiontree.MLDecisionTreeJobInput;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.port.PortObject;
 
@@ -33,10 +34,13 @@ import org.knime.core.node.port.PortObject;
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class MLDecisionTreeClassificationLearnerNodeModel extends AbstractMLTreeNodeModel<MLDecisionTreeJobInput, DecisionTreeSettings> {
+public class MLDecisionTreeClassificationLearnerNodeModel extends AbstractMLTreeNodeModel<MLDecisionTreeClassificationLearnerJobInput, DecisionTreeSettings> {
 
     /**Unique model name.*/
     public static final String MODEL_NAME = "MLDecisionTreeClassification";
+
+    /**The model type.*/
+    public static final MLModelType MODEL_TYPE = MLModelType.getOrCreate(Category.CLASSIFICATION, MODEL_NAME);
 
     /**Unique job id.*/
     public static final String JOB_ID = "MLDecisionTreeClassificationLearnerJob";
@@ -45,7 +49,7 @@ public class MLDecisionTreeClassificationLearnerNodeModel extends AbstractMLTree
      * Constructor.
      */
     public MLDecisionTreeClassificationLearnerNodeModel() {
-        super(MODEL_NAME, JOB_ID, new DecisionTreeSettings(DecisionTreeLearnerMode.CLASSIFICATION));
+        super(MODEL_TYPE, JOB_ID, new DecisionTreeSettings(DecisionTreeLearnerMode.CLASSIFICATION));
      }
 
     @Override

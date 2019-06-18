@@ -56,9 +56,9 @@ public class SparkMLModelPortObject extends FileStorePortObject {
 
     private static final String KEY_TABLE_SPEC = "tableSpec";
 
-    private static final String KEY_TARGET_COLUMN_NAME = "targetColumnName";
+    private static final String KEY_MODEL_TYPE = "modelType";
 
-    private static final String KEY_MODEL_NAME = "modelName";
+    private static final String KEY_TARGET_COLUMN_NAME = "targetColumnName";
 
     private static final String KEY_NAMED_MODEL_ID = "namedModelId";
 
@@ -94,7 +94,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
         final FileStore zippedPipelineModel) {
         super(Collections.singletonList(zippedPipelineModel));
         m_model = model;
-        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getModelName(), model.getTableSpec(),
+        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getType(), model.getTableSpec(),
             model.getTargetColumnName().orElse(null));
     }
 
@@ -107,28 +107,28 @@ public class SparkMLModelPortObject extends FileStorePortObject {
         final FileStore zippedPipelineModel, final FileStore modelInterpreterFile) {
         super(Arrays.asList(zippedPipelineModel, modelInterpreterFile));
         m_model = model;
-        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getModelName(), model.getTableSpec(),
+        m_spec = new SparkMLModelPortObjectSpec(model.getSparkVersion(), model.getType(), model.getTableSpec(),
             model.getTargetColumnName().orElse(null));
     }
 
 
     /**
      * @param sparkVersion
-     * @param modelName
+     * @param type
      * @param namedModelId
      * @param tableSpec
      * @param targetColumnName
      * @param metaData
      * @throws MissingSparkModelHelperException
      */
-    public SparkMLModelPortObject(final SparkVersion sparkVersion, final String modelName, final String namedModelId,
+    public SparkMLModelPortObject(final SparkVersion sparkVersion, final MLModelType type, final String namedModelId,
         final DataTableSpec tableSpec, final String targetColumnName, final MLMetaData metaData)
         throws MissingSparkModelHelperException {
 
         // we first create a placeholder MLModel with a null zippedModelPipeline and modelInterpreterFile, which we will add
         // later. At this point the file stores are not yet initialized.
-        m_model = new MLModel(sparkVersion, modelName, null, namedModelId, tableSpec, targetColumnName, null, metaData);
-        m_spec = new SparkMLModelPortObjectSpec(m_model.getSparkVersion(), m_model.getModelName(), tableSpec,
+        m_model = new MLModel(sparkVersion, type, null, namedModelId, tableSpec, targetColumnName, null, metaData);
+        m_spec = new SparkMLModelPortObjectSpec(m_model.getSparkVersion(), m_model.getType(), tableSpec,
             m_model.getTargetColumnName().orElse(null));
     }
 
@@ -162,6 +162,7 @@ public class SparkMLModelPortObject extends FileStorePortObject {
      * Serializer used to save {@link SparkModelPortObject}s.
      */
     public static final class Serializer extends PortObjectSerializer<SparkMLModelPortObject> {
+
         /**
          * {@inheritDoc}
          */
@@ -176,9 +177,9 @@ public class SparkMLModelPortObject extends FileStorePortObject {
             out.putNextEntry(new ZipEntry(ZIP_KEY_ML_MODEL));
             ModelContent modelContent = new ModelContent(ZIP_KEY_ML_MODEL);
             modelContent.addString(KEY_SPARK_VERSION, model.getSparkVersion().toString());
-            modelContent.addString(KEY_MODEL_NAME, model.getModelName());
             modelContent.addString(KEY_NAMED_MODEL_ID, model.getNamedModelId());
             modelContent.addString(KEY_TARGET_COLUMN_NAME, model.getTargetColumnName().orElse(null));
+            model.getType().saveToModelContent(modelContent.addModelContent(KEY_MODEL_TYPE));
 
             final ModelContentWO tableSpecModel = modelContent.addModelContent(KEY_TABLE_SPEC);
             model.getTableSpec().save(tableSpecModel);
@@ -206,17 +207,17 @@ public class SparkMLModelPortObject extends FileStorePortObject {
                 final ModelContentRO modelContent = ModelContent.loadFromXML(new NonClosableInputStream.Zip(in));
 
                 final SparkVersion sparkVersion = SparkVersion.fromString(modelContent.getString(KEY_SPARK_VERSION));
-                final String modelName = modelContent.getString(KEY_MODEL_NAME);
                 final String namedModelId = modelContent.getString(KEY_NAMED_MODEL_ID);
                 final String targetColumnName = modelContent.getString(KEY_TARGET_COLUMN_NAME);
                 final DataTableSpec tableSpec = DataTableSpec.load(modelContent.getModelContent(KEY_TABLE_SPEC));
+                final MLModelType type = MLModelType.readFromModelContent(modelContent.getModelContent(KEY_MODEL_TYPE));
 
                 MLMetaData metaData = null;
                 if (modelContent.containsKey(KEY_MODEL_META_DATA)) {
                     metaData = MLMetaDataUtils.loadFromModelContent(modelContent.getModelContent(KEY_MODEL_META_DATA));
                 }
 
-                return new SparkMLModelPortObject(sparkVersion, modelName, namedModelId, tableSpec, targetColumnName,
+                return new SparkMLModelPortObject(sparkVersion, type, namedModelId, tableSpec, targetColumnName,
                     metaData);
 
             } catch (InvalidSettingsException | MissingSparkModelHelperException e) {

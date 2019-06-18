@@ -29,6 +29,7 @@ import org.knime.bigdata.spark.core.context.SparkContextID;
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
@@ -48,13 +49,13 @@ public abstract class DefaultMLModelHelper implements MLModelHelper {
      */
     public static final String NAMED_MODEL_UPLOADER_JOB_ID = "NamedModelUploaderJob";
 
-    private final String m_modelName;
+    private final MLModelType m_modelType;
 
     /**
-     * @param modelName the unique name of the model
+     * @param modelType the unique name of the model.
      */
-    protected DefaultMLModelHelper(final String modelName) {
-        m_modelName = modelName;
+    protected DefaultMLModelHelper(final MLModelType modelType) {
+        m_modelType = modelType;
     }
 
     /**
@@ -62,7 +63,7 @@ public abstract class DefaultMLModelHelper implements MLModelHelper {
      */
     @Override
     public String getModelName() {
-        return m_modelName;
+        return m_modelType.getUniqueName();
     }
 
     @Override

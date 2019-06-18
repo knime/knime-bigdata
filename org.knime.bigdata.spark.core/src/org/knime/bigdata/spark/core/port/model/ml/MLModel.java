@@ -57,6 +57,11 @@ import org.knime.core.data.DataTableSpec;
 public class MLModel extends SparkModel {
 
     /**
+     * The model type.
+     */
+    private final MLModelType m_type;
+
+    /**
      * A file that contains the zipped Pipeline model.
      */
     private File m_zippedPipelineModel;
@@ -84,7 +89,7 @@ public class MLModel extends SparkModel {
 
     /**
      * @param sparkVersion the Spark version the model was learned with
-     * @param modelName the unique name of the model
+     * @param type The model type.
      * @param zippedPipelineModel File that contains the zipped PipelineModel.
      * @param namedModelId Key/ID of the named model on the Spark side. May be null.
      * @param settings {@link MLlibSettings} used when learning the model
@@ -93,17 +98,17 @@ public class MLModel extends SparkModel {
      *            value mapping information. May be null.
      * @throws MissingSparkModelHelperException
      */
-    public MLModel(final SparkVersion sparkVersion, final String modelName, final File zippedPipelineModel,
+    public MLModel(final SparkVersion sparkVersion, final MLModelType type, final File zippedPipelineModel,
         final String namedModelId, final MLlibSettings settings, final Path modelInterpreterFile,
         final MLMetaData modelMetaData) throws MissingSparkModelHelperException {
 
-        this(sparkVersion, modelName, zippedPipelineModel, namedModelId, settings.getLearningTableSpec(),
+        this(sparkVersion, type, zippedPipelineModel, namedModelId, settings.getLearningTableSpec(),
             settings.getClassColName(), modelInterpreterFile, modelMetaData);
     }
 
     /**
      * @param sparkVersion the Spark version the model was learned with
-     * @param modelName the unique name of the model
+     * @param type The model type.
      * @param zippedPipelineModel File that contains the zipped PipelineModel.
      * @param namedModelId Key/ID of the named model on the Spark side. May be null.
      * @param spec the DataTableSpec of the table used to learn the model including the class column name
@@ -113,16 +118,25 @@ public class MLModel extends SparkModel {
      *            information. May be null.
      * @throws MissingSparkModelHelperException
      */
-    public MLModel(final SparkVersion sparkVersion, final String modelName, final File zippedPipelineModel,
+    public MLModel(final SparkVersion sparkVersion, final MLModelType type, final File zippedPipelineModel,
         final String namedModelId, final DataTableSpec spec, final String targetColName,
         final Path modelInterpreterFile, final MLMetaData modelMetaData) throws MissingSparkModelHelperException {
 
-        super(sparkVersion, modelName, spec, targetColName, null);
+        super(sparkVersion, type.getUniqueName(), spec, targetColName, null);
+        m_type = type;
         m_zippedPipelineModel = zippedPipelineModel;
         m_namedModelId = namedModelId;
         m_modelInterpreterFile = Optional.ofNullable(modelInterpreterFile);
         m_modelMetaData = Optional.ofNullable(modelMetaData);
-        m_modelHelper = ModelHelperRegistry.getMLModelHelper(modelName, sparkVersion);
+        m_modelHelper = ModelHelperRegistry.getMLModelHelper(type.getUniqueName(), sparkVersion);
+    }
+
+
+    /**
+     * @return the model type
+     */
+    public MLModelType getType() {
+        return m_type;
     }
 
     /**

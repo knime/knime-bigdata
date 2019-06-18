@@ -20,10 +20,13 @@
  */
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
+import java.util.Random;
+
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.node.MLlibNodeSettings;
 import org.knime.bigdata.spark.core.node.SparkMLModelLearnerNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObject;
 import org.knime.core.node.port.PortType;
 
@@ -33,41 +36,41 @@ import org.knime.core.node.port.PortType;
  * @param <I> The {@link JobInput}
  * @param <T> The {@link MLlibNodeSettings}
  */
-public abstract class AbstractMLTreeNodeModel<I extends MLDecisionTreeJobInput, T extends DecisionTreeSettings>
+public abstract class AbstractMLTreeNodeModel<I extends MLDecisionTreeLearnerJobInput, T extends DecisionTreeSettings>
     extends SparkMLModelLearnerNodeModel<I, T> {
 
     /** Index of input data port. */
     static final int DATA_INPORT = 0;
 
     /**
-     * @param modelName
+     * @param modelType
      * @param jobId
      * @param requireClassCol
      */
-    public AbstractMLTreeNodeModel(final String modelName, final String jobId, final boolean requireClassCol) {
-        super(modelName, jobId, requireClassCol);
+    public AbstractMLTreeNodeModel(final MLModelType modelType, final String jobId, final boolean requireClassCol) {
+        super(modelType, jobId, requireClassCol);
     }
 
     /**
      * @param inPortTypes
      * @param outPortTypes
-     * @param modelName
+     * @param modelType
      * @param jobId
      * @param requireClassCol
      */
-    public AbstractMLTreeNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, final String modelName, final String jobId,
+    public AbstractMLTreeNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, final MLModelType modelType, final String jobId,
         final boolean requireClassCol) {
-        super(inPortTypes, outPortTypes, modelName, jobId, requireClassCol);
+        super(inPortTypes, outPortTypes, modelType, jobId, requireClassCol);
     }
 
     /**
-     * @param modelName
+     * @param modelType
      * @param jobId
      * @param settings
      */
-    public AbstractMLTreeNodeModel(final String modelName, final String jobId,
+    public AbstractMLTreeNodeModel(final MLModelType modelType, final String jobId,
         final T settings) {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelName, jobId,
+        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelType, jobId,
             settings);
     }
 }

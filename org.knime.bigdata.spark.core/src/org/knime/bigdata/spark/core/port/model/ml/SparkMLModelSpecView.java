@@ -48,7 +48,7 @@ public class SparkMLModelSpecView extends JPanel {
         super.setName("ML Model");
 
         StringBuilder buf = new StringBuilder("<html><body>");
-        appendField("Model name", spec.getModelName(), buf);
+        appendField("Model name", spec.getModelType().getUniqueName(), buf);
         appendField("Created with Spark version", spec.getSparkVersion().getLabel(), buf);
         if (spec.getTargetColumnSpec().isPresent()) {
             final DataColumnSpec targetCol = spec.getTargetColumnSpec().get();
