@@ -51,24 +51,24 @@ public class MLlibNodeComponents<T extends MLlibNodeSettings> {
     /**
      * @param nodeSettings the extended {@link MLlibNodeSettings}
      */
-    @SuppressWarnings("unchecked")
     public MLlibNodeComponents(final T nodeSettings) {
-        this(nodeSettings, false);
+        this(nodeSettings, false, true);
     }
-
 
     /**
      * @param nodeSettings the extended {@link MLlibNodeSettings}
+     * @param requireNominalTargetCol Whether a nominal target column is required or not.
+     * @param showTargetColLabel
      */
     @SuppressWarnings("unchecked")
-    public MLlibNodeComponents(final T nodeSettings, final boolean requireNominalTargetCol) {
+    public MLlibNodeComponents(final T nodeSettings, final boolean requireNominalTargetCol, final boolean showTargetColLabel) {
         m_nodeSettings = nodeSettings;
         if (requireNominalTargetCol) {
             m_classColComponent = new DialogComponentColumnNameSelection(m_nodeSettings.getClassColModel(),
-                "Class column ", 0, NominalValue.class);
+                showTargetColLabel ? "Class column " : "", 0, NominalValue.class);
         } else {
             m_classColComponent = new DialogComponentColumnNameSelection(m_nodeSettings.getClassColModel(),
-                "Class column ", 0, DoubleValue.class);
+                showTargetColLabel ? "Target column " : "", 0, DoubleValue.class);
         }
     }
 

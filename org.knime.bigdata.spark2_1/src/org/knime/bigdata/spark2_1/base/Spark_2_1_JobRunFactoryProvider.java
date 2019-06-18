@@ -30,6 +30,7 @@ import org.knime.bigdata.spark2_1.jobs.genericdatasource.Spark2GenericDataSource
 import org.knime.bigdata.spark2_1.jobs.hive.Hive2SparkJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.hive.Spark2HiveJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.prediction.decisiontree.classification.MLDecisionTreeClassificationLearnerJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.ml.prediction.decisiontree.regression.MLDecisionTreeRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.predictor.classification.MLPredictorClassificationJobRunFactory;
@@ -152,6 +153,7 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new UploadJarJobRunFactory(),
             new PySparkJobRunFactory(),
             new MLDecisionTreeClassificationLearnerJobRunFactory(),
+            new MLDecisionTreeRegressionLearnerJobRunFactory(),
             new MLGradientBoostedTreesClassificationLearnerJobRunFactory(),
             new MLRandomForestClassificationLearnerJobRunFactory(),
             new NamedModelCheckerJobRunFactory(),

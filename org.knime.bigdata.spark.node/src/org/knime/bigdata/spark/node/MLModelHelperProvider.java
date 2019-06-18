@@ -43,6 +43,7 @@ public class MLModelHelperProvider extends DefaultModelHelperProvider<MLModel> {
     public MLModelHelperProvider() {
         super(Spark2CompatibilityChecker.INSTANCE,
             new MLDecisionTreeClassificationModelHelper(),
+            new MLDecisionTreeRegressionModelHelper(),
             new MLGradientBoostedTreesClassificationModelHelper(),
             new MLRandomForestClassificationModelHelper(),
     }
