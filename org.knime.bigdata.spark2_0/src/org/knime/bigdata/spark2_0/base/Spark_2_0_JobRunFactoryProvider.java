@@ -34,6 +34,7 @@ import org.knime.bigdata.spark2_0.jobs.ml.prediction.decisiontree.regression.MLD
 import org.knime.bigdata.spark2_0.jobs.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_0.jobs.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_0.jobs.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerJobRunFactory;
+import org.knime.bigdata.spark2_0.jobs.ml.prediction.randomforest.regression.MLRandomForestRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_0.jobs.ml.predictor.classification.MLPredictorClassificationJobRunFactory;
 import org.knime.bigdata.spark2_0.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
 import org.knime.bigdata.spark2_0.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
@@ -158,6 +159,7 @@ public class Spark_2_0_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new MLGradientBoostedTreesClassificationLearnerJobRunFactory(),
             new MLGradientBoostedTreesRegressionLearnerJobRunFactory(),
             new MLRandomForestClassificationLearnerJobRunFactory(),
+            new MLRandomForestRegressionLearnerJobRunFactory(),
             new NamedModelCheckerJobRunFactory(),
             new NamedModelUploaderJobRunFactory(),
             new MLPredictorClassificationJobRunFactory());

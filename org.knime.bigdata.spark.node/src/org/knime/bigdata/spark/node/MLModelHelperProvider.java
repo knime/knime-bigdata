@@ -47,5 +47,6 @@ public class MLModelHelperProvider extends DefaultModelHelperProvider<MLModel> {
             new MLGradientBoostedTreesClassificationModelHelper(),
             new MLGradientBoostedTreesRegressionModelHelper(),
             new MLRandomForestClassificationModelHelper(),
+            new MLRandomForestRegressionModelHelper());
     }
 }
