@@ -32,6 +32,7 @@ import org.knime.bigdata.spark.core.port.data.SparkDataTable;
 import org.knime.bigdata.spark.core.port.model.ModelHelperRegistry;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
+import org.knime.bigdata.spark.core.port.model.ml.MLModelType.Category;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObject;
 import org.knime.bigdata.spark.core.port.model.ml.SparkMLModelPortObjectSpec;
 import org.knime.bigdata.spark.core.util.SparkIDs;
@@ -41,7 +42,6 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -83,14 +83,9 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
         final SparkMLModelPortObjectSpec modelSpec = (SparkMLModelPortObjectSpec)inSpecs[0];
         final SparkDataPortObjectSpec inputSparkData = (SparkDataPortObjectSpec)inSpecs[1];
 
-        if (!modelSpec.getTargetColumnSpec().isPresent()) {
+        if (modelSpec.getModelType().getCategory() != Category.CLASSIFICATION) {
             throw new InvalidSettingsException(
-                String.format("%s models are not supported by this node", modelSpec.getModelName()));
-        }
-
-        if (!modelSpec.getTargetColumnSpec().get().getType().equals(StringCell.TYPE)) {
-            throw new InvalidSettingsException(
-                String.format("Predictor only supports class columns of type String.", modelSpec.getModelName()));
+                String.format("%s models are not supported by this node", modelSpec.getModelType().getUniqueName()));
         }
 
         MLPredictionUtils.checkFeatureColumns(modelSpec.getLearningColumnSpec(), inputSparkData.getTableSpec());

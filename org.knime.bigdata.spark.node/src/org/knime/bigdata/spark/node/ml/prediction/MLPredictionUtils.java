@@ -35,6 +35,14 @@ import org.knime.core.node.InvalidSettingsException;
  */
 public class MLPredictionUtils {
 
+    /**
+     * Checks that all feature columns given by learningColumns are present with a compatible type in the
+     * given inputSpec.
+     *
+     * @param learningColumns
+     * @param inputSpec
+     * @throws InvalidSettingsException
+     */
     public static void checkFeatureColumns(final DataTableSpec learningColumns, final DataTableSpec inputSpec)
         throws InvalidSettingsException {
 

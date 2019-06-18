@@ -18,7 +18,7 @@
  * History
  *   Created on 29.04.2016 by koetter
  */
-package org.knime.bigdata.spark2_2.jobs.ml.prediction.predictor;
+package org.knime.bigdata.spark2_3.jobs.ml.predictor.classification;
 
 import org.knime.bigdata.spark.core.job.DefaultSimpleJobRunFactory;
 import org.knime.bigdata.spark.node.ml.prediction.predictor.classification.MLPredictorClassificationJobInput;
