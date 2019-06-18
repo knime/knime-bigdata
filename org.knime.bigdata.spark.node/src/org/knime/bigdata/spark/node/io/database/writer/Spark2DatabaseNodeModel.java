@@ -31,6 +31,8 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -132,7 +134,8 @@ public class Spark2DatabaseNodeModel extends SparkNodeModel {
         final CredentialsProvider cp = getCredentialsProvider();
         final Properties conProperties = new Properties();
         final String namedInputObject = rdd.getData().getID();
-        final Spark2DatabaseJobInput input = new Spark2DatabaseJobInput(namedInputObject,
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(rdd.getTableSpec());
+        final Spark2DatabaseJobInput input = new Spark2DatabaseJobInput(namedInputObject, schema,
             settings.getJDBCUrl(), m_settings.getTable(), m_settings.getSaveMode(), conProperties);
 
         String user = settings.getUserName(cp);
