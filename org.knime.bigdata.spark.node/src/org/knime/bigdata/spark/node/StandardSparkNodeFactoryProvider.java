@@ -53,6 +53,7 @@ import org.knime.bigdata.spark.node.ml.prediction.decisiontree.regression.MLDeci
 import org.knime.bigdata.spark.node.ml.prediction.gbt.classification.MLGradientBoostedTreesClassificationLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.gbt.regression.MLGradientBoostedTreesRegressionLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.predictor.classification.MLPredictorClassificationNodeFactory;
+import org.knime.bigdata.spark.node.ml.prediction.predictor.regression.MLPredictorRegressionNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.randomforest.regression.MLRandomForestRegressionLearnerNodeFactory;
 import org.knime.bigdata.spark.node.mllib.associationrule.SparkAssociationRuleApplyNodeFactory;
@@ -250,6 +251,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new MLGradientBoostedTreesClassificationLearnerNodeFactory(),
             new MLGradientBoostedTreesRegressionLearnerNodeFactory(),
             new MLPredictorClassificationNodeFactory(),
+            new MLPredictorRegressionNodeFactory());
     }
 
 }

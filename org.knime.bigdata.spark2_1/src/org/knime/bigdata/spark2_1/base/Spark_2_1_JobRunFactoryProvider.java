@@ -36,6 +36,7 @@ import org.knime.bigdata.spark2_1.jobs.ml.prediction.gbt.regression.MLGradientBo
 import org.knime.bigdata.spark2_1.jobs.ml.prediction.randomforest.classification.MLRandomForestClassificationLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.prediction.randomforest.regression.MLRandomForestRegressionLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.ml.predictor.classification.MLPredictorClassificationJobRunFactory;
+import org.knime.bigdata.spark2_1.jobs.ml.predictor.regression.MLPredictorRegressionJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleApplyJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.associationrule.AssociationRuleLearnerJobRunFactory;
 import org.knime.bigdata.spark2_1.jobs.mllib.clustering.kmeans.KMeansJobRunFactory;
@@ -162,6 +163,7 @@ public class Spark_2_1_JobRunFactoryProvider extends DefaultJobRunFactoryProvide
             new MLRandomForestRegressionLearnerJobRunFactory(),
             new NamedModelCheckerJobRunFactory(),
             new NamedModelUploaderJobRunFactory(),
-            new MLPredictorClassificationJobRunFactory());
+            new MLPredictorClassificationJobRunFactory(),
+            new MLPredictorRegressionJobRunFactory());
     }
 }
