@@ -31,6 +31,8 @@ import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
 import org.knime.bigdata.spark.core.node.SparkNodeModel;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.core.port.data.SparkDataTableUtil;
+import org.knime.bigdata.spark.core.types.intermediate.IntermediateSpec;
 import org.knime.bigdata.spark.node.io.database.db.SparkDBNodeUtils;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseJobInput;
 import org.knime.bigdata.spark.node.io.database.writer.Spark2DatabaseNodeModel;
@@ -123,11 +125,13 @@ public class Spark2DBNodeModel extends SparkNodeModel {
 
     private Spark2DatabaseJobInput createJobInput(final DBSessionPortObject dbPort, final SparkDataPortObject sparkPort) {
         final String namedInputObject = sparkPort.getData().getID();
+        final IntermediateSpec schema = SparkDataTableUtil.toIntermediateSpec(sparkPort.getTableSpec());
+
         final UrlDBConnectionController controller = (UrlDBConnectionController) dbPort.getSessionInformation().getConnectionController();
         final String url = controller.getConnectionJdbcUrl();
         final Properties conProperties  = controller.getConnectionJdbcProperties();
         final String table = dbPort.getDBSession().getDialect().createFullName(m_settings.getSchema(), m_settings.getTable());
-        return new Spark2DatabaseJobInput(namedInputObject, url, table, m_settings.getSaveMode(), conProperties);
+        return new Spark2DatabaseJobInput(namedInputObject, schema, url, table, m_settings.getSaveMode(), conProperties);
     }
 
     static DataTypeMappingConfiguration<SQLType> getTypeMappingConfig(final DBSessionPortObjectSpec spec)
