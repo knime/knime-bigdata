@@ -18,7 +18,7 @@
  * History
  *   Created on 27.09.2015 by koetter
  */
-package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
+package org.knime.bigdata.spark.node.ml.prediction.randomforest.classification;
 
 import org.knime.bigdata.spark.core.node.DefaultSparkNodeFactory;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -29,14 +29,15 @@ import org.knime.core.node.NodeDialogPane;
 
 /**
  *
- * @author Tobias Koetter, KNIME.com
+ * @author Bjoern Lohrmann, KNIME GmbH
  */
-public class MLlibRandomForestNodeFactory extends DefaultSparkNodeFactory<MLlibRandomForestNodeModel> {
+public class MLRandomForestClassificationLearnerNodeFactory
+    extends DefaultSparkNodeFactory<MLRandomForestClassificationLearnerNodeModel> {
 
     /**
      * Constructor.
      */
-    public MLlibRandomForestNodeFactory() {
+    public MLRandomForestClassificationLearnerNodeFactory() {
         super("mining/prediction");
     }
 
@@ -44,8 +45,8 @@ public class MLlibRandomForestNodeFactory extends DefaultSparkNodeFactory<MLlibR
      * {@inheritDoc}
      */
     @Override
-    public MLlibRandomForestNodeModel createNodeModel() {
-        return new MLlibRandomForestNodeModel();
+    public MLRandomForestClassificationLearnerNodeModel createNodeModel() {
+        return new MLRandomForestClassificationLearnerNodeModel();
     }
 
     /**
@@ -62,7 +63,7 @@ public class MLlibRandomForestNodeFactory extends DefaultSparkNodeFactory<MLlibR
     @Override
     protected NodeDialogPane createNodeDialogPane() {
         final RandomForestLearnerSettings settings =
-            new RandomForestLearnerSettings(DecisionTreeLearnerMode.DEPRECATED);
+            new RandomForestLearnerSettings(DecisionTreeLearnerMode.CLASSIFICATION);
         final RandomForestLearnerComponents components = new RandomForestLearnerComponents(settings);
 
         return new RandomForestLearnerNodeDialog(components);

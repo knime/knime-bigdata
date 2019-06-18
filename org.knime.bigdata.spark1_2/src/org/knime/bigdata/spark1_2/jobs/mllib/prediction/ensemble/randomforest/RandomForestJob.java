@@ -71,7 +71,7 @@ public class RandomForestJob implements SparkJob<RandomForestJobInput, ModelJobO
         final int maxBins = input.getMaxNoOfBins();
         final String impurity = input.getQualityMeasure().name();
         final int numTrees = input.getNoOfTrees();
-        final String featureSubSetStrategy = input.getFeatureStrategy().name();
+        final String featureSubSetStrategy = input.getFeatureStrategy();
         final int seed = input.getSeed();
         final RandomForestModel model;
         if (isClassification) {

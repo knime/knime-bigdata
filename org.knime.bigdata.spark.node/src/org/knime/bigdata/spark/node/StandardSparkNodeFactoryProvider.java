@@ -240,6 +240,7 @@ public class StandardSparkNodeFactoryProvider extends DefaultSparkNodeFactoryPro
             new SparkJavaSnippetSourceNodeFactory(),
             new MLlibPCANodeFactory(),
             new MLPredictorClassificationNodeFactory());
+            new MLRandomForestClassificationLearnerNodeFactory(),
     }
 
 }

@@ -21,9 +21,9 @@
 package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.FeatureSubsetStrategy;
-import org.knime.bigdata.spark.core.job.util.EnumContainer.InformationGain;
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
 import org.knime.bigdata.spark.core.job.util.NominalFeatureInfo;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.FeatureSamplingStrategy;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.DecisionTreeJobInput;
 
 /**
@@ -69,11 +69,11 @@ public class RandomForestJobInput extends DecisionTreeJobInput {
     public RandomForestJobInput(final String aInputRDD, final Integer[] featureColIdxs,
         final NominalFeatureInfo nominalFeatureInfo, final int classColIdx, final Long noOfClasses, final int maxDepth,
         final int maxNoOfBins, final int aNumTrees, final boolean aIsClassification,
-        final FeatureSubsetStrategy aFSStrategy, final Integer aRandomSeed, final InformationGain qualityMeasure) {
+        final String aFSStrategy, final Integer aRandomSeed, final QualityMeasure qualityMeasure) {
         super(aInputRDD, featureColIdxs, nominalFeatureInfo, classColIdx, noOfClasses, aIsClassification, maxDepth, maxNoOfBins,
             qualityMeasure);
         set(NUM_TREES, aNumTrees);
-        set(FEATURE_SUBSET_STRATEGY, aFSStrategy.name());
+        set(FEATURE_SUBSET_STRATEGY, aFSStrategy);
         set(RANDOM_SEED, aRandomSeed);
     }
 
@@ -85,14 +85,13 @@ public class RandomForestJobInput extends DecisionTreeJobInput {
     }
 
     /**
-     * @return the {@link FeatureSubsetStrategy} that defines the number of features to consider for splits at each
+     * @return the {@link FeatureSamplingStrategy} that defines the number of features to consider for splits at each
      * node. Supported: "auto", "all", "sqrt", "log2", "onethird". If "auto" is set, this parameter is set based on
      * numTrees: if numTrees == 1, set to "all"; if numTrees > 1 (forest)
      * set to "sqrt".
      */
-    public FeatureSubsetStrategy getFeatureStrategy() {
-        final String stragetyName = get(FEATURE_SUBSET_STRATEGY);
-        return FeatureSubsetStrategy.valueOf(stragetyName);
+    public String getFeatureStrategy() {
+        return get(FEATURE_SUBSET_STRATEGY);
     }
 
     /**

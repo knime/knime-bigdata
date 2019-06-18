@@ -22,6 +22,8 @@ package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
+import org.knime.bigdata.spark.node.ml.prediction.randomforest.RandomForestLearnerSettings;
 import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.AbstractMLlibTreeNodeModel;
 
 /**
@@ -30,7 +32,7 @@ import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.AbstractMLlibT
  * @author Ole Ostergaard
  */
 public class MLlibRandomForestNodeModel
-extends AbstractMLlibTreeNodeModel<RandomForestJobInput, RandomForestSettings> {
+extends AbstractMLlibTreeNodeModel<RandomForestJobInput, RandomForestLearnerSettings> {
 
     /**Unique model name.*/
     public static final String MODEL_NAME = "RandomForests";
@@ -42,19 +44,27 @@ extends AbstractMLlibTreeNodeModel<RandomForestJobInput, RandomForestSettings> {
      * Constructor.
      */
     protected MLlibRandomForestNodeModel() {
-        super(MODEL_NAME, JOB_ID, new RandomForestSettings());
+        super(MODEL_NAME, JOB_ID, new RandomForestLearnerSettings(DecisionTreeLearnerMode.DEPRECATED));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected RandomForestJobInput getJob(final RandomForestSettings settings, final SparkDataPortObject data,
+    protected RandomForestJobInput getJob(final RandomForestLearnerSettings settings, final SparkDataPortObject data,
         final MLlibSettings mllibSettings) {
-        return new RandomForestJobInput(data.getTableName(), mllibSettings.getFeatueColIdxs(),
-            mllibSettings.getNominalFeatureInfo(), mllibSettings.getClassColIdx(), mllibSettings.getNumberOfClasses(),
-            settings.getMaxDepth(), settings.getMaxNoOfBins(),  settings.getNoOfTrees(), settings.isClassification(),
-            settings.getFeatureSubsetStragegy(), settings.getSeed(), settings.getQualityMeasure());
+        return new RandomForestJobInput(data.getTableName(),
+            mllibSettings.getFeatueColIdxs(),
+            mllibSettings.getNominalFeatureInfo(),
+            mllibSettings.getClassColIdx(),
+            mllibSettings.getNumberOfClasses(),
+            settings.getMaxDepth(),
+            settings.getMaxNoOfBins(),
+            settings.getNoOfTrees(),
+            settings.isClassification(),
+            settings.getFeatureSubsetStragegy().name(),
+            settings.getSeed(),
+            settings.getQualityMeasure());
     }
 
 }
