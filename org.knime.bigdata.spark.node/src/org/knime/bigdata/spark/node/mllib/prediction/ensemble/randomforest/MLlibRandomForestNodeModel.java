@@ -20,6 +20,7 @@
  */
 package org.knime.bigdata.spark.node.mllib.prediction.ensemble.randomforest;
 
+import org.knime.bigdata.spark.core.job.util.EnumContainer.QualityMeasure;
 import org.knime.bigdata.spark.core.job.util.MLlibSettings;
 import org.knime.bigdata.spark.core.port.data.SparkDataPortObject;
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -64,7 +65,14 @@ extends AbstractMLlibTreeNodeModel<RandomForestJobInput, RandomForestLearnerSett
             settings.isClassification(),
             settings.getFeatureSubsetStragegy().name(),
             settings.getSeed(),
-            settings.getQualityMeasure());
+            getQualityMeasure());
     }
 
+    private QualityMeasure getQualityMeasure() {
+        if (getSettings().isClassification()) {
+            return getSettings().getQualityMeasure();
+        } else {
+            return QualityMeasure.variance;
+        }
+    }
 }
