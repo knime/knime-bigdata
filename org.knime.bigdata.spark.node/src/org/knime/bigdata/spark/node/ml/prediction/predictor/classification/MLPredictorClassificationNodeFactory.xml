@@ -4,28 +4,31 @@
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Predictor" icon="icon.png">
 	<name>Spark Predictor (Classification)</name>
-	<shortDescription>Predicts input data based on a previously learned Spark ML model (e.g. Decision Tree). Please
-	note that all feature columns selected during model training must be present in the ingoing DataFrame.
+	<shortDescription>Classifies input data based on a previously learned Spark ML classification model. 
+	
 	</shortDescription>
 	<fullDescription>
 		<intro>
-			This node labels new data points using a learned Spark ML model
-			e.g. a
-			Decision Tree.
+			This node classifies/labels input data using a previously learned Spark ML classification model. 
+			Please note that all feature columns selected during model training must be present in the ingoing DataFrame.
+	
+			<p>
+			<i>Note: This node is not compatible with Spark MLlib models. For these models please use the Spark Predictor node.</i>
+			</p>
+			
 			<p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
 		<option name="Change prediction column name">
 			When set, you can change the name of the
-			prediction column. The default name is "Prediction (classcolumn)".
+			prediction column. The default name is "Prediction (targetcolumn)".
 		</option>
 		<option name="Prediction Column">
-			The desired name for the predicted column.
+			The desired name for the prediction column.
 		</option>
 		<option name="Append individual class probabilities">
 			Select to append the class probability of each
 			class to the output. For each
-			class, a new column with name "P
-			(classcolumn=class)".
+			class, a new column with name "P (targetcolumn=class)" will appended.
 		</option>
 		<option name="Append individual class probabilities">
 			If class probabilities are appended, the suffix
@@ -35,10 +38,9 @@
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Spark ML Model">Spark ML model to use for prediction.
+		<inPort index="0" name="Spark ML Model">Spark ML classification model to use.
 		</inPort>
-		<inPort index="1" name="Input Data">Spark DataFrame containing the input
-			data to predict.
+		<inPort index="1" name="Input Data">Spark DataFrame containing the input data to classify.
 		</inPort>
 		<outPort index="0" name="Labeled Data">Input DataFrame with appended
 			prediction column and, if selected, columns for

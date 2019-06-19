@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd"
 	type="Learner" icon="icon.png">
 	<name>Spark Decision Tree Learner</name>
-	<shortDescription>Trains a decision tree model in Spark.
+	<shortDescription>Trains a decision tree classification model in Spark.
 	</shortDescription>
 	<fullDescription>
 		<intro>
@@ -14,12 +14,11 @@
 				spark.ml
 				decision tree
 			</a>
-			implementation to train a decision tree model in Spark. It supports
-			binary and multiclass
-			classification. The class column must be
-			nominal, whereas the feature columns can be
-			either nominal or
-			numerical.
+			implementation to train a decision tree classification model in Spark. The underlying algorithm performs a
+			recursive binary partitioning of the feature space. Each split is chosen by selecting the
+			best split from a set of possible splits, in order to maximize the information gain at
+			a tree node. It supports binary and multiclass classification. The target column must be
+			nominal, whereas the feature columns can be either nominal or numerical.
 			<p>
 				Use the
 				<i>Spark Predictor (Classification)</i>
@@ -32,39 +31,67 @@
 			</p>
 			<p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
-		<option name="Max number of bins">
-			Maximum number of bins used for discretizing
-			continuous features and
-			for choosing how to split on features at each
-			node.
-		</option>
-		<option name="Max depth">
-			Maximum depth of the tree (>= 0).
-		</option>
-		<option name="Quality measure">
-			Criterion used for information gain calculation. Available methods:
-			"gini" (recommended) or "entropy".
-			For more details on the available
-			methods see the
-			<a
-				href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>
-			.
-		</option>
-		<option name="Min rows per child">
-			Minimum number of rows from the training data each child must have after split. If a
-			split causes the left or right child to have fewer rows, the split will be discarded as invalid.
-			Must be >= 1.
-		</option>
-		<option name="Class column">The classification column. Must be nominal.
-		</option>
-		<option name="Feature Columns">The feature columns to learn the model from.
-			Both nominal and numeric columns are supported.
-		</option>
+		
+		<tab name="Settings">
+			<option name="Target column">
+				A nominal column that contains the labels to train with.
+				Rows with missing values in this column will be ignored during model training.
+			</option>
+			
+			<option name="Feature Columns">
+				The feature columns to learn the model with. Both nominal and numeric columns are supported.
+				The dialog allows to select the columns manually (by moving them to the right panel) or via a
+				wildcard/regex selection (all columns whose names match the wildcard/regex are used for learning).
+				In case of manual selection, the behavior for new columns (i.e. that are not available at the
+				time you configure the node) can be specified as either Enforce exclusion (new columns are
+				excluded and therefore not used for learning) or Enforce inclusion (new columns are included
+				and therefore used for learning).
+			</option>
+			
+			<option name="Quality measure">
+				Measure to use for information gain calculation when evaluating splits. Available methods are
+				"gini" (recommended) or "entropy". For more details on the available methods see the
+				<a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">Spark
+				documentation</a>
+			</option>
+			
+			<option name="Max tree depth">
+				Maximum depth of the decision tree (>= 0).
+			</option>
+			
+			<option name="Min rows per tree node">
+				Minimum number of rows each tree node must have. If a split causes the left or right child node to have
+				fewer rows, the split will be discarded as invalid. Must be >= 1.
+			</option>
+			
+			<option name="Min information gain per split">
+				Minimum information gain for a split to be considered.
+			</option>
+		</tab>
+		
+		<tab name="Advanced">
+			<option name="Max number of bins">
+				Number of bins to use when discretizing continuous features. Increasing the number of bins
+				means that the algorithm will consider more split candidates and make more fine-grained decisions on
+				how to split. However, it also increases the amount of computation and communication that needs to be performed
+				and hence increases training time. Additionally, the number of bins must be at least the maximum
+				number of distinct values for any nominal feature.
+			</option>
+			
+			<option name="Use static random seed">
+				Seed for generating random numbers.
+			</option>
+		</tab>
 	</fullDescription>
 
 	<ports>
-		<inPort index="0" name="Input data">Input Spark DataFrame/RDD with training data.</inPort>
-		<outPort index="0" name="Spark ML Decision Tree Model">Spark ML Decision Tree Model</outPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame with training data.</inPort>
+		<outPort index="0" name="Feature importance measures">
+			Table with estimates of the importance of each feature. The features are listed in order of decreasing
+			importance and are normalized to sum up to 1. Note that feature importances for single decision trees
+			can have high variance due to correlated predictor variables. Consider using the Spark Random Forest
+			Learner to determine feature importance instead.
+		</outPort>
+		<outPort index="1" name="Spark ML Decision Tree model (classification)">Spark ML Decision Tree model (classification)</outPort>
 	</ports>
-
 </knimeNode>

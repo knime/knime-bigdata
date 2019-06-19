@@ -3,59 +3,107 @@
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Learner" icon="icon.png">
     <name>Spark Random Forest Learner (Regression)</name>
-	<shortDescription>Random forests induction performed in Spark.</shortDescription>
+	<shortDescription>Trains a Random Forest regression model in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
-			This node applies the Apache Spark 
-			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#random-forests">Random Forests</a> algorithm.
+			Random forests are ensembles of decision trees. Learning a Random Forest model means
+			training a set of independent decision trees in parallel.
+			This node uses the
+			<a
+				href="http://spark.apache.org/docs/2.4.3/ml-classification-regression.html#random-forests">
+				spark.ml Random Forest
+			</a>
+			implementation to train a regression model in Spark. The target column must be numeric, whereas the
+			feature columns can be either nominal or numerical.
 			<p>
-            Please note that all data must be numeric, including the label column. 
-            Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
-            </p>
-            <p>
-            Use the Spark Predictor node to apply the learned model to unseen data.
-            </p>
+				Use the
+				<i>Spark Predictor (Regression)</i>
+				node to apply the learned model to unseen data.
+			</p>
+			<p>
+				Please refer to the
+				<a href="http://spark.apache.org/docs/2.4.3/mllib-ensembles.html#random-forests">Spark documentation</a>
+				for a full description of the underlying algorithm.
+			</p>
+			<p><i>This node requires at least Apache Spark 2.0.</i></p>
 		</intro>
-    	<option name="Number of trees">Number of trees in the random forest.</option>
-		<option name="Max depth">
-			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes.
-		</option>
-    	<option name="Max number of bins">
-			Maximum number of bins used for splitting features.
-		</option>
-		<option name="Feature selection strategy">Number of features to consider for splits at each node. 
-		Supported: 
-		<ul>
-		  <li>auto</li>
-		  <li>all</li>
-		  <li>sqrt</li>
-		  <li>log2</li>
-		  <li>onethird</li> 
-		</ul> 
-		If "auto" is set, this parameter is set based on numTrees: if numTrees == 1, set to "all"; 
-		if numTrees > 1 (forest) set to "sqrt".
-		</option>
-        <option name="Is classification">Select this option for binary or multiclass classification.</option>
-		<option name="Quality measure">
-			  Criterion used for information gain calculation. Available methods: 
-			  <ul>
-			     <li>gini (recommended)</li>
-                 <li>entropy</li>
-			  </ul>
-			  For more details on the available methods see the 
-			  <a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
-			  Only available for classifications.
-		</option>
-        <option name="Seed">Random seed for bootstrapping and choosing feature subsets.</option>        		
-		<option name="Class column">The classification column. Must be numeric.</option>
-		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+		
+		<tab name="Settings">
+			<option name="Target column">
+				A numeric column that contains the values to train with. Rows with missing values in this column will
+				be ignored during model training.
+			</option>
+
+			<option name="Feature Columns">
+				The feature columns to learn the model with. Both nominal and numeric columns are supported.
+				The dialog allows to select the columns manually (by moving them to the right panel) or via a
+				wildcard/regex selection (all columns whose names match the wildcard/regex are used for learning).
+				In case of manual selection, the behavior for new columns (i.e. that are not available at the
+				time you configure the node) can be specified as either Enforce exclusion (new columns are
+				excluded and therefore not used for learning) or Enforce inclusion (new columns are included
+				and therefore used for learning).
+			</option>
+
+			<option name="Number of models">
+				The number of decision trees in the forest. Increasing this number will make the Random Forest model
+				less likely to overfit, but also directly increase training time.
+			</option>
+			
+			<option name="Max tree depth">
+				Maximum depth of the decision trees (>= 0).
+			</option>
+			
+			<option name="Min rows per tree node">
+				Minimum number of rows each tree node must have. If a split causes the left or right child node to have
+				fewer rows, the split will be discarded as invalid. Must be >= 1.
+			</option>
+
+			<option name="Min information gain per split">
+				Minimum information gain for a split to be considered. Note that for regression, the information gain
+				is always calculated with a variance-based quality measure.
+			</option>
+		</tab>
+		
+		<tab name="Advanced">
+			<option name="Data sampling (rows)">
+				Sampling the rows is also known as bagging, a very popular ensemble learning strategy. If sampling is
+				disabled (default), then each decision tree is trained on the full data set. Otherwise each
+				tree is trained with a different data sample that contains the configured fraction of rows of the
+				original data. 
+			</option>
+			
+			<option name="Feature sampling">
+				Feature sampling is also called random subspace method or attribute bagging. This option specifies the sample size
+				for each split at a tree node:
+				<ul>
+				  <li><i>auto (default)</i>: if "Number of models" is one, then this is the same as "all", otherwise "onethird" will be used.</li>
+				  <li><i>all</i>: each sample contains all features.</li>
+				  <li><i>sqrt</i>: sample size is sqrt(number of features)</li>
+				  <li><i>log2</i>: sample size is log2(number of features)</li>
+				  <li><i>onethird</i>: sample size is 1/3 of the features</li> 
+				</ul> 
+			</option>
+			
+			<option name="Max number of bins">
+				Number of bins to use when discretizing continuous features. Increasing the number of bins
+				means that the algorithm will consider more split candidates and make more fine-grained decisions on
+				how to split. However, it also increases the amount of computation and communication that needs to be performed
+				and hence increases training time. Additionally, the number of bins must be at least the maximum
+				number of distinct values for any nominal feature.
+			</option>
+			
+			<option name="Use static random seed">
+				Seed for generating random numbers when sampling rows and features.
+			</option>
+		</tab>
 	</fullDescription>
 
     <ports>
-		<inPort index="0" name="Input data">Input Spark DataFrame/RDD</inPort>
-		<inPort optional="true" index="1" name="PMML mapping dictionary">PMML with the nominal values mapping dictionary</inPort>
-        <outPort index="0" name="Random Forests Model">Spark MLlib Random Forests Model</outPort>
+		<inPort index="0" name="Input data">Input Spark DataFrame with training data.</inPort>
+		<outPort index="0" name="Feature importance measures">
+			Table with estimates of the importance of each feature. The features are listed in order of decreasing
+			importance and are normalized to sum up to 1.
+		</outPort>
+		<outPort index="1" name="Spark ML Random Forest model (regression)">Spark ML Random Forest model (regression)</outPort>
     </ports>
-    
 </knimeNode>

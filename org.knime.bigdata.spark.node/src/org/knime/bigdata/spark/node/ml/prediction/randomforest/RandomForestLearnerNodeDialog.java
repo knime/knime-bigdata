@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -82,7 +81,6 @@ public class RandomForestLearnerNodeDialog extends DecisionTreeNodeDialog<Random
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        settingsTab.add(new JLabel("Boosting Options"), gbc);
         addAdvancedForestOptions(settingsTab, gbc);
 
         addSeparatorAndLabel(settingsTab, "Other Options", gbc);

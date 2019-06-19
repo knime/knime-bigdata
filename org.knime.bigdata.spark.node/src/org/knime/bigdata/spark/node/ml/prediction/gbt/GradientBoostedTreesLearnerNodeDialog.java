@@ -25,7 +25,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.knime.bigdata.spark.node.ml.prediction.decisiontree.DecisionTreeLearnerMode;
@@ -71,9 +70,6 @@ public class GradientBoostedTreesLearnerNodeDialog
         gbc.gridy++;
         addLine(settingsTab, "Max number of models", getComponents().getMaxNoOfModelsComponent().getComponentPanel(), gbc);
 
-        gbc.gridy++;
-        addLine(settingsTab, "Learning rate", getComponents().getLearningRateComponent().getComponentPanel(), gbc);
-
         if (getMode() != DecisionTreeLearnerMode.CLASSIFICATION) {
             gbc.gridy++;
             addLine(settingsTab, "Loss function", getComponents().getLossFunctionComponent().getComponentPanel(), gbc);
@@ -91,7 +87,6 @@ public class GradientBoostedTreesLearnerNodeDialog
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        settingsTab.add(new JLabel("Boosting Options"), gbc);
         addAvancedBoostingOptions(settingsTab, gbc);
 
         addSeparatorAndLabel(settingsTab, "Other Options", gbc);
@@ -103,6 +98,9 @@ public class GradientBoostedTreesLearnerNodeDialog
     }
 
     private void addAvancedBoostingOptions(final JPanel settingsTab, final GridBagConstraints gbc) {
+        gbc.gridy++;
+        addLine(settingsTab, "Learning rate", getComponents().getLearningRateComponent().getComponentPanel(), gbc);
+
         if (getMode() != DecisionTreeLearnerMode.DEPRECATED) {
             gbc.gridy++;
             final JPanel dataSamplingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
