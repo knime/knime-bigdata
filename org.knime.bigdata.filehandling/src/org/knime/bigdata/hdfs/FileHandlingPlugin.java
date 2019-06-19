@@ -80,8 +80,7 @@ public class FileHandlingPlugin extends AbstractUIPlugin {
                 throw new RuntimeException("No implementation found");
             }
         } catch (Throwable t) {
-            LOG.error("Failed to initialize the JAX-RS 1.x RuntimeDelegate. Provided error message: " + t.getMessage(),
-                t);
+            LOG.debug("Failed to initialize the JAX-RS 1.x RuntimeDelegate. Provided error message: " + t.getMessage());
             RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
         }
         HadoopInitializer.ensureInitialized();
