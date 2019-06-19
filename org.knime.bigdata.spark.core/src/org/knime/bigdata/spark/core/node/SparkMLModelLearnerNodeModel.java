@@ -20,11 +20,13 @@
  */
 package org.knime.bigdata.spark.core.node;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
 import org.knime.bigdata.spark.core.exception.KNIMESparkException;
+import org.knime.bigdata.spark.core.exception.MissingSparkModelHelperException;
 import org.knime.bigdata.spark.core.job.JobInput;
 import org.knime.bigdata.spark.core.job.MLModelLearnerJobOutput;
 import org.knime.bigdata.spark.core.job.ModelJobOutput;
@@ -70,31 +72,15 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
      *
      * @param modelType The type of the {@link MLModel} learned by this node model.
      * @param jobId The unique job id
-     * @param requireTargetCol <code>true</code> if this model learner requires a class column
+     * @param settings Node settings.
      */
     protected SparkMLModelLearnerNodeModel(final MLModelType modelType, final String jobId,
-        final boolean requireTargetCol) {
-        super(new PortType[]{SparkDataPortObject.TYPE}, new PortType[]{SparkMLModelPortObject.PORT_TYPE}, modelType.getUniqueName(),
-            jobId, requireTargetCol);
-        m_modelType = modelType;
-    }
-
-    /**
-     * Constructor for general input/output {@link PortType}s. if you use this constructor you might need to overwrite
-     * the {@link #configureInternal(PortObjectSpec[])} and {@link #executeInternal(PortObject[], ExecutionContext)}
-     * method which expects a {@link SparkDataPortObject} as first input and returns a {@link SparkModelPortObject} as
-     * output.
-     *
-     * @param inPortTypes the input {@link PortType}s
-     * @param outPortTypes the output {@link PortType}s
-     * @param modelType The type of the {@link MLModel} learned by this node model.
-     * @param jobId the unique job id
-     * @param requireTargetCol <code>true</code> if this model learner requires a class column
-     */
-    protected SparkMLModelLearnerNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-        final MLModelType modelType, final String jobId, final boolean requireTargetCol) {
-
-        super(inPortTypes, outPortTypes, modelType.getUniqueName(), jobId, requireTargetCol);
+        final S settings) {
+        super(new PortType[]{SparkDataPortObject.TYPE},
+            new PortType[]{SparkMLModelPortObject.PORT_TYPE},
+            modelType.getUniqueName(),
+            jobId,
+            settings);
         m_modelType = modelType;
     }
 
@@ -140,6 +126,26 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
      */
     @Override
     protected PortObject[] executeInternal(final PortObject[] inData, final ExecutionContext exec) throws Exception {
+        final SparkMLModelPortObject modelPortObject = learnModel(inData, exec);
+        return new PortObject[] {modelPortObject};
+    }
+
+    /**
+     * Runs a Spark job to learn the model and returns a {@link SparkMLModelPortObject} with the model and its metadata.
+     *
+     * @param inData The ingoing port objects.
+     * @param exec The execution context.
+     * @return port object that contains the learned model.
+     * @throws CanceledExecutionException
+     * @throws KNIMESparkException
+     * @throws InvalidSettingsException
+     * @throws IOException
+     * @throws MissingSparkModelHelperException
+     */
+    protected SparkMLModelPortObject learnModel(final PortObject[] inData, final ExecutionContext exec)
+        throws CanceledExecutionException, KNIMESparkException, InvalidSettingsException, IOException,
+        MissingSparkModelHelperException {
+
         exec.setMessage("Starting " + getModelName() + " model learner");
         exec.checkCanceled();
         final S settings = getSettings();
@@ -172,10 +178,9 @@ public abstract class SparkMLModelLearnerNodeModel<I extends NamedModelLearnerJo
         addAdditionalNamedObjectsToDelete(data.getContextID(), newNamedModelId);
 
         if (modelInterpreterFileStore != null) {
-            return new PortObject[]{
-                new SparkMLModelPortObject(mlModel, modelFileStore, modelInterpreterFileStore)};
+            return new SparkMLModelPortObject(mlModel, modelFileStore, modelInterpreterFileStore);
         } else {
-            return new PortObject[]{new SparkMLModelPortObject(mlModel, modelFileStore)};
+            return new SparkMLModelPortObject(mlModel, modelFileStore);
         }
     }
 

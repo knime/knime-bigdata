@@ -16,57 +16,44 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Created on May 31, 2019 by bjoern
+ *   Created on Jun 19, 2019 by bjoern
  */
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
+import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 
 /**
- * Class to hold metadata about a single decision tree model.
+ * Abstract superclass for MLMetaData object that contain metadata about decision trees or tree ensembles.
  *
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class MLDecisionTreeMetaData extends GenericMLDecisionTreeMetaData {
+public class GenericMLDecisionTreeMetaData extends MLMetaData {
 
-    private static final String KEY_NUM_NODES = "numNodes";
-
-    private static final String KEY_DEPTH = "depth";
+    private static final String KEY_FEATURE_IMPORTANCES = "featureImportances";
 
     /**
      * Constructor for (de)serialization.
      */
-    public MLDecisionTreeMetaData() {
+    public GenericMLDecisionTreeMetaData() {
     }
 
     /**
      *
-     * @param numNodes Number of nodes in tree.
-     * @param depth Tree depth.
      * @param featureImportances Estimate of the importance of each feature.
      */
-    public MLDecisionTreeMetaData(final int numNodes, final int depth,
-        final double[] featureImportances) {
-        super(featureImportances);
-
-        setInteger(KEY_NUM_NODES, numNodes);
-        setInteger(KEY_DEPTH, depth);
+    public GenericMLDecisionTreeMetaData(final double[] featureImportances) {
+        setDoubleArray(KEY_FEATURE_IMPORTANCES, featureImportances);
     }
 
     /**
+     * Each feature's importance is the average of its importance across all trees in the ensemble The feature
+     * importances are normalized to sum to 1.
      *
-     * @return number of nodes in tree.
+     * @return an estimate of the importance of each feature.
      */
-    public int getNumberOfTreeNodes() {
-        return getInteger(KEY_NUM_NODES);
-    }
-
-    /**
-     *
-     * @return depth of tree.
-     */
-    public int getTreeDepth() {
-        return getInteger(KEY_DEPTH);
+    public double[] getFeatureImportances() {
+        return getDoubleArray(KEY_FEATURE_IMPORTANCES);
     }
 }

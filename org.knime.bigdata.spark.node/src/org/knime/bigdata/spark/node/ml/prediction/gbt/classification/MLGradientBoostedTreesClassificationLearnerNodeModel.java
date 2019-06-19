@@ -50,7 +50,9 @@ public class MLGradientBoostedTreesClassificationLearnerNodeModel extends
      * Constructor.
      */
     public MLGradientBoostedTreesClassificationLearnerNodeModel() {
-        super(MODEL_TYPE, JOB_ID, new GradientBoostedTreesLearnerSettings(DecisionTreeLearnerMode.CLASSIFICATION));
+        super(MODEL_TYPE,
+            JOB_ID,
+            new GradientBoostedTreesLearnerSettings(DecisionTreeLearnerMode.CLASSIFICATION));
     }
 
     @Override

@@ -60,28 +60,11 @@ public abstract class SparkModelLearnerNodeModel<I extends JobInput, S extends M
      * as output port.
      * @param modelName the unique model name
      * @param jobId the unique job id
-     * @param requireClassCol <code>true</code> if this model learner requires a class column
+     * @param settings Node settings for the node.
      */
-    protected SparkModelLearnerNodeModel(final String modelName, final String jobId, final boolean requireClassCol) {
+    protected SparkModelLearnerNodeModel(final String modelName, final String jobId, final S settings) {
         this(new PortType[]{SparkDataPortObject.TYPE},
-            new PortType[]{SparkModelPortObject.TYPE}, modelName, jobId, requireClassCol);
-    }
-
-    /**
-     * Constructor for general input/output {@link PortType}s. if you use this constructor you might need to overwrite
-     * the {@link #configureInternal(PortObjectSpec[])} and {@link #executeInternal(PortObject[], ExecutionContext)}
-     * method which expects a {@link SparkDataPortObject} as first input and returns a {@link SparkModelPortObject} as
-     * output.
-     * @param inPortTypes the input {@link PortType}s
-     * @param outPortTypes the output {@link PortType}s
-     * @param modelName the unique model name
-     * @param jobId the unique job id
-     * @param requireClassCol <code>true</code> if this model learner requires a class column
-     */
-    @SuppressWarnings("unchecked")
-    protected SparkModelLearnerNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes,
-        final String modelName, final String jobId, final boolean requireClassCol) {
-        this(inPortTypes, outPortTypes, modelName, jobId, (S)new MLlibNodeSettings(requireClassCol));
+            new PortType[]{SparkModelPortObject.TYPE}, modelName, jobId, settings);
     }
 
     /**

@@ -49,7 +49,7 @@ public class MLlibNaiveBayesNodeModel extends SparkModelLearnerNodeModel<NaiveBa
      * Constructor.
      */
     MLlibNaiveBayesNodeModel() {
-        super(MODEL_NAME, JOB_ID, true);
+        super(MODEL_NAME, JOB_ID, new MLlibNodeSettings(true));
     }
 
     /**

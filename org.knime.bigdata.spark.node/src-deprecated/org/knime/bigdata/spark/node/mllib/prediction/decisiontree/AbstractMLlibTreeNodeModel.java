@@ -54,27 +54,6 @@ public abstract class AbstractMLlibTreeNodeModel<I extends DecisionTreeJobInput,
     /**
      * @param modelName
      * @param jobId
-     * @param requireClassCol
-     */
-    public AbstractMLlibTreeNodeModel(final String modelName, final String jobId, final boolean requireClassCol) {
-        super(modelName, jobId, requireClassCol);
-    }
-
-    /**
-     * @param inPortTypes
-     * @param outPortTypes
-     * @param modelName
-     * @param jobId
-     * @param requireClassCol
-     */
-    public AbstractMLlibTreeNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, final String modelName, final String jobId,
-        final boolean requireClassCol) {
-        super(inPortTypes, outPortTypes, modelName, jobId, requireClassCol);
-    }
-
-    /**
-     * @param modelName
-     * @param jobId
      * @param settings
      */
     public AbstractMLlibTreeNodeModel(final String modelName, final String jobId,

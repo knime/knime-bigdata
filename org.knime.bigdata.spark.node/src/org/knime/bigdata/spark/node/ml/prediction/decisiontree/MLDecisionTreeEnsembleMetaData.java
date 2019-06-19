@@ -21,7 +21,6 @@
 package org.knime.bigdata.spark.node.ml.prediction.decisiontree;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
 
 /**
  * Class to hold metadata about a decision tree ensemble.
@@ -29,15 +28,13 @@ import org.knime.bigdata.spark.core.port.model.ml.MLMetaData;
  * @author Bjoern Lohrmann, KNIME GmbH
  */
 @SparkClass
-public class MLDecisionTreeEnsembleMetaData extends MLMetaData {
+public class MLDecisionTreeEnsembleMetaData extends GenericMLDecisionTreeMetaData {
 
     private static final String KEY_NUM_TREES = "numTrees";
 
     private static final String KEY_TOTAL_NUM_NODES = "totalNumNodes";
 
     private static final String KEY_TREE_WEIGHTS = "treeWeights";
-
-    private static final String KEY_FEATURE_IMPORTANCES = "featureImportances";
 
     /**
      * Constructor for (de)serialization.
@@ -54,11 +51,11 @@ public class MLDecisionTreeEnsembleMetaData extends MLMetaData {
      */
     public MLDecisionTreeEnsembleMetaData(final int numTrees, final int totalNumNodes, final double[] treeWeights,
         final double[] featureImportances) {
+        super(featureImportances);
 
         setInteger(KEY_NUM_TREES, numTrees);
         setInteger(KEY_TOTAL_NUM_NODES, totalNumNodes);
         setDoubleArray(KEY_TREE_WEIGHTS, treeWeights);
-        setDoubleArray(KEY_FEATURE_IMPORTANCES, featureImportances);
     }
 
     /**
@@ -83,15 +80,5 @@ public class MLDecisionTreeEnsembleMetaData extends MLMetaData {
      */
     public double[] getTreeWeights() {
         return getDoubleArray(KEY_TREE_WEIGHTS);
-    }
-
-    /**
-     * Each feature's importance is the average of its importance across all trees in the ensemble The feature
-     * importances are normalized to sum to 1.
-     *
-     * @return an estimate of the importance of each feature.
-     */
-    public double[] getFeatureImportances() {
-        return get(KEY_FEATURE_IMPORTANCES);
     }
 }
