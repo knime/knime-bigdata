@@ -18,7 +18,7 @@
  * History
  *   Created on May 25, 2016 by oole
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.view;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -49,20 +49,24 @@ import org.knime.core.node.NodeLogger;
 
 
 /**
- * Creates the panel for the {@link MLlibDecisionTreeGraphView}
+ * Creates the panel for the {@link DecisionTreeGraphView}
  *
  * @author Ole Ostergaard
  */
-public class MLlibDecisionTreeGraphPanel extends JSplitPane {
+public class DecisionTreeGraphPanel extends JSplitPane {
+
     private static final long serialVersionUID = 4229032429584451491L;
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(MLlibDecisionTreeGraphPanel.class);
-    private MLlibDecisionTreeGraphView m_graph;
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(DecisionTreeGraphPanel.class);
+
+    private DecisionTreeGraphView m_graph;
+
     private JPopupMenu m_popup;
 
     /**
      * @param graph the graph to be displayed
      */
-    public MLlibDecisionTreeGraphPanel(final MLlibDecisionTreeGraphView graph) {
+    public DecisionTreeGraphPanel(final DecisionTreeGraphView graph) {
         m_graph = graph;
         JPanel p = new JPanel(new GridLayout());
         p.setBackground(ColorAttr.BACKGROUND);

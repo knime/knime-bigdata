@@ -45,7 +45,7 @@
  * History
  *   26.11.2010 (hofer): created
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.view;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
@@ -60,27 +60,31 @@ import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
  *
  * @author Ole Ostergaard
  */
-public class MLlibDecisionTreeGraphView extends HierarchicalGraphView<TreeNode> {
-    private MLlibDecisionTreeNodeWidgetFactory m_factory;
+public class DecisionTreeGraphView extends HierarchicalGraphView<TreeNode> {
+
+    private DecisionTreeNodeWidgetFactory m_factory;
+
     private Map<Integer, String> m_featureMap;
+
     private ColumnBasedValueMapping m_metaData;
 
     /**
      * @param topNode the top/root node of the tree
      * @param features the map, mapping column numbers to feature names
-     * @param metaData  the map, mapping the feature value ids to the feature value names
+     * @param metaData the map, mapping the feature value ids to the feature value names
      */
-    public MLlibDecisionTreeGraphView(final TreeNode topNode, final Map<Integer, String> features, final ColumnBasedValueMapping metaData) {
+    @SuppressWarnings("unlikely-arg-type")
+    public DecisionTreeGraphView(final TreeNode topNode, final Map<Integer, String> features,
+        final ColumnBasedValueMapping metaData) {
         super(topNode);
         m_featureMap = features;
         m_metaData = metaData;
 
-
         // fix to recreate nodewidgets including feature map
         getWidgets().clear();
         if (null != topNode) {
-            MLlibDecisionTreeNodeWidget w = (MLlibDecisionTreeNodeWidget)getNodeWidgetFactoryWithFeatures(features, m_metaData).
-            createGraphNode(topNode);
+            DecisionTreeNodeWidget w =
+                (DecisionTreeNodeWidget)getNodeWidgetFactoryWithFeatures(features, m_metaData).createGraphNode(topNode);
             setNodeWidth((int)w.getPreferredSize().getWidth() + 20);
             layoutGraph();
             // With this call parent components get informed about the
@@ -100,8 +104,7 @@ public class MLlibDecisionTreeGraphView extends HierarchicalGraphView<TreeNode> 
     @Override
     public void setRootNode(final TreeNode root) {
         if (null != root) {
-            MLlibDecisionTreeNodeWidget w = (MLlibDecisionTreeNodeWidget)getNodeWidgetFactory().
-                                    createGraphNode(root);
+            DecisionTreeNodeWidget w = (DecisionTreeNodeWidget)getNodeWidgetFactory().createGraphNode(root);
             setNodeWidth((int)w.getPreferredSize().getWidth() + 20);
         } else {
             setNodeWidth(100);
@@ -115,7 +118,7 @@ public class MLlibDecisionTreeGraphView extends HierarchicalGraphView<TreeNode> 
     @Override
     public NodeWidgetFactory<TreeNode> getNodeWidgetFactory() {
         if (m_factory == null) {
-            m_factory = new MLlibDecisionTreeNodeWidgetFactory(this);
+            m_factory = new DecisionTreeNodeWidgetFactory(this);
         }
         return m_factory;
     }
@@ -125,12 +128,13 @@ public class MLlibDecisionTreeGraphView extends HierarchicalGraphView<TreeNode> 
      * @param metaData
      * @return nodeWidgetFactory
      */
-    public NodeWidgetFactory<TreeNode> getNodeWidgetFactoryWithFeatures(final Map<Integer, String> features, final ColumnBasedValueMapping metaData) {
+    public NodeWidgetFactory<TreeNode> getNodeWidgetFactoryWithFeatures(final Map<Integer, String> features,
+        final ColumnBasedValueMapping metaData) {
         m_featureMap = features;
         m_metaData = metaData;
 
         if (m_factory == null) {
-            m_factory = new MLlibDecisionTreeNodeWidgetFactory(this);
+            m_factory = new DecisionTreeNodeWidgetFactory(this);
         }
         return m_factory;
 
@@ -143,14 +147,10 @@ public class MLlibDecisionTreeGraphView extends HierarchicalGraphView<TreeNode> 
     @Override
     public void mousePressed(final MouseEvent e) {
         TreeNode nodePressed = nodeAtPoint(e.getPoint());
-        Dimension preferredSize = null != nodePressed
-                ? getWidgets().get(nodePressed).getPreferredSize()
-                : null;
+        Dimension preferredSize = null != nodePressed ? getWidgets().get(nodePressed).getPreferredSize() : null;
         super.mousePressed(e);
         // relayout when preferred size of the clicked node has changed
-        Dimension preferredSizeAfter = null != nodePressed
-            ? getWidgets().get(nodePressed).getPreferredSize()
-            : null;
+        Dimension preferredSizeAfter = null != nodePressed ? getWidgets().get(nodePressed).getPreferredSize() : null;
         if (null != nodePressed && !preferredSize.equals(preferredSizeAfter)) {
             layoutGraph();
             getView().revalidate();

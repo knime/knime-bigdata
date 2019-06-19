@@ -40,9 +40,9 @@ import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
 import org.knime.bigdata.spark.core.port.model.ml.MLMetaDataUtils;
 import org.knime.bigdata.spark.core.port.model.ml.MLModel;
 import org.knime.bigdata.spark.core.port.model.ml.MLModelType;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphPanel;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.MLlibDecisionTreeGraphView;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.DecisionTreeGraphPanel;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.DecisionTreeGraphView;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.TreeNode;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeView;
 
@@ -188,8 +188,8 @@ public class MLDecisionTreeInterpreter implements ModelInterpreter<MLModel> {
 
         final ColumnBasedValueMapping legacyMapping = MLMetaDataUtils.toLegacyColumnBasedValueMapping(mlModel);
 
-        final MLlibDecisionTreeGraphView graph = new MLlibDecisionTreeGraphView(rootNode, features, legacyMapping);
-        final JComponent view = new MLlibDecisionTreeGraphPanel(graph);
+        final DecisionTreeGraphView graph = new DecisionTreeGraphView(rootNode, features, legacyMapping);
+        final JComponent view = new DecisionTreeGraphPanel(graph);
         view.setName("Decision Tree View");
         return view;
     }

@@ -21,7 +21,7 @@
 package org.knime.bigdata.spark1_2.jobs.mllib.prediction.ensemble.gradientboostedtrees;
 
 import org.apache.spark.mllib.tree.model.Node;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.TreeNode;
 import org.knime.bigdata.spark1_2.jobs.mllib.prediction.decisiontree.TreeNode1_2;
 
 /**

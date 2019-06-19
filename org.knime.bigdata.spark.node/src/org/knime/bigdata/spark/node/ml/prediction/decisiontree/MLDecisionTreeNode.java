@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.knime.bigdata.spark.core.job.SparkClass;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.TreeNode;
 
 /**
  * Tree node of a Spark ML Decision Tree.

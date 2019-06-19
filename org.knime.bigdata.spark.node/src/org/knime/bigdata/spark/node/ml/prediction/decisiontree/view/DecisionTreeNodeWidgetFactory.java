@@ -45,7 +45,7 @@
  * History
  *   22.07.2010 (hofer): created
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.view;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,20 +54,20 @@ import org.knime.base.node.mine.decisiontree2.view.graph.NodeWidget;
 import org.knime.base.node.mine.decisiontree2.view.graph.NodeWidgetFactory;
 
 /**
+ * Factory class for {@link DecisionTreeNodeWidget} instances.
  *
  * @author Ole Ostergaard
  */
-public final class MLlibDecisionTreeNodeWidgetFactory
-        implements NodeWidgetFactory<TreeNode> {
+public final class DecisionTreeNodeWidgetFactory implements NodeWidgetFactory<TreeNode> {
 
-    private MLlibDecisionTreeGraphView m_graph;
+    private DecisionTreeGraphView m_graph;
 
     /**
      * Creates a new instance.
      *
      * @param graph the graph
      */
-    public MLlibDecisionTreeNodeWidgetFactory(final MLlibDecisionTreeGraphView graph) {
+    public DecisionTreeNodeWidgetFactory(final DecisionTreeGraphView graph) {
         m_graph = graph;
     }
 
@@ -75,17 +75,12 @@ public final class MLlibDecisionTreeNodeWidgetFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeWidget<TreeNode> createGraphNode(
-            final TreeNode node) {
+    public NodeWidget<TreeNode> createGraphNode(final TreeNode node) {
         Integer parent = node.getParentId();
-        MLlibDecisionTreeNodeWidget widget =
-            (MLlibDecisionTreeNodeWidget)m_graph.getWidgets().get(parent);
-        boolean tableCollapsed = null != widget ? widget.getTableCollapsed()
-                : false;
-        boolean chartCollapsed = null != widget ? widget.getChartCollapsed()
-                : false;
-        return new MLlibDecisionTreeNodeWidget(m_graph, node,
-                tableCollapsed, chartCollapsed);
+        DecisionTreeNodeWidget widget = (DecisionTreeNodeWidget)m_graph.getWidgets().get(parent);
+        boolean tableCollapsed = null != widget ? widget.getTableCollapsed() : false;
+        boolean chartCollapsed = null != widget ? widget.getChartCollapsed() : false;
+        return new DecisionTreeNodeWidget(m_graph, node, tableCollapsed, chartCollapsed);
     }
 
     /**

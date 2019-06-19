@@ -41,7 +41,7 @@ import org.apache.spark.mllib.tree.model.TreeEnsembleModel;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.bigdata.spark.core.port.model.MLlibModel;
 import org.knime.bigdata.spark.core.port.model.ModelInterpreter;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.TreeNode;
 import org.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.DecisionTreeInterpreter;
 import org.knime.bigdata.spark1_5.jobs.mllib.prediction.decisiontree.TreeNode1_5;
 import org.knime.core.node.NodeLogger;

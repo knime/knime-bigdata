@@ -45,7 +45,7 @@
  * History
  *   22.07.2010 (hofer): created
  */
-package org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view;
+package org.knime.bigdata.spark.node.ml.prediction.decisiontree.view;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -71,21 +71,26 @@ import org.knime.base.node.mine.decisiontree2.view.graph.ComponentNodeWidget;
 import org.knime.bigdata.spark.core.job.util.ColumnBasedValueMapping;
 import org.knime.core.data.property.ColorAttr;
 
-
 /**
  * A view for a {@link TreeNode}.
  *
  * @author Ole Ostergaard
  */
-public final class MLlibDecisionTreeNodeWidget
-            extends ComponentNodeWidget<TreeNode> {
+public final class DecisionTreeNodeWidget extends ComponentNodeWidget<TreeNode> {
     private boolean m_displayTable;
+
     private boolean m_tableCollapsed;
+
     private boolean m_chartCollapsed;
+
     private CollapsiblePanel m_table;
+
     private CollapsiblePanel m_chart;
+
     private Map<Integer, String> m_featureMap;
+
     private ColumnBasedValueMapping m_metaData;
+
     private TreeNode m_rootNode;
 
     /**
@@ -94,10 +99,8 @@ public final class MLlibDecisionTreeNodeWidget
      * @param tableCollapsed true when table should be collapsed initially
      * @param chartCollapsed true when chart should be collapsed initially
      */
-    public MLlibDecisionTreeNodeWidget(
-            final MLlibDecisionTreeGraphView graph,
-            final TreeNode decNode, final boolean tableCollapsed,
-            final boolean chartCollapsed) {
+    public DecisionTreeNodeWidget(final DecisionTreeGraphView graph, final TreeNode decNode,
+        final boolean tableCollapsed, final boolean chartCollapsed) {
         super(graph, decNode);
         m_tableCollapsed = tableCollapsed;
         m_chartCollapsed = chartCollapsed;
@@ -115,11 +118,9 @@ public final class MLlibDecisionTreeNodeWidget
      * @param displayTable true when the table should be displayed
      * @param displayChart true when the chart should be displayed
      */
-    public MLlibDecisionTreeNodeWidget(
-            final MLlibDecisionTreeGraphView graph,
-            final TreeNode decNode,final boolean tableCollapsed,
-            final boolean chartCollapsed, final boolean displayTable,
-            final boolean displayChart) {
+    public DecisionTreeNodeWidget(final DecisionTreeGraphView graph, final TreeNode decNode,
+        final boolean tableCollapsed, final boolean chartCollapsed, final boolean displayTable,
+        final boolean displayChart) {
         super(graph, decNode);
         m_tableCollapsed = tableCollapsed;
         m_chartCollapsed = chartCollapsed;
@@ -127,7 +128,7 @@ public final class MLlibDecisionTreeNodeWidget
         m_featureMap = graph.getFeatureMap();
         m_metaData = graph.getMetaData();
         m_rootNode = graph.getRootNode();
-        }
+    }
 
     /**
      * {@inheritDoc}
@@ -168,8 +169,7 @@ public final class MLlibDecisionTreeNodeWidget
      * @return the tableCollapsed
      */
     boolean getTableCollapsed() {
-        return null != m_table ? m_table.isCollapsed()
-                : m_tableCollapsed;
+        return null != m_table ? m_table.isCollapsed() : m_tableCollapsed;
     }
 
     /**
@@ -186,8 +186,7 @@ public final class MLlibDecisionTreeNodeWidget
      * @return the chartCollapsed
      */
     boolean getChartCollapsed() {
-        return null != m_chart ? m_chart.isCollapsed()
-                : m_chartCollapsed;
+        return null != m_chart ? m_chart.isCollapsed() : m_chartCollapsed;
     }
 
     /**
@@ -216,9 +215,12 @@ public final class MLlibDecisionTreeNodeWidget
         super.setScaleFactor(scale);
     }
 
-    /** The panel at the top displaying the node label.
+    /**
+     * The panel at the top displaying the node label.
+     *
      * @param scale
-     * @return A label, e.g. "Iris-versicolor (45/46)" */
+     * @return A label, e.g. "Iris-versicolor (45/46)"
+     */
     private JPanel createNodeLabelPanel(final float scale) {
         int gap = Math.round(5 * scale);
         JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, gap, gap));
@@ -228,8 +230,8 @@ public final class MLlibDecisionTreeNodeWidget
         if (m_metaData != null) {
             double pred = node.getPrediction();
             // if we find a mapped value we append it, else we just append the prediction
-            if (m_metaData.map(m_featureMap.size() -1, node.getPrediction()) != null) {
-                label.append((String)m_metaData.map(m_featureMap.size() -1, node.getPrediction()));
+            if (m_metaData.map(m_featureMap.size() - 1, node.getPrediction()) != null) {
+                label.append((String)m_metaData.map(m_featureMap.size() - 1, node.getPrediction()));
             } else {
                 label.append(convertCount(pred));
             }
@@ -277,7 +279,7 @@ public final class MLlibDecisionTreeNodeWidget
         TreeNode node = getUserObject();
         if (node.hasStats()) {
             c.gridy++;
-            c.gridx= 0;
+            c.gridx = 0;
             JLabel gainLabel = scaledLabel("Gain", scale);
             p.add(gainLabel, c);
             c.gridx++;
@@ -292,7 +294,7 @@ public final class MLlibDecisionTreeNodeWidget
         JLabel impurityValue = scaledLabel(convertCount(node.getImpurity()), scale);
         p.add(impurityValue, c);
         c.gridy++;
-        c.gridx=0;
+        c.gridx = 0;
         if (node.hasStats()) {
             JLabel leftImpLabel = scaledLabel("LeftImpurity", scale);
             p.add(leftImpLabel, c);
@@ -300,14 +302,14 @@ public final class MLlibDecisionTreeNodeWidget
             JLabel leftImpValue = scaledLabel(convertCount(node.getLeftImpurity()), scale);
             p.add(leftImpValue, c);
             c.gridy++;
-            c.gridx=0;
+            c.gridx = 0;
             JLabel rightImpLabel = scaledLabel("RightImpurity", scale);
             p.add(rightImpLabel, c);
             c.gridx++;
             JLabel rightImpValue = scaledLabel(convertCount(node.getRightImpurity()), scale);
             p.add(rightImpValue, c);
             c.gridy++;
-            c.gridx=0;
+            c.gridx = 0;
         }
         JLabel descendantsLabel = scaledLabel("Descendants", scale);
         p.add(descendantsLabel, c);
@@ -321,22 +323,22 @@ public final class MLlibDecisionTreeNodeWidget
         return p;
     }
 
-    private JLabel scaledLabel(final String label, final float scale) {
+    private static JLabel scaledLabel(final String label, final float scale) {
         JLabel l = new JLabel(label);
         l.setFont(l.getFont().deriveFont(l.getFont().getSize() * scale));
         return l;
     }
 
-    private JLabel scaledLabel(final String label, final float scale,
-            final int horizontalAlignment) {
+    private static JLabel scaledLabel(final String label, final float scale, final int horizontalAlignment) {
         JLabel l = new JLabel(label, horizontalAlignment);
         l.setFont(l.getFont().deriveFont(l.getFont().getSize() * scale));
         return l;
     }
 
-
     private static final DecimalFormat DECIMAL_FORMAT_ONE = initFormat("0.000");
+
     private static final DecimalFormat DECIMAL_FORMAT = initFormat("0");
+
     private static DecimalFormat initFormat(final String pattern) {
         DecimalFormat df = new DecimalFormat(pattern);
         df.setGroupingUsed(true);
@@ -358,7 +360,7 @@ public final class MLlibDecisionTreeNodeWidget
     @Override
     public String getConnectorLabelAbove() {
         TreeNode node = getUserObject();
-        if (!node.equals(m_rootNode) ) {
+        if (!node.equals(m_rootNode)) {
             if (node.isCategorical()) {
                 return getCategoricalSplitLabel(node);
             } else {
@@ -396,11 +398,7 @@ public final class MLlibDecisionTreeNodeWidget
         }
     }
 
-    /**
-     * @param node
-     * @return
-     */
-    private String getContinuousSplitLabel(final TreeNode node) {
+    private static String getContinuousSplitLabel(final TreeNode node) {
         final String continuous = convertCount(node.getThreshold());
         if (node.isLeftChild()) {
             return "\u2264 " + continuous;

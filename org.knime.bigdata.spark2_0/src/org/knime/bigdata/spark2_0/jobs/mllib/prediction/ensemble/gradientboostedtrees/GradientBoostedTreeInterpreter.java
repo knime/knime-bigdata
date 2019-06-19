@@ -22,7 +22,7 @@ package org.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.gradientbooste
 
 import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel;
-import org.knime.bigdata.spark.node.mllib.prediction.decisiontree.view.TreeNode;
+import org.knime.bigdata.spark.node.ml.prediction.decisiontree.view.TreeNode;
 import org.knime.bigdata.spark.node.mllib.prediction.ensemble.gradientboostedtrees.MLlibGradientBoostedTreeNodeModel;
 import org.knime.bigdata.spark2_0.jobs.mllib.prediction.ensemble.MLlibTreeEnsembleModelInterpreter;
 
