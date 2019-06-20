@@ -66,6 +66,11 @@
             factory="org.knime.bigdata.database.hive.HiveAgentFactory"
             interface="org.knime.database.agent.loader.DBLoader">
         </Agent>
+        <Agent
+            dbTypes="impala"
+            factory="org.knime.bigdata.database.impala.ImpalaAgentFactory"
+            interface="org.knime.database.agent.loader.DBLoader">
+        </Agent>
    </extension>
    <!-- ********************************** DB Aggregation Functions ********************************** -->
    
@@ -183,7 +188,9 @@
    
    
      <!-- Loader node implementation -->
-   <extension point="org.knime.database.nodes.LoaderNode">
-   	<LoaderNode dbTypes="hive" class="org.knime.bigdata.database.hive.node.loader.HiveLoaderNode"/>
+    <extension point="org.knime.database.nodes.LoaderNode">
+   		<LoaderNode dbTypes="hive" class="org.knime.bigdata.database.hive.node.loader.HiveLoaderNode"/>
+   		<LoaderNode dbTypes="impala" class="org.knime.bigdata.database.impala.node.loader.ImpalaLoaderNode"/>
    	</extension>
+   	
 </plugin>

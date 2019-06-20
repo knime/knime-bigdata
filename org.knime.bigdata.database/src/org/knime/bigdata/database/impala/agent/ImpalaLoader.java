@@ -44,67 +44,35 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   20.05.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   17.06.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive.node.loader;
+package org.knime.bigdata.database.impala.agent;
 
-import java.util.List;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import org.knime.base.filehandling.remote.files.RemoteFile;
-import org.knime.database.dialect.DBColumn;
+import org.knime.bigdata.database.loader.BigDataLoader;
+import org.knime.database.session.DBSessionReference;
 
 /**
+ * LoaderNode implementation for Impala Loader
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveLoaderParameters {
-
-    private final RemoteFile<?> m_remoteFile;
-    private final List<DBColumn> m_normalColums;
-    private final List<DBColumn> m_partitionColums;
-    private final DBColumn[] m_inputColumns;
+public class ImpalaLoader extends BigDataLoader {
 
     /**
-     * @param normalColums
-     * @param partitionColums
-     * @param inputColumns
-     * @param remoteFile
+     * Creates a Impala Loader
+     *
+     * @param sessionReference the {@link DBSessionReference} object
      */
-    public HiveLoaderParameters(final List<DBColumn> normalColums, final List<DBColumn> partitionColums,
-        final DBColumn[] inputColumns, final RemoteFile<?> remoteFile) {
-        m_remoteFile = remoteFile;
-        m_normalColums = normalColums;
-        m_partitionColums = partitionColums;
-        m_inputColumns = inputColumns;
-
+    public ImpalaLoader(final DBSessionReference sessionReference) {
+        super(sessionReference, "STORED AS PARQUET");
     }
 
-    /**
-     * @return the remoteFile
-     */
-    public RemoteFile<?> getRemoteFile() {
-        return m_remoteFile;
-    }
-
-    /**
-     * @return the normalColums
-     */
-    public List<DBColumn> getNormalColums() {
-        return m_normalColums;
-    }
-
-    /**
-     * @return the partitionColums
-     */
-    public List<DBColumn> getPartitionColums() {
-        return m_partitionColums;
-    }
-
-    /**
-     * @return the inputColumns
-     */
-    public DBColumn[] getInputColumns() {
-        return m_inputColumns;
+    @Override
+    protected void setPartitioningSettings(final Statement statement) throws SQLException {
+        //Nothing to do
     }
 
 }

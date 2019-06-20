@@ -44,22 +44,25 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   07.05.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
+ *   17.06.2019 (Mareike Hoeger, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.bigdata.database.hive.node.loader;
+package org.knime.bigdata.database.impala.node.loader;
+
+import static org.knime.core.util.FileUtil.createTempFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.orc.TypeDescription;
 import org.knime.base.filehandling.remote.files.Connection;
 import org.knime.base.filehandling.remote.files.RemoteFile;
 import org.knime.bigdata.database.loader.BigDataLoaderNode;
 import org.knime.bigdata.fileformats.node.writer.AbstractFileFormatWriter;
-import org.knime.bigdata.fileformats.orc.datatype.mapping.ORCTypeMappingService;
-import org.knime.bigdata.fileformats.orc.writer.OrcKNIMEWriter;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetType;
+import org.knime.bigdata.fileformats.parquet.datatype.mapping.ParquetTypeMappingService;
+import org.knime.bigdata.fileformats.parquet.writer.ParquetKNIMEWriter;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -69,48 +72,61 @@ import org.knime.datatype.mapping.DataTypeMappingConfiguration;
 import org.knime.datatype.mapping.DataTypeMappingDirection;
 
 /**
- * Implementation of the loader node for the Hive database.
+ *
  *
  * @author Mareike Hoeger, KNIME GmbH, Konstanz, Germany
  */
-public class HiveLoaderNode extends BigDataLoaderNode {
+public class ImpalaLoaderNode extends BigDataLoaderNode {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected AbstractFileFormatWriter createWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final DBColumn[] inputColumns) throws IOException {
-        return new OrcKNIMEWriter(file, spec, -1, "NONE", getORCTypesMapping(spec, inputColumns));
+    protected Path getTempFilePath() throws IOException {
+        // Create and write to the temporary file
+        return createTempFile("knime2db", ".parquet").toPath();
     }
 
-    private static DataTypeMappingConfiguration<TypeDescription> getORCTypesMapping(final DataTableSpec spec,
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected AbstractFileFormatWriter createWriter(final RemoteFile<Connection> file, final DataTableSpec spec,
+        final DBColumn[] inputColumns) throws IOException {
+        return new ParquetKNIMEWriter(file, spec, "UNCOMPRESSED", -1, getParquetTypesMapping(spec, inputColumns));
+    }
+
+    private static DataTypeMappingConfiguration<ParquetType> getParquetTypesMapping(final DataTableSpec spec,
         final DBColumn[] inputColumns) {
 
-        List<TypeDescription> orcTypes = new ArrayList<>();
+        List<ParquetType> parquetTypes = new ArrayList<>();
         for (DBColumn dbCol : inputColumns) {
             String type = dbCol.getType();
-            orcTypes.add(HiveTypeUtil.hivetoOrcType(type));
+            parquetTypes.add(ImpalaTypeUtil.impalatoParquetType(type));
         }
 
-        final DataTypeMappingConfiguration<TypeDescription> configuration =
-            ORCTypeMappingService.getInstance().createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+        final DataTypeMappingConfiguration<ParquetType> configuration =
+            ParquetTypeMappingService.getInstance().createMappingConfiguration(DataTypeMappingDirection.KNIME_TO_EXTERNAL);
+
 
         for (int i = 0; i < spec.getNumColumns(); i++) {
             DataColumnSpec knimeCol = spec.getColumnSpec(i);
             DataType dataType = knimeCol.getType();
-            TypeDescription orcType = orcTypes.get(i);
+            ParquetType parquetType = parquetTypes.get(i);
             Collection<ConsumptionPath> consumPaths =
-                ORCTypeMappingService.getInstance().getConsumptionPathsFor(dataType);
+                    ParquetTypeMappingService.getInstance().getConsumptionPathsFor(dataType);
             boolean found = false;
             for (ConsumptionPath path : consumPaths) {
 
-                if (path.getConsumerFactory().getDestinationType().equals(orcType)) {
+                if (path.getConsumerFactory().getDestinationType().equals(parquetType)) {
                     found = true;
-
                     configuration.addRule(dataType, path);
                     break;
                 }
             }
             if (!found) {
-                String error = String.format("Could not find ConsumptionPath for %s to JDBC Type %s via ORC Type %s",
-                    dataType, inputColumns[i].getType(), orcType);
+                String error = String.format("Could not find ConsumptionPath for %s to JDBC Type %s via Parquet Type %s",
+                    dataType, inputColumns[i].getType(), parquetType);
                 LOGGER.error(error);
                 throw new RuntimeException(error);
             }
@@ -119,4 +135,5 @@ public class HiveLoaderNode extends BigDataLoaderNode {
         return configuration;
 
     }
+
 }
