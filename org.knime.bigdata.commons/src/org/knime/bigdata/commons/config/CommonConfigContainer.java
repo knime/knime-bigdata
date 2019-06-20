@@ -33,7 +33,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.eclipse.CommonPreferenceInitializer;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.core.node.workflow.NodeContext;
 import org.knime.core.util.KNIMERuntimeContext;
 
@@ -157,21 +156,6 @@ public class CommonConfigContainer {
     }
 
     /**
-     * @return custom kerberos user as String or <code>null</code> if the default should be used
-     */
-    public String getKerberosUserConfig() {
-        return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER);
-    }
-
-    /**
-     * @return <code>true</code> if a kerberos keytab file is available
-     */
-    public boolean hasKerberosUserConfig() {
-        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER) == null
-            || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_USER).isEmpty());
-    }
-
-    /**
      * @return <code>true</code> if Kerberos impersonation should be enabled
      */
     public boolean enableKerberosImpersonation() {
@@ -227,21 +211,6 @@ public class CommonConfigContainer {
     }
 
     /**
-     * @return the file path to the custom kerberos keytab or <code>null</code> if the default should be used
-     */
-    public String getKerberosKeytabConfig() {
-        return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE);
-    }
-
-    /**
-     * @return <code>true</code> if a kerberos keytab file is available
-     */
-    public boolean hasKerberosKeytabConfig() {
-        return !(PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE) == null
-            || PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_KEYTAB_FILE).isEmpty());
-    }
-
-    /**
      * @return <code>true</code> if JDBC parameter based user impersonation should be used
      */
     public boolean useJDBCImpersonationParameter() {
@@ -253,21 +222,6 @@ public class CommonConfigContainer {
      */
     public String getJDBCImpersonationParameter() {
         return PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_JDBC_IMPERSONATION_PARAM);
-    }
-
-    /**
-     * @return true if Kerberos logging is enabled.
-     */
-    public boolean isKerberosLoggingEnabled() {
-        return PREFERENCE_STORE.getBoolean(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_ENABLED);
-    }
-
-    /**
-     * @return the Kerberos logging {@link LEVEL}
-     */
-    public LEVEL getKerberosLoggingLevel() {
-        final String levelString = PREFERENCE_STORE.getString(CommonPreferenceInitializer.PREF_KERBEROS_LOGGING_LEVEL);
-        return LEVEL.valueOf(levelString);
     }
 
     /**

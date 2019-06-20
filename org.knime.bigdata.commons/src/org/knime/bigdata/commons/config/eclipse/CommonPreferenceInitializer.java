@@ -49,7 +49,6 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.knime.bigdata.commons.CommonsPlugin;
 import org.knime.bigdata.commons.config.CommonConfigContainer;
-import org.knime.core.node.NodeLogger.LEVEL;
 
 /**
  * @author Tobias Koetter, KNIME.com
@@ -84,18 +83,9 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
     public static final String PREF_KEYSTORE_KEYPASSWORD = "org.knime.bigdata.config.keystore.keypassword";
     /** Preference key for keystore type */
     public static final String PREF_KEYSTORE_TYPE = "org.knime.bigdata.config.keystore.type";
-    /** Preference key for custom kerberos user. */
-    public static final String PREF_KERBEROS_USER = "org.knime.bigdata.config.kerberos.user";
-    /** Preference key for custom kerberos keytab file. */
-    public static final String PREF_KERBEROS_KEYTAB_FILE = "org.knime.bigdata.config.kerberos.keytab.file";
     /** Preference key to enable/disable Kerberos impersonation on the server. */
     public static final String PREF_KERBEROS_IMPERSONATION_PARAM =
             "org.knime.bigdata.config.kerberos.impersonation.enabled";
-
-    /**Kerberos logging flag.*/
-    public static final String PREF_KERBEROS_LOGGING_ENABLED = "org.knime.bigdata.config.kerberos.logging.enabled";
-    /**Kerberos logging level.*/
-    public static final String PREF_KERBEROS_LOGGING_LEVEL = "org.knime.bigdata.config.kerberos.logging.level";
 
     /** Preference key for JDBC impersonation parameter flag. */
     public static final String PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG =
@@ -117,7 +107,7 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         loadDefaultValues(store);
     }
 
-    private void loadDefaultValues(final IPreferenceStore store) {
+    private static void loadDefaultValues(final IPreferenceStore store) {
         store.setDefault(PREF_CORE_SITE_FILE, "");
         store.setDefault(PREF_HDFS_SITE_FILE, "");
 
@@ -134,11 +124,6 @@ public class CommonPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PREF_KEYSTORE_KEYPASSWORD, "");
         store.setDefault(PREF_KEYSTORE_TYPE, FileBasedKeyStoresFactory.DEFAULT_KEYSTORE_TYPE);
 
-        store.setDefault(PREF_KERBEROS_LOGGING_ENABLED, false);
-        store.setDefault(PREF_KERBEROS_LOGGING_LEVEL, LEVEL.INFO.name());
-
-        store.setDefault(PREF_KERBEROS_USER, "");
-        store.setDefault(PREF_KERBEROS_KEYTAB_FILE, "");
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM_FLAG, false);
         store.setDefault(PREF_KERBEROS_JDBC_IMPERSONATION_PARAM, "DelegationUID=" + CommonConfigContainer.JDBC_IMPERSONATION_PLACEHOLDER);
         store.setDefault(PREF_KERBEROS_IMPERSONATION_PARAM, true);

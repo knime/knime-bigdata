@@ -22,13 +22,6 @@
             id="org.knime.bigdata.commons.config.eclipse.HadoopPreferencePage"
             name="Hadoop">
       </page>
-
-      <page
-            category="org.knime.bigdata.commons.config.eclipse.CommonPreferencePage"
-            class="org.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
-            id="org.knime.bigdata.commons.config.eclipse.KerberosPreferencePage"
-            name="Kerberos">
-      </page>
    </extension>
    <extension
          point="org.knime.core.NodeFactoryClassMapper">

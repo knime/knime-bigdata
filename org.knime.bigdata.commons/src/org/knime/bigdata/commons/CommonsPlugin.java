@@ -26,10 +26,8 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.knime.bigdata.commons.config.CommonConfigContainer;
 import org.knime.bigdata.commons.config.EclipsePreferencesHelper;
 import org.knime.bigdata.commons.hadoop.HadoopInitializer;
-import org.knime.bigdata.commons.security.kerberos.logging.KerberosLogger;
 import org.osgi.framework.BundleContext;
 
 
@@ -63,16 +61,6 @@ public class CommonsPlugin extends AbstractUIPlugin {
         m_pluginRootPath = tmpFile.getAbsolutePath();
         EclipsePreferencesHelper.checkForLegacyPreferences(getBundle().getSymbolicName());
         HadoopInitializer.ensureInitialized();
-        checkConfiguration();
-    }
-
-    /**
-     * Looks at configuration parameter from the {@link CommonConfigContainer} that require attention on startup
-     * e.g. the Kerberos logging.
-     */
-    private void checkConfiguration() {
-        final CommonConfigContainer config = CommonConfigContainer.getInstance();
-        KerberosLogger.getInstance().setEnable(config.isKerberosLoggingEnabled(), config.getKerberosLoggingLevel());
     }
 
     /**
