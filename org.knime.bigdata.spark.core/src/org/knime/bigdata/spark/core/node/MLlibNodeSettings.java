@@ -127,7 +127,7 @@ public class MLlibNodeSettings {
     public void check(final DataTableSpec tableSpec) throws InvalidSettingsException {
         final String classColName = m_classColModel.getStringValue();
         if (m_requiresClassCol && classColName == null) {
-            throw new InvalidSettingsException("No class column selected");
+            throw new InvalidSettingsException("No target column selected");
         }
         final int classColIdx = tableSpec.findColumnIndex(classColName);
         if (m_requiresClassCol && classColIdx < 0) {

@@ -21,6 +21,7 @@
 package org.knime.bigdata.spark.node.ml.prediction.predictor.classification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.knime.bigdata.spark.core.context.SparkContextUtil;
@@ -132,6 +133,7 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
             new MLPredictorClassificationJobInput(data.getID(),
                 mlModel.getNamedModelId(),
                 newNamedObject,
+                mlModel.getTargetColumnName().get(),
                 determinePredictionColumnName(data.getTableSpec(), mlModel.getTargetColumnName().get()),
                 m_settings.getAppendClassProbabilityColumnsModel().getBooleanValue(),
                 determineProbabilityColumnSuffix());
@@ -154,20 +156,25 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
 
     private DataTableSpec createSpecWithProbabilityColumns(final DataTableSpec tableSpec, final MLModel mlModel) {
 
-        final DataTableSpec withPredictionCol =
-            createSpecWithPredictionCol(tableSpec, mlModel.getTargetColumnSpec().get());
-
         final List<DataColumnSpec> columnsToAppend = new ArrayList<>();
         final String suffix = determineProbabilityColumnSuffix();
 
-        final List<String> nominalValuesOfTargetCol =
-            mlModel.getModelMetaData(MLMetaData.class).get().getNominalTargetValueMappings();
+        final String[] nominalValuesOfTargetCol =
+            mlModel.getModelMetaData(MLMetaData.class).get().getNominalTargetValueMappings().toArray(new String[0]);
+        Arrays.sort(nominalValuesOfTargetCol);
+
         for (String nominalValue : nominalValuesOfTargetCol) {
             final String probabilityColName =
-                String.format("P (%s=%s)%s", mlModel.getTargetColumnName().get(), nominalValue, suffix);
+                String.format("P (%s=%s)%s",
+                    mlModel.getTargetColumnName().get(),
+                    nominalValue,
+                    suffix);
             columnsToAppend.add(new DataColumnSpecCreator(probabilityColName, DoubleCell.TYPE).createSpec());
         }
-        return new DataTableSpec(withPredictionCol, new DataTableSpec(columnsToAppend.toArray(new DataColumnSpec[0])));
+
+        columnsToAppend.add(createPredictionColSpec(tableSpec, mlModel.getTargetColumnSpec().get()));
+
+        return new DataTableSpec(tableSpec, new DataTableSpec(columnsToAppend.toArray(new DataColumnSpec[0])));
     }
 
     private String determineProbabilityColumnSuffix() {
@@ -191,10 +198,17 @@ public class MLPredictorClassificationNodeModel extends SparkNodeModel {
 
     private DataTableSpec createSpecWithPredictionCol(final DataTableSpec inputSpec,
         final DataColumnSpec targetColumnSpec) {
+
+        final DataColumnSpec predictionColSpec = createPredictionColSpec(inputSpec, targetColumnSpec);
+        return new DataTableSpec(inputSpec, new DataTableSpec(predictionColSpec));
+    }
+
+    private DataColumnSpec createPredictionColSpec(final DataTableSpec inputSpec,
+        final DataColumnSpec targetColumnSpec) {
         final String predictionColName = determinePredictionColumnName(inputSpec, targetColumnSpec.getName());
         final DataColumnSpec predictionColSpec =
             new DataColumnSpecCreator(predictionColName, targetColumnSpec.getType()).createSpec();
-        return new DataTableSpec(inputSpec, new DataTableSpec(predictionColSpec));
+        return predictionColSpec;
     }
 
     /**

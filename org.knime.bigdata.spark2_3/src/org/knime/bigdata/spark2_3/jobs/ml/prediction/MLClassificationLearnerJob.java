@@ -114,7 +114,8 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         final Classifier<?, ?, ?> classifier = createClassifier(input);
         classifier.setFeaturesCol(featureVectorColumn)
             .setLabelCol(indexedTargetColumn)
-            .setPredictionCol(predictionCol);
+            .setPredictionCol(predictionCol)
+            .setRawPredictionCol("rawprediction_" + UUID.randomUUID().toString());
 
         if (classifier instanceof ProbabilisticClassifier) {
             ((ProbabilisticClassifier<?, ?, ?>)classifier)

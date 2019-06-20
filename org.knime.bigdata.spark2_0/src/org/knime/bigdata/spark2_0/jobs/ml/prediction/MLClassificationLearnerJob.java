@@ -35,6 +35,7 @@ import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.param.shared.HasRawPredictionCol;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
@@ -115,6 +116,11 @@ public abstract class MLClassificationLearnerJob<I extends NamedModelLearnerJobI
         classifier.setFeaturesCol(featureVectorColumn)
             .setLabelCol(indexedTargetColumn)
             .setPredictionCol(predictionCol);
+
+        if (classifier instanceof HasRawPredictionCol) {
+            classifier.set(((HasRawPredictionCol)classifier).rawPredictionCol(),
+                "rawprediction_" + UUID.randomUUID().toString());
+        }
 
         if (classifier instanceof ProbabilisticClassifier) {
             ((ProbabilisticClassifier<?, ?, ?>)classifier)

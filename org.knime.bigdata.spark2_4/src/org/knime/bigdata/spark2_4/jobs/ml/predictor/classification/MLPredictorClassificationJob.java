@@ -20,12 +20,14 @@
  */
 package org.knime.bigdata.spark2_4.jobs.ml.predictor.classification;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.spark.SparkContext;
 import org.apache.spark.ml.PipelineModel;
-import org.apache.spark.ml.classification.ClassificationModel;
 import org.apache.spark.ml.classification.ProbabilisticClassificationModel;
 import org.apache.spark.ml.feature.IndexToString;
 import org.apache.spark.sql.Dataset;
@@ -53,26 +55,21 @@ public class MLPredictorClassificationJob implements SimpleSparkJob<MLPredictorC
         final Dataset<Row> inputDataset = namedObjects.getDataFrame(input.getFirstNamedInputObject());
         final PipelineModel model = namedObjects.get(input.getNamedModelId());
 
-        final IndexToString targetColumnStringifier =
-                MLUtils.findFirstStageOfType(model, IndexToString.class);
-        targetColumnStringifier.setOutputCol(input.getPredictionColumn());
-
         // apply pipeline model (classification)
         final Dataset<Row> predictedDataset = model.transform(inputDataset);
 
         // clean up columns and unpack conditional class probabilities if desired
-        final ClassificationModel<?, ?> classificationModel =
-            MLUtils.findFirstStageOfType(model, ClassificationModel.class);
-
         final Dataset<Row> cleanedDataset = predictedDataset.selectExpr(
-            determineOutputColumns(inputDataset, input, classificationModel, targetColumnStringifier.getLabels()));
+            determineOutputColumns(inputDataset, input, model));
 
         namedObjects.addDataFrame(input.getFirstNamedOutputObject(), cleanedDataset);
     }
 
     private static String[] determineOutputColumns(final Dataset<Row> inputDataset,
-        final MLPredictorClassificationJobInput input, final ClassificationModel<?, ?> classificationModel,
-        final String[] targetColumnLabels) {
+        final MLPredictorClassificationJobInput input, final PipelineModel model) {
+
+        final IndexToString predictionColumnStringifier =
+                MLUtils.findFirstStageOfType(model, IndexToString.class);
 
         final List<String> outputColumns = new LinkedList<>();
 
@@ -81,21 +78,59 @@ public class MLPredictorClassificationJob implements SimpleSparkJob<MLPredictorC
             outputColumns.add(String.format("`%s`", inputColumn));
         }
 
-        // then retain the desired prediction column
-        outputColumns.add(String.format("`%s`", input.getPredictionColumn()));
-
         // then add conditional class probabilities, if desired
         if (input.appendProbabilityColumns()) {
-            final ProbabilisticClassificationModel<?, ?> probClassificationModel =
-                (ProbabilisticClassificationModel<?, ?>)classificationModel;
+            final String[] targetColumnLabels = predictionColumnStringifier.getLabels();
 
-            for (int i = 0; i < targetColumnLabels.length; i++) {
-                outputColumns.add(String.format("vectorToArray(`%s`)[%d] as `P (%s=%s)%s`",
-                    probClassificationModel.getProbabilityCol(), i, input.getPredictionColumn(),
-                    targetColumnLabels[i], input.getProbabilityColumnSuffix()));
-            }
+            // the index of each label in the probability vector column
+            final Map<String, Integer> labelIndicesInVector = createLabelIndicesMap(targetColumnLabels);
 
+            // target column labels sorted in ascending order
+            final String[] sortedTargetColumnLabels = sortTargetColumnLabels(targetColumnLabels);
+
+            // the name of the probability vector column
+            final String probabilityColumn =
+                MLUtils.findFirstStageOfType(model, ProbabilisticClassificationModel.class).getProbabilityCol();
+
+            appendProbabilityColumns(input, labelIndicesInVector, sortedTargetColumnLabels, probabilityColumn,
+                outputColumns);
         }
+
+        // then retain the prediction column
+        outputColumns.add(String.format("`%s` as `%s`",
+            predictionColumnStringifier.getOutputCol(),
+            input.getPredictionColumn()));
+
         return outputColumns.toArray(new String[0]);
+    }
+
+    private static void appendProbabilityColumns(final MLPredictorClassificationJobInput input,
+        final Map<String, Integer> labelIndicesInVector, final String[] sortedTargetColumnLabels,
+        final String probabilityColumn, final List<String> outputColumns) {
+
+        for (int i = 0; i < sortedTargetColumnLabels.length; i++) {
+            final int labelIndexInVector = labelIndicesInVector.get(sortedTargetColumnLabels[i]);
+
+            outputColumns.add(String.format("vectorToArray(`%s`)[%d] as `P (%s=%s)%s`",
+                probabilityColumn, // the vector-typed probability column
+                labelIndexInVector, // the vector index for the current label
+                input.getOriginalTargetColumn(), // the name of the original target column during learning
+                sortedTargetColumnLabels[i], // the current label
+                input.getProbabilityColumnSuffix())); // the probability column suffix
+        }
+    }
+
+    private static String[] sortTargetColumnLabels(final String[] targetColumnLabels) {
+        final String[] toReturn = targetColumnLabels.clone();
+        Arrays.sort(toReturn);
+        return toReturn;
+    }
+
+    private static Map<String, Integer> createLabelIndicesMap(final String[] targetColumnLabels) {
+        final Map<String, Integer> toReturn = new HashMap<>();
+        for (int i = 0; i < targetColumnLabels.length; i++) {
+            toReturn.put(targetColumnLabels[i], i);
+        }
+        return toReturn;
     }
 }

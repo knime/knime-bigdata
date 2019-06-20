@@ -30,6 +30,8 @@ import org.knime.bigdata.spark.core.job.SparkClass;
 @SparkClass
 public class MLPredictorClassificationJobInput extends JobInput {
 
+    private static final String KEY_ORIGINAL_TARGET_COLUMN = "originalTargetColumn";
+
     private static final String KEY_PREDICTION_COLUMN = "predictionColumn";
 
     private static final String KEY_NAMED_MODEL_ID = "namedModelId";
@@ -50,14 +52,17 @@ public class MLPredictorClassificationJobInput extends JobInput {
      * @param namedInputObject Key/ID of the dataset to use for prediction.
      * @param namedModelId Key/ID of the named model to use for prediction.
      * @param namedOutputObject Key/ID of the dataset to create.
+     * @param originalTargetColumn The name of the original target column that the model was trained on.
      * @param predictionColumn Name of the prediction column to append.
+     * @param appendProbabilityColumns
      * @param probabilityColumnSuffix the desired suffix for the probability columns.
      */
     public MLPredictorClassificationJobInput(final String namedInputObject, final String namedModelId,
-        final String namedOutputObject, final String predictionColumn, final boolean appendProbabilityColumns,
+        final String namedOutputObject, final String originalTargetColumn, final String predictionColumn, final boolean appendProbabilityColumns,
         final String probabilityColumnSuffix) {
 
         addNamedInputObject(namedInputObject);
+        set(KEY_ORIGINAL_TARGET_COLUMN, originalTargetColumn);
         set(KEY_PREDICTION_COLUMN, predictionColumn);
         set(KEY_NAMED_MODEL_ID, namedModelId);
         set(KEY_APPEND_PROBABILITY_COLUMNS, appendProbabilityColumns);
@@ -84,6 +89,13 @@ public class MLPredictorClassificationJobInput extends JobInput {
      */
     public String getProbabilityColumnSuffix() {
         return get(KEY_PROBABILITY_COLUMN_SUFFIX);
+    }
+
+    /**
+     * @return the name of the original target column that the model was trained on.
+     */
+    public String getOriginalTargetColumn() {
+        return get(KEY_ORIGINAL_TARGET_COLUMN);
     }
 
     /**
