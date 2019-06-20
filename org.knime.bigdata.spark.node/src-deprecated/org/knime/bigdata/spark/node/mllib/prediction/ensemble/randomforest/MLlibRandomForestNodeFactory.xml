@@ -9,22 +9,22 @@
 			This node applies the Apache Spark 
 			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#random-forests">Random Forests</a> algorithm.
 			<p>
-            Please note that all data must be numeric, including the label column. 
-            Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
-            </p>
-            <p>
-            Use the Spark Predictor node to apply the learned model to unseen data.
-            </p>
+				Please note that all data must be numeric, including the label column. 
+				Use the Spark Category To Number nodes to convert nominal values to
+				numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
+			</p>
+			<p>
+				Use the Spark Predictor node to apply the learned model to unseen data.
+			</p>
 		</intro>
-    	<option name="Number of trees">Number of trees in the random forest.</option>
-		<option name="Max depth">
-			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes.
-		</option>
-    	<option name="Max number of bins">
-			Maximum number of bins used for splitting features.
-		</option>
-		<option name="Feature selection strategy">Number of features to consider for splits at each node. 
+		
+		<option name="Target column">The classification column. Must be numeric.</option>
+
+		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+
+    	<option name="Number of models">Number of trees in the random forest.</option>
+    	
+		<option name="Feature sampling">Number of features to consider for splits at each node. 
 		Supported: 
 		<ul>
 		  <li>auto</li>
@@ -36,20 +36,29 @@
 		If "auto" is set, this parameter is set based on numTrees: if numTrees == 1, set to "all"; 
 		if numTrees > 1 (forest) set to "sqrt".
 		</option>
-        <option name="Is classification">Select this option for binary or multiclass classification.</option>
-		<option name="Quality measure">
-			  Criterion used for information gain calculation. Available methods: 
-			  <ul>
-			     <li>gini (recommended)</li>
-                 <li>entropy</li>
-			  </ul>
-			  For more details on the available methods see the 
-			  <a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
-			  Only available for classifications.
+		
+		<option name="Seed">Random seed for bootstrapping and choosing feature subsets.</option>
+
+		<option name="Max number of bins">
+			Maximum number of bins used for splitting features.
 		</option>
-        <option name="Seed">Random seed for bootstrapping and choosing feature subsets.</option>        		
-		<option name="Class column">The classification column. Must be numeric.</option>
-		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+
+		<option name="Is classification">Select this option for binary or multiclass classification.</option>
+
+		<option name="Quality measure">
+			Criterion used for information gain calculation. Available methods: 
+			<ul>
+				<li>gini (recommended)</li>
+				<li>entropy</li>
+			</ul>
+			For more details on the available methods see the 
+			<a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
+			Only available for classifications.
+		</option>
+
+		<option name="Max tree depth">
+			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes.
+		</option>
 	</fullDescription>
 
     <ports>

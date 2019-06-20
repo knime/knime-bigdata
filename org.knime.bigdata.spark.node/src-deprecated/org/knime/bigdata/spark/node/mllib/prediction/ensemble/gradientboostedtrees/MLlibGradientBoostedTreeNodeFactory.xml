@@ -9,36 +9,53 @@
 			This node applies the Apache Spark 
 			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#gradient-boosted-trees-gbts">Gradient-Boosted Trees</a> (GBTs) algorithm.
 			<p>
-			<b>Note:</b> GBTs do not yet support multiclass classification. The class column needs to contain 0 and 1
-			as class labels. For multiclass problems, please use decision trees or Random Forests.
+				<b>Note:</b> GBTs do not yet support multiclass classification. The class column needs to contain 0 and 1
+				as class labels. For multiclass problems, please use decision trees or Random Forests.
 			</p>
 			<p>
-            Please note that all data must be numeric, including the label column which needs to contain 0 and 1. 
-            Use the Spark Category To Number nodes to convert nominal values to
-            numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
-            </p>
-            <p>
-            Use the Spark Predictor node to apply the learned model to unseen data.
-            </p>
+				Please note that all data must be numeric, including the label column which needs to contain 0 and 1. 
+				Use the Spark Category To Number nodes to convert nominal values to
+				numeric columns. The mapping dictionary of the converter node is the input of the second in port of this node.
+			</p>
+			<p>
+				Use the Spark Predictor node to apply the learned model to unseen data.
+			</p>
 		</intro>
-    	<option name="Number of iterations">Number of iterations of boosting. In other words, the number of weak 
-    	hypotheses used in the final model.</option>
-    	<option name="Max number of bins">
+		
+		<option name="Target column">The target column. Must be numeric.</option>
+		
+		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+		
+		<option name="Number of models">
+			Number of decision tree models to learn, also known as the number iterations to perform. In other words, the number of
+			weak hypotheses used in the final model.
+		</option>
+		
+		<option name="Loss function">Loss function used for minimization during gradient boosting. 
+			Available functions: Log Loss, Squared Error and Absolute Error.
+			For details about the loss functions see the 
+			<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#losses">Losses</a> documentation.
+		</option>
+		
+		<option name="Max number of bins">
 			Maximum number of bins used for splitting features (suggested value: 100).
 		</option>
-		<option name="Max depth">
+
+		<option name="Is classification">Select this option for binary classification.</option>
+		
+		<option name="Quality measure">
+			  Criterion used for information gain calculation. Available methods: "gini" (recommended) or "entropy".
+			  For more details on the available methods see the 
+			  <a href="http://spark.apache.org/docs/latest/mllib-decision-tree.html#node-impurity-and-information-gain">MLlib documentation</a>.
+		</option>
+
+		<option name="Max tree depth">
 			 Maximum depth of the tree. E.g., depth 0 means 1 leaf node; depth 1 means 1 internal node + 2 leaf nodes. (suggested value: 4)
 		</option>
-		<option name="Loss function">Loss function used for minimization during gradient boosting. 
-		Available functions: Log Loss, Squared Error and Absolute Error.
-		For details about the loss functions see the 
-		<a href="http://spark.apache.org/docs/latest/mllib-ensembles.html#losses">Losses</a> documentation.
-		</option>
-        <option name="Is classification">Select this option for binary classification.</option>
-        <option name="Learning rate">Learning rate for shrinking the contribution of each estimator. 
-        The learning rate should be between in the interval (0, 1]</option>        		
-		<option name="Class column">The classification column. Must be numeric.</option>
-		<option name="Feature Columns">The feature columns to learn the model from. Supports only numeric columns.</option>
+		
+		 <option name="Learning rate">Learning rate for shrinking the contribution of each estimator. 
+			 The learning rate should be between in the interval (0, 1].
+		 </option>
 	</fullDescription>
 
     <ports>

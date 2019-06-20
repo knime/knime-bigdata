@@ -248,7 +248,7 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
     protected void addColumnSelections(final JPanel panel, final GridBagConstraints gbc) {
         // class column
         gbc.gridx = 0;
-        addLine(panel, "Class column", m_components.getClassColComponent().getComponentPanel(), gbc);
+        addLine(panel, "Target column", m_components.getClassColComponent().getComponentPanel(), gbc);
 
         // feature columns
         gbc.gridy++;

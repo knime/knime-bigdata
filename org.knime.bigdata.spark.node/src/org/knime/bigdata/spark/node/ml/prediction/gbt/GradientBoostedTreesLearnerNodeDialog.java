@@ -68,11 +68,16 @@ public class GradientBoostedTreesLearnerNodeDialog
 
     private void addBasicBoostingOptions(final JPanel settingsTab, final GridBagConstraints gbc) {
         gbc.gridy++;
-        addLine(settingsTab, "Max number of models", getComponents().getMaxNoOfModelsComponent().getComponentPanel(), gbc);
+        addLine(settingsTab, "Number of models", getComponents().getMaxNoOfModelsComponent().getComponentPanel(), gbc);
 
         if (getMode() != DecisionTreeLearnerMode.CLASSIFICATION) {
             gbc.gridy++;
             addLine(settingsTab, "Loss function", getComponents().getLossFunctionComponent().getComponentPanel(), gbc);
+        }
+
+        if (getMode() == DecisionTreeLearnerMode.DEPRECATED) {
+            gbc.gridy++;
+            addLine(settingsTab, "Learning rate", getComponents().getLearningRateComponent().getComponentPanel(), gbc);
         }
     }
 

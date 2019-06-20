@@ -57,7 +57,8 @@ public class MLlibNodeComponents<T extends MLlibNodeSettings> {
 
     /**
      * @param nodeSettings the extended {@link MLlibNodeSettings}
-     * @param requireNominalTargetCol Whether a nominal target column is required or not.
+     * @param requireNominalTargetCol Whether a nominal target column is required or not (in which case it is
+     *            numerical).
      * @param showTargetColLabel
      */
     @SuppressWarnings("unchecked")

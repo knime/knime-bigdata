@@ -43,7 +43,7 @@
 				and therefore used for learning).
 			</option>
 
-			<option name="Max number of models">The maximum number of decision tree models in the ensemble model.
+			<option name="Number of models">The number of decision tree models in the ensemble model.
 				Increasing this number makes the model more expressive and improves training data accuracy. However,
 				increasing it too much may lead to overfitting. Also, increasing this number directly increases the
 				time required to train the ensemble, because the trees need to be trained sequentially.

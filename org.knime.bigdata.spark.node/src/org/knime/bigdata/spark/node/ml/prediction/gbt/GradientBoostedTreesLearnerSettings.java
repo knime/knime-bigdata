@@ -71,7 +71,7 @@ public class GradientBoostedTreesLearnerSettings extends DecisionTreeSettings {
             m_lossFunction =
                     new SettingsModelString("lossFunction", EnumContainer.GBTLossFunction.squared.name());
 
-            m_maxNoOfModels = new SettingsModelIntegerBounded("maxModels", 5, 1, Integer.MAX_VALUE);
+            m_maxNoOfModels = new SettingsModelIntegerBounded("numModels", 5, 1, Integer.MAX_VALUE);
 
             m_shouldSampleData.addChangeListener(new ChangeListener() {
                 @Override
