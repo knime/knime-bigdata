@@ -83,9 +83,6 @@ public class RandomForestLearnerNodeDialog extends DecisionTreeNodeDialog<Random
 
         addAdvancedForestOptions(settingsTab, gbc);
 
-        addSeparatorAndLabel(settingsTab, "Other Options", gbc);
-        addOtherOptions(settingsTab, gbc);
-
         addVerticalGlue(settingsTab, gbc);
 
         return settingsTab;
@@ -94,7 +91,9 @@ public class RandomForestLearnerNodeDialog extends DecisionTreeNodeDialog<Random
     private void addBasicForestOptions(final JPanel settingsTab, final GridBagConstraints gbc) {
         gbc.gridy++;
         addLine(settingsTab, "Number of models", getComponents().getNoOfModelsComponent().getComponentPanel(), gbc);
+    }
 
+    private void addAdvancedForestOptions(final JPanel settingsTab, final GridBagConstraints gbc) {
         if (getMode() == DecisionTreeLearnerMode.DEPRECATED) {
             gbc.gridy++;
             addLine(settingsTab, "Feature sampling",
@@ -115,11 +114,7 @@ public class RandomForestLearnerNodeDialog extends DecisionTreeNodeDialog<Random
             seedPanel.add(seedButton);
 
             addLine(settingsTab, "Seed", seedPanel, gbc);
-        }
-    }
-
-    private void addAdvancedForestOptions(final JPanel settingsTab, final GridBagConstraints gbc) {
-        if (getMode() != DecisionTreeLearnerMode.DEPRECATED) {
+        } else  {
             gbc.gridy++;
             final JPanel dataSamplingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             eliminateHGapIfPossible(getComponents().getShouldSampleDataComponent().getComponentPanel());
@@ -132,6 +127,7 @@ public class RandomForestLearnerNodeDialog extends DecisionTreeNodeDialog<Random
             addLine(settingsTab, "Feature sampling",
                 getComponents().getFeatureSamplingStrategyComponent().getComponentPanel(), gbc);
 
+            addSeedingOption(settingsTab, gbc);
         }
     }
 }

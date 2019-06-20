@@ -67,9 +67,6 @@
 			<option name="Min information gain per split">
 				Minimum information gain for a split to be considered.
 			</option>
-		</tab>
-		
-		<tab name="Advanced">
 			<option name="Max number of bins">
 				Number of bins to use when discretizing continuous features. Increasing the number of bins
 				means that the algorithm will consider more split candidates and make more fine-grained decisions on
@@ -77,9 +74,12 @@
 				and hence increases training time. Additionally, the number of bins must be at least the maximum
 				number of distinct values for any nominal feature.
 			</option>
+		</tab>
+		
+		<tab name="Advanced">
 			
 			<option name="Use static random seed">
-				Seed for generating random numbers.
+				Seed for generating random numbers. Randomness is used when binning numeric features during splitting.
 			</option>
 		</tab>
 	</fullDescription>

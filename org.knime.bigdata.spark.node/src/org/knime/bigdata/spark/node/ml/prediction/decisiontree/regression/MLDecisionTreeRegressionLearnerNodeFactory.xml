@@ -73,7 +73,7 @@
 			</option>
 			
 			<option name="Use static random seed">
-				Seed for generating random numbers.
+				Seed for generating random numbers. Randomness is used when binning numeric features during splitting.
 			</option>
 		</tab>
 	</fullDescription>

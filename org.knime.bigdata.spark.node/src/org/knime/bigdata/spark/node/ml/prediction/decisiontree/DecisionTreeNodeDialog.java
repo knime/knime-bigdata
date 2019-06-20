@@ -73,8 +73,9 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
 
         addTab("Settings", getSettingsTab());
 
-        if (m_mode != DecisionTreeLearnerMode.DEPRECATED) {
-            addTab("Advanced", getAdvancedTab());
+        final JPanel advancedTab = getAdvancedTab();
+        if (advancedTab != null) {
+            addTab("Advanced", advancedTab);
         }
     }
 
@@ -84,7 +85,11 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
      *         displayed.
      */
     protected JPanel getAdvancedTab() {
-        final JPanel settingsTab = new JPanel(new GridBagLayout());
+        if (m_mode == DecisionTreeLearnerMode.DEPRECATED) {
+            return null;
+        }
+
+        final JPanel tab = new JPanel(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -93,11 +98,10 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        addOtherOptions(settingsTab, gbc);
+        addSeedingOption(tab, gbc);
+        addVerticalGlue(tab, gbc);
 
-        addVerticalGlue(settingsTab, gbc);
-
-        return settingsTab;
+        return tab;
     }
 
     /**
@@ -139,40 +143,33 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
     }
 
     /**
-     * Invoked to add "Other options" to the settings tab.
-     *
      * @param panel
      * @param gbc
      */
-    protected void addOtherOptions(final JPanel panel, final GridBagConstraints gbc) {
+    protected void addSeedingOption(final JPanel panel, final GridBagConstraints gbc) {
         gbc.gridy++;
-        addLine(panel, "Max number of bins", m_components.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
 
-        if (m_mode != DecisionTreeLearnerMode.DEPRECATED) {
-            gbc.gridy++;
+        final JButton seedButton = new JButton("New");
+        seedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                m_settings.nextSeed();
+            }
+        });
 
-            final JButton seedButton = new JButton("New");
-            seedButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    m_settings.nextSeed();
-                }
-            });
+        eliminateHGapIfPossible(m_components.getSeedComponent().getComponentPanel());
+        final JPanel seedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        seedPanel.add(m_components.getSeedComponent().getComponentPanel());
+        seedPanel.add(seedButton);
+        m_settings.getUseStaticSeedModel().addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                seedButton.setEnabled(m_settings.getUseStaticSeedModel().getBooleanValue());
+            }
+        });
+        eliminateHGapIfPossible(m_components.getUseStaticSeedComponent().getComponentPanel());
 
-            eliminateHGapIfPossible(m_components.getSeedComponent().getComponentPanel());
-            final JPanel seedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            seedPanel.add(m_components.getSeedComponent().getComponentPanel());
-            seedPanel.add(seedButton);
-            m_settings.getUseStaticSeedModel().addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(final ChangeEvent e) {
-                    seedButton.setEnabled(m_settings.getUseStaticSeedModel().getBooleanValue());
-                }
-            });
-            eliminateHGapIfPossible(m_components.getUseStaticSeedComponent().getComponentPanel());
-
-            addLine(panel, m_components.getUseStaticSeedComponent().getComponentPanel(), seedPanel, gbc);
-        }
+        addLine(panel, m_components.getUseStaticSeedComponent().getComponentPanel(), seedPanel, gbc);
     }
 
     /**
@@ -210,6 +207,9 @@ public class DecisionTreeNodeDialog<SETTINGS extends DecisionTreeSettings, COMPO
             gbc.gridy++;
             addLine(panel, "Min information gain per split",
                 m_components.getMinInformationGainComponent().getComponentPanel(), gbc);
+
+            gbc.gridy++;
+            addLine(panel, "Max number of bins", m_components.getMaxNoOfBinsComponent().getComponentPanel(), gbc);
         }
     }
 

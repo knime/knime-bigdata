@@ -62,6 +62,14 @@
 				Minimum information gain for a split to be considered. Note that for regression, the information gain
 				is always calculated with a variance-based quality measure.
 			</option>
+
+			<option name="Max number of bins">
+				Number of bins to use when discretizing continuous features. Increasing the number of bins
+				means that the algorithm will consider more split candidates and make more fine-grained decisions on
+				how to split. However, it also increases the amount of computation and communication that needs to be performed
+				and hence increases training time. Additionally, the number of bins must be at least the maximum
+				number of distinct values for any nominal feature.
+			</option>
 		</tab>
 		
 		<tab name="Advanced">
@@ -84,16 +92,9 @@
 				</ul> 
 			</option>
 			
-			<option name="Max number of bins">
-				Number of bins to use when discretizing continuous features. Increasing the number of bins
-				means that the algorithm will consider more split candidates and make more fine-grained decisions on
-				how to split. However, it also increases the amount of computation and communication that needs to be performed
-				and hence increases training time. Additionally, the number of bins must be at least the maximum
-				number of distinct values for any nominal feature.
-			</option>
-			
 			<option name="Use static random seed">
-				Seed for generating random numbers when sampling rows and features.
+				Seed for generating random numbers. Randomness is used when sampling rows and features, as well as binning numeric
+				features during splitting.
 			</option>
 		</tab>
 	</fullDescription>

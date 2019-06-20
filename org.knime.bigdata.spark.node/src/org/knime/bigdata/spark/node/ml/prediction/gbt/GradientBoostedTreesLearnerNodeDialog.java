@@ -74,11 +74,6 @@ public class GradientBoostedTreesLearnerNodeDialog
             gbc.gridy++;
             addLine(settingsTab, "Loss function", getComponents().getLossFunctionComponent().getComponentPanel(), gbc);
         }
-
-        if (getMode() == DecisionTreeLearnerMode.DEPRECATED) {
-            gbc.gridy++;
-            addLine(settingsTab, "Learning rate", getComponents().getLearningRateComponent().getComponentPanel(), gbc);
-        }
     }
 
     @Override
@@ -93,9 +88,6 @@ public class GradientBoostedTreesLearnerNodeDialog
         gbc.gridy = 0;
 
         addAvancedBoostingOptions(settingsTab, gbc);
-
-        addSeparatorAndLabel(settingsTab, "Other Options", gbc);
-        addOtherOptions(settingsTab, gbc);
 
         addVerticalGlue(settingsTab, gbc);
 
@@ -119,6 +111,7 @@ public class GradientBoostedTreesLearnerNodeDialog
             addLine(settingsTab, "Feature sampling",
                 getComponents().getFeatureSubsetStrategyComponent().getComponentPanel(), gbc);
 
+            addSeedingOption(settingsTab, gbc);
         }
     }
 }
