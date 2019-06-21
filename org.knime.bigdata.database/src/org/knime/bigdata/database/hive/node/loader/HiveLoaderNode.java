@@ -77,7 +77,7 @@ public class HiveLoaderNode extends BigDataLoaderNode {
 
     @Override
     protected AbstractFileFormatWriter createWriter(final RemoteFile<Connection> file, final DataTableSpec spec, final DBColumn[] inputColumns) throws IOException {
-        return new OrcKNIMEWriter(file, spec, -1, "NONE", getORCTypesMapping(spec, inputColumns));
+        return new OrcKNIMEWriter(file, spec, 100, "NONE", getORCTypesMapping(spec, inputColumns));
     }
 
     private static DataTypeMappingConfiguration<TypeDescription> getORCTypesMapping(final DataTableSpec spec,
