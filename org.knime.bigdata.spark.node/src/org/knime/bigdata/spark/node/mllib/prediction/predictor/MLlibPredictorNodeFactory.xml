@@ -2,7 +2,7 @@
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
     type="Predictor" icon="icon.png">
-    <name>Spark Predictor</name>
+    <name>Spark Predictor (MLlib)</name>
     <shortDescription>Predicts input data based on a previously learned Spark MLlib model (e.g. decision tree).</shortDescription>
     <fullDescription>
         <intro>

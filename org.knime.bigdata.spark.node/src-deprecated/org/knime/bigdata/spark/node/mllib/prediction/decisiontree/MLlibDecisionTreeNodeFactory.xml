@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd" 
-    type="Learner" deprecated="true" icon="icon.png">
-    <name>Spark Decision Tree Learner</name>
+    type="Learner" icon="icon.png">
+    <name>Spark Decision Tree Learner (MLlib)</name>
 	<shortDescription>Decision tree induction performed in Spark.</shortDescription>
 	<fullDescription>
 		<intro>
